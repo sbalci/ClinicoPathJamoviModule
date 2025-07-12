@@ -1,5 +1,31 @@
-# from https://github.com/raviselker/ppv
-
+#' @title Positive Predictive Value Calculator
+#' 
+#' @description
+#' This module calculates the Positive Predictive Value (PPV) and False Discovery Rate (FDR)
+#' for research findings based on the framework described by Ioannidis (2005). It helps
+#' researchers understand the probability that their claimed findings are actually true
+#' given various study characteristics.
+#' 
+#' @details
+#' The calculation is based on Bayes' theorem and considers:
+#' - Prior probability of true relationships (percentage of a priori true hypotheses)
+#' - Type I error rate (alpha level)
+#' - Statistical power (1 - beta)
+#' - Proportion of p-hacked or biased studies
+#' 
+#' PPV = (Power × R + u × β × R) / (R + α - β × R + u - u × α + u × β × R)
+#' where R is the pre-study odds of true relationships (percTrue/(100-percTrue))
+#' and u is the bias factor (percHack/100)
+#' 
+#' @references
+#' Ioannidis, J. P. (2005). Why most published research findings are false. 
+#' PLoS medicine, 2(8), e124.
+#' 
+#' Adapted from https://github.com/raviselker/ppv
+#' 
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @importFrom ggplot2 ggplot aes geom_point scale_color_manual scale_shape_manual theme element_blank element_rect
 
 ppvClass <- R6::R6Class(
     "ppvClass",
@@ -10,6 +36,7 @@ ppvClass <- R6::R6Class(
             private$.initConfusionTable()
 
         },
+        
         .run = function() {
 
             results <- private$.compute()
@@ -26,6 +53,14 @@ ppvClass <- R6::R6Class(
             alpha <- self$options$alpha
             power <- self$options$power
             percHack <- self$options$percHack
+
+            # Input validation
+            if (percTrue == 0) {
+                jmvcore::reject("Percentage of true hypotheses cannot be 0%")
+            }
+            if (percTrue == 100 && percHack > 0) {
+                jmvcore::reject("Cannot have p-hacking when all hypotheses are true (100%)")
+            }
 
             suppressWarnings({
 
@@ -121,15 +156,60 @@ ppvClass <- R6::R6Class(
 
             html <- self$results$ppv
 
-            ppv <- paste0("<p><b>Positive Predictive Value (PPV)</b>: ", round(results$ppv*100,2), "% of claimed findings are true, ",
-                          round(results$hit*100,2)," / (", round(results$hit*100,2), " + ", round(results$falseAlarm*100,2), ")</p>")
-            fdr <- paste0("<p><b>False Discovery Rate (FDR)</b>: ", round(results$fdr*100,2), "% of claimed findings are false, ",
-                          round(results$falseAlarm*100,2)," / (", round(results$hit*100,2), " + ", round(results$falseAlarm*100,2), ")</p>")
+            # Calculate actual numbers from percentages
+            truePositives <- round(results$hit * 100, 2)
+            falsePositives <- round(results$falseAlarm * 100, 2)
+            totalPositives <- truePositives + falsePositives
+            
+            ppv_percentage <- round(results$ppv * 100, 2)
+            fdr_percentage <- round(results$fdr * 100, 2)
 
-            html$content <- paste0(ppv, fdr)
+            # Create comprehensive interpretation
+            interpretation <- ""
+            if (ppv_percentage < 50) {
+                interpretation <- "Most claimed findings are likely to be false positives."
+            } else if (ppv_percentage < 75) {
+                interpretation <- "A substantial proportion of claimed findings may be false."
+            } else {
+                interpretation <- "Most claimed findings are likely to be true."
+            }
 
-            # stylesheet <- "p {margine:0px;}"
-            # html$stylesheets <- stylesheet
+            # Build HTML content with enhanced formatting
+            content <- paste0(
+                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<h4 style='margin-top: 0;'>Results Summary</h4>",
+                "<p><b>Positive Predictive Value (PPV)</b>: ", ppv_percentage, "%</p>",
+                "<p style='margin-left: 20px; color: #666;'>",
+                "Out of ", round(totalPositives, 1), " positive findings, ",
+                round(truePositives, 1), " are expected to be true.",
+                "</p>",
+                "<p><b>False Discovery Rate (FDR)</b>: ", fdr_percentage, "%</p>",
+                "<p style='margin-left: 20px; color: #666;'>",
+                "Out of ", round(totalPositives, 1), " positive findings, ",
+                round(falsePositives, 1), " are expected to be false.",
+                "</p>",
+                "</div>",
+                
+                "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<h4 style='margin-top: 0;'>Interpretation</h4>",
+                "<p>", interpretation, "</p>",
+                "</div>",
+                
+                "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px;'>",
+                "<h4 style='margin-top: 0;'>Study Parameters Used</h4>",
+                "<ul style='margin: 5px 0;'>",
+                "<li>Prior probability of true hypotheses: ", self$options$percTrue, "%</li>",
+                "<li>Significance level (α): ", self$options$alpha, "</li>",
+                "<li>Statistical power: ", self$options$power, "</li>",
+                "<li>Percentage of p-hacked studies: ", self$options$percHack, "%</li>",
+                "</ul>",
+                "<p style='margin-top: 10px; font-size: 0.9em; color: #666;'>",
+                "Based on the framework by Ioannidis (2005): Why most published research findings are false.",
+                "</p>",
+                "</div>"
+            )
+
+            html$content <- content
 
         },
 
@@ -188,6 +268,11 @@ ppvClass <- R6::R6Class(
         }),
 
     public=list(
+        readDataset=function() {
+            # This analysis doesn't require data
+            return(NULL)
+        },
+        
         asSource=function() {
 
             paste0("This module does not support syntax mode yet.")

@@ -1,6 +1,45 @@
 #' @title Power Analysis for Survival Studies
+#' 
+#' @description
+#' This module provides comprehensive power analysis for survival studies,
+#' allowing researchers to calculate statistical power, required sample size,
+#' or minimum detectable hazard ratio for survival analysis designs.
+#' 
+#' @details
+#' The powersurvival function implements power calculations based on the
+#' Freedman method for survival studies with Cox proportional hazards models.
+#' It supports both simple designs (fixed follow-up) and complex designs
+#' with accrual periods, variable follow-up times, and loss to follow-up.
+#' 
+#' Key features:
+#' \itemize{
+#'   \item Three calculation types: power, sample size, or hazard ratio
+#'   \item Simple and complex study designs
+#'   \item Interactive plots showing parameter relationships
+#'   \item Comprehensive educational output with interpretation
+#'   \item Input validation and warning system
+#' }
+#' 
+#' For complex designs, the function accounts for:
+#' \itemize{
+#'   \item Accrual period and variable follow-up times
+#'   \item Loss to follow-up as competing risk
+#'   \item Baseline hazard estimation from median survival
+#'   \item Average follow-up time calculations
+#' }
+#' 
+#' @references
+#' Freedman, L.S. (1982). Tables of the number of patients required in clinical
+#' trials using the log-rank test. Statistics in Medicine, 1, 121-129.
+#' 
+#' Rosner, B. (2006). Fundamentals of Biostatistics (6th edition). 
+#' Thomson Brooks/Cole.
+#' 
+#' @author Serdar Balci \email{drserdarbalci@@gmail.com}
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @importFrom powerSurvEpi powerCT.default
+#' @importFrom ggplot2 ggplot aes geom_line geom_hline geom_vline labs theme_bw ylim scale_x_reverse
 #'
 
 powersurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -58,6 +97,61 @@ powersurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             median_survival <- self$options$median_survival
             loss_to_followup <- self$options$loss_followup
 
+            # Input validation
+            validation_errors <- character(0)
+            
+            # Check for logical consistency
+            if (study_design == "complex") {
+                if (accrual_time <= 0) {
+                    validation_errors <- c(validation_errors, "Accrual time must be positive for complex designs")
+                }
+                if (follow_up_time < 0) {
+                    validation_errors <- c(validation_errors, "Follow-up time cannot be negative")
+                }
+                if (median_survival <= 0) {
+                    validation_errors <- c(validation_errors, "Median survival must be positive")
+                }
+                if (loss_to_followup < 0 || loss_to_followup >= 1) {
+                    validation_errors <- c(validation_errors, "Loss to follow-up rate must be between 0 and 1")
+                }
+                # Check that total study time is reasonable
+                total_time <- accrual_time + follow_up_time
+                if (total_time > median_survival * 5) {
+                    validation_errors <- c(validation_errors, 
+                        "Warning: Total study time is very long compared to median survival. Consider shorter study duration or check parameters.")
+                }
+            }
+            
+            # Check for extreme parameter combinations
+            if (prob_event <= 0.01 && n < 1000) {
+                validation_errors <- c(validation_errors, 
+                    "Warning: Very low event probability with small sample size may lead to unreliable estimates.")
+            }
+            
+            if (calc_type == "sample_size" && power >= 0.99) {
+                validation_errors <- c(validation_errors, 
+                    "Warning: Very high power requirements may result in impractically large sample sizes.")
+            }
+            
+            # Display validation errors/warnings if any
+            if (length(validation_errors) > 0) {
+                error_html <- paste(
+                    "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin-bottom: 15px;'>",
+                    "<h4 style='color: #856404; margin-top: 0;'>Parameter Validation</h4>",
+                    paste("<p style='color: #856404; margin: 5px 0;'>", validation_errors, "</p>", collapse = ""),
+                    "</div>",
+                    collapse = ""
+                )
+                self$results$message$setContent(error_html)
+                self$results$message$setVisible(TRUE)
+                
+                # Return early if there are critical errors (not just warnings)
+                critical_errors <- validation_errors[!grepl("^Warning:", validation_errors)]
+                if (length(critical_errors) > 0) {
+                    return()
+                }
+            }
+
             # Initialize results
             result <- NULL
             plot_data <- NULL
@@ -102,13 +196,30 @@ powersurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
 
                 } else if (study_design == "complex") {
-                    # Use Schoenfeld's formula directly for complex designs
-                    # Note: The complex parameters aren't directly supported by powerCT.default
-                    # So we'll use a more appropriate approach with the basic parameters
-
-                    # For demonstration: calculate effective probability based on
-                    # median survival and follow-up time
-                    effective_prob <- 1 - exp(-follow_up_time/median_survival)
+                    # Enhanced complex design implementation
+                    # Calculate effective event probability accounting for accrual pattern,
+                    # variable follow-up times, and loss to follow-up
+                    
+                    # Convert median survival to hazard rate (assuming exponential distribution)
+                    baseline_hazard <- log(2) / median_survival
+                    
+                    # Average follow-up time accounting for accrual pattern
+                    # For uniform accrual, average follow-up = accrual_time/2 + follow_up_time
+                    avg_followup <- accrual_time / 2 + follow_up_time
+                    
+                    # Adjust for loss to follow-up (competing risk)
+                    # Effective hazard includes both event and loss to follow-up
+                    competing_hazard <- loss_to_followup
+                    total_hazard <- baseline_hazard + competing_hazard
+                    
+                    # Probability of observing the event (not censored by loss to follow-up)
+                    event_prob_given_endpoint <- baseline_hazard / total_hazard
+                    
+                    # Probability of reaching any endpoint during study period
+                    prob_any_endpoint <- 1 - exp(-total_hazard * avg_followup)
+                    
+                    # Effective probability of observing the event of interest
+                    effective_prob <- prob_any_endpoint * event_prob_given_endpoint
 
                     result <- powerSurvEpi::powerCT.default(
                         nE = nE,
@@ -256,8 +367,14 @@ powersurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
 
                 } else if (study_design == "complex") {
-                    # For complex designs, use the modified event probabilities
-                    effective_prob <- 1 - exp(-follow_up_time/median_survival)
+                    # Enhanced complex design implementation for sample size calculation
+                    baseline_hazard <- log(2) / median_survival
+                    avg_followup <- accrual_time / 2 + follow_up_time
+                    competing_hazard <- loss_to_followup
+                    total_hazard <- baseline_hazard + competing_hazard
+                    event_prob_given_endpoint <- baseline_hazard / total_hazard
+                    prob_any_endpoint <- 1 - exp(-total_hazard * avg_followup)
+                    effective_prob <- prob_any_endpoint * event_prob_given_endpoint
 
                     # Define power calculation for binary search
                     calculate_power <- function(total_n) {
@@ -538,8 +655,14 @@ powersurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                 } else if (study_design == "complex") {
-                    # For complex designs, use the modified event probabilities
-                    effective_prob <- 1 - exp(-follow_up_time/median_survival)
+                    # Enhanced complex design implementation for hazard ratio calculation
+                    baseline_hazard <- log(2) / median_survival
+                    avg_followup <- accrual_time / 2 + follow_up_time
+                    competing_hazard <- loss_to_followup
+                    total_hazard <- baseline_hazard + competing_hazard
+                    event_prob_given_endpoint <- baseline_hazard / total_hazard
+                    prob_any_endpoint <- 1 - exp(-total_hazard * avg_followup)
+                    effective_prob <- prob_any_endpoint * event_prob_given_endpoint
 
                     # Function to calculate power given hazard ratio for complex design
                     calculate_hr_power <- function(hazard_ratio) {

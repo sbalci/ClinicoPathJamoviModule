@@ -1,5 +1,242 @@
-#' @title ROC Analysis
-#' @return Table
+#' @title Comprehensive ROC Analysis with Advanced Features
+#' 
+#' @description 
+#' Performs sophisticated Receiver Operating Characteristic (ROC) curve analysis
+#' with optimal cutpoint determination, multiple comparison methods, and advanced
+#' statistical features including IDI/NRI calculations, DeLong test, and 
+#' comprehensive visualization options.
+#' 
+#' @details
+#' This function provides an extensive ROC analysis toolkit that goes beyond
+#' basic ROC curve generation. Key features include:
+#' 
+#' \strong{Core ROC Analysis:}
+#' \itemize{
+#'   \item AUC calculation with confidence intervals
+#'   \item Multiple cutpoint optimization methods (12 different approaches)
+#'   \item 16 different optimization metrics (Youden, accuracy, F1, etc.)
+#'   \item Bootstrap confidence intervals
+#'   \item Manual cutpoint specification
+#' }
+#' 
+#' \strong{Advanced Statistical Methods:}
+#' \itemize{
+#'   \item DeLong test for comparing multiple AUCs
+#'   \item IDI (Integrated Discrimination Index) with bootstrap CI
+#'   \item NRI (Net Reclassification Index) with bootstrap CI  
+#'   \item Partial AUC calculations
+#'   \item ROC curve smoothing (multiple methods)
+#'   \item Classifier performance comparison
+#' }
+#' 
+#' \strong{Visualization Options:}
+#' \itemize{
+#'   \item ROC curves (individual and combined)
+#'   \item Sensitivity/specificity vs threshold plots
+#'   \item Predictive value vs prevalence plots
+#'   \item Precision-recall curves
+#'   \item Dot plots showing class distributions
+#'   \item Interactive ROC plots
+#'   \item Confidence bands and quantile confidence intervals
+#' }
+#' 
+#' \strong{Subgroup Analysis:}
+#' \itemize{
+#'   \item Stratified analysis by grouping variables
+#'   \item Cost-benefit optimization with custom cost ratios
+#'   \item Hospital/site comparisons
+#' }
+#' 
+#' @param data A data frame containing the variables for analysis
+#' @param dependentVars Character vector of test variable names to evaluate. 
+#'   Multiple variables can be specified for comparison.
+#' @param classVar Name of the binary classification variable (gold standard).
+#'   Must have exactly two levels.
+#' @param positiveClass Which level of classVar represents the positive class.
+#'   If not specified, the first level is used.
+#' @param subGroup Optional grouping variable for stratified analysis.
+#' @param method Cutpoint optimization method. Options include:
+#'   \itemize{
+#'     \item "maximize_metric": Maximize the specified metric
+#'     \item "minimize_metric": Minimize the specified metric  
+#'     \item "oc_youden_kernel": Youden index with kernel smoothing
+#'     \item "oc_manual": Use manually specified cutpoint
+#'     \item "oc_cost_ratio": Optimize based on cost ratio
+#'     \item "oc_equal_sens_spec": Equal sensitivity and specificity
+#'     \item "oc_closest_01": Closest to perfect classifier (0,1)
+#'   }
+#' @param metric Optimization metric when using maximize/minimize methods:
+#'   "youden", "accuracy", "F1_score", "cohens_kappa", etc.
+#' @param direction Classification direction: ">=" (higher values = positive) or 
+#'   "<=" (lower values = positive)
+#' @param specifyCutScore Manual cutpoint value (required when method = "oc_manual")
+#' @param delongTest Logical. Perform DeLong test for AUC comparison (requires ≥2 variables)
+#' @param calculateIDI Logical. Calculate Integrated Discrimination Index (requires ≥2 variables)
+#' @param calculateNRI Logical. Calculate Net Reclassification Index (requires ≥2 variables)
+#' @param refVar Reference variable for IDI/NRI calculations
+#' @param plotROC Logical. Generate ROC curve plots
+#' @param combinePlots Logical. Combine multiple variables in single plot
+#' @param sensSpecTable Logical. Generate sensitivity/specificity confusion matrix
+#' @param showThresholdTable Logical. Show detailed threshold performance table
+#' @param partialAUC Logical. Calculate partial AUC over specified range
+#' @param bootstrapCI Logical. Calculate bootstrap confidence intervals
+#' @param precisionRecallCurve Logical. Generate precision-recall curves
+#' @param compareClassifiers Logical. Generate classifier comparison metrics
+#' @param ... Additional parameters for fine-tuning analysis
+#' 
+#' @return A psychopdarocResults object containing:
+#' \itemize{
+#'   \item \code{resultsTable}: Detailed results for each threshold
+#'   \item \code{simpleResultsTable}: Summary AUC results with confidence intervals
+#'   \item \code{sensSpecTable}: Confusion matrix at optimal cutpoint
+#'   \item \code{plotROC}: ROC curve visualization
+#'   \item \code{delongTest}: DeLong test results (if requested)
+#'   \item \code{idiTable}: IDI results with confidence intervals (if requested)
+#'   \item \code{nriTable}: NRI results with confidence intervals (if requested)
+#'   \item Additional plots and tables based on options selected
+#' }
+#' 
+#' @examples
+#' \dontrun{
+#' # Load example medical data
+#' data(medical_roc_data)
+#' 
+#' # Basic ROC analysis
+#' result1 <- psychopdaroc(
+#'   data = medical_roc_data,
+#'   dependentVars = "biomarker1",
+#'   classVar = "disease_status", 
+#'   positiveClass = "Disease"
+#' )
+#' 
+#' # Compare multiple biomarkers with DeLong test
+#' result2 <- psychopdaroc(
+#'   data = medical_roc_data,
+#'   dependentVars = c("biomarker1", "biomarker2", "biomarker3"),
+#'   classVar = "disease_status",
+#'   positiveClass = "Disease",
+#'   delongTest = TRUE,
+#'   combinePlots = TRUE
+#' )
+#' 
+#' # Advanced analysis with IDI/NRI
+#' result3 <- psychopdaroc(
+#'   data = medical_roc_data,
+#'   dependentVars = c("biomarker1", "biomarker2"),
+#'   classVar = "disease_status",
+#'   positiveClass = "Disease", 
+#'   calculateIDI = TRUE,
+#'   calculateNRI = TRUE,
+#'   refVar = "biomarker1",
+#'   nriThresholds = "0.3,0.7"
+#' )
+#' 
+#' # Cost-benefit optimization
+#' result4 <- psychopdaroc(
+#'   data = medical_roc_data,
+#'   dependentVars = "biomarker1",
+#'   classVar = "disease_status",
+#'   positiveClass = "Disease",
+#'   method = "oc_cost_ratio",
+#'   costratioFP = 2.5  # False positives cost 2.5x false negatives
+#' )
+#' 
+#' # Subgroup analysis by hospital
+#' result5 <- psychopdaroc(
+#'   data = medical_roc_data,
+#'   dependentVars = "biomarker1",
+#'   classVar = "disease_status",
+#'   positiveClass = "Disease",
+#'   subGroup = "hospital"
+#' )
+#' 
+#' # Comprehensive analysis with all features
+#' result6 <- psychopdaroc(
+#'   data = medical_roc_data,
+#'   dependentVars = c("biomarker1", "biomarker2"),
+#'   classVar = "disease_status",
+#'   positiveClass = "Disease",
+#'   method = "maximize_metric",
+#'   metric = "youden",
+#'   plotROC = TRUE,
+#'   sensSpecTable = TRUE,
+#'   showThresholdTable = TRUE,
+#'   delongTest = TRUE,
+#'   calculateIDI = TRUE,
+#'   partialAUC = TRUE,
+#'   bootstrapCI = TRUE,
+#'   precisionRecallCurve = TRUE,
+#'   compareClassifiers = TRUE
+#' )
+#' 
+#' # Financial risk assessment example
+#' data(financial_roc_data)
+#' 
+#' financial_result <- psychopdaroc(
+#'   data = financial_roc_data,
+#'   dependentVars = c("credit_score", "income_debt_ratio", "employment_score"),
+#'   classVar = "default_status",
+#'   positiveClass = "Default",
+#'   direction = "<=",  # Lower credit scores indicate higher risk
+#'   method = "oc_cost_ratio",
+#'   costratioFP = 0.1,  # False positives (rejected good clients) cost less
+#'   delongTest = TRUE,
+#'   subGroup = "client_type"
+#' )
+#' 
+#' # Educational assessment example
+#' data(education_roc_data)
+#' 
+#' education_result <- psychopdaroc(
+#'   data = education_roc_data,
+#'   dependentVars = c("exam_score", "project_score", "peer_score"),
+#'   classVar = "pass_status",
+#'   positiveClass = "Pass",
+#'   method = "maximize_metric",
+#'   metric = "accuracy",
+#'   calculateIDI = TRUE,
+#'   refVar = "exam_score",
+#'   subGroup = "class_section"
+#' )
+#' 
+#' # Manufacturing quality control example
+#' data(manufacturing_roc_data)
+#' 
+#' quality_result <- psychopdaroc(
+#'   data = manufacturing_roc_data, 
+#'   dependentVars = c("dimension_score", "surface_score", "strength_score"),
+#'   classVar = "quality_status",
+#'   positiveClass = "Defect",
+#'   method = "oc_equal_sens_spec",  # Balanced sensitivity/specificity
+#'   plotROC = TRUE,
+#'   showCriterionPlot = TRUE,
+#'   showDotPlot = TRUE,
+#'   subGroup = "production_line"
+#' )
+#' }
+#' 
+#' @references
+#' DeLong, E. R., DeLong, D. M., & Clarke-Pearson, D. L. (1988). 
+#' Comparing the areas under two or more correlated receiver operating 
+#' characteristic curves: a nonparametric approach. Biometrics, 44(3), 837-845.
+#' 
+#' Pencina, M. J., D'Agostino, R. B., D'Agostino, R. B., & Vasan, R. S. (2008). 
+#' Evaluating the added predictive ability of a new marker: from area under the 
+#' ROC curve to reclassification and beyond. Statistics in Medicine, 27(2), 157-172.
+#' 
+#' Youden, W. J. (1950). Index for rating diagnostic tests. Cancer, 3(1), 32-35.
+#' 
+#' @seealso 
+#' \code{\link{cutpointr}} for cutpoint optimization methods
+#' \code{\link{pROC}} for ROC curve analysis
+#' 
+#' @note
+#' This function originally developed by Lucas Friesen in the psychoPDA module.
+#' Enhanced version with additional features added to the ClinicoPath module.
+#' 
+#' @keywords ROC AUC sensitivity specificity diagnostic biomarker classification
+#' 
+#' @export
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2

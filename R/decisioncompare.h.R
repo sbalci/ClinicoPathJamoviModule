@@ -526,6 +526,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param fnote .
 #' @param ci .
 #' @param plot .
+#' @param radarplot .
 #' @param statComp Perform statistical comparison between tests (McNemar's
 #'   test and confidence intervals for differences).
 #' @return A results object containing:
@@ -542,6 +543,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$mcnemarTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotRadar} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -567,6 +569,7 @@ decisioncompare <- function(
     fnote = FALSE,
     ci = FALSE,
     plot = FALSE,
+    radarplot = FALSE,
     statComp = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -604,6 +607,7 @@ decisioncompare <- function(
         fnote = fnote,
         ci = ci,
         plot = plot,
+        radarplot = radarplot,
         statComp = statComp)
 
     analysis <- decisioncompareClass$new(

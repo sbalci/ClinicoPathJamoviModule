@@ -10,7 +10,6 @@ children:
       - type: ComboBox
         name: calc_type
         label: 'Calculate:'
-        # enable: true
   
   - type: CollapseBox
     label: Basic Parameters
@@ -24,13 +23,13 @@ children:
             format: number
             label: 'Hazard Ratio:'
             suffix: ""
-            # enable: (calc_type != "hazard_ratio")
+            enable: (calc_type != "hazard_ratio")
           - type: TextBox
             name: power
             format: number
             label: 'Power (1-β):'
             suffix: ""
-            # enable: (calc_type != "power")
+            enable: (calc_type != "power")
           - type: TextBox
             name: alpha
             format: number
@@ -41,7 +40,7 @@ children:
             format: number
             label: 'Total Sample Size:'
             suffix: ""
-            # enable: (calc_type != "sample_size")
+            enable: (calc_type != "sample_size")
           - type: TextBox
             name: allocation_ratio
             format: number
@@ -65,7 +64,7 @@ children:
             label: 'Study Design:'
       - type: Label
         label: Complex Design Parameters
-        # enable: (study_design:complex)
+        enable: (study_design:complex)
         children:
           - type: LayoutBox
             margin: large
@@ -74,19 +73,19 @@ children:
                 name: accrual_time
                 format: number
                 label: 'Accrual Time (years):'
-                # enable: (study_design:complex)
+                enable: (study_design:complex)
               - type: TextBox
                 name: follow_up_time
                 format: number
                 label: 'Follow-up Time (years):'
-                # enable: (study_design:complex)
+                enable: (study_design:complex)
               - type: TextBox
                 name: median_survival
                 format: number
                 label: 'Median Survival (Control Group, years):'
-                # enable: (study_design:complex)
+                enable: (study_design:complex)
               - type: TextBox
                 name: loss_followup
                 format: number
                 label: 'Loss to Follow-up Rate (per year):'
-                # enable: (study_design:complex)
+                enable: (study_design:complex)

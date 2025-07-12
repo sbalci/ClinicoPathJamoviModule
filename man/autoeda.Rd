@@ -15,6 +15,7 @@ autoeda(
   pca_components = 5,
   plot_theme = "clinical",
   output_format = "combined",
+  eda_engine = "dataexplorer",
   advanced_options = FALSE,
   categorical_limit = 15,
   generate_report = FALSE
@@ -46,8 +47,11 @@ analysis.}
 
 \item{output_format}{Format for the automated EDA output.}
 
-\item{advanced_options}{Enable advanced DataExplorer features and detailed
-analysis.}
+\item{eda_engine}{Choose the exploratory data analysis engine. DataExplorer
+provides comprehensive automated reporting. ggEDA provides enhanced
+visualizations for clinical research.}
+
+\item{advanced_options}{Enable advanced features and detailed analysis.}
 
 \item{categorical_limit}{Maximum number of levels for categorical variables
 to include in analysis.}
