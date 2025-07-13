@@ -185,14 +185,31 @@ subgroupforestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Instructions"))
+                title="Instructions",
+                clearWith=list(
+                    "outcome",
+                    "treatment",
+                    "subgroups",
+                    "outcomeType")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Forest Plot",
-                width=600,
-                height=400,
-                requiresData=TRUE))
+                title="Subgroup Forest Plot",
+                width=800,
+                height=500,
+                requiresData=TRUE,
+                renderFun=".plot",
+                clearWith=list(
+                    "outcome",
+                    "treatment",
+                    "subgroups",
+                    "outcomeType",
+                    "effectMeasure",
+                    "confidenceLevel",
+                    "sortBy",
+                    "showSampleSizes",
+                    "logScale",
+                    "nullLine")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
@@ -212,7 +229,7 @@ subgroupforestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="integer"),
                     list(
                         `name`="estimate", 
-                        `title`="Effect", 
+                        `title`="Effect Estimate", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -229,7 +246,14 @@ subgroupforestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `name`="pvalue", 
                         `title`="P-value", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "outcome",
+                    "treatment",
+                    "subgroups",
+                    "outcomeType",
+                    "effectMeasure",
+                    "confidenceLevel")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="interactions",
@@ -247,7 +271,14 @@ subgroupforestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="interpretation", 
                         `title`="Interpretation", 
-                        `type`="text"))))
+                        `type`="text")),
+                visible="(showInteraction)",
+                clearWith=list(
+                    "outcome",
+                    "treatment",
+                    "subgroups",
+                    "outcomeType",
+                    "showInteraction")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="overall",
@@ -286,7 +317,7 @@ subgroupforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "subgroupforest",
-                version = c(0,0,3),
+                version = c(0,1,0),
                 options = options,
                 results = subgroupforestResults$new(options=options),
                 data = data,
@@ -301,26 +332,75 @@ subgroupforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Subgroup Analysis Forest Plot
 #'
+#' Creates forest plots showing treatment effects across different patient 
+#' subgroups. Performs subgroup analysis for clinical trials and observational 
+#' studies, calculating treatment effects within patient subgroups and testing 
+#' for interactions. Supports survival (time-to-event), binary, and continuous 
+#' outcomes with comprehensive statistical validation and heterogeneity 
+#' testing.
 #' 
+#'
+#' @examples
+#' # Survival outcome subgroup analysis
+#' subgroupforest(
+#'     data = clinical_trial,
+#'     outcome = "time_to_event",
+#'     treatment = "treatment_arm",
+#'     subgroups = c("age_group", "gender", "stage"),
+#'     time = "time_to_event",
+#'     event = "event_occurred",
+#'     outcomeType = "survival",
+#'     effectMeasure = "hr"
+#' )
+#'
+#' # Binary outcome analysis
+#' subgroupforest(
+#'     data = study_data,
+#'     outcome = "response",
+#'     treatment = "intervention",
+#'     subgroups = c("age_category", "sex"),
+#'     outcomeType = "binary",
+#'     effectMeasure = "or"
+#' )
+#'
 #' @param data The data as a data frame.
-#' @param outcome Primary outcome variable (time-to-event, binary, or
-#'   continuous).
-#' @param treatment Treatment or exposure variable (binary factor).
-#' @param subgroups Variables defining patient subgroups for analysis.
-#' @param time Time variable for survival analysis (required if outcome is
-#'   survival time).
-#' @param event Event indicator for survival analysis (1=event, 0=censored).
-#' @param outcomeType Type of outcome variable for appropriate statistical
-#'   analysis.
-#' @param effectMeasure Statistical measure for treatment effect.
+#' @param outcome Primary outcome variable. For survival analysis, this should
+#'   be the time variable. For binary outcomes, use 0/1 or factor with 2 levels.
+#'   For continuous outcomes, use numeric variables.
+#' @param treatment Treatment or exposure variable (must be binary: 0/1,
+#'   control/treatment). This variable defines the two groups being compared in
+#'   the analysis.
+#' @param subgroups Variables defining patient subgroups for analysis
+#'   (categorical variables). Each variable will be analyzed separately to
+#'   identify differential treatment effects. Examples: age groups, gender,
+#'   disease stage, biomarker status.
+#' @param time Time variable for survival analysis (numeric, required if
+#'   outcomeType = "survival"). Should contain time to event or censoring in
+#'   consistent units (days, months, years).
+#' @param event Event indicator for survival analysis (binary: 1=event
+#'   occurred, 0=censored). Required for survival analysis to distinguish
+#'   between observed events and censored observations.
+#' @param outcomeType Type of outcome variable: "survival" (time-to-event),
+#'   "binary" (yes/no), "continuous". Determines the statistical method used for
+#'   analysis (Cox regression, logistic regression, linear regression).
+#' @param effectMeasure Statistical measure for treatment effect: "hr" (hazard
+#'   ratio), "or" (odds ratio),  "rr" (risk ratio), "md" (mean difference).
+#'   Should match the outcome type.
 #' @param confidenceLevel Confidence level for intervals.
 #' @param showOverall Display overall treatment effect across all patients.
-#' @param showInteraction Perform statistical tests for subgroup interactions.
-#' @param sortBy Method for ordering subgroups in the plot.
+#' @param showInteraction Perform statistical tests for subgroup interactions
+#'   using likelihood ratio tests. Tests whether treatment effect varies
+#'   significantly across subgroups.
+#' @param sortBy Method for ordering subgroups in the plot: "effect" (by
+#'   effect size),  "n" (by sample size), "alpha" (alphabetical). Affects visual
+#'   presentation.
 #' @param showSampleSizes Display sample sizes for each subgroup.
-#' @param logScale Display effects on log scale (appropriate for ratios).
-#' @param nullLine Value for null effect reference line (1 for ratios, 0 for
-#'   differences).
+#' @param logScale Display effects on log scale (recommended for ratios: HR,
+#'   OR, RR). Makes ratio effects more interpretable and symmetric around null
+#'   value.
+#' @param nullLine Value for null effect reference line (1 for ratios:
+#'   HR/OR/RR, 0 for differences: MD). Vertical line indicating no treatment
+#'   effect.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

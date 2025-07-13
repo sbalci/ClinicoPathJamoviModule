@@ -235,3 +235,43 @@ options:
       description:
         R: Whether to include clinical interpretation of results.
         jamovi: Include practical interpretation for clinical research planning.
+
+    - name: show_power_plot
+      title: "Show Power Curve Plot"
+      type: Bool
+      default: false
+      description:
+        R: Whether to display power curve visualization.
+        jamovi: Show interactive power curves and sample size relationships.
+
+    - name: show_timeline_plot
+      title: "Show Study Timeline Plot"
+      type: Bool
+      default: false
+      description:
+        R: Whether to display study timeline visualization for Lachin-Foulkes method.
+        jamovi: Show study design timeline with accrual and follow-up periods.
+
+    - name: power_plot_range
+      title: "Power Plot Sample Size Range"
+      type: String
+      default: "auto"
+      description:
+        R: Sample size range for power plots (format 'min,max' or 'auto').
+        jamovi: Specify sample size range for power curves (e.g., '50,500' or 'auto').
+
+    - name: export_results
+      title: "Export Results to Data"
+      type: Bool
+      default: false
+      description:
+        R: Whether to export detailed results for external analysis.
+        jamovi: Export comprehensive power analysis results to dataset for further analysis.
+
+    - name: export_power_curve
+      title: "Export Power Curve Data"
+      type: Bool
+      default: false
+      description:
+        R: Whether to export power curve data points.
+        jamovi: Export power curve data for external plotting and analysis.

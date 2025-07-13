@@ -4,17 +4,7 @@
 \alias{venn}
 \title{Venn Diagram}
 \usage{
-venn(
-  data,
-  var1,
-  var1true,
-  var2,
-  var2true,
-  var3 = NULL,
-  var3true,
-  var4 = NULL,
-  var4true
-)
+venn(data, var1, var1true, var2, var2true, var3, var3true, var4, var4true)
 }
 \arguments{
 \item{data}{The dataset as a data frame containing the variables for

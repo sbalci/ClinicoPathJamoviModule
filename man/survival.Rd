@@ -42,7 +42,14 @@ survival(
   medianline = "none",
   person_time = FALSE,
   time_intervals = "12, 36, 60",
-  rate_multiplier = 100
+  rate_multiplier = 100,
+  rmst_analysis = FALSE,
+  rmst_tau = 0,
+  stratified_cox = FALSE,
+  strata_variable,
+  residual_diagnostics = FALSE,
+  export_survival_data = FALSE,
+  loglog = FALSE
 )
 }
 \arguments{
@@ -140,6 +147,35 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 
 \item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
+
+\item{rmst_analysis}{Calculate Restricted Mean Survival Time, which
+represents the average survival time up to a specified time horizon. Useful
+when median survival cannot be estimated or for comparing survival over a
+specific time period.}
+
+\item{rmst_tau}{Time horizon for RMST calculation. If 0 or not specified,
+uses the 75th percentile of follow-up time. Should be specified in the same
+units as the survival time.}
+
+\item{stratified_cox}{Perform stratified Cox regression to account for
+non-proportional hazards or unmeasured confounders that affect baseline
+hazard.}
+
+\item{strata_variable}{Variable to use for stratification in Cox
+regression. This variable should represent groups with different baseline
+hazards.}
+
+\item{residual_diagnostics}{Calculate and display Cox model residuals for
+diagnostic purposes, including Martingale, deviance, score, and Schoenfeld
+residuals.}
+
+\item{export_survival_data}{Export detailed survival estimates for external
+analysis, including survival probabilities, confidence intervals, and risk
+tables at multiple time points.}
+
+\item{loglog}{Display log-log survival plot for visual assessment of
+proportional hazards assumption. Parallel lines suggest proportional
+hazards.}
 }
 \value{
 A results object containing:
@@ -157,12 +193,19 @@ A results object containing:
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$rmstTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$rmstSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$survivalExport} \tab \tab \tab \tab \tab an output \cr
+\code{results$survivalExportSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot7} \tab \tab \tab \tab \tab an image \cr
+\code{results$residualsPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 }

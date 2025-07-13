@@ -10,9 +10,7 @@ agepyramid(
   gender,
   female,
   bin_width = 5,
-  plot_title = "Age Pyramid",
-  color1 = "#1F77B4",
-  color2 = "#FF7F0E"
+  plot_title = "Age Pyramid"
 )
 }
 \arguments{
@@ -31,10 +29,6 @@ the level female}
 the granularity of the age groups.}
 
 \item{plot_title}{The title displayed on the age pyramid plot.}
-
-\item{color1}{First color for the pyramid chart bars.}
-
-\item{color2}{Second color for the pyramid chart bars.}
 }
 \value{
 A results object containing:

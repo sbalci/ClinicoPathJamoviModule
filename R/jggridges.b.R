@@ -192,10 +192,13 @@ jggridgesClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         )
                 }
             } else if (plot_type == "violin_ridges") {
-                plot <- plot + ggridges::geom_violin_ridges(
+                # Note: geom_violin_ridges doesn't exist in ggridges
+                # Using geom_density_ridges with violin-like parameters instead
+                plot <- plot + ggridges::geom_density_ridges(
                     scale = scale,
                     alpha = alpha,
-                    rel_min_height = rel_min_height
+                    rel_min_height = rel_min_height,
+                    bandwidth = private$.getBandwidth()
                 )
             }
             

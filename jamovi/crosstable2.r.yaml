@@ -1,0 +1,73 @@
+---
+name:  crosstable2
+title: Cross Table
+jrs:   '1.1'
+
+items:
+
+    - name: subtitle
+      title: '`Cross Table - ${group}`'
+      type:  Preformatted
+
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - sty
+
+    - name: todo2
+      title: To Do
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - sty
+
+    - name: tablestyle1
+      title: '`Cross Table - ${group}`'
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - sty
+      visible: (sty:arsenal)
+      refs: arsenal
+
+    - name: tablestyle2
+      title: '`Cross Table - ${group}`'
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - cont
+          - pcat
+          - sty
+      visible: (sty:finalfit)
+      refs: finalfit
+
+    - name: tablestyle3
+      title: '`Cross Table - ${group}`'
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - sty
+      visible: (sty:gtsummary)
+      refs: gtsummary
+
+    - name: tablestyle4
+      title: '`Cross Table - ${group}`'
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - sty
+      visible: (sty:nejm || sty:lancet || sty:hmisc)
+      refs: tangram
+
+
+refs:
+    - ClinicoPathJamoviModule
+...

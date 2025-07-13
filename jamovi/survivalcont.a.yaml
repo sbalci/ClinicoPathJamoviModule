@@ -421,6 +421,53 @@ options:
         Specify the multiplier for incidence rates (e.g., 100 for rates per 100 person-years,
         1000 for rates per 1000 person-years).
 
+    - name: rmst_analysis
+      title: "RMST Analysis"
+      type: Bool
+      default: false
+      description: >-
+        Enable Restricted Mean Survival Time (RMST) analysis. RMST provides the average 
+        survival time up to a specified time horizon, useful when median survival is undefined.
+
+    - name: rmst_tau
+      title: "RMST Time Horizon (τ)"
+      type: Number
+      default: 0
+      description: >-
+        Specify the time horizon for RMST calculation. If left as 0, will use 75th percentile 
+        of observed survival times. This represents the maximum follow-up time for RMST calculation.
+
+    - name: residual_diagnostics
+      title: "Residual Diagnostics"
+      type: Bool
+      default: false
+      description: >-
+        Enable Cox model residual diagnostics including Martingale, Deviance, Score, and 
+        Schoenfeld residuals. Useful for checking model assumptions and identifying outliers.
+
+    - name: stratified_cox
+      title: "Stratified Cox Regression"
+      type: Bool
+      default: false
+      description: >-
+        Enable stratified Cox regression analysis. This allows for different baseline hazards 
+        across strata while maintaining proportional hazards within strata.
+
+    - name: strata_variable
+      title: "Stratification Variable"
+      type: Variable
+      description: >-
+        Variable to use for stratification in Cox regression. Should be a categorical variable 
+        that defines different risk groups or populations.
+
+    - name: loglog
+      title: "Log-Log Plot"
+      type: Bool
+      default: false
+      description: >-
+        Enable log-log plot for assessing proportional hazards assumption. Parallel lines 
+        in the log-log plot suggest that proportional hazards assumption holds.
+
 
 
 

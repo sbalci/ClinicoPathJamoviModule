@@ -1,0 +1,197 @@
+---
+name:  alluvial2
+title: Alluvial Diagrams
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptive Plots
+version: '0.0.3'
+jas: '1.2'
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+          jamovi: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables
+      type: Variables
+      description:
+          R: >
+            a string naming the variables from `data` that contains the
+            values used for the Alluvial Diagram.
+          jamovi: >
+            a string naming the variables from `data` that contains the
+            values used for the Alluvial Diagram.
+
+    - name: condensationvar
+      title: Condensation Variable
+      type: Variable
+      default: NULL
+      description:
+          R: >
+            The primary variable to be used for condensation.
+          jamovi: >
+            The primary variable to be used for condensation.
+
+    - name: excl
+      title: Exclude missing (NA)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Exclude missing values from the analysis.
+          jamovi: >
+            Exclude missing values from the analysis.
+
+    - name: marg
+      title: Marginal plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include marginal plots.
+          jamovi: >
+            Include marginal plots.
+
+
+    # - name: verb
+    #   title: Print plot summary
+    #   type: Bool
+    #   default: false
+
+
+    - name: fill
+      title: Fill by
+      type: List
+      options:
+        - title: First variable
+          name: first_variable
+        - title: Last variable
+          name: last_variable
+        - title: All flows
+          name: all_flows
+        - title: Values
+          name: values
+      default: first_variable
+      description:
+          R: >
+            A list for the argument fill for selecting the variable to be
+            represented by color. Default is 'first_variable'.
+          jamovi: >
+            A list for the argument fill for selecting the variable to be
+            represented by color. Default is 'first_variable'.
+
+    - name: bin
+      title: Bin labels
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Mean
+          name: mean
+        - title: Median
+          name: median
+        - title: Min-Max
+          name: min_max
+        - title: Cuts
+          name: cuts
+      default: default
+      description:
+          R: >
+            labels for the bins from low to high
+          jamovi: >
+            labels for the bins from low to high
+
+
+    - name: orient
+      title: Plot orientation
+      type: List
+      options:
+        - title: Horizontal
+          name: horr
+        - title: Vertical
+          name: vert
+      default: vert
+      description:
+          R: >
+            Orientation of the plot. Default is 'vertical'.
+          jamovi: >
+            Orientation of the plot. Default is 'vertical'.
+
+
+
+
+#     - name: flip
+#       title: Flip plot
+#       type: Bool
+#       default: false
+
+
+
+    - name: usetitle
+      title: Custom title
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use a custom title for the plot.
+          jamovi: >
+            Use a custom title for the plot.
+
+    - name: mytitle
+      title: Title
+      type: String
+      default: 'Alluvial Plot'
+      description:
+          R: >
+            Title for the plot.
+          jamovi: >
+            Title for the plot.
+
+
+    # - name: originaltheme
+    #   title: Easy Alluvial Theme
+    #   type: Bool
+    #   default: false
+
+
+    # - name: themex
+    #   title: Theme
+    #   type: List
+    #   options:
+    #     - title: jamovi
+    #       name: jamovi
+    #     - title: easyalluvial
+    #       name: easyalluvial
+    #     # - title: ipsum
+    #     #   name: ipsum
+    #     - title: grey
+    #       name: grey
+    #     - title: gray
+    #       name: gray
+    #     - title: bw
+    #       name: bw
+    #     - title: linedraw
+    #       name: linedraw
+    #     - title: light
+    #       name: light
+    #     - title: dark
+    #       name: dark
+    #     - title: minimal
+    #       name: minimal
+    #     - title: classic
+    #       name: classic
+    #     - title: void
+    #       name: void
+    #     - title: test
+    #       name: test
+    #   default: easyalluvial
+
+# - name: inter
+#   title: Interactive
+#   type: Bool
+#   default: false
+
+...

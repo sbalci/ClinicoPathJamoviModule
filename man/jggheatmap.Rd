@@ -7,9 +7,9 @@
 jggheatmap(
   data,
   matrix_vars,
-  row_var,
-  col_var,
-  value_var,
+  row_var = NULL,
+  col_var = NULL,
+  value_var = NULL,
   cluster_rows = TRUE,
   cluster_cols = TRUE,
   clustering_method = "complete",
@@ -26,7 +26,7 @@ jggheatmap(
   col_label_size = 10,
   show_dendrograms = TRUE,
   dendrogram_height = 0.2,
-  annotation_var,
+  annotation_var = NULL,
   annotation_colors = "default",
   plot_title = "",
   plot_width = 600,
@@ -43,11 +43,11 @@ jggheatmap(
 
 \item{matrix_vars}{Variables to include in the heatmap matrix}
 
-\item{row_var}{Variable defining row groupings}
+\item{row_var}{Variable defining row groupings (for pivot format)}
 
-\item{col_var}{Variable defining column groupings}
+\item{col_var}{Variable defining column groupings (for pivot format)}
 
-\item{value_var}{Variable containing matrix values}
+\item{value_var}{Variable containing matrix values (for pivot format)}
 
 \item{cluster_rows}{Perform hierarchical clustering on rows}
 

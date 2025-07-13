@@ -1,9 +1,9 @@
 ---
 name:  swimmerplot
 title: Swimmer Plot
-menuGroup: ExplorationD
+menuGroup: Exploration
 menuSubgroup: Patient Follow-Up Plots
-version: '0.0.3'
+version: '0.0.2'
 jas: '1.2'
 
 description:
@@ -194,88 +194,88 @@ options:
             Size of event markers on the plot
 
 
-    - name: milestone1Name
-      title: Milestone 1 Name
-      type: String
-      default: "Surgery"
-      description:
-          R: >
-            Name for the first milestone event (e.g., Surgery)
+    # - name: milestone1Name
+    #   title: Milestone 1 Name
+    #   type: String
+    #   default: "Surgery"
+    #   description:
+    #       R: >
+    #         Name for the first milestone event (e.g., Surgery)
             
-    - name: milestone1Date
-      title: Milestone 1 Date
-      type: Variable
-      suggested: [continuous, ordinal, nominal]
-      required: false
-      description:
-          R: >
-            Date/time when milestone 1 occurred
+    # - name: milestone1Date
+    #   title: Milestone 1 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 1 occurred
 
-    - name: milestone2Name
-      title: Milestone 2 Name
-      type: String
-      default: "Treatment"
-      description:
-          R: >
-            Name for the second milestone event (e.g., Treatment)
+    # - name: milestone2Name
+    #   title: Milestone 2 Name
+    #   type: String
+    #   default: "Treatment Start"
+    #   description:
+    #       R: >
+    #         Name for the second milestone event (e.g., Treatment Start)
             
-    - name: milestone2Date
-      title: Milestone 2 Date
-      type: Variable
-      suggested: [continuous, ordinal, nominal]
-      required: false
-      description:
-          R: >
-            Date/time when milestone 2 occurred
+    # - name: milestone2Date
+    #   title: Milestone 2 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 2 occurred
 
-    - name: milestone3Name
-      title: Milestone 3 Name
-      type: String
-      default: "Recurrence"
-      description:
-          R: >
-            Name for the third milestone event (e.g., Recurrence)
+    # - name: milestone3Name
+    #   title: Milestone 3 Name
+    #   type: String
+    #   default: "Response Assessment"
+    #   description:
+    #       R: >
+    #         Name for the third milestone event (e.g., Response Assessment)
             
-    - name: milestone3Date
-      title: Milestone 3 Date
-      type: Variable
-      suggested: [continuous, ordinal, nominal]
-      required: false
-      description:
-          R: >
-            Date/time when milestone 3 occurred
+    # - name: milestone3Date
+    #   title: Milestone 3 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 3 occurred
 
-    - name: milestone4Name
-      title: Milestone 4 Name
-      type: String
-      default: "Remission"
-      description:
-          R: >
-            Name for the fourth milestone event (e.g., Remission)
+    # - name: milestone4Name
+    #   title: Milestone 4 Name
+    #   type: String
+    #   default: "Progression"
+    #   description:
+    #       R: >
+    #         Name for the fourth milestone event (e.g., Progression)
             
-    - name: milestone4Date
-      title: Milestone 4 Date
-      type: Variable
-      suggested: [continuous, ordinal, nominal]
-      required: false
-      description:
-          R: >
-            Date/time when milestone 4 occurred
+    # - name: milestone4Date
+    #   title: Milestone 4 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 4 occurred
 
-    - name: milestone5Name
-      title: Milestone 5 Name
-      type: String
-      default: "Death"
-      description:
-          R: >
-            Name for the fifth milestone event (e.g., Death)
+    # - name: milestone5Name
+    #   title: Milestone 5 Name
+    #   type: String
+    #   default: "Death/Last Follow-up"
+    #   description:
+    #       R: >
+    #         Name for the fifth milestone event (e.g., Death/Last Follow-up)
             
-    - name: milestone5Date
-      title: Milestone 5 Date
-      type: Variable
-      suggested: [continuous, ordinal, nominal]
-      required: false
-      description:
-          R: >
-            Date/time when milestone 5 occurred
+    # - name: milestone5Date
+    #   title: Milestone 5 Date
+    #   type: Variable
+    #   suggested: [continuous, nominal, ordinal]
+    #   required: false
+    #   description:
+    #       R: >
+    #         Date/time when milestone 5 occurred
 ...

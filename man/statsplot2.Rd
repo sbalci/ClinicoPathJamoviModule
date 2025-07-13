@@ -2,7 +2,7 @@
 % Please edit documentation in R/statsplot2.h.R
 \name{statsplot2}
 \alias{statsplot2}
-\title{Graphs and Plots}
+\title{Automatic Plot Selection}
 \usage{
 statsplot2(
   data,
@@ -19,21 +19,29 @@ statsplot2(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{dep}{The dependent variable (y-axis, 1st measurement). Can be
+continuous or categorical.}
 
-\item{group}{.}
+\item{group}{The grouping variable (x-axis, 2nd measurement). Can be
+continuous or categorical.}
 
-\item{grvar}{.}
+\item{grvar}{Optional grouping variable for creating grouped plots across
+multiple panels.}
 
-\item{direction}{select measurement type (repeated or independent)}
+\item{direction}{Measurement design type. "independent" for
+between-subjects comparisons,  "repeated" for within-subjects/repeated
+measures comparisons.}
 
-\item{distribution}{select distribution type (parametric or nonparametric)}
+\item{distribution}{Statistical approach: "p" = parametric, "np" =
+nonparametric,  "r" = robust, "bf" = Bayes factor.}
 
-\item{alluvsty}{.}
+\item{alluvsty}{Style for alluvial diagrams: "t1" = ggalluvial with stratum
+labels,  "t2" = easyalluvial with automatic variable selection.}
 
-\item{excl}{.}
+\item{excl}{If TRUE, excludes rows with missing values before analysis.}
 
-\item{originaltheme}{.}
+\item{originaltheme}{If TRUE, uses original ggplot2 themes instead of
+ggstatsplot themes.}
 }
 \value{
 A results object containing:
@@ -44,10 +52,28 @@ A results object containing:
 }
 }
 \description{
-Function for Generating Plots and Graphs Based on Variable Types.
+Automatically selects and generates the most appropriate statistical
+visualization based on variable data types. Supports both independent and
+repeated measures designs with various plot types including violin plots,
+scatter plots, bar charts, and alluvial diagrams.
 }
 \examples{
-\donttest{
-# example will be added
-}
+# Automatic plot selection for factor vs continuous variables
+statsplot2(
+    data = mtcars,
+    dep = "mpg",
+    group = "cyl",
+    direction = "independent",
+    distribution = "p"
+)
+
+# Repeated measures with alluvial diagram
+statsplot2(
+    data = survey_data,
+    dep = "condition_baseline",
+    group = "condition_followup",
+    direction = "repeated",
+    alluvsty = "t1"
+)
+
 }

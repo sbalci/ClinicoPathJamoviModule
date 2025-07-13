@@ -4,8 +4,8 @@
 \alias{agepyramidClass}
 \title{Age Pyramid}
 \description{
-Generates an age pyramid plot from the provided data using ggcharts::pyramid_chart.
-The function allows customization of bin width (age group granularity), plot title, and bar colors.
+Generates an age pyramid plot from the provided data.
+The function allows customization of bin width (age group granularity) and plot title.
 It creates a visually appealing plot showing the distribution of age by gender.
 }
 \section{Super classes}{

@@ -14,21 +14,34 @@ options:
       title: Matrix Variables
       type: Variables
       description: "Variables to include in the heatmap matrix"
+      permitted:
+        - numeric
 
     - name: row_var
       title: Row Variable
       type: Variable
-      description: "Variable defining row groupings"
+      description: "Variable defining row groupings (for pivot format)"
+      default:
+      permitted:
+        - factor
+        - id
 
     - name: col_var
       title: Column Variable
       type: Variable
-      description: "Variable defining column groupings"
+      description: "Variable defining column groupings (for pivot format)"
+      default:
+      permitted:
+        - factor
+        - id
 
     - name: value_var
       title: Value Variable
       type: Variable
-      description: "Variable containing matrix values"
+      description: "Variable containing matrix values (for pivot format)"
+      default:
+      permitted:
+        - numeric
 
     - name: cluster_rows
       title: Cluster Rows
@@ -190,6 +203,7 @@ options:
       title: Annotation Variable
       type: Variable
       description: "Variable for row/column annotations"
+      default: NULL
 
     - name: annotation_colors
       title: Annotation Colors

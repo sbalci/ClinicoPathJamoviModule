@@ -35,12 +35,16 @@ roc_res$AUC
 
 ## Bootstrapping and Confidence Intervals
 
-`auc_ci()` and `bootstrap_ci()` provide convenience wrappers for computing
-confidence intervals for diagnostic metrics.
+The `pROC` package provides robust methods for computing confidence intervals for diagnostic metrics.
 
 ```{r, eval=FALSE}
-auc_ci(roc_res)
-bootstrap_ci(roc_res)
+# Calculate AUC confidence intervals using pROC
+library(pROC)
+roc_obj <- roc(response = outcome, predictor = biomarker)
+pROC::ci.auc(roc_obj, method = "bootstrap")
+
+# Calculate threshold-specific confidence intervals
+pROC::ci.thresholds(roc_obj)
 ```
 
-These utilities allow you to assess the stability of your ROC analysis.
+These methods provide statistically sound confidence intervals for your ROC analysis.

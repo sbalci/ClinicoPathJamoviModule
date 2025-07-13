@@ -359,6 +359,64 @@ options:
         Specify the multiplier for incidence rates (e.g., 100 for rates per 100 person-years,
         1000 for rates per 1000 person-years).
 
+    - name: rmst_analysis
+      title: "Restricted Mean Survival Time (RMST)"
+      type: Bool
+      default: false
+      description: >-
+        Calculate Restricted Mean Survival Time, which represents the average survival time
+        up to a specified time horizon. Useful when median survival cannot be estimated
+        or for comparing survival over a specific time period.
+
+    - name: rmst_tau
+      title: "RMST Time Horizon"
+      type: Number
+      default: 0
+      description: >-
+        Time horizon for RMST calculation. If 0 or not specified, uses the 75th percentile
+        of follow-up time. Should be specified in the same units as the survival time.
+
+    - name: stratified_cox
+      title: "Stratified Cox Regression"
+      type: Bool
+      default: false
+      description: >-
+        Perform stratified Cox regression to account for non-proportional hazards
+        or unmeasured confounders that affect baseline hazard.
+
+    - name: strata_variable
+      title: "Stratification Variable"
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >-
+        Variable to use for stratification in Cox regression. This variable should
+        represent groups with different baseline hazards.
+
+    - name: residual_diagnostics
+      title: "Model Residual Diagnostics"
+      type: Bool
+      default: false
+      description: >-
+        Calculate and display Cox model residuals for diagnostic purposes, including
+        Martingale, deviance, score, and Schoenfeld residuals.
+
+    - name: export_survival_data
+      title: "Export Survival Estimates"
+      type: Bool
+      default: false
+      description: >-
+        Export detailed survival estimates for external analysis, including survival
+        probabilities, confidence intervals, and risk tables at multiple time points.
+
+    - name: loglog
+      title: "Log-Log Plot"
+      type: Bool
+      default: false
+      description: >-
+        Display log-log survival plot for visual assessment of proportional hazards
+        assumption. Parallel lines suggest proportional hazards.
+
 
 
 

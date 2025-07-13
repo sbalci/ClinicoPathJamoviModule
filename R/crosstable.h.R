@@ -174,7 +174,7 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "crosstable",
-                version = c(0,0,3),
+                version = c(0,0,2),
                 options = options,
                 results = crosstableResults$new(options=options),
                 data = data,
@@ -195,7 +195,7 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \donttest{
 #' # Example usage:
 #' # dat <- as.data.frame(your_data)
-#' # ClinicoPath::crosstable(
+#' # ClinicoPathDescriptives::crosstable(
 #' #   data = dat,
 #' #   vars = vars(YourRowVariable),
 #' #   group = "YourGroupingVariable",

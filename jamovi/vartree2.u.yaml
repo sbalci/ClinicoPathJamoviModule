@@ -1,0 +1,127 @@
+title: Variable Tree
+name: vartree2
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: true
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Variable for Percentage
+        children:
+          - type: VariablesListBox
+            name: percvar
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: percvarLevel
+      - type: TargetLayoutBox
+        label: Continuous Variable for Summaries
+        children:
+          - type: VariablesListBox
+            name: summaryvar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Prune Below
+        children:
+          - type: VariablesListBox
+            name: prunebelow
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: pruneLevel1
+          - type: LevelSelector
+            name: pruneLevel2
+      - type: TargetLayoutBox
+        label: Follow Below
+        children:
+          - type: VariablesListBox
+            name: follow
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: followLevel1
+          - type: LevelSelector
+            name: followLevel2
+  - type: CollapseBox
+    label: Options
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Output
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: excl
+                  - type: CheckBox
+                    name: varnames
+                  - type: CheckBox
+                    name: showcount
+                  - type: CheckBox
+                    name: pct
+                  - type: CheckBox
+                    name: vp
+                    enable: (!excl && pct)
+                  - type: CheckBox
+                    name: nodelabel
+                  - type: CheckBox
+                    name: legend
+                    enable: (varnames)
+                  - type: TextBox
+                    name: mytitle
+                    format: string
+                    width: large
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Plots
+                fitToGrid: true
+                cell:
+                  column: 1
+                  row: 0
+                children:
+                  - type: CheckBox
+                    name: horizontal
+                  - type: CheckBox
+                    name: sline
+                  - type: CheckBox
+                    name: useprunesmaller
+                    children:
+                      - type: TextBox
+                        name: prunesmaller
+                        format: number
+                        enable: (useprunesmaller)
+                  - type: CheckBox
+                    name: pattern
+                    enable: (!sequence)
+                  - type: CheckBox
+                    name: sequence
+                    enable: (!pattern)
+                  - type: CheckBox
+                    name: ptable
+                  - type: ComboBox
+                    name: summarylocation

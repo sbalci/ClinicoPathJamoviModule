@@ -52,7 +52,7 @@ The `jggridges` function supports:
 
 Let's start with a basic ridge plot comparing age distributions across tumor grades:
 
-```{r}
+```{r, eval=FALSE}
 # Load histopathology data
 data(histopathology, package = "ClinicoPath")
 
@@ -84,7 +84,7 @@ Ridge plots display:
 
 The most common type, showing smooth density estimates:
 
-```{r}
+```{r eval=FALSE}
 # Density ridges with custom scaling
 density_ridge <- jggridges(
   data = histopathology,
@@ -133,13 +133,13 @@ ridgeline <- jggridges(
 Combination of ridge plots and violin plots:
 
 ```{r}
-# Violin ridge plot
-violin_ridge <- jggridges(
+# Density ridge plot (violin_ridges not available in ggridges)
+density_ridge <- jggridges(
   data = histopathology,
   x_var = "OverallTime",
   y_var = "Group",
-  plot_type = "violin_ridges",
-  plot_title = "Violin Ridge Plot: Survival Time by Treatment Group"
+  plot_type = "density_ridges",
+  plot_title = "Density Ridge Plot: Survival Time by Treatment Group"
 )
 ```
 

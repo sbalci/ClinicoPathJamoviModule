@@ -139,7 +139,8 @@ jggsankeyfierClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 }
                 
                 flow_data <- data %>%
-                    dplyr::select(!!!cols_to_select) %>%
+                    dplyr::select(dplyr::all_of(unlist(cols_to_select))) %>%
+                    dplyr::rename(!!!cols_to_select) %>%
                     dplyr::filter(!is.na(source), !is.na(target), !is.na(value))
                     
             } else if (!is.null(self$options$node_vars) && length(self$options$node_vars) >= 2) {
@@ -158,7 +159,7 @@ jggsankeyfierClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 }
                 
                 flow_data <- data %>%
-                    dplyr::select(!!!cols_to_select) %>%
+                    dplyr::select(dplyr::all_of(cols_to_select)) %>%
                     dplyr::filter(!is.na(!!sym(value_var)))
                     
                 # Convert to long format for ggalluvial

@@ -1,10 +1,10 @@
 ---
 name:  venn
 title: Venn Diagram
-menuGroup: ExplorationD
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
 menuSubtitle: Venn Diagram, UpSet Plot
-version: '0.0.3'
+version: '0.0.2'
 jas: '1.2'
 
 options:
@@ -64,7 +64,6 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
-      default: NULL
       description:
           R: >
             An optional variable from `data` to include in the diagram.
@@ -86,7 +85,6 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
-      default: NULL
       description:
           R: >
             An optional variable from `data` for additional overlap analysis.

@@ -7,16 +7,7 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     public = list(
         initialize = function(
             vars = NULL,
-            date_vars = NULL,
-            distr = FALSE,
-            summary_format = "standard",
-            grvar = NULL,
-            pivot_layout = "clinical",
-            include_confidence = TRUE,
-            advanced_metrics = FALSE,
-            pivot_export = FALSE,
-            summarytools_graphs = TRUE,
-            summarytools_round_digits = 2, ...) {
+            distr = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -31,105 +22,20 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "continuous"),
                 permitted=list(
                     "numeric"))
-            private$..date_vars <- jmvcore::OptionVariables$new(
-                "date_vars",
-                date_vars,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
             private$..distr <- jmvcore::OptionBool$new(
                 "distr",
                 distr,
                 default=FALSE)
-            private$..summary_format <- jmvcore::OptionList$new(
-                "summary_format",
-                summary_format,
-                options=list(
-                    "standard",
-                    "sumvar",
-                    "pivot",
-                    "summarytools_df",
-                    "summarytools_desc",
-                    "summarytools_freq"),
-                default="standard")
-            private$..grvar <- jmvcore::OptionVariable$new(
-                "grvar",
-                grvar,
-                suggested=list(
-                    "ordinal",
-                    "nominal"),
-                permitted=list(
-                    "factor"),
-                default=NULL)
-            private$..pivot_layout <- jmvcore::OptionList$new(
-                "pivot_layout",
-                pivot_layout,
-                options=list(
-                    "clinical",
-                    "statistical",
-                    "comparative"),
-                default="clinical")
-            private$..include_confidence <- jmvcore::OptionBool$new(
-                "include_confidence",
-                include_confidence,
-                default=TRUE)
-            private$..advanced_metrics <- jmvcore::OptionBool$new(
-                "advanced_metrics",
-                advanced_metrics,
-                default=FALSE)
-            private$..pivot_export <- jmvcore::OptionBool$new(
-                "pivot_export",
-                pivot_export,
-                default=FALSE)
-            private$..summarytools_graphs <- jmvcore::OptionBool$new(
-                "summarytools_graphs",
-                summarytools_graphs,
-                default=TRUE)
-            private$..summarytools_round_digits <- jmvcore::OptionInteger$new(
-                "summarytools_round_digits",
-                summarytools_round_digits,
-                min=1,
-                max=6,
-                default=2)
 
             self$.addOption(private$..vars)
-            self$.addOption(private$..date_vars)
             self$.addOption(private$..distr)
-            self$.addOption(private$..summary_format)
-            self$.addOption(private$..grvar)
-            self$.addOption(private$..pivot_layout)
-            self$.addOption(private$..include_confidence)
-            self$.addOption(private$..advanced_metrics)
-            self$.addOption(private$..pivot_export)
-            self$.addOption(private$..summarytools_graphs)
-            self$.addOption(private$..summarytools_round_digits)
         }),
     active = list(
         vars = function() private$..vars$value,
-        date_vars = function() private$..date_vars$value,
-        distr = function() private$..distr$value,
-        summary_format = function() private$..summary_format$value,
-        grvar = function() private$..grvar$value,
-        pivot_layout = function() private$..pivot_layout$value,
-        include_confidence = function() private$..include_confidence$value,
-        advanced_metrics = function() private$..advanced_metrics$value,
-        pivot_export = function() private$..pivot_export$value,
-        summarytools_graphs = function() private$..summarytools_graphs$value,
-        summarytools_round_digits = function() private$..summarytools_round_digits$value),
+        distr = function() private$..distr$value),
     private = list(
         ..vars = NA,
-        ..date_vars = NA,
-        ..distr = NA,
-        ..summary_format = NA,
-        ..grvar = NA,
-        ..pivot_layout = NA,
-        ..include_confidence = NA,
-        ..advanced_metrics = NA,
-        ..pivot_export = NA,
-        ..summarytools_graphs = NA,
-        ..summarytools_round_digits = NA)
+        ..distr = NA)
 )
 
 summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -138,9 +44,7 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     active = list(
         todo = function() private$.items[["todo"]],
         text = function() private$.items[["text"]],
-        text1 = function() private$.items[["text1"]],
-        pivot_summary = function() private$.items[["pivot_summary"]],
-        pivot_export_info = function() private$.items[["pivot_export_info"]]),
+        text1 = function() private$.items[["text1"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -162,24 +66,7 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
-                title="Continuous Data Plots"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="pivot_summary",
-                title="Enhanced Pivot Summary",
-                visible="(summary_format:pivot)",
-                clearWith=list(
-                    "vars",
-                    "summary_format",
-                    "pivot_layout",
-                    "include_confidence",
-                    "advanced_metrics",
-                    "grvar")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="pivot_export_info",
-                title="Export Information",
-                visible="(pivot_export && summary_format:pivot)"))}))
+                title="Continuous Data Plots"))}))
 
 summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "summarydataBase",
@@ -189,7 +76,7 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "summarydata",
-                version = c(0,0,3),
+                version = c(0,0,2),
                 options = options,
                 results = summarydataResults$new(options=options),
                 data = data,
@@ -221,76 +108,34 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the continuous values used for the report
-#' @param date_vars Variables containing date/time data to be analyzed with
-#'   date-specific statistics (similar to sumvar's dist_date function)
 #' @param distr If TRUE, additional distribution diagnostics (Shapiro-Wilk
 #'   test, skewness, and kurtosis) will be computed and explained.
-#' @param summary_format Choose the format for summary statistics display. New
-#'   summarytools options provide publication-ready automated EDA summaries with
-#'   embedded visualizations.
-#' @param grvar Optional grouping variable to stratify the summary statistics
-#'   by categories.
-#' @param pivot_layout Layout style for pivottabler enhanced summaries.
-#' @param include_confidence Include confidence intervals in pivot summary
-#'   tables.
-#' @param advanced_metrics Include advanced metrics like IQR, MAD, and robust
-#'   statistics.
-#' @param pivot_export Enable enhanced export capabilities for pivot tables.
-#' @param summarytools_graphs Include histograms and bar charts in
-#'   summarytools dfSummary output.
-#' @param summarytools_round_digits Number of decimal places for summarytools
-#'   output.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$pivot_summary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$pivot_export_info} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
 summarydata <- function(
     data,
     vars,
-    date_vars = NULL,
-    distr = FALSE,
-    summary_format = "standard",
-    grvar = NULL,
-    pivot_layout = "clinical",
-    include_confidence = TRUE,
-    advanced_metrics = FALSE,
-    pivot_export = FALSE,
-    summarytools_graphs = TRUE,
-    summarytools_round_digits = 2) {
+    distr = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("summarydata requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
-    if ( ! missing(date_vars)) date_vars <- jmvcore::resolveQuo(jmvcore::enquo(date_vars))
-    if ( ! missing(grvar)) grvar <- jmvcore::resolveQuo(jmvcore::enquo(grvar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(vars), vars, NULL),
-            `if`( ! missing(date_vars), date_vars, NULL),
-            `if`( ! missing(grvar), grvar, NULL))
+            `if`( ! missing(vars), vars, NULL))
 
-    for (v in grvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- summarydataOptions$new(
         vars = vars,
-        date_vars = date_vars,
-        distr = distr,
-        summary_format = summary_format,
-        grvar = grvar,
-        pivot_layout = pivot_layout,
-        include_confidence = include_confidence,
-        advanced_metrics = advanced_metrics,
-        pivot_export = pivot_export,
-        summarytools_graphs = summarytools_graphs,
-        summarytools_round_digits = summarytools_round_digits)
+        distr = distr)
 
     analysis <- summarydataClass$new(
         options = options,

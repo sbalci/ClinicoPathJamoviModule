@@ -696,9 +696,9 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # Example analyzing overall survival for a patient cohort:
 #' # singlearm(
 #' #   data = patient_data,
-#' #   time = "months_survival",
+#' #   elapsedtime = "months_survival",
 #' #   outcome = "death_status",
-#' #   outcome_level = "Dead"
+#' #   outcomeLevel = "Dead"
 #' # )
 #'}
 #' @param data The data as a data frame.

@@ -37,6 +37,9 @@
 #' @import jmvcore
 #' @importFrom gsDesign nSurvival nEvents hrn2z hrz2n zn2hr
 #' @import magrittr
+#' @importFrom ggplot2 ggplot aes geom_line geom_hline geom_point geom_rect annotate
+#' @importFrom ggplot2 labs scale_y_continuous scale_y_discrete scale_fill_manual theme_minimal theme element_text element_blank
+#' @importFrom scales percent
 
 survivalpowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "survivalpowerClass",
@@ -114,6 +117,19 @@ survivalpowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 
                 if (self$options$show_interpretation) {
                     private$.generate_interpretation()
+                }
+                
+                # Handle exports
+                if (self$options$export_results) {
+                    private$.export_results()
+                }
+                
+                if (self$options$export_power_curve) {
+                    private$.export_power_curve()
+                }
+                
+                if (self$options$export_results || self$options$export_power_curve) {
+                    private$.generate_export_summary()
                 }
                 
             }, error = function(e) {
@@ -462,6 +478,315 @@ survivalpowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             interp_html <- paste0(interp_html, "</div>")
             
             self$results$interpretation$setContent(interp_html)
+        },
+        
+        .plot_power_curve = function(image, ggtheme, theme, ...) {
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+                stop("Package 'ggplot2' is required for power curve plots.")
+            }
+            
+            if (is.null(private$.results_data)) {
+                return()
+            }
+            
+            # Generate power curve data
+            power_data <- private$.generate_power_curve_data()
+            
+            if (is.null(power_data) || nrow(power_data) == 0) {
+                return()
+            }
+            
+            # Create power curve plot
+            p <- ggplot2::ggplot(power_data, ggplot2::aes(x = sample_size, y = power)) +
+                ggplot2::geom_line(color = "#1f77b4", size = 1.2) +
+                ggplot2::geom_hline(yintercept = 0.8, linetype = "dashed", color = "#ff7f0e", alpha = 0.7) +
+                ggplot2::geom_hline(yintercept = 0.9, linetype = "dashed", color = "#2ca02c", alpha = 0.7) +
+                ggplot2::labs(
+                    title = paste("Power Curve -", private$.results_data$method, "Method"),
+                    subtitle = paste("Hazard Ratio:", round(private$.results_data$hazard_ratio, 3)),
+                    x = "Sample Size",
+                    y = "Statistical Power",
+                    caption = "Dashed lines: 80% (orange) and 90% (green) power thresholds"
+                ) +
+                ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
+                    plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
+                    panel.grid.minor = ggplot2::element_blank()
+                )
+            
+            # Add current point if applicable
+            if (private$.results_data$calculation %in% c("Sample Size", "Power (Estimated)", "Power")) {
+                current_point <- data.frame(
+                    sample_size = private$.results_data$sample_size %||% private$.results_data$calculated_sample_size,
+                    power = private$.results_data$power
+                )
+                if (!is.null(current_point$sample_size)) {
+                    p <- p + ggplot2::geom_point(
+                        data = current_point, 
+                        color = "#d62728", 
+                        size = 4, 
+                        shape = 19
+                    ) +
+                    ggplot2::annotate(
+                        "text",
+                        x = current_point$sample_size,
+                        y = current_point$power + 0.05,
+                        label = paste("Current:", round(current_point$sample_size), "subjects,", 
+                                    scales::percent(current_point$power, accuracy = 0.1), "power"),
+                        hjust = 0.5,
+                        color = "#d62728",
+                        fontface = "bold"
+                    )
+                }
+            }
+            
+            print(p)
+            TRUE
+        },
+        
+        .plot_timeline = function(image, ggtheme, theme, ...) {
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+                stop("Package 'ggplot2' is required for timeline plots.")
+            }
+            
+            if (is.null(private$.results_data) || private$.results_data$method != "Lachin-Foulkes") {
+                return()
+            }
+            
+            # Generate timeline data
+            timeline_data <- private$.generate_timeline_data()
+            
+            if (is.null(timeline_data)) {
+                return()
+            }
+            
+            # Create timeline plot
+            p <- ggplot2::ggplot(timeline_data, ggplot2::aes(x = time, y = phase, fill = phase)) +
+                ggplot2::geom_rect(
+                    ggplot2::aes(xmin = start, xmax = end, ymin = as.numeric(phase) - 0.4, ymax = as.numeric(phase) + 0.4),
+                    alpha = 0.7
+                ) +
+                ggplot2::scale_fill_manual(values = c("Accrual" = "#1f77b4", "Follow-up" = "#ff7f0e", "Analysis" = "#2ca02c")) +
+                ggplot2::labs(
+                    title = "Study Timeline - Lachin-Foulkes Design",
+                    subtitle = paste("Total Duration:", private$.results_data$study_duration, "time units"),
+                    x = "Time (months/years)",
+                    y = "Study Phase"
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
+                    plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
+                    legend.position = "none",
+                    panel.grid.major.y = ggplot2::element_blank(),
+                    panel.grid.minor = ggplot2::element_blank()
+                ) +
+                ggplot2::scale_y_discrete(limits = c("Analysis", "Follow-up", "Accrual"))
+            
+            # Add annotations
+            p <- p + ggplot2::annotate(
+                "text",
+                x = private$.results_data$accrual_duration / 2,
+                y = 3.2,
+                label = paste("Accrual Period\n", private$.results_data$accrual_duration, "time units"),
+                hjust = 0.5,
+                fontface = "bold",
+                color = "#1f77b4"
+            )
+            
+            if (private$.results_data$study_duration > private$.results_data$accrual_duration) {
+                p <- p + ggplot2::annotate(
+                    "text",
+                    x = (private$.results_data$accrual_duration + private$.results_data$study_duration) / 2,
+                    y = 2.2,
+                    label = paste("Follow-up Period\n", 
+                                private$.results_data$study_duration - private$.results_data$accrual_duration, 
+                                "time units"),
+                    hjust = 0.5,
+                    fontface = "bold",
+                    color = "#ff7f0e"
+                )
+            }
+            
+            print(p)
+            TRUE
+        },
+        
+        .generate_power_curve_data = function() {
+            if (is.null(private$.results_data)) return(NULL)
+            
+            # Determine sample size range
+            range_str <- self$options$power_plot_range
+            if (range_str == "auto" || is.null(range_str) || range_str == "") {
+                # Auto-determine range based on current calculation
+                if (!is.null(private$.results_data$sample_size)) {
+                    center <- private$.results_data$sample_size
+                    min_n <- max(10, round(center * 0.3))
+                    max_n <- round(center * 2)
+                } else {
+                    min_n <- 50
+                    max_n <- 500
+                }
+            } else {
+                # Parse user-specified range
+                range_parts <- strsplit(range_str, ",")[[1]]
+                if (length(range_parts) == 2) {
+                    min_n <- as.numeric(trimws(range_parts[1]))
+                    max_n <- as.numeric(trimws(range_parts[2]))
+                } else {
+                    min_n <- 50
+                    max_n <- 500
+                }
+            }
+            
+            # Generate sample size sequence
+            sample_sizes <- seq(min_n, max_n, length.out = 50)
+            powers <- numeric(length(sample_sizes))
+            
+            # Calculate power for each sample size
+            tryCatch({
+                for (i in seq_along(sample_sizes)) {
+                    if (private$.results_data$method == "Lachin-Foulkes") {
+                        # Use gsDesign for power calculation
+                        temp_result <- gsDesign::nSurvival(
+                            lambda1 = self$options$hazard_control,
+                            lambda2 = self$options$hazard_treatment,
+                            Ts = self$options$study_duration,
+                            Tr = self$options$accrual_duration,
+                            eta = self$options$dropout_rate,
+                            ratio = self$options$allocation_ratio,
+                            alpha = self$options$alpha,
+                            beta = self$options$beta,
+                            sided = as.numeric(self$options$sided),
+                            entry = self$options$entry_type,
+                            gamma = if (self$options$entry_type == "expo") self$options$gamma else NA
+                        )
+                        # Approximate power based on sample size ratio
+                        power_ratio <- sample_sizes[i] / temp_result$n
+                        powers[i] <- min(0.99, 1 - self$options$beta * (1/power_ratio))
+                    } else {
+                        # Schoenfeld method - calculate events needed then approximate sample size relationship
+                        hr <- private$.results_data$hazard_ratio
+                        events_needed <- gsDesign::nEvents(
+                            hr = hr,
+                            alpha = self$options$alpha,
+                            beta = self$options$beta,
+                            ratio = self$options$allocation_ratio,
+                            sided = as.numeric(self$options$sided)
+                        )$n[1]
+                        
+                        # Approximate power based on events (assuming ~50% event rate)
+                        approx_events <- sample_sizes[i] * 0.5
+                        z_value <- sqrt(approx_events / events_needed) * (qnorm(1 - self$options$alpha/as.numeric(self$options$sided)) + qnorm(1 - self$options$beta))
+                        powers[i] <- pnorm(z_value - qnorm(1 - self$options$alpha/as.numeric(self$options$sided)))
+                    }
+                }
+                
+                data.frame(
+                    sample_size = sample_sizes,
+                    power = pmax(0, pmin(1, powers))
+                )
+            }, error = function(e) {
+                NULL
+            })
+        },
+        
+        .generate_timeline_data = function() {
+            if (is.null(private$.results_data) || private$.results_data$method != "Lachin-Foulkes") {
+                return(NULL)
+            }
+            
+            data.frame(
+                phase = factor(c("Accrual", "Follow-up", "Analysis"), 
+                             levels = c("Analysis", "Follow-up", "Accrual")),
+                start = c(0, private$.results_data$accrual_duration, private$.results_data$study_duration),
+                end = c(private$.results_data$accrual_duration, 
+                       private$.results_data$study_duration, 
+                       private$.results_data$study_duration + 1),
+                time = c(private$.results_data$accrual_duration/2,
+                        (private$.results_data$accrual_duration + private$.results_data$study_duration)/2,
+                        private$.results_data$study_duration + 0.5)
+            )
+        },
+        
+        .export_results = function() {
+            if (is.null(private$.results_data)) return()
+            
+            # Create comprehensive results data frame
+            results_df <- data.frame(
+                Method = private$.results_data$method,
+                Calculation_Type = private$.results_data$calculation,
+                Sample_Size = private$.results_data$sample_size %||% NA,
+                Events_Required = private$.results_data$events %||% NA,
+                Statistical_Power = round(private$.results_data$power, 4),
+                Hazard_Ratio = round(private$.results_data$hazard_ratio, 4),
+                Control_Hazard_Rate = private$.results_data$control_hazard %||% NA,
+                Treatment_Hazard_Rate = private$.results_data$treatment_hazard %||% NA,
+                Study_Duration = private$.results_data$study_duration %||% NA,
+                Accrual_Duration = private$.results_data$accrual_duration %||% NA,
+                Type_I_Error_Alpha = private$.results_data$alpha,
+                Type_II_Error_Beta = round(private$.results_data$beta, 4),
+                Allocation_Ratio = private$.results_data$allocation_ratio %||% NA,
+                Analysis_Date = Sys.Date(),
+                stringsAsFactors = FALSE
+            )
+            
+            # Remove NA columns for cleaner export
+            results_df <- results_df[, !apply(is.na(results_df), 2, all)]
+            
+            self$results$exported_results$set(results_df)
+        },
+        
+        .export_power_curve = function() {
+            power_data <- private$.generate_power_curve_data()
+            
+            if (!is.null(power_data) && nrow(power_data) > 0) {
+                # Add metadata columns
+                power_data$Method <- private$.results_data$method
+                power_data$Hazard_Ratio <- private$.results_data$hazard_ratio
+                power_data$Alpha <- self$options$alpha
+                power_data$Beta <- self$options$beta
+                power_data$Allocation_Ratio <- self$options$allocation_ratio
+                power_data$Analysis_Date <- Sys.Date()
+                
+                # Round for cleaner export
+                power_data$power <- round(power_data$power, 4)
+                power_data$sample_size <- round(power_data$sample_size)
+                
+                self$results$exported_power_curve$set(power_data)
+            }
+        },
+        
+        .generate_export_summary = function() {
+            summary_html <- "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>"
+            summary_html <- paste0(summary_html, "<h4>Export Summary</h4>")
+            
+            if (self$options$export_results) {
+                results_count <- if (!is.null(private$.results_data)) 1 else 0
+                summary_html <- paste0(summary_html, "<p>✅ <strong>Power Analysis Results:</strong> ", results_count, " record exported</p>")
+                summary_html <- paste0(summary_html, "<p style='margin-left: 20px; color: #666;'>Contains: sample size, power, hazard ratios, study parameters</p>")
+            }
+            
+            if (self$options$export_power_curve) {
+                power_data <- private$.generate_power_curve_data()
+                curve_count <- if (!is.null(power_data)) nrow(power_data) else 0
+                summary_html <- paste0(summary_html, "<p>✅ <strong>Power Curve Data:</strong> ", curve_count, " data points exported</p>")
+                summary_html <- paste0(summary_html, "<p style='margin-left: 20px; color: #666;'>Contains: sample size vs power relationships for external plotting</p>")
+            }
+            
+            summary_html <- paste0(summary_html, "<h5>Usage Instructions:</h5>")
+            summary_html <- paste0(summary_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+            summary_html <- paste0(summary_html, "<li>Exported data appears in your dataset as new variables</li>")
+            summary_html <- paste0(summary_html, "<li>Use 'Data' > 'Export' to save as CSV/Excel for external analysis</li>")
+            summary_html <- paste0(summary_html, "<li>Power curve data can be used for custom plotting in R/Python</li>")
+            summary_html <- paste0(summary_html, "<li>Results data is suitable for protocol documents and reports</li>")
+            summary_html <- paste0(summary_html, "</ul>")
+            
+            summary_html <- paste0(summary_html, "</div>")
+            
+            self$results$export_summary$setContent(summary_html)
         }
     )
 )

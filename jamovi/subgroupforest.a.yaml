@@ -2,9 +2,41 @@
 name: subgroupforest
 title: Subgroup Analysis Forest Plot
 menuGroup: SurvivalD
-menuSubgroup: ClinicoPath Clinical Plots
-version: '0.0.3'
+menuSubgroup: ClinicoPath Clinical Analysis
+version: '0.1.0'
 jas: '1.2'
+
+description:
+    main: >
+        Creates forest plots showing treatment effects across different patient subgroups.
+        Performs subgroup analysis for clinical trials and observational studies,
+        calculating treatment effects within patient subgroups and testing for interactions.
+        Supports survival (time-to-event), binary, and continuous outcomes with
+        comprehensive statistical validation and heterogeneity testing.
+    R:
+        dontrun: false
+        usage: |
+            # Survival outcome subgroup analysis
+            subgroupforest(
+                data = clinical_trial,
+                outcome = "time_to_event",
+                treatment = "treatment_arm", 
+                subgroups = c("age_group", "gender", "stage"),
+                time = "time_to_event",
+                event = "event_occurred",
+                outcomeType = "survival",
+                effectMeasure = "hr"
+            )
+            
+            # Binary outcome analysis
+            subgroupforest(
+                data = study_data,
+                outcome = "response",
+                treatment = "intervention",
+                subgroups = c("age_category", "sex"),
+                outcomeType = "binary",
+                effectMeasure = "or"
+            )
 
 options:
     - name: data
@@ -19,7 +51,9 @@ options:
       suggested: [continuous, nominal]
       description:
           R: >
-            Primary outcome variable (time-to-event, binary, or continuous).
+            Primary outcome variable. For survival analysis, this should be the time variable.
+            For binary outcomes, use 0/1 or factor with 2 levels. For continuous outcomes,
+            use numeric variables.
 
     - name: treatment
       title: Treatment Variable
@@ -28,7 +62,8 @@ options:
       permitted: [factor]
       description:
           R: >
-            Treatment or exposure variable (binary factor).
+            Treatment or exposure variable (must be binary: 0/1, control/treatment).
+            This variable defines the two groups being compared in the analysis.
 
     - name: subgroups
       title: Subgroup Variables
@@ -37,7 +72,9 @@ options:
       permitted: [factor]
       description:
           R: >
-            Variables defining patient subgroups for analysis.
+            Variables defining patient subgroups for analysis (categorical variables).
+            Each variable will be analyzed separately to identify differential treatment effects.
+            Examples: age groups, gender, disease stage, biomarker status.
 
     - name: time
       title: Time Variable (for survival)
@@ -45,7 +82,8 @@ options:
       suggested: [continuous]
       description:
           R: >
-            Time variable for survival analysis (required if outcome is survival time).
+            Time variable for survival analysis (numeric, required if outcomeType = "survival").
+            Should contain time to event or censoring in consistent units (days, months, years).
 
     - name: event
       title: Event Variable (for survival)
@@ -54,7 +92,8 @@ options:
       permitted: [factor]
       description:
           R: >
-            Event indicator for survival analysis (1=event, 0=censored).
+            Event indicator for survival analysis (binary: 1=event occurred, 0=censored).
+            Required for survival analysis to distinguish between observed events and censored observations.
 
     - name: outcomeType
       title: Outcome Type
@@ -69,24 +108,26 @@ options:
       default: survival
       description:
           R: >
-            Type of outcome variable for appropriate statistical analysis.
+            Type of outcome variable: "survival" (time-to-event), "binary" (yes/no), "continuous".
+            Determines the statistical method used for analysis (Cox regression, logistic regression, linear regression).
 
     - name: effectMeasure
       title: Effect Measure
       type: List
       options:
-        - title: Hazard Ratio (HR)
+        - title: Hazard Ratio (HR) - for survival
           name: hr
-        - title: Odds Ratio (OR)
+        - title: Odds Ratio (OR) - for binary
           name: or
-        - title: Risk Ratio (RR)
+        - title: Risk Ratio (RR) - for binary
           name: rr
-        - title: Mean Difference
+        - title: Mean Difference (MD) - for continuous
           name: md
       default: hr
       description:
           R: >
-            Statistical measure for treatment effect.
+            Statistical measure for treatment effect: "hr" (hazard ratio), "or" (odds ratio), 
+            "rr" (risk ratio), "md" (mean difference). Should match the outcome type.
 
     - name: confidenceLevel
       title: Confidence Level
@@ -117,22 +158,24 @@ options:
       default: true
       description:
           R: >
-            Perform statistical tests for subgroup interactions.
+            Perform statistical tests for subgroup interactions using likelihood ratio tests.
+            Tests whether treatment effect varies significantly across subgroups.
 
     - name: sortBy
       title: Sort Subgroups By
       type: List
       options:
-        - title: Effect Size
+        - title: Effect Size (ascending)
           name: effect
-        - title: Sample Size
+        - title: Sample Size (descending)
           name: n
         - title: Alphabetical
           name: alpha
       default: effect
       description:
           R: >
-            Method for ordering subgroups in the plot.
+            Method for ordering subgroups in the plot: "effect" (by effect size), 
+            "n" (by sample size), "alpha" (alphabetical). Affects visual presentation.
 
     - name: showSampleSizes
       title: Show Sample Sizes
@@ -148,7 +191,8 @@ options:
       default: true
       description:
           R: >
-            Display effects on log scale (appropriate for ratios).
+            Display effects on log scale (recommended for ratios: HR, OR, RR).
+            Makes ratio effects more interpretable and symmetric around null value.
 
     - name: nullLine
       title: Null Effect Line
@@ -156,4 +200,5 @@ options:
       default: 1
       description:
           R: >
-            Value for null effect reference line (1 for ratios, 0 for differences).
+            Value for null effect reference line (1 for ratios: HR/OR/RR, 0 for differences: MD).
+            Vertical line indicating no treatment effect.

@@ -1,9 +1,9 @@
 ---
 name:  crosstable
 title: Cross Tables
-menuGroup: ExplorationD
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Comparisons
-version: '0.0.3'
+version: '0.0.2'
 jas: '1.2'
 
 description:
@@ -13,7 +13,7 @@ description:
         usage: |
             # Example usage:
             # dat <- as.data.frame(your_data)
-            # ClinicoPath::crosstable(
+            # ClinicoPathDescriptives::crosstable(
             #   data = dat,
             #   vars = vars(YourRowVariable),
             #   group = "YourGroupingVariable",

@@ -50,19 +50,24 @@ jggsankeyfierOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 value_var)
             private$..source_var <- jmvcore::OptionVariable$new(
                 "source_var",
-                source_var)
+                source_var,
+                default=NULL)
             private$..target_var <- jmvcore::OptionVariable$new(
                 "target_var",
-                target_var)
+                target_var,
+                default=NULL)
             private$..node_vars <- jmvcore::OptionVariables$new(
                 "node_vars",
-                node_vars)
+                node_vars,
+                default=NULL)
             private$..grouping_var <- jmvcore::OptionVariable$new(
                 "grouping_var",
-                grouping_var)
+                grouping_var,
+                default=NULL)
             private$..time_var <- jmvcore::OptionVariable$new(
                 "time_var",
-                time_var)
+                time_var,
+                default=NULL)
             private$..node_width <- jmvcore::OptionNumber$new(
                 "node_width",
                 node_width,
@@ -383,11 +388,11 @@ jggsankeyfier <- function(
     data,
     diagram_type = "sankey",
     value_var,
-    source_var,
-    target_var,
-    node_vars,
-    grouping_var,
-    time_var,
+    source_var = NULL,
+    target_var = NULL,
+    node_vars = NULL,
+    grouping_var = NULL,
+    time_var = NULL,
     node_width = 0.5,
     node_spacing = 0.1,
     edge_alpha = 0.6,

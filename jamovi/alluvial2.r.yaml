@@ -1,0 +1,65 @@
+---
+name:  alluvial2
+title: Alluvial Diagrams
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - vars
+
+    # - name:  plothtml
+    #   title: Plot html
+    #   type:  Html
+    #   clearWith:
+    #       - vars
+    #       - excl
+    #       - marg
+    #       - inter
+
+    - title: Alluvial Diagrams
+      name: plot
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+          - vars
+          - excl
+          - marg
+          - verb
+          - fill
+          - bin
+          - orient
+          - usetitle
+          - mytitle
+          # - themex
+          # - originaltheme
+
+
+    - title: '`Condensation Plot ${condensationvar}`'
+      name: plot2
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot2
+      requiresData: true
+      clearWith:
+          - vars
+          - condensationvar
+          # - themex
+          # - originaltheme
+      visible: (condensationvar)
+
+
+refs:
+    - easyalluvial
+    - ClinicoPathJamoviModule
+    # - parcats
+
+
+...

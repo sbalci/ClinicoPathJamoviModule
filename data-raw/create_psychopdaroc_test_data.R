@@ -274,7 +274,7 @@ cat('
 #\' @source Simulated data for demonstration purposes
 #\' @keywords datasets
 "medical_roc_data"
-', file = "R/data_medical_roc.R")
+', file = "data-raw/data_medical_roc.R")
 
 # Education ROC Data Documentation  
 cat('
@@ -305,7 +305,7 @@ cat('
 #\' @source Simulated data for demonstration purposes
 #\' @keywords datasets
 "education_roc_data"
-', file = "R/data_education_roc.R")
+', file = "data-raw/data_education_roc.R")
 
 # Financial ROC Data Documentation
 cat('
@@ -337,7 +337,7 @@ cat('
 #\' @source Simulated data for demonstration purposes
 #\' @keywords datasets
 "financial_roc_data"
-', file = "R/data_financial_roc.R")
+', file = "data-raw/data_financial_roc.R")
 
 # Manufacturing ROC Data Documentation
 cat('
@@ -369,7 +369,7 @@ cat('
 #\' @source Simulated data for demonstration purposes
 #\' @keywords datasets
 "manufacturing_roc_data"
-', file = "R/data_manufacturing_roc.R")
+', file = "data-raw/data_manufacturing_roc.R")
 
 # Print summary
 cat("\\n=============================================================================\\n")

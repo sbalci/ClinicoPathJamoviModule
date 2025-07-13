@@ -54,21 +54,18 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"),
-                default=NULL)
+                    "factor"))
             private$..percvarLevel <- jmvcore::OptionLevel$new(
                 "percvarLevel",
                 percvarLevel,
-                variable="(percvar)",
-                allowNone=TRUE)
+                variable="(percvar)")
             private$..summaryvar <- jmvcore::OptionVariable$new(
                 "summaryvar",
                 summaryvar,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"),
-                default=NULL)
+                    "numeric"))
             private$..prunebelow <- jmvcore::OptionVariable$new(
                 "prunebelow",
                 prunebelow,
@@ -76,8 +73,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"),
-                default=NULL)
+                    "factor"))
             private$..pruneLevel1 <- jmvcore::OptionLevel$new(
                 "pruneLevel1",
                 pruneLevel1,
@@ -95,8 +91,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"),
-                default=NULL)
+                    "factor"))
             private$..followLevel1 <- jmvcore::OptionLevel$new(
                 "followLevel1",
                 followLevel1,
@@ -297,7 +292,7 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "vartree",
-                version = c(0,0,3),
+                version = c(0,0,2),
                 options = options,
                 results = vartreeResults$new(options=options),
                 data = data,
@@ -356,13 +351,13 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 vartree <- function(
     data,
     vars,
-    percvar = NULL,
+    percvar,
     percvarLevel,
-    summaryvar = NULL,
-    prunebelow = NULL,
+    summaryvar,
+    prunebelow,
     pruneLevel1,
     pruneLevel2,
-    follow = NULL,
+    follow,
     followLevel1,
     followLevel2,
     excl = FALSE,

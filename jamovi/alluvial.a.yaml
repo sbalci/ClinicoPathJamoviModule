@@ -1,9 +1,9 @@
 ---
 name:  alluvial
 title: Alluvial Diagrams
-menuGroup: ExplorationD
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
-version: '0.0.3'
+version: '0.0.2'
 jas: '1.2'
 options:
     - name: data
@@ -28,7 +28,6 @@ options:
     - name: condensationvar
       title: Condensation Variable
       type: Variable
-      default: NULL
       description:
           R: >
             The primary variable to be used for condensation.

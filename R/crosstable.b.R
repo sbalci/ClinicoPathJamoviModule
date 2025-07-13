@@ -28,10 +28,6 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom gtsummary tbl_summary modify_header add_n add_overall bold_labels add_p add_q bold_levels bold_p all_continuous all_categorical all_stat_cols style_pvalue as_kable_extra
-#' @importFrom gt md
-#' @importFrom purrr partial
-#' @import magrittr
 #'
 
 crosstableClass <- if (requireNamespace('jmvcore'))
@@ -127,9 +123,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 } else if (sty == "finalfit") {
                     myvars_term <- jmvcore::composeTerm(components = myvars)
                     myvars_term <- jmvcore::decomposeTerm(term = myvars_term)
-
-                    private$.checkpoint()
-
                     tablefinalfit <- mydata %>%
                         finalfit::summary_factorlist(
                             .data = .,
@@ -175,38 +168,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     )
                     self$results$tablestyle2$setContent(tablefinalfit)
                 } else if (sty == "gtsummary") {
-                    # tablegtsummary <- gtsummary::tbl_summary(data = mydata, by = mygroup)
-
-
-                    tablegtsummary <-
-                    gtsummary::tbl_summary(data = mydata,
-                                           by = mygroup,
-                                           statistic = list(
-                                               gtsummary::all_continuous() ~ "{mean} ({sd})",
-                                               gtsummary::all_categorical() ~ "{n} / {N} ({p}%)"
-                                           ),
-                                           digits = gtsummary::all_continuous() ~ 2,
-                                           missing_text = "(Missing)"
-                                           ) %>%
-                    gtsummary::modify_header(
-                        gtsummary::all_stat_cols() ~ "**{level}** N = {n} ({style_percent(p)}%)"
-                    ) %>%
-                    gtsummary::add_n() %>%
-                    gtsummary::add_overall() %>%
-                    gtsummary::bold_labels() %>%
-                    gtsummary::add_p(pvalue_fun = 
-                                         purrr::partial(
-                                             gtsummary::style_pvalue,
-                                             digits = 2)
-                                     ) %>%
-                    gtsummary::add_q() %>%
-                    gtsummary::bold_labels() %>%
-                    gtsummary::bold_levels() %>%
-                    gtsummary::bold_p()
-
-
-
-
+                    tablegtsummary <- gtsummary::tbl_summary(data = mydata, by = mygroup)
                     tablegtsummary <- gtsummary::as_kable_extra(tablegtsummary)
                     self$results$tablestyle3$setContent(tablegtsummary)
                 } else if (sty %in% c("nejm", "lancet", "hmisc")) {
