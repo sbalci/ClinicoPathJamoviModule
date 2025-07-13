@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-function-alluvial.html">Function Reference: alluvial() - Complete Parameter Guide</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-1-multisurvival-time-dependent-comprehensive.html">Time-Dependent Covariates in Multisurvival Analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Performing a Benford's Law Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-function-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-swimmerplot.html">Vignette: Creating Advanced Swimmer Plots with Date and Event Handling</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-12-chisqposttest.html">Chi-Square Post-Hoc Tests for Clinicopathological Research</a></li>
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">ClinicoPath
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-09-function-alluvial.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-09-function-alluvial.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-09-function-alluvial.Rmd</code></div>
@@ -642,16 +644,7 @@ analysis structure</p>
 <span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 11.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/basic-examples-1.png" width="700"></p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span></span>
 <span><span class="co"># With parameter customization</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
@@ -659,20 +652,12 @@ analysis structure</p>
 <span>  fill <span class="op">=</span> <span class="st">"last_variable"</span>,</span>
 <span>  excl <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  orient <span class="op">=</span> <span class="st">"horr"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 49"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 19.9 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 8.5 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/basic-examples-2.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="advanced-usage">Advanced Usage<a class="anchor" aria-label="anchor" href="#advanced-usage"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Comprehensive parameter usage</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
@@ -686,16 +671,7 @@ analysis structure</p>
 <span>  usetitle <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  mytitle <span class="op">=</span> <span class="st">"Comprehensive Clinical Characteristics Flow"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 81"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 33.1 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 5.3 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-1.png" width="700"><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-2.png" width="700"></p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span></span>
 <span><span class="co"># Marginal plots example</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
@@ -704,20 +680,6 @@ analysis structure</p>
 <span>  orient <span class="op">=</span> <span class="st">"vert"</span>,</span>
 <span>  fill <span class="op">=</span> <span class="st">"first_variable"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 11.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-3.png" width="700"></p>
-<pre><code><span><span class="co">#&gt; TableGrob (10 x 1) "arrange": 4 grobs</span></span>
-<span><span class="co">#&gt;   z         cells    name                 grob</span></span>
-<span><span class="co">#&gt; 1 1 ( 2- 2, 1- 1) arrange      gtable[arrange]</span></span>
-<span><span class="co">#&gt; 2 2 ( 3- 9, 1- 1) arrange       gtable[layout]</span></span>
-<span><span class="co">#&gt; 3 3 ( 1- 1, 1- 1) arrange text[GRID.text.1120]</span></span>
-<span><span class="co">#&gt; 4 4 (10-10, 1- 1) arrange text[GRID.text.1121]</span></span>
 <span></span>
 <span><span class="co"># Condensation analysis</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
@@ -725,20 +687,12 @@ analysis structure</p>
 <span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span>,</span>
 <span>  condensationvar <span class="op">=</span> <span class="st">"Sex"</span>,</span>
 <span>  fill <span class="op">=</span> <span class="st">"values"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 14.8 %"</span></span></code></pre>
-<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-4.png" width="700"><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/advanced-examples-5.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="different-datasets">Different Datasets<a class="anchor" aria-label="anchor" href="#different-datasets"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Colon cancer analysis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"colon"</span><span class="op">)</span></span>
 <span><span class="co"># Convert numeric variables to factors for alluvial plot</span></span>
@@ -753,31 +707,14 @@ analysis structure</p>
 <span>  usetitle <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  mytitle <span class="op">=</span> <span class="st">"Colon Cancer Characteristics"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 29"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 1.6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 30 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/dataset-examples-1.png" width="700"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span></span>
 <span><span class="co"># Using histopathology dataset for treatment analysis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"histopathology"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grade"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span>,</span>
 <span>  fill <span class="op">=</span> <span class="st">"last_variable"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 13.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-09-function-alluvial_files/figure-html/dataset-examples-2.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

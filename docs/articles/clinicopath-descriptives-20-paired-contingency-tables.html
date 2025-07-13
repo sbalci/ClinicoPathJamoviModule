@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">Analysis by
 Claude</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-20-paired-contingency-tables.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-20-paired-contingency-tables.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-20-paired-contingency-tables.Rmd</code></div>
@@ -296,11 +298,7 @@ between measurements on the same subjects.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">prostate_agreement_data</span>, package <span class="op">=</span> <span class="st">"ClinicoPath"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Examine the rater variables in histopathology</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rater 1"</span>, <span class="st">"Rater 2"</span>, <span class="st">"Rater 3"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; tibble [250 × 3] (S3: tbl_df/tbl/data.frame)</span></span>
-<span><span class="co">#&gt;  $ Rater 1: num [1:250] 0 1 1 0 0 0 1 1 1 0 ...</span></span>
-<span><span class="co">#&gt;  $ Rater 2: num [1:250] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
-<span><span class="co">#&gt;  $ Rater 3: num [1:250] 1 1 1 0 1 1 1 1 1 1 ...</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rater 1"</span>, <span class="st">"Rater 2"</span>, <span class="st">"Rater 3"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -321,36 +319,7 @@ pathologists:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display the basic agreement results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">basic_agreement</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PAIRED SAMPLES CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                                                </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Rater 1                       0            1            Total   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    0          Count                     74            6       80   </span></span>
-<span><span class="co">#&gt;               % within row        92.50000      7.50000            </span></span>
-<span><span class="co">#&gt;               % within column     84.09091      3.72671            </span></span>
-<span><span class="co">#&gt;                                                                    </span></span>
-<span><span class="co">#&gt;    1          Count                     14          155      169   </span></span>
-<span><span class="co">#&gt;               % within row         8.28402     91.71598            </span></span>
-<span><span class="co">#&gt;               % within column     15.90909     96.27329            </span></span>
-<span><span class="co">#&gt;                                                                    </span></span>
-<span><span class="co">#&gt;    Total      Count                     88          161      249   </span></span>
-<span><span class="co">#&gt;               % within row        35.34137     64.65863            </span></span>
-<span><span class="co">#&gt;               % within column    100.00000    100.00000            </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  McNemar Test                                                </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                                Value       df    p           </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    χ²                          3.200000     1    0.0736383   </span></span>
-<span><span class="co">#&gt;    χ² continuity correction    2.450000     1    0.1175249   </span></span>
-<span><span class="co">#&gt;    N                                249                      </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">basic_agreement</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="understanding-mcnemars-test">Understanding McNemar’s Test<a class="anchor" aria-label="anchor" href="#understanding-mcnemars-test"></a>
 </h3>
@@ -381,65 +350,10 @@ test:</p>
 <span></span>
 <span><span class="co"># Display the Gleason agreement results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gleason_agreement</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PAIRED SAMPLES CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                                                                                                                     </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Urologist_A                       3+3=6        3+4=7        4+3=7        4+4=8        4+5=9        5+4=9        5+5=10       Total   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    3+3=6          Count                     22            7            0            0            0            0            0       29   </span></span>
-<span><span class="co">#&gt;                   % within row        75.86207     24.13793      0.00000      0.00000      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column     73.33333     16.66667      0.00000      0.00000      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    3+4=7          Count                      5           20            7            1            0            0            0       33   </span></span>
-<span><span class="co">#&gt;                   % within row        15.15152     60.60606     21.21212      3.03030      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column     16.66667     47.61905     38.88889      5.26316      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    4+3=7          Count                      3           11            9            5            0            0            0       28   </span></span>
-<span><span class="co">#&gt;                   % within row        10.71429     39.28571     32.14286     17.85714      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column     10.00000     26.19048     50.00000     26.31579      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    4+4=8          Count                      0            4            2           11            1            0            0       18   </span></span>
-<span><span class="co">#&gt;                   % within row         0.00000     22.22222     11.11111     61.11111      5.55556      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column      0.00000      9.52381     11.11111     57.89474     20.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    4+5=9          Count                      0            0            0            2            3            3            0        8   </span></span>
-<span><span class="co">#&gt;                   % within row         0.00000      0.00000      0.00000     25.00000     37.50000     37.50000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column      0.00000      0.00000      0.00000     10.52632     60.00000     60.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    5+4=9          Count                      0            0            0            0            1            1            0        2   </span></span>
-<span><span class="co">#&gt;                   % within row         0.00000      0.00000      0.00000      0.00000     50.00000     50.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column      0.00000      0.00000      0.00000      0.00000     20.00000     20.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    5+5=10         Count                      0            0            0            0            0            1            1        2   </span></span>
-<span><span class="co">#&gt;                   % within row         0.00000      0.00000      0.00000      0.00000      0.00000     50.00000     50.00000            </span></span>
-<span><span class="co">#&gt;                   % within column      0.00000      0.00000      0.00000      0.00000      0.00000     20.00000    100.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    Total          Count                     30           42           18           19            5            5            1      120   </span></span>
-<span><span class="co">#&gt;                   % within row        25.00000     35.00000     15.00000     15.83333      4.16667      4.16667      0.83333            </span></span>
-<span><span class="co">#&gt;                   % within column    100.00000    100.00000    100.00000    100.00000    100.00000    100.00000    100.00000            </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  McNemar Test                                             </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                                Value    df    p           </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    χ²                            NaN                      </span></span>
-<span><span class="co">#&gt;    χ² continuity correction      NaN                      </span></span>
-<span><span class="co">#&gt;    N                             120                      </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────</span></span>
 <span></span>
 <span><span class="co"># Check the structure of the Gleason score data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">prostate_agreement_data</span><span class="op">$</span><span class="va">Urologist_A</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  3+3=6  3+4=7  4+3=7  4+4=8  4+5=9  5+4=9 5+5=10 </span></span>
-<span><span class="co">#&gt;     29     33     28     18      8      2      2</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">prostate_agreement_data</span><span class="op">$</span><span class="va">Urologist_B</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  3+3=6  3+4=7  4+3=7  4+4=8  4+5=9  5+4=9 5+5=10 </span></span>
-<span><span class="co">#&gt;     30     42     18     19      5      5      1</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">prostate_agreement_data</span><span class="op">$</span><span class="va">Urologist_B</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="gold-standard-comparison">Gold Standard Comparison<a class="anchor" aria-label="anchor" href="#gold-standard-comparison"></a>
@@ -460,55 +374,6 @@ gold standard:</p>
 <span></span>
 <span><span class="co"># Display the gold standard comparison</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gold_standard_comparison</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PAIRED SAMPLES CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                                                                                                                     </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Urologist_A                       3+3=6        3+4=7        4+3=7        4+4=8        4+5=9        5+4=9        5+5=10       Total   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    3+3=6          Count                     27            2            0            0            0            0            0       29   </span></span>
-<span><span class="co">#&gt;                   % within row        93.10345      6.89655      0.00000      0.00000      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column     75.00000      5.71429      0.00000      0.00000      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    3+4=7          Count                      6           23            4            0            0            0            0       33   </span></span>
-<span><span class="co">#&gt;                   % within row        18.18182     69.69697     12.12121      0.00000      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column     16.66667     65.71429     17.39130      0.00000      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    4+3=7          Count                      3            6           18            1            0            0            0       28   </span></span>
-<span><span class="co">#&gt;                   % within row        10.71429     21.42857     64.28571      3.57143      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column      8.33333     17.14286     78.26087      7.14286      0.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    4+4=8          Count                      0            4            1           11            2            0            0       18   </span></span>
-<span><span class="co">#&gt;                   % within row         0.00000     22.22222      5.55556     61.11111     11.11111      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column      0.00000     11.42857      4.34783     78.57143     22.22222      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    4+5=9          Count                      0            0            0            2            6            0            0        8   </span></span>
-<span><span class="co">#&gt;                   % within row         0.00000      0.00000      0.00000     25.00000     75.00000      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column      0.00000      0.00000      0.00000     14.28571     66.66667      0.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    5+4=9          Count                      0            0            0            0            1            1            0        2   </span></span>
-<span><span class="co">#&gt;                   % within row         0.00000      0.00000      0.00000      0.00000     50.00000     50.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                   % within column      0.00000      0.00000      0.00000      0.00000     11.11111    100.00000      0.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    5+5=10         Count                      0            0            0            0            0            0            2        2   </span></span>
-<span><span class="co">#&gt;                   % within row         0.00000      0.00000      0.00000      0.00000      0.00000      0.00000    100.00000            </span></span>
-<span><span class="co">#&gt;                   % within column      0.00000      0.00000      0.00000      0.00000      0.00000      0.00000    100.00000            </span></span>
-<span><span class="co">#&gt;                                                                                                                                         </span></span>
-<span><span class="co">#&gt;    Total          Count                     36           35           23           14            9            1            2      120   </span></span>
-<span><span class="co">#&gt;                   % within row        30.00000     29.16667     19.16667     11.66667      7.50000      0.83333      1.66667            </span></span>
-<span><span class="co">#&gt;                   % within column    100.00000    100.00000    100.00000    100.00000    100.00000    100.00000    100.00000            </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  McNemar Test                                             </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                                Value    df    p           </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    χ²                            NaN                      </span></span>
-<span><span class="co">#&gt;    χ² continuity correction      NaN                      </span></span>
-<span><span class="co">#&gt;    N                             120                      </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────</span></span>
 <span></span>
 <span><span class="co"># This helps assess the accuracy of Urologist A's diagnoses</span></span></code></pre></div>
 </div>
@@ -537,12 +402,7 @@ published data or summary tables:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display the survey data structure</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">survey_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   1st survey 2nd survey Counts</span></span>
-<span><span class="co">#&gt; 1    Approve    Approve    794</span></span>
-<span><span class="co">#&gt; 2    Approve Disapprove    150</span></span>
-<span><span class="co">#&gt; 3 Disapprove    Approve     86</span></span>
-<span><span class="co">#&gt; 4 Disapprove Disapprove    570</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">survey_data</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="formula-interface">Formula Interface<a class="anchor" aria-label="anchor" href="#formula-interface"></a>
@@ -587,18 +447,7 @@ time:</p>
 <span></span>
 <span><span class="co"># Show the simulated data structure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treatment_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   patient_id before_treatment after_treatment</span></span>
-<span><span class="co">#&gt; 1          1             Poor            Good</span></span>
-<span><span class="co">#&gt; 2          2             Good            Good</span></span>
-<span><span class="co">#&gt; 3          3             Poor            Good</span></span>
-<span><span class="co">#&gt; 4          4             Good            Poor</span></span>
-<span><span class="co">#&gt; 5          5             Good            Good</span></span>
-<span><span class="co">#&gt; 6          6             Poor            Poor</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">treatment_data</span><span class="op">$</span><span class="va">before_treatment</span>, <span class="va">treatment_data</span><span class="op">$</span><span class="va">after_treatment</span><span class="op">)</span></span>
-<span><span class="co">#&gt;       </span></span>
-<span><span class="co">#&gt;        Good Poor</span></span>
-<span><span class="co">#&gt;   Good   15   14</span></span>
-<span><span class="co">#&gt;   Poor   47   24</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">treatment_data</span><span class="op">$</span><span class="va">before_treatment</span>, <span class="va">treatment_data</span><span class="op">$</span><span class="va">after_treatment</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="exact-tests-for-small-samples">Exact Tests for Small Samples<a class="anchor" aria-label="anchor" href="#exact-tests-for-small-samples"></a>
@@ -647,33 +496,7 @@ be useful:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display the comparison</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">urol_a_vs_c</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PAIRED SAMPLES CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                                                                       </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Urologist_A    3+3=6    3+4=7    4+3=7    4+4=8    4+5=9    5+4=9    5+5=10    Total   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    3+3=6             18        9        2        0        0        0         0       29   </span></span>
-<span><span class="co">#&gt;    3+4=7              8       15        8        2        0        0         0       33   </span></span>
-<span><span class="co">#&gt;    4+3=7              4        7       14        3        0        0         0       28   </span></span>
-<span><span class="co">#&gt;    4+4=8              2        3        1        9        2        1         0       18   </span></span>
-<span><span class="co">#&gt;    4+5=9              0        0        1        2        5        0         0        8   </span></span>
-<span><span class="co">#&gt;    5+4=9              0        0        0        0        2        0         0        2   </span></span>
-<span><span class="co">#&gt;    5+5=10             0        0        0        0        0        0         2        2   </span></span>
-<span><span class="co">#&gt;    Total             32       34       26       16        9        1         2      120   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  McNemar Test                                             </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                                Value    df    p           </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    χ²                            NaN                      </span></span>
-<span><span class="co">#&gt;    χ² continuity correction      NaN                      </span></span>
-<span><span class="co">#&gt;    N                             120                      </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">urol_a_vs_c</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="clinical-examples">Clinical Examples<a class="anchor" aria-label="anchor" href="#clinical-examples"></a>
@@ -702,11 +525,7 @@ be useful:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Cross-tabulation of diagnostic results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">diagnostic_data</span><span class="op">$</span><span class="va">test_method_1</span>, <span class="va">diagnostic_data</span><span class="op">$</span><span class="va">test_method_2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;           </span></span>
-<span><span class="co">#&gt;            Negative Positive</span></span>
-<span><span class="co">#&gt;   Negative       68       26</span></span>
-<span><span class="co">#&gt;   Positive       44       12</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">diagnostic_data</span><span class="op">$</span><span class="va">test_method_1</span>, <span class="va">diagnostic_data</span><span class="op">$</span><span class="va">test_method_2</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="example-2-observer-variability-in-pathology">Example 2: Observer Variability in Pathology<a class="anchor" aria-label="anchor" href="#example-2-observer-variability-in-pathology"></a>

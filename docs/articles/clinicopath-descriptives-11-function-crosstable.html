@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">Analysis by
 Gemini</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-11-function-crosstable.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-11-function-crosstable.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-11-function-crosstable.Rmd</code></div>
@@ -283,98 +285,13 @@ Gemini</h4>
 <span><span class="co"># Ensure Age is numeric and integer</span></span>
 <span><span class="va">cancer_trial</span><span class="op">$</span><span class="va">Age</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">cancer_trial</span><span class="op">$</span><span class="va">Age</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cancer_trial</span><span class="op">)</span></span>
-<span><span class="co">##   Age Gender Tumor_Grade Biomarker_X Treatment_Group</span></span>
-<span><span class="co">## 1  59   Male          II    98.16110         Therapy</span></span>
-<span><span class="co">## 2  62   Male           I    70.78371         Placebo</span></span>
-<span><span class="co">## 3  80   Male          II    84.13129         Placebo</span></span>
-<span><span class="co">## 4  65   Male          II    99.27896         Therapy</span></span>
-<span><span class="co">## 5  66   Male          II   116.76740         Therapy</span></span>
-<span><span class="co">## 6  82   Male         III    58.73634         Therapy</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cancer_trial</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># This code simulates how the jamovi module would be called in an R environment.</span></span>
 <span><span class="co"># You would need the ClinicoPathDescriptives package installed.</span></span>
 <span></span>
 <span><span class="co"># Load the library</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule">ClinicoPath</a></span><span class="op">)</span></span>
-<span><span class="co">## Warning: replacing previous import 'dplyr::as_data_frame' by</span></span>
-<span><span class="co">## 'igraph::as_data_frame' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'DiagrammeR::count_automorphisms' by</span></span>
-<span><span class="co">## 'igraph::count_automorphisms' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'dplyr::groups' by 'igraph::groups' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'DiagrammeR::get_edge_ids' by</span></span>
-<span><span class="co">## 'igraph::get_edge_ids' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'dplyr::union' by 'igraph::union' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'igraph::union' by 'lubridate::union' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'igraph::%--%' by 'lubridate::%--%' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::tnr' by 'mlr3measures::tnr' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::precision' by</span></span>
-<span><span class="co">## 'mlr3measures::precision' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::tn' by 'mlr3measures::tn' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::fnr' by 'mlr3measures::fnr' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::tp' by 'mlr3measures::tp' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::npv' by 'mlr3measures::npv' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::ppv' by 'mlr3measures::ppv' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::auc' by 'mlr3measures::auc' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::tpr' by 'mlr3measures::tpr' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::fn' by 'mlr3measures::fn' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::fp' by 'mlr3measures::fp' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::fpr' by 'mlr3measures::fpr' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::recall' by</span></span>
-<span><span class="co">## 'mlr3measures::recall' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::specificity' by</span></span>
-<span><span class="co">## 'mlr3measures::specificity' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::sensitivity' by</span></span>
-<span><span class="co">## 'mlr3measures::sensitivity' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'cutpointr::roc' by 'pROC::roc' when loading</span></span>
-<span><span class="co">## 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'mlr3measures::auc' by 'pROC::auc' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'igraph::as_data_frame' by</span></span>
-<span><span class="co">## 'tibble::as_data_frame' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'igraph::crossing' by 'tidyr::crossing' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'magrittr::extract' by 'tidyr::extract' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'mlr3measures::sensitivity' by</span></span>
-<span><span class="co">## 'caret::sensitivity' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'mlr3measures::specificity' by</span></span>
-<span><span class="co">## 'caret::specificity' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Registered S3 methods overwritten by 'useful':</span></span>
-<span><span class="co">##   method         from     </span></span>
-<span><span class="co">##   autoplot.acf   ggfortify</span></span>
-<span><span class="co">##   fortify.acf    ggfortify</span></span>
-<span><span class="co">##   fortify.kmeans ggfortify</span></span>
-<span><span class="co">##   fortify.ts     ggfortify</span></span>
-<span><span class="co">## Warning: replacing previous import 'jmvcore::select' by 'dplyr::select' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Registered S3 methods overwritten by 'ggpp':</span></span>
-<span><span class="co">##   method                  from   </span></span>
-<span><span class="co">##   heightDetails.titleGrob ggplot2</span></span>
-<span><span class="co">##   widthDetails.titleGrob  ggplot2</span></span>
-<span><span class="co">## Warning: replacing previous import 'DataExplorer::plot_histogram' by</span></span>
-<span><span class="co">## 'grafify::plot_histogram' when loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
-<span><span class="co">## Warning: replacing previous import 'tibble::view' by 'summarytools::view' when</span></span>
-<span><span class="co">## loading 'ClinicoPath'</span></span>
 <span></span>
 <span><span class="co"># Run the crosstable analysis with NEJM style</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/crosstable.html">crosstable</a></span><span class="op">(</span></span>
@@ -389,164 +306,6 @@ Gemini</h4>
 <span><span class="co"># results$tablestyle4</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">htmltools</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">tablestyle4</span><span class="op">$</span><span class="va">content</span><span class="op">)</span></span></code></pre></div>
-<div class="figure" id="tbl3">
-<style>
-    #tbl3 body .figbody {
-    font-family: Corbel, "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", "Bitstream Vera Sans", "Liberation Sans", Verdana, "Verdana Ref", sans-serif;
-  font-size: 66%;
-  -webkit-print-color-adjust: exact;
-}
-
-    #tbl3 .figure  {  margin-left:  auto;
-                  margin-right: auto;
-}
-    #tbl3 .caption { text-align:   left;
-           text-indent: 2em;
-             padding: 0.5em 0 0.5em 0;
-             font-weight: bold;
-             background-color: #f7f4ef !important;
-             border: 1px solid black;
-         }
-
-    #tbl3 .figbody {
-    text-align:   center;
-  border:       1px solid black
-}
-
-    #tbl3 .figbody table {
-  margin: 0;
-  width: 100%;
-}
-
-    #tbl3 .figbody td {
-    padding: 0.2em 0.5em 0.2em 0.5em;
-}
-
-    #tbl3 .figbody thead tr td
-{
-    font-weight: bold;
-}
-
-    #tbl3 .figbody tbody tr:nth-child(odd) {background: #fffbed !important;}
-
-    #tbl3 .header td {text-align: center;}
-
-    #tbl3 .subheader    { font-size: smaller; }
-    #tbl3 .subheader td { text-align: center; /* border-bottom: 1pt solid black; */ }
-
-    #tbl3 .subheader em {font-style: normal;}
-
-    #tbl3 tbody .variable {
-    float:      left;
-    text-align: left;
-    padding-left: 0.5em;
-}
-
-    #tbl3 .units {
-    float:      right;
-    font-size:  x-small;
-    text-align: right;
-    padding-left: 1em;
-    vertical-align: text-bottom; /* FIXME why doesn't this work */
-}
-
-    #tbl3 td .align{
-    display: inline-block;
-    margin: 0 auto;
-}
-
-    #tbl3 .nobr {
-   white-space: nowrap;
-}
-    #tbl3 .supsub {
-   display: inline-block;
-   margin: -9em 0;
-   vertical-align: -0.55em;
-   line-height: 1.35em;
-   font-size: 70%;
-   text-align: left;
-}
-
-    #tbl3 .statistics {font-style: italic;}
-    #tbl3 .statistics {padding-right: 0.5em;}
-</style>
-<div class="caption">Cross Table for Dependent treatment_group</div>
-<div class="figbody"><table class="table tangram">
-<thead>
-<tr>
-<th class="header even tg-label"><span class="variable"></span></th>
-<th class="header even tg-label"><span class="variable">N</span></th>
-<th class="header even tg-label"><span class="variable">Placebo</span></th>
-<th class="header even tg-label"><span class="variable">Therapy</span></th>
-<th class="header even tg-label"><span class="variable">Test Statistic</span></th>
-</tr>
-<tr class="subheaderrow">
-<th class="subheader header even tg-label"><span class="variable"></span></th>
-<th class="subheader header even tg-label"><span class="variable"></span></th>
-<th class="subheader header even data N"><span class="N">(N=93)</span></th>
-<th class="subheader header even data N"><span class="N">(N=107)</span></th>
-<th class="subheader header even tg-label"><span class="variable"></span></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="header odd tg-label"><span class="variable">Age</span></td>
-<td class="odd data N"><span class="N">200</span></td>
-<td class="odd">58.0 <strong>64.0</strong> 71.0</td>
-<td class="odd">58.0 <strong>64.0</strong> 70.0</td>
-<td class="statistics odd">F<sub>1,198</sub>=0.01, P=0.92<sup>3</sup>
-</td> </tr>
-<tr>
-<td class="header even tg-label"><span class="variable">Gender : Male</span></td>
-<td class="even data N"><span class="N">200</span></td>
-<td class="even">0.5  <span class="fraction"><span class="numerator">42</span>/<span class="denominator">93</span></span>
-</td>
-<td class="even">0.5  <span class="fraction"><span class="numerator"> 51</span>/<span class="denominator">107</span></span>
-</td>
-<td class="statistics even">Χ<span class="supsub">2<br>1</span>=0.13, P=0.72<sup>2</sup>
-</td> </tr>
-<tr>
-<td class="header odd tg-label"><span class="variable">Tumor_Grade</span></td>
-<td class="odd data N"><span class="N">200</span></td>
-<td class="odd"></td>
-<td class="odd"></td>
-<td class="statistics odd">Χ<span class="supsub">2<br>2</span>=0.88, P=0.65<sup>2</sup>
-</td> </tr>
-<tr>
-<td class="subheader header odd tg-label"><span class="variable">        I</span></td>
-<td class="odd tg-label"><span class="variable"></span></td>
-<td class="odd">0.3  <span class="fraction"><span class="numerator">29</span>/<span class="denominator">93</span></span>
-</td>
-<td class="odd">0.3  <span class="fraction"><span class="numerator"> 27</span>/<span class="denominator">107</span></span>
-</td>
-<td class="odd"></td> </tr>
-<tr>
-<td class="subheader header odd tg-label"><span class="variable">        II</span></td>
-<td class="odd tg-label"><span class="variable"></span></td>
-<td class="odd">0.5  <span class="fraction"><span class="numerator">45</span>/<span class="denominator">93</span></span>
-</td>
-<td class="odd">0.5  <span class="fraction"><span class="numerator"> 56</span>/<span class="denominator">107</span></span>
-</td>
-<td class="odd"></td> </tr>
-<tr>
-<td class="subheader header odd tg-label"><span class="variable">        III</span></td>
-<td class="odd tg-label"><span class="variable"></span></td>
-<td class="odd">0.2  <span class="fraction"><span class="numerator">19</span>/<span class="denominator">93</span></span>
-</td>
-<td class="odd">0.2  <span class="fraction"><span class="numerator"> 24</span>/<span class="denominator">107</span></span>
-</td>
-<td class="odd"></td> </tr>
-<tr>
-<td class="header even tg-label"><span class="variable">Biomarker_X</span></td>
-<td class="even data N"><span class="N">200</span></td>
-<td class="even">91.7 <strong>104.1</strong> 118.2</td>
-<td class="even">83.9 <strong>98.2</strong> 114.9</td>
-<td class="statistics even">F<sub>1,198</sub>=3.22, P=0.07<sup>3</sup>
-</td> </tr>
-</tbody>
-</table></div>
-<div class="footnote">N is the number of non-missing value. <sup>1</sup>Kruskal-Wallis. <sup>2</sup>Pearson. <sup>3</sup>Wilcoxon.</div>
-</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>

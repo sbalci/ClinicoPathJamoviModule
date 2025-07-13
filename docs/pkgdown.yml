@@ -1,4 +1,4 @@
-pandoc: '3.4'
+pandoc: 3.7.0.2
 pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
@@ -14,6 +14,7 @@ articles:
   clinicopath-descriptives-04-benford: clinicopath-descriptives-04-benford.html
   clinicopath-descriptives-04-data-quality-exploration: clinicopath-descriptives-04-data-quality-exploration.html
   clinicopath-descriptives-05-alluvial: clinicopath-descriptives-05-alluvial.html
+  clinicopath-descriptives-05-dataquality-comprehensive: clinicopath-descriptives-05-dataquality-comprehensive.html
   clinicopath-descriptives-05-digital-pathology: clinicopath-descriptives-05-digital-pathology.html
   clinicopath-descriptives-06-agepyramid: clinicopath-descriptives-06-agepyramid.html
   clinicopath-descriptives-06-molecular-workflow: clinicopath-descriptives-06-molecular-workflow.html
@@ -22,28 +23,39 @@ articles:
   clinicopath-descriptives-08-function-agepyramid: clinicopath-descriptives-08-function-agepyramid.html
   clinicopath-descriptives-09-crosstable: clinicopath-descriptives-09-crosstable.html
   clinicopath-descriptives-09-function-alluvial: clinicopath-descriptives-09-function-alluvial.html
+  clinicopath-descriptives-1-multisurvival-time-dependent-comprehensive: clinicopath-descriptives-1-multisurvival-time-dependent-comprehensive.html
   clinicopath-descriptives-10-function-benford: clinicopath-descriptives-10-function-benford.html
   clinicopath-descriptives-11-function-crosstable: clinicopath-descriptives-11-function-crosstable.html
   clinicopath-descriptives-11-swimmerplot: clinicopath-descriptives-11-swimmerplot.html
   clinicopath-descriptives-12-chisqposttest: clinicopath-descriptives-12-chisqposttest.html
   clinicopath-descriptives-12-function-reportcat: clinicopath-descriptives-12-function-reportcat.html
   clinicopath-descriptives-13-cisingle: clinicopath-descriptives-13-cisingle.html
+  clinicopath-descriptives-13-enhancedcrosstable: clinicopath-descriptives-13-enhancedcrosstable.html
   clinicopath-descriptives-13-function-summarydata: clinicopath-descriptives-13-function-summarydata.html
+  clinicopath-descriptives-14-enhancedtables: clinicopath-descriptives-14-enhancedtables.html
   clinicopath-descriptives-14-function-tableone: clinicopath-descriptives-14-function-tableone.html
   clinicopath-descriptives-15-clinical-hemodynamic-monitoring: clinicopath-descriptives-15-clinical-hemodynamic-monitoring.html
+  clinicopath-descriptives-15-eurostatmap: clinicopath-descriptives-15-eurostatmap.html
   clinicopath-descriptives-15-function-venn: clinicopath-descriptives-15-function-venn.html
+  clinicopath-descriptives-15-groupsummary-comprehensive: clinicopath-descriptives-15-groupsummary-comprehensive.html
   clinicopath-descriptives-16-coefficient-plots: clinicopath-descriptives-16-coefficient-plots.html
   clinicopath-descriptives-16-data-summary-legacy: clinicopath-descriptives-16-data-summary-legacy.html
+  clinicopath-descriptives-17-desctools: clinicopath-descriptives-17-desctools.html
   clinicopath-descriptives-17-introduction-legacy: clinicopath-descriptives-17-introduction-legacy.html
   clinicopath-descriptives-18-consort-flowcharts: clinicopath-descriptives-18-consort-flowcharts.html
   clinicopath-descriptives-18-digital-pathology-validation-legacy: clinicopath-descriptives-18-digital-pathology-validation-legacy.html
   clinicopath-descriptives-19-contingency-tables: clinicopath-descriptives-19-contingency-tables.html
+  clinicopath-descriptives-19-flowchart-comprehensive: clinicopath-descriptives-19-flowchart-comprehensive.html
   clinicopath-descriptives-19-molecular-pathology-workflow-legacy: clinicopath-descriptives-19-molecular-pathology-workflow-legacy.html
+  clinicopath-descriptives-20-ggflowchart-comprehensive: clinicopath-descriptives-20-ggflowchart-comprehensive.html
   clinicopath-descriptives-20-ihcstats-comprehensive-legacy: clinicopath-descriptives-20-ihcstats-comprehensive-legacy.html
   clinicopath-descriptives-20-paired-contingency-tables: clinicopath-descriptives-20-paired-contingency-tables.html
   clinicopath-descriptives-21-correlation-analysis: clinicopath-descriptives-21-correlation-analysis.html
+  clinicopath-descriptives-21-ggprism-comprehensive: clinicopath-descriptives-21-ggprism-comprehensive.html
   clinicopath-descriptives-21-use-in-r-legacy: clinicopath-descriptives-21-use-in-r-legacy.html
+  clinicopath-descriptives-22-gtsummary-comprehensive: clinicopath-descriptives-22-gtsummary-comprehensive.html
   clinicopath-descriptives-22-venn-legacy: clinicopath-descriptives-22-venn-legacy.html
+  clinicopath-descriptives-23-hullplot-comprehensive: clinicopath-descriptives-23-hullplot-comprehensive.html
   general-01-getting-started: general-01-getting-started.html
   general-02-jamovi-user-guide: general-02-jamovi-user-guide.html
   general-03-clinical-examples: general-03-clinical-examples.html
@@ -91,7 +103,41 @@ articles:
   jjstatsplot-09-continuous-comparisons-legacy: jjstatsplot-09-continuous-comparisons-legacy.html
   jjstatsplot-10-correlations-scatterplots-legacy: jjstatsplot-10-correlations-scatterplots-legacy.html
   jjstatsplot-11-introduction-legacy: jjstatsplot-11-introduction-legacy.html
+  jjstatsplot-12-economistplots: jjstatsplot-12-economistplots.html
   jjstatsplot-14-clinical-classification-comprehensive: jjstatsplot-14-clinical-classification-comprehensive.html
+  jjstatsplot-15-grafify-comprehensive: jjstatsplot-15-grafify-comprehensive.html
+  jjstatsplot-16-jcomplexupset-comprehensive: jjstatsplot-16-jcomplexupset-comprehensive.html
+  jjstatsplot-17-jextractggstats-comprehensive: jjstatsplot-17-jextractggstats-comprehensive.html
+  jjstatsplot-18-jforester-comprehensive: jjstatsplot-18-jforester-comprehensive.html
+  jjstatsplot-19-jforestmodel-comprehensive: jjstatsplot-19-jforestmodel-comprehensive.html
+  jjstatsplot-20-jggheatmap-comprehensive: jjstatsplot-20-jggheatmap-comprehensive.html
+  jjstatsplot-21-jggridges-comprehensive: jjstatsplot-21-jggridges-comprehensive.html
+  jjstatsplot-22-jggsankeyfier-comprehensive: jjstatsplot-22-jggsankeyfier-comprehensive.html
+  jjstatsplot-23-jggstats-comprehensive: jjstatsplot-23-jggstats-comprehensive.html
+  jjstatsplot-23-jjbarstats-comprehensive: jjstatsplot-23-jjbarstats-comprehensive.html
+  jjstatsplot-24-jjarcdiagram-comprehensive: jjstatsplot-24-jjarcdiagram-comprehensive.html
+  jjstatsplot-24-jjbetweenstats-comprehensive: jjstatsplot-24-jjbetweenstats-comprehensive.html
+  jjstatsplot-25-jjcorrmat-comprehensive: jjstatsplot-25-jjcorrmat-comprehensive.html
+  jjstatsplot-26-jjdotplotstats-comprehensive: jjstatsplot-26-jjdotplotstats-comprehensive.html
+  jjstatsplot-27-jjhistostats-comprehensive: jjstatsplot-27-jjhistostats-comprehensive.html
+  jjstatsplot-28-jjpiestats-comprehensive: jjstatsplot-28-jjpiestats-comprehensive.html
+  jjstatsplot-29-jjridgestats-comprehensive: jjstatsplot-29-jjridgestats-comprehensive.html
+  jjstatsplot-30-jjriverplot-comprehensive: jjstatsplot-30-jjriverplot-comprehensive.html
+  jjstatsplot-30-linechart-comprehensive: jjstatsplot-30-linechart-comprehensive.html
+  jjstatsplot-31-jjscatterstats-comprehensive: jjstatsplot-31-jjscatterstats-comprehensive.html
+  jjstatsplot-31-jpps-comprehensive: jjstatsplot-31-jpps-comprehensive.html
+  jjstatsplot-31-jscattermore-comprehensive: jjstatsplot-31-jscattermore-comprehensive.html
+  jjstatsplot-31-lollipop-comprehensive: jjstatsplot-31-lollipop-comprehensive.html
+  jjstatsplot-32-jjstreamgraph-comprehensive: jjstatsplot-32-jjstreamgraph-comprehensive.html
+  jjstatsplot-32-jsjplot-comprehensive: jjstatsplot-32-jsjplot-comprehensive.html
+  jjstatsplot-33-jjtreemap-comprehensive: jjstatsplot-33-jjtreemap-comprehensive.html
+  jjstatsplot-33-jsummarytools-comprehensive: jjstatsplot-33-jsummarytools-comprehensive.html
+  jjstatsplot-34-jjwithinstats-comprehensive: jjstatsplot-34-jjwithinstats-comprehensive.html
+  jjstatsplot-34-jviolin-comprehensive: jjstatsplot-34-jviolin-comprehensive.html
+  jjstatsplot-35-jvisr-comprehensive: jjstatsplot-35-jvisr-comprehensive.html
+  jjstatsplot-36-jwaffle-comprehensive: jjstatsplot-36-jwaffle-comprehensive.html
+  jjstatsplot-37-missingdata-comprehensive: jjstatsplot-37-missingdata-comprehensive.html
+  jjstatsplot-38-modelbuilder-comprehensive: jjstatsplot-38-modelbuilder-comprehensive.html
   jsurvival-01-introduction: jsurvival-01-introduction.html
   jsurvival-02-person-time-analysis: jsurvival-02-person-time-analysis.html
   jsurvival-03-treatment-response: jsurvival-03-treatment-response.html
@@ -100,14 +146,19 @@ articles:
   jsurvival-05-treatment-pathway-visualization: jsurvival-05-treatment-pathway-visualization.html
   jsurvival-06-function-waterfall: jsurvival-06-function-waterfall.html
   jsurvival-07-use-in-r: jsurvival-07-use-in-r.html
+  jsurvival-08-groupedforest-comprehensive: jsurvival-08-groupedforest-comprehensive.html
   jsurvival-08-stage-migration-analysis-legacy: jsurvival-08-stage-migration-analysis-legacy.html
+  jsurvival-09-lassocox-comprehensive: jsurvival-09-lassocox-comprehensive.html
   jsurvival-09-waterfall-legacy: jsurvival-09-waterfall-legacy.html
+  jsurvival-1-stagemigration-comprehensive: jsurvival-1-stagemigration-comprehensive.html
   jsurvival-10-introduction-legacy: jsurvival-10-introduction-legacy.html
   jsurvival-11-person-time-analysis-legacy: jsurvival-11-person-time-analysis-legacy.html
   jsurvival-12-treatment-response-analysis-legacy: jsurvival-12-treatment-response-analysis-legacy.html
   jsurvival-13-use-in-r-legacy: jsurvival-13-use-in-r-legacy.html
   jsurvival-14-comparing-survival: jsurvival-14-comparing-survival.html
   jsurvival-15-competing-survival: jsurvival-15-competing-survival.html
+  jsurvival-16-cox-model-diagnostics: jsurvival-16-cox-model-diagnostics.html
+  jsurvival-17-jiwillsurvive-comprehensive: jsurvival-17-jiwillsurvive-comprehensive.html
   meddecide-01-introduction: meddecide-01-introduction.html
   meddecide-02-comprehensive-guide: meddecide-02-comprehensive-guide.html
   meddecide-03-agreement-advanced-features: meddecide-03-agreement-advanced-features.html
@@ -118,8 +169,11 @@ articles:
   meddecide-06-decision-tree-vs-markov: meddecide-06-decision-tree-vs-markov.html
   meddecide-07-bayesian-decision-curve-analysis: meddecide-07-bayesian-decision-curve-analysis.html
   meddecide-07-decision-trees: meddecide-07-decision-trees.html
+  meddecide-07-kappasizeci-comprehensive: meddecide-07-kappasizeci-comprehensive.html
   meddecide-08-decision-panel-clinical: meddecide-08-decision-panel-clinical.html
+  meddecide-08-kappasizefixedn-comprehensive: meddecide-08-kappasizefixedn-comprehensive.html
   meddecide-09-decision-panel-advanced: meddecide-09-decision-panel-advanced.html
+  meddecide-09-kappasizepower-comprehensive: meddecide-09-kappasizepower-comprehensive.html
   meddecide-10-decision-panel-optimization: meddecide-10-decision-panel-optimization.html
   meddecide-11-precision-oncology: meddecide-11-precision-oncology.html
   meddecide-12-nogoldstandard: meddecide-12-nogoldstandard.html
@@ -145,11 +199,13 @@ articles:
   meddecide-32-vignettes-legacy: meddecide-32-vignettes-legacy.html
   meddecide-33-use-in-r-legacy: meddecide-33-use-in-r-legacy.html
   meddecide-34-cotest-analysis: meddecide-34-cotest-analysis.html
+  meddecide-35-screening-calculator-comprehensive: meddecide-35-screening-calculator-comprehensive.html
+  meddecide-36-sequential-testing-comprehensive: meddecide-36-sequential-testing-comprehensive.html
   module-development-jamovi: module-development-jamovi.html
   pkgnet-report: pkgnet-report.html
   use-jjstatsplot-in-R: use-jjstatsplot-in-R.html
-  users-of-clinicopath: users-of-clinicopath.html
-last_built: 2025-07-03T17:19Z
+  users-of-ClinicoPath: users-of-ClinicoPath.html
+last_built: 2025-07-13T19:00Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

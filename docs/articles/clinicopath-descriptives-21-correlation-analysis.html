@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">Analysis by
 Claude</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-21-correlation-analysis.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-21-correlation-analysis.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-21-correlation-analysis.Rmd</code></div>
@@ -325,11 +327,7 @@ options</p>
 <span><span class="co"># Examine available numeric variables</span></span>
 <span><span class="va">numeric_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">histopathology</span>, <span class="va">is.numeric</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Available numeric variables:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Available numeric variables:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">numeric_vars</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "ID"               "Age"              "Grade"            "TStage"          </span></span>
-<span><span class="co">#&gt;  [5] "Anti-X-intensity" "Anti-Y-intensity" "OverallTime"      "Outcome"         </span></span>
-<span><span class="co">#&gt;  [9] "Rater 1"          "Rater 2"</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">numeric_vars</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -345,42 +343,7 @@ measurements:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display the basic correlation results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">basic_correlation</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  CORRELATION ANALYSIS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Correlation Matrix                           </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Variable       Age           OverallTime   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Age            —              0.07400000   </span></span>
-<span><span class="co">#&gt;    OverallTime    0.07400000    —             </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Pairwise Correlations                                                                                         </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Variable 1    Variable 2     r            p            t            df     Lower         Upper        N     </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Age           OverallTime    0.0738587    0.2474876    1.1592384    245    -0.0514349    0.1968633    247   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Summary Statistics         </span></span>
-<span><span class="co">#&gt;  ────────────────────────── </span></span>
-<span><span class="co">#&gt;    Statistic    Value       </span></span>
-<span><span class="co">#&gt;  ────────────────────────── </span></span>
-<span><span class="co">#&gt;  ────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color: #f8f9fa; padding: 15px; border-radius:</span></span>
-<span><span class="co">#&gt;  5px; margin: 10px 0;'&gt;&lt;h4 style='color: #495057; margin-top:</span></span>
-<span><span class="co">#&gt;  0;'&gt;Correlation Analysis Summary</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Pearson's correlation analysis was performed on 2 variables with 247</span></span>
-<span><span class="co">#&gt;  complete observations. Out of 1 pairwise correlations, 0 (0%) were</span></span>
-<span><span class="co">#&gt;  statistically significant at α = 0.05.</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-21-correlation-analysis_files/figure-html/unnamed-chunk-3-1.png" width="768"><img src="clinicopath-descriptives-21-correlation-analysis_files/figure-html/unnamed-chunk-3-2.png" width="768"></p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">basic_correlation</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="understanding-the-output">Understanding the Output<a class="anchor" aria-label="anchor" href="#understanding-the-output"></a>
 </h3>
@@ -658,15 +621,7 @@ correlations appear as thicker connections:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Network: Correlation strength visualization\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Not enough numeric variables available for this example\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt; Note: Plot generation skipped in vignette mode</span></span>
-<span><span class="co">#&gt; Note: Plot generation skipped in vignette mode</span></span>
-<span><span class="co">#&gt; Note: Plot generation skipped in vignette mode</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Each plot type offers different insights:</span></span>
-<span><span class="co">#&gt; - Matrix: Overall pattern identification</span></span>
-<span><span class="co">#&gt; - Pairs: Individual relationship examination</span></span>
-<span><span class="co">#&gt; - Network: Correlation strength visualization</span></span></code></pre></div>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

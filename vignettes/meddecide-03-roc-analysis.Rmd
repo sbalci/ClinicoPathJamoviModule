@@ -6,7 +6,8 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>",  echo = TRUE,
+  eval = FALSE)
 ```
 
 This vignette shows how to perform Receiver Operating Characteristic

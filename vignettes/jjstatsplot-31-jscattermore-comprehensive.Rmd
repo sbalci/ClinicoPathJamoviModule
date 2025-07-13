@@ -34,7 +34,9 @@ knitr::opts_chunk$set(
   fig.width = 10,
   fig.height = 6,
   dpi = 300,
-  out.width = "100%"
+  out.width = "100%",
+  echo = TRUE,
+  eval = FALSE
 )
 
 # Check if scattermore is available
@@ -62,7 +64,10 @@ basic_data <- data.frame(
 result_basic <- jscattermore(
   data = basic_data,
   x_var = "x",
-  y_var = "y"
+  y_var = "y",
+  facet_var = NULL,
+  color_var = NULL,
+  size_var = NULL
 )
 
 # The result contains the plot and summary information

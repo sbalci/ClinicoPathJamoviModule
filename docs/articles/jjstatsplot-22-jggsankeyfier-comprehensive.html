@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.55</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -422,7 +422,7 @@ Decision tree visualizations</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Focus on successful outcomes</span></span>
 <span><span class="va">successful_processes</span> <span class="op">&lt;-</span> <span class="va">business_process_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">final_outcome</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Closed Won"</span>, <span class="st">"On Hold"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">final_outcome</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Closed Won"</span>, <span class="st">"On Hold"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># jggsankeyfier(</span></span>
 <span><span class="co">#   data = successful_processes,</span></span>
@@ -576,13 +576,7 @@ Decision tree visualizations</p>
 <span>  category <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Type1"</span>, <span class="st">"Type2"</span>, <span class="st">"Type1"</span>, <span class="st">"Type2"</span>, <span class="st">"Type1"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">example_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   source target flow_value category</span></span>
-<span><span class="co">#&gt; 1      A      X         50    Type1</span></span>
-<span><span class="co">#&gt; 2      A      Y         30    Type2</span></span>
-<span><span class="co">#&gt; 3      B      X         25    Type1</span></span>
-<span><span class="co">#&gt; 4      B      Z         40    Type2</span></span>
-<span><span class="co">#&gt; 5      C      Y         35    Type1</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">example_data</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="multi-node-format">Multi-Node Format<a class="anchor" aria-label="anchor" href="#multi-node-format"></a>
@@ -598,12 +592,7 @@ Decision tree visualizations</p>
 <span>  group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Group1"</span>, <span class="st">"Group2"</span>, <span class="st">"Group1"</span>, <span class="st">"Group3"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">example_alluvial</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   stage_1 stage_2 stage_3 value  group</span></span>
-<span><span class="co">#&gt; 1 Start_A   Mid_X   End_1   100 Group1</span></span>
-<span><span class="co">#&gt; 2 Start_B   Mid_Y   End_2    75 Group2</span></span>
-<span><span class="co">#&gt; 3 Start_A   Mid_Z   End_1    50 Group1</span></span>
-<span><span class="co">#&gt; 4 Start_C   Mid_X   End_3    25 Group3</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">example_alluvial</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -673,8 +662,8 @@ multiple targets</li>
 <span></span>
 <span><span class="co"># Aggregate data</span></span>
 <span><span class="va">clinical_summary</span> <span class="op">&lt;-</span> <span class="va">clinical_decisions</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">presentation</span>, <span class="va">initial_test</span>, <span class="va">diagnosis</span>, <span class="va">treatment</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">summarise</span><span class="op">(</span>patient_count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">patient_count</span><span class="op">)</span>, .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">presentation</span>, <span class="va">initial_test</span>, <span class="va">diagnosis</span>, <span class="va">treatment</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>patient_count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">patient_count</span><span class="op">)</span>, .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># jggsankeyfier(</span></span>
 <span><span class="co">#   data = clinical_summary,</span></span>
@@ -700,8 +689,8 @@ multiple targets</li>
 <span></span>
 <span><span class="co"># Aggregate by severity</span></span>
 <span><span class="va">transfer_summary</span> <span class="op">&lt;-</span> <span class="va">hospital_transfers</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">admission_dept</span>, <span class="va">transfer_dept</span>, <span class="va">severity</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">summarise</span><span class="op">(</span>patient_count <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span>, avg_los <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">los_days</span><span class="op">)</span>, .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">admission_dept</span>, <span class="va">transfer_dept</span>, <span class="va">severity</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>patient_count <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>, avg_los <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">los_days</span><span class="op">)</span>, .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># jggsankeyfier(</span></span>
 <span><span class="co">#   data = transfer_summary,</span></span>
@@ -744,9 +733,9 @@ exploration</li>
 <span></span>
 <span><span class="co"># Aggregate to reduce complexity</span></span>
 <span><span class="va">aggregated_data</span> <span class="op">&lt;-</span> <span class="va">large_dataset_simulation</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">source</span>, <span class="va">target</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">summarise</span><span class="op">(</span>total_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>, flow_count <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span>, .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">total_value</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">total_value</span>, <span class="fl">0.75</span><span class="op">)</span><span class="op">)</span>  <span class="co"># Focus on top 25% of flows</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">source</span>, <span class="va">target</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>total_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>, flow_count <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>, .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">total_value</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">total_value</span>, <span class="fl">0.75</span><span class="op">)</span><span class="op">)</span>  <span class="co"># Focus on top 25% of flows</span></span>
 <span></span>
 <span><span class="co"># jggsankeyfier(</span></span>
 <span><span class="co">#   data = aggregated_data,</span></span>
@@ -829,22 +818,7 @@ flows - <strong>Solution</strong>: Use multi-level grouping</p>
 <span>  value_var <span class="op">=</span> <span class="st">"flow_amount"</span>,</span>
 <span>  source_var <span class="op">=</span> <span class="st">"from_node"</span>, </span>
 <span>  target_var <span class="op">=</span> <span class="st">"to_node"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Data Quality Assessment for Flow Diagram</span></span>
-<span><span class="co">#&gt; ==========================================</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Dataset dimensions: 8 rows, 4 columns</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Value Variable ( flow_amount ):</span></span>
-<span><span class="co">#&gt;   - Non-missing values: 8 / 8 </span></span>
-<span><span class="co">#&gt;   - Range: 25 to 100 </span></span>
-<span><span class="co">#&gt;   - Zero values: 0 </span></span>
-<span><span class="co">#&gt;   - Negative values: 0 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Source-Target Format:</span></span>
-<span><span class="co">#&gt;   - Unique sources: 4 </span></span>
-<span><span class="co">#&gt;   - Unique targets: 3 </span></span>
-<span><span class="co">#&gt;   - Total unique flows: 8</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">

@@ -52,6 +52,7 @@ options:
       description:
         R: Variable for color mapping.
         jamovi: Variable to map to point colors (optional).
+      default: NULL
 
     - name: size_var
       title: "Size Variable"
@@ -61,6 +62,7 @@ options:
       description:
         R: Variable for size mapping.
         jamovi: Variable to map to point sizes (optional).
+      default: NULL
 
     - name: plot_type
       title: "Plot Type"
@@ -189,6 +191,7 @@ options:
       description:
         R: Variable for creating multiple panels.
         jamovi: Variable to create separate plots for each level.
+      default: NULL
 
     - name: log_transform_x
       title: "Log Transform X"

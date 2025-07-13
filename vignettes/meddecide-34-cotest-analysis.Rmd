@@ -22,7 +22,9 @@ knitr::opts_chunk$set(
   fig.width = 8,
   fig.height = 6,
   dpi = 150,
-  out.width = "100%"
+  out.width = "100%",
+    echo = TRUE,
+  eval = FALSE
 )
 
 library(ClinicoPath)

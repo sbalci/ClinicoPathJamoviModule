@@ -11,12 +11,16 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
   collapse = TRUE,
   comment = "#>",
   warning = FALSE,
   message = FALSE,
   fig.width = 8,
-  fig.height = 6
+  fig.height = 6,
+    echo = TRUE,
+  eval = FALSE
 )
 ```
 

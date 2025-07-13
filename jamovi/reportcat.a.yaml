@@ -3,7 +3,7 @@ name:  reportcat
 title: Summary of Categorical Variables
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptives
-version: '0.0.2'
+version: '0.0.3'
 jas: '1.2'
 
 description:

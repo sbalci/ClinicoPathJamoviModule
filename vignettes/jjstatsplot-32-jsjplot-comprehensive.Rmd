@@ -33,7 +33,9 @@ knitr::opts_chunk$set(
   fig.width = 12,
   fig.height = 8,
   dpi = 300,
-  out.width = "100%"
+  out.width = "100%",
+  echo = TRUE,
+  eval = FALSE
 )
 
 # Check if sjPlot is available

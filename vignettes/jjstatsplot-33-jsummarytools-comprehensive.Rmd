@@ -32,7 +32,9 @@ options(digits = 3)
 knitr::opts_chunk$set(
   fig.width = 12,
   fig.height = 8,
-  dpi = 300,
+    dpi = 300,
+  echo = TRUE,
+  eval = FALSE,
   out.width = "100%"
 )
 

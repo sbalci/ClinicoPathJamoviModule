@@ -3,7 +3,7 @@ name: swimmerplotUnified
 title: "Unified Swimmer Plot"
 menuGroup: Exploration
 menuSubgroup: Patient Follow-Up Plots
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

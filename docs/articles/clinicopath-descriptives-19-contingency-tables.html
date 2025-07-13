@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">Analysis by
 Claude</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-19-contingency-tables.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-19-contingency-tables.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-19-contingency-tables.Rmd</code></div>
@@ -295,15 +297,7 @@ tests for small samples</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># Examine the structure of relevant categorical variables</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Mortality5yr"</span>, <span class="st">"Grade"</span>, <span class="st">"TStage"</span>, <span class="st">"Group"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; tibble [250 × 7] (S3: tbl_df/tbl/data.frame)</span></span>
-<span><span class="co">#&gt;  $ Sex         : chr [1:250] "Male" "Female" "Male" "Male" ...</span></span>
-<span><span class="co">#&gt;  $ Mortality5yr: chr [1:250] "Alive" "Dead" "Dead" "Alive" ...</span></span>
-<span><span class="co">#&gt;  $ Grade       : num [1:250] 2 2 1 3 2 2 1 2 3 3 ...</span></span>
-<span><span class="co">#&gt;  $ TStage      : num [1:250] 4 4 4 4 1 4 2 3 4 4 ...</span></span>
-<span><span class="co">#&gt;  $ Group       : chr [1:250] "Control" "Treatment" "Control" "Treatment" ...</span></span>
-<span><span class="co">#&gt;  $ LVI         : chr [1:250] "Present" "Absent" "Absent" "Present" ...</span></span>
-<span><span class="co">#&gt;  $ PNI         : chr [1:250] "Absent" "Absent" "Absent" "Absent" ...</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Mortality5yr"</span>, <span class="st">"Grade"</span>, <span class="st">"TStage"</span>, <span class="st">"Group"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -325,36 +319,7 @@ sex and 5-year mortality:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display basic result structure</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">basic_result</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                                                   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Sex                          Alive        Dead         Total       </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Female    Observed                  33           87          120   </span></span>
-<span><span class="co">#&gt;              % within row        27.50000     72.50000    100.00000   </span></span>
-<span><span class="co">#&gt;              % within column     41.77215     51.47929     48.38710   </span></span>
-<span><span class="co">#&gt;                                                                       </span></span>
-<span><span class="co">#&gt;    Male      Observed                  46           82          128   </span></span>
-<span><span class="co">#&gt;              % within row        35.93750     64.06250    100.00000   </span></span>
-<span><span class="co">#&gt;              % within column     58.22785     48.52071     51.61290   </span></span>
-<span><span class="co">#&gt;                                                                       </span></span>
-<span><span class="co">#&gt;    Total     Observed                  79          169          248   </span></span>
-<span><span class="co">#&gt;              % within row        31.85484     68.14516    100.00000   </span></span>
-<span><span class="co">#&gt;              % within column    100.00000    100.00000    100.00000   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  χ² Tests                                                </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                           Value        df    p           </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    χ²                      2.031219     1    0.1540970   </span></span>
-<span><span class="co">#&gt;    Fisher's exact test    0.6772422          0.1737129   </span></span>
-<span><span class="co">#&gt;    N                            248                      </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">basic_result</span><span class="op">)</span></span></code></pre></div>
 <p>For 2×2 tables, we can also calculate odds ratios and relative
 risk:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -378,52 +343,7 @@ risk:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display measures result</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">measures_result</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                                                   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Sex                          Alive        Dead         Total       </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Female    Observed                  33           87          120   </span></span>
-<span><span class="co">#&gt;              Expected            38.22581     81.77419     120.0000   </span></span>
-<span><span class="co">#&gt;              % within row        27.50000     72.50000    100.00000   </span></span>
-<span><span class="co">#&gt;              % within column     41.77215     51.47929     48.38710   </span></span>
-<span><span class="co">#&gt;              % of total          13.30645     35.08065     48.38710   </span></span>
-<span><span class="co">#&gt;                                                                       </span></span>
-<span><span class="co">#&gt;    Male      Observed                  46           82          128   </span></span>
-<span><span class="co">#&gt;              Expected            40.77419     87.22581     128.0000   </span></span>
-<span><span class="co">#&gt;              % within row        35.93750     64.06250    100.00000   </span></span>
-<span><span class="co">#&gt;              % within column     58.22785     48.52071     51.61290   </span></span>
-<span><span class="co">#&gt;              % of total          18.54839     33.06452     51.61290   </span></span>
-<span><span class="co">#&gt;                                                                       </span></span>
-<span><span class="co">#&gt;    Total     Observed                  79          169          248   </span></span>
-<span><span class="co">#&gt;              Expected            79.00000    169.00000     248.0000   </span></span>
-<span><span class="co">#&gt;              % within row        31.85484     68.14516    100.00000   </span></span>
-<span><span class="co">#&gt;              % within column    100.00000    100.00000    100.00000   </span></span>
-<span><span class="co">#&gt;              % of total          31.85484     68.14516    100.00000   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  χ² Tests                                                </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                           Value        df    p           </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    χ²                      2.031219     1    0.1540970   </span></span>
-<span><span class="co">#&gt;    Fisher's exact test    0.6772422          0.1737129   </span></span>
-<span><span class="co">#&gt;    N                            248                      </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Comparative Measures                                        </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                      Value         Lower         Upper       </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Log odds ratio    -0.3913227    -0.9306923    0.1480469   </span></span>
-<span><span class="co">#&gt;    Odds ratio         0.6761619     0.3942806     1.159567   </span></span>
-<span><span class="co">#&gt;    Relative risk      0.7652174     0.5278535     1.109318   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">measures_result</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="larger-contingency-tables">Larger Contingency Tables<a class="anchor" aria-label="anchor" href="#larger-contingency-tables"></a>
@@ -447,54 +367,7 @@ association patterns:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display multi-category result</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi_result</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                                                                            </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Grade                       1            2            3            4            Total       </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    1        Observed                   6           17           22           29           74   </span></span>
-<span><span class="co">#&gt;             Expected            7.161290     15.21774     18.50000     33.12097     74.00000   </span></span>
-<span><span class="co">#&gt;             % within row         8.10811     22.97297     29.72973     39.18919    100.00000   </span></span>
-<span><span class="co">#&gt;             % within column     25.00000     33.33333     35.48387     26.12613     29.83871   </span></span>
-<span><span class="co">#&gt;                                                                                                </span></span>
-<span><span class="co">#&gt;    2        Observed                   9           10           19           38           76   </span></span>
-<span><span class="co">#&gt;             Expected            7.354839     15.62903     19.00000     34.01613     76.00000   </span></span>
-<span><span class="co">#&gt;             % within row        11.84211     13.15789     25.00000     50.00000    100.00000   </span></span>
-<span><span class="co">#&gt;             % within column     37.50000     19.60784     30.64516     34.23423     30.64516   </span></span>
-<span><span class="co">#&gt;                                                                                                </span></span>
-<span><span class="co">#&gt;    3        Observed                   9           24           21           44           98   </span></span>
-<span><span class="co">#&gt;             Expected            9.483871     20.15323     24.50000     43.86290     98.00000   </span></span>
-<span><span class="co">#&gt;             % within row         9.18367     24.48980     21.42857     44.89796    100.00000   </span></span>
-<span><span class="co">#&gt;             % within column     37.50000     47.05882     33.87097     39.63964     39.51613   </span></span>
-<span><span class="co">#&gt;                                                                                                </span></span>
-<span><span class="co">#&gt;    Total    Observed                  24           51           62          111          248   </span></span>
-<span><span class="co">#&gt;             Expected           24.000000     51.00000     62.00000    111.00000    248.00000   </span></span>
-<span><span class="co">#&gt;             % within row         9.67742     20.56452     25.00000     44.75806    100.00000   </span></span>
-<span><span class="co">#&gt;             % within column    100.00000    100.00000    100.00000    100.00000    100.00000   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  χ² Tests                                            </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                        Value       df    p           </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    χ²                  5.693282     6    0.4584104   </span></span>
-<span><span class="co">#&gt;    Likelihood ratio    5.922387     6    0.4319403   </span></span>
-<span><span class="co">#&gt;    N                        248                      </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Nominal                                  </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                               Value       </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Contingency coefficient    0.1498052   </span></span>
-<span><span class="co">#&gt;    Phi-coefficient                  NaN   </span></span>
-<span><span class="co">#&gt;    Cramer's V                 0.1071372   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi_result</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="ordinal-association-measures">Ordinal Association Measures<a class="anchor" aria-label="anchor" href="#ordinal-association-measures"></a>
@@ -515,44 +388,7 @@ for ordering:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display ordinal result</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ordinal_result</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                          </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Grade    1     2     3     4      Total   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    1         6    17    22     29       74   </span></span>
-<span><span class="co">#&gt;    2         9    10    19     38       76   </span></span>
-<span><span class="co">#&gt;    3         9    24    21     44       98   </span></span>
-<span><span class="co">#&gt;    Total    24    51    62    111      248   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  χ² Tests                              </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────── </span></span>
-<span><span class="co">#&gt;          Value       df    p           </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    χ²    5.693282     6    0.4584104   </span></span>
-<span><span class="co">#&gt;    N          248                      </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Gamma                                                       </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Gamma         Standard Error    Lower         Upper       </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    0.01529883        0.08121123    -0.1438722    0.1744699   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Kendall's Tau-b                               </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Kendall's Tau-B    t            p           </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;         0.01033864    0.1855578    0.8527916   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ordinal_result</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="stratified-analysis">Stratified Analysis<a class="anchor" aria-label="anchor" href="#stratified-analysis"></a>
@@ -575,69 +411,7 @@ layers:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display stratified result</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">stratified_result</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                                                             </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Group        Sex                       Alive        Dead         Total       </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Control      Female    Observed               16           41           57   </span></span>
-<span><span class="co">#&gt;                           % within row     28.07018     71.92982    100.00000   </span></span>
-<span><span class="co">#&gt;                                                                                 </span></span>
-<span><span class="co">#&gt;                 Male      Observed               20           41           61   </span></span>
-<span><span class="co">#&gt;                           % within row     32.78689     67.21311    100.00000   </span></span>
-<span><span class="co">#&gt;                                                                                 </span></span>
-<span><span class="co">#&gt;                 Total     Observed               36           82          118   </span></span>
-<span><span class="co">#&gt;                           % within row     30.50847     69.49153    100.00000   </span></span>
-<span><span class="co">#&gt;                                                                                 </span></span>
-<span><span class="co">#&gt;    Treatment    Female    Observed               17           46           63   </span></span>
-<span><span class="co">#&gt;                           % within row     26.98413     73.01587    100.00000   </span></span>
-<span><span class="co">#&gt;                                                                                 </span></span>
-<span><span class="co">#&gt;                 Male      Observed               25           41           66   </span></span>
-<span><span class="co">#&gt;                           % within row     37.87879     62.12121    100.00000   </span></span>
-<span><span class="co">#&gt;                                                                                 </span></span>
-<span><span class="co">#&gt;                 Total     Observed               42           87          129   </span></span>
-<span><span class="co">#&gt;                           % within row     32.55814     67.44186    100.00000   </span></span>
-<span><span class="co">#&gt;                                                                                 </span></span>
-<span><span class="co">#&gt;    Total        Female    Observed               33           87          120   </span></span>
-<span><span class="co">#&gt;                           % within row     27.50000     72.50000    100.00000   </span></span>
-<span><span class="co">#&gt;                                                                                 </span></span>
-<span><span class="co">#&gt;                 Male      Observed               45           82          127   </span></span>
-<span><span class="co">#&gt;                           % within row     35.43307     64.56693    100.00000   </span></span>
-<span><span class="co">#&gt;                                                                                 </span></span>
-<span><span class="co">#&gt;                 Total     Observed               78          169          247   </span></span>
-<span><span class="co">#&gt;                           % within row     31.57895     68.42105    100.00000   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  χ² Tests                                                             </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Group                               Value        df    p           </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Control      χ²                     0.3092065     1    0.5781675   </span></span>
-<span><span class="co">#&gt;                 Fisher's exact test    0.8015178          0.6897282   </span></span>
-<span><span class="co">#&gt;                 N                            118                      </span></span>
-<span><span class="co">#&gt;                                                                       </span></span>
-<span><span class="co">#&gt;    Treatment    χ²                     1.7423407     1    0.1868425   </span></span>
-<span><span class="co">#&gt;                 Fisher's exact test    0.6084678          0.1954887   </span></span>
-<span><span class="co">#&gt;                 N                            129                      </span></span>
-<span><span class="co">#&gt;                                                                       </span></span>
-<span><span class="co">#&gt;    Total        χ²                     1.7971457     1    0.1800580   </span></span>
-<span><span class="co">#&gt;                 Fisher's exact test    0.6922338          0.2178515   </span></span>
-<span><span class="co">#&gt;                 N                            247                      </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Comparative Measures                                              </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Group                      Value        Lower        Upper      </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Control      Odds ratio    0.8000000    0.3641243    1.757642   </span></span>
-<span><span class="co">#&gt;    Treatment    Odds ratio    0.6060870    0.2873821    1.278233   </span></span>
-<span><span class="co">#&gt;    Total        Odds ratio    0.6911877    0.4023508    1.187373   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">stratified_result</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="working-with-count-data">Working with Count Data<a class="anchor" aria-label="anchor" href="#working-with-count-data"></a>
@@ -670,14 +444,7 @@ classic HairEyeColor dataset:</p>
 <span>  <span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">hair_eye_data</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt;    Hair   Eye  Sex Freq</span></span>
-<span><span class="co">#&gt; 1 Black Brown Male   32</span></span>
-<span><span class="co">#&gt; 2 Brown Brown Male   53</span></span>
-<span><span class="co">#&gt; 3   Red Brown Male   10</span></span>
-<span><span class="co">#&gt; 4 Blond Brown Male    3</span></span>
-<span><span class="co">#&gt; 5 Black  Blue Male   11</span></span>
-<span><span class="co">#&gt; 6 Brown  Blue Male   50</span></span></code></pre></div>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="multiple-association-tests">Multiple Association Tests<a class="anchor" aria-label="anchor" href="#multiple-association-tests"></a>
@@ -708,63 +475,7 @@ measures:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Display comprehensive result</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comprehensive_result</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  CONTINGENCY TABLES</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Contingency Tables                                                    </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    LVI                           Absent       Present      Total       </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Absent     Observed                  96           46          142   </span></span>
-<span><span class="co">#&gt;               Expected            94.47581     47.52419     142.0000   </span></span>
-<span><span class="co">#&gt;               % within row        67.60563     32.39437    100.00000   </span></span>
-<span><span class="co">#&gt;               % within column     58.18182     55.42169     57.25806   </span></span>
-<span><span class="co">#&gt;               % of total          38.70968     18.54839     57.25806   </span></span>
-<span><span class="co">#&gt;                                                                        </span></span>
-<span><span class="co">#&gt;    Present    Observed                  69           37          106   </span></span>
-<span><span class="co">#&gt;               Expected            70.52419     35.47581     106.0000   </span></span>
-<span><span class="co">#&gt;               % within row        65.09434     34.90566    100.00000   </span></span>
-<span><span class="co">#&gt;               % within column     41.81818     44.57831     42.74194   </span></span>
-<span><span class="co">#&gt;               % of total          27.82258     14.91935     42.74194   </span></span>
-<span><span class="co">#&gt;                                                                        </span></span>
-<span><span class="co">#&gt;    Total      Observed                 165           83          248   </span></span>
-<span><span class="co">#&gt;               Expected           165.00000     83.00000     248.0000   </span></span>
-<span><span class="co">#&gt;               % within row        66.53226     33.46774    100.00000   </span></span>
-<span><span class="co">#&gt;               % within column    100.00000    100.00000    100.00000   </span></span>
-<span><span class="co">#&gt;               % of total          66.53226     33.46774    100.00000   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  χ² Tests                                                      </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                                Value         df    p           </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    χ²                           0.1719012     1    0.6784276   </span></span>
-<span><span class="co">#&gt;    χ² continuity correction    0.07761808     1    0.7805517   </span></span>
-<span><span class="co">#&gt;    Likelihood ratio             0.1716229     1    0.6786735   </span></span>
-<span><span class="co">#&gt;    Fisher's exact test           1.118581          0.6856439   </span></span>
-<span><span class="co">#&gt;    N                                  248                      </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Comparative Measures                                   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                     Value       Lower        Upper      </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Odds ratio       1.119093    0.6573888    1.905065   </span></span>
-<span><span class="co">#&gt;    Relative risk    1.038579    0.8675045    1.243391   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Nominal                                   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;                               Value        </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Contingency coefficient    0.02631863   </span></span>
-<span><span class="co">#&gt;    Phi-coefficient            0.02632775   </span></span>
-<span><span class="co">#&gt;    Cramer's V                 0.02632775   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comprehensive_result</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="interpreting-results">Interpreting Results<a class="anchor" aria-label="anchor" href="#interpreting-results"></a>

@@ -31,8 +31,8 @@ Ridgeline plots are particularly effective for:
 ## Installation and Setup
 
 ```{r setup}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Install ClinicoPath if not already installed
 if (!require("ClinicoPath")) {
@@ -48,8 +48,8 @@ library(ggplot2)
 ### Basic Ridgeline Plot
 
 ```{r basic-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Load test data
 data(jjridgestats_test_data)
@@ -69,8 +69,8 @@ result$plot
 ### Customized Ridgeline Plot
 
 ```{r customized-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Customized ridgeline with scaling and colors
 result_custom <- jjridgestats(
@@ -91,8 +91,8 @@ result_custom$plot
 ### Histogram-Style Ridgeline
 
 ```{r histogram-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Histogram-style ridgeline plot
 result_hist <- jjridgestats(
@@ -188,8 +188,8 @@ The function includes significant performance optimizations:
 ### Performance Benefits
 
 ```{r performance-concept}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # The optimized version provides:
 # - Faster processing for large datasets
@@ -203,8 +203,8 @@ eval: false
 ### Clinical Trial Response Analysis
 
 ```{r clinical-trial}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Treatment response distributions
 response_analysis <- jjridgestats(
@@ -228,8 +228,8 @@ response_analysis <- jjridgestats(
 ### Biomarker Progression Analysis
 
 ```{r biomarker-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Biomarker expression across disease stages
 biomarker_progression <- jjridgestats(
@@ -253,8 +253,8 @@ biomarker_progression <- jjridgestats(
 ### Multi-Center Quality Control
 
 ```{r quality-control}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Laboratory value distributions across centers
 lab_qc <- jjridgestats(
@@ -279,8 +279,8 @@ lab_qc <- jjridgestats(
 ### Longitudinal Treatment Response
 
 ```{r longitudinal-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Symptom severity over time
 longitudinal_response <- jjridgestats(
@@ -304,8 +304,8 @@ longitudinal_response <- jjridgestats(
 ### Regional Population Differences
 
 ```{r population-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Inflammatory marker distributions by region
 population_differences <- jjridgestats(
@@ -330,8 +330,8 @@ population_differences <- jjridgestats(
 ### Comparative Plot Styles
 
 ```{r plot-styles-comparison}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Same data with different plot styles
 variable_of_interest <- "response_score"
@@ -380,8 +380,8 @@ The input data should be a data frame with:
 ### Example Data Structure
 
 ```{r data-structure}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Structure of test data
 str(jjridgestats_test_data)
@@ -412,8 +412,8 @@ str(jjridgestats_test_data)
 #### Choosing Plot Style
 
 ```{r style-guidelines}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Use density plots when:
 # - Data is truly continuous
@@ -434,8 +434,8 @@ eval: false
 #### Parameter Selection
 
 ```{r parameter-guidelines}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Scaling guidelines:
 # scaling = 0.5-0.8: Conservative, clear separation
@@ -467,8 +467,8 @@ eval: false
 #### Common Patterns
 
 ```{r interpretation-patterns}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Common clinical patterns in ridgeline plots:
 
@@ -504,8 +504,8 @@ The `jjridgestats` function is built on:
 ### Caching Details
 
 ```{r caching-technical}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Internal caching structure (conceptual)
 # private$.processedData: Cached cleaned data with numeric conversion
@@ -521,8 +521,8 @@ eval: false
 ### Dependencies
 
 ```{r dependencies}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Required packages:
 # - ggplot2: Core plotting
@@ -545,8 +545,8 @@ eval: false
 ### Publication Guidelines
 
 ```{r publication-tips}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # For scientific publications:
 # - Use minimal theme with clear axis labels
@@ -597,8 +597,8 @@ publication_plot <- jjridgestats(
 ### Error Handling
 
 ```{r error-handling}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Example error handling
 tryCatch({
@@ -625,8 +625,8 @@ tryCatch({
 ### Performance Considerations
 
 ```{r performance-tips}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # For large datasets:
 # - Consider sampling for initial exploration
@@ -645,8 +645,8 @@ eval: false
 ### When to Use Ridgeline Plots vs Alternatives
 
 ```{r visualization-comparison}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Use ridgeline plots when:
 # - Comparing distribution shapes across groups
@@ -676,8 +676,8 @@ eval: false
 ### Custom Themes and Styling
 
 ```{r advanced-customization}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Advanced styling examples:
 

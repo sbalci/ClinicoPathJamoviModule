@@ -53,6 +53,19 @@ Your dataset should contain:
 
 Let's examine the structure of our test data:
 
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
+  collapse = TRUE,
+  comment = "#>",
+    echo = TRUE,
+  eval = FALSE
+)
+```
+
+
 ```{r setup}
 library(ClinicoPath)
 library(dplyr)

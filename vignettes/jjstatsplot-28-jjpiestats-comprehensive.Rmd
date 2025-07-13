@@ -22,8 +22,8 @@ The `jjpiestats` function provides a comprehensive interface for creating pie ch
 ## Installation and Setup
 
 ```{r setup}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Install ClinicoPath if not already installed
 if (!require("ClinicoPath")) {
@@ -49,8 +49,8 @@ Before demonstrating the functionality, it's crucial to understand the well-docu
 #### 2. **Comparison Difficulties**
 
 ```{r pie-problems}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Example demonstrating comparison difficulties
 # These values are hard to distinguish in pie charts:
@@ -86,8 +86,8 @@ Pie charts may be considered only when:
 ### Recommended Alternatives
 
 ```{r alternatives-concept}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Instead of pie charts, consider:
 
@@ -168,8 +168,8 @@ The optimized version provides:
 ### Basic Pie Chart
 
 ```{r basic-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Load test data
 data(jjpiestats_test_data)
@@ -189,8 +189,8 @@ result$plot1
 ### Contingency Table Analysis
 
 ```{r contingency-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Pie chart with grouping for association testing
 result_grouped <- jjpiestats(
@@ -208,8 +208,8 @@ result_grouped$plot2
 ### Split Panel Analysis
 
 ```{r split-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Separate pie charts by hospital site
 result_split <- jjpiestats(
@@ -229,8 +229,8 @@ result_split$plot4
 ### Clinical Trial Response Analysis
 
 ```{r clinical-trial}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Primary endpoint analysis
 primary_response <- jjpiestats(
@@ -262,8 +262,8 @@ response_by_site <- jjpiestats(
 ### Safety Analysis
 
 ```{r safety-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Adverse event distribution
 adverse_events <- jjpiestats(
@@ -293,8 +293,8 @@ safety_by_region <- jjpiestats(
 ### Biomarker Analysis
 
 ```{r biomarker-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Biomarker prevalence
 biomarker_prevalence <- jjpiestats(
@@ -324,8 +324,8 @@ response_by_biomarker <- jjpiestats(
 ### Statistical Method Comparison
 
 ```{r method-comparison}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Compare different statistical approaches
 variable_of_interest <- "tumor_grade"
@@ -370,8 +370,8 @@ The input data should be a data frame with:
 ### Example Data Structure
 
 ```{r data-structure}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Structure of test data
 str(jjpiestats_test_data)
@@ -404,8 +404,8 @@ str(jjpiestats_test_data)
 ### Visualization Guidelines
 
 ```{r viz-guidelines}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Recommended practices when using pie charts:
 
@@ -436,8 +436,8 @@ Consider `jjbarstats` instead when:
 - Publishing in scientific journals
 
 ```{r when-alternatives}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Use bar charts for these scenarios:
 # - Multiple time points
@@ -462,8 +462,8 @@ The `jjpiestats` function is built on:
 ### Caching Implementation
 
 ```{r caching-details}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Internal caching structure (conceptual)
 # private$.processedData: Cached cleaned data with factor levels
@@ -479,8 +479,8 @@ eval: false
 ### Statistical Tests Performed
 
 ```{r statistical-tests}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Tests performed based on typestatistics:
 
@@ -519,8 +519,8 @@ Despite their limitations, pie charts are sometimes requested in:
 ### Recommended Workflow
 
 ```{r clinical-workflow}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Step 1: Create pie chart if required
 pie_result <- jjpiestats(
@@ -567,8 +567,8 @@ bar_result <- jjbarstats(  # Recommended alternative
 ### Error Handling
 
 ```{r error-handling}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Example error handling
 tryCatch({

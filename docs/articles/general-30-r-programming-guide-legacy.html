@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">ClinicoPath
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/general-30-r-programming-guide-legacy.Rmd" class="external-link"><code>vignettes/general-30-r-programming-guide-legacy.Rmd</code></a></small>
       <div class="d-none name"><code>general-30-r-programming-guide-legacy.Rmd</code></div>
@@ -332,10 +334,6 @@ workflows.</p>
 <span><span class="co">#&gt; 'mlr3measures::specificity' when loading 'ClinicoPath'</span></span>
 <span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::sensitivity' by</span></span>
 <span><span class="co">#&gt; 'mlr3measures::sensitivity' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::roc' by 'pROC::roc' when loading</span></span>
-<span><span class="co">#&gt; 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'mlr3measures::auc' by 'pROC::auc' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
 <span><span class="co">#&gt; Warning: replacing previous import 'igraph::as_data_frame' by</span></span>
 <span><span class="co">#&gt; 'tibble::as_data_frame' when loading 'ClinicoPath'</span></span>
 <span><span class="co">#&gt; Warning: replacing previous import 'igraph::crossing' by 'tidyr::crossing' when</span></span>
@@ -362,6 +360,10 @@ workflows.</p>
 <span><span class="co">#&gt; 'grafify::plot_histogram' when loading 'ClinicoPath'</span></span>
 <span><span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span></span>
 <span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'mlr3measures::auc' by 'pROC::auc' when</span></span>
+<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::roc' by 'pROC::roc' when loading</span></span>
+<span><span class="co">#&gt; 'ClinicoPath'</span></span>
 <span><span class="co">#&gt; Warning: replacing previous import 'tibble::view' by 'summarytools::view' when</span></span>
 <span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>

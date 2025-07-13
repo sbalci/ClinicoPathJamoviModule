@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.55</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -398,7 +398,7 @@ sampling</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Focus on biomarker effects</span></span>
 <span><span class="va">biomarker_data</span> <span class="op">&lt;-</span> <span class="va">logistic_model_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">biomarker_level</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">biomarker_level</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># jggstats(</span></span>
 <span><span class="co">#   data = biomarker_data,</span></span>
@@ -891,21 +891,7 @@ correlated predictors</p>
 <span>  data <span class="op">=</span> <span class="va">linear_model_data</span>,</span>
 <span>  dependent_var <span class="op">=</span> <span class="st">"outcome"</span>,</span>
 <span>  independent_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"treatment"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Data Quality Assessment for Statistical Modeling</span></span>
-<span><span class="co">#&gt; =============================================</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Dataset dimensions: 200 rows, 9 columns</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Dependent Variable ( outcome ):</span></span>
-<span><span class="co">#&gt;   - Type: numeric </span></span>
-<span><span class="co">#&gt;   - Missing values: 0 / 200 </span></span>
-<span><span class="co">#&gt;   - Range: 40.23 to 137.06 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Independent Variables:</span></span>
-<span><span class="co">#&gt;   - age : Type: integer, Missing: 0, Range: 19 - 80</span></span>
-<span><span class="co">#&gt;   - sex : Type: character, Missing: 0, Levels: 2</span></span>
-<span><span class="co">#&gt;   - treatment : Type: character, Missing: 0, Levels: 3</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
