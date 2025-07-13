@@ -13,6 +13,8 @@ knitr::opts_chunk$set(
   fig.height = 6,
   warning = FALSE,
   message = FALSE,
+  eval = FALSE,
+    echo = TRUE,
   eval = FALSE
 )
 ```

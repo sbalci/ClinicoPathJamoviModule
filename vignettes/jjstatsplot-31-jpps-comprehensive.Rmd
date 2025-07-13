@@ -471,6 +471,9 @@ marketing_result
 Identify predictors of health outcomes:
 
 ```{r medical_example}
+#| echo: true
+#| eval: false
+
 # Clinical data
 clinical_data <- data.frame(
   age = round(runif(80, 25, 75)),

@@ -3,7 +3,7 @@
 
 # Global settings
 global:
-  new_version: "0.0.3.55"
+  new_version: "0.0.3.56"
   new_date: "2025-07-13"
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
@@ -143,8 +143,8 @@ modules:
     r_files:
       - "psychopdaroc_utilities.R"
       - "nomogrammer.R"
-      - "meddecide-utils.R"
-      - "meddecide_stats_utils.R"
+      # - "meddecide-utils.R"
+      # - "meddecide_stats_utils.R"
       - "diagnostic_metrics.R"
 
     vignette_files:

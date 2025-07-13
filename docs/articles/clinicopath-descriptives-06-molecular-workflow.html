@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-function-alluvial.html">Function Reference: alluvial() - Complete Parameter Guide</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-1-multisurvival-time-dependent-comprehensive.html">Time-Dependent Covariates in Multisurvival Analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Performing a Benford's Law Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-function-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-swimmerplot.html">Vignette: Creating Advanced Swimmer Plots with Date and Event Handling</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-12-chisqposttest.html">Chi-Square Post-Hoc Tests for Clinicopathological Research</a></li>
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">ClinicoPath
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-06-molecular-workflow.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-06-molecular-workflow.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-06-molecular-workflow.Rmd</code></div>
@@ -555,8 +557,8 @@ biomarker.</p>
 <span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pROC"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://xrobin.github.io/pROC/" class="external-link">pROC</a></span><span class="op">)</span></span>
 <span>  </span>
-<span>  <span class="va">roc_platform_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/roc.html">roc</a></span><span class="op">(</span><span class="va">pdl1_high</span>, <span class="va">biomarker_validation_study</span><span class="op">$</span><span class="va">Platform_A_PD_L1</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>  <span class="va">roc_platform_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/roc.html">roc</a></span><span class="op">(</span><span class="va">pdl1_high</span>, <span class="va">biomarker_validation_study</span><span class="op">$</span><span class="va">Platform_B_PD_L1</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">roc_platform_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/pROC/man/roc.html" class="external-link">roc</a></span><span class="op">(</span><span class="va">pdl1_high</span>, <span class="va">biomarker_validation_study</span><span class="op">$</span><span class="va">Platform_A_PD_L1</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">roc_platform_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/pROC/man/roc.html" class="external-link">roc</a></span><span class="op">(</span><span class="va">pdl1_high</span>, <span class="va">biomarker_validation_study</span><span class="op">$</span><span class="va">Platform_B_PD_L1</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Platform A AUC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/pROC/man/auc.html" class="external-link">auc</a></span><span class="op">(</span><span class="va">roc_platform_a</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Platform B AUC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/pROC/man/auc.html" class="external-link">auc</a></span><span class="op">(</span><span class="va">roc_platform_b</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>

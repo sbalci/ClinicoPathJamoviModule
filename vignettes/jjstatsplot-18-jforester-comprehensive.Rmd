@@ -13,7 +13,9 @@ knitr::opts_chunk$set(
   fig.width = 8,
   fig.height = 6,
   warning = FALSE,
-  message = FALSE
+  message = FALSE,
+    echo = TRUE,
+  eval = FALSE
 )
 ```
 
@@ -529,7 +531,9 @@ publication_plot <- jforester(
   effect_type = "or",
   plot_width = 12,
   plot_height = 10,
-  dpi = 300,
+    dpi = 300,
+  echo = TRUE,
+  eval = FALSE,
   font_family = "Times",
   export_format = "pdf",
   plot_title = "Publication-Ready Forest Plot"

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">Analysis by
 Gemini</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-10-function-benford.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-10-function-benford.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-10-function-benford.Rmd</code></div>
@@ -276,14 +278,7 @@ Gemini</h4>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># View the first few rows</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">payments</span><span class="op">)</span></span>
-<span><span class="co">#&gt;       amount</span></span>
-<span><span class="co">#&gt; 1   48.37817</span></span>
-<span><span class="co">#&gt; 2   93.65755</span></span>
-<span><span class="co">#&gt; 3 3352.34918</span></span>
-<span><span class="co">#&gt; 4  170.88944</span></span>
-<span><span class="co">#&gt; 5  192.20749</span></span>
-<span><span class="co">#&gt; 6 4583.09574</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">payments</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># This code shows how to use the benford.analysis package directly</span></span>
 <span><span class="co"># The ClinicoPath::benford function is designed for jamovi and won't work in R Markdown</span></span>
@@ -293,72 +288,17 @@ Gemini</h4>
 <span></span>
 <span><span class="co"># Check the data structure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">payments</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 'data.frame':    500 obs. of  1 variable:</span></span>
-<span><span class="co">#&gt;  $ amount: num  48.4 93.7 3352.3 170.9 192.2 ...</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">payments</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;       amount</span></span>
-<span><span class="co">#&gt; 1   48.37817</span></span>
-<span><span class="co">#&gt; 2   93.65755</span></span>
-<span><span class="co">#&gt; 3 3352.34918</span></span>
-<span><span class="co">#&gt; 4  170.88944</span></span>
-<span><span class="co">#&gt; 5  192.20749</span></span>
-<span><span class="co">#&gt; 6 4583.09574</span></span>
 <span></span>
 <span><span class="co"># Run the Benford analysis using the benford.analysis package directly</span></span>
 <span><span class="va">bfd.cp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/benford.html">benford</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">payments</span><span class="op">$</span><span class="va">amount</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># View the results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">bfd.cp</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Benford object:</span></span>
-<span><span class="co">#&gt;  </span></span>
-<span><span class="co">#&gt; Data: payments$amount </span></span>
-<span><span class="co">#&gt; Number of observations used = 500 </span></span>
-<span><span class="co">#&gt; Number of obs. for second order = 499 </span></span>
-<span><span class="co">#&gt; First digits analysed = 2</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Mantissa: </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;    Statistic  Value</span></span>
-<span><span class="co">#&gt;         Mean  0.516</span></span>
-<span><span class="co">#&gt;          Var  0.086</span></span>
-<span><span class="co">#&gt;  Ex.Kurtosis -1.266</span></span>
-<span><span class="co">#&gt;     Skewness -0.041</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; The 5 largest deviations: </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   digits absolute.diff</span></span>
-<span><span class="co">#&gt; 1     10          5.70</span></span>
-<span><span class="co">#&gt; 2     17          5.59</span></span>
-<span><span class="co">#&gt; 3     14          4.98</span></span>
-<span><span class="co">#&gt; 4     35          4.88</span></span>
-<span><span class="co">#&gt; 5     52          4.86</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Stats:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Pearson's Chi-squared test</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; data:  payments$amount</span></span>
-<span><span class="co">#&gt; X-squared = 81.205, df = 89, p-value = 0.7095</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Mantissa Arc Test</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; data:  payments$amount</span></span>
-<span><span class="co">#&gt; L2 = 0.0016603, df = 2, p-value = 0.436</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Mean Absolute Deviation (MAD): 0.003480567</span></span>
-<span><span class="co">#&gt; MAD Conformity - Nigrini (2012): Nonconformity</span></span>
-<span><span class="co">#&gt; Distortion Factor: 0.9465649</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Remember: Real data will never conform perfectly to Benford's Law. You should not focus on p-values!</span></span>
 <span></span>
 <span><span class="co"># Create plot</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bfd.cp</span><span class="op">)</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-10-function-benford_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bfd.cp</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Get suspects</span></span>
 <span><span class="va">suspects</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/benford.analysis/man/getSuspects.html" class="external-link">getSuspects</a></span><span class="op">(</span><span class="va">bfd.cp</span>, <span class="va">payments</span><span class="op">)</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">suspects</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
@@ -366,44 +306,7 @@ Gemini</h4>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">suspects</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"No suspicious values detected"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt; [1] "Suspicious values:"</span></span>
-<span><span class="co">#&gt;           amount</span></span>
-<span><span class="co">#&gt;            &lt;num&gt;</span></span>
-<span><span class="co">#&gt;  1:   170.889437</span></span>
-<span><span class="co">#&gt;  2:  1716.707678</span></span>
-<span><span class="co">#&gt;  3:    17.537695</span></span>
-<span><span class="co">#&gt;  4:    17.399084</span></span>
-<span><span class="co">#&gt;  5:  1082.477541</span></span>
-<span><span class="co">#&gt;  6:   173.455607</span></span>
-<span><span class="co">#&gt;  7:  1047.274939</span></span>
-<span><span class="co">#&gt;  8: 10476.645262</span></span>
-<span><span class="co">#&gt;  9:    17.696161</span></span>
-<span><span class="co">#&gt; 10:   100.047814</span></span>
-<span><span class="co">#&gt; 11:   175.822433</span></span>
-<span><span class="co">#&gt; 12:   179.319128</span></span>
-<span><span class="co">#&gt; 13:    10.787596</span></span>
-<span><span class="co">#&gt; 14:  1745.771325</span></span>
-<span><span class="co">#&gt; 15:    10.654344</span></span>
-<span><span class="co">#&gt; 16:   102.940302</span></span>
-<span><span class="co">#&gt; 17:   103.740938</span></span>
-<span><span class="co">#&gt; 18:   177.859390</span></span>
-<span><span class="co">#&gt; 19:   177.401309</span></span>
-<span><span class="co">#&gt; 20:  1017.451181</span></span>
-<span><span class="co">#&gt; 21:   172.276777</span></span>
-<span><span class="co">#&gt; 22:  1760.494638</span></span>
-<span><span class="co">#&gt; 23:    10.200650</span></span>
-<span><span class="co">#&gt; 24:  1010.308244</span></span>
-<span><span class="co">#&gt; 25:   103.563768</span></span>
-<span><span class="co">#&gt; 26:     1.070583</span></span>
-<span><span class="co">#&gt; 27:    17.992696</span></span>
-<span><span class="co">#&gt; 28: 17942.095954</span></span>
-<span><span class="co">#&gt; 29:   101.389182</span></span>
-<span><span class="co">#&gt; 30:    17.204289</span></span>
-<span><span class="co">#&gt; 31:     1.733296</span></span>
-<span><span class="co">#&gt; 32:  1757.041881</span></span>
-<span><span class="co">#&gt; 33:    10.528625</span></span>
-<span><span class="co">#&gt;           amount</span></span></code></pre></div>
+<span><span class="op">}</span></span></code></pre></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">ClinicoPath
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/general-10-visualization-gallery.Rmd" class="external-link"><code>vignettes/general-10-visualization-gallery.Rmd</code></a></small>
       <div class="d-none name"><code>general-10-visualization-gallery.Rmd</code></div>
@@ -335,8 +337,7 @@ audience</li>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Enhanced dataset prepared with"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">viz_data</span><span class="op">)</span>, <span class="st">"patients and"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">viz_data</span><span class="op">)</span>, <span class="st">"variables\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Enhanced dataset prepared with 250 patients and 42 variables</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Enhanced dataset prepared with"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">viz_data</span><span class="op">)</span>, <span class="st">"patients and"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">viz_data</span><span class="op">)</span>, <span class="st">"variables\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -352,27 +353,7 @@ audience</li>
 <span>  age <span class="op">=</span> <span class="st">"Age"</span>,</span>
 <span>  gender <span class="op">=</span> <span class="st">"Sex"</span>,</span>
 <span>  female <span class="op">=</span> <span class="st">"Female"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  AGE PYRAMID</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Population Data                  </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Population    Female    Male   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────── </span></span>
-<span><span class="co">#&gt;    (70,73]            8       5   </span></span>
-<span><span class="co">#&gt;    (65,70]           17      11   </span></span>
-<span><span class="co">#&gt;    (60,65]           16      10   </span></span>
-<span><span class="co">#&gt;    (55,60]           14      17   </span></span>
-<span><span class="co">#&gt;    (50,55]            8      11   </span></span>
-<span><span class="co">#&gt;    (45,50]            8      15   </span></span>
-<span><span class="co">#&gt;    (40,45]           19      14   </span></span>
-<span><span class="co">#&gt;    (35,40]           13      15   </span></span>
-<span><span class="co">#&gt;    (30,35]            6      13   </span></span>
-<span><span class="co">#&gt;    (25,30]           10      17   </span></span>
-<span><span class="co">#&gt;    (20,25]            1       0   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-2-1.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="age-pyramid-by-treatment-group">Age Pyramid by Treatment Group<a class="anchor" aria-label="anchor" href="#age-pyramid-by-treatment-group"></a>
@@ -384,27 +365,7 @@ audience</li>
 <span>  age <span class="op">=</span> <span class="st">"Age"</span>, </span>
 <span>  gender <span class="op">=</span> <span class="st">"Sex"</span>,</span>
 <span>  female <span class="op">=</span> <span class="st">"Female"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  AGE PYRAMID</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Population Data                  </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Population    Female    Male   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────── </span></span>
-<span><span class="co">#&gt;    (70,73]            8       5   </span></span>
-<span><span class="co">#&gt;    (65,70]           17      11   </span></span>
-<span><span class="co">#&gt;    (60,65]           16      10   </span></span>
-<span><span class="co">#&gt;    (55,60]           14      17   </span></span>
-<span><span class="co">#&gt;    (50,55]            8      11   </span></span>
-<span><span class="co">#&gt;    (45,50]            8      15   </span></span>
-<span><span class="co">#&gt;    (40,45]           19      14   </span></span>
-<span><span class="co">#&gt;    (35,40]           13      15   </span></span>
-<span><span class="co">#&gt;    (30,35]            6      13   </span></span>
-<span><span class="co">#&gt;    (25,30]           10      17   </span></span>
-<span><span class="co">#&gt;    (20,25]            1       0   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-3-1.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="age-pyramid-by-risk-profile">Age Pyramid by Risk Profile<a class="anchor" aria-label="anchor" href="#age-pyramid-by-risk-profile"></a>
@@ -416,27 +377,7 @@ audience</li>
 <span>  age <span class="op">=</span> <span class="st">"Age"</span>,</span>
 <span>  gender <span class="op">=</span> <span class="st">"Sex"</span>,</span>
 <span>  female <span class="op">=</span> <span class="st">"Female"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  AGE PYRAMID</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Population Data                  </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Population    Female    Male   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────── </span></span>
-<span><span class="co">#&gt;    (70,73]            8       5   </span></span>
-<span><span class="co">#&gt;    (65,70]           17      11   </span></span>
-<span><span class="co">#&gt;    (60,65]           16      10   </span></span>
-<span><span class="co">#&gt;    (55,60]           14      17   </span></span>
-<span><span class="co">#&gt;    (50,55]            8      11   </span></span>
-<span><span class="co">#&gt;    (45,50]            8      15   </span></span>
-<span><span class="co">#&gt;    (40,45]           19      14   </span></span>
-<span><span class="co">#&gt;    (35,40]           13      15   </span></span>
-<span><span class="co">#&gt;    (30,35]            6      13   </span></span>
-<span><span class="co">#&gt;    (25,30]           10      17   </span></span>
-<span><span class="co">#&gt;    (20,25]            1       0   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-4-1.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -451,15 +392,7 @@ audience</li>
 <span>  data <span class="op">=</span> <span class="va">viz_data</span>,</span>
 <span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Group"</span>, <span class="st">"Grade"</span>, <span class="st">"LymphNodeMetastasis"</span><span class="op">)</span>,</span>
 <span>  condensationvar <span class="op">=</span> <span class="st">"Outcome_Status"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 13.2 %"</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-5-1.png" width="960"><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-5-2.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="complex-pathological-progression">Complex Pathological Progression<a class="anchor" aria-label="anchor" href="#complex-pathological-progression"></a>
@@ -470,15 +403,7 @@ audience</li>
 <span>  data <span class="op">=</span> <span class="va">viz_data</span>,</span>
 <span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grade"</span>, <span class="st">"TStage"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span>,</span>
 <span>  condensationvar <span class="op">=</span> <span class="st">"LymphNodeMetastasis"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 47"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 18.8 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 5.6 %"</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-6-1.png" width="960"><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-6-2.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="treatment-response-flow">Treatment Response Flow<a class="anchor" aria-label="anchor" href="#treatment-response-flow"></a>
@@ -489,15 +414,7 @@ audience</li>
 <span>  data <span class="op">=</span> <span class="va">viz_data</span>,</span>
 <span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age_Group"</span>, <span class="st">"Risk_Profile"</span>, <span class="st">"Group"</span><span class="op">)</span>,</span>
 <span>  condensationvar <span class="op">=</span> <span class="st">"Treatment_Response"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 20"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 8 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 12 %"</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-7-1.png" width="960"><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-7-2.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -527,12 +444,7 @@ audience</li>
 <span>  var3true <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  var4 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  var4true <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  VENN DIAGRAM</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-8-1.png" width="960"><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-8-2.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="four-way-set-analysis">Four-way Set Analysis<a class="anchor" aria-label="anchor" href="#four-way-set-analysis"></a>
@@ -549,12 +461,7 @@ audience</li>
 <span>  var3true <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  var4 <span class="op">=</span> <span class="st">"High_Grade"</span>,</span>
 <span>  var4true <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  VENN DIAGRAM</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-9-1.png" width="960"><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-9-2.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -589,9 +496,7 @@ audience</li>
 <span><span class="op">}</span>, error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Variable tree visualization temporarily unavailable due to rendering issues.\n"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Error:"</span>, <span class="va">e</span><span class="op">$</span><span class="va">message</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Variable tree visualization temporarily unavailable due to rendering issues.</span></span>
-<span><span class="co">#&gt; Error: $ operator is invalid for atomic vectors</span></span></code></pre></div>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="outcome-focused-tree">Outcome-focused Tree<a class="anchor" aria-label="anchor" href="#outcome-focused-tree"></a>
@@ -622,9 +527,7 @@ audience</li>
 <span><span class="op">}</span>, error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Variable tree visualization temporarily unavailable due to rendering issues.\n"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Error:"</span>, <span class="va">e</span><span class="op">$</span><span class="va">message</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Variable tree visualization temporarily unavailable due to rendering issues.</span></span>
-<span><span class="co">#&gt; Error: $ operator is invalid for atomic vectors</span></span></code></pre></div>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -662,29 +565,7 @@ audience</li>
 <span>  patientID <span class="op">=</span> <span class="st">"PatientID"</span>,</span>
 <span>  responseVar <span class="op">=</span> <span class="st">"ResponseValue"</span>,</span>
 <span>  timeVar <span class="op">=</span> <span class="st">"Time"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  TREATMENT RESPONSE ANALYSIS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Response Categories Based on RECIST v1.1 Criteria </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Category    Number of Patients    Percentage   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Person-Time Analysis                                                                                                   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Response Category    Patients    % Patients    Person-Time    % Time    Median Time to Response    Median Duration   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Clinical Response Metrics </span></span>
-<span><span class="co">#&gt;  ───────────────────────── </span></span>
-<span><span class="co">#&gt;    Metric    Value   </span></span>
-<span><span class="co">#&gt;  ───────────────────────── </span></span>
-<span><span class="co">#&gt;  ─────────────────────────</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="waterfall-with-response-categories">Waterfall with Response Categories<a class="anchor" aria-label="anchor" href="#waterfall-with-response-categories"></a>
@@ -696,29 +577,7 @@ audience</li>
 <span>  patientID <span class="op">=</span> <span class="st">"PatientID"</span>,</span>
 <span>  responseVar <span class="op">=</span> <span class="st">"ResponseValue"</span>,</span>
 <span>  timeVar <span class="op">=</span> <span class="st">"Time"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  TREATMENT RESPONSE ANALYSIS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Response Categories Based on RECIST v1.1 Criteria </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Category    Number of Patients    Percentage   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Person-Time Analysis                                                                                                   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Response Category    Patients    % Patients    Person-Time    % Time    Median Time to Response    Median Duration   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Clinical Response Metrics </span></span>
-<span><span class="co">#&gt;  ───────────────────────── </span></span>
-<span><span class="co">#&gt;    Metric    Value   </span></span>
-<span><span class="co">#&gt;  ───────────────────────── </span></span>
-<span><span class="co">#&gt;  ─────────────────────────</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -755,42 +614,12 @@ audience</li>
 <span>  milestone3Date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  milestone4Date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  milestone5Date <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PATIENT TIMELINE ANALYSIS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Timeline Summary                                        </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Metric                                 Value          </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Median Duration                          0.23324573   </span></span>
-<span><span class="co">#&gt;    Mean Duration                            0.23868322   </span></span>
-<span><span class="co">#&gt;    Standard Deviation                       0.08284499   </span></span>
-<span><span class="co">#&gt;    Range                                    0.27595269   </span></span>
-<span><span class="co">#&gt;    Minimum                                  0.10183968   </span></span>
-<span><span class="co">#&gt;    Maximum                                  0.37779238   </span></span>
-<span><span class="co">#&gt;    25th Percentile                          0.18725361   </span></span>
-<span><span class="co">#&gt;    75th Percentile                          0.29894875   </span></span>
-<span><span class="co">#&gt;    Total Person-Time                        6.92181340   </span></span>
-<span><span class="co">#&gt;    Number of Subjects                      30.00000000   </span></span>
-<span><span class="co">#&gt;    Mean Follow-up Time                      0.23868322   </span></span>
-<span><span class="co">#&gt;    No Event Rate                           31.03448276   </span></span>
-<span><span class="co">#&gt;    No Event Incidence (per 100 months)    130.02373042   </span></span>
-<span><span class="co">#&gt;    Event Rate                              68.96551724   </span></span>
-<span><span class="co">#&gt;    Event Incidence (per 100 months)       288.94162316   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-14-1.png" width="960"></p>
-<pre><code><span><span class="co">#&gt; TableGrob (2 x 1) "arrange": 2 grobs</span></span>
-<span><span class="co">#&gt;   z     cells    name           grob</span></span>
-<span><span class="co">#&gt; 1 1 (1-1,1-1) arrange gtable[layout]</span></span>
-<span><span class="co">#&gt; 2 2 (2-2,1-1) arrange gtable[layout]</span></span></code></pre>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="swimmer-plot-by-treatment-group">Swimmer Plot by Treatment Group<a class="anchor" aria-label="anchor" href="#swimmer-plot-by-treatment-group"></a>
 </h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Swimmer plot with grouping</span></span>
 <span><span class="fu"><a href="../reference/swimmerplot.html">swimmerplot</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">swimmer_data</span>,</span>
@@ -804,37 +633,7 @@ audience</li>
 <span>  milestone3Date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  milestone4Date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  milestone5Date <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PATIENT TIMELINE ANALYSIS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Timeline Summary                                        </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Metric                                 Value          </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Median Duration                          0.23324573   </span></span>
-<span><span class="co">#&gt;    Mean Duration                            0.23868322   </span></span>
-<span><span class="co">#&gt;    Standard Deviation                       0.08284499   </span></span>
-<span><span class="co">#&gt;    Range                                    0.27595269   </span></span>
-<span><span class="co">#&gt;    Minimum                                  0.10183968   </span></span>
-<span><span class="co">#&gt;    Maximum                                  0.37779238   </span></span>
-<span><span class="co">#&gt;    25th Percentile                          0.18725361   </span></span>
-<span><span class="co">#&gt;    75th Percentile                          0.29894875   </span></span>
-<span><span class="co">#&gt;    Total Person-Time                        6.92181340   </span></span>
-<span><span class="co">#&gt;    Number of Subjects                      30.00000000   </span></span>
-<span><span class="co">#&gt;    Mean Follow-up Time                      0.23868322   </span></span>
-<span><span class="co">#&gt;    No Event Rate                           31.03448276   </span></span>
-<span><span class="co">#&gt;    No Event Incidence (per 100 months)    130.02373042   </span></span>
-<span><span class="co">#&gt;    Event Rate                              68.96551724   </span></span>
-<span><span class="co">#&gt;    Event Incidence (per 100 months)       288.94162316   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-15-1.png" width="960"></p>
-<pre><code><span><span class="co">#&gt; TableGrob (2 x 1) "arrange": 2 grobs</span></span>
-<span><span class="co">#&gt;   z     cells    name           grob</span></span>
-<span><span class="co">#&gt; 1 1 (1-1,1-1) arrange gtable[layout]</span></span>
-<span><span class="co">#&gt; 2 2 (2-2,1-1) arrange gtable[layout]</span></span></code></pre>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -843,7 +642,7 @@ audience</li>
 <div class="section level3">
 <h3 id="benfords-law-analysis">Benford’s Law Analysis<a class="anchor" aria-label="anchor" href="#benfords-law-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Benford's law for measurement data</span></span>
 <span><span class="co"># benford(</span></span>
 <span><span class="co">#   data = viz_data,</span></span>
@@ -853,7 +652,7 @@ audience</li>
 <div class="section level3">
 <h3 id="multi-variable-benford-analysis">Multi-variable Benford Analysis<a class="anchor" aria-label="anchor" href="#multi-variable-benford-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Benford's law for follow-up time</span></span>
 <span><span class="co"># benford(</span></span>
 <span><span class="co">#   data = viz_data,</span></span>
@@ -867,26 +666,18 @@ audience</li>
 <div class="section level3">
 <h3 id="multi-dimensional-analysis">Multi-dimensional Analysis<a class="anchor" aria-label="anchor" href="#multi-dimensional-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Complex alluvial showing multiple relationships</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">viz_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html" class="external-link">sample_n</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span>,</span>
 <span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age_Group"</span>, <span class="st">"Sex"</span>, <span class="st">"Risk_Profile"</span>, <span class="st">"Group"</span>, <span class="st">"Outcome_Status"</span><span class="op">)</span>,</span>
 <span>  condensationvar <span class="op">=</span> <span class="st">"Outcome_Status"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 64"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 32 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 4.5 %"</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-18-1.png" width="960"><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-18-2.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="biomarker-integration-visualization">Biomarker Integration Visualization<a class="anchor" aria-label="anchor" href="#biomarker-integration-visualization"></a>
 </h3>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create biomarker categories for visualization</span></span>
 <span><span class="va">biomarker_viz</span> <span class="op">&lt;-</span> <span class="va">viz_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -906,15 +697,7 @@ audience</li>
 <span>  data <span class="op">=</span> <span class="va">biomarker_viz</span>,</span>
 <span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Measurement_Profile"</span>, <span class="st">"Risk_Profile"</span>, <span class="st">"Treatment_Response"</span><span class="op">)</span>,</span>
 <span>  condensationvar <span class="op">=</span> <span class="st">"Treatment_Response"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 43"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 17.2 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 5.6 %"</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-19-1.png" width="960"><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-19-2.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -923,27 +706,20 @@ audience</li>
 <div class="section level3">
 <h3 id="color-scheme-guidelines">Color Scheme Guidelines<a class="anchor" aria-label="anchor" href="#color-scheme-guidelines"></a>
 </h3>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Demonstrate color considerations for publications</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Recommended color schemes for clinical research:\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Recommended color schemes for clinical research:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"• Treatment groups: Blue (#2E86AB) vs Orange (#F24236)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; • Treatment groups: Blue (#2E86AB) vs Orange (#F24236)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"• Risk levels: Green (#00CC66) → Yellow (#FFCC00) → Red (#FF3300)\n"</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; • Risk levels: Green (#00CC66) → Yellow (#FFCC00) → Red (#FF3300)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"• Outcomes: Success (#4CAF50) vs Failure (#F44336)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; • Outcomes: Success (#4CAF50) vs Failure (#F44336)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"• Demographics: Standard accessible palette\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; • Demographics: Standard accessible palette</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"• Pathology: Sequential color scales for severity\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; • Pathology: Sequential color scales for severity</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"All visualizations should be colorblind-friendly and print well in grayscale.\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; All visualizations should be colorblind-friendly and print well in grayscale.</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"All visualizations should be colorblind-friendly and print well in grayscale.\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="figure-legend-best-practices">Figure Legend Best Practices<a class="anchor" aria-label="anchor" href="#figure-legend-best-practices"></a>
 </h3>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example of comprehensive figure annotation</span></span>
 <span><span class="va">example_figure_legend</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
 <span><span class="st">Figure 1. Treatment Response Analysis in Cancer Patients (N=250)</span></span>
@@ -961,21 +737,7 @@ audience</li>
 <span><span class="st">RECIST, Response Evaluation Criteria in Solid Tumors.</span></span>
 <span><span class="st">"</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">example_figure_legend</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Figure 1. Treatment Response Analysis in Cancer Patients (N=250)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Panel A: Waterfall plot showing individual patient responses to treatment, </span></span>
-<span><span class="co">#&gt; measured as percentage change in tumor size from baseline. Each bar represents </span></span>
-<span><span class="co">#&gt; one patient, ordered by response magnitude. Horizontal lines indicate RECIST </span></span>
-<span><span class="co">#&gt; criteria thresholds: -30% (partial response) and +20% (progressive disease).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Panel B: Alluvial diagram depicting patient flow from baseline characteristics </span></span>
-<span><span class="co">#&gt; through treatment assignment to clinical outcomes. Line thickness represents </span></span>
-<span><span class="co">#&gt; number of patients; connections show relationship patterns between variables.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Abbreviations: PR, partial response; SD, stable disease; PD, progressive disease; </span></span>
-<span><span class="co">#&gt; RECIST, Response Evaluation Criteria in Solid Tumors.</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">example_figure_legend</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -984,7 +746,7 @@ audience</li>
 <div class="section level3">
 <h3 id="complete-analysis-pipeline-visualization">Complete Analysis Pipeline Visualization<a class="anchor" aria-label="anchor" href="#complete-analysis-pipeline-visualization"></a>
 </h3>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Demonstrate integrated workflow visualization</span></span>
 <span><span class="va">workflow_demo</span> <span class="op">&lt;-</span> <span class="va">viz_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Risk_Profile</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Treatment_Response</span><span class="op">)</span><span class="op">)</span></span>
@@ -994,34 +756,19 @@ audience</li>
 <span>  data <span class="op">=</span> <span class="va">workflow_demo</span>,</span>
 <span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Age_Group"</span>, <span class="st">"Risk_Profile"</span>, <span class="st">"Group"</span>, <span class="st">"Treatment_Response"</span><span class="op">)</span>,</span>
 <span>  condensationvar <span class="op">=</span> <span class="st">"Treatment_Response"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 65"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 26 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 4.4 %"</span></span></code></pre></div>
-<p><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-22-1.png" width="960"><img src="general-10-visualization-gallery_files/figure-html/unnamed-chunk-22-2.png" width="960"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="multi-panel-figure-concept">Multi-panel Figure Concept<a class="anchor" aria-label="anchor" href="#multi-panel-figure-concept"></a>
 </h3>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Multi-panel figure recommendations for manuscripts:\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Multi-panel figure recommendations for manuscripts:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Panel A: Demographics (Age pyramid by treatment group)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Panel A: Demographics (Age pyramid by treatment group)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Panel B: Baseline characteristics (Alluvial: risk → treatment assignment)\n"</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; Panel B: Baseline characteristics (Alluvial: risk → treatment assignment)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Panel C: Treatment response (Waterfall plot with RECIST categories)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Panel C: Treatment response (Waterfall plot with RECIST categories)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Panel D: Outcome relationships (Venn diagram of risk factors)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Panel D: Outcome relationships (Venn diagram of risk factors)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Panel E: Timeline analysis (Swimmer plot by response group)\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Panel E: Timeline analysis (Swimmer plot by response group)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"This approach provides comprehensive visual narrative of study results.\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; This approach provides comprehensive visual narrative of study results.</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"This approach provides comprehensive visual narrative of study results.\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

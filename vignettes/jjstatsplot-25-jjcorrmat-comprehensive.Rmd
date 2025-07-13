@@ -19,8 +19,8 @@ The `jjcorrmat` function provides a comprehensive interface for creating correla
 ## Installation and Setup
 
 ```{r setup}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Install ClinicoPath if not already installed
 if (!require("ClinicoPath")) {
@@ -36,8 +36,8 @@ library(ggplot2)
 ### Basic Correlation Matrix
 
 ```{r basic-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Load test data
 data(jjcorrmat_test_data)
@@ -56,8 +56,8 @@ result$plot
 ### Grouped Correlation Matrix
 
 ```{r grouped-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Grouped correlation matrix by tumor grade
 result_grouped <- jjcorrmat(
@@ -124,8 +124,8 @@ The function has been significantly optimized for performance:
 ### Performance Benefits
 
 ```{r performance-comparison}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Performance comparison (conceptual)
 # Before optimization: 
@@ -144,8 +144,8 @@ eval: false
 ### Multiple Statistical Methods
 
 ```{r multiple-methods}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Compare different correlation methods
 methods <- c("parametric", "nonparametric", "robust", "bayes")
@@ -169,8 +169,8 @@ for (method in methods) {
 ### Clinical Research Example
 
 ```{r clinical-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Analyze biomarker correlations in breast cancer data
 biomarkers <- c("ki67_percent", "p53_score", "her2_intensity", "tumor_size_mm", "age_years")
@@ -212,8 +212,8 @@ The input data should be a data frame with:
 ### Example Data Structure
 
 ```{r data-structure}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Structure of test data
 str(jjcorrmat_test_data)
@@ -272,8 +272,8 @@ str(jjcorrmat_test_data)
 ### Error Messages
 
 ```{r error-handling}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Example error handling
 tryCatch({
@@ -301,8 +301,8 @@ The `jjcorrmat` function is built on:
 ### Caching Implementation
 
 ```{r caching-details}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Internal caching structure (conceptual)
 # private$.processedData: Cached cleaned data

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-function-alluvial.html">Function Reference: alluvial() - Complete Parameter Guide</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-1-multisurvival-time-dependent-comprehensive.html">Time-Dependent Covariates in Multisurvival Analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Performing a Benford's Law Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-function-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-swimmerplot.html">Vignette: Creating Advanced Swimmer Plots with Date and Event Handling</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-12-chisqposttest.html">Chi-Square Post-Hoc Tests for Clinicopathological Research</a></li>
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">Analysis by
 Gemini</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-02-tableone.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-02-tableone.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-02-tableone.Rmd</code></div>
@@ -279,112 +281,14 @@ Gemini</h4>
 <span>    LVI <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Present"</span>, <span class="st">"Absent"</span>, <span class="cn">NA</span><span class="op">)</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span>, prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.7</span>, <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Age    Sex Grade TumorSize     LVI</span></span>
-<span><span class="co">#&gt; 1  54 Female  High  51.98810  Absent</span></span>
-<span><span class="co">#&gt; 2  57 Female   Low  43.12413  Absent</span></span>
-<span><span class="co">#&gt; 3  75 Female  High  27.34855  Absent</span></span>
-<span><span class="co">#&gt; 4  60   Male  High  35.43194  Absent</span></span>
-<span><span class="co">#&gt; 5  61 Female   Low  25.85660  Absent</span></span>
-<span><span class="co">#&gt; 6  77 Female   Low  25.23753 Present</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># This code simulates how the jamovi module would be called in an R environment.</span></span>
 <span><span class="co"># You would need the ClinicoPathDescriptives package installed and dplyr for vars().</span></span>
 <span><span class="co"># Alternatively, pass variables as a character vector: c("Age", "Sex", "Grade", "TumorSize", "LVI")</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule">ClinicoPath</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::as_data_frame' by</span></span>
-<span><span class="co">#&gt; 'igraph::as_data_frame' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'DiagrammeR::count_automorphisms' by</span></span>
-<span><span class="co">#&gt; 'igraph::count_automorphisms' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::groups' by 'igraph::groups' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'DiagrammeR::get_edge_ids' by</span></span>
-<span><span class="co">#&gt; 'igraph::get_edge_ids' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::union' by 'igraph::union' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'igraph::union' by 'lubridate::union' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'igraph::%--%' by 'lubridate::%--%' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::tnr' by 'mlr3measures::tnr' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::precision' by</span></span>
-<span><span class="co">#&gt; 'mlr3measures::precision' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::tn' by 'mlr3measures::tn' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::fnr' by 'mlr3measures::fnr' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::tp' by 'mlr3measures::tp' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::npv' by 'mlr3measures::npv' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::ppv' by 'mlr3measures::ppv' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::auc' by 'mlr3measures::auc' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::tpr' by 'mlr3measures::tpr' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::fn' by 'mlr3measures::fn' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::fp' by 'mlr3measures::fp' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::fpr' by 'mlr3measures::fpr' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::recall' by</span></span>
-<span><span class="co">#&gt; 'mlr3measures::recall' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::specificity' by</span></span>
-<span><span class="co">#&gt; 'mlr3measures::specificity' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::sensitivity' by</span></span>
-<span><span class="co">#&gt; 'mlr3measures::sensitivity' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'cutpointr::roc' by 'pROC::roc' when loading</span></span>
-<span><span class="co">#&gt; 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'mlr3measures::auc' by 'pROC::auc' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'igraph::as_data_frame' by</span></span>
-<span><span class="co">#&gt; 'tibble::as_data_frame' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'igraph::crossing' by 'tidyr::crossing' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'magrittr::extract' by 'tidyr::extract' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'mlr3measures::sensitivity' by</span></span>
-<span><span class="co">#&gt; 'caret::sensitivity' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'mlr3measures::specificity' by</span></span>
-<span><span class="co">#&gt; 'caret::specificity' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Registered S3 methods overwritten by 'useful':</span></span>
-<span><span class="co">#&gt;   method         from     </span></span>
-<span><span class="co">#&gt;   autoplot.acf   ggfortify</span></span>
-<span><span class="co">#&gt;   fortify.acf    ggfortify</span></span>
-<span><span class="co">#&gt;   fortify.kmeans ggfortify</span></span>
-<span><span class="co">#&gt;   fortify.ts     ggfortify</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'jmvcore::select' by 'dplyr::select' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Registered S3 methods overwritten by 'ggpp':</span></span>
-<span><span class="co">#&gt;   method                  from   </span></span>
-<span><span class="co">#&gt;   heightDetails.titleGrob ggplot2</span></span>
-<span><span class="co">#&gt;   widthDetails.titleGrob  ggplot2</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'DataExplorer::plot_histogram' by</span></span>
-<span><span class="co">#&gt; 'grafify::plot_histogram' when loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::select' by 'jmvcore::select' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'tibble::view' by 'summarytools::view' when</span></span>
-<span><span class="co">#&gt; loading 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'ClinicoPath'</span></span>
-<span><span class="co">#&gt; The following object is masked _by_ '.GlobalEnv':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     histopathology</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span> <span class="co"># For the vars() helper, not strictly needed if using character vector</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span></span>
 <span><span class="co"># Ensure the data is available (e.g., from the package or your own)</span></span>
 <span><span class="co"># data(histopathology, package = "ClinicoPathDescriptives") </span></span>
@@ -405,60 +309,7 @@ Gemini</h4>
 <span><span class="co"># Within jamovi, the HTML table is rendered automatically.</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">htmltools</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">tablestyle2</span><span class="op">$</span><span class="va">content</span><span class="op">)</span></span></code></pre></div>
-<table style="NAborder-bottom: 0;" class="table">
-<thead><tr>
-<th style="text-align:left;"> Characteristic </th>
-   <th style="text-align:center;"> N = 100 </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Age </td>
-   <td style="text-align:center;"> 60 (55, 67) </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Sex </td>
-   <td style="text-align:center;">  </td>
-  </tr>
-<tr>
-<td style="text-align:left;padding-left: 2em;" indentlevel="1"> Female </td>
-   <td style="text-align:center;"> 49 (49%) </td>
-  </tr>
-<tr>
-<td style="text-align:left;padding-left: 2em;" indentlevel="1"> Male </td>
-   <td style="text-align:center;"> 51 (51%) </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Grade </td>
-   <td style="text-align:center;">  </td>
-  </tr>
-<tr>
-<td style="text-align:left;padding-left: 2em;" indentlevel="1"> High </td>
-   <td style="text-align:center;"> 31 (31%) </td>
-  </tr>
-<tr>
-<td style="text-align:left;padding-left: 2em;" indentlevel="1"> Low </td>
-   <td style="text-align:center;"> 69 (69%) </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> LVI </td>
-   <td style="text-align:center;">  </td>
-  </tr>
-<tr>
-<td style="text-align:left;padding-left: 2em;" indentlevel="1"> Absent </td>
-   <td style="text-align:center;"> 65 (71%) </td>
-  </tr>
-<tr>
-<td style="text-align:left;padding-left: 2em;" indentlevel="1"> Present </td>
-   <td style="text-align:center;"> 27 (29%) </td>
-  </tr>
-<tr>
-<td style="text-align:left;padding-left: 2em;" indentlevel="1"> Unknown </td>
-   <td style="text-align:center;"> 8 </td>
-  </tr>
-</tbody>
-<tfoot><tr><td style="padding: 0; " colspan="100%">
-<sup>1</sup> Median (Q1, Q3); n (%)</td></tr></tfoot>
-</table></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 

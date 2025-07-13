@@ -11,7 +11,9 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "advancedtree-",
   out.width = "100%",
-  dpi = 300,
+    dpi = 300,
+  echo = TRUE,
+  eval = FALSE,
   fig.align = "center",
   warning = FALSE,
   message = FALSE

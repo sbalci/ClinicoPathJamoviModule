@@ -11,7 +11,9 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 10,
   fig.height = 7,
-  dpi = 300
+  dpi = 300,
+  echo = TRUE,
+  eval = FALSE
 )
 
 # Load required packages

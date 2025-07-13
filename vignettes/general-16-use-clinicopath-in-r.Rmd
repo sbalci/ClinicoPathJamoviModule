@@ -7,6 +7,8 @@ output: html_document
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
   collapse = TRUE,
   fig.width = 6,
   fig.height = 4,

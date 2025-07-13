@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-function-alluvial.html">Function Reference: alluvial() - Complete Parameter Guide</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-1-multisurvival-time-dependent-comprehensive.html">Time-Dependent Covariates in Multisurvival Analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Performing a Benford's Law Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-function-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-swimmerplot.html">Vignette: Creating Advanced Swimmer Plots with Date and Event Handling</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-12-chisqposttest.html">Chi-Square Post-Hoc Tests for Clinicopathological Research</a></li>
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -259,7 +261,7 @@
                         <h4 data-toc-skip class="author">ClinicoPath
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2025-07-12</h4>
+            <h4 data-toc-skip class="date">2025-07-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/clinicopath-descriptives-05-alluvial.Rmd" class="external-link"><code>vignettes/clinicopath-descriptives-05-alluvial.Rmd</code></a></small>
       <div class="d-none name"><code>clinicopath-descriptives-05-alluvial.Rmd</code></div>
@@ -289,15 +291,7 @@ the alluvial function using real clinical datasets.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"histopathology"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Preview the data structure</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Race"</span>, <span class="st">"Group"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span>, <span class="st">"PreinvasiveComponent"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; tibble [250 × 7] (S3: tbl_df/tbl/data.frame)</span></span>
-<span><span class="co">#&gt;  $ Sex                 : chr [1:250] "Male" "Female" "Male" "Male" ...</span></span>
-<span><span class="co">#&gt;  $ Race                : chr [1:250] "White" "White" "White" "White" ...</span></span>
-<span><span class="co">#&gt;  $ Group               : chr [1:250] "Control" "Treatment" "Control" "Treatment" ...</span></span>
-<span><span class="co">#&gt;  $ Grade_Level         : chr [1:250] "high" "low" "low" "high" ...</span></span>
-<span><span class="co">#&gt;  $ LVI                 : chr [1:250] "Present" "Absent" "Absent" "Present" ...</span></span>
-<span><span class="co">#&gt;  $ PNI                 : chr [1:250] "Absent" "Absent" "Absent" "Absent" ...</span></span>
-<span><span class="co">#&gt;  $ PreinvasiveComponent: chr [1:250] "Present" "Absent" "Absent" "Absent" ...</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Race"</span>, <span class="st">"Group"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span>, <span class="st">"PreinvasiveComponent"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="basic-alluvial-diagrams">Basic Alluvial Diagrams<a class="anchor" aria-label="anchor" href="#basic-alluvial-diagrams"></a>
@@ -312,15 +306,7 @@ categorical variables:</p>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 11.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/basic-alluvial-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="four-variable-analysis">Four-Variable Analysis<a class="anchor" aria-label="anchor" href="#four-variable-analysis"></a>
@@ -331,15 +317,7 @@ categorical variables:</p>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Race"</span>, <span class="st">"Group"</span>, <span class="st">"Grade_Level"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 53"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 21.2 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 8.4 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/four-variable-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -356,15 +334,7 @@ diagram:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span>,</span>
 <span>    fill <span class="op">=</span> <span class="st">"first_variable"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 28"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 11.2 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 7.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/fill-first-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fill-by-last-variable">Fill by Last Variable<a class="anchor" aria-label="anchor" href="#fill-by-last-variable"></a>
@@ -375,15 +345,7 @@ diagram:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span>,</span>
 <span>    fill <span class="op">=</span> <span class="st">"last_variable"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 28"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 11.2 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 7.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/fill-last-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fill-by-all-flows">Fill by All Flows<a class="anchor" aria-label="anchor" href="#fill-by-all-flows"></a>
@@ -394,15 +356,7 @@ diagram:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Race"</span>, <span class="st">"Group"</span><span class="op">)</span>,</span>
 <span>    fill <span class="op">=</span> <span class="st">"all_flows"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 24"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 9.6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 16.8 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/fill-all-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fill-by-values">Fill by Values<a class="anchor" aria-label="anchor" href="#fill-by-values"></a>
@@ -413,15 +367,7 @@ diagram:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span>,</span>
 <span>    fill <span class="op">=</span> <span class="st">"values"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 14.8 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/fill-values-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -438,15 +384,7 @@ control the bin labels:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"Group"</span><span class="op">)</span>,</span>
 <span>    bin <span class="op">=</span> <span class="st">"default"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 11.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/bin-default-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="mean-based-binning">Mean-Based Binning<a class="anchor" aria-label="anchor" href="#mean-based-binning"></a>
@@ -457,15 +395,7 @@ control the bin labels:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Race"</span>, <span class="st">"Grade_Level"</span><span class="op">)</span>,</span>
 <span>    bin <span class="op">=</span> <span class="st">"mean"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 32"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 12.8 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 12.8 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/bin-mean-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="median-based-binning">Median-Based Binning<a class="anchor" aria-label="anchor" href="#median-based-binning"></a>
@@ -476,15 +406,7 @@ control the bin labels:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Group"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span><span class="op">)</span>,</span>
 <span>    bin <span class="op">=</span> <span class="st">"median"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 12.8 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/bin-median-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="min-max-binning">Min-Max Binning<a class="anchor" aria-label="anchor" href="#min-max-binning"></a>
@@ -495,15 +417,7 @@ control the bin labels:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Group"</span>, <span class="st">"Grade_Level"</span><span class="op">)</span>,</span>
 <span>    bin <span class="op">=</span> <span class="st">"min_max"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 11.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/bin-minmax-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="cut-based-binning">Cut-Based Binning<a class="anchor" aria-label="anchor" href="#cut-based-binning"></a>
@@ -514,15 +428,7 @@ control the bin labels:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Race"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span><span class="op">)</span>,</span>
 <span>    bin <span class="op">=</span> <span class="st">"cuts"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 33"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 13.2 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 14.8 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/bin-cuts-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -538,15 +444,7 @@ control the bin labels:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Race"</span>, <span class="st">"Group"</span><span class="op">)</span>,</span>
 <span>    orient <span class="op">=</span> <span class="st">"vert"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 24"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 9.6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 16.8 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/orient-vertical-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="horizontal-orientation">Horizontal Orientation<a class="anchor" aria-label="anchor" href="#horizontal-orientation"></a>
@@ -557,15 +455,7 @@ control the bin labels:</p>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Race"</span>, <span class="st">"Group"</span><span class="op">)</span>,</span>
 <span>    orient <span class="op">=</span> <span class="st">"horr"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 24"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 9.6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 16.8 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/orient-horizontal-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -580,28 +470,14 @@ control the bin labels:</p>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span><span class="op">)</span>,</span>
 <span>    marg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    orient <span class="op">=</span> <span class="st">"vert"</span>  <span class="co"># Required for marginal plots</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 11.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/marginal-plots-1.png" width="700"></p>
-<pre><code><span><span class="co">#&gt; TableGrob (10 x 1) "arrange": 4 grobs</span></span>
-<span><span class="co">#&gt;   z         cells    name                 grob</span></span>
-<span><span class="co">#&gt; 1 1 ( 2- 2, 1- 1) arrange      gtable[arrange]</span></span>
-<span><span class="co">#&gt; 2 2 ( 3- 9, 1- 1) arrange       gtable[layout]</span></span>
-<span><span class="co">#&gt; 3 3 ( 1- 1, 1- 1) arrange text[GRID.text.2303]</span></span>
-<span><span class="co">#&gt; 4 4 (10-10, 1- 1) arrange text[GRID.text.2304]</span></span></code></pre>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="custom-titles">Custom Titles<a class="anchor" aria-label="anchor" href="#custom-titles"></a>
 </h2>
 <p>Add custom titles to your diagrams (cannot be used with marginal
 plots):</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Alluvial diagram with custom title</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
@@ -609,15 +485,7 @@ plots):</p>
 <span>    usetitle <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    mytitle <span class="op">=</span> <span class="st">"Patient Demographics and Clinical Characteristics Flow"</span>,</span>
 <span>    marg <span class="op">=</span> <span class="cn">FALSE</span>  <span class="co"># Custom titles cannot be used with marginal plots</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 53"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 21.2 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 8.4 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/custom-title-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="missing-value-handling">Missing Value Handling<a class="anchor" aria-label="anchor" href="#missing-value-handling"></a>
@@ -626,40 +494,24 @@ plots):</p>
 <div class="section level3">
 <h3 id="include-missing-values-default">Include Missing Values (Default)<a class="anchor" aria-label="anchor" href="#include-missing-values-default"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Include missing values in the analysis</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"PreinvasiveComponent"</span>, <span class="st">"LVI"</span><span class="op">)</span>,</span>
 <span>    excl <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 11"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 4.4 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 24.8 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/include-missing-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="exclude-missing-values">Exclude Missing Values<a class="anchor" aria-label="anchor" href="#exclude-missing-values"></a>
 </h3>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Exclude missing values from the analysis</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"PreinvasiveComponent"</span>, <span class="st">"LVI"</span><span class="op">)</span>,</span>
 <span>    excl <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 8"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 3.2 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 25.1 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/exclude-missing-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -667,22 +519,14 @@ plots):</p>
 </h2>
 <p>Create condensation plots to show how a specific variable relates to
 the overall flow:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Main alluvial diagram with condensation analysis</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
 <span>    vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span><span class="op">)</span>,</span>
 <span>    condensationvar <span class="op">=</span> <span class="st">"Sex"</span>,  <span class="co"># This will generate a second plot</span></span>
 <span>    fill <span class="op">=</span> <span class="st">"first_variable"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 14.8 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/condensation-plot-1.png" width="700"><img src="clinicopath-descriptives-05-alluvial_files/figure-html/condensation-plot-2.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 <p>The condensation plot shows how the selected variable
 (<code>Sex</code> in this example) relates to the patterns in the main
 alluvial diagram.</p>
@@ -693,7 +537,7 @@ alluvial diagram.</p>
 <div class="section level3">
 <h3 id="comprehensive-clinical-analysis">Comprehensive Clinical Analysis<a class="anchor" aria-label="anchor" href="#comprehensive-clinical-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Comprehensive analysis with multiple parameters</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
@@ -705,20 +549,12 @@ alluvial diagram.</p>
 <span>    orient <span class="op">=</span> <span class="st">"vert"</span>,</span>
 <span>    usetitle <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    mytitle <span class="op">=</span> <span class="st">"Comprehensive Histopathological Characteristics Analysis"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 81"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 33.1 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 5.3 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/comprehensive-example-1.png" width="700"><img src="clinicopath-descriptives-05-alluvial_files/figure-html/comprehensive-example-2.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="treatment-response-analysis">Treatment Response Analysis<a class="anchor" aria-label="anchor" href="#treatment-response-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create treatment response data for alluvial plot</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">treatment_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -739,12 +575,11 @@ alluvial diagram.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_brewer</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"qual"</span>, palette <span class="op">=</span> <span class="st">"Set1"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Treatment Response Pathways"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/treatment-response-1.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="survival-analysis-flow">Survival Analysis Flow<a class="anchor" aria-label="anchor" href="#survival-analysis-flow"></a>
 </h3>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Using colon cancer dataset</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"colon"</span><span class="op">)</span></span>
 <span></span>
@@ -756,15 +591,7 @@ alluvial diagram.</p>
 <span>    excl <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    usetitle <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    mytitle <span class="op">=</span> <span class="st">"Colon Cancer Prognostic Factors Flow"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 4"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 0.2 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 38.2 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/survival-flow-1.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -797,7 +624,7 @@ automatically</li>
 <div class="section level3">
 <h3 id="valid-parameter-combinations">Valid Parameter Combinations<a class="anchor" aria-label="anchor" href="#valid-parameter-combinations"></a>
 </h3>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Valid: Marginal plots with vertical orientation</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
@@ -806,20 +633,6 @@ automatically</li>
 <span>    orient <span class="op">=</span> <span class="st">"vert"</span>,</span>
 <span>    usetitle <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 15"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 11.6 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/valid-combinations-1.png" width="700"></p>
-<pre><code><span><span class="co">#&gt; TableGrob (10 x 1) "arrange": 4 grobs</span></span>
-<span><span class="co">#&gt;   z         cells    name                 grob</span></span>
-<span><span class="co">#&gt; 1 1 ( 2- 2, 1- 1) arrange      gtable[arrange]</span></span>
-<span><span class="co">#&gt; 2 2 ( 3- 9, 1- 1) arrange       gtable[layout]</span></span>
-<span><span class="co">#&gt; 3 3 ( 1- 1, 1- 1) arrange text[GRID.text.4019]</span></span>
-<span><span class="co">#&gt; 4 4 (10-10, 1- 1) arrange text[GRID.text.4020]</span></span>
 <span></span>
 <span><span class="co"># Valid: Custom title with horizontal orientation</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
@@ -830,16 +643,7 @@ automatically</li>
 <span>    usetitle <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    mytitle <span class="op">=</span> <span class="st">"Horizontal Flow Diagram"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 24"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 9.6 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 16.8 %"</span></span></code></pre>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/valid-combinations-2.png" width="700"></p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span></span>
 <span><span class="co"># Valid: All flow coloring with median binning</span></span>
 <span><span class="fu"><a href="../reference/alluvial.html">alluvial</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">histopathology</span>,</span>
@@ -847,15 +651,7 @@ automatically</li>
 <span>    fill <span class="op">=</span> <span class="st">"all_flows"</span>,</span>
 <span>    bin <span class="op">=</span> <span class="st">"median"</span>,</span>
 <span>    excl <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  ALLUVIAL DIAGRAMS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; character(0)</span></span>
-<span><span class="co">#&gt; [1] "Number of flows: 24"</span></span>
-<span><span class="co">#&gt; [1] "Original Dataframe reduced to 9.8 %"</span></span>
-<span><span class="co">#&gt; [1] "Maximum weight of a single flow 13 %"</span></span></code></pre></div>
-<p><img src="clinicopath-descriptives-05-alluvial_files/figure-html/valid-combinations-3.png" width="700"></p>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -1014,139 +810,8 @@ data.</p>
 <div class="section level2">
 <h2 id="session-information">Session Information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.5.1 (2025-06-13)</span></span>
-<span><span class="co">#&gt; Platform: aarch64-apple-darwin20</span></span>
-<span><span class="co">#&gt; Running under: macOS Sequoia 15.5</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Matrix products: default</span></span>
-<span><span class="co">#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRblas.0.dylib </span></span>
-<span><span class="co">#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; locale:</span></span>
-<span><span class="co">#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; time zone: Europe/Istanbul</span></span>
-<span><span class="co">#&gt; tzcode source: internal</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; attached base packages:</span></span>
-<span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] ggalluvial_0.12.5    ggplot2_3.5.2        ClinicoPath_0.0.3.53</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;   [1] igraph_2.1.4            plotly_4.11.0           Formula_1.2-5          </span></span>
-<span><span class="co">#&gt;   [4] rematch2_2.1.2          cutpointr_1.2.1         timeROC_0.4            </span></span>
-<span><span class="co">#&gt;   [7] tidyselect_1.2.1        vtree_5.1.9             lattice_0.22-7         </span></span>
-<span><span class="co">#&gt;  [10] stringr_1.5.1           lgr_0.4.4               parallel_4.5.1         </span></span>
-<span><span class="co">#&gt;  [13] caret_7.0-1             dichromat_2.0-0.1       png_0.1-8              </span></span>
-<span><span class="co">#&gt;  [16] cli_3.6.5               bayestestR_0.16.1       askpass_1.2.1          </span></span>
-<span><span class="co">#&gt;  [19] arsenal_3.6.3           openssl_2.3.3           ggeconodist_0.1.0      </span></span>
-<span><span class="co">#&gt;  [22] countrycode_1.6.1       pkgdown_2.1.3           textshaping_1.0.1      </span></span>
-<span><span class="co">#&gt;  [25] paradox_1.0.1           purrr_1.0.4             officer_0.6.10         </span></span>
-<span><span class="co">#&gt;  [28] naivebayes_1.0.0        stars_0.6-8             broom.mixed_0.2.9.6    </span></span>
-<span><span class="co">#&gt;  [31] ggflowchart_1.0.0       ggoncoplot_0.1.0        curl_6.4.0             </span></span>
-<span><span class="co">#&gt;  [34] strucchange_1.5-4       mime_0.13               evaluate_1.0.4         </span></span>
-<span><span class="co">#&gt;  [37] coin_1.4-3              V8_6.0.4                stringi_1.8.7          </span></span>
-<span><span class="co">#&gt;  [40] pROC_1.18.5             backports_1.5.0         desc_1.4.3             </span></span>
-<span><span class="co">#&gt;  [43] mlr3extralearners_1.0.0 lmerTest_3.1-3          XML_3.99-0.18          </span></span>
-<span><span class="co">#&gt;  [46] Exact_3.3               tinytable_0.10.0        lubridate_1.9.4        </span></span>
-<span><span class="co">#&gt;  [49] httpuv_1.6.16           paletteer_1.6.0         mlr3viz_0.10.1         </span></span>
-<span><span class="co">#&gt;  [52] magrittr_2.0.3          rappdirs_0.3.3          splines_4.5.1          </span></span>
-<span><span class="co">#&gt;  [55] prodlim_2025.04.28      r2rtf_1.1.4             KMsurv_0.1-6           </span></span>
-<span><span class="co">#&gt;  [58] BiasedUrn_2.0.12        survminer_0.5.0         logger_0.4.0           </span></span>
-<span><span class="co">#&gt;  [61] dplyr_1.1.4             epiR_2.0.84             wk_0.9.4               </span></span>
-<span><span class="co">#&gt;  [64] palmerpenguins_0.1.1    networkD3_0.4.1         DT_0.33                </span></span>
-<span><span class="co">#&gt;  [67] lpSolve_5.6.23          rootSolve_1.8.2.4       DBI_1.2.3              </span></span>
-<span><span class="co">#&gt;  [70] terra_1.8-54            jquerylib_0.1.4         withr_3.0.2            </span></span>
-<span><span class="co">#&gt;  [73] reformulas_0.4.1        class_7.3-23            systemfonts_1.2.3      </span></span>
-<span><span class="co">#&gt;  [76] lmtest_0.9-40           rprojroot_2.0.4         leaflegend_1.2.1       </span></span>
-<span><span class="co">#&gt;  [79] RefManageR_1.4.0        htmlwidgets_1.6.4       fs_1.6.6               </span></span>
-<span><span class="co">#&gt;  [82] waffle_1.0.2            ggvenn_0.1.10           labeling_0.4.3         </span></span>
-<span><span class="co">#&gt;  [85] gtsummary_2.3.0         cellranger_1.1.0        summarytools_1.1.4     </span></span>
-<span><span class="co">#&gt;  [88] extrafont_0.19          lmom_3.2                zoo_1.8-14             </span></span>
-<span><span class="co">#&gt;  [91] raster_3.6-32           knitr_1.50              ggcharts_0.2.1         </span></span>
-<span><span class="co">#&gt;  [94] gt_1.0.0                timechange_0.3.0        foreach_1.5.2          </span></span>
-<span><span class="co">#&gt;  [97] dcurves_0.5.0           patchwork_1.3.1         visNetwork_2.1.2       </span></span>
-<span><span class="co">#&gt; [100] grid_4.5.1              data.table_1.17.8       timeDate_4041.110      </span></span>
-<span><span class="co">#&gt; [103] pan_1.9                 gsDesign_3.6.9          quantreg_6.1           </span></span>
-<span><span class="co">#&gt; [106] psych_2.5.6             extrafontdb_1.0         DiagrammeR_1.0.11      </span></span>
-<span><span class="co">#&gt; [109] sparsevctrs_0.3.4       clintools_0.9.10.1      DescTools_0.99.60      </span></span>
-<span><span class="co">#&gt; [112] lazyeval_0.2.2          yaml_2.3.10             leaflet_2.2.2          </span></span>
-<span><span class="co">#&gt; [115] easyalluvial_0.3.2      useful_1.2.6.1          survival_3.8-3         </span></span>
-<span><span class="co">#&gt; [118] crosstable_0.8.1        lwgeom_0.2-14           crayon_1.5.3           </span></span>
-<span><span class="co">#&gt; [121] RColorBrewer_1.1-3      tidyr_1.3.1             progressr_0.15.1       </span></span>
-<span><span class="co">#&gt; [124] tweenr_2.0.3            later_1.4.2             jtools_2.3.0           </span></span>
-<span><span class="co">#&gt; [127] microbenchmark_1.5.0    ggridges_0.5.6          mlr3measures_1.0.0     </span></span>
-<span><span class="co">#&gt; [130] codetools_0.2-20        base64enc_0.1-3         labelled_2.14.1        </span></span>
-<span><span class="co">#&gt; [133] shape_1.4.6.1           estimability_1.5.1      gdtools_0.4.2          </span></span>
-<span><span class="co">#&gt; [136] data.tree_1.1.0         foreign_0.8-90          pkgconfig_2.0.3        </span></span>
-<span><span class="co">#&gt; [139] grafify_5.0.0.1         xml2_1.3.8              ggpubr_0.6.1           </span></span>
-<span><span class="co">#&gt; [142] performance_0.15.0      viridisLite_0.4.2       xtable_1.8-4           </span></span>
-<span><span class="co">#&gt; [145] bibtex_0.5.1            car_3.1-3               plyr_1.8.9             </span></span>
-<span><span class="co">#&gt; [148] httr_1.4.7              rbibutils_2.3           tools_4.5.1            </span></span>
-<span><span class="co">#&gt; [151] globals_0.18.0          hardhat_1.4.1           cols4all_0.8           </span></span>
-<span><span class="co">#&gt; [154] htmlTable_2.4.3         broom_1.0.8             checkmate_2.3.2        </span></span>
-<span><span class="co">#&gt; [157] nlme_3.1-168            MatrixModels_0.5-4      regions_0.1.8          </span></span>
-<span><span class="co">#&gt; [160] survMisc_0.5.6          maptiles_0.10.0         crosstalk_1.2.1        </span></span>
-<span><span class="co">#&gt; [163] assertthat_0.2.1        lme4_1.1-37             digest_0.6.37          </span></span>
-<span><span class="co">#&gt; [166] numDeriv_2016.8-1.1     Matrix_1.7-3            tmap_4.1               </span></span>
-<span><span class="co">#&gt; [169] furrr_0.3.1             farver_2.1.2            tzdb_0.5.0             </span></span>
-<span><span class="co">#&gt; [172] reshape2_1.4.4          viridis_0.6.5           pec_2023.04.12         </span></span>
-<span><span class="co">#&gt; [175] rapportools_1.2         ModelMetrics_1.2.2.2    gghalves_0.1.4         </span></span>
-<span><span class="co">#&gt; [178] rpart_4.1.24            mice_3.18.0             glue_1.8.0             </span></span>
-<span><span class="co">#&gt; [181] cachem_1.1.0            ggswim_0.1.0            polyclip_1.10-7        </span></span>
-<span><span class="co">#&gt; [184] UpSetR_1.4.0            Hmisc_5.2-3             generics_0.1.4         </span></span>
-<span><span class="co">#&gt; [187] visdat_0.6.0            classInt_0.4-11         stats4_4.5.1           </span></span>
-<span><span class="co">#&gt; [190] mvtnorm_1.3-3           survey_4.4-2            powerSurvEpi_0.1.5     </span></span>
-<span><span class="co">#&gt; [193] ggfortify_0.4.18        parallelly_1.45.0       ISOweek_0.6-2          </span></span>
-<span><span class="co">#&gt; [196] mnormt_2.1.1            here_1.0.1              ggmice_0.1.0           </span></span>
-<span><span class="co">#&gt; [199] ragg_1.4.0              fontBitstreamVera_0.1.1 carData_3.0-5          </span></span>
-<span><span class="co">#&gt; [202] minqa_1.2.8             httr2_1.1.2             giscoR_0.6.1           </span></span>
-<span><span class="co">#&gt; [205] tcltk_4.5.1             rpart.plot_3.1.2        glmnet_4.1-9           </span></span>
-<span><span class="co">#&gt; [208] coefplot_1.2.8          eurostat_4.0.0          jmvcore_2.6.3          </span></span>
-<span><span class="co">#&gt; [211] spacesXYZ_1.6-0         gower_1.0.2             mitools_2.4            </span></span>
-<span><span class="co">#&gt; [214] readxl_1.4.5            datawizard_1.1.0        fontawesome_0.5.3      </span></span>
-<span><span class="co">#&gt; [217] ggsignif_0.6.4          timereg_2.0.6           party_1.3-18           </span></span>
-<span><span class="co">#&gt; [220] gridExtra_2.3           shiny_1.11.1            lava_1.8.1             </span></span>
-<span><span class="co">#&gt; [223] tmaptools_3.2           parameters_0.27.0       arcdiagram_0.1.12      </span></span>
-<span><span class="co">#&gt; [226] rmarkdown_2.29          TidyDensity_1.5.0       pander_0.6.6           </span></span>
-<span><span class="co">#&gt; [229] mlr3misc_0.18.0         scales_1.4.0            gld_2.6.7              </span></span>
-<span><span class="co">#&gt; [232] svglite_2.2.1           future_1.58.0           fontLiberation_0.1.0   </span></span>
-<span><span class="co">#&gt; [235] DiagrammeRsvg_0.1       ggpp_0.5.9              km.ci_0.5-6            </span></span>
-<span><span class="co">#&gt; [238] rstudioapi_0.17.1       janitor_2.2.1           cluster_2.1.8.1        </span></span>
-<span><span class="co">#&gt; [241] hms_1.1.3               anytime_0.3.11          colorspace_2.1-1       </span></span>
-<span><span class="co">#&gt; [244] jomo_2.7-6              rlang_1.1.6             s2_1.1.9               </span></span>
-<span><span class="co">#&gt; [247] pivottabler_1.5.6       ipred_0.9-15            ggforce_0.5.0          </span></span>
-<span><span class="co">#&gt; [250] kknn_1.4.1              mgcv_1.9-3              xfun_0.52              </span></span>
-<span><span class="co">#&gt; [253] coda_0.19-4.1           e1071_1.7-16            TH.data_1.1-3          </span></span>
-<span><span class="co">#&gt; [256] modeltools_0.2-24       matrixStats_1.5.0       benford.analysis_0.1.5 </span></span>
-<span><span class="co">#&gt; [259] recipes_1.3.1           iterators_1.0.14        emmeans_1.11.1         </span></span>
-<span><span class="co">#&gt; [262] randomForest_4.7-1.2    abind_1.4-8             tibble_3.3.0           </span></span>
-<span><span class="co">#&gt; [265] libcoin_1.0-10          ggrain_0.0.4            readr_2.1.5            </span></span>
-<span><span class="co">#&gt; [268] Rdpack_2.6.4            promises_1.3.3          sandwich_3.1-1         </span></span>
-<span><span class="co">#&gt; [271] proxy_0.4-27            compiler_4.5.1          forcats_1.0.0          </span></span>
-<span><span class="co">#&gt; [274] leaflet.providers_2.0.0 boot_1.3-31             distributional_0.5.0   </span></span>
-<span><span class="co">#&gt; [277] tableone_0.13.2         SparseM_1.84-2          polynom_1.4-1          </span></span>
-<span><span class="co">#&gt; [280] listenv_0.9.1           Rcpp_1.1.0              Rttf2pt1_1.3.12        </span></span>
-<span><span class="co">#&gt; [283] fontquiver_0.2.1        DataExplorer_0.8.3      datefixR_1.7.0         </span></span>
-<span><span class="co">#&gt; [286] rms_8.0-0               units_0.8-7             MASS_7.3-65            </span></span>
-<span><span class="co">#&gt; [289] uuid_1.2-1              insight_1.3.1           R6_2.6.1               </span></span>
-<span><span class="co">#&gt; [292] fastmap_1.2.0           multcomp_1.4-28         rstatix_0.7.2          </span></span>
-<span><span class="co">#&gt; [295] ROCR_1.0-11             vcd_1.4-13              mitml_0.4-5            </span></span>
-<span><span class="co">#&gt; [298] ggdist_3.3.3            nnet_7.3-20             gtable_0.3.6           </span></span>
-<span><span class="co">#&gt; [301] leafem_0.2.4            KernSmooth_2.23-26      irr_0.84.1             </span></span>
-<span><span class="co">#&gt; [304] gtExtras_0.6.0          htmltools_0.5.8.1       tidyplots_0.3.1.9000   </span></span>
-<span><span class="co">#&gt; [307] leafsync_0.1.0          polspline_1.1.25        lifecycle_1.0.4        </span></span>
-<span><span class="co">#&gt; [310] sf_1.0-21               zip_2.3.3               kableExtra_1.4.0       </span></span>
-<span><span class="co">#&gt; [313] pryr_0.1.6              nloptr_2.2.1            mlr3_1.0.1             </span></span>
-<span><span class="co">#&gt; [316] mlr3learners_0.12.0     sass_0.4.10             vctrs_0.6.5            </span></span>
-<span><span class="co">#&gt; [319] snakecase_0.11.1        flextable_0.9.9         haven_2.5.5            </span></span>
-<span><span class="co">#&gt; [322] sp_2.2-0                pracma_2.4.4            future.apply_1.20.0    </span></span>
-<span><span class="co">#&gt; [325] bslib_0.9.0             pillar_1.11.0           magick_2.8.7           </span></span>
-<span><span class="co">#&gt; [328] moments_0.14.1          jsonlite_2.0.0          expm_1.0-0</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

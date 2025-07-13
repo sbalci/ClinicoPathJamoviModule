@@ -32,8 +32,8 @@ River plots excel at visualizing:
 ## Installation and Setup
 
 ```{r setup}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Install ClinicoPath if not already installed
 if (!require("ClinicoPath")) {
@@ -49,8 +49,8 @@ library(ggplot2)
 ### Basic Alluvial Plot (Longitudinal Data)
 
 ```{r basic-longitudinal}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Load test data
 data(jjriverplot_test_data_long)
@@ -70,8 +70,8 @@ result$plot
 ### Weighted River Plot
 
 ```{r weighted-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # River plot with treatment costs as weights
 result_weighted <- jjriverplot(
@@ -91,8 +91,8 @@ result_weighted$plot
 ### Multi-Stage Pathway (Wide Format)
 
 ```{r wide-format-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Load wide format data
 data(jjriverplot_test_data_wide)
@@ -125,8 +125,8 @@ result_pathway$plot
 #### Alluvial Diagrams
 
 ```{r alluvial-concept}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Alluvial plots show flowing streams between time points
 # - Curved connections emphasize continuity
@@ -142,8 +142,8 @@ Best for:
 #### Sankey Diagrams
 
 ```{r sankey-concept}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Sankey diagrams show directed flows between stages
 # - Straighter connections emphasize flow direction
@@ -159,8 +159,8 @@ Best for:
 #### Stream Graphs
 
 ```{r stream-concept}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Stream graphs show stacked area plots over time
 # - Shows composition changes continuously
@@ -209,8 +209,8 @@ The function includes significant performance optimizations:
 ### Performance Benefits
 
 ```{r performance-concept}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # The optimized version provides:
 # - Faster processing for large datasets
@@ -224,8 +224,8 @@ eval: false
 ### Clinical Trial Analysis
 
 ```{r clinical-trial}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Treatment response progression over time
 clinical_pathway <- jjriverplot(
@@ -250,8 +250,8 @@ clinical_pathway <- jjriverplot(
 ### Quality of Life Progression
 
 ```{r qol-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Quality of life changes alongside treatment response
 qol_flow <- jjriverplot(
@@ -275,8 +275,8 @@ qol_flow <- jjriverplot(
 ### Treatment Arm Comparison
 
 ```{r treatment-comparison}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Compare pathways by treatment arm using wide format
 treatment_comparison <- jjriverplot(
@@ -303,8 +303,8 @@ control_pathway <- jjriverplot(
 ### Educational Journey Analysis
 
 ```{r education-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Load education data
 data(jjriverplot_education_data)
@@ -331,8 +331,8 @@ education_flow <- jjriverplot(
 ### Marketing Funnel Analysis
 
 ```{r marketing-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Load marketing data  
 data(jjriverplot_marketing_data)
@@ -360,8 +360,8 @@ marketing_funnel <- jjriverplot(
 ### Multi-Site Quality Control
 
 ```{r multisite-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Analyze treatment consistency across hospital centers
 site_analysis <- jjriverplot(
@@ -395,8 +395,8 @@ site_comparison <- jjriverplot(
 #### Long Format (Longitudinal Data)
 
 ```{r long-format-structure}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Structure for longitudinal river plots
 # Required columns:
@@ -416,8 +416,8 @@ example_long <- data.frame(
 #### Wide Format (Cross-Sectional Stages)
 
 ```{r wide-format-structure}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Structure for multi-stage river plots
 # Required: multiple strata variables representing sequential stages
@@ -435,8 +435,8 @@ example_wide <- data.frame(
 ### Data Quality Requirements
 
 ```{r data-quality}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # For optimal river plots:
 # 1. Adequate sample sizes (n > 50 recommended)
@@ -451,8 +451,8 @@ eval: false
 ### Plot Type Selection
 
 ```{r plot-type-selection}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Use Alluvial plots when:
 # - Tracking changes over time
@@ -476,8 +476,8 @@ eval: false
 ### Color and Fill Strategy
 
 ```{r color-strategy}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # fillType selection:
 # - "first": Track where flows originated (good for source analysis)
@@ -493,8 +493,8 @@ eval: false
 ### Labeling and Clarity
 
 ```{r labeling-guidelines}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # For clear river plots:
 # 1. Use meaningful variable names and category labels
@@ -515,8 +515,8 @@ eval: false
 ### Subset Analysis
 
 ```{r subset-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Analyze specific subgroups for detailed insights
 # Example: High-cost patients only
@@ -548,8 +548,8 @@ elderly_analysis <- jjriverplot(
 ### Comparative Analysis
 
 ```{r comparative-analysis}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Compare different treatments side by side
 treatment_groups <- c("Treatment_A", "Treatment_B")
@@ -574,8 +574,8 @@ for (treatment in treatment_groups) {
 ### Quality Control Applications
 
 ```{r quality-control}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Multi-center consistency analysis
 center_comparison <- function(center_id) {
@@ -612,8 +612,8 @@ The `jjriverplot` function is built on:
 ### Caching Details
 
 ```{r caching-technical}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Internal caching structure (conceptual)
 # private$.processedData: Cached cleaned data with factor conversion
@@ -629,8 +629,8 @@ eval: false
 ### Dependencies
 
 ```{r dependencies}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Required packages:
 # - ggplot2: Core plotting
@@ -654,8 +654,8 @@ eval: false
 ### Publication Guidelines
 
 ```{r publication-tips}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # For scientific publications:
 # - Use clear, descriptive titles and axis labels
@@ -707,8 +707,8 @@ publication_plot <- jjriverplot(
 ### Error Handling
 
 ```{r error-handling}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Example error handling
 tryCatch({
@@ -735,8 +735,8 @@ tryCatch({
 ### Performance Considerations
 
 ```{r performance-tips}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # For large datasets:
 # - Consider sampling for initial exploration
@@ -756,8 +756,8 @@ eval: false
 ### What River Plots Reveal
 
 ```{r interpretation-guide}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # River plots effectively show:
 # 1. Transition patterns: How categories change over time
@@ -776,8 +776,8 @@ eval: false
 ### Common Patterns
 
 ```{r common-patterns}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Clinical research patterns:
 
@@ -799,8 +799,8 @@ eval: false
 ### When to Use River Plots vs Alternatives
 
 ```{r visualization-comparison}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Use river plots when:
 # - Tracking categorical changes over time

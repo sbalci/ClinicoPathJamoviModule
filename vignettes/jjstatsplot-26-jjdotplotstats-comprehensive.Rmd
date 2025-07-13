@@ -21,8 +21,8 @@ The `jjdotplotstats` function provides a powerful interface for creating statist
 ## Installation and Setup
 
 ```{r setup}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Install ClinicoPath if not already installed
 if (!require("ClinicoPath")) {
@@ -38,8 +38,8 @@ library(ggplot2)
 ### Basic Dot Plot
 
 ```{r basic-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Load test data
 data(jjdotplotstats_test_data)
@@ -59,8 +59,8 @@ result$plot
 ### Grouped Dot Plot
 
 ```{r grouped-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Grouped dot plot by treatment center
 result_grouped <- jjdotplotstats(
@@ -150,8 +150,8 @@ The function has been significantly optimized for performance:
 ### Performance Benefits
 
 ```{r performance-comparison}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Performance comparison (conceptual)
 # Before optimization: 
@@ -170,8 +170,8 @@ eval: false
 ### Multiple Statistical Methods Comparison
 
 ```{r multiple-methods}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Compare different statistical methods
 methods <- c("parametric", "nonparametric", "robust", "bayes")
@@ -195,8 +195,8 @@ for (method in methods) {
 ### Clinical Biomarker Analysis
 
 ```{r clinical-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Comprehensive biomarker analysis
 biomarkers <- c("crp_level", "esr_level", "platelet_count", "hemoglobin_level")
@@ -223,8 +223,8 @@ for (biomarker in biomarkers) {
 ### Gender-Stratified Analysis
 
 ```{r gender-stratified}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Analyze hemoglobin levels by disease severity, stratified by gender
 hgb_gender_analysis <- jjdotplotstats(
@@ -244,8 +244,8 @@ hgb_gender_analysis <- jjdotplotstats(
 ### Treatment Response Analysis
 
 ```{r treatment-response}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Analyze biomarker levels by treatment response
 # (excluding healthy patients who don't have treatment)
@@ -280,8 +280,8 @@ The input data should be a data frame with:
 ### Example Data Structure
 
 ```{r data-structure}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Structure of test data
 str(jjdotplotstats_test_data)
@@ -338,8 +338,8 @@ str(jjdotplotstats_test_data)
 ### Customization Tips
 
 ```{r customization-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Highly customized dot plot
 custom_plot <- jjdotplotstats(
@@ -380,8 +380,8 @@ custom_plot <- jjdotplotstats(
 ### Error Handling
 
 ```{r error-handling}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Example error handling
 tryCatch({
@@ -410,8 +410,8 @@ The `jjdotplotstats` function is built on:
 ### Caching Implementation
 
 ```{r caching-details}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Internal caching structure (conceptual)
 # private$.processedData: Cached cleaned data with converted variables

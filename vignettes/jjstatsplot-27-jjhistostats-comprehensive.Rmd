@@ -22,8 +22,8 @@ The `jjhistostats` function provides a comprehensive interface for creating stat
 ## Installation and Setup
 
 ```{r setup}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Install ClinicoPath if not already installed
 if (!require("ClinicoPath")) {
@@ -39,8 +39,8 @@ library(ggplot2)
 ### Basic Histogram
 
 ```{r basic-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Load test data
 data(jjhistostats_test_data)
@@ -61,8 +61,8 @@ result$plot
 ### Multiple Variables Histogram
 
 ```{r multiple-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Multiple histograms in one analysis
 result_multiple <- jjhistostats(
@@ -80,8 +80,8 @@ result_multiple$plot
 ### Grouped Histogram
 
 ```{r grouped-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Grouped histogram by disease stage
 result_grouped <- jjhistostats(
@@ -175,8 +175,8 @@ The function has been significantly optimized for performance:
 ### Performance Benefits
 
 ```{r performance-comparison}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Performance comparison (conceptual)
 # Before optimization: 
@@ -195,8 +195,8 @@ eval: false
 ### Distribution Shape Analysis
 
 ```{r distribution-shapes}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Analyze different distribution shapes in the test data
 
@@ -234,8 +234,8 @@ psa_hist <- jjhistostats(
 ### Clinical Biomarker Analysis
 
 ```{r clinical-example}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Comprehensive biomarker distribution analysis
 biomarkers <- c("hemoglobin_level", "creatinine_level", "crp_level")
@@ -265,8 +265,8 @@ biomarker_by_treatment <- jjhistostats(
 ### Normality Assessment Workflow
 
 ```{r normality-assessment}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Systematic normality testing across multiple methods
 variable_of_interest <- "ejection_fraction"
@@ -311,8 +311,8 @@ norm_bayes <- jjhistostats(
 ### Custom Binning Strategies
 
 ```{r binning-strategies}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Different binning approaches for the same variable
 variable <- "lab_score"
@@ -355,8 +355,8 @@ The input data should be a data frame with:
 ### Example Data Structure
 
 ```{r data-structure}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Structure of test data
 str(jjhistostats_test_data)
@@ -402,8 +402,8 @@ str(jjhistostats_test_data)
 ### Binning Strategy Guidelines
 
 ```{r binning-guidelines}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # General binning guidelines:
 
@@ -458,8 +458,8 @@ eval: false
 ### Error Handling
 
 ```{r error-handling}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Example error handling
 tryCatch({
@@ -493,8 +493,8 @@ The `jjhistostats` function is built on:
 ### Caching Implementation
 
 ```{r caching-details}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Internal caching structure (conceptual)
 # private$.processedData: Cached cleaned data with converted variables
@@ -528,8 +528,8 @@ Histograms are essential for:
 ### Normality Assessment Workflow
 
 ```{r clinical-workflow}
-echo: true
-eval: false
+#| echo: true
+#| eval: false
 
 # Typical clinical research workflow
 

@@ -12,7 +12,9 @@ knitr::opts_chunk$set(
   fig.width = 8,
   fig.height = 6,
   warning = FALSE,
-  message = FALSE
+  message = FALSE,
+    echo = TRUE,
+  eval = FALSE
 )
 
 library(ClinicoPath)

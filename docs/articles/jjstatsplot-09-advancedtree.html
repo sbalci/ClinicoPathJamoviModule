@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -316,110 +318,19 @@ from 250 patients.</p>
 <span></span>
 <span><span class="co"># Overview of the dataset</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">histopathology</span><span class="op">)</span></span>
-<span><span class="co">#&gt; spc_tbl_ [250 × 38] (S3: spec_tbl_df/tbl_df/tbl/data.frame)</span></span>
-<span><span class="co">#&gt;  $ ID                  : num [1:250] 1 2 3 4 5 6 7 8 9 10 ...</span></span>
-<span><span class="co">#&gt;  $ Name                : chr [1:250] "Tonisia" "Daniyah" "Naviana" "Daerion" ...</span></span>
-<span><span class="co">#&gt;  $ Sex                 : chr [1:250] "Male" "Female" "Male" "Male" ...</span></span>
-<span><span class="co">#&gt;  $ Age                 : num [1:250] 27 36 65 51 58 53 33 26 25 68 ...</span></span>
-<span><span class="co">#&gt;  $ Race                : chr [1:250] "White" "White" "White" "White" ...</span></span>
-<span><span class="co">#&gt;  $ PreinvasiveComponent: chr [1:250] "Present" "Absent" "Absent" "Absent" ...</span></span>
-<span><span class="co">#&gt;  $ LVI                 : chr [1:250] "Present" "Absent" "Absent" "Present" ...</span></span>
-<span><span class="co">#&gt;  $ PNI                 : chr [1:250] "Absent" "Absent" "Absent" "Absent" ...</span></span>
-<span><span class="co">#&gt;  $ LastFollowUpDate    : chr [1:250] "2019.10.22 00:00:00" "2019.06.22 00:00:00" "2019.08.22 00:00:00" "2019.03.22 00:00:00" ...</span></span>
-<span><span class="co">#&gt;  $ Death               : chr [1:250] "YANLIŞ" "DOĞRU" "DOĞRU" "YANLIŞ" ...</span></span>
-<span><span class="co">#&gt;  $ Group               : chr [1:250] "Control" "Treatment" "Control" "Treatment" ...</span></span>
-<span><span class="co">#&gt;  $ Grade               : num [1:250] 2 2 1 3 2 2 1 2 3 3 ...</span></span>
-<span><span class="co">#&gt;  $ TStage              : num [1:250] 4 4 4 4 1 4 2 3 4 4 ...</span></span>
-<span><span class="co">#&gt;  $ Anti-X-intensity    : num [1:250] 3 2 2 3 3 3 2 2 1 2 ...</span></span>
-<span><span class="co">#&gt;  $ Anti-Y-intensity    : num [1:250] 1 1 2 3 3 2 2 2 1 3 ...</span></span>
-<span><span class="co">#&gt;  $ LymphNodeMetastasis : chr [1:250] "Present" "Absent" "Absent" "Absent" ...</span></span>
-<span><span class="co">#&gt;  $ Valid               : chr [1:250] "YANLIŞ" "DOĞRU" "YANLIŞ" "DOĞRU" ...</span></span>
-<span><span class="co">#&gt;  $ Smoker              : chr [1:250] "YANLIŞ" "YANLIŞ" "DOĞRU" "YANLIŞ" ...</span></span>
-<span><span class="co">#&gt;  $ Grade_Level         : chr [1:250] "high" "low" "low" "high" ...</span></span>
-<span><span class="co">#&gt;  $ SurgeryDate         : chr [1:250] "2019.07.08 00:00:00" "2019.03.18 00:00:00" "2019.05.18 00:00:00" "2018.10.24 00:00:00" ...</span></span>
-<span><span class="co">#&gt;  $ DeathTime           : chr [1:250] "Within1Year" "Within1Year" "Within1Year" "Within1Year" ...</span></span>
-<span><span class="co">#&gt;  $ int                 : chr [1:250] "2019-07-08 UTC--2019-10-22 UTC" "2019-03-18 UTC--2019-06-22 UTC" "2019-05-18 UTC--2019-08-22 UTC" "2018-10-24 UTC--2019-03-22 UTC" ...</span></span>
-<span><span class="co">#&gt;  $ OverallTime         : num [1:250] 3.5 3.1 3.1 4.9 3.3 9.3 6.3 9 5.8 9.9 ...</span></span>
-<span><span class="co">#&gt;  $ Outcome             : num [1:250] 0 1 1 0 0 0 1 1 1 0 ...</span></span>
-<span><span class="co">#&gt;  $ Mortality5yr        : chr [1:250] "Alive" "Dead" "Dead" "Alive" ...</span></span>
-<span><span class="co">#&gt;  $ Rater 1             : num [1:250] 0 1 1 0 0 0 1 1 1 0 ...</span></span>
-<span><span class="co">#&gt;  $ Rater 2             : num [1:250] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
-<span><span class="co">#&gt;  $ Rater 3             : num [1:250] 1 1 1 0 1 1 1 1 1 1 ...</span></span>
-<span><span class="co">#&gt;  $ Rater A             : num [1:250] 3 2 3 3 2 3 1 1 2 1 ...</span></span>
-<span><span class="co">#&gt;  $ Rater B             : num [1:250] 3 2 3 3 2 3 1 1 2 1 ...</span></span>
-<span><span class="co">#&gt;  $ New Test            : num [1:250] 0 0 0 0 0 0 1 0 0 0 ...</span></span>
-<span><span class="co">#&gt;  $ Golden Standart     : num [1:250] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
-<span><span class="co">#&gt;  $ MeasurementA        : num [1:250] -1.63432 0.37071 0.01585 -1.23584 -0.00141 ...</span></span>
-<span><span class="co">#&gt;  $ MeasurementB        : num [1:250] 0.611 0.554 0.742 0.622 0.527 ...</span></span>
-<span><span class="co">#&gt;  $ Disease Status      : chr [1:250] "Ill" "Ill" "Healthy" "Ill" ...</span></span>
-<span><span class="co">#&gt;  $ Measurement1        : num [1:250] 0.387 0.829 0.159 2.447 0.847 ...</span></span>
-<span><span class="co">#&gt;  $ Measurement2        : num [1:250] 1.8654 0.5425 0.0701 2.4071 0.5564 ...</span></span>
-<span><span class="co">#&gt;  $ Outcome2            : chr [1:250] "DOD" "DOOC" "AWD" "AWOD" ...</span></span>
-<span><span class="co">#&gt;  - attr(*, "spec")=</span></span>
-<span><span class="co">#&gt;   .. cols(</span></span>
-<span><span class="co">#&gt;   ..   ID = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Name = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Sex = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Age = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Race = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   PreinvasiveComponent = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   LVI = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   PNI = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   LastFollowUpDate = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Death = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Group = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Grade = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   TStage = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `Anti-X-intensity` = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `Anti-Y-intensity` = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   LymphNodeMetastasis = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Valid = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Smoker = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Grade_Level = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   SurgeryDate = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   DeathTime = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   int = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   OverallTime = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Outcome = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Mortality5yr = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `Rater 1` = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `Rater 2` = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `Rater 3` = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `Rater A` = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `Rater B` = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `New Test` = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `Golden Standart` = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   MeasurementA = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   MeasurementB = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   `Disease Status` = <span style="color: #BB0000;">col_character()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Measurement1 = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Measurement2 = <span style="color: #00BB00;">col_double()</span>,</span></span>
-<span><span class="co">#&gt;   ..   Outcome2 = <span style="color: #BB0000;">col_character()</span></span></span>
-<span><span class="co">#&gt;   .. )</span></span>
 <span></span>
 <span><span class="co"># Key variables for decision tree analysis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Continuous Variables:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Continuous Variables:</span></span>
 <span><span class="va">continuous_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age"</span>, <span class="st">"Grade"</span>, <span class="st">"TStage"</span>, <span class="st">"OverallTime"</span>, <span class="st">"MeasurementA"</span>, <span class="st">"MeasurementB"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">continuous_vars</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Age"          "Grade"        "TStage"       "OverallTime"  "MeasurementA"</span></span>
-<span><span class="co">#&gt; [6] "MeasurementB"</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nCategorical Variables:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Categorical Variables:</span></span>
 <span><span class="va">categorical_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sex"</span>, <span class="st">"Group"</span>, <span class="st">"Grade_Level"</span>, <span class="st">"LVI"</span>, <span class="st">"PNI"</span>, <span class="st">"LymphNodeMetastasis"</span>, <span class="st">"Mortality5yr"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">categorical_vars</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Sex"                 "Group"               "Grade_Level"        </span></span>
-<span><span class="co">#&gt; [4] "LVI"                 "PNI"                 "LymphNodeMetastasis"</span></span>
-<span><span class="co">#&gt; [7] "Mortality5yr"</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nOutcome Variables:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Outcome Variables:</span></span>
 <span><span class="va">outcome_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Outcome"</span>, <span class="st">"Death"</span>, <span class="st">"Mortality5yr"</span>, <span class="st">"Outcome2"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">outcome_vars</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Outcome"      "Death"        "Mortality5yr" "Outcome2"</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">outcome_vars</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="basic-decision-tree-analysis">Basic Decision Tree Analysis<a class="anchor" aria-label="anchor" href="#basic-decision-tree-analysis"></a>

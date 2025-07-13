@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.53</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.56</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-09-function-alluvial.html">Function Reference: alluvial() - Complete Parameter Guide</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-1-multisurvival-time-dependent-comprehensive.html">Time-Dependent Covariates in Multisurvival Analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Checking Data Authenticity with Benford's Law</a></li>
+    <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-10-function-benford.html">Vignette: Performing a Benford's Law Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-function-crosstable.html">Vignette: Generating a Publication-Ready 'Table 1' with crosstable</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-11-swimmerplot.html">Vignette: Creating Advanced Swimmer Plots with Date and Event Handling</a></li>
     <li><a class="dropdown-item" href="../articles/clinicopath-descriptives-12-chisqposttest.html">Chi-Square Post-Hoc Tests for Clinicopathological Research</a></li>
@@ -231,6 +231,8 @@
     <li><a class="dropdown-item" href="../articles/meddecide-32-vignettes-legacy.html">meddecide: Medical Decision Making in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-33-use-in-r-legacy.html">Use meddecide in R</a></li>
     <li><a class="dropdown-item" href="../articles/meddecide-34-cotest-analysis.html">Co-Testing Analysis: Combining Diagnostic Tests for Better Clinical Decision Making</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-35-screening-calculator-comprehensive.html">Screening Test Calculator: A Comprehensive Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/meddecide-36-sequential-testing-comprehensive.html">Sequential Testing Analysis: A Comprehensive Guide</a></li>
     <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/use-jjstatsplot-in-R.html">Use jjstatsplot in R</a></li>
@@ -300,10 +302,7 @@ for NSCLC</li>
 <span></span>
 <span><span class="co"># Check available variables</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Available variables in ihc_test_data:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Available variables in ihc_test_data:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ihc_test_data</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "SampleID" "ER"       "PR"       "HER2"     "Ki67"     "p53"      "CD3"     </span></span>
-<span><span class="co">#&gt; [8] "CD20"     "CD45"</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ihc_test_data</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="core-functionality-overview">Core Functionality Overview<a class="anchor" aria-label="anchor" href="#core-functionality-overview"></a>
@@ -313,26 +312,16 @@ for NSCLC</li>
 </h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"IHC Clustering Methods:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; IHC Clustering Methods:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"1. Hierarchical clustering with multiple distance metrics\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 1. Hierarchical clustering with multiple distance metrics</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2. PAM (Partitioning Around Medoids) clustering\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 2. PAM (Partitioning Around Medoids) clustering</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"3. K-means clustering\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 3. K-means clustering</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"4. Fuzzy clustering\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 4. Fuzzy clustering</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Distance Metrics:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Distance Metrics:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Gower: Mixed data types (categorical + continuous)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Gower: Mixed data types (categorical + continuous)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Jaccard: Binary/categorical data\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Jaccard: Binary/categorical data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Euclidean: Continuous data\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Euclidean: Continuous data</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Manhattan: Robust to outliers\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Manhattan: Robust to outliers</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Manhattan: Robust to outliers\n\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -343,88 +332,56 @@ for NSCLC</li>
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Matsuoka 2011 Features:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Matsuoka 2011 Features:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Ward's hierarchical clustering (ward.D2)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Ward's hierarchical clustering (ward.D2)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- 3-tier scoring system (0, 1, 2)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - 3-tier scoring system (0, 1, 2)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Prognostic clustering with survival analysis\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Prognostic clustering with survival analysis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Multi-region tumor analysis (central vs invasive)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Multi-region tumor analysis (central vs invasive)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Cox regression for prognostic groups\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Cox regression for prognostic groups</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Target: Colorectal cancer prognosis\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Target: Colorectal cancer prognosis</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Key markers: p53, Ki67, VEGF, COX2\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Key markers: p53, Ki67, VEGF, COX2</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Key markers: p53, Ki67, VEGF, COX2\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="carvalho-2011-methodology">Carvalho 2011 Methodology<a class="anchor" aria-label="anchor" href="#carvalho-2011-methodology"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Carvalho 2011 Features:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Carvalho 2011 Features:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Iterative marker selection algorithm\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Iterative marker selection algorithm</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Binary scoring system for specific markers\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Binary scoring system for specific markers</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Renal tumor differential diagnosis\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Renal tumor differential diagnosis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Automatic marker importance ranking\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Automatic marker importance ranking</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Diagnostic accuracy optimization\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Diagnostic accuracy optimization</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Target: Renal oncocytoma vs chromophobe RCC\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Target: Renal oncocytoma vs chromophobe RCC</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Key markers: CK7, CD117, E-cadherin, Claudin-7\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Key markers: CK7, CD117, E-cadherin, Claudin-7</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Key markers: CK7, CD117, E-cadherin, Claudin-7\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="olsen-2006-methodology">Olsen 2006 Methodology<a class="anchor" aria-label="anchor" href="#olsen-2006-methodology"></a>
 </h3>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Olsen 2006 Features:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Olsen 2006 Features:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Hierarchical clustering for sarcoma classification\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Hierarchical clustering for sarcoma classification</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Standard IHC scoring scale integration\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Standard IHC scoring scale integration</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Differential diagnosis clustering\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Differential diagnosis clustering</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Subtype-specific marker panels\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Subtype-specific marker panels</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Morphology correlation analysis\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Morphology correlation analysis</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Target: Sarcoma differential diagnosis\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Target: Sarcoma differential diagnosis</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Key markers: Vimentin, SMA, Desmin, S100, CD34\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Key markers: Vimentin, SMA, Desmin, S100, CD34</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Key markers: Vimentin, SMA, Desmin, S100, CD34\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="sterlacci-2019-methodology">Sterlacci 2019 Methodology<a class="anchor" aria-label="anchor" href="#sterlacci-2019-methodology"></a>
 </h3>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Sterlacci 2019 Features:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Sterlacci 2019 Features:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- TIL (Tumor-Infiltrating Lymphocytes) signature analysis\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - TIL (Tumor-Infiltrating Lymphocytes) signature analysis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- CD3, CD8, CD20, PD-L1 integration\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - CD3, CD8, CD20, PD-L1 integration</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Immune microenvironment clustering\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Immune microenvironment clustering</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- NSCLC histotype correlation\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - NSCLC histotype correlation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Prognostic immune signatures\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Prognostic immune signatures</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Target: NSCLC immune microenvironment\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Target: NSCLC immune microenvironment</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Key markers: CD3, CD8, CD20, PD-L1, FOXP3\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Key markers: CD3, CD8, CD20, PD-L1, FOXP3</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Key markers: CD3, CD8, CD20, PD-L1, FOXP3\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -435,51 +392,33 @@ for NSCLC</li>
 </h3>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"H-Score Calculation:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; H-Score Calculation:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Automated H-Score computation from IHC data\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Automated H-Score computation from IHC data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Integration with clustering results\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Integration with clustering results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Intensity and percentage scoring\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Intensity and percentage scoring</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Quality control and validation metrics\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Quality control and validation metrics</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Quality control and validation metrics\n\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="prognostic-analysis">Prognostic Analysis<a class="anchor" aria-label="anchor" href="#prognostic-analysis"></a>
 </h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Prognostic Analysis Features:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Prognostic Analysis Features:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Survival time and event integration\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Survival time and event integration</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Cox proportional hazards modeling\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Cox proportional hazards modeling</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Kaplan-Meier survival curves\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Kaplan-Meier survival curves</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Log-rank test for cluster comparison\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Log-rank test for cluster comparison</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Hazard ratio calculation with confidence intervals\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Hazard ratio calculation with confidence intervals</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Hazard ratio calculation with confidence intervals\n\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="visualization-options">Visualization Options<a class="anchor" aria-label="anchor" href="#visualization-options"></a>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Visualization Components:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Visualization Components:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Hierarchical clustering dendrograms\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Hierarchical clustering dendrograms</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- IHC expression heatmaps\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - IHC expression heatmaps</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Cluster assignment plots\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Cluster assignment plots</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Survival curves by cluster\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Survival curves by cluster</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Marker importance rankings\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Marker importance rankings</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Correlation matrices\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Correlation matrices</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Correlation matrices\n\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -490,34 +429,22 @@ for NSCLC</li>
 </h3>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Diagnostic Applications:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Diagnostic Applications:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"1. Sarcoma subtype classification\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 1. Sarcoma subtype classification</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2. Renal tumor differential diagnosis\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 2. Renal tumor differential diagnosis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"3. Colorectal cancer prognostic grouping\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 3. Colorectal cancer prognostic grouping</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"4. NSCLC immune profiling\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 4. NSCLC immune profiling</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"5. Custom marker panel optimization\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 5. Custom marker panel optimization</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"5. Custom marker panel optimization\n\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="research-applications">Research Applications<a class="anchor" aria-label="anchor" href="#research-applications"></a>
 </h3>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Research Applications:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Research Applications:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"1. Biomarker discovery and validation\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 1. Biomarker discovery and validation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2. Tumor heterogeneity analysis\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 2. Tumor heterogeneity analysis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"3. Immune microenvironment characterization\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 3. Immune microenvironment characterization</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"4. Multi-region tumor analysis\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 4. Multi-region tumor analysis</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"5. Prognostic signature development\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 5. Prognostic signature development</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"5. Prognostic signature development\n\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -528,30 +455,18 @@ for NSCLC</li>
 </h3>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Required Data Structure:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Required Data Structure:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Patient/case identifier column\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Patient/case identifier column</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- IHC marker expression variables\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - IHC marker expression variables</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Optional: Survival time and event variables\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Optional: Survival time and event variables</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Optional: Clinical and pathological variables\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Optional: Clinical and pathological variables</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Optional: Multi-region scoring variables\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Optional: Multi-region scoring variables</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Scoring Systems Supported:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Scoring Systems Supported:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Binary (0/1, negative/positive)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Binary (0/1, negative/positive)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- 3-tier (0/1/2, negative/weak/strong)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - 3-tier (0/1/2, negative/weak/strong)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- 4-tier (0/1/2/3)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - 4-tier (0/1/2/3)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- H-Score (0-300)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - H-Score (0-300)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Percentage (0-100)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Percentage (0-100)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Percentage (0-100)\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

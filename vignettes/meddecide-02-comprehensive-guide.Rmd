@@ -7,8 +7,12 @@ output: html_document
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+    echo = TRUE,
+  eval = FALSE
 )
 ```
 

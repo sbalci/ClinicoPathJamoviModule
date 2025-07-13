@@ -351,15 +351,15 @@ jjbetweenstats(
 Athletic performance comparison:
 
 ```{r exercise-physiology}
-jjbetweenstats(
-  data = exercise_physiology_data,
-  dep = c(vo2_max, muscle_mass, lactate_threshold),
-  group = training_regimen,
-  grvar = experience_level,
-  typestatistics = "parametric",
-  effsizetype = "biased",
-  centralityplotting = TRUE
-)
+# jjbetweenstats(
+#   data = exercise_physiology_data,
+#   dep = c(vo2_max, muscle_mass, lactate_threshold),
+#   group = training_regimen,
+#   grvar = experience_level,
+#   typestatistics = "parametric",
+#   effsizetype = "biased",
+#   centralityplotting = TRUE
+# )
 ```
 
 # Working with Histopathology Data
