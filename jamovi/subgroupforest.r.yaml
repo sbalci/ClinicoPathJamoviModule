@@ -7,13 +7,30 @@ items:
     - name: todo
       title: Instructions
       type: Html
+      clearWith:
+          - outcome
+          - treatment
+          - subgroups
+          - outcomeType
       
     - name: plot
-      title: Forest Plot
+      title: Subgroup Forest Plot
       type: Image
-      width: 600
-      height: 400
+      width: 800
+      height: 500
       requiresData: true
+      renderFun: .plot
+      clearWith:
+          - outcome
+          - treatment
+          - subgroups
+          - outcomeType
+          - effectMeasure
+          - confidenceLevel
+          - sortBy
+          - showSampleSizes
+          - logScale
+          - nullLine
       
     - name: summary
       title: Subgroup Analysis Summary
@@ -29,7 +46,7 @@ items:
           title: "Events"
           type: integer
         - name: estimate
-          title: "Effect"
+          title: "Effect Estimate"
           type: number
           format: zto
         - name: ci_lower
@@ -44,6 +61,13 @@ items:
           title: "P-value"
           type: number
           format: zto,pvalue
+      clearWith:
+          - outcome
+          - treatment
+          - subgroups
+          - outcomeType
+          - effectMeasure
+          - confidenceLevel
           
     - name: interactions
       title: Interaction Tests
@@ -59,6 +83,13 @@ items:
         - name: interpretation
           title: "Interpretation"
           type: text
+      visible: "(showInteraction)"
+      clearWith:
+          - outcome
+          - treatment
+          - subgroups
+          - outcomeType
+          - showInteraction
 
     - name: overall
       title: Overall Treatment Effect

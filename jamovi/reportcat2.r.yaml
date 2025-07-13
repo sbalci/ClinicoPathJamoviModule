@@ -1,0 +1,29 @@
+---
+name:  reportcat2
+title: Summary of Categorical Variables
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - vars
+
+    - name:  text
+      title: ''
+      type:  Html
+
+    - name:  text1
+      title: 'Categorical Data'
+      type:  Html
+
+
+refs:
+    - report
+    - gtExtras
+    - ClinicoPathJamoviModule
+
+
+...

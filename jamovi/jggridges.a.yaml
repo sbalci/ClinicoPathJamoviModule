@@ -31,6 +31,7 @@ options:
       suggested: [ordinal, nominal]
       permitted: [factor]
       description: Variable for color mapping
+      default: NULL
     
     - name: facet_var
       title: Facet Variable
@@ -38,6 +39,7 @@ options:
       suggested: [ordinal, nominal]
       permitted: [factor]
       description: Variable for facetting plots
+      default: NULL
     
     - name: plot_type
       title: Plot Type

@@ -4,9 +4,147 @@
 \alias{survivalcontClass}
 \title{Survival Analysis for Continuous Explanatory Variable}
 \description{
-Survival Analysis for Continuous Explanatory Variable
+Comprehensive survival analysis for continuous explanatory variables with optimal
+cut-off determination, multiple cut-offs analysis, RMST analysis, residual diagnostics,
+and advanced visualization options.
+}
+\details{
+This function provides advanced survival analysis specifically designed for continuous
+explanatory variables. It includes:
 
-Survival Analysis for Continuous Explanatory Variable
+\strong{Core Features:}
+\itemize{
+\item Optimal cut-off determination using maximally selected rank statistics
+\item Multiple cut-offs analysis with 4 different methods (quantile, recursive, tree-based, minimum p-value)
+\item Person-time analysis with interval stratification
+\item Date-based time calculation with multiple format support
+\item Multiple event level support (overall, cause-specific, competing risks)
+\item Landmark analysis for time-dependent effects
+}
+
+\strong{Advanced Analytics:}
+\itemize{
+\item Restricted Mean Survival Time (RMST) analysis
+\item Cox model residual diagnostics (Martingale, Deviance, Score, Schoenfeld)
+\item Log-log plots for proportional hazards assessment
+\item Enhanced error handling and data validation
+}
+
+\strong{Visualization Options:}
+\itemize{
+\item Kaplan-Meier survival curves with optimal cut-offs
+\item Multiple cut-offs histogram with cut-point annotations
+\item Cumulative events and hazard plots
+\item KMunicate-style plots for publication
+\item Residual diagnostic plots (4-panel layout)
+\item Log-log plots for assumption checking
+}
+}
+\examples{
+\dontrun{
+# Basic survival analysis with optimal cut-off
+data("lung", package = "survival")
+lung$status_binary <- ifelse(lung$status == 2, 1, 0)
+
+result1 <- survivalcont(
+  data = lung,
+  elapsedtime = "time",
+  outcome = "status_binary", 
+  contexpl = "age",
+  findcut = TRUE,
+  sc = TRUE
+)
+
+# Multiple cut-offs analysis with different methods
+result2 <- survivalcont(
+  data = lung,
+  elapsedtime = "time",
+  outcome = "status_binary",
+  contexpl = "ph.karno",
+  multiple_cutoffs = TRUE,
+  num_cutoffs = "three",
+  cutoff_method = "recursive",
+  min_group_size = 15,
+  sc = TRUE
+)
+
+# RMST analysis with residual diagnostics
+result3 <- survivalcont(
+  data = lung,
+  elapsedtime = "time",
+  outcome = "status_binary",
+  contexpl = "wt.loss",
+  findcut = TRUE,
+  rmst_analysis = TRUE,
+  rmst_tau = 500,
+  residual_diagnostics = TRUE,
+  loglog = TRUE
+)
+
+# Person-time analysis with date calculation
+# Create sample data with dates
+set.seed(123)
+n <- 200
+sample_data <- data.frame(
+  biomarker = rnorm(n, 100, 25),
+  event = rbinom(n, 1, 0.6),
+  dx_date = as.Date("2020-01-01") + sample(0:365, n, replace = TRUE),
+  fu_date = as.Date("2020-01-01") + sample(366:1095, n, replace = TRUE)
+)
+
+result4 <- survivalcont(
+  data = sample_data,
+  tint = TRUE,
+  dxdate = "dx_date",
+  fudate = "fu_date",
+  timetypedata = "ymd",
+  timetypeoutput = "months",
+  outcome = "event",
+  contexpl = "biomarker",
+  person_time = TRUE,
+  time_intervals = "6, 12, 24",
+  rate_multiplier = 1000,
+  calculatedtime = TRUE
+)
+
+# Comprehensive analysis with all features
+result5 <- survivalcont(
+  data = lung,
+  elapsedtime = "time",
+  outcome = "status_binary",
+  contexpl = "meal.cal",
+  findcut = TRUE,
+  multiple_cutoffs = TRUE,
+  num_cutoffs = "two",
+  cutoff_method = "quantile",
+  rmst_analysis = TRUE,
+  rmst_tau = 400,
+  residual_diagnostics = TRUE,
+  person_time = TRUE,
+  time_intervals = "100, 300, 500",
+  sc = TRUE,
+  ce = TRUE,
+  ch = TRUE,
+  kmunicate = TRUE,
+  loglog = TRUE,
+  ci95 = TRUE,
+  risktable = TRUE,
+  calculatedcutoff = TRUE,
+  calculatedmulticut = TRUE
+)
+}
+
+}
+\references{
+Hothorn, T., & Zeileis, A. (2008). Generalized maximally selected statistics.
+Biometrics, 64(4), 1263-1269.
+
+Royston, P., & Parmar, M. K. (2013). Restricted mean survival time: an alternative
+to the hazard ratio for the design and analysis of randomized trials with a
+time-to-event outcome. BMC Medical Research Methodology, 13(1), 152.
+
+Morris, T. P., et al. (2019). Proposals on Kaplan–Meier plots in medical research
+and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::survivalcontBase} -> \code{survivalcontClass}

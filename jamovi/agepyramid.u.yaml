@@ -38,15 +38,3 @@ children:
         name: plot_title
         format: string
         width: large
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: color1
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: color2
-        format: string

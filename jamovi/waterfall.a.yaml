@@ -1,29 +1,11 @@
 ---
 name: waterfall
 title: Treatment Response Analysis
-menuGroup: ExplorationD
+menuGroup: Exploration
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall Plot, Spider Plot'
-version: '0.0.3'
+version: '0.0.2'
 jas: '1.2'
-
-description:
-    main: Creates a waterfall plot and analyzes tumor response data following RECIST criteria.
-    R:
-        dontrun: true
-        usage: |
-            data <- data.frame(
-                PatientID = paste0("PT", 1:10),
-                Response = c(-100, -45, -30, -20, -10, 0, 10, 20, 30, 40),
-                Time = c(0, 2, 4, 6, 8, 10, 12, 14, 16, 18)
-            )
-            waterfall(
-                data = data,
-                patientID = "PatientID",
-                responseVar = "Response",
-                timeVar = "Time"
-            )
-
 
 options:
     - name: data
@@ -62,7 +44,6 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
-      default: NULL
       description:
           R: >
             Time point of measurement for spider plot (e.g., months from baseline)
@@ -107,22 +88,11 @@ options:
       title: Show RECIST Thresholds
       type: Bool
       default: false
-      description:
-          R: >
-            Show +20 percent and -30 percent RECIST thresholds.
-          jamovi: >
-            Show +20 percent and -30 percent RECIST thresholds.
-
 
     - name: labelOutliers
       title: Label Large Changes
       type: Bool
       default: false
-      description:
-          R: >
-            Label responses exceeding the specified threshold.
-          jamovi: >
-            Label responses exceeding the specified threshold.
 
     - name: showMedian
       title: Show Median Response
@@ -203,11 +173,6 @@ options:
       title: Show Waterfall Plot
       type: Bool
       default: false
-      description:
-          R: >
-            Display the waterfall plot showing best response for each patient.
-          jamovi: >
-            Display the waterfall plot showing best response for each patient.
 
     - name: showSpiderPlot
       title: Show Spider Plot
@@ -215,9 +180,9 @@ options:
       default: false
       description:
           R: >
-            Display spider plot showing response trajectories over time (requires time variable).
+            Create an additional spider plot showing response over time if longitudinal data available
           jamovi: >
-            Display spider plot showing response trajectories over time (requires time variable).
+            Create an additional spider plot showing response over time if longitudinal data available
 
     - name: addResponseCategory
       title: Add Response Category to Data

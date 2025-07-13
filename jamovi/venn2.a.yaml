@@ -1,0 +1,105 @@
+---
+name:  venn2
+title: Venn Diagram
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptive Plots
+menuSubtitle: Venn Diagram, UpSet Plot
+version: '0.0.3'
+jas: '1.2'
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The dataset as a data frame containing the variables for analysis.
+          jamovi: >
+            The data as a data frame.
+
+    - name: var1
+      title: 'Variable 1 (Required)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            A string naming the primary variable from `data` for the diagram.
+          jamovi: >
+            A string naming the primary variable from `data`.
+
+    - name: var1true
+      title: 'Select True Level'
+      type: Level
+      variable: (var1)
+      description:
+          R: >
+            The level in `var1` that represents the positive condition.
+          jamovi: >
+            The level in `var1` that represents the true condition.
+
+    - name: var2
+      title: 'Variable 2 (Required)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            A string naming the secondary variable from `data` used in the diagram.
+          jamovi: >
+            A string naming the secondary variable from `data`.
+
+    - name: var2true
+      title: 'Select True Level'
+      type: Level
+      variable: (var2)
+      description:
+          R: >
+            The level in `var2` that represents the positive condition.
+          jamovi: >
+            The level in `var2` that represents the true condition.
+
+    - name: var3
+      title: 'Variable 3 (Optional)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+          R: >
+            An optional variable from `data` to include in the diagram.
+          jamovi: >
+            An optional variable from `data`.
+
+    - name: var3true
+      title: 'Select True Level'
+      type: Level
+      variable: (var3)
+      description:
+          R: >
+            The level in `var3` that represents the positive condition.
+          jamovi: >
+            The level in `var3` that represents the true condition.
+
+    - name: var4
+      title: 'Variable 4 (Optional)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+          R: >
+            An optional variable from `data` for additional overlap analysis.
+          jamovi: >
+            An optional variable from `data`.
+
+    - name: var4true
+      title: 'Select True Level'
+      type: Level
+      variable: (var4)
+      description:
+          R: >
+            The level in `var4` that represents the positive condition.
+          jamovi: >
+            The level in `var4` that represents the true condition.
+...

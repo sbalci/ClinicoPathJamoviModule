@@ -5,8 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup}
-include: false
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -63,33 +62,33 @@ The `jggsankeyfier` function creates flow diagrams that visualize how quantities
 
 ```{r simple-sankey}
 # Load test data
-data("simple_flow_data")
+data("simple_flow_data", package = "ClinicoPath")
 
 # Basic sankey diagram
-jggsankeyfier(
-  data = simple_flow_data,
-  value_var = "flow_amount",
-  source_var = "from_node", 
-  target_var = "to_node",
-  diagram_type = "sankey",
-  plot_title = "Simple Flow Diagram"
-)
+# jggsankeyfier(
+#   data = simple_flow_data,
+#   value_var = "flow_amount",
+#   source_var = "from_node", 
+#   target_var = "to_node",
+#   diagram_type = "sankey",
+#   plot_title = "Simple Flow Diagram"
+# )
 ```
 
 ### Multi-Level Alluvial Diagram
 
 ```{r multi-level-alluvial}
 # Load complex data
-data("complex_alluvial_data")
+data("complex_alluvial_data", package = "ClinicoPath")
 
 # Multi-level alluvial diagram
-jggsankeyfier(
-  data = complex_alluvial_data,
-  value_var = "revenue",
-  node_vars = c("level_1", "level_2", "level_3", "level_4"),
-  diagram_type = "alluvial",
-  plot_title = "Multi-Level Revenue Flow"
-)
+# jggsankeyfier(
+#   data = complex_alluvial_data,
+#   value_var = "revenue",
+#   node_vars = c("level_1", "level_2", "level_3", "level_4"),
+#   diagram_type = "alluvial",
+#   plot_title = "Multi-Level Revenue Flow"
+# )
 ```
 
 ## Clinical Research Applications
@@ -98,40 +97,40 @@ jggsankeyfier(
 
 ```{r treatment-pathways}
 # Load treatment pathway data
-data("treatment_pathways_data")
+data("treatment_pathways_data", package = "ClinicoPath")
 
 # Visualize treatment progression
-jggsankeyfier(
-  data = treatment_pathways_data,
-  value_var = "patient_count",
-  node_vars = c("initial_diagnosis", "first_treatment", "response", "final_outcome"),
-  grouping_var = "age_group",
-  diagram_type = "alluvial",
-  color_palette = "viridis",
-  plot_title = "Cancer Treatment Pathways",
-  plot_subtitle = "Patient flow through treatment stages",
-  show_statistics = TRUE,
-  show_interpretation = TRUE
-)
+# jggsankeyfier(
+#   data = treatment_pathways_data,
+#   value_var = "patient_count",
+#   node_vars = c("initial_diagnosis", "first_treatment", "response", "final_outcome"),
+#   grouping_var = "age_group",
+#   diagram_type = "alluvial",
+#   color_palette = "viridis",
+#   plot_title = "Cancer Treatment Pathways",
+#   plot_subtitle = "Patient flow through treatment stages",
+#   show_statistics = TRUE,
+#   show_interpretation = TRUE
+# )
 ```
 
 ### Patient Outcome Flows
 
 ```{r patient-outcomes}
 # Create outcome-focused view
-jggsankeyfier(
-  data = treatment_pathways_data,
-  value_var = "patient_count", 
-  source_var = "response",
-  target_var = "final_outcome",
-  grouping_var = "age_group",
-  diagram_type = "sankey",
-  color_palette = "set3",
-  plot_title = "Treatment Response to Final Outcome",
-  flow_direction = "left_right",
-  show_labels = TRUE,
-  show_values = TRUE
-)
+# jggsankeyfier(
+#   data = treatment_pathways_data,
+#   value_var = "patient_count", 
+#   source_var = "response",
+#   target_var = "final_outcome",
+#   grouping_var = "age_group",
+#   diagram_type = "sankey",
+#   color_palette = "set3",
+#   plot_title = "Treatment Response to Final Outcome",
+#   flow_direction = "left_right",
+#   show_labels = TRUE,
+#   show_values = TRUE
+# )
 ```
 
 ## Business Process Analysis
@@ -140,22 +139,22 @@ jggsankeyfier(
 
 ```{r business-process}
 # Load business process data
-data("business_process_data")
+data("business_process_data", package = "ClinicoPath")
 
 # Analyze process flows
-jggsankeyfier(
-  data = business_process_data,
-  value_var = "process_value",
-  node_vars = c("department_start", "process_step_1", "process_step_2", "final_outcome"),
-  grouping_var = "region",
-  time_var = "quarter", 
-  diagram_type = "alluvial",
-  color_palette = "plasma",
-  plot_title = "Business Process Value Flow",
-  plot_subtitle = "Quarterly process analysis by region",
-  sort_nodes = "by_value",
-  value_format = "rounded"
-)
+# jggsankeyfier(
+#   data = business_process_data,
+#   value_var = "process_value",
+#   node_vars = c("department_start", "process_step_1", "process_step_2", "final_outcome"),
+#   grouping_var = "region",
+#   time_var = "quarter", 
+#   diagram_type = "alluvial",
+#   color_palette = "plasma",
+#   plot_title = "Business Process Value Flow",
+#   plot_subtitle = "Quarterly process analysis by region",
+#   sort_nodes = "by_value",
+#   value_format = "rounded"
+# )
 ```
 
 ### Sales Pipeline Analysis
@@ -165,20 +164,20 @@ jggsankeyfier(
 successful_processes <- business_process_data %>%
   filter(final_outcome %in% c("Closed Won", "On Hold"))
 
-jggsankeyfier(
-  data = successful_processes,
-  value_var = "process_value",
-  source_var = "department_start",
-  target_var = "final_outcome", 
-  grouping_var = "quarter",
-  diagram_type = "sankey",
-  color_palette = "dark2",
-  plot_title = "Successful Sales Pipeline",
-  edge_alpha = 0.8,
-  node_width = 0.7,
-  show_values = TRUE,
-  value_format = "rounded"
-)
+# jggsankeyfier(
+#   data = successful_processes,
+#   value_var = "process_value",
+#   source_var = "department_start",
+#   target_var = "final_outcome",
+#   grouping_var = "quarter",
+#   diagram_type = "sankey",
+#   color_palette = "dark2",
+#   plot_title = "Successful Sales Pipeline",
+#   edge_alpha = 0.8,
+#   node_width = 0.7,
+#   show_values = TRUE,
+#   value_format = "rounded"
+# )
 ```
 
 ## Educational Data Analysis
@@ -187,40 +186,40 @@ jggsankeyfier(
 
 ```{r education-pathways}
 # Load education data
-data("education_pathways_data")
+data("education_pathways_data", package = "ClinicoPath")
 
 # Analyze educational progression
-jggsankeyfier(
-  data = education_pathways_data,
-  value_var = "student_count",
-  node_vars = c("high_school_type", "college_admission", "major_category", "graduation_status"),
-  grouping_var = "socioeconomic_status",
-  diagram_type = "alluvial",
-  color_palette = "pastel1",
-  plot_title = "Educational Pathway Analysis",
-  plot_subtitle = "Student progression through education system",
-  show_interpretation = TRUE,
-  output_format = "both"
-)
+# jggsankeyfier(
+#   data = education_pathways_data,
+#   value_var = "student_count",
+#   node_vars = c("high_school_type", "college_admission", "major_category", "graduation_status"),
+#   grouping_var = "socioeconomic_status",
+#   diagram_type = "alluvial",
+#   color_palette = "pastel1",
+#   plot_title = "Educational Pathway Analysis",
+#   plot_subtitle = "Student progression through education system",
+#   show_interpretation = TRUE,
+#   output_format = "both"
+# )
 ```
 
 ### College Admission Outcomes
 
 ```{r college-outcomes}
 # Focus on college admission patterns
-jggsankeyfier(
-  data = education_pathways_data,
-  value_var = "student_count",
-  source_var = "high_school_type",
-  target_var = "college_admission",
-  grouping_var = "socioeconomic_status",
-  diagram_type = "parallel_sets",
-  color_palette = "viridis",
-  plot_title = "High School to College Transitions",
-  flow_direction = "left_right",
-  show_labels = TRUE,
-  label_size = 10
-)
+# jggsankeyfier(
+#   data = education_pathways_data,
+#   value_var = "student_count",
+#   source_var = "high_school_type",
+#   target_var = "college_admission",
+#   grouping_var = "socioeconomic_status",
+#   diagram_type = "parallel_sets",
+#   color_palette = "viridis",
+#   plot_title = "High School to College Transitions",
+#   flow_direction = "left_right",
+#   show_labels = TRUE,
+#   label_size = 10
+# )
 ```
 
 ## Technology Migration Analysis
@@ -229,22 +228,22 @@ jggsankeyfier(
 
 ```{r tech-migration}
 # Load technology migration data
-data("tech_migration_data")
+data("tech_migration_data", package = "ClinicoPath")
 
 # Analyze migration patterns
-jggsankeyfier(
-  data = tech_migration_data,
-  value_var = "migration_cost",
-  node_vars = c("legacy_system", "migration_phase_1", "migration_phase_2", "implementation"),
-  grouping_var = "business_unit",
-  diagram_type = "sankey",
-  color_palette = "set3",
-  plot_title = "Technology Migration Analysis",
-  plot_subtitle = "Cost flow through migration phases",
-  sort_nodes = "by_value",
-  value_format = "rounded",
-  show_statistics = TRUE
-)
+# jggsankeyfier(
+#   data = tech_migration_data,
+#   value_var = "migration_cost",
+#   node_vars = c("legacy_system", "migration_phase_1", "migration_phase_2", "implementation"),
+#   grouping_var = "business_unit",
+#   diagram_type = "sankey",
+#   color_palette = "set3",
+#   plot_title = "Technology Migration Analysis",
+#   plot_subtitle = "Cost flow through migration phases",
+#   sort_nodes = "by_value",
+#   value_format = "rounded",
+#   show_statistics = TRUE
+# )
 ```
 
 ## Advanced Customization
@@ -253,25 +252,25 @@ jggsankeyfier(
 
 ```{r custom-styling}
 # Advanced styling example
-jggsankeyfier(
-  data = sankey_simple_data,
-  value_var = "flow_value",
-  source_var = "source",
-  target_var = "target",
-  grouping_var = "group",
-  diagram_type = "alluvial",
-  color_palette = "viridis",
-  node_width = 0.8,
-  edge_alpha = 0.7,
-  show_labels = TRUE,
-  label_size = 12,
-  show_values = TRUE,
-  value_format = "percent",
-  plot_title = "Custom Styled Flow Diagram",
-  plot_subtitle = "Demonstrating advanced styling options",
-  theme_style = "minimal",
-  flow_direction = "left_right"
-)
+# jggsankeyfier(
+#   data = simple_flow_data,
+#   value_var = "flow_value",
+#   source_var = "source",
+#   target_var = "target",
+#   grouping_var = "group",
+#   diagram_type = "alluvial",
+#   color_palette = "viridis",
+#   node_width = 0.8,
+#   edge_alpha = 0.7,
+#   show_labels = TRUE,
+#   label_size = 12,
+#   show_values = TRUE,
+#   value_format = "percent",
+#   plot_title = "Custom Styled Flow Diagram",
+#   plot_subtitle = "Demonstrating advanced styling options",
+#   theme_style = "minimal",
+#   flow_direction = "left_right"
+# )
 ```
 
 ### Different Flow Directions
@@ -280,19 +279,19 @@ jggsankeyfier(
 # Demonstrate different flow directions
 directions <- c("left_right", "top_bottom", "right_left", "bottom_top")
 
-for (direction in directions[1:2]) {  # Show first two for brevity
-  print(
-    jggsankeyfier(
-      data = simple_flow_data,
-      value_var = "flow_amount",
-      source_var = "from_node",
-      target_var = "to_node",
-      diagram_type = "sankey",
-      flow_direction = direction,
-      plot_title = paste("Flow Direction:", gsub("_", " to ", direction))
-    )
-  )
-}
+# for (direction in directions[1:2]) {  # Show first two for brevity
+#   print(
+#     jggsankeyfier(
+#       data = simple_flow_data,
+#       value_var = "flow_amount",
+#       source_var = "from_node",
+#       target_var = "to_node",
+#       diagram_type = "sankey",
+#       flow_direction = direction,
+#       plot_title = paste("Flow Direction:", gsub("_", " to ", direction))
+#     )
+#   )
+# }
 ```
 
 ## Data Preparation Guidelines
@@ -352,16 +351,16 @@ The function provides automatic statistics including:
 
 ```{r flow-statistics}
 # Example with statistics enabled
-jggsankeyfier(
-  data = simple_flow_data,
-  value_var = "flow_amount",
-  source_var = "from_node",
-  target_var = "to_node",
-  diagram_type = "sankey",
-  show_statistics = TRUE,
-  show_interpretation = TRUE,
-  output_format = "both"
-)
+# jggsankeyfier(
+#   data = simple_flow_data,
+#   value_var = "flow_amount",
+#   source_var = "from_node",
+#   target_var = "to_node",
+#   diagram_type = "sankey",
+#   show_statistics = TRUE,
+#   show_interpretation = TRUE,
+#   output_format = "both"
+# )
 ```
 
 ## Common Use Cases in Healthcare
@@ -383,15 +382,15 @@ clinical_summary <- clinical_decisions %>%
   group_by(presentation, initial_test, diagnosis, treatment) %>%
   summarise(patient_count = sum(patient_count), .groups = "drop")
 
-jggsankeyfier(
-  data = clinical_summary,
-  value_var = "patient_count",
-  node_vars = c("presentation", "initial_test", "diagnosis", "treatment"),
-  diagram_type = "alluvial",
-  color_palette = "viridis",
-  plot_title = "Clinical Decision Pathway Analysis",
-  plot_subtitle = "Patient flow through diagnostic and treatment stages"
-)
+# jggsankeyfier(
+#   data = clinical_summary,
+#   value_var = "patient_count",
+#   node_vars = c("presentation", "initial_test", "diagnosis", "treatment"),
+#   diagram_type = "alluvial",
+#   color_palette = "viridis",
+#   plot_title = "Clinical Decision Pathway Analysis",
+#   plot_subtitle = "Patient flow through diagnostic and treatment stages"
+# )
 ```
 
 ### Hospital Department Transfers
@@ -410,19 +409,19 @@ transfer_summary <- hospital_transfers %>%
   group_by(admission_dept, transfer_dept, severity) %>%
   summarise(patient_count = n(), avg_los = mean(los_days), .groups = "drop")
 
-jggsankeyfier(
-  data = transfer_summary,
-  value_var = "patient_count",
-  source_var = "admission_dept",
-  target_var = "transfer_dept",
-  grouping_var = "severity",
-  diagram_type = "sankey",
-  color_palette = "plasma",
-  plot_title = "Hospital Department Transfers",
-  plot_subtitle = "Patient flow between departments by severity",
-  show_values = TRUE,
-  show_interpretation = TRUE
-)
+# jggsankeyfier(
+#   data = transfer_summary,
+#   value_var = "patient_count",
+#   source_var = "admission_dept",
+#   target_var = "transfer_dept",
+#   grouping_var = "severity",
+#   diagram_type = "sankey",
+#   color_palette = "plasma",
+#   plot_title = "Hospital Department Transfers",
+#   plot_subtitle = "Patient flow between departments by severity",
+#   show_values = TRUE,
+#   show_interpretation = TRUE
+# )
 ```
 
 ## Performance Optimization
@@ -449,15 +448,15 @@ aggregated_data <- large_dataset_simulation %>%
   summarise(total_value = sum(value), flow_count = n(), .groups = "drop") %>%
   filter(total_value >= quantile(total_value, 0.75))  # Focus on top 25% of flows
 
-jggsankeyfier(
-  data = aggregated_data,
-  value_var = "total_value", 
-  source_var = "source",
-  target_var = "target",
-  diagram_type = "sankey",
-  plot_title = "Optimized Large Dataset Visualization",
-  plot_subtitle = "Showing top 25% of flows by value"
-)
+# jggsankeyfier(
+#   data = aggregated_data,
+#   value_var = "total_value", 
+#   source_var = "source",
+#   target_var = "target",
+#   diagram_type = "sankey",
+#   plot_title = "Optimized Large Dataset Visualization",
+#   plot_subtitle = "Showing top 25% of flows by value"
+# )
 ```
 
 ## Troubleshooting Guide

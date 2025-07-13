@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.54
+version: 0.0.3.55
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -28,7 +28,7 @@ analyses:
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: >
@@ -43,15 +43,14 @@ analyses:
   - title: Summary of Categorical Variables
     name: reportcat
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Categorical Variables
     description: >
-      Generates a comprehensive summary of categorical variables including
-      frequency counts,  percentages, missing value information, and optional
-      visual summaries. Supports multiple  output formats and sorting options
-      for enhanced data exploration. Automatically handles  edge cases like
-      missing values, single categories, and variable conversion.
+      Generates a detailed summary of categorical variables including counts,
+      percentages, and missing value information. The output is presented in
+      both textual and visual formats, making it easy to interpret the
+      distribution of your data.
     ribbon: analyses
     category: analyses
   - title: Benford Analysis
@@ -65,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -73,7 +72,7 @@ analyses:
   - title: Alluvial Diagrams
     name: alluvial
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Alluvial Diagrams
     ribbon: analyses
@@ -81,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -90,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: Function for Generating Tree Summaries of Variables.
@@ -98,7 +97,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables.
@@ -107,7 +106,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >-
@@ -119,7 +118,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: Exploration
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >-
@@ -767,11 +766,15 @@ analyses:
     name: subgroupforest
     ns: ClinicoPath
     menuGroup: SurvivalD
-    menuSubgroup: ClinicoPath Clinical Plots
+    menuSubgroup: ClinicoPath Clinical Analysis
     menuTitle: Subgroup Analysis Forest Plot
-    description: >-
-      Creates forest plots for subgroup analysis showing treatment effects
-      across patient subgroups.
+    description: >
+      Creates forest plots showing treatment effects across different patient
+      subgroups. Performs subgroup analysis for clinical trials and
+      observational studies, calculating treatment effects within patient
+      subgroups and testing for interactions. Supports survival (time-to-event),
+      binary, and continuous outcomes with comprehensive statistical validation
+      and heterogeneity testing.
     ribbon: analyses
     category: analyses
   - title: Advanced Raincloud Plot
@@ -1386,14 +1389,18 @@ analyses:
       'Creates waffle charts to visualize distributions and proportions'
     ribbon: analyses
     category: analyses
-  - title: Graphs and Plots
+  - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
     menuGroup: JJStatsPlotD
-    menuSubgroup: Drafts JJStatsPlot
-    menuTitle: Graphs and Plots
-    description: Function for Generating Plots and Graphs Based on Variable Types.
-    menuSubtitle: Variable Type Based Graphs and Plots
+    menuSubgroup: Auto Visualization
+    menuTitle: Automatic Plot Selection
+    description: >-
+      Automatically selects and generates the most appropriate statistical
+      visualization based on variable data types. Supports both independent and
+      repeated measures designs with various plot types including violin plots,
+      scatter plots, bar charts, and alluvial diagrams.
+    menuSubtitle: Automatic Plot Selection Based on Variable Types
     ribbon: analyses
     category: analyses
   - title: Professional Violin Plot
@@ -1850,6 +1857,92 @@ analyses:
     menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Benford Analysis 2
+  - title: Age Pyramid
+    name: agepyramid2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Age Pyramid
+  - title: Alluvial Diagrams
+    name: alluvial2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Alluvial Diagrams
+  - title: Cross Tables
+    name: crosstable2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Comparisons
+    menuTitle: Cross Tables
+    description: Function for making Cross Tables.
+  - title: Summary of Categorical Variables
+    name: reportcat2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Summary of Categorical Variables
+    description: >
+      Generates a comprehensive summary of categorical variables including
+      frequency counts,  percentages, missing value information, and optional
+      visual summaries. Supports multiple  output formats and sorting options
+      for enhanced data exploration. Automatically handles  edge cases like
+      missing values, single categories, and variable conversion.
+  - title: Summary of Continuous Variables
+    name: summarydata2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Summary of Continuous Variables
+    description: >
+      This module generates descriptive statistics for continuous variables.
+
+      It provides both a textual summary and a visually appealing summary table.
+
+      Optionally, you can enable distribution diagnostics to examine normality,
+      skewness, and kurtosis.
+  - title: Swimmer Plot
+    name: swimmerplot1
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: Patient Follow-Up Plots
+    menuTitle: Swimmer Plot
+    description: >-
+      Creates a swimmer plot to visualize individual patient timelines and
+      clinical events.
+  - title: Variable Tree
+    name: vartree2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Variable Tree
+    description: Function for Generating Tree Summaries of Variables.
+  - title: Venn Diagram
+    name: venn2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptive Plots
+    menuTitle: Venn Diagram
+    menuSubtitle: Venn Diagram, UpSet Plot
+  - title: Treatment Response Analysis
+    name: waterfall2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: Patient Follow-Up Plots
+    menuTitle: Treatment Response Analysis
+    menuSubtitle: Waterfall Plot, Spider Plot
+    description: >-
+      Creates a waterfall plot and analyzes tumor response data following RECIST
+      criteria.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

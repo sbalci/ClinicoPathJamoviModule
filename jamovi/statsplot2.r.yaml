@@ -1,6 +1,6 @@
 ---
 name:  statsplot2
-title: Variable Type Based Graphs and Plots
+title: Automatic Plot Selection Based on Variable Types
 jrs:   '1.1'
 
 items:
@@ -16,19 +16,7 @@ items:
           - excl
           - grvar
           - originaltheme
-          # - pairw
 
-    # - name:  text1
-    #   title: Variable Types
-    #   type:  Preformatted
-
-    # - name:  text2
-    #   title: GGStatsPlot
-    #   type:  Preformatted
-
-    # - name:  text3
-    #   title: GGStatsPlot
-    #   type:  Preformatted
 
     - name:  text4
       title: Explanation
@@ -41,14 +29,10 @@ items:
           - excl
           - grvar
           - originaltheme
-          # - pairw
 
 
-    # - name:  text5
-    #   title: Stats Expression Formula
-    #   type:  Preformatted
 
-    - title: Variable Type Based Graphs and Plots
+    - title: Automatically Selected Plot
       name: plot
       type: Image
       width:  800
@@ -64,7 +48,6 @@ items:
           - excl
           - grvar
           - originaltheme
-          # - pairw
 
 
 refs:

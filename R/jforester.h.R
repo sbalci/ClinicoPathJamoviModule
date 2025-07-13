@@ -60,10 +60,12 @@ jforesterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 ci_upper)
             private$..sample_sizes <- jmvcore::OptionVariable$new(
                 "sample_sizes",
-                sample_sizes)
+                sample_sizes,
+                default=NULL)
             private$..events <- jmvcore::OptionVariable$new(
                 "events",
-                events)
+                events,
+                default=NULL)
             private$..effect_type <- jmvcore::OptionList$new(
                 "effect_type",
                 effect_type,
@@ -515,8 +517,8 @@ jforester <- function(
     estimates,
     ci_lower,
     ci_upper,
-    sample_sizes,
-    events,
+    sample_sizes = NULL,
+    events = NULL,
     effect_type = "or",
     confidence_level = "95",
     reference_line = 1,

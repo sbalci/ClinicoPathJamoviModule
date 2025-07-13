@@ -84,64 +84,9 @@ children:
               - type: CheckBox
                 name: useggswim
                 label: Use ggswim Package
-              - type: TextBox
-                name: markerSize
-                format: number
-                label: Marker Size
-  - type: CollapseBox
-    label: Milestone Options
-    collapsed: true
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Milestone 1
-            children:
-              - type: TextBox
-                name: milestone1Name
-                format: string
-              - type: VariablesListBox
-                name: milestone1Date
-                maxItemCount: 1
-                isTarget: true
-          - type: Label
-            label: Milestone 2
-            children:
-              - type: TextBox
-                name: milestone2Name
-                format: string
-              - type: VariablesListBox
-                name: milestone2Date
-                maxItemCount: 1
-                isTarget: true
-          - type: Label
-            label: Milestone 3
-            children:
-              - type: TextBox
-                name: milestone3Name
-                format: string
-              - type: VariablesListBox
-                name: milestone3Date
-                maxItemCount: 1
-                isTarget: true
-          - type: Label
-            label: Milestone 4
-            children:
-              - type: TextBox
-                name: milestone4Name
-                format: string
-              - type: VariablesListBox
-                name: milestone4Date
-                maxItemCount: 1
-                isTarget: true
-          - type: Label
-            label: Milestone 5
-            children:
-              - type: TextBox
-                name: milestone5Name
-                format: string
-              - type: VariablesListBox
-                name: milestone5Date
-                maxItemCount: 1
-                isTarget: true
+      - type: TextBox
+        name: markerSize
+        format: number

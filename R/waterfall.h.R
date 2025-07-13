@@ -50,8 +50,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"),
-                default=NULL)
+                    "numeric"))
             private$..inputType <- jmvcore::OptionList$new(
                 "inputType",
                 inputType,
@@ -179,7 +178,6 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         todo2 = function() private$.items[["todo2"]],
         summaryTable = function() private$.items[["summaryTable"]],
-        personTimeTable = function() private$.items[["personTimeTable"]],
         clinicalMetrics = function() private$.items[["clinicalMetrics"]],
         waterfallplot = function() private$.items[["waterfallplot"]],
         spiderplot = function() private$.items[["spiderplot"]],
@@ -238,40 +236,6 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "inputType")))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="personTimeTable",
-                title="Person-Time Analysis",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="category", 
-                        `title`="Response Category", 
-                        `type`="text"),
-                    list(
-                        `name`="patients", 
-                        `title`="Patients", 
-                        `type`="integer"),
-                    list(
-                        `name`="patient_pct", 
-                        `title`="% Patients", 
-                        `type`="text"),
-                    list(
-                        `name`="person_time", 
-                        `title`="Person-Time", 
-                        `type`="text"),
-                    list(
-                        `name`="time_pct", 
-                        `title`="% Time", 
-                        `type`="text"),
-                    list(
-                        `name`="median_time", 
-                        `title`="Median Time to Response", 
-                        `type`="text"),
-                    list(
-                        `name`="median_duration", 
-                        `title`="Median Duration", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
                 name="clinicalMetrics",
                 title="Clinical Response Metrics",
                 rows=0,
@@ -326,7 +290,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="addResponseCategory",
                 title="Add Response Category to Data",
-                varTitle="`Calculated Response Category`",
+                varTitle="RECIST",
                 varDescription="Calculated response category based on RECIST criteria.",
                 measureType="nominal",
                 clearWith=list(
@@ -343,7 +307,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "waterfall",
-                version = c(0,0,3),
+                version = c(0,0,2),
                 options = options,
                 results = waterfallResults$new(options=options),
                 data = data,
@@ -358,23 +322,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Treatment Response Analysis
 #'
-#' Creates a waterfall plot and analyzes tumor response data following RECIST 
-#' criteria.
-#'
-#' @examples
-#' \donttest{
-#' data <- data.frame(
-#'     PatientID = paste0("PT", 1:10),
-#'     Response = c(-100, -45, -30, -20, -10, 0, 10, 20, 30, 40),
-#'     Time = c(0, 2, 4, 6, 8, 10, 12, 14, 16, 18)
-#' )
-#' waterfall(
-#'     data = data,
-#'     patientID = "PatientID",
-#'     responseVar = "Response",
-#'     timeVar = "Time"
-#' )
-#'}
+#' 
 #' @param data The data as a data frame.
 #' @param patientID Variable containing patient identifiers.
 #' @param responseVar Percentage change in tumor size.
@@ -384,8 +332,8 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   calculate percent change) or 'percentage' for pre-calculated percentage
 #'   changes
 #' @param sortBy Sort the waterfall plot by best response or patient ID.
-#' @param showThresholds Show +20 percent and -30 percent RECIST thresholds.
-#' @param labelOutliers Label responses exceeding the specified threshold.
+#' @param showThresholds .
+#' @param labelOutliers .
 #' @param showMedian Show median response as a horizontal line.
 #' @param showCI Show confidence interval around median response.
 #' @param minResponseForLabel Minimum response value for labels to be
@@ -393,16 +341,14 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param colorScheme Color scheme for waterfall plot.
 #' @param barAlpha Transparency of bars in waterfall plot.
 #' @param barWidth Width of bars in waterfall plot.
-#' @param showWaterfallPlot Display the waterfall plot showing best response
-#'   for each patient.
-#' @param showSpiderPlot Display spider plot showing response trajectories
-#'   over time (requires time variable).
+#' @param showWaterfallPlot .
+#' @param showSpiderPlot Create an additional spider plot showing response
+#'   over time if longitudinal data available
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$waterfallplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
@@ -420,7 +366,7 @@ waterfall <- function(
     data,
     patientID,
     responseVar,
-    timeVar = NULL,
+    timeVar,
     inputType = "percentage",
     sortBy = "response",
     showThresholds = FALSE,

@@ -40,11 +40,13 @@ options:
       title: Sample Sizes
       type: Variable
       description: Sample sizes for each study/group (optional)
+      default: NULL
 
     - name: events
       title: Events/Cases
       type: Variable
       description: Number of events or cases (optional)
+      default: NULL
 
     - name: effect_type
       title: Effect Measure Type

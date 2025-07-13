@@ -1,0 +1,88 @@
+---
+name:  crosstable2
+title: Cross Tables
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Comparisons
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: Function for making Cross Tables.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage:
+            # dat <- as.data.frame(your_data)
+            # ClinicoPath::crosstable(
+            #   data = dat,
+            #   vars = vars(YourRowVariable),
+            #   group = "YourGroupingVariable",
+            #   sty = "finalfit",
+            #   excl = TRUE,
+            #   cont = "mean",
+            #   pcat = "chisq",
+            #   exportCSV = TRUE
+            # )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+    - name: vars
+      title: Dependent Variable(s)
+      type: Variables
+      description: >
+            The variable(s) that will appear as rows in the cross table.
+    - name: group
+      title: Grouping Variable
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description: >
+            The variable that will appear as columns (groups) in the table.
+    - name: sty
+      title: Table Style
+      type: List
+      options:
+        - title: arsenal
+          name: arsenal
+        - title: finalfit
+          name: finalfit
+        - title: gtsummary
+          name: gtsummary
+        - title: NEJM
+          name: nejm
+        - title: Lancet
+          name: lancet
+        - title: hmisc
+          name: hmisc
+      default: nejm
+    - name: excl
+      title: Exclude Missing (NA)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Exclude rows with missing values.
+    - name: cont
+      title: Mean vs Median
+      type: List
+      options:
+        - title: mean
+          name: mean
+        - title: median
+          name: median
+      default: mean
+    - name: pcat
+      title: ChiSq vs Fisher
+      type: List
+      options:
+        - title: chisq
+          name: chisq
+        - title: fisher
+          name: fisher
+      default: chisq
+
+...

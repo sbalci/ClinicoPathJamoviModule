@@ -25,37 +25,56 @@ subgroupforest(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{outcome}{Primary outcome variable (time-to-event, binary, or
-continuous).}
+\item{outcome}{Primary outcome variable. For survival analysis, this should
+be the time variable. For binary outcomes, use 0/1 or factor with 2 levels.
+For continuous outcomes, use numeric variables.}
 
-\item{treatment}{Treatment or exposure variable (binary factor).}
+\item{treatment}{Treatment or exposure variable (must be binary: 0/1,
+control/treatment). This variable defines the two groups being compared in
+the analysis.}
 
-\item{subgroups}{Variables defining patient subgroups for analysis.}
+\item{subgroups}{Variables defining patient subgroups for analysis
+(categorical variables). Each variable will be analyzed separately to
+identify differential treatment effects. Examples: age groups, gender,
+disease stage, biomarker status.}
 
-\item{time}{Time variable for survival analysis (required if outcome is
-survival time).}
+\item{time}{Time variable for survival analysis (numeric, required if
+outcomeType = "survival"). Should contain time to event or censoring in
+consistent units (days, months, years).}
 
-\item{event}{Event indicator for survival analysis (1=event, 0=censored).}
+\item{event}{Event indicator for survival analysis (binary: 1=event
+occurred, 0=censored). Required for survival analysis to distinguish
+between observed events and censored observations.}
 
-\item{outcomeType}{Type of outcome variable for appropriate statistical
-analysis.}
+\item{outcomeType}{Type of outcome variable: "survival" (time-to-event),
+"binary" (yes/no), "continuous". Determines the statistical method used for
+analysis (Cox regression, logistic regression, linear regression).}
 
-\item{effectMeasure}{Statistical measure for treatment effect.}
+\item{effectMeasure}{Statistical measure for treatment effect: "hr" (hazard
+ratio), "or" (odds ratio),  "rr" (risk ratio), "md" (mean difference).
+Should match the outcome type.}
 
 \item{confidenceLevel}{Confidence level for intervals.}
 
 \item{showOverall}{Display overall treatment effect across all patients.}
 
-\item{showInteraction}{Perform statistical tests for subgroup interactions.}
+\item{showInteraction}{Perform statistical tests for subgroup interactions
+using likelihood ratio tests. Tests whether treatment effect varies
+significantly across subgroups.}
 
-\item{sortBy}{Method for ordering subgroups in the plot.}
+\item{sortBy}{Method for ordering subgroups in the plot: "effect" (by
+effect size),  "n" (by sample size), "alpha" (alphabetical). Affects visual
+presentation.}
 
 \item{showSampleSizes}{Display sample sizes for each subgroup.}
 
-\item{logScale}{Display effects on log scale (appropriate for ratios).}
+\item{logScale}{Display effects on log scale (recommended for ratios: HR,
+OR, RR). Makes ratio effects more interpretable and symmetric around null
+value.}
 
-\item{nullLine}{Value for null effect reference line (1 for ratios, 0 for
-differences).}
+\item{nullLine}{Value for null effect reference line (1 for ratios:
+HR/OR/RR, 0 for differences: MD). Vertical line indicating no treatment
+effect.}
 }
 \value{
 A results object containing:
@@ -74,5 +93,34 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summary)}
 }
 \description{
-Subgroup Analysis Forest Plot
+Creates forest plots showing treatment effects across different patient
+subgroups. Performs subgroup analysis for clinical trials and observational
+studies, calculating treatment effects within patient subgroups and testing
+for interactions. Supports survival (time-to-event), binary, and continuous
+outcomes with comprehensive statistical validation and heterogeneity
+testing.
+}
+\examples{
+# Survival outcome subgroup analysis
+subgroupforest(
+    data = clinical_trial,
+    outcome = "time_to_event",
+    treatment = "treatment_arm",
+    subgroups = c("age_group", "gender", "stage"),
+    time = "time_to_event",
+    event = "event_occurred",
+    outcomeType = "survival",
+    effectMeasure = "hr"
+)
+
+# Binary outcome analysis
+subgroupforest(
+    data = study_data,
+    outcome = "response",
+    treatment = "intervention",
+    subgroups = c("age_category", "sex"),
+    outcomeType = "binary",
+    effectMeasure = "or"
+)
+
 }

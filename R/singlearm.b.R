@@ -150,64 +150,38 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           timetypedata <- self$options$timetypedata
 
 
-          # # Define a mapping from timetypedata to lubridate functions
-          # lubridate_functions <- list(
-          #     ymdhms = lubridate::ymd_hms,
-          #     ymd = lubridate::ymd,
-          #     ydm = lubridate::ydm,
-          #     mdy = lubridate::mdy,
-          #     myd = lubridate::myd,
-          #     dmy = lubridate::dmy,
-          #     dym = lubridate::dym
-          # )
-          # # Apply the appropriate lubridate function based on timetypedata
-          # if (timetypedata %in% names(lubridate_functions)) {
-          #     func <- lubridate_functions[[timetypedata]]
-          #     mydata[["start"]] <- func(mydata[[dxdate]])
-          #     mydata[["end"]] <- func(mydata[[fudate]])
-          # }
-
-
-          if (timetypedata == "ymdhms") {
-            mydata[["start"]] <- lubridate::ymd_hms(mydata[[dxdate]])
-            mydata[["end"]] <-
-              lubridate::ymd_hms(mydata[[fudate]])
-          }
-          if (timetypedata == "ymd") {
-            mydata[["start"]] <- lubridate::ymd(mydata[[dxdate]])
-            mydata[["end"]] <-
-              lubridate::ymd(mydata[[fudate]])
-          }
-          if (timetypedata == "ydm") {
-            mydata[["start"]] <- lubridate::ydm(mydata[[dxdate]])
-            mydata[["end"]] <-
-              lubridate::ydm(mydata[[fudate]])
-          }
-          if (timetypedata == "mdy") {
-            mydata[["start"]] <- lubridate::mdy(mydata[[dxdate]])
-            mydata[["end"]] <-
-              lubridate::mdy(mydata[[fudate]])
-          }
-          if (timetypedata == "myd") {
-            mydata[["start"]] <- lubridate::myd(mydata[[dxdate]])
-            mydata[["end"]] <-
-              lubridate::myd(mydata[[fudate]])
-          }
-          if (timetypedata == "dmy") {
-            mydata[["start"]] <- lubridate::dmy(mydata[[dxdate]])
-            mydata[["end"]] <-
-              lubridate::dmy(mydata[[fudate]])
-          }
-          if (timetypedata == "dym") {
-            mydata[["start"]] <- lubridate::dym(mydata[[dxdate]])
-            mydata[["end"]] <-
-              lubridate::dym(mydata[[fudate]])
+          # Define a mapping from timetypedata to lubridate functions
+          lubridate_functions <- list(
+              ymdhms = lubridate::ymd_hms,
+              ymd = lubridate::ymd,
+              ydm = lubridate::ydm,
+              mdy = lubridate::mdy,
+              myd = lubridate::myd,
+              dmy = lubridate::dmy,
+              dym = lubridate::dym
+          )
+          
+          # Apply the appropriate lubridate function based on timetypedata
+          if (timetypedata %in% names(lubridate_functions)) {
+              func <- lubridate_functions[[timetypedata]]
+              mydata[["start"]] <- func(mydata[[dxdate]])
+              mydata[["end"]] <- func(mydata[[fudate]])
+          } else {
+              stop(paste0("Unsupported time type format: ", timetypedata, 
+                         ". Supported formats are: ", paste(names(lubridate_functions), collapse = ", ")))
           }
 
 
 
           if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
-            stop(paste0("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: ", self$options$timetypedata)
+            start_valid <- sum(!is.na(mydata[["start"]]))
+            end_valid <- sum(!is.na(mydata[["end"]]))
+            stop(paste0("Time difference cannot be calculated. ",
+                       "Start date valid entries: ", start_valid, ", ",
+                       "End date valid entries: ", end_valid, ". ",
+                       "Please verify that your date variables match the selected format: ", 
+                       self$options$timetypedata, ". ",
+                       "Common issues: incorrect date format, missing values, or non-date data in date columns.")
             )
           }
 
@@ -220,13 +194,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             dplyr::mutate(interval = lubridate::interval(start, end))
 
 
-          # self$results$mydataview$setContent(
-          #     list(
-          #       "mydata" = head(mydata),
-          #       "start" = sum(!is.na(mydata[["start"]])),
-          #       "end" = sum(!is.na(mydata[["end"]]))
-          #     )
-          # )
 
           mydata <- mydata %>%
             dplyr::mutate(mytime = lubridate::time_length(interval, timetypeoutput))
@@ -264,13 +231,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         if (!multievent) {
           if (inherits(outcome1, contin)) {
-            if (!((length(unique(
-              outcome1[!is.na(outcome1)]
-            )) == 2) && (sum(unique(
-              outcome1[!is.na(outcome1)]
-            )) == 1))) {
+            unique_vals <- unique(outcome1[!is.na(outcome1)])
+            if (!((length(unique_vals) == 2) && (sum(unique_vals) == 1))) {
               stop(
-                'When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.'
+                paste0('When using continuous variable as an outcome, it must only contain 1s and 0s. ',
+                       'Current unique values found: ', paste(sort(unique_vals), collapse = ", "), '. ',
+                       'Expected: 0 (censored/alive/disease-free) and 1 (event/dead/recurrence). ',
+                       'Please recode your outcome variable or use factor levels instead.')
               )
 
             }
@@ -557,11 +524,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         ## Add Calculated Time to Data ----
 
-        # self$results$mydataview$setContent(
-        #     list(
-        #         head(results$cleanData)
-        #     )
-        # )
 
 
         if ( self$options$tint && self$options$calculatedtime && self$results$calculatedtime$isNotFilled()) {
@@ -609,21 +571,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         km_fit_median_df <- summary(km_fit)
 
 
-        # medianSummary2 <-
-        #   as.data.frame(km_fit_median_df$table)
-        # self$results$medianSummary2$setContent(medianSummary2)
-
-
-
-        results1html <-
+        # Process survival fit results for table display
+        results1table <-
           as.data.frame(km_fit_median_df$table) %>%
           t() %>%
           as.data.frame() %>%
           janitor::clean_names(dat = ., case = "snake")
-
-        results1table <- results1html
-
-        # self$results$medianSummary2$setContent(results1table)
 
         # records n_max n_start events rmean se_rmean median
         # km_fit_median_df$table     247   247     247    167 22.06    1.234   15.9
@@ -676,7 +629,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           dplyr::pull(.) -> km_fit_median_definition
 
 
+        # Add additional statistical information
+        n_events <- km_fit_median_df$table[["events"]]
+        n_total <- km_fit_median_df$table[["records"]]
+        event_rate <- round((n_events / n_total) * 100, 1)
+        
         medianSummary <- c(km_fit_median_definition,
+                           paste0("Event rate: ", event_rate, "% (", n_events, " events out of ", n_total, " subjects)."),
                            "The median survival time is when 50% of subjects have experienced the event.",
                            "This means that 50% of subjects in this group survived longer than this time period.",
                            "Note: Confidence intervals are calculated using the log-log transformation method for improved accuracy with censored data (not plain Greenwood formula)."
@@ -742,7 +701,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                          "lower",
                                          "upper")])
 
-        # self$results$tableview$setContent(km_fit_df)
 
 
         # km_fit_df[, 1] <- gsub(
@@ -782,7 +740,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           dplyr::mutate(
             description =
               glue::glue(
-                "{time} month survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n The estimated probability of surviving beyond {time} months was {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n At this time point, there were {n.risk} subjects still at risk and {n.event} events had occurred in this group."
+                "{time} {self$options$timetypeoutput} survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n The estimated probability of surviving beyond {time} {self$options$timetypeoutput} was {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n At this time point, there were {n.risk} subjects still at risk and {n.event} events had occurred in this group. \n Event rate by this timepoint: {scales::percent(n.event / km_fit_df$n.risk[1])}."
               )
           ) %>%
           dplyr::select(description) %>%
@@ -911,13 +869,19 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }
         }
 
+        # Calculate additional statistics
+        mean_follow_up <- round(total_time / nrow(mydata), 2)
+        median_follow_up <- round(stats::median(mydata[[mytime]]), 2)
+        
         # Create summary text with interpretation
         summary_html <- glue::glue("
     <h4>Person-Time Analysis Summary</h4>
     <p>Total follow-up time: <b>{round(total_time, 1)} {time_unit}</b></p>
-    <p>Number of events: <b>{total_events}</b></p>
+    <p>Mean follow-up time: <b>{mean_follow_up} {time_unit}</b></p>
+    <p>Median follow-up time: <b>{median_follow_up} {time_unit}</b></p>
+    <p>Number of events: <b>{total_events}</b> out of <b>{nrow(mydata)}</b> subjects</p>
     <p>Overall incidence rate: <b>{round(overall_rate, 2)}</b> per {rate_multiplier} {time_unit} [95% CI: {round(ci_lower, 2)}-{round(ci_upper, 2)}]</p>
-    <p>This represents the rate at which events occurred in your study population. The incidence rate is calculated as the number of events divided by the total person-time at risk.</p>
+    <p><i>Interpretation:</i> This represents the rate at which events occurred in your study population. The incidence rate is calculated as the number of events divided by the total person-time at risk. Confidence intervals use the exact Poisson method.</p>
   ")
 
         self$results$personTimeSummary$setContent(summary_html)

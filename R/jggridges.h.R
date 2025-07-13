@@ -59,7 +59,8 @@ jggridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..facet_var <- jmvcore::OptionVariable$new(
                 "facet_var",
                 facet_var,
@@ -67,7 +68,8 @@ jggridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..plot_type <- jmvcore::OptionList$new(
                 "plot_type",
                 plot_type,
@@ -364,8 +366,8 @@ jggridges <- function(
     data,
     x_var,
     y_var,
-    color_var,
-    facet_var,
+    color_var = NULL,
+    facet_var = NULL,
     plot_type = "density_ridges",
     scale = 1,
     rel_min_height = 0.01,

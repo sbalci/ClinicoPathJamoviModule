@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup}
-include: false
+#| include: false
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -76,14 +76,14 @@ The `jggstats` function provides advanced statistical visualization capabilities
 data("linear_model_data")
 
 # Basic coefficient plot
-jggstats(
-  data = linear_model_data,
-  dependent_var = "outcome",
-  independent_vars = c("age", "sex", "treatment"),
-  analysis_type = "ggcoef_model",
-  model_type = "lm",
-  plot_title = "Linear Model Coefficients"
-)
+# jggstats(
+#   data = linear_model_data,
+#   dependent_var = "outcome",
+#   independent_vars = c("age", "sex", "treatment"),
+#   analysis_type = "ggcoef_model",
+#   model_type = "lm",
+#   plot_title = "Linear Model Coefficients"
+# )
 ```
 
 ### Logistic Regression Coefficients
@@ -93,18 +93,18 @@ jggstats(
 data("logistic_model_data")
 
 # Logistic regression coefficient plot
-jggstats(
-  data = logistic_model_data,
-  dependent_var = "disease",
-  independent_vars = c("age", "sex", "smoking", "bmi"),
-  analysis_type = "ggcoef_model",
-  model_type = "glm",
-  family = "binomial",
-  sort_coefficients = TRUE,
-  show_significance = TRUE,
-  plot_title = "Disease Risk Factors",
-  plot_subtitle = "Logistic regression odds ratios"
-)
+# jggstats(
+#   data = logistic_model_data,
+#   dependent_var = "disease",
+#   independent_vars = c("age", "sex", "smoking", "bmi"),
+#   analysis_type = "ggcoef_model",
+#   model_type = "glm",
+#   family = "binomial",
+#   sort_coefficients = TRUE,
+#   show_significance = TRUE,
+#   plot_title = "Disease Risk Factors",
+#   plot_subtitle = "Logistic regression odds ratios"
+# )
 ```
 
 ## Clinical Research Applications
@@ -116,19 +116,19 @@ jggstats(
 data("survival_analysis_data")
 
 # Cox regression coefficient plot
-jggstats(
-  data = survival_analysis_data,
-  model_formula = "Surv(survival_time, event) ~ age + sex + stage + treatment",
-  analysis_type = "ggcoef_model",
-  model_type = "coxph",
-  show_intercept = FALSE,
-  sort_coefficients = TRUE,
-  color_palette = "viridis",
-  plot_title = "Survival Analysis",
-  plot_subtitle = "Cox regression hazard ratios",
-  show_model_summary = TRUE,
-  show_interpretation = TRUE
-)
+# jggstats(
+#   data = survival_analysis_data,
+#   model_formula = "Surv(survival_time, event) ~ age + sex + stage + treatment",
+#   analysis_type = "ggcoef_model",
+#   model_type = "coxph",
+#   show_intercept = FALSE,
+#   sort_coefficients = TRUE,
+#   color_palette = "viridis",
+#   plot_title = "Survival Analysis",
+#   plot_subtitle = "Cox regression hazard ratios",
+#   show_model_summary = TRUE,
+#   show_interpretation = TRUE
+# )
 ```
 
 ### Biomarker Analysis
@@ -138,39 +138,39 @@ jggstats(
 biomarker_data <- logistic_model_data %>%
   filter(!is.na(biomarker_level))
 
-jggstats(
-  data = biomarker_data,
-  dependent_var = "disease",
-  independent_vars = c("biomarker_level", "age", "sex"),
-  grouping_var = "family_history",
-  analysis_type = "ggcoef_compare",
-  model_type = "glm",
-  family = "binomial",
-  confidence_level = 0.95,
-  color_palette = "set1",
-  plot_title = "Biomarker Effects by Family History",
-  facet_var = "clinic",
-  facet_type = "wrap"
-)
+# jggstats(
+#   data = biomarker_data,
+#   dependent_var = "disease",
+#   independent_vars = c("biomarker_level", "age", "sex"),
+#   grouping_var = "family_history",
+#   analysis_type = "ggcoef_compare",
+#   model_type = "glm",
+#   family = "binomial",
+#   confidence_level = 0.95,
+#   color_palette = "set1",
+#   plot_title = "Biomarker Effects by Family History",
+#   facet_var = "clinic",
+#   facet_type = "wrap"
+# )
 ```
 
 ### Treatment Response Analysis
 
 ```{r treatment-response}
 # Analyze treatment effects
-jggstats(
-  data = linear_model_data,
-  dependent_var = "outcome",
-  independent_vars = c("treatment", "age", "baseline_score"),
-  analysis_type = "ggcoef_model",
-  model_type = "lm",
-  show_intercept = FALSE,
-  standardized = TRUE,
-  show_significance = TRUE,
-  plot_title = "Treatment Effects Analysis",
-  plot_subtitle = "Standardized coefficients",
-  theme_style = "classic"
-)
+# jggstats(
+#   data = linear_model_data,
+#   dependent_var = "outcome",
+#   independent_vars = c("treatment", "age", "baseline_score"),
+#   analysis_type = "ggcoef_model",
+#   model_type = "lm",
+#   show_intercept = FALSE,
+#   standardized = TRUE,
+#   show_significance = TRUE,
+#   plot_title = "Treatment Effects Analysis",
+#   plot_subtitle = "Standardized coefficients",
+#   theme_style = "classic"
+# )
 ```
 
 ## Survey Data Analysis
@@ -182,16 +182,16 @@ jggstats(
 data("likert_survey_data")
 
 # Likert plot for satisfaction measures
-jggstats(
-  data = likert_survey_data,
-  dependent_var = "satisfaction_work",
-  grouping_var = "department",
-  analysis_type = "gglikert",
-  likert_levels = 5,
-  color_palette = "viridis",
-  plot_title = "Work Satisfaction by Department",
-  plot_subtitle = "Employee survey responses (1-5 scale)"
-)
+# jggstats(
+#   data = likert_survey_data,
+#   dependent_var = "satisfaction_work",
+#   grouping_var = "department",
+#   analysis_type = "gglikert",
+#   likert_levels = 5,
+#   color_palette = "viridis",
+#   plot_title = "Work Satisfaction by Department",
+#   plot_subtitle = "Employee survey responses (1-5 scale)"
+# )
 ```
 
 ### Weighted Survey Analysis
@@ -201,17 +201,17 @@ jggstats(
 data("survey_proportion_data")
 
 # Weighted survey analysis
-jggstats(
-  data = survey_proportion_data,
-  dependent_var = "political_preference",
-  weight_var = "weight",
-  grouping_var = "age_category",
-  analysis_type = "ggsurvey",
-  color_palette = "dark2",
-  plot_title = "Political Preferences by Age",
-  plot_subtitle = "Weighted survey estimates",
-  show_interpretation = TRUE
-)
+# jggstats(
+#   data = survey_proportion_data,
+#   dependent_var = "political_preference",
+#   weight_var = "weight",
+#   grouping_var = "age_category",
+#   analysis_type = "ggsurvey",
+#   color_palette = "dark2",
+#   plot_title = "Political Preferences by Age",
+#   plot_subtitle = "Weighted survey estimates",
+#   show_interpretation = TRUE
+# )
 ```
 
 ### Cross-tabulation Analysis
@@ -221,17 +221,17 @@ jggstats(
 data("cross_tab_data")
 
 # Cross-tabulation visualization
-jggstats(
-  data = cross_tab_data,
-  dependent_var = "test_result",
-  grouping_var = "disease_status",
-  analysis_type = "stat_cross",
-  color_palette = "paired",
-  plot_title = "Diagnostic Test Performance",
-  plot_subtitle = "Test results by true disease status",
-  facet_var = "age_group",
-  facet_type = "wrap"
-)
+# jggstats(
+#   data = cross_tab_data,
+#   dependent_var = "test_result",
+#   grouping_var = "disease_status",
+#   analysis_type = "stat_cross",
+#   color_palette = "paired",
+#   plot_title = "Diagnostic Test Performance",
+#   plot_subtitle = "Test results by true disease status",
+#   facet_var = "age_group",
+#   facet_type = "wrap"
+# )
 ```
 
 ## Educational Data Analysis
@@ -243,36 +243,36 @@ jggstats(
 data("model_comparison_data")
 
 # Model achievement predictors
-jggstats(
-  data = model_comparison_data,
-  dependent_var = "test_score",
-  independent_vars = c("socioeconomic_status", "parent_education", "school_type", "class_size"),
-  analysis_type = "ggcoef_model",
-  model_type = "lm",
-  sort_coefficients = TRUE,
-  show_significance = TRUE,
-  plot_title = "Academic Achievement Predictors",
-  plot_subtitle = "Factors affecting test scores",
-  show_model_summary = TRUE
-)
+# jggstats(
+#   data = model_comparison_data,
+#   dependent_var = "test_score",
+#   independent_vars = c("socioeconomic_status", "parent_education", "school_type", "class_size"),
+#   analysis_type = "ggcoef_model",
+#   model_type = "lm",
+#   sort_coefficients = TRUE,
+#   show_significance = TRUE,
+#   plot_title = "Academic Achievement Predictors",
+#   plot_subtitle = "Factors affecting test scores",
+#   show_model_summary = TRUE
+# )
 ```
 
 ### School Comparison Analysis
 
 ```{r school-comparison}
 # Compare models across districts
-jggstats(
-  data = model_comparison_data,
-  dependent_var = "test_score",
-  independent_vars = c("socioeconomic_status", "parent_education"),
-  grouping_var = "district",
-  analysis_type = "ggcoef_compare",
-  model_type = "lm",
-  confidence_level = 0.90,
-  color_palette = "set1",
-  plot_title = "District-Specific Achievement Models",
-  plot_subtitle = "Model comparison across school districts"
-)
+# jggstats(
+#   data = model_comparison_data,
+#   dependent_var = "test_score",
+#   independent_vars = c("socioeconomic_status", "parent_education"),
+#   grouping_var = "district",
+#   analysis_type = "ggcoef_compare",
+#   model_type = "lm",
+#   confidence_level = 0.90,
+#   color_palette = "set1",
+#   plot_title = "District-Specific Achievement Models",
+#   plot_subtitle = "Model comparison across school districts"
+# )
 ```
 
 ## Advanced Statistical Modeling
@@ -284,18 +284,18 @@ jggstats(
 data("mixed_effects_data")
 
 # Mixed effects model visualization
-jggstats(
-  data = mixed_effects_data,
-  dependent_var = "score",
-  independent_vars = c("time_months", "treatment_group", "baseline_severity"),
-  analysis_type = "ggcoef_model",
-  model_type = "lmer",
-  show_intercept = FALSE,
-  sort_coefficients = TRUE,
-  plot_title = "Longitudinal Treatment Effects",
-  plot_subtitle = "Mixed effects model coefficients",
-  theme_style = "minimal"
-)
+# jggstats(
+#   data = mixed_effects_data,
+#   dependent_var = "score",
+#   independent_vars = c("time_months", "treatment_group", "baseline_severity"),
+#   analysis_type = "ggcoef_model",
+#   model_type = "lmer",
+#   show_intercept = FALSE,
+#   sort_coefficients = TRUE,
+#   plot_title = "Longitudinal Treatment Effects",
+#   plot_subtitle = "Mixed effects model coefficients",
+#   theme_style = "minimal"
+# )
 ```
 
 ### Complex Survey Design
@@ -305,35 +305,35 @@ jggstats(
 data("weighted_analysis_data")
 
 # Weighted means analysis
-jggstats(
-  data = weighted_analysis_data,
-  dependent_var = "income_thousands",
-  grouping_var = "head_education",
-  weight_var = "final_weight",
-  analysis_type = "stat_weighted_mean",
-  color_palette = "viridis",
-  plot_title = "Income by Education Level",
-  plot_subtitle = "Population-weighted estimates",
-  show_interpretation = TRUE,
-  output_format = "both"
-)
+# jggstats(
+#   data = weighted_analysis_data,
+#   dependent_var = "income_thousands",
+#   grouping_var = "head_education",
+#   weight_var = "final_weight",
+#   analysis_type = "stat_weighted_mean",
+#   color_palette = "viridis",
+#   plot_title = "Income by Education Level",
+#   plot_subtitle = "Population-weighted estimates",
+#   show_interpretation = TRUE,
+#   output_format = "both"
+# )
 ```
 
 ### Proportion Analysis
 
 ```{r proportion-analysis}
 # Analyze health coverage proportions
-jggstats(
-  data = weighted_analysis_data,
-  dependent_var = "insurance_coverage",
-  grouping_var = "geography",
-  analysis_type = "stat_prop",
-  color_palette = "dark2",
-  plot_title = "Insurance Coverage by Geography",
-  plot_subtitle = "Proportion analysis",
-  facet_var = "state_region",
-  facet_type = "wrap"
-)
+# jggstats(
+#   data = weighted_analysis_data,
+#   dependent_var = "insurance_coverage",
+#   grouping_var = "geography",
+#   analysis_type = "stat_prop",
+#   color_palette = "dark2",
+#   plot_title = "Insurance Coverage by Geography",
+#   plot_subtitle = "Proportion analysis",
+#   facet_var = "state_region",
+#   facet_type = "wrap"
+# )
 ```
 
 ## Data Quality and Cascade Analysis
@@ -342,15 +342,15 @@ jggstats(
 
 ```{r cascade-analysis}
 # Cascade analysis for data quality
-jggstats(
-  data = linear_model_data,
-  dependent_var = "outcome",
-  independent_vars = c("age", "sex", "treatment", "baseline_score"),
-  analysis_type = "ggcascade",
-  plot_title = "Data Cascade Analysis",
-  plot_subtitle = "Sample size at each analysis step",
-  theme_style = "classic"
-)
+# jggstats(
+#   data = linear_model_data,
+#   dependent_var = "outcome",
+#   independent_vars = c("age", "sex", "treatment", "baseline_score"),
+#   analysis_type = "ggcascade",
+#   plot_title = "Data Cascade Analysis",
+#   plot_subtitle = "Sample size at each analysis step",
+#   theme_style = "classic"
+# )
 ```
 
 ### Missing Data Patterns
@@ -361,14 +361,14 @@ incomplete_data <- model_comparison_data
 incomplete_data$test_score[sample(nrow(incomplete_data), 50)] <- NA
 incomplete_data$socioeconomic_status[sample(nrow(incomplete_data), 30)] <- NA
 
-jggstats(
-  data = incomplete_data,
-  dependent_var = "test_score",
-  independent_vars = c("socioeconomic_status", "parent_education", "school_type"),
-  analysis_type = "ggcascade",
-  plot_title = "Missing Data Impact",
-  plot_subtitle = "Sample reduction due to missing values"
-)
+# jggstats(
+#   data = incomplete_data,
+#   dependent_var = "test_score",
+#   independent_vars = c("socioeconomic_status", "parent_education", "school_type"),
+#   analysis_type = "ggcascade",
+#   plot_title = "Missing Data Impact",
+#   plot_subtitle = "Sample reduction due to missing values"
+# )
 ```
 
 ## Advanced Customization
@@ -377,46 +377,46 @@ jggstats(
 
 ```{r custom-styling}
 # Advanced styling example
-jggstats(
-  data = logistic_model_data,
-  dependent_var = "disease",
-  independent_vars = c("age", "bmi", "biomarker_level"),
-  grouping_var = "smoking",
-  analysis_type = "ggcoef_model",
-  model_type = "glm",
-  family = "binomial",
-  standardized = FALSE,
-  show_intercept = FALSE,
-  sort_coefficients = TRUE,
-  show_significance = TRUE,
-  confidence_level = 0.95,
-  color_palette = "viridis",
-  theme_style = "dark",
-  plot_title = "Disease Risk Model",
-  plot_subtitle = "Logistic regression with custom styling",
-  x_label = "Log Odds Ratio",
-  y_label = "Risk Factors",
-  show_model_summary = TRUE,
-  show_interpretation = TRUE
-)
+# jggstats(
+#   data = logistic_model_data,
+#   dependent_var = "disease",
+#   independent_vars = c("age", "bmi", "biomarker_level"),
+#   grouping_var = "smoking",
+#   analysis_type = "ggcoef_model",
+#   model_type = "glm",
+#   family = "binomial",
+#   standardized = FALSE,
+#   show_intercept = FALSE,
+#   sort_coefficients = TRUE,
+#   show_significance = TRUE,
+#   confidence_level = 0.95,
+#   color_palette = "viridis",
+#   theme_style = "dark",
+#   plot_title = "Disease Risk Model",
+#   plot_subtitle = "Logistic regression with custom styling",
+#   x_label = "Log Odds Ratio",
+#   y_label = "Risk Factors",
+#   show_model_summary = TRUE,
+#   show_interpretation = TRUE
+# )
 ```
 
 ### Faceted Analysis
 
 ```{r faceted-analysis}
 # Multi-panel analysis
-jggstats(
-  data = survey_proportion_data,
-  dependent_var = "approve_policy",
-  grouping_var = "political_preference",
-  analysis_type = "stat_prop",
-  facet_var = "education_level",
-  facet_type = "wrap",
-  color_palette = "set1",
-  plot_title = "Policy Approval by Political Preference",
-  plot_subtitle = "Broken down by education level",
-  theme_style = "minimal"
-)
+# jggstats(
+#   data = survey_proportion_data,
+#   dependent_var = "approve_policy",
+#   grouping_var = "political_preference",
+#   analysis_type = "stat_prop",
+#   facet_var = "education_level",
+#   facet_type = "wrap",
+#   color_palette = "set1",
+#   plot_title = "Policy Approval by Political Preference",
+#   plot_subtitle = "Broken down by education level",
+#   theme_style = "minimal"
+# )
 ```
 
 ## Model Comparison and Selection
@@ -428,43 +428,43 @@ jggstats(
 base_data <- linear_model_data
 
 # Model 1: Simple linear
-jggstats(
-  data = base_data,
-  dependent_var = "outcome",
-  independent_vars = c("age", "sex"),
-  analysis_type = "ggcoef_model",
-  model_type = "lm",
-  plot_title = "Simple Linear Model",
-  show_model_summary = TRUE
-)
+# jggstats(
+#   data = base_data,
+#   dependent_var = "outcome",
+#   independent_vars = c("age", "sex"),
+#   analysis_type = "ggcoef_model",
+#   model_type = "lm",
+#   plot_title = "Simple Linear Model",
+#   show_model_summary = TRUE
+# )
 
 # Model 2: With interactions
-jggstats(
-  data = base_data,
-  model_formula = "outcome ~ age * sex + treatment",
-  analysis_type = "ggcoef_model",
-  model_type = "lm",
-  plot_title = "Model with Interactions",
-  show_model_summary = TRUE
-)
+# jggstats(
+#   data = base_data,
+#   model_formula = "outcome ~ age * sex + treatment",
+#   analysis_type = "ggcoef_model",
+#   model_type = "lm",
+#   plot_title = "Model with Interactions",
+#   show_model_summary = TRUE
+# )
 ```
 
 ### Nested Model Comparison
 
 ```{r nested-models}
 # Systematic model comparison
-jggstats(
-  data = model_comparison_data,
-  dependent_var = "test_score",
-  independent_vars = c("socioeconomic_status", "parent_education"),
-  grouping_var = "school_type",
-  analysis_type = "ggcoef_compare",
-  model_type = "lm",
-  sort_coefficients = TRUE,
-  plot_title = "Nested Model Comparison",
-  plot_subtitle = "Effects across different school types",
-  output_format = "both"
-)
+# jggstats(
+#   data = model_comparison_data,
+#   dependent_var = "test_score",
+#   independent_vars = c("socioeconomic_status", "parent_education"),
+#   grouping_var = "school_type",
+#   analysis_type = "ggcoef_compare",
+#   model_type = "lm",
+#   sort_coefficients = TRUE,
+#   plot_title = "Nested Model Comparison",
+#   plot_subtitle = "Effects across different school types",
+#   output_format = "both"
+# )
 ```
 
 ## Interpretation Guidelines
@@ -483,19 +483,19 @@ Key elements to interpret:
 
 ```{r significance-interpretation}
 # Example with significance markers
-jggstats(
-  data = logistic_model_data,
-  dependent_var = "disease",
-  independent_vars = c("age", "sex", "smoking", "family_history", "bmi"),
-  analysis_type = "ggcoef_model",
-  model_type = "glm",
-  family = "binomial",
-  show_significance = TRUE,
-  sort_coefficients = TRUE,
-  plot_title = "Significance Testing Example",
-  plot_subtitle = "Stars indicate statistical significance",
-  show_interpretation = TRUE
-)
+# jggstats(
+#   data = logistic_model_data,
+#   dependent_var = "disease",
+#   independent_vars = c("age", "sex", "smoking", "family_history", "bmi"),
+#   analysis_type = "ggcoef_model",
+#   model_type = "glm",
+#   family = "binomial",
+#   show_significance = TRUE,
+#   sort_coefficients = TRUE,
+#   plot_title = "Significance Testing Example",
+#   plot_subtitle = "Stars indicate statistical significance",
+#   show_interpretation = TRUE
+# )
 ```
 
 ## Performance Considerations
@@ -514,15 +514,15 @@ large_data <- do.call(rbind, replicate(5, linear_model_data, simplify = FALSE))
 large_data$id <- 1:nrow(large_data)
 
 # Efficient analysis
-jggstats(
-  data = large_data,
-  dependent_var = "outcome",
-  independent_vars = c("age", "sex", "treatment"),
-  analysis_type = "ggcoef_model",
-  model_type = "lm",
-  plot_title = "Large Dataset Analysis",
-  plot_subtitle = paste("N =", nrow(large_data), "observations")
-)
+# jggstats(
+#   data = large_data,
+#   dependent_var = "outcome",
+#   independent_vars = c("age", "sex", "treatment"),
+#   analysis_type = "ggcoef_model",
+#   model_type = "lm",
+#   plot_title = "Large Dataset Analysis",
+#   plot_subtitle = paste("N =", nrow(large_data), "observations")
+# )
 ```
 
 ## Troubleshooting Guide

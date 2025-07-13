@@ -43,7 +43,13 @@ survivalcont(
   medianline = "none",
   person_time = FALSE,
   time_intervals = "12, 36, 60",
-  rate_multiplier = 100
+  rate_multiplier = 100,
+  rmst_analysis = FALSE,
+  rmst_tau = 0,
+  residual_diagnostics = FALSE,
+  stratified_cox = FALSE,
+  strata_variable,
+  loglog = FALSE
 )
 }
 \arguments{
@@ -182,6 +188,30 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 
 \item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
+
+\item{rmst_analysis}{Enable Restricted Mean Survival Time (RMST) analysis.
+RMST provides the average  survival time up to a specified time horizon,
+useful when median survival is undefined.}
+
+\item{rmst_tau}{Specify the time horizon for RMST calculation. If left as
+0, will use 75th percentile  of observed survival times. This represents
+the maximum follow-up time for RMST calculation.}
+
+\item{residual_diagnostics}{Enable Cox model residual diagnostics including
+Martingale, Deviance, Score, and  Schoenfeld residuals. Useful for checking
+model assumptions and identifying outliers.}
+
+\item{stratified_cox}{Enable stratified Cox regression analysis. This
+allows for different baseline hazards  across strata while maintaining
+proportional hazards within strata.}
+
+\item{strata_variable}{Variable to use for stratification in Cox
+regression. Should be a categorical variable  that defines different risk
+groups or populations.}
+
+\item{loglog}{Enable log-log plot for assessing proportional hazards
+assumption. Parallel lines  in the log-log plot suggest that proportional
+hazards assumption holds.}
 }
 \value{
 A results object containing:
@@ -192,6 +222,9 @@ A results object containing:
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$rmstTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$rmstSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$rescutTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot5} \tab \tab \tab \tab \tab an image \cr
@@ -202,6 +235,8 @@ A results object containing:
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot7} \tab \tab \tab \tab \tab an image \cr
+\code{results$residualsPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 \code{results$calculatedcutoff} \tab \tab \tab \tab \tab an output \cr

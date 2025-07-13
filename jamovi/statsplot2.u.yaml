@@ -1,4 +1,4 @@
-title: Graphs and Plots
+title: Automatic Plot Selection
 name: statsplot2
 jus: '3.0'
 stage: 0
@@ -9,14 +9,14 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Dependent (y-axis, 1st measurement)
+        label: Dependent Variable (y-axis)
         children:
           - type: VariablesListBox
             name: dep
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Grouping (x-axis, 2nd measurement)
+        label: Grouping Variable (x-axis)
         children:
           - type: VariablesListBox
             name: group

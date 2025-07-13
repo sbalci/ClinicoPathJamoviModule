@@ -78,12 +78,12 @@ You can analyze multiple dependent variables simultaneously:
 
 ```{r multiple-deps}
 # Analyze multiple outcomes in clinical trial
-jjbarstats(
-  data = clinical_trial_data,
-  dep = c(primary_outcome, side_effects),
-  group = drug_dosage,
-  grvar = NULL
-)
+# jjbarstats(
+#   data = clinical_trial_data,
+#   dep = c(primary_outcome, side_effects),
+#   group = drug_dosage,
+#   grvar = NULL
+# )
 ```
 
 # Advanced Statistical Options
@@ -169,13 +169,13 @@ jjbarstats(
 When you have more than two groups, pairwise comparisons help identify which specific groups differ:
 
 ```{r pairwise-comparisons}
-jjbarstats(
-  data = clinical_trial_data,
-  dep = primary_outcome,
-  group = drug_dosage,
-  pairwisecomparisons = TRUE,
-  padjustmethod = "holm"
-)
+# jjbarstats(
+#   data = clinical_trial_data,
+#   dep = primary_outcome,
+#   group = drug_dosage,
+#   pairwisecomparisons = TRUE,
+#   padjustmethod = "holm"
+# )
 ```
 
 ## Multiple Comparison Correction Methods
@@ -467,37 +467,37 @@ When reporting results from jjbarstats:
 
 ```{r workflow-example}
 # Step 1: Overall analysis
-overall_result <- jjbarstats(
-  data = clinical_trial_data,
-  dep = primary_outcome,
-  group = drug_dosage,
-  typestatistics = "nonparametric",
-  pairwisecomparisons = TRUE,
-  padjustmethod = "BH"
-)
+# overall_result <- jjbarstats(
+#   data = clinical_trial_data,
+#   dep = primary_outcome,
+#   group = drug_dosage,
+#   typestatistics = "nonparametric",
+#   pairwisecomparisons = TRUE,
+#   padjustmethod = "BH"
+# )
 
 # Step 2: Subgroup analysis by study phase
-subgroup_result <- jjbarstats(
-  data = clinical_trial_data,
-  dep = primary_outcome,
-  group = drug_dosage,
-  grvar = study_phase,
-  typestatistics = "nonparametric",
-  pairwisecomparisons = TRUE
-)
+# subgroup_result <- jjbarstats(
+#   data = clinical_trial_data,
+#   dep = primary_outcome,
+#   group = drug_dosage,
+#   grvar = study_phase,
+#   typestatistics = "nonparametric",
+#   pairwisecomparisons = TRUE
+# )
 ```
 
 ## Comparative Analysis Across Different Outcomes
 
 ```{r comparative-analysis}
 # Compare primary and secondary outcomes
-jjbarstats(
-  data = clinical_trial_data,
-  dep = c(primary_outcome, side_effects, baseline_condition),
-  group = drug_dosage,
-  typestatistics = "robust",
-  pairwisecomparisons = FALSE
-)
+# jjbarstats(
+#   data = clinical_trial_data,
+#   dep = c(primary_outcome, side_effects, baseline_condition),
+#   group = drug_dosage,
+#   typestatistics = "robust",
+#   pairwisecomparisons = FALSE
+# )
 ```
 
 # Conclusion

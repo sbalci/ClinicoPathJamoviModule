@@ -31,26 +31,31 @@ options:
       title: Source Variable
       type: Variable
       description: "Variable defining source nodes"
+      default: null
 
     - name: target_var
       title: Target Variable
       type: Variable
       description: "Variable defining target nodes"
+      default: null
 
     - name: node_vars
       title: Node Variables
       type: Variables
       description: "Variables for multi-level node definitions"
+      default: null
 
     - name: grouping_var
       title: Grouping Variable
       type: Variable
       description: "Variable for grouping flows"
+      default: null
 
     - name: time_var
       title: Time Variable
       type: Variable
       description: "Variable for temporal flow analysis"
+      default: null
 
     - name: node_width
       title: Node Width

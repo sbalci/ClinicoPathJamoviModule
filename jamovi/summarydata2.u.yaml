@@ -1,0 +1,65 @@
+title: Summary of Continuous Variables
+name: summarydata2
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Date Variables
+        children:
+          - type: VariablesListBox
+            name: date_vars
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: distr
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: summary_format
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Group Variable
+        children:
+          - type: VariablesListBox
+            name: grvar
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: pivot_layout
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: include_confidence
+      - type: CheckBox
+        name: advanced_metrics
+      - type: CheckBox
+        name: pivot_export
+      - type: CheckBox
+        name: summarytools_graphs
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: summarytools_round_digits
+        format: number

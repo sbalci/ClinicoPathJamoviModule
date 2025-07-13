@@ -34,15 +34,17 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "direction",
                 direction,
                 options=list(
-                    "repeated",
-                    "independent"),
+                    "independent",
+                    "repeated"),
                 default="independent")
             private$..distribution <- jmvcore::OptionList$new(
                 "distribution",
                 distribution,
                 options=list(
                     "p",
-                    "np"),
+                    "np",
+                    "r",
+                    "bf"),
                 default="p")
             private$..alluvsty <- jmvcore::OptionList$new(
                 "alluvsty",
@@ -102,7 +104,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Variable Type Based Graphs and Plots",
+                title="Automatic Plot Selection Based on Variable Types",
                 refs=list(
                     "ggstatsplot",
                     "ggalluvial",
@@ -134,7 +136,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "originaltheme")))
             self$add(jmvcore::Image$new(
                 options=options,
-                title="Variable Type Based Graphs and Plots",
+                title="Automatically Selected Plot",
                 name="plot",
                 width=800,
                 height=600,
@@ -158,7 +160,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "statsplot2",
-                version = c(0,0,3),
+                version = c(0,1,0),
                 options = options,
                 results = statsplot2Results$new(options=options),
                 data = data,
@@ -171,23 +173,49 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Graphs and Plots
+#' Automatic Plot Selection
 #'
-#' Function for Generating Plots and Graphs Based on Variable Types.
+#' Automatically selects and generates the most appropriate statistical 
+#' visualization based on variable data types. Supports both independent and 
+#' repeated measures designs with various plot types including violin plots, 
+#' scatter plots, bar charts, and alluvial diagrams.
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Automatic plot selection for factor vs continuous variables
+#' statsplot2(
+#'     data = mtcars,
+#'     dep = "mpg",
+#'     group = "cyl",
+#'     direction = "independent",
+#'     distribution = "p"
+#' )
+#'
+#' # Repeated measures with alluvial diagram
+#' statsplot2(
+#'     data = survey_data,
+#'     dep = "condition_baseline",
+#'     group = "condition_followup",
+#'     direction = "repeated",
+#'     alluvsty = "t1"
+#' )
+#'
 #' @param data The data as a data frame.
-#' @param dep .
-#' @param group .
-#' @param grvar .
-#' @param direction select measurement type (repeated or independent)
-#' @param distribution select distribution type (parametric or nonparametric)
-#' @param alluvsty .
-#' @param excl .
-#' @param originaltheme .
+#' @param dep The dependent variable (y-axis, 1st measurement). Can be
+#'   continuous or categorical.
+#' @param group The grouping variable (x-axis, 2nd measurement). Can be
+#'   continuous or categorical.
+#' @param grvar Optional grouping variable for creating grouped plots across
+#'   multiple panels.
+#' @param direction Measurement design type. "independent" for
+#'   between-subjects comparisons,  "repeated" for within-subjects/repeated
+#'   measures comparisons.
+#' @param distribution Statistical approach: "p" = parametric, "np" =
+#'   nonparametric,  "r" = robust, "bf" = Bayes factor.
+#' @param alluvsty Style for alluvial diagrams: "t1" = ggalluvial with stratum
+#'   labels,  "t2" = easyalluvial with automatic variable selection.
+#' @param excl If TRUE, excludes rows with missing values before analysis.
+#' @param originaltheme If TRUE, uses original ggplot2 themes instead of
+#'   ggstatsplot themes.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

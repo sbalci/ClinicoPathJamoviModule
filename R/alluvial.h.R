@@ -27,8 +27,7 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 vars)
             private$..condensationvar <- jmvcore::OptionVariable$new(
                 "condensationvar",
-                condensationvar,
-                default=NULL)
+                condensationvar)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -166,7 +165,7 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "alluvial",
-                version = c(0,0,3),
+                version = c(0,0,2),
                 options = options,
                 results = alluvialResults$new(options=options),
                 data = data,
@@ -205,7 +204,7 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 alluvial <- function(
     data,
     vars,
-    condensationvar = NULL,
+    condensationvar,
     excl = FALSE,
     marg = FALSE,
     fill = "first_variable",

@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r}
+```{r eval=FALSE}
 library(ClinicoPath)
 library(ggplot2)
 library(dplyr)
@@ -53,7 +53,7 @@ The `jggheatmap` function supports:
 
 The simplest way to create a heatmap is using the matrix variables approach with numeric data:
 
-```{r}
+```{r eval=FALSE}
 # Load histopathology data
 data(histopathology, package = "ClinicoPath")
 
@@ -61,14 +61,14 @@ data(histopathology, package = "ClinicoPath")
 head(histopathology[c("Age", "TStage", "Grade", "LVI", "PNI")])
 ```
 
-```{r}
-# Create a basic heatmap using matrix variables
+```{r eval=FALSE}
+# Create a basic heatmap using matrix variables (correlation matrix)
 basic_heatmap <- jggheatmap(
   data = histopathology,
   matrix_vars = c("Age", "TStage", "Grade"),
-  plot_title = "Basic Clinical Parameters Heatmap",
+  plot_title = "Clinical Parameters Correlation Heatmap",
   show_colorbar = TRUE,
-  colorbar_title = "Value"
+  colorbar_title = "Correlation"
 )
 
 # The plot will be displayed in jamovi interface
@@ -89,7 +89,7 @@ When using matrix variables:
 
 For data that needs to be reshaped into matrix format, use the pivot approach:
 
-```{r}
+```{r eval=FALSE}
 # Create example data in pivot format
 pivot_data <- histopathology[1:20, ] %>%
   select(PatientID, Grade, TStage, Age) %>%
@@ -103,7 +103,7 @@ pivot_data <- histopathology[1:20, ] %>%
 head(pivot_data)
 ```
 
-```{r}
+```{r eval=FALSE}
 # Create heatmap using pivot format
 pivot_heatmap <- jggheatmap(
   data = pivot_data,
@@ -122,7 +122,7 @@ pivot_heatmap <- jggheatmap(
 
 Row scaling normalizes each row to have mean=0 and sd=1, useful for comparing patterns across variables:
 
-```{r}
+```{r eval=FALSE}
 # Row scaling for cross-variable comparison
 row_scaled_heatmap <- jggheatmap(
   data = histopathology,
@@ -138,7 +138,7 @@ row_scaled_heatmap <- jggheatmap(
 
 Column scaling normalizes each variable independently:
 
-```{r}
+```{r eval=FALSE}
 # Column scaling for variable standardization
 column_scaled_heatmap <- jggheatmap(
   data = histopathology,
@@ -154,7 +154,7 @@ column_scaled_heatmap <- jggheatmap(
 
 Global scaling applies standardization across the entire matrix:
 
-```{r}
+```{r eval=FALSE}
 # Global scaling for overall comparison
 global_scaled_heatmap <- jggheatmap(
   data = histopathology,
@@ -172,7 +172,7 @@ global_scaled_heatmap <- jggheatmap(
 
 Enable clustering to reveal patterns and group similar rows/columns:
 
-```{r}
+```{r eval=FALSE}
 # Basic clustering with default settings
 clustered_heatmap <- jggheatmap(
   data = histopathology,
@@ -189,7 +189,7 @@ clustered_heatmap <- jggheatmap(
 
 Different clustering methods reveal different patterns:
 
-```{r}
+```{r eval=FALSE}
 # Ward's method clustering
 ward_heatmap <- jggheatmap(
   data = histopathology,
@@ -217,7 +217,7 @@ average_heatmap <- jggheatmap(
 
 Choose appropriate distance metrics for your data type:
 
-```{r}
+```{r eval=FALSE}
 # Pearson correlation distance
 correlation_heatmap <- jggheatmap(
   data = histopathology,
@@ -248,7 +248,7 @@ manhattan_heatmap <- jggheatmap(
 
 The function provides several professional color schemes:
 
-```{r}
+```{r eval=FALSE}
 # Viridis color scheme (perceptually uniform)
 viridis_heatmap <- jggheatmap(
   data = histopathology,
@@ -281,7 +281,7 @@ rdylbu_heatmap <- jggheatmap(
 
 Show actual values within cells for detailed analysis:
 
-```{r}
+```{r eval=FALSE}
 # Display cell values with custom formatting
 values_heatmap <- jggheatmap(
   data = histopathology[1:15, ],  # Smaller subset for readability
@@ -300,7 +300,7 @@ values_heatmap <- jggheatmap(
 
 Control the appearance of row and column labels:
 
-```{r}
+```{r eval=FALSE}
 # Custom label styling
 custom_labels_heatmap <- jggheatmap(
   data = histopathology,
@@ -329,7 +329,7 @@ minimal_labels_heatmap <- jggheatmap(
 
 Customize plot size and appearance:
 
-```{r}
+```{r eval=FALSE}
 # Large format for publication
 publication_heatmap <- jggheatmap(
   data = histopathology,
@@ -348,7 +348,7 @@ publication_heatmap <- jggheatmap(
 
 Customize cell shapes and colors:
 
-```{r}
+```{r eval=FALSE}
 # Custom cell appearance
 custom_cells_heatmap <- jggheatmap(
   data = histopathology,
@@ -367,7 +367,7 @@ custom_cells_heatmap <- jggheatmap(
 
 Heatmaps are excellent for visualizing correlation matrices:
 
-```{r}
+```{r eval=FALSE}
 # Calculate correlation matrix
 numeric_vars <- c("Age", "TStage", "Grade", "LVI", "PNI")
 correlation_matrix <- cor(histopathology[numeric_vars], use = "complete.obs")
@@ -381,7 +381,7 @@ correlation_long <- correlation_matrix %>%
 head(correlation_long)
 ```
 
-```{r}
+```{r eval=FALSE}
 # Create correlation heatmap
 correlation_heatmap <- jggheatmap(
   data = correlation_long,
@@ -404,7 +404,7 @@ correlation_heatmap <- jggheatmap(
 
 The function supports different output formats:
 
-```{r}
+```{r eval=FALSE}
 # Plot only (default)
 plot_only_heatmap <- jggheatmap(
   data = histopathology,
@@ -440,7 +440,7 @@ both_output_heatmap <- jggheatmap(
 
 For genomic data analysis (simulated example):
 
-```{r}
+```{r eval=FALSE}
 # Simulate gene expression data
 set.seed(123)
 gene_expression <- data.frame(
@@ -470,7 +470,7 @@ gene_heatmap <- jggheatmap(
 
 Analyzing biomarker patterns:
 
-```{r}
+```{r eval=FALSE}
 # Create biomarker data subset
 biomarker_data <- histopathology %>%
   select(Age, TStage, Grade, LVI, PNI) %>%
@@ -499,7 +499,7 @@ biomarker_heatmap <- jggheatmap(
 
 Use heatmaps to identify unusual patterns:
 
-```{r}
+```{r eval=FALSE}
 # Create QC heatmap with highlighting
 qc_heatmap <- jggheatmap(
   data = histopathology,
@@ -520,7 +520,7 @@ qc_heatmap <- jggheatmap(
 
 Show clustering relationships:
 
-```{r}
+```{r eval=FALSE}
 # Detailed dendrogram display
 dendrogram_heatmap <- jggheatmap(
   data = histopathology,
@@ -540,7 +540,7 @@ dendrogram_heatmap <- jggheatmap(
 
 Add contextual information (when available):
 
-```{r}
+```{r eval=FALSE}
 # Heatmap with annotations
 annotated_heatmap <- jggheatmap(
   data = histopathology,
@@ -647,7 +647,7 @@ top_vars <- names(sort(var_scores, decreasing = TRUE)[1:20])
 ## Time Series Heatmaps
 For longitudinal data analysis:
 
-```{r}
+```{r eval=FALSE}
 # Simulate time series data
 time_series_data <- expand.grid(
   Patient = paste0("P", 1:10),
@@ -675,7 +675,7 @@ timeseries_heatmap <- jggheatmap(
 ## Multi-Level Comparisons
 For comparing different conditions:
 
-```{r}
+```{r eval=FALSE}
 # Create condition-specific data
 condition_data <- histopathology %>%
   mutate(Condition = ifelse(Grade > 2, "High_Grade", "Low_Grade")) %>%

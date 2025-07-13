@@ -52,7 +52,90 @@ items:
       - beta
       - power
 
+  - name: power_plot
+    title: "Power Curve Analysis"
+    type: Image
+    width: 700
+    height: 500
+    renderFun: .plot_power_curve
+    visible: (calculation_type && method && show_power_plot)
+    requiresData: false
+    clearWith:
+      - calculation_type
+      - method
+      - show_power_plot
+      - hazard_control
+      - hazard_treatment
+      - hazard_ratio
+      - alpha
+      - beta
+      - power
+      - allocation_ratio
+      - power_plot_range
+
+  - name: timeline_plot
+    title: "Study Timeline Visualization"
+    type: Image
+    width: 700
+    height: 400
+    renderFun: .plot_timeline
+    visible: (calculation_type && method == "lachin_foulkes" && show_timeline_plot)
+    requiresData: false
+    clearWith:
+      - calculation_type
+      - method
+      - show_timeline_plot
+      - study_duration
+      - accrual_duration
+      - hazard_control
+      - hazard_treatment
+
+  - name: exported_results
+    title: "Export Power Analysis Results"
+    type: Output
+    varTitle: "Survival Power Results"
+    varDescription: "Comprehensive survival power analysis results for external analysis"
+    clearWith:
+      - export_results
+      - calculation_type
+      - method
+      - hazard_control
+      - hazard_treatment
+      - hazard_ratio
+      - study_duration
+      - accrual_duration
+      - alpha
+      - beta
+      - power
+      - allocation_ratio
+
+  - name: exported_power_curve
+    title: "Export Power Curve Data"
+    type: Output
+    varTitle: "Power Curve Data"
+    varDescription: "Power curve data points for external plotting and analysis"
+    clearWith:
+      - export_power_curve
+      - calculation_type
+      - method
+      - hazard_control
+      - hazard_treatment
+      - hazard_ratio
+      - alpha
+      - beta
+      - allocation_ratio
+      - power_plot_range
+
+  - name: export_summary
+    title: "Export Summary"
+    type: Html
+    visible: (export_results || export_power_curve)
+    clearWith:
+      - export_results
+      - export_power_curve
+
 refs:
   - gsDesign
   - survival
+  - ggplot2
 ...

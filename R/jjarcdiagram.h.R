@@ -52,14 +52,16 @@ jjarcdiagramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
                 group,
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..showNodes <- jmvcore::OptionBool$new(
                 "showNodes",
                 showNodes,
@@ -314,8 +316,8 @@ jjarcdiagram <- function(
     data,
     source,
     target,
-    weight,
-    group,
+    weight = NULL,
+    group = NULL,
     showNodes = TRUE,
     nodeSize = "fixed",
     nodeSizeValue = 2,

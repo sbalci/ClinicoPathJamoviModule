@@ -45,16 +45,29 @@ jggheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..matrix_vars <- jmvcore::OptionVariables$new(
                 "matrix_vars",
-                matrix_vars)
+                matrix_vars,
+                permitted=list(
+                    "numeric"))
             private$..row_var <- jmvcore::OptionVariable$new(
                 "row_var",
-                row_var)
+                row_var,
+                default=NULL,
+                permitted=list(
+                    "factor",
+                    "id"))
             private$..col_var <- jmvcore::OptionVariable$new(
                 "col_var",
-                col_var)
+                col_var,
+                default=NULL,
+                permitted=list(
+                    "factor",
+                    "id"))
             private$..value_var <- jmvcore::OptionVariable$new(
                 "value_var",
-                value_var)
+                value_var,
+                default=NULL,
+                permitted=list(
+                    "numeric"))
             private$..cluster_rows <- jmvcore::OptionBool$new(
                 "cluster_rows",
                 cluster_rows,
@@ -163,7 +176,8 @@ jggheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0.2)
             private$..annotation_var <- jmvcore::OptionVariable$new(
                 "annotation_var",
-                annotation_var)
+                annotation_var,
+                default=NULL)
             private$..annotation_colors <- jmvcore::OptionList$new(
                 "annotation_colors",
                 annotation_colors,
@@ -400,9 +414,9 @@ jggheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' @param data .
 #' @param matrix_vars Variables to include in the heatmap matrix
-#' @param row_var Variable defining row groupings
-#' @param col_var Variable defining column groupings
-#' @param value_var Variable containing matrix values
+#' @param row_var Variable defining row groupings (for pivot format)
+#' @param col_var Variable defining column groupings (for pivot format)
+#' @param value_var Variable containing matrix values (for pivot format)
 #' @param cluster_rows Perform hierarchical clustering on rows
 #' @param cluster_cols Perform hierarchical clustering on columns
 #' @param clustering_method .
@@ -447,9 +461,9 @@ jggheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jggheatmap <- function(
     data,
     matrix_vars,
-    row_var,
-    col_var,
-    value_var,
+    row_var = NULL,
+    col_var = NULL,
+    value_var = NULL,
     cluster_rows = TRUE,
     cluster_cols = TRUE,
     clustering_method = "complete",
@@ -466,7 +480,7 @@ jggheatmap <- function(
     col_label_size = 10,
     show_dendrograms = TRUE,
     dendrogram_height = 0.2,
-    annotation_var,
+    annotation_var = NULL,
     annotation_colors = "default",
     plot_title = "",
     plot_width = 600,

@@ -14,12 +14,3 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: sumvar_style
-      - type: CheckBox
-        name: show_proportions
-      - type: CheckBox
-        name: sort_by_frequency

@@ -3,8 +3,92 @@
 \name{subgroupforestClass}
 \alias{subgroupforestClass}
 \title{Subgroup Analysis Forest Plot}
+\value{
+A results object containing forest plot, summary tables, and interaction tests
+}
 \description{
-Creates forest plots showing treatment effects across different patient subgroups
+Creates forest plots showing treatment effects across different patient subgroups.
+This function performs subgroup analysis for clinical trials and observational studies,
+calculating treatment effects within patient subgroups and testing for interactions.
+Supports survival (time-to-event), binary, and continuous outcomes.
+
+\strong{Clinical Applications:}
+\itemize{
+\item Identify patient subgroups with differential treatment benefit
+\item Test for treatment-by-subgroup interactions
+\item Guide personalized treatment decisions
+\item Explore heterogeneity in treatment effects
+}
+
+\strong{Statistical Methods:}
+\itemize{
+\item Survival outcomes: Cox proportional hazards models (Hazard Ratios)
+\item Binary outcomes: Logistic regression (Odds Ratios, Risk Ratios)
+\item Continuous outcomes: Linear regression (Mean Differences)
+\item Interaction testing: Likelihood ratio tests
+}
+}
+\details{
+\strong{Effect Measures by Outcome Type:}
+
+\emph{Survival Outcomes:}
+\itemize{
+\item Hazard Ratio (HR): Compares hazard rates between treatment groups
+\item HR > 1: Increased hazard (worse outcome) with treatment
+\item HR < 1: Decreased hazard (better outcome) with treatment
+}
+
+\emph{Binary Outcomes:}
+\itemize{
+\item Odds Ratio (OR): Compares odds of outcome between groups
+\item Risk Ratio (RR): Compares probability of outcome between groups
+\item OR/RR > 1: Higher risk with treatment
+\item OR/RR < 1: Lower risk with treatment
+}
+
+\emph{Continuous Outcomes:}
+\itemize{
+\item Mean Difference (MD): Difference in means between groups
+\item MD > 0: Higher values with treatment
+\item MD < 0: Lower values with treatment
+}
+
+\strong{Interaction Testing:}
+Tests whether treatment effect varies significantly across subgroups using
+likelihood ratio tests comparing models with and without interaction terms.
+
+\strong{Sample Size Requirements:}
+\itemize{
+\item Minimum 5 patients per subgroup for analysis
+\item Larger samples recommended for stable estimates
+\item Consider multiple comparison adjustments for many subgroups
+}
+}
+\examples{
+\donttest{
+# Survival outcome subgroup analysis
+subgroupforest(
+  data = clinical_trial,
+  outcome = "time_to_event",
+  treatment = "treatment_arm", 
+  subgroups = c("age_group", "gender", "stage"),
+  time = "time_to_event",
+  event = "event_occurred",
+  outcomeType = "survival",
+  effectMeasure = "hr"
+)
+
+# Binary outcome analysis
+subgroupforest(
+  data = study_data,
+  outcome = "response",
+  treatment = "intervention",
+  subgroups = c("age_category", "sex"),
+  outcomeType = "binary",
+  effectMeasure = "or"
+)
+}
+
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::subgroupforestBase} -> \code{subgroupforestClass}

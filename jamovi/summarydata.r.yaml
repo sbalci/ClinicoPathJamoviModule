@@ -17,22 +17,7 @@ items:
       title: 'Continuous Data Plots'
       type:  Html
 
-    - name: pivot_summary
-      title: 'Enhanced Pivot Summary'
-      type: Html
-      visible: (summary_format:pivot)
-      clearWith:
-        - vars
-        - summary_format
-        - pivot_layout
-        - include_confidence
-        - advanced_metrics
-        - grvar
 
-    - name: pivot_export_info
-      title: 'Export Information'
-      type: Html
-      visible: (pivot_export && summary_format:pivot)
 
 refs:
     - gtExtras

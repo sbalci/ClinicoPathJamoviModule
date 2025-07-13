@@ -1,0 +1,182 @@
+---
+name: summarydata2
+title: Summary of Continuous Variables
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+version: '0.0.3'
+jas: '1.2'
+
+description:
+  main: |
+    This module generates descriptive statistics for continuous variables.
+    It provides both a textual summary and a visually appealing summary table.
+    Optionally, you can enable distribution diagnostics to examine normality, skewness, and kurtosis.
+  R:
+    dontrun: true
+    usage: |
+      # Example:
+      # 1. Load your data frame.
+      # 2. Select one or more continuous variables.
+      # 3. (Optional) Enable Distribution Diagnostics to view additional tests.
+      # 4. Run the summarydata module to see descriptive statistics and distribution characteristics.
+
+
+options:
+
+    # - name: lang
+    #   title: Language
+    #   type: List
+    #   options:
+    #     - title: English
+    #       name: English
+    #     - title: Türkçe
+    #       name: Türkçe
+    #     - title: Deutsch
+    #       name: Deutsch
+    #   default: English
+    #   description:
+    #       R: select language
+
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            a string naming the variables from `data` that contains the
+            continuous values used for the report
+
+    - name: date_vars
+      title: Date Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+          R: >
+            Variables containing date/time data to be analyzed with 
+            date-specific statistics (similar to sumvar's dist_date function)
+
+
+    - name: distr
+      title: "Distribution Diagnostics"
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, additional distribution diagnostics (Shapiro-Wilk test, skewness, and kurtosis)
+          will be computed and explained.
+
+    - name: summary_format
+      title: "Summary Format"
+      type: List
+      options:
+        - title: "Standard"
+          name: standard
+        - title: "Enhanced (sumvar style)"
+          name: sumvar
+        - title: "Pivot Enhanced (pivottabler)"
+          name: pivot
+        - title: "summarytools: dfSummary"
+          name: summarytools_df
+        - title: "summarytools: Descriptives"
+          name: summarytools_desc
+        - title: "summarytools: Frequency"
+          name: summarytools_freq
+      default: standard
+      description:
+        R: >
+          Choose the format for summary statistics display. New summarytools options provide
+          publication-ready automated EDA summaries with embedded visualizations.
+        jamovi: >
+          Select the summary format style. summarytools options provide automated EDA analysis.
+
+    - name: grvar
+      title: 'Group Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+        R: >
+          Optional grouping variable to stratify the summary statistics by categories.
+
+    - name: pivot_layout
+      title: "Pivot Layout Style"
+      type: List
+      options:
+        - title: "Clinical Research"
+          name: clinical
+        - title: "Statistical Analysis"
+          name: statistical  
+        - title: "Comparative Study"
+          name: comparative
+      default: clinical
+      description:
+        R: >
+          Layout style for pivottabler enhanced summaries.
+        jamovi: >
+          Choose the pivot table layout style.
+
+    - name: include_confidence
+      title: "Include Confidence Intervals"
+      type: Bool
+      default: true
+      description:
+        R: >
+          Include confidence intervals in pivot summary tables.
+        jamovi: >
+          Add confidence intervals to the summary.
+
+    - name: advanced_metrics
+      title: "Advanced Statistical Metrics" 
+      type: Bool
+      default: false
+      description:
+        R: >
+          Include advanced metrics like IQR, MAD, and robust statistics.
+        jamovi: >
+          Include advanced statistical measures.
+
+    - name: pivot_export
+      title: "Enable Pivot Export"
+      type: Bool
+      default: false
+      description:
+        R: >
+          Enable enhanced export capabilities for pivot tables.
+        jamovi: >
+          Enable advanced export options.
+
+    - name: summarytools_graphs
+      title: "Include Graphics in summarytools"
+      type: Bool
+      default: true
+      description:
+        R: >
+          Include histograms and bar charts in summarytools dfSummary output.
+        jamovi: >
+          Add inline plots to summarytools analysis.
+
+    - name: summarytools_round_digits
+      title: "Round Digits"
+      type: Integer
+      min: 1
+      max: 6
+      default: 2
+      description:
+        R: >
+          Number of decimal places for summarytools output.
+        jamovi: >
+          Decimal precision for statistical summaries.
+
+
+...

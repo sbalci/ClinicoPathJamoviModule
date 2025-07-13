@@ -1,7 +1,203 @@
-#' @title Survival Analysis
+#' @title Comprehensive Survival Analysis
+#' 
+#' @description
+#' Performs comprehensive univariate and stratified survival analysis comparing survival between groups.
+#' This analysis calculates person-time follow-up for each group and uses this to derive accurate
+#' survival estimates and incidence rates that account for varying follow-up durations across groups.
+#' The Cox proportional hazards model incorporates person-time by modeling the hazard function,
+#' which represents the instantaneous event rate per unit of person-time.
+#' 
+#' **Key Features:**
+#' - Kaplan-Meier survival curves with multiple plot types
+#' - Cox proportional hazards regression (univariate and stratified)
+#' - Median survival time with confidence intervals
+#' - Restricted Mean Survival Time (RMST) analysis
+#' - Person-time analysis with incidence rates
+#' - Competing risks and cause-specific survival
+#' - Landmark analysis for conditional survival
+#' - Proportional hazards assumption testing
+#' - Model residual diagnostics
+#' - Pairwise group comparisons with multiple testing correction
+#' 
+#' **Statistical Methods:**
+#' - Kaplan-Meier estimator for survival probabilities
+#' - Log-rank test for group comparisons
+#' - Cox proportional hazards model for risk assessment
+#' - Competing risks analysis using cumulative incidence functions
+#' - RMST for robust survival comparisons
+#' 
+#' **Visualization Options:**
+#' - Standard survival curves
+#' - Cumulative events and hazard plots
+#' - KMunicate-style plots for publication
+#' - Log-log plots for proportional hazards assessment
+#' - Residual diagnostic plots
+#' 
+#' @param data The data as a data frame
+#' @param elapsedtime Numeric variable containing survival time (time to event or censoring)
+#' @param tint Logical. Use dates to calculate survival time from diagnosis and follow-up dates
+#' @param dxdate Date variable for diagnosis date (when tint = TRUE)
+#' @param fudate Date variable for follow-up/event date (when tint = TRUE)
+#' @param explanatory Factor variable for group comparisons (e.g., treatment groups, risk categories)
+#' @param outcome Event indicator variable (binary: 0=censored, 1=event) or factor for multi-state outcomes
+#' @param outcomeLevel Event level when using factor outcome variable
+#' @param dod Dead of disease level (for competing risks analysis)
+#' @param dooc Dead of other causes level (for competing risks analysis)
+#' @param awd Alive with disease level (for competing risks analysis)
+#' @param awod Alive without disease level (for competing risks analysis)
+#' @param analysistype Type of survival analysis: "overall", "cause", or "compete"
+#' @param cutp Time points for survival probability estimation (comma-separated)
+#' @param timetypedata Date format in data: "ymd", "dmy", "mdy", etc.
+#' @param timetypeoutput Time unit for output: "days", "weeks", "months", "years"
+#' @param uselandmark Logical. Perform landmark analysis
+#' @param landmark Landmark time point for conditional survival analysis
+#' @param pw Logical. Perform pairwise group comparisons
+#' @param padjustmethod Multiple testing correction method for pairwise comparisons
+#' @param ph_cox Logical. Test proportional hazards assumption
+#' @param stratified_cox Logical. Use stratified Cox regression
+#' @param strata_variable Variable for Cox model stratification
+#' @param rmst_analysis Logical. Calculate Restricted Mean Survival Time
+#' @param rmst_tau Time horizon for RMST calculation (uses 75th percentile if NULL)
+#' @param residual_diagnostics Logical. Calculate and display model residuals
+#' @param export_survival_data Logical. Export survival estimates for external analysis
+#' @param person_time Logical. Calculate person-time metrics and incidence rates
+#' @param time_intervals Time intervals for stratified person-time analysis
+#' @param rate_multiplier Multiplier for incidence rates (e.g., 100 for per 100 person-years)
+#' @param sc Logical. Display survival curve plot
+#' @param ce Logical. Display cumulative events plot
+#' @param ch Logical. Display cumulative hazard plot
+#' @param kmunicate Logical. Display KMunicate-style plot
+#' @param loglog Logical. Display log-log plot for proportional hazards assessment
+#' @param endplot Maximum time for plot x-axis
+#' @param ybegin_plot Minimum value for plot y-axis
+#' @param yend_plot Maximum value for plot y-axis
+#' @param byplot Time interval for plot axis breaks
+#' @param multievent Logical. Use multiple event levels for competing risks
+#' @param ci95 Logical. Display 95% confidence intervals on plots
+#' @param risktable Logical. Display risk table below survival curves
+#' @param censored Logical. Display censoring marks on survival curves
+#' @param pplot Logical. Display p-value on plots
+#' @param medianline Type of median survival line: "none", "h", "v", "hv"
+#' 
+#' @return A comprehensive results object containing survival analysis outputs
+#' 
+#' @details
+#' **Analysis Types:**
+#' - **Overall Survival**: Time from study entry to death from any cause
+#' - **Cause-Specific Survival**: Time to death from specific cause (censoring other deaths)
+#' - **Competing Risks**: Accounts for multiple types of events that prevent observation of the primary outcome
+#' 
+#' **Person-Time Analysis:**
+#' Calculates incidence rates accounting for varying follow-up times. Particularly useful for:
+#' - Studies with differential loss to follow-up
+#' - Comparison of event rates across populations
+#' - Assessment of time-varying risk
+#' 
+#' **Restricted Mean Survival Time (RMST):**
+#' Alternative to median survival when survival curves don't reach 50% or for comparing
+#' survival over a specific time horizon. Represents the area under the survival curve
+#' up to a specified time point.
+#' 
+#' **Model Diagnostics:**
+#' - Proportional hazards assumption testing using Schoenfeld residuals
+#' - Martingale and deviance residuals for outlier detection
+#' - Log-log plots for visual assessment of proportional hazards
+#' 
+#' @examples
+#' \donttest{
+#' # Basic survival analysis
+#' data("histopathologySurvival", package = "ClinicoPathJamoviModule")
+#' 
+#' # Standard survival analysis with median and survival probabilities
+#' survival_result <- survival(
+#'   data = histopathologySurvival,
+#'   elapsedtime = "OverallSurvival_indays",
+#'   outcome = "Outcome",
+#'   outcomeLevel = "Dead",
+#'   explanatory = "Grade",
+#'   timetypeoutput = "months",
+#'   cutp = "12, 36, 60",
+#'   sc = TRUE,
+#'   pw = TRUE
+#' )
+#' 
+#' # Survival analysis with person-time metrics
+#' survival_with_pt <- survival(
+#'   data = histopathologySurvival,
+#'   elapsedtime = "OverallSurvival_indays", 
+#'   outcome = "Outcome",
+#'   outcomeLevel = "Dead",
+#'   explanatory = "Stage",
+#'   person_time = TRUE,
+#'   time_intervals = "365, 1095, 1825",
+#'   rate_multiplier = 1000
+#' )
+#' 
+#' # RMST analysis for non-proportional hazards
+#' rmst_analysis <- survival(
+#'   data = histopathologySurvival,
+#'   elapsedtime = "OverallSurvival_indays",
+#'   outcome = "Outcome", 
+#'   outcomeLevel = "Dead",
+#'   explanatory = "Treatment",
+#'   rmst_analysis = TRUE,
+#'   rmst_tau = 1095  # 3 years
+#' )
+#' 
+#' # Competing risks analysis
+#' competing_risks <- survival(
+#'   data = cancer_data,
+#'   elapsedtime = "survival_days",
+#'   outcome = "death_cause",
+#'   multievent = TRUE,
+#'   dod = "Cancer",
+#'   dooc = "Other",
+#'   awd = "Alive_Disease",
+#'   awod = "Alive_Free",
+#'   analysistype = "compete",
+#'   explanatory = "risk_group"
+#' )
+#' 
+#' # Landmark analysis for conditional survival
+#' landmark_survival <- survival(
+#'   data = histopathologySurvival,
+#'   elapsedtime = "OverallSurvival_indays",
+#'   outcome = "Outcome",
+#'   outcomeLevel = "Dead", 
+#'   explanatory = "Grade",
+#'   uselandmark = TRUE,
+#'   landmark = 365  # 1-year conditional survival
+#' )
+#' 
+#' # Date-based survival calculation
+#' date_survival <- survival(
+#'   data = clinical_data,
+#'   tint = TRUE,
+#'   dxdate = "diagnosis_date",
+#'   fudate = "last_contact_date",
+#'   timetypedata = "ymd",
+#'   timetypeoutput = "months",
+#'   outcome = "vital_status",
+#'   outcomeLevel = "Dead",
+#'   explanatory = "treatment_arm"
+#' )
+#' }
+#' 
+#' @references
+#' Klein JP, Moeschberger ML (2003). Survival Analysis: Techniques for Censored and Truncated Data. Springer.
+#' 
+#' Therneau TM, Grambsch PM (2000). Modeling Survival Data: Extending the Cox Model. Springer.
+#' 
+#' Royston P, Parmar MK (2013). Restricted mean survival time: an alternative to the hazard ratio for the design and analysis of randomized trials with a time-to-event outcome. BMC Medical Research Methodology 13:152.
+#' 
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import magrittr
+#' @import survival
+#' @import survminer
+#' @import finalfit
+#' @importFrom dplyr mutate filter
+#' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme
 #'
 
 survivalClass <- if (requireNamespace('jmvcore'))
@@ -23,18 +219,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 }
 
 
-                # if (self$options$sas) {
-                #     # Disable tables
-                #     self$results$medianSummary$setVisible(FALSE)
-                #     self$results$medianTable$setVisible(FALSE)
-                #     self$results$coxSummary$setVisible(FALSE)
-                #     self$results$coxTable$setVisible(FALSE)
-                #     self$results$tCoxtext2$setVisible(FALSE)
-                #     self$results$survTableSummary$setVisible(FALSE)
-                #     self$results$survTable$setVisible(FALSE)
-                #     self$results$pairwiseSummary$setVisible(FALSE)
-                #     self$results$pairwiseTable$setVisible(FALSE)
-                # }
             }
             ,
 
@@ -151,58 +335,26 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     timetypedata <- self$options$timetypedata
 
 
-                    # # Define a mapping from timetypedata to lubridate functions
-                    # lubridate_functions <- list(
-                    #     ymdhms = lubridate::ymd_hms,
-                    #     ymd = lubridate::ymd,
-                    #     ydm = lubridate::ydm,
-                    #     mdy = lubridate::mdy,
-                    #     myd = lubridate::myd,
-                    #     dmy = lubridate::dmy,
-                    #     dym = lubridate::dym
-                    # )
-                    # # Apply the appropriate lubridate function based on timetypedata
-                    # if (timetypedata %in% names(lubridate_functions)) {
-                    #     func <- lubridate_functions[[timetypedata]]
-                    #     mydata[["start"]] <- func(mydata[[dxdate]])
-                    #     mydata[["end"]] <- func(mydata[[fudate]])
-                    # }
-
-
-                    if (timetypedata == "ymdhms") {
-                        mydata[["start"]] <- lubridate::ymd_hms(mydata[[dxdate]])
-                        mydata[["end"]] <-
-                            lubridate::ymd_hms(mydata[[fudate]])
-                    }
-                    if (timetypedata == "ymd") {
-                        mydata[["start"]] <- lubridate::ymd(mydata[[dxdate]])
-                        mydata[["end"]] <-
-                            lubridate::ymd(mydata[[fudate]])
-                    }
-                    if (timetypedata == "ydm") {
-                        mydata[["start"]] <- lubridate::ydm(mydata[[dxdate]])
-                        mydata[["end"]] <-
-                            lubridate::ydm(mydata[[fudate]])
-                    }
-                    if (timetypedata == "mdy") {
-                        mydata[["start"]] <- lubridate::mdy(mydata[[dxdate]])
-                        mydata[["end"]] <-
-                            lubridate::mdy(mydata[[fudate]])
-                    }
-                    if (timetypedata == "myd") {
-                        mydata[["start"]] <- lubridate::myd(mydata[[dxdate]])
-                        mydata[["end"]] <-
-                            lubridate::myd(mydata[[fudate]])
-                    }
-                    if (timetypedata == "dmy") {
-                        mydata[["start"]] <- lubridate::dmy(mydata[[dxdate]])
-                        mydata[["end"]] <-
-                            lubridate::dmy(mydata[[fudate]])
-                    }
-                    if (timetypedata == "dym") {
-                        mydata[["start"]] <- lubridate::dym(mydata[[dxdate]])
-                        mydata[["end"]] <-
-                            lubridate::dym(mydata[[fudate]])
+                    # Define a mapping from timetypedata to lubridate functions
+                    lubridate_functions <- list(
+                        ymdhms = lubridate::ymd_hms,
+                        ymd = lubridate::ymd,
+                        ydm = lubridate::ydm,
+                        mdy = lubridate::mdy,
+                        myd = lubridate::myd,
+                        dmy = lubridate::dmy,
+                        dym = lubridate::dym
+                    )
+                    
+                    # Apply the appropriate lubridate function based on timetypedata
+                    if (timetypedata %in% names(lubridate_functions)) {
+                        date_parser <- lubridate_functions[[timetypedata]]
+                        mydata[["start"]] <- date_parser(mydata[[dxdate]])
+                        mydata[["end"]] <- date_parser(mydata[[fudate]])
+                    } else {
+                        stop(paste0("Unknown date format: ", timetypedata, 
+                                  ". Supported formats are: ", 
+                                  paste(names(lubridate_functions), collapse = ", ")))
                     }
 
 
@@ -256,13 +408,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 if (!multievent) {
                     if (inherits(outcome1, contin)) {
-                        if (!((length(unique(
-                            outcome1[!is.na(outcome1)]
-                        )) == 2) && (sum(unique(
-                            outcome1[!is.na(outcome1)]
-                        )) == 1))) {
+                        unique_values <- unique(outcome1[!is.na(outcome1)])
+                        if (!(length(unique_values) == 2 && all(unique_values %in% c(0, 1)))) {
                             stop(
-                                'When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.'
+                                paste0('Outcome variable must be binary (0/1) for survival analysis.\n',
+                                      '- Use 0 for censored observations (alive/disease-free)\n',
+                                      '- Use 1 for events (death/recurrence)\n',
+                                      'Current values found: ', paste(unique_values, collapse = ", "),
+                                      '\n\nFor multi-state outcomes, enable "Multiple Event Levels" option.')
                             )
 
                         }
@@ -280,7 +433,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     } else {
                         stop(
-                            'When using continuous variable as an outcome, it must only contain 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0. If you are using a factor as an outcome, please check the levels and content.'
+                            paste0('Invalid outcome variable format.\n',
+                                  'For survival analysis, the outcome variable must be:\n',
+                                  '- Binary numeric (0/1): 0=censored, 1=event\n',
+                                  '- Factor variable: Select appropriate event level\n',
+                                  '\nCurrent variable type: ', class(outcome1)[1], '\n',
+                                  'For complex outcomes with multiple states, enable "Multiple Event Levels" option.')
                         )
 
                     }
@@ -460,6 +618,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 image6 <- self$results$plot6
                 image6$setState(plotData)
+                
+                image7 <- self$results$plot7
+                image7$setState(plotData)
 
                 # Return Data ----
 
@@ -552,6 +713,36 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 ## Median Survival ----
                     private$.medianSurv(results)
                 private$.checkpoint()  # Add checkpoint here
+                
+                ## RMST Analysis ----
+                if (self$options$rmst_analysis) {
+                    rmst_tau <- if (is.null(self$options$rmst_tau) || self$options$rmst_tau <= 0) {
+                        NULL  # Use default (75th percentile)
+                    } else {
+                        self$options$rmst_tau
+                    }
+                    
+                    rmst_results <- private$.calculateRMST(results, tau = rmst_tau)
+                    
+                    if (!is.null(rmst_results$table)) {
+                        # Populate RMST table
+                        rmst_table <- self$results$rmstTable
+                        for (i in 1:nrow(rmst_results$table)) {
+                            rmst_table$addRow(rowKey = i, values = list(
+                                group = rmst_results$table$Group[i],
+                                rmst = rmst_results$table$RMST[i],
+                                se = rmst_results$table$SE[i],
+                                ci_lower = rmst_results$table$CI_Lower[i],
+                                ci_upper = rmst_results$table$CI_Upper[i],
+                                tau = rmst_results$table$Tau[i]
+                            ))
+                        }
+                        
+                        # Add interpretation
+                        self$results$rmstSummary$setContent(rmst_results$interpretation)
+                    }
+                }
+                private$.checkpoint()  # Add checkpoint here
 
                 ## Cox ----
                     private$.cox(results)
@@ -559,6 +750,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Survival Table ----
                     private$.survTable(results)
+                private$.checkpoint()  # Add checkpoint here
+                
+                ## Export Survival Data ----
+                private$.exportSurvivalData(results)
                 private$.checkpoint()  # Add checkpoint here
 
 
@@ -583,11 +778,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Add Calculated Time to Data ----
 
-                # self$results$mydataview$setContent(
-                #     list(
-                #         results
-                #     )
-                # )
 
                 if (self$options$tint && self$options$calculatedtime && self$results$calculatedtime$isNotFilled()) {
                     self$results$calculatedtime$setRowNums(results$cleanData$row_names)
@@ -603,6 +793,64 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 }
             }
 
+            # RMST Analysis Function ----
+            ,
+            .calculateRMST = function(results, tau = NULL) {
+                # Restricted Mean Survival Time calculation
+                tryCatch({
+                    mytime <- results$name1time
+                    myoutcome <- results$name2outcome
+                    myfactor <- results$name3explanatory
+                    mydata <- results$cleanData
+                    
+                    mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+                    
+                    # Set default tau to 75th percentile of follow-up time if not specified
+                    if (is.null(tau)) {
+                        tau <- quantile(mydata[[mytime]], 0.75, na.rm = TRUE)
+                    }
+                    
+                    formula <- paste('survival::Surv(', mytime, ',', myoutcome, ') ~ ', myfactor)
+                    formula <- as.formula(formula)
+                    
+                    private$.checkpoint()
+                    
+                    km_fit <- survival::survfit(formula, data = mydata)
+                    
+                    # Calculate RMST for each group
+                    rmst_summary <- summary(km_fit, rmean = tau, extend = TRUE)
+                    
+                    rmst_table <- data.frame(
+                        Group = gsub(paste0(myfactor, "="), "", names(km_fit$strata)),
+                        RMST = round(rmst_summary$table[, "rmean"], 2),
+                        SE = round(rmst_summary$table[, "se(rmean)"], 2),
+                        Tau = rep(round(tau, 1), length(km_fit$strata)),
+                        stringsAsFactors = FALSE
+                    )
+                    
+                    # Add confidence intervals (approximate)
+                    rmst_table$CI_Lower <- round(rmst_table$RMST - 1.96 * rmst_table$SE, 2)
+                    rmst_table$CI_Upper <- round(rmst_table$RMST + 1.96 * rmst_table$SE, 2)
+                    
+                    return(list(
+                        table = rmst_table,
+                        tau = tau,
+                        interpretation = paste0(
+                            "Restricted Mean Survival Time (RMST) represents the average survival time ",
+                            "up to ", round(tau, 1), " ", self$options$timetypeoutput, ". ",
+                            "This metric is useful when median survival cannot be estimated (curves don't reach 50%) ",
+                            "or when comparing survival over a specific time horizon."
+                        )
+                    ))
+                }, error = function(e) {
+                    return(list(
+                        table = NULL,
+                        tau = NULL,
+                        interpretation = paste("Error calculating RMST:", e$message)
+                    ))
+                })
+            }
+            
             # Median Survival Function ----
             ,
             .medianSurv = function(results) {
@@ -636,9 +884,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 km_fit_median_df <- summary(km_fit)
 
 
-                # medianSummary2 <-
-                #   as.data.frame(km_fit_median_df$table)
-                # self$results$medianSummary2$setContent(medianSummary2)
 
 
 
@@ -665,7 +910,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                              x = results1table$factor)
 
 
-                # self$results$medianSummary2$setContent(results2table)
 
 
                 medianTable <- self$results$medianTable
@@ -742,13 +986,36 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 myformula <-
                     paste("Surv(", mytime, ",", myoutcome, ")")
+                
+                # Add stratified Cox regression if enabled
+                strata_var <- NULL
+                if (self$options$stratified_cox && !is.null(self$options$strata_variable) && self$options$strata_variable != "") {
+                    strata_var <- self$options$strata_variable
+                    # Check if stratification variable exists
+                    if (strata_var %in% names(mydata)) {
+                        # Modify explanatory variable to include stratification
+                        myfactor_with_strata <- paste0(myfactor, " + strata(", strata_var, ")")
+                    } else {
+                        warning(paste("Stratification variable", strata_var, "not found. Using standard Cox regression."))
+                        myfactor_with_strata <- myfactor
+                    }
+                } else {
+                    myfactor_with_strata <- myfactor
+                }
 
                 private$.checkpoint()
 
+                # Use appropriate explanatory formula (with or without stratification)
+                explanatory_formula <- if (!is.null(strata_var) && strata_var %in% names(mydata)) {
+                    myfactor_with_strata
+                } else {
+                    myfactor
+                }
+                
                 finalfit::finalfit(
                     .data = mydata,
                     dependent = myformula,
-                    explanatory = myfactor,
+                    explanatory = explanatory_formula,
                     metrics = TRUE
                 ) -> tCox
 
@@ -876,10 +1143,133 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     image8 <- self$results$plot8
                     image8$setState(zph)
+                    
+                    # Add residual diagnostics if enabled
+                    if (self$options$residual_diagnostics) {
+                        residuals_data <- private$.calculateResiduals(cox_model, mydata)
+                        
+                        # Populate residuals table
+                        if (!is.null(residuals_data)) {
+                            residuals_table <- self$results$residualsTable
+                            for (i in 1:nrow(residuals_data)) {
+                                residuals_table$addRow(rowKey = i, values = list(
+                                    observation = residuals_data$observation[i],
+                                    martingale = residuals_data$martingale[i],
+                                    deviance = residuals_data$deviance[i],
+                                    score = residuals_data$score[i],
+                                    schoenfeld = residuals_data$schoenfeld[i]
+                                ))
+                            }
+                            
+                            # Add residuals plot data
+                            image9 <- self$results$residualsPlot
+                            image9$setState(list(
+                                residuals_data = residuals_data,
+                                cox_model = cox_model
+                            ))
+                        }
+                    }
 
                     }
 
 
+            }
+            
+            # Calculate Residuals Function ----
+            ,
+            .calculateResiduals = function(cox_model, mydata) {
+                tryCatch({
+                    # Calculate different types of residuals
+                    martingale_res <- residuals(cox_model, type = "martingale")
+                    deviance_res <- residuals(cox_model, type = "deviance")
+                    score_res <- residuals(cox_model, type = "score")
+                    schoenfeld_res <- residuals(cox_model, type = "schoenfeld")
+                    
+                    # Create data frame with residuals
+                    residuals_df <- data.frame(
+                        observation = 1:length(martingale_res),
+                        martingale = round(martingale_res, 4),
+                        deviance = round(deviance_res, 4),
+                        score = if (is.matrix(score_res)) round(score_res[,1], 4) else round(score_res, 4),
+                        schoenfeld = if (length(schoenfeld_res) == length(martingale_res)) {
+                            round(schoenfeld_res, 4)
+                        } else {
+                            rep(NA, length(martingale_res))
+                        }
+                    )
+                    
+                    return(residuals_df)
+                    
+                }, error = function(e) {
+                    warning(paste("Error calculating residuals:", e$message))
+                    return(NULL)
+                })
+            }
+            
+            # Export Survival Data Function ----
+            ,
+            .exportSurvivalData = function(results) {
+                # Export Kaplan-Meier estimates for external analysis
+                if (!self$options$export_survival_data) {
+                    return()
+                }
+                
+                tryCatch({
+                    mytime <- results$name1time
+                    myoutcome <- results$name2outcome
+                    myfactor <- results$name3explanatory
+                    mydata <- results$cleanData
+                    
+                    mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+                    
+                    formula <- paste('survival::Surv(', mytime, ',', myoutcome, ') ~ ', myfactor)
+                    formula <- as.formula(formula)
+                    
+                    private$.checkpoint()
+                    
+                    km_fit <- survival::survfit(formula, data = mydata)
+                    
+                    # Generate time points for export (every unit from 0 to max time)
+                    max_time <- max(mydata[[mytime]], na.rm = TRUE)
+                    export_times <- seq(0, max_time, by = max(1, floor(max_time/100)))
+                    
+                    # Get survival estimates at specified times
+                    km_export <- summary(km_fit, times = export_times, extend = TRUE)
+                    
+                    # Create export data frame
+                    export_df <- data.frame(
+                        time = km_export$time,
+                        strata = km_export$strata,
+                        n_risk = km_export$n.risk,
+                        n_event = km_export$n.event,
+                        survival = round(km_export$surv, 4),
+                        std_error = round(km_export$std.err, 4),
+                        lower_ci = round(km_export$lower, 4),
+                        upper_ci = round(km_export$upper, 4)
+                    )
+                    
+                    # Clean up strata names
+                    export_df$strata <- gsub(paste0(myfactor, "="), "", export_df$strata)
+                    
+                    # Add to results as exportable data
+                    if (self$results$survivalExport$isNotFilled()) {
+                        self$results$survivalExport$setRowNums(1:nrow(export_df))
+                        self$results$survivalExport$setValues(export_df)
+                    }
+                    
+                    # Create summary for user
+                    export_summary <- paste0(
+                        "<h4>Survival Data Export Summary</h4>",
+                        "<p>Exported ", nrow(export_df), " time points covering ", length(unique(export_df$strata)), " groups.</p>",
+                        "<p>Time range: 0 to ", round(max_time, 1), " ", self$options$timetypeoutput, "</p>",
+                        "<p>Data includes: time, group, number at risk, events, survival probability, standard error, and 95% confidence intervals.</p>"
+                    )
+                    
+                    self$results$survivalExportSummary$setContent(export_summary)
+                    
+                }, error = function(e) {
+                    warning(paste("Error exporting survival data:", e$message))
+                })
             }
 
 
@@ -1436,6 +1826,104 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 print(plot3)
                 TRUE
             }
+            
+            # Log-Log Survival Plot (for PH assumption) ----
+            ,
+            .plot7 = function(image7, ggtheme, theme, ...) {
+                loglog <- self$options$loglog
+
+                if (!loglog)
+                    return()
+
+                results <- image7$state
+
+                if (is.null(results)) {
+                    return()
+                }
+
+                mytime <- results$name1time
+                mytime <- jmvcore::constructFormula(terms = mytime)
+
+                myoutcome <- results$name2outcome
+                myoutcome <-
+                    jmvcore::constructFormula(terms = myoutcome)
+
+                myfactor <- results$name3explanatory
+                myfactor <-
+                    jmvcore::constructFormula(terms = myfactor)
+
+                plotData <- results$cleanData
+
+                plotData[[mytime]] <-
+                    jmvcore::toNumeric(plotData[[mytime]])
+
+                myformula <-
+                    paste('survival::Surv(',
+                          mytime,
+                          ',',
+                          myoutcome,
+                          ') ~ ',
+                          myfactor)
+
+                myformula <- as.formula(myformula)
+
+                km_fit <-
+                    survival::survfit(myformula, data = plotData)
+
+                title2 <- as.character(myfactor)
+
+                # Create log-log plot
+                tryCatch({
+                    plot7 <- plotData %>%
+                        finalfit::surv_plot(
+                            .data = .,
+                            dependent = paste("Surv(", mytime, ",", myoutcome, ")"),
+                            explanatory = myfactor,
+                            xlab = paste0('log(Time) (', self$options$timetypeoutput, ')'),
+                            ylab = 'log(-log(Survival))',
+                            title = paste0("Log-Log Plot for ", title2),
+                            subtitle = "Assessment of Proportional Hazards Assumption",
+                            fun = function(x) log(-log(x)),
+                            legend = 'right'
+                        ) +
+                        ggplot2::scale_x_log10()
+
+                    print(plot7)
+                    TRUE
+                    
+                }, error = function(e) {
+                    # Fallback simple log-log plot
+                    survival_times <- seq(min(plotData[[mytime]], na.rm = TRUE), 
+                                        max(plotData[[mytime]], na.rm = TRUE), 
+                                        length.out = 100)
+                    
+                    km_summary <- summary(km_fit, times = survival_times, extend = TRUE)
+                    
+                    plot_data <- data.frame(
+                        time = km_summary$time,
+                        surv = km_summary$surv,
+                        strata = km_summary$strata
+                    )
+                    
+                    # Remove invalid values
+                    plot_data <- plot_data[plot_data$surv > 0 & plot_data$surv < 1, ]
+                    plot_data$log_time <- log(plot_data$time)
+                    plot_data$log_log_surv <- log(-log(plot_data$surv))
+                    
+                    plot7 <- ggplot2::ggplot(plot_data, ggplot2::aes(x = log_time, y = log_log_surv, color = strata)) +
+                        ggplot2::geom_line(size = 1) +
+                        ggplot2::labs(
+                            x = paste0('log(Time) (', self$options$timetypeoutput, ')'),
+                            y = 'log(-log(Survival))',
+                            title = paste0("Log-Log Plot for ", title2),
+                            subtitle = "Parallel lines suggest proportional hazards"
+                        ) +
+                        ggtheme
+                    
+                    print(plot7)
+                    TRUE
+                })
+            }
 
 
             # KMunicate Style ----
@@ -1504,6 +1992,45 @@ survivalClass <- if (requireNamespace('jmvcore'))
             }
 
 
+            # Residuals Plot ----
+            ,
+            .plot9 = function(image9, ggtheme, theme, ...) {
+                residual_diagnostics <- self$options$residual_diagnostics
+
+                if (!residual_diagnostics)
+                    return()
+
+                plot_state <- image9$state
+
+                if (is.null(plot_state) || is.null(plot_state$residuals_data)) {
+                    return()
+                }
+
+                residuals_data <- plot_state$residuals_data
+                
+                tryCatch({
+                    # Create residuals plot
+                    plot9 <- ggplot2::ggplot(residuals_data, ggplot2::aes(x = observation)) +
+                        ggplot2::geom_point(ggplot2::aes(y = martingale), color = "blue", alpha = 0.6) +
+                        ggplot2::geom_smooth(ggplot2::aes(y = martingale), method = "loess", se = TRUE, color = "red") +
+                        ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+                        ggplot2::labs(
+                            x = "Observation Index",
+                            y = "Martingale Residuals",
+                            title = "Cox Model Residual Diagnostics",
+                            subtitle = "Martingale residuals should be randomly scattered around zero"
+                        ) +
+                        ggtheme
+                    
+                    print(plot9)
+                    TRUE
+                    
+                }, error = function(e) {
+                    warning(paste("Error creating residuals plot:", e$message))
+                    FALSE
+                })
+            }
+            
             # cox.zph ----
             ,
             .plot8 = function(image8, ggtheme, theme, ...) {

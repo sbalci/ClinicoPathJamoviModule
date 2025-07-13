@@ -79,7 +79,9 @@ jjarcdiagram(
   target = "target",
   showNodes = TRUE,
   horizontal = TRUE,
-  plotTitle = "Basic Network Structure"
+  plotTitle = "Basic Network Structure",
+  group = NULL,
+  weight = NULL
 )
 ```
 
@@ -94,7 +96,8 @@ jjarcdiagram(
   weight = "weight",
   arcWidth = "weight",
   showNodes = TRUE,
-  plotTitle = "Weighted Network Connections"
+  plotTitle = "Weighted Network Connections",
+  group = NULL
 )
 ```
 
@@ -124,12 +127,12 @@ jjarcdiagram(
 data("jjarcdiagram_social_network")
 
 # Preview the social network data
-str(jjarcdiagram_social_network)
-head(jjarcdiagram_social_network)
+str(social_network_data)
+head(social_network_data)
 
 # Create social network visualization
 jjarcdiagram(
-  data = jjarcdiagram_social_network,
+  data = social_network_data,
   source = "source",
   target = "target", 
   weight = "weight",
@@ -151,12 +154,12 @@ jjarcdiagram(
 data("jjarcdiagram_academic_network")
 
 # Preview the academic network data
-str(jjarcdiagram_academic_network)
-head(jjarcdiagram_academic_network)
+str(academic_network_data)
+head(academic_network_data)
 
 # Create academic collaboration visualization
 jjarcdiagram(
-  data = jjarcdiagram_academic_network,
+  data = academic_network_data,
   source = "author1",
   target = "author2",
   weight = "publications",
@@ -178,12 +181,12 @@ jjarcdiagram(
 data("jjarcdiagram_org_hierarchy")
 
 # Preview the organizational data
-str(jjarcdiagram_org_hierarchy)
-head(jjarcdiagram_org_hierarchy)
+str(org_hierarchy_data)
+head(org_hierarchy_data)
 
 # Create organizational hierarchy visualization
 jjarcdiagram(
-  data = jjarcdiagram_org_hierarchy,
+  data = org_hierarchy_data,
   source = "employee",
   target = "reports_to",
   weight = "relationship_strength",
@@ -206,12 +209,12 @@ jjarcdiagram(
 data("jjarcdiagram_gene_network")
 
 # Preview the gene network data
-str(jjarcdiagram_gene_network)
-head(jjarcdiagram_gene_network)
+str(gene_network_data)
+head(gene_network_data)
 
 # Create gene regulatory network visualization
 jjarcdiagram(
-  data = jjarcdiagram_gene_network,
+  data = gene_network_data,
   source = "regulator",
   target = "target",
   weight = "regulation_score",
@@ -234,12 +237,12 @@ jjarcdiagram(
 data("jjarcdiagram_supply_chain")
 
 # Preview the supply chain data
-str(jjarcdiagram_supply_chain)
-head(jjarcdiagram_supply_chain)
+str(supply_chain_data)
+head(supply_chain_data)
 
 # Create supply chain visualization
 jjarcdiagram(
-  data = jjarcdiagram_supply_chain,
+  data = supply_chain_data,
   source = "supplier",
   target = "customer",
   weight = "volume",
@@ -262,7 +265,7 @@ jjarcdiagram(
 ```{r layout-comparison}
 # Horizontal layout
 jjarcdiagram(
-  data = jjarcdiagram_simple_weighted,
+  data = simple_weighted_network,
   source = "from_node",
   target = "to_node",
   weight = "connection_weight",
@@ -273,7 +276,7 @@ jjarcdiagram(
 
 # Vertical layout
 jjarcdiagram(
-  data = jjarcdiagram_simple_weighted,
+  data = simple_weighted_network,
   source = "from_node",
   target = "to_node",
   weight = "connection_weight",
@@ -288,7 +291,7 @@ jjarcdiagram(
 ```{r node-sizing}
 # Fixed node size
 jjarcdiagram(
-  data = jjarcdiagram_academic_network,
+  data = academic_network_data,
   source = "author1",
   target = "author2",
   weight = "publications",
@@ -301,7 +304,7 @@ jjarcdiagram(
 
 # Degree-based node sizing
 jjarcdiagram(
-  data = jjarcdiagram_academic_network,
+  data = academic_network_data,
   source = "author1",
   target = "author2",
   weight = "publications",
@@ -317,7 +320,7 @@ jjarcdiagram(
 ```{r arc-width}
 # Fixed arc width
 jjarcdiagram(
-  data = jjarcdiagram_supply_chain,
+  data = supply_chain_data,
   source = "supplier",
   target = "customer",
   weight = "volume",
@@ -328,7 +331,7 @@ jjarcdiagram(
 
 # Weight-proportional arc width
 jjarcdiagram(
-  data = jjarcdiagram_supply_chain,
+  data = supply_chain_data,
   source = "supplier",
   target = "customer",
   weight = "volume",
@@ -347,7 +350,7 @@ transparency_levels <- c(0.2, 0.5, 0.8)
 for(alpha in transparency_levels) {
   cat("\n=== Arc Transparency:", alpha, "===\n")
   result <- jjarcdiagram(
-    data = jjarcdiagram_social_network,
+    data = social_network_data,
     source = "source",
     target = "target",
     weight = "weight",
@@ -366,7 +369,7 @@ for(alpha in transparency_levels) {
 ```{r node-sorting}
 # Sort by node names
 jjarcdiagram(
-  data = jjarcdiagram_gene_network,
+  data = gene_network_data,
   source = "regulator",
   target = "target",
   weight = "regulation_score",
@@ -378,7 +381,7 @@ jjarcdiagram(
 
 # Sort by degree centrality
 jjarcdiagram(
-  data = jjarcdiagram_gene_network,
+  data = gene_network_data,
   source = "regulator",
   target = "target",
   weight = "regulation_score",
@@ -391,7 +394,7 @@ jjarcdiagram(
 
 # Sort by groups
 jjarcdiagram(
-  data = jjarcdiagram_gene_network,
+  data = gene_network_data,
   source = "regulator",
   target = "target",
   weight = "regulation_score",
@@ -410,7 +413,7 @@ jjarcdiagram(
 ```{r direction-comparison}
 # Directed network (default for hierarchical data)
 jjarcdiagram(
-  data = jjarcdiagram_org_hierarchy,
+  data = org_hierarchy_data,
   source = "employee",
   target = "reports_to",
   weight = "relationship_strength",
@@ -422,7 +425,7 @@ jjarcdiagram(
 
 # Undirected network (treat connections as bidirectional)
 jjarcdiagram(
-  data = jjarcdiagram_org_hierarchy,
+  data = org_hierarchy_data,
   source = "employee",
   target = "reports_to",
   weight = "relationship_strength",
@@ -443,7 +446,7 @@ data("jjarcdiagram_minimal_network")
 
 # Visualize minimal network
 jjarcdiagram(
-  data = jjarcdiagram_minimal_network,
+  data = minimal_network_data,
   source = "from",
   target = "to",
   weight = "strength",
@@ -462,7 +465,7 @@ data("jjarcdiagram_selfloop_network")
 
 # Visualize network with self-loops
 jjarcdiagram(
-  data = jjarcdiagram_selfloop_network,
+  data = selfloop_network_data,
   source = "node1",
   target = "node2",
   weight = "weight",
@@ -481,12 +484,12 @@ jjarcdiagram(
 data("jjarcdiagram_large_network")
 
 # Preview large network
-cat("Large network size:", nrow(jjarcdiagram_large_network), "edges\n")
-cat("Unique nodes:", length(unique(c(jjarcdiagram_large_network$source, jjarcdiagram_large_network$target))), "\n")
+cat("Large network size:", nrow(large_network_data), "edges\n")
+cat("Unique nodes:", length(unique(c(large_network_data$source, large_network_data$target))), "\n")
 
 # Visualize large network
 jjarcdiagram(
-  data = jjarcdiagram_large_network,
+  data = large_network_data,
   source = "source",
   target = "target",
   weight = "weight",
@@ -508,7 +511,7 @@ jjarcdiagram(
 ```{r network-stats}
 # Generate comprehensive network statistics
 jjarcdiagram(
-  data = jjarcdiagram_academic_network,
+  data = academic_network_data,
   source = "author1",
   target = "author2",
   weight = "publications",
@@ -537,7 +540,7 @@ The network statistics provide valuable insights:
 ```{r custom-styling}
 # Custom plot with enhanced labeling
 jjarcdiagram(
-  data = jjarcdiagram_social_network,
+  data = social_network_data,
   source = "source",
   target = "target",
   weight = "weight",
@@ -558,21 +561,21 @@ jjarcdiagram(
 
 ```{r multiple-groups}
 # Compare different grouping strategies
-grouping_vars <- c("group", "interaction_type")
-
-for(var in grouping_vars) {
-  cat("\n=== Grouping by", var, "===\n")
-  result <- jjarcdiagram(
-    data = jjarcdiagram_social_network,
-    source = "source",
-    target = "target",
-    weight = "weight",
-    group = var,
-    colorByGroup = TRUE,
-    showLegend = TRUE,
-    plotTitle = paste("Grouped by", var)
-  )
-}
+# grouping_vars <- c("group", "interaction_type")
+ 
+# for(var in grouping_vars) {
+#   cat("\n=== Grouping by", var, "===\n")
+#   result <- jjarcdiagram(
+#     data = social_network_data,
+#     source = "source",
+#     target = "target",
+#     weight = "weight",
+#     group = var,
+#     colorByGroup = TRUE,
+#     showLegend = TRUE,
+#     plotTitle = paste("Grouped by", var)
+#   )
+# }
 ```
 
 ## Clinical and Research Applications
@@ -582,7 +585,7 @@ for(var in grouping_vars) {
 ```{r biological-applications}
 # Gene regulation network analysis
 jjarcdiagram(
-  data = jjarcdiagram_gene_network,
+  data = gene_network_data,
   source = "regulator",
   target = "target",
   weight = "regulation_score",
@@ -601,7 +604,7 @@ jjarcdiagram(
 ```{r organizational-applications}
 # Department-level analysis
 jjarcdiagram(
-  data = jjarcdiagram_org_hierarchy,
+  data = org_hierarchy_data,
   source = "employee",
   target = "reports_to",
   weight = "relationship_strength",
@@ -621,7 +624,7 @@ jjarcdiagram(
 ```{r collaboration-applications}
 # Research collaboration analysis
 jjarcdiagram(
-  data = jjarcdiagram_academic_network,
+  data = academic_network_data,
   source = "author1",
   target = "author2",
   weight = "collaboration_years",
@@ -644,9 +647,9 @@ jjarcdiagram(
 ```{r performance}
 # Compare performance with different network sizes
 network_sizes <- list(
-  "Small" = jjarcdiagram_minimal_network,
-  "Medium" = jjarcdiagram_social_network,
-  "Large" = jjarcdiagram_large_network
+  "Small" = minimal_network_data,
+  "Medium" = social_network_data,
+  "Large" = large_network_data
 )
 
 for(size_name in names(network_sizes)) {
@@ -689,7 +692,7 @@ for(size_name in names(network_sizes)) {
 
 ```{r network-comparison}
 # Compare networks with different parameters
-comparison_data <- jjarcdiagram_academic_network
+comparison_data <- academic_network_data
 
 # Network sorted by names
 jjarcdiagram(
@@ -722,7 +725,7 @@ jjarcdiagram(
 ```{r dynamic-properties}
 # Analyze temporal aspects using collaboration years
 jjarcdiagram(
-  data = jjarcdiagram_academic_network,
+  data = academic_network_data,
   source = "author1",
   target = "author2",
   weight = "collaboration_years",

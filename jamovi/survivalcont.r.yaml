@@ -161,6 +161,91 @@ items:
         - tint
         - multievent
 
+    - name: rmstTable
+      title: 'Restricted Mean Survival Time'
+      type: Table
+      visible: (rmst_analysis)
+      rows: 0
+      columns:
+        - name: group
+          title: "Group"
+          type: text
+        - name: rmst
+          title: "RMST"
+          type: number
+          format: zto
+        - name: se
+          title: "SE"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "Lower"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "Upper"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: tau
+          title: "Time Horizon (τ)"
+          type: number
+          format: zto
+      clearWith:
+        - rmst_analysis
+        - rmst_tau
+        - contexpl
+        - outcome
+        - outcomeLevel
+        - findcut
+        - multiple_cutoffs
+
+    - name: rmstSummary
+      title: 'RMST Interpretation'
+      type: Preformatted
+      visible: (rmst_analysis)
+      clearWith:
+        - rmst_analysis
+        - rmst_tau
+        - contexpl
+        - outcome
+        - outcomeLevel
+        - findcut
+        - multiple_cutoffs
+
+    - name: residualsTable
+      title: 'Cox Model Residuals'
+      type: Table
+      visible: (residual_diagnostics)
+      rows: 0
+      columns:
+        - name: observation
+          title: "Observation"
+          type: integer
+        - name: martingale
+          title: "Martingale"
+          type: number
+          format: zto
+        - name: deviance
+          title: "Deviance"
+          type: number
+          format: zto
+        - name: score
+          title: "Score"
+          type: number
+          format: zto
+        - name: schoenfeld
+          title: "Schoenfeld"
+          type: number
+          format: zto
+      clearWith:
+        - residual_diagnostics
+        - contexpl
+        - outcome
+        - outcomeLevel
+        - findcut
+
 
 
     - name:  rescutTable
@@ -463,6 +548,43 @@ items:
       refs:
           - KMunicate
           - KMunicate2
+
+    - name: plot7
+      title: '`Log-Log Plot - ${contexpl} Grouped with New Cut-Off`'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plot7
+      visible: (findcut && loglog)
+      requiresData: true
+      clearWith:
+        - loglog
+        - endplot
+        - byplot
+        - contexpl
+        - outcome
+        - outcomeLevel
+        - overalltime
+        - findcut
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+
+    - name: residualsPlot
+      title: '`Residuals Diagnostic Plot - ${contexpl}`'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot9
+      visible: (residual_diagnostics)
+      requiresData: true
+      clearWith:
+        - residual_diagnostics
+        - contexpl
+        - outcome
+        - outcomeLevel
+        - findcut
 
 
     - name: calculatedtime

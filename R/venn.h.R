@@ -52,8 +52,7 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"),
-                default=NULL)
+                    "factor"))
             private$..var3true <- jmvcore::OptionLevel$new(
                 "var3true",
                 var3true,
@@ -65,8 +64,7 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"),
-                default=NULL)
+                    "factor"))
             private$..var4true <- jmvcore::OptionLevel$new(
                 "var4true",
                 var4true,
@@ -159,7 +157,7 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "venn",
-                version = c(0,0,3),
+                version = c(0,0,2),
                 options = options,
                 results = vennResults$new(options=options),
                 data = data,
@@ -207,9 +205,9 @@ venn <- function(
     var1true,
     var2,
     var2true,
-    var3 = NULL,
+    var3,
     var3true,
-    var4 = NULL,
+    var4,
     var4true) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

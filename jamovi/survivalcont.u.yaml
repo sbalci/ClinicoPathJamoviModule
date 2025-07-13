@@ -282,3 +282,37 @@ children:
           - type: TextBox
             name: rate_multiplier
             format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: rmst_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: rmst_tau
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: residual_diagnostics
+      - type: CheckBox
+        name: stratified_cox
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Stratification Variable
+        children:
+          - type: VariablesListBox
+            name: strata_variable
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: loglog
