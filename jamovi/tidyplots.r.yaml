@@ -1,6 +1,6 @@
 ---
 name:  tidyplots
-title: Tidy Plots
+title: Comprehensive Tidy Plots
 jrs:   '1.1'
 
 items:
@@ -14,21 +14,50 @@ items:
       type: Image
       renderFun: .plot
       requiresData: true
-      width: 600
-      height: 400
+      width: 800
+      height: 600
       clearWith:
           - xvar
           - yvar
           - color
+          - group
+          - facet
           - plotType
           - pointType
+          - lineType
+          - barType
+          - areaType
           - showMean
+          - meanType
+          - showMedian
+          - medianType
           - showSEM
+          - showSD
           - showCI
+          - ciType
+          - showRange
+          - showDistribution
+          - distributionType
+          - showOutliers
+          - violinPoints
+          - histogramBins
+          - showPValue
+          - showSignificance
           - colorScheme
+          - alpha
+          - fontSize
           - plotTitle
           - xLabel
           - yLabel
+          - legendTitle
+          - removeLegend
+          - removePadding
+          - removeXAxis
+          - removeXAxisLabels
+          - removeXAxisTitle
+          - removeYAxis
+          - removeYAxisLabels
+          - removeYAxisTitle
 
 refs:
     - tidyplots

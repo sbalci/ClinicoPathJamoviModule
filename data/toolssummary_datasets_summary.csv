@@ -1,0 +1,7 @@
+"Dataset","Observations","Variables","Description","Key_Features","Primary_Use_Case","Recommended_summarytools_Features"
+"toolssummary_clinical_demographics",300,16,"Clinical research demographics with treatment groups","Treatment groups, missing data patterns, clinical variables","Grouped summaries by treatment","dfSummary, descr, freq, ctable"
+"toolssummary_laboratory_results",200,15,"Laboratory results with longitudinal structure","Longitudinal visits, lab values, clinical categories","Longitudinal analysis, lab value summaries","dfSummary, descr, freq by visit"
+"toolssummary_mixed_datatypes",250,15,"Mixed data types with complex categorical variables","Mixed types, ordinal factors, complex categories","Mixed data type handling, categorical analysis","dfSummary, freq for categories, descr for numeric"
+"toolssummary_timeseries_data",200,12,"Time series data for longitudinal analysis","Time series, dropout patterns, repeated measures","Time-based analysis, dropout assessment","dfSummary, descr by timepoint, freq"
+"toolssummary_edge_cases",150,12,"Edge cases and robustness testing scenarios","Extreme values, special characters, edge cases","Robustness testing, error handling","All functions for robustness testing"
+"toolssummary_small_sample",20,7,"Small sample size for minimal data testing","Minimal data, basic structure, single missing value","Minimal sample behavior, edge case validation","Basic freq, descr for minimal data"

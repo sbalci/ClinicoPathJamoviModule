@@ -1,5 +1,27 @@
-# Enhanced Time-Dependent ROC Analysis for Clinical Research
-# Provides comprehensive evaluation of biomarker predictive performance over time
+#' @title Enhanced Time-Dependent ROC Analysis for Clinical Research
+#' 
+#' @description 
+#' Comprehensive evaluation of biomarker predictive performance over time using 
+#' time-dependent ROC analysis. Supports multiple ROC estimation methods and 
+#' provides clinical interpretation of results.
+#' 
+#' @details
+#' This analysis provides time-dependent ROC curve analysis with:
+#' \itemize{
+#'   \item Multiple estimation methods (incident, cumulative, static)
+#'   \item Bootstrap confidence intervals for robust inference
+#'   \item Optimal cutoff calculation using Youden index
+#'   \item Comprehensive visualization (ROC curves and AUC over time)
+#'   \item Clinical interpretation and performance assessment
+#'   \item Model comparison capabilities
+#' }
+#' 
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @import timeROC
+#' @import ggplot2
+#' @import glue
+#' @import dplyr
 
 timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "timerocClass",
@@ -178,37 +200,53 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             table <- self$results$cutoffTable
             
             for (i in seq_along(timepoints)) {
-                # Extract ROC data for this timepoint
-                tp <- timepoints[i]
-                
-                # Find ROC data for this timepoint
-                time_idx <- which.min(abs(private$.fit$times - tp))
-                
-                if (length(time_idx) > 0) {
-                    # Get sensitivity and specificity at different thresholds
-                    sens <- private$.fit$TP[, time_idx]
-                    spec <- private$.fit$FP[, time_idx]  # This is actually 1-specificity, so we need 1-this
-                    spec <- 1 - spec
+                tryCatch({
+                    # Extract ROC data for this timepoint
+                    tp <- timepoints[i]
                     
-                    # Calculate Youden index
-                    youden <- sens + spec - 1
+                    # Find ROC data for this timepoint - exact match or closest
+                    time_idx <- which.min(abs(private$.fit$times - tp))
                     
-                    # Find optimal cutoff
-                    optimal_idx <- which.max(youden)
-                    optimal_cutoff <- private$.fit$marker[optimal_idx]
-                    optimal_sens <- sens[optimal_idx]
-                    optimal_spec <- spec[optimal_idx]
-                    optimal_youden <- youden[optimal_idx]
-                    
-                    # Add to table
-                    table$addRow(rowKey = i, values = list(
-                        timepoint = tp,
-                        cutoff = round(optimal_cutoff, 3),
-                        sensitivity = round(optimal_sens, 3),
-                        specificity = round(optimal_spec, 3),
-                        youden = round(optimal_youden, 3)
-                    ))
-                }
+                    if (length(time_idx) > 0 && !is.null(private$.fit$TP) && !is.null(private$.fit$FP)) {
+                        # Get sensitivity (True Positive Rate) and False Positive Rate
+                        sens <- private$.fit$TP[, time_idx]
+                        fpr <- private$.fit$FP[, time_idx]  # This is False Positive Rate (1-specificity)
+                        spec <- 1 - fpr  # Calculate specificity from FPR
+                        
+                        # Remove any NA values and ensure vectors are same length
+                        valid_idx <- !is.na(sens) & !is.na(spec) & !is.na(private$.fit$marker)
+                        if (sum(valid_idx) > 0) {
+                            sens_clean <- sens[valid_idx]
+                            spec_clean <- spec[valid_idx]
+                            marker_clean <- private$.fit$marker[valid_idx]
+                            
+                            # Calculate Youden index (J = Sensitivity + Specificity - 1)
+                            youden <- sens_clean + spec_clean - 1
+                            
+                            # Find optimal cutoff (maximum Youden index)
+                            optimal_idx <- which.max(youden)
+                            
+                            if (length(optimal_idx) > 0 && optimal_idx <= length(marker_clean)) {
+                                optimal_cutoff <- marker_clean[optimal_idx]
+                                optimal_sens <- sens_clean[optimal_idx]
+                                optimal_spec <- spec_clean[optimal_idx]
+                                optimal_youden <- youden[optimal_idx]
+                                
+                                # Add to table
+                                table$addRow(rowKey = i, values = list(
+                                    timepoint = tp,
+                                    cutoff = round(optimal_cutoff, 3),
+                                    sensitivity = round(optimal_sens, 3),
+                                    specificity = round(optimal_spec, 3),
+                                    youden = round(optimal_youden, 3)
+                                ))
+                            }
+                        }
+                    }
+                }, error = function(e) {
+                    # Silent error handling - skip this timepoint if calculation fails
+                    warning(paste("Could not calculate optimal cutoff for timepoint", timepoints[i], ":", e$message))
+                })
             }
         },
 
@@ -219,8 +257,28 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Parse timepoints
             timepoints <- private$.parseTimepoints()
 
-            # Compute time-dependent ROC
+            # Additional validation before running timeROC
             tryCatch({
+                # Validate data for timeROC requirements
+                if (length(unique(private$.data$status)) < 2) {
+                    stop("Outcome variable must have both event (1) and non-event (0) cases")
+                }
+                
+                if (max(timepoints) > max(private$.data$time, na.rm = TRUE)) {
+                    warning("Some timepoints exceed maximum follow-up time. Results may be unreliable.")
+                }
+                
+                # Check for sufficient events at each timepoint
+                for (tp in timepoints) {
+                    at_risk <- sum(private$.data$time >= tp, na.rm = TRUE)
+                    events_by_time <- sum(private$.data$time <= tp & private$.data$status == 1, na.rm = TRUE)
+                    if (events_by_time < 5) {
+                        warning(sprintf("Few events (%d) observed by timepoint %d. Results may be unreliable.", 
+                                      events_by_time, tp))
+                    }
+                }
+
+                # Compute time-dependent ROC with enhanced parameters
                 fit <- timeROC::timeROC(
                     T = private$.data$time,
                     delta = private$.data$status,
@@ -232,27 +290,49 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     method = self$options$method
                 )
 
+                # Validate timeROC results
+                if (is.null(fit) || is.null(fit$AUC)) {
+                    stop("timeROC analysis failed to produce valid results")
+                }
+
                 # Store results
                 private$.fit <- fit
 
                 # Calculate marker statistics
                 private$.calculateMarkerStats()
 
-                # Fill AUC table
+                # Fill AUC table with improved error handling
                 table <- self$results$aucTable
                 
                 for (i in seq_along(timepoints)) {
-                    auc <- fit$AUC[i]
-                    se <- sqrt(fit$var.AUC[i])
-                    
-                    row <- list(
-                        timepoint = timepoints[i],
-                        auc = round(auc, 3),
-                        se = round(se, 3),
-                        ci_lower = round(auc - 1.96*se, 3),
-                        ci_upper = round(auc + 1.96*se, 3)
-                    )
-                    table$addRow(rowKey = i, values = row)
+                    if (i <= length(fit$AUC) && !is.na(fit$AUC[i])) {
+                        auc <- fit$AUC[i]
+                        
+                        # Calculate standard error with bounds checking
+                        if (!is.null(fit$var.AUC) && i <= length(fit$var.AUC) && !is.na(fit$var.AUC[i])) {
+                            se <- sqrt(pmax(0, fit$var.AUC[i]))  # Ensure non-negative variance
+                        } else {
+                            se <- NA
+                        }
+                        
+                        # Calculate confidence intervals with bounds
+                        if (!is.na(se)) {
+                            ci_lower <- pmax(0, auc - 1.96*se)  # AUC cannot be < 0
+                            ci_upper <- pmin(1, auc + 1.96*se)  # AUC cannot be > 1
+                        } else {
+                            ci_lower <- NA
+                            ci_upper <- NA
+                        }
+                        
+                        row <- list(
+                            timepoint = timepoints[i],
+                            auc = round(auc, 3),
+                            se = ifelse(is.na(se), "N/A", round(se, 3)),
+                            ci_lower = ifelse(is.na(ci_lower), "N/A", round(ci_lower, 3)),
+                            ci_upper = ifelse(is.na(ci_upper), "N/A", round(ci_upper, 3))
+                        )
+                        table$addRow(rowKey = i, values = row)
+                    }
                 }
 
                 # Calculate optimal cutoffs
@@ -271,17 +351,36 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             }, error = function(e) {
                 error_msg <- sprintf("
-                    <h3>Analysis Error</h3>
-                    <p><b>Error:</b> %s</p>
-                    <p><b>Troubleshooting Tips:</b></p>
+                    <h3>Time-Dependent ROC Analysis Error</h3>
+                    <p><b>Error Message:</b> %s</p>
+                    
+                    <h4>Common Issues and Solutions:</h4>
                     <ul>
-                        <li>Check that your time variable contains positive numeric values</li>
-                        <li>Ensure outcome variable is properly coded (0/1 or factor with event level specified)</li>
-                        <li>Verify marker variable is continuous and contains sufficient variation</li>
-                        <li>Make sure there are events (status=1) in your dataset</li>
-                        <li>Check that specified timepoints are within your follow-up period</li>
+                        <li><b>Time Variable:</b> Must be positive numeric values (days, months, years)</li>
+                        <li><b>Outcome Variable:</b> Must be binary (0/1) or factor with specified event level</li>
+                        <li><b>Marker Variable:</b> Must be continuous with sufficient variation</li>
+                        <li><b>Events Required:</b> Need at least 5-10 events for reliable ROC analysis</li>
+                        <li><b>Timepoints:</b> Should be within your follow-up period</li>
+                        <li><b>Sample Size:</b> Need adequate sample size for time-dependent analysis (≥50 recommended)</li>
                     </ul>
-                ", e$message)
+                    
+                    <h4>Data Requirements Check:</h4>
+                    <ul>
+                        <li>Sample size: %d observations</li>
+                        <li>Total events: %d (%.1f%%)</li>
+                        <li>Follow-up range: %.1f to %.1f %s</li>
+                        <li>Timepoints specified: %s</li>
+                    </ul>
+                ", 
+                e$message,
+                ifelse(is.null(private$.data), 0, nrow(private$.data)),
+                ifelse(is.null(private$.data), 0, sum(private$.data$status, na.rm = TRUE)),
+                ifelse(is.null(private$.data), 0, 100 * mean(private$.data$status, na.rm = TRUE)),
+                ifelse(is.null(private$.data), 0, min(private$.data$time, na.rm = TRUE)),
+                ifelse(is.null(private$.data), 0, max(private$.data$time, na.rm = TRUE)),
+                self$options$timetypeoutput,
+                paste(timepoints, collapse = ", ")
+                )
                 
                 self$results$text$setContent(error_msg)
             })
@@ -496,22 +595,35 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             timepoints <- private$.timepoints
             auc <- private$.fit$AUC
-            se <- sqrt(private$.fit$var.AUC)
+            
+            # Enhanced error handling for variance
+            if (!is.null(private$.fit$var.AUC) && length(private$.fit$var.AUC) >= length(auc)) {
+                se <- sqrt(pmax(0, private$.fit$var.AUC[1:length(auc)]))
+            } else {
+                se <- rep(0, length(auc))  # Fallback if variance not available
+            }
 
-            # Create data frame for plotting
+            # Create data frame for plotting with validation
+            valid_data <- !is.na(auc) & !is.na(timepoints)
+            if (sum(valid_data) == 0) {
+                return(FALSE)  # Cannot plot if no valid data
+            }
+            
             plot_data <- data.frame(
-                time = timepoints,
-                auc = auc,
-                lower = pmax(0, auc - 1.96*se),  # Ensure CI doesn't go below 0
-                upper = pmin(1, auc + 1.96*se)   # Ensure CI doesn't go above 1
+                time = timepoints[valid_data],
+                auc = auc[valid_data],
+                lower = pmax(0, auc[valid_data] - 1.96*se[valid_data]),  # Ensure CI doesn't go below 0
+                upper = pmin(1, auc[valid_data] + 1.96*se[valid_data])   # Ensure CI doesn't go above 1
             )
 
-            # Create the plot
+            # Create the plot with improved aesthetics
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = auc)) +
                 ggplot2::geom_hline(yintercept = 0.5, linetype = "dashed", 
-                                   color = "red", alpha = 0.7, size = 1) +
+                                   color = "red", alpha = 0.7, linewidth = 1) +
                 ggplot2::geom_hline(yintercept = 0.7, linetype = "dotted", 
-                                   color = "orange", alpha = 0.7) +
+                                   color = "orange", alpha = 0.7, linewidth = 0.8) +
+                ggplot2::geom_hline(yintercept = 0.8, linetype = "dotdash", 
+                                   color = "green", alpha = 0.5, linewidth = 0.6) +
                 ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper),
                                     alpha = 0.2, fill = "blue") +
                 ggplot2::geom_point(color = "blue", size = 3) +
@@ -521,14 +633,14 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     labels = scales::number_format(accuracy = 0.1)
                 ) +
                 ggplot2::scale_x_continuous(
-                    breaks = timepoints,
-                    labels = timepoints
+                    breaks = plot_data$time,
+                    labels = plot_data$time
                 ) +
                 ggplot2::labs(
                     x = sprintf("Time (%s)", self$options$timetypeoutput),
                     y = "Area Under ROC Curve (AUC)",
-                    title = sprintf("AUC Over Time: %s", self$options$marker),
-                    subtitle = sprintf("Method: %s | Red line: Random performance (0.5) | Orange line: Clinical threshold (0.7)",
+                    title = sprintf("Time-Dependent AUC: %s", self$options$marker),
+                    subtitle = sprintf("Method: %s | Dashed: Random (0.5) | Dotted: Fair (0.7) | Dot-dash: Good (0.8)",
                                      self$options$method),
                     caption = ifelse(self$options$bootstrapCI, 
                                    sprintf("Error bars: 95%% CI (%d bootstrap samples)", self$options$nboot),
@@ -541,15 +653,21 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     plot.caption = ggplot2::element_text(size = 8, style = "italic"),
                     axis.title = ggplot2::element_text(size = 12),
                     axis.text = ggplot2::element_text(size = 10),
-                    panel.grid.minor = ggplot2::element_blank()
+                    panel.grid.minor = ggplot2::element_blank(),
+                    panel.grid.major = ggplot2::element_line(alpha = 0.3)
                 )
 
-            # Add smoothing if requested
-            if (self$options$smoothAUC && length(timepoints) > 2) {
-                p <- p + ggplot2::geom_smooth(method = "loess", se = FALSE, 
-                                            color = "darkblue", size = 1.2)
+            # Add smoothing if requested and feasible
+            if (self$options$smoothAUC && nrow(plot_data) > 2) {
+                tryCatch({
+                    p <- p + ggplot2::geom_smooth(method = "loess", se = FALSE, 
+                                                color = "darkblue", linewidth = 1.2)
+                }, error = function(e) {
+                    # Fallback to simple line if smoothing fails
+                    p <- p + ggplot2::geom_line(color = "blue", linewidth = 1)
+                })
             } else {
-                p <- p + ggplot2::geom_line(color = "blue", size = 1)
+                p <- p + ggplot2::geom_line(color = "blue", linewidth = 1)
             }
 
             print(p)

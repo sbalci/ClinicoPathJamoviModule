@@ -3,8 +3,8 @@
 
 # Global settings
 global:
-  new_version: "0.0.3.56"
-  new_date: "2025-07-13"
+  new_version: "0.0.3.59"
+  new_date: "2025-07-15"
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 # Operation modes
@@ -17,9 +17,9 @@ modes:
   WIP: false
 
   # File copying control modes
-  copy_vignettes: true       # Enable/disable vignette file copying
-  copy_data_files: true      # Enable/disable data file copying
-  copy_test_files: true     # Enable/disable test file copying
+  copy_vignettes: false       # Enable/disable vignette file copying
+  copy_data_files: false      # Enable/disable data file copying
+  copy_test_files: false    # Enable/disable test file copying
   copy_r_files: true         # Enable/disable R utility file copying
   use_legacy_copying: false  # Use legacy hardcoded file lists instead of config-based copying
 
@@ -34,28 +34,25 @@ required_packages:
   - yaml
   - future
 
-# Vignette domain-to-module mapping
-vignette_domains:
-  # Automatic domain-based copying (domain prefix -> target modules)
-  domain_mapping:
-    clinicopath-descriptives: ["ClinicoPathDescriptives"]
-    clinicopath-biomarker: ["ClinicoPathDescriptives"]
-    clinicopath-checkdata: ["ClinicoPathDescriptives"]
-    jjstatsplot: ["jjstatsplot"]
-    meddecide: ["meddecide"]
-    jsurvival: ["jsurvival"]
-    general: ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+# Vignette folder-to-module mapping
+vignette_folders:
+  # Direct folder mapping (source folder -> target modules)
+  folder_mapping:
+    vignettes-ClinicoPathDescriptives: ["ClinicoPathDescriptives"]
+    vignettes-jjstatsplot: ["jjstatsplot"]
+    vignettes-meddecide: ["meddecide"]
+    vignettes-jsurvival: ["jsurvival"]
+    vignettes: ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]  # General vignettes to all modules
 
-  # Special files that don't follow domain pattern
+  # Special files that don't follow domain pattern (from vignettes/ folder)
   special_files:
     "use-jjstatsplot-in-R.Rmd": ["jjstatsplot"]
-    "clinicopath-descriptives-1-multisurvival-time-dependent-comprehensive.qmd": ["jsurvival"]
-    # "module-development-jamovi.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-    # "users-of-clinicopath.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-    # "pkgnet-report.Rmd": ["ClinicoPathDescriptives"]
-    # "_workflows.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-    # "_wf_master.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-    # "_wf_child.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+    "module-development-jamovi.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+    "users-of-clinicopath.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+    "pkgnet-report.Rmd": ["ClinicoPathDescriptives"]
+    "_workflows.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+    "_wf_master.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+    "_wf_child.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
 
   # Files to exclude from copying (internal or temporary files)
   exclude_patterns:
@@ -70,9 +67,9 @@ vignette_domains:
 
   # Copy mode settings
   copy_settings:
-    use_domain_based: true        # Enable domain-based copying
+    use_folder_based: true        # Enable folder-based copying
     use_manual_lists: false       # Use manual vignette_files lists
-    include_general: false        # Copy general domain to all modules
+    include_general: false         # Copy general vignettes folder to all modules
     overwrite_existing: true      # Overwrite existing vignette files
     create_directories: true      # Create vignette directories if missing
 
@@ -105,11 +102,13 @@ modules:
       - "jggstats_quality_data.rda"
       - "jggstats_survey_data.rda"
 
-    r_files: []
+    r_files: 
+      - "utils.R"
 
     vignette_files:
-      # Manual files (when use_manual_lists: true)
-      # Domain-based copying is now preferred (see vignette_domains section)
+      # Manual files (when use_folder_based: false)
+      # Example: ["01-introduction.Rmd", "02-categorical-plots.Rmd"]
+      # Leave empty to use folder-based copying
       []
 
     test_files: []
@@ -121,7 +120,7 @@ modules:
       - "jamovi"
 
   meddecide:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
     menuGroup_pattern: "menuGroup: meddecide$"
     menuGroup_pattern_wip: "menuGroup: meddecide"
@@ -143,13 +142,14 @@ modules:
     r_files:
       - "psychopdaroc_utilities.R"
       - "nomogrammer.R"
+      - "utils.R"
       # - "meddecide-utils.R"
       # - "meddecide_stats_utils.R"
-      - "diagnostic_metrics.R"
 
     vignette_files:
-      # Manual files (when use_manual_lists: true)
-      # Domain-based copying is now preferred (see vignette_domains section)
+      # Manual files (when use_folder_based: false)
+      # Example: ["01-introduction.Rmd", "03-roc-analysis.Rmd"]
+      # Leave empty to use folder-based copying
       []
 
     test_files:
@@ -183,11 +183,13 @@ modules:
       - "stagemigration_combined.rda"
       - "stagemigration_summary_stats.rda"
 
-    r_files: []
+    r_files: 
+      - "utils.R"
 
     vignette_files:
-      # Manual files (when use_manual_lists: true)
-      # Domain-based copying is now preferred (see vignette_domains section)
+      # Manual files (when use_folder_based: false)
+      # Example: ["01-introduction.Rmd", "02-person-time-analysis.Rmd"]
+      # Leave empty to use folder-based copying
       []
 
     test_files:
@@ -200,7 +202,7 @@ modules:
       - "jamovi"
 
   ClinicoPathDescriptives:
-    enabled: false
+    enabled: true
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     menuGroup_pattern: "menuGroup: Exploration$"
     menuGroup_pattern_wip: "menuGroup: Exploration"
@@ -230,11 +232,13 @@ modules:
       - "outlierdetection_problematic.rda"
       - "outlierdetection_test_data.rda"
 
-    r_files: []
+    r_files: 
+      - "utils.R"
 
     vignette_files:
-      # Manual files (when use_manual_lists: true)
-      # Domain-based copying is now preferred (see vignette_domains section)
+      # Manual files (when use_folder_based: false)
+      # Example: ["03-data-summary.Rmd", "10-visualization-gallery.Rmd"]
+      # Leave empty to use folder-based copying
       []
 
     test_files: []

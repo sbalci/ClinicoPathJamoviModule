@@ -111,3 +111,20 @@ children:
         name: show_formulas
       - type: CheckBox
         name: show_interpretation
+      - type: CheckBox
+        name: show_power_plot
+      - type: CheckBox
+        name: show_timeline_plot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: power_plot_range
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: export_results
+      - type: CheckBox
+        name: export_power_curve

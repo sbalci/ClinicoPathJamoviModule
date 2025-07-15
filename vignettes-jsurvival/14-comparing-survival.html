@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="ClinicoPath Development Team" />
+
+<meta name="date" content="2025-07-02" />
+
+<title>jSurvival 14: Comparing Survival Outcomes Between Groups</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">jSurvival 14: Comparing Survival Outcomes
+Between Groups</h1>
+<h4 class="author">ClinicoPath Development Team</h4>
+<h4 class="date">2025-07-02</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction</a>
+<ul>
+<li><a href="#module-overview" id="toc-module-overview"><span class="toc-section-number">1.1</span> Module Overview</a>
+<ul>
+<li><a href="#statistical-methods" id="toc-statistical-methods"><span class="toc-section-number">1.1.1</span> 1. <strong>Statistical
+Methods</strong></a></li>
+<li><a href="#visualization-features" id="toc-visualization-features"><span class="toc-section-number">1.1.2</span> 2. <strong>Visualization
+Features</strong></a></li>
+<li><a href="#clinical-applications" id="toc-clinical-applications"><span class="toc-section-number">1.1.3</span> 3. <strong>Clinical
+Applications</strong></a></li>
+</ul></li>
+</ul></li>
+<li><a href="#getting-started" id="toc-getting-started"><span class="toc-section-number">2</span> Getting Started</a>
+<ul>
+<li><a href="#sample-data-overview" id="toc-sample-data-overview"><span class="toc-section-number">2.1</span> Sample Data Overview</a></li>
+</ul></li>
+<li><a href="#core-functionality" id="toc-core-functionality"><span class="toc-section-number">3</span> Core Functionality</a>
+<ul>
+<li><a href="#basic-survival-comparison" id="toc-basic-survival-comparison"><span class="toc-section-number">3.1</span> 1. Basic Survival
+Comparison</a></li>
+<li><a href="#multi-group-comparison" id="toc-multi-group-comparison"><span class="toc-section-number">3.2</span> 2. Multi-Group Comparison</a></li>
+<li><a href="#biomarker-stratification-analysis" id="toc-biomarker-stratification-analysis"><span class="toc-section-number">3.3</span> 3. Biomarker Stratification
+Analysis</a></li>
+</ul></li>
+<li><a href="#advanced-applications" id="toc-advanced-applications"><span class="toc-section-number">4</span>
+Advanced Applications</a>
+<ul>
+<li><a href="#time-to-progression-analysis" id="toc-time-to-progression-analysis"><span class="toc-section-number">4.1</span> 4. Time-to-Progression
+Analysis</a></li>
+<li><a href="#subgroup-analysis" id="toc-subgroup-analysis"><span class="toc-section-number">4.2</span> 5. Subgroup Analysis</a></li>
+<li><a href="#risk-based-stratification" id="toc-risk-based-stratification"><span class="toc-section-number">4.3</span> 6. Risk-Based
+Stratification</a></li>
+</ul></li>
+<li><a href="#statistical-considerations" id="toc-statistical-considerations"><span class="toc-section-number">5</span> Statistical Considerations</a>
+<ul>
+<li><a href="#power-and-sample-size" id="toc-power-and-sample-size"><span class="toc-section-number">5.1</span> Power and Sample Size</a></li>
+<li><a href="#multiple-comparisons" id="toc-multiple-comparisons"><span class="toc-section-number">5.2</span> Multiple Comparisons</a></li>
+</ul></li>
+<li><a href="#best-practices-and-interpretation" id="toc-best-practices-and-interpretation"><span class="toc-section-number">6</span> Best Practices and
+Interpretation</a>
+<ul>
+<li><a href="#clinical-significance" id="toc-clinical-significance"><span class="toc-section-number">6.1</span> Clinical Significance</a></li>
+<li><a href="#reporting-guidelines" id="toc-reporting-guidelines"><span class="toc-section-number">6.2</span> Reporting Guidelines</a></li>
+</ul></li>
+<li><a href="#integration-with-jamovi" id="toc-integration-with-jamovi"><span class="toc-section-number">7</span> Integration with jamovi</a>
+<ul>
+<li><a href="#using-comparingsurvival-in-jamovi" id="toc-using-comparingsurvival-in-jamovi"><span class="toc-section-number">7.1</span> Using comparingsurvival in
+jamovi</a></li>
+</ul></li>
+<li><a href="#conclusion" id="toc-conclusion"><span class="toc-section-number">8</span> Conclusion</a>
+<ul>
+<li><a href="#key-takeaways" id="toc-key-takeaways"><span class="toc-section-number">8.1</span> Key Takeaways</a></li>
+<li><a href="#next-steps" id="toc-next-steps"><span class="toc-section-number">8.2</span> Next Steps</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>Comparing survival outcomes between different groups is a fundamental
+aspect of clinical research and oncology studies. The
+<strong>comparingsurvival</strong> function in jSurvival provides
+comprehensive tools for performing group-wise survival comparisons using
+Kaplan-Meier estimation and log-rank tests, with enhanced visualization
+capabilities.</p>
+<p><strong>Learning Objectives:</strong></p>
+<ul>
+<li>Master group-wise survival comparisons using Kaplan-Meier
+methods</li>
+<li>Interpret log-rank test results and statistical significance</li>
+<li>Create publication-ready survival curves with group
+stratification</li>
+<li>Understand hazard ratios and median survival differences</li>
+<li>Apply proper statistical methodology for survival group
+comparisons</li>
+<li>Identify when survival differences are clinically meaningful</li>
+</ul>
+<div id="module-overview" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Module Overview</h2>
+<p>The <strong>comparingsurvival</strong> function provides:</p>
+<div id="statistical-methods" class="section level3" number="1.1.1">
+<h3><span class="header-section-number">1.1.1</span> 1.
+<strong>Statistical Methods</strong></h3>
+<ul>
+<li><strong>Kaplan-Meier Estimation</strong>: Non-parametric survival
+curves for each group</li>
+<li><strong>Log-rank Test</strong>: Statistical comparison of survival
+distributions</li>
+<li><strong>Hazard Ratio Estimation</strong>: Measure of relative risk
+between groups</li>
+<li><strong>Confidence Intervals</strong>: Uncertainty quantification
+for survival estimates</li>
+</ul>
+</div>
+<div id="visualization-features" class="section level3" number="1.1.2">
+<h3><span class="header-section-number">1.1.2</span> 2.
+<strong>Visualization Features</strong></h3>
+<ul>
+<li><strong>Survival Curves</strong>: Group-stratified Kaplan-Meier
+plots</li>
+<li><strong>Risk Tables</strong>: Number at risk at specified time
+points</li>
+<li><strong>Confidence Bands</strong>: Visual representation of
+estimation uncertainty</li>
+<li><strong>Statistical Annotations</strong>: P-values and test
+statistics on plots</li>
+</ul>
+</div>
+<div id="clinical-applications" class="section level3" number="1.1.3">
+<h3><span class="header-section-number">1.1.3</span> 3. <strong>Clinical
+Applications</strong></h3>
+<ul>
+<li><strong>Treatment Comparisons</strong>: Compare therapeutic
+interventions</li>
+<li><strong>Biomarker Stratification</strong>: Evaluate prognostic
+markers</li>
+<li><strong>Risk Group Analysis</strong>: Compare different risk
+categories</li>
+<li><strong>Subgroup Analysis</strong>: Examine specific patient
+populations</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(ClinicoPath)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="getting-started" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Getting Started</h1>
+<div id="sample-data-overview" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Sample Data
+Overview</h2>
+<p>We’ll use comprehensive clinical datasets to demonstrate survival
+comparisons across different scenarios.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Load clinical survival data</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">data</span>(ihc_molecular_comprehensive)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># Dataset overview</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Dataset dimensions:&quot;</span>, <span class="fu">nrow</span>(ihc_molecular_comprehensive), <span class="st">&quot;×&quot;</span>, <span class="fu">ncol</span>(ihc_molecular_comprehensive), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># Key survival variables</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>survival_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Overall_Survival_Months&quot;</span>, <span class="st">&quot;Death_Event&quot;</span>, <span class="st">&quot;PFS_Months&quot;</span>, <span class="st">&quot;Progression_Event&quot;</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Survival variables:&quot;</span>, <span class="fu">paste</span>(survival_vars, <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># Grouping variables for comparison</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>grouping_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;EGFR_Mutation&quot;</span>, <span class="st">&quot;Grade&quot;</span>, <span class="st">&quot;MSI_Status&quot;</span>, <span class="st">&quot;HER2_IHC&quot;</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Grouping variables:&quot;</span>, <span class="fu">paste</span>(grouping_vars, <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co"># Basic survival statistics by key groups</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>survival_by_egfr <span class="ot">&lt;-</span> ihc_molecular_comprehensive <span class="sc">%&gt;%</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  <span class="fu">group_by</span>(EGFR_Mutation) <span class="sc">%&gt;%</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>    <span class="at">events =</span> <span class="fu">sum</span>(Death_Event),</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>    <span class="at">event_rate =</span> <span class="fu">round</span>(<span class="fu">mean</span>(Death_Event) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>    <span class="at">median_survival =</span> <span class="fu">median</span>(Overall_Survival_Months),</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>  )</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Survival by EGFR Mutation Status:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="fu">print</span>(survival_by_egfr)</span></code></pre></div>
+</div>
+</div>
+<div id="core-functionality" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Core Functionality</h1>
+<div id="basic-survival-comparison" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> 1. Basic Survival
+Comparison</h2>
+<p>Fundamental two-group survival comparison.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Basic Survival Comparison Example</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># In jamovi: jsurvival &gt; Comparing Survival</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Basic Survival Comparison: EGFR Mutation Status</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;===============================================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">requireNamespace</span>(<span class="st">&quot;survival&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="fu">library</span>(survival)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  </span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="co"># Create survival object</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  surv_obj <span class="ot">&lt;-</span> <span class="fu">Surv</span>(ihc_molecular_comprehensive<span class="sc">$</span>Overall_Survival_Months,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                   ihc_molecular_comprehensive<span class="sc">$</span>Death_Event)</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  </span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  <span class="co"># Kaplan-Meier analysis by EGFR status</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  km_egfr <span class="ot">&lt;-</span> <span class="fu">survfit</span>(surv_obj <span class="sc">~</span> EGFR_Mutation, <span class="at">data =</span> ihc_molecular_comprehensive)</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>  </span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Survival Summary by EGFR Status:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>  summary_table <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_egfr, <span class="at">times =</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">24</span>, <span class="dv">36</span>, <span class="dv">48</span>, <span class="dv">60</span>))<span class="sc">$</span>table</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="fu">print</span>(summary_table)</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  </span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="co"># Extract median survival times</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>  median_survivals <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_egfr)<span class="sc">$</span>table[, <span class="st">&quot;median&quot;</span>]</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>  <span class="fu">names</span>(median_survivals) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;EGFR Negative&quot;</span>, <span class="st">&quot;EGFR Positive&quot;</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>  </span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Median Survival Times:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(median_survivals)) {</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">names</span>(median_survivals)[i], <span class="st">&quot;:&quot;</span>, median_survivals[i], <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>  }</span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>  </span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a>  <span class="co"># Calculate survival difference</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a>  survival_diff <span class="ot">&lt;-</span> <span class="fu">abs</span>(<span class="fu">diff</span>(median_survivals))</span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Difference in median survival:&quot;</span>, <span class="fu">round</span>(survival_diff, <span class="dv">1</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a>  </span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a>  <span class="co"># Log-rank test</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a>  logrank_test <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(surv_obj <span class="sc">~</span> EGFR_Mutation, <span class="at">data =</span> ihc_molecular_comprehensive)</span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>  chi_square <span class="ot">&lt;-</span> logrank_test<span class="sc">$</span>chisq</span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>  p_value <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pchisq</span>(chi_square, <span class="dv">1</span>)</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>  </span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Log-rank Test Results:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Chi-square statistic:&quot;</span>, <span class="fu">round</span>(chi_square, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;P-value:&quot;</span>, <span class="fu">round</span>(p_value, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Degrees of freedom: 1</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a>  </span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a>  <span class="co"># Statistical interpretation</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>  <span class="cf">if</span>(p_value <span class="sc">&lt;</span> <span class="fl">0.001</span>) {</span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: Highly significant difference (p &lt; 0.001)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span>(p_value <span class="sc">&lt;</span> <span class="fl">0.01</span>) {</span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: Highly significant difference (p &lt; 0.01)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span>(p_value <span class="sc">&lt;</span> <span class="fl">0.05</span>) {</span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: Significant difference (p &lt; 0.05)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: No significant difference (p ≥ 0.05)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a>  }</span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a>  </span>
+<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a>  <span class="co"># Effect size (hazard ratio approximation)</span></span>
+<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a>  cox_simple <span class="ot">&lt;-</span> <span class="fu">coxph</span>(surv_obj <span class="sc">~</span> EGFR_Mutation, <span class="at">data =</span> ihc_molecular_comprehensive)</span>
+<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a>  hr <span class="ot">&lt;-</span> <span class="fu">exp</span>(cox_simple<span class="sc">$</span>coefficients)</span>
+<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a>  hr_ci <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">confint</span>(cox_simple))</span>
+<span id="cb3-59"><a href="#cb3-59" tabindex="-1"></a>  </span>
+<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Hazard Ratio Analysis:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Hazard Ratio:&quot;</span>, <span class="fu">round</span>(hr, <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-62"><a href="#cb3-62" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;95% Confidence Interval:&quot;</span>, <span class="fu">round</span>(hr_ci[<span class="dv">1</span>], <span class="dv">2</span>), <span class="st">&quot;-&quot;</span>, <span class="fu">round</span>(hr_ci[<span class="dv">2</span>], <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-63"><a href="#cb3-63" tabindex="-1"></a>  </span>
+<span id="cb3-64"><a href="#cb3-64" tabindex="-1"></a>  <span class="cf">if</span>(hr <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb3-65"><a href="#cb3-65" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR positive patients have&quot;</span>, <span class="fu">round</span>(hr, <span class="dv">2</span>), <span class="st">&quot;times higher hazard of death</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-66"><a href="#cb3-66" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb3-67"><a href="#cb3-67" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR positive patients have&quot;</span>, <span class="fu">round</span>(<span class="dv">1</span><span class="sc">/</span>hr, <span class="dv">2</span>), <span class="st">&quot;times lower hazard of death</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-68"><a href="#cb3-68" tabindex="-1"></a>  }</span>
+<span id="cb3-69"><a href="#cb3-69" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="multi-group-comparison" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> 2. Multi-Group
+Comparison</h2>
+<p>Compare survival across multiple groups simultaneously.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Multi-Group Survival Comparison</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co"># Comparing across tumor grades</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Multi-Group Survival Comparison: Tumor Grade</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;===========================================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">requireNamespace</span>(<span class="st">&quot;survival&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="co"># Survival by tumor grade (3 groups)</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  km_grade <span class="ot">&lt;-</span> <span class="fu">survfit</span>(surv_obj <span class="sc">~</span> Grade, <span class="at">data =</span> ihc_molecular_comprehensive)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  </span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Survival Summary by Tumor Grade:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  grade_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_grade, <span class="at">times =</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">24</span>, <span class="dv">36</span>, <span class="dv">48</span>, <span class="dv">60</span>))<span class="sc">$</span>table</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  <span class="fu">print</span>(grade_summary)</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  </span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="co"># Median survival by grade</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  grade_medians <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_grade)<span class="sc">$</span>table[, <span class="st">&quot;median&quot;</span>]</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  grade_names <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&quot;Grade&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(grade_medians))</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  <span class="fu">names</span>(grade_medians) <span class="ot">&lt;-</span> grade_names</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  </span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Median Survival by Grade:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(grade_medians)) {</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">names</span>(grade_medians)[i], <span class="st">&quot;:&quot;</span>, grade_medians[i], <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>  }</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>  </span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>  <span class="co"># Overall log-rank test</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>  logrank_grade <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(surv_obj <span class="sc">~</span> Grade, <span class="at">data =</span> ihc_molecular_comprehensive)</span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>  chi_square_grade <span class="ot">&lt;-</span> logrank_grade<span class="sc">$</span>chisq</span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>  df_grade <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(ihc_molecular_comprehensive<span class="sc">$</span>Grade)) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>  p_value_grade <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pchisq</span>(chi_square_grade, df_grade)</span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a>  </span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Overall Log-rank Test:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Chi-square statistic:&quot;</span>, <span class="fu">round</span>(chi_square_grade, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Degrees of freedom:&quot;</span>, df_grade, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;P-value:&quot;</span>, <span class="fu">round</span>(p_value_grade, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>  </span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>  <span class="co"># Pairwise comparisons (if overall test is significant)</span></span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a>  <span class="cf">if</span>(p_value_grade <span class="sc">&lt;</span> <span class="fl">0.05</span>) {</span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise Comparisons:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a>    grades <span class="ot">&lt;-</span> <span class="fu">unique</span>(ihc_molecular_comprehensive<span class="sc">$</span>Grade)</span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a>    grades <span class="ot">&lt;-</span> grades[<span class="sc">!</span><span class="fu">is.na</span>(grades)]</span>
+<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a>    </span>
+<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a>    <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(<span class="fu">length</span>(grades)<span class="sc">-</span><span class="dv">1</span>)) {</span>
+<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a>      <span class="cf">for</span>(j <span class="cf">in</span> (i<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span><span class="fu">length</span>(grades)) {</span>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a>        grade_subset <span class="ot">&lt;-</span> ihc_molecular_comprehensive[ihc_molecular_comprehensive<span class="sc">$</span>Grade <span class="sc">%in%</span> <span class="fu">c</span>(grades[i], grades[j]), ]</span>
+<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a>        <span class="cf">if</span>(<span class="fu">nrow</span>(grade_subset) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a>          surv_subset <span class="ot">&lt;-</span> <span class="fu">Surv</span>(grade_subset<span class="sc">$</span>Overall_Survival_Months, grade_subset<span class="sc">$</span>Death_Event)</span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a>          logrank_pair <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(surv_subset <span class="sc">~</span> Grade, <span class="at">data =</span> grade_subset)</span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a>          p_pair <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pchisq</span>(logrank_pair<span class="sc">$</span>chisq, <span class="dv">1</span>)</span>
+<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a>          </span>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a>          <span class="fu">cat</span>(<span class="fu">paste0</span>(<span class="st">&quot;Grade &quot;</span>, grades[i], <span class="st">&quot; vs Grade &quot;</span>, grades[j], <span class="st">&quot;: p = &quot;</span>, <span class="fu">round</span>(p_pair, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>))</span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a>        }</span>
+<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a>      }</span>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a>    }</span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a>  }</span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a>  </span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a>  <span class="co"># Clinical significance assessment</span></span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a>  max_diff <span class="ot">&lt;-</span> <span class="fu">max</span>(grade_medians, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">-</span> <span class="fu">min</span>(grade_medians, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-58"><a href="#cb4-58" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Clinical Significance:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-59"><a href="#cb4-59" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Range of median survivals:&quot;</span>, <span class="fu">round</span>(max_diff, <span class="dv">1</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-60"><a href="#cb4-60" tabindex="-1"></a>  </span>
+<span id="cb4-61"><a href="#cb4-61" tabindex="-1"></a>  <span class="cf">if</span>(max_diff <span class="sc">&gt;=</span> <span class="dv">12</span>) {</span>
+<span id="cb4-62"><a href="#cb4-62" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: Clinically meaningful difference (≥12 months)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-63"><a href="#cb4-63" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span>(max_diff <span class="sc">&gt;=</span> <span class="dv">6</span>) {</span>
+<span id="cb4-64"><a href="#cb4-64" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: Moderate clinical difference (6-12 months)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-65"><a href="#cb4-65" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb4-66"><a href="#cb4-66" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: Limited clinical difference (&lt;6 months)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-67"><a href="#cb4-67" tabindex="-1"></a>  }</span>
+<span id="cb4-68"><a href="#cb4-68" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="biomarker-stratification-analysis" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> 3. Biomarker
+Stratification Analysis</h2>
+<p>Evaluate survival differences by molecular biomarkers.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Biomarker-Based Survival Stratification</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Biomarker Stratification Analysis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;=================================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># Multiple biomarker analysis</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>biomarkers <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="st">&quot;MSI_Status&quot;</span> <span class="ot">=</span> <span class="st">&quot;Microsatellite Instability&quot;</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="st">&quot;HER2_IHC&quot;</span> <span class="ot">=</span> <span class="st">&quot;HER2 Expression&quot;</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="st">&quot;EGFR_Mutation&quot;</span> <span class="ot">=</span> <span class="st">&quot;EGFR Mutation Status&quot;</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>biomarker_results <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="cf">for</span>(biomarker <span class="cf">in</span> <span class="fu">names</span>(biomarkers)) {</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">paste0</span>(<span class="st">&quot;Analysis: &quot;</span>, biomarkers[[biomarker]], <span class="st">&quot; (&quot;</span>, biomarker, <span class="st">&quot;)</span><span class="sc">\n</span><span class="st">&quot;</span>))</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">paste0</span>(<span class="fu">rep</span>(<span class="st">&quot;-&quot;</span>, <span class="fu">nchar</span>(biomarkers[[biomarker]]) <span class="sc">+</span> <span class="fu">nchar</span>(biomarker) <span class="sc">+</span> <span class="dv">12</span>), <span class="at">collapse =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  </span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  <span class="co"># Filter out missing values</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  complete_data <span class="ot">&lt;-</span> ihc_molecular_comprehensive[<span class="sc">!</span><span class="fu">is.na</span>(ihc_molecular_comprehensive[[biomarker]]), ]</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  </span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">nrow</span>(complete_data) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>    <span class="co"># Survival analysis</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>    surv_bio <span class="ot">&lt;-</span> <span class="fu">Surv</span>(complete_data<span class="sc">$</span>Overall_Survival_Months, complete_data<span class="sc">$</span>Death_Event)</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>    formula_str <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&quot;surv_bio ~&quot;</span>, biomarker)</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>    km_bio <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">as.formula</span>(formula_str), <span class="at">data =</span> complete_data)</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>    </span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>    <span class="co"># Summary statistics</span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>    bio_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_bio)<span class="sc">$</span>table</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>    <span class="fu">print</span>(bio_summary)</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>    </span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>    <span class="co"># Log-rank test</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>    logrank_bio <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(<span class="fu">as.formula</span>(formula_str), <span class="at">data =</span> complete_data)</span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>    p_bio <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pchisq</span>(logrank_bio<span class="sc">$</span>chisq, <span class="fu">nrow</span>(bio_summary) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>    </span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Log-rank test p-value:&quot;</span>, <span class="fu">round</span>(p_bio, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>    </span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>    <span class="co"># Cox regression for hazard ratio</span></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>    cox_bio <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">as.formula</span>(formula_str), <span class="at">data =</span> complete_data)</span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>    hr_bio <span class="ot">&lt;-</span> <span class="fu">exp</span>(cox_bio<span class="sc">$</span>coefficients)</span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a>    </span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(hr_bio) <span class="sc">==</span> <span class="dv">1</span>) {  <span class="co"># Binary biomarker</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a>      hr_ci_bio <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">confint</span>(cox_bio))</span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;Hazard Ratio:&quot;</span>, <span class="fu">round</span>(hr_bio, <span class="dv">2</span>), <span class="st">&quot;(95% CI:&quot;</span>, <span class="fu">round</span>(hr_ci_bio[<span class="dv">1</span>], <span class="dv">2</span>), <span class="st">&quot;-&quot;</span>, <span class="fu">round</span>(hr_ci_bio[<span class="dv">2</span>], <span class="dv">2</span>), <span class="st">&quot;)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a>    }</span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a>    </span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a>    <span class="co"># Store results</span></span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a>    biomarker_results[[biomarker]] <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a>      <span class="at">p_value =</span> p_bio,</span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a>      <span class="at">significant =</span> p_bio <span class="sc">&lt;</span> <span class="fl">0.05</span>,</span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a>      <span class="at">summary =</span> bio_summary</span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a>    )</span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a>    </span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a>    <span class="co"># Interpretation</span></span>
+<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a>    <span class="cf">if</span>(p_bio <span class="sc">&lt;</span> <span class="fl">0.001</span>) {</span>
+<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;Result: Highly significant prognostic biomarker (p &lt; 0.001)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span>(p_bio <span class="sc">&lt;</span> <span class="fl">0.01</span>) {</span>
+<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;Result: Highly significant prognostic biomarker (p &lt; 0.01)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span>(p_bio <span class="sc">&lt;</span> <span class="fl">0.05</span>) {</span>
+<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;Result: Significant prognostic biomarker (p &lt; 0.05)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;Result: Not a significant prognostic biomarker (p ≥ 0.05)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a>    }</span>
+<span id="cb5-63"><a href="#cb5-63" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb5-64"><a href="#cb5-64" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Insufficient data for analysis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-65"><a href="#cb5-65" tabindex="-1"></a>    biomarker_results[[biomarker]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">p_value =</span> <span class="cn">NA</span>, <span class="at">significant =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-66"><a href="#cb5-66" tabindex="-1"></a>  }</span>
+<span id="cb5-67"><a href="#cb5-67" tabindex="-1"></a>  </span>
+<span id="cb5-68"><a href="#cb5-68" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-69"><a href="#cb5-69" tabindex="-1"></a>}</span>
+<span id="cb5-70"><a href="#cb5-70" tabindex="-1"></a></span>
+<span id="cb5-71"><a href="#cb5-71" tabindex="-1"></a><span class="co"># Summary of biomarker findings</span></span>
+<span id="cb5-72"><a href="#cb5-72" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Biomarker Analysis Summary:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-73"><a href="#cb5-73" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;===========================</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-74"><a href="#cb5-74" tabindex="-1"></a>significant_biomarkers <span class="ot">&lt;-</span> <span class="fu">names</span>(biomarker_results)[<span class="fu">sapply</span>(biomarker_results, <span class="cf">function</span>(x) x<span class="sc">$</span>significant)]</span>
+<span id="cb5-75"><a href="#cb5-75" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(significant_biomarkers) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb5-76"><a href="#cb5-76" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Significant prognostic biomarkers:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-77"><a href="#cb5-77" tabindex="-1"></a>  <span class="cf">for</span>(bio <span class="cf">in</span> significant_biomarkers) {</span>
+<span id="cb5-78"><a href="#cb5-78" tabindex="-1"></a>    p_val <span class="ot">&lt;-</span> biomarker_results[[bio]]<span class="sc">$</span>p_value</span>
+<span id="cb5-79"><a href="#cb5-79" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">paste0</span>(<span class="st">&quot;- &quot;</span>, biomarkers[[bio]], <span class="st">&quot; (p = &quot;</span>, <span class="fu">round</span>(p_val, <span class="dv">4</span>), <span class="st">&quot;)</span><span class="sc">\n</span><span class="st">&quot;</span>))</span>
+<span id="cb5-80"><a href="#cb5-80" tabindex="-1"></a>  }</span>
+<span id="cb5-81"><a href="#cb5-81" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb5-82"><a href="#cb5-82" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;No significant prognostic biomarkers identified</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-83"><a href="#cb5-83" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+<div id="advanced-applications" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Advanced
+Applications</h1>
+<div id="time-to-progression-analysis" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> 4.
+Time-to-Progression Analysis</h2>
+<p>Compare progression-free survival between groups.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Time-to-Progression Comparison</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Progression-Free Survival Analysis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;==================================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">requireNamespace</span>(<span class="st">&quot;survival&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="co"># Create PFS survival object</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  pfs_surv <span class="ot">&lt;-</span> <span class="fu">Surv</span>(ihc_molecular_comprehensive<span class="sc">$</span>PFS_Months,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                   ihc_molecular_comprehensive<span class="sc">$</span>Progression_Event)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  </span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="co"># PFS by treatment-relevant biomarker (e.g., EGFR)</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  km_pfs <span class="ot">&lt;-</span> <span class="fu">survfit</span>(pfs_surv <span class="sc">~</span> EGFR_Mutation, <span class="at">data =</span> ihc_molecular_comprehensive)</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  </span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Progression-Free Survival by EGFR Status:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  pfs_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_pfs, <span class="at">times =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">12</span>, <span class="dv">18</span>, <span class="dv">24</span>, <span class="dv">30</span>))<span class="sc">$</span>table</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  <span class="fu">print</span>(pfs_summary)</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>  </span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>  <span class="co"># Median PFS</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>  pfs_medians <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_pfs)<span class="sc">$</span>table[, <span class="st">&quot;median&quot;</span>]</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Median PFS Times:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;EGFR Negative:&quot;</span>, pfs_medians[<span class="dv">1</span>], <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;EGFR Positive:&quot;</span>, pfs_medians[<span class="dv">2</span>], <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>  </span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>  <span class="co"># Statistical test</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>  logrank_pfs <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(pfs_surv <span class="sc">~</span> EGFR_Mutation, <span class="at">data =</span> ihc_molecular_comprehensive)</span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>  p_pfs <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pchisq</span>(logrank_pfs<span class="sc">$</span>chisq, <span class="dv">1</span>)</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>  </span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Log-rank Test for PFS:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;P-value:&quot;</span>, <span class="fu">round</span>(p_pfs, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>  </span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>  <span class="co"># Compare OS vs PFS findings</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>  os_p <span class="ot">&lt;-</span> biomarker_results[[<span class="st">&quot;EGFR_Mutation&quot;</span>]]<span class="sc">$</span>p_value</span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">OS vs PFS Comparison:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Overall Survival p-value:&quot;</span>, <span class="fu">round</span>(os_p, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Progression-Free Survival p-value:&quot;</span>, <span class="fu">round</span>(p_pfs, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>  </span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>  <span class="cf">if</span>(os_p <span class="sc">&lt;</span> <span class="fl">0.05</span> <span class="sc">&amp;&amp;</span> p_pfs <span class="sc">&lt;</span> <span class="fl">0.05</span>) {</span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR status affects both OS and PFS</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span>(p_pfs <span class="sc">&lt;</span> <span class="fl">0.05</span>) {</span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR status primarily affects PFS</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span>(os_p <span class="sc">&lt;</span> <span class="fl">0.05</span>) {</span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR status primarily affects OS</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR status does not significantly affect survival outcomes</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a>  }</span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="subgroup-analysis" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> 5. Subgroup
+Analysis</h2>
+<p>Examine survival differences within specific patient subgroups.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Subgroup Survival Analysis</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Subgroup Analysis: High-Grade Tumors</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;===================================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># Focus on high-grade tumors (Grade 3)</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>high_grade <span class="ot">&lt;-</span> ihc_molecular_comprehensive[ihc_molecular_comprehensive<span class="sc">$</span>Grade <span class="sc">==</span> <span class="dv">3</span>, ]</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">nrow</span>(high_grade) <span class="sc">&gt;</span> <span class="dv">20</span>) {  <span class="co"># Ensure adequate sample size</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;High-grade tumor cohort size:&quot;</span>, <span class="fu">nrow</span>(high_grade), <span class="st">&quot;patients</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  </span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  <span class="co"># Survival in high-grade tumors by EGFR status</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  surv_hg <span class="ot">&lt;-</span> <span class="fu">Surv</span>(high_grade<span class="sc">$</span>Overall_Survival_Months, high_grade<span class="sc">$</span>Death_Event)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  km_hg <span class="ot">&lt;-</span> <span class="fu">survfit</span>(surv_hg <span class="sc">~</span> EGFR_Mutation, <span class="at">data =</span> high_grade)</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  </span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Survival in High-Grade Tumors by EGFR Status:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  hg_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_hg, <span class="at">times =</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">24</span>, <span class="dv">36</span>))<span class="sc">$</span>table</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  <span class="fu">print</span>(hg_summary)</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>  </span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>  <span class="co"># Statistical test in subgroup</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>  logrank_hg <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(surv_hg <span class="sc">~</span> EGFR_Mutation, <span class="at">data =</span> high_grade)</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>  p_hg <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pchisq</span>(logrank_hg<span class="sc">$</span>chisq, <span class="dv">1</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>  </span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Log-rank test p-value in high-grade subgroup:&quot;</span>, <span class="fu">round</span>(p_hg, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>  </span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>  <span class="co"># Compare to overall population</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>  overall_p <span class="ot">&lt;-</span> biomarker_results[[<span class="st">&quot;EGFR_Mutation&quot;</span>]]<span class="sc">$</span>p_value</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Subgroup vs Overall Population:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Overall population p-value:&quot;</span>, <span class="fu">round</span>(overall_p, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;High-grade subgroup p-value:&quot;</span>, <span class="fu">round</span>(p_hg, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a>  </span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>  <span class="cf">if</span>(p_hg <span class="sc">&lt;</span> <span class="fl">0.05</span> <span class="sc">&amp;&amp;</span> overall_p <span class="sc">&gt;=</span> <span class="fl">0.05</span>) {</span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR effect is significant only in high-grade tumors</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span>(p_hg <span class="sc">&gt;=</span> <span class="fl">0.05</span> <span class="sc">&amp;&amp;</span> overall_p <span class="sc">&lt;</span> <span class="fl">0.05</span>) {</span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR effect is diluted in high-grade subgroup</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span>(p_hg <span class="sc">&lt;</span> overall_p) {</span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR effect is stronger in high-grade tumors</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Interpretation: EGFR effect is consistent across grades</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a>  }</span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Insufficient sample size for subgroup analysis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="risk-based-stratification" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> 6. Risk-Based
+Stratification</h2>
+<p>Create risk groups and compare survival outcomes.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Risk-Based Survival Stratification</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Risk-Based Survival Stratification</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;==================================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co"># Create composite risk score</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>risk_data <span class="ot">&lt;-</span> ihc_molecular_comprehensive <span class="sc">%&gt;%</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>    <span class="co"># Risk factors (higher = worse prognosis)</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>    <span class="at">age_risk =</span> <span class="fu">ifelse</span>(Age <span class="sc">&gt;</span> <span class="dv">65</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>    <span class="at">grade_risk =</span> <span class="fu">ifelse</span>(Grade <span class="sc">==</span> <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>    <span class="at">egfr_risk =</span> <span class="fu">ifelse</span>(EGFR_Mutation <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>    </span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>    <span class="co"># Protective factors (higher = better prognosis)</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>    <span class="at">msi_protective =</span> <span class="fu">ifelse</span>(MSI_Status <span class="sc">==</span> <span class="st">&quot;MSI-High&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>    </span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>    <span class="co"># Composite risk score (0-3, higher = worse)</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>    <span class="at">risk_score =</span> age_risk <span class="sc">+</span> grade_risk <span class="sc">+</span> egfr_risk <span class="sc">-</span> msi_protective</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>    <span class="co"># Risk groups</span></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>    <span class="at">risk_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>      risk_score <span class="sc">&lt;=</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&quot;Low Risk&quot;</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>      risk_score <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">&quot;Intermediate Risk&quot;</span>, </span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>      risk_score <span class="sc">&gt;=</span> <span class="dv">2</span> <span class="sc">~</span> <span class="st">&quot;High Risk&quot;</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>    ),</span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a>    <span class="at">risk_group =</span> <span class="fu">factor</span>(risk_group, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Low Risk&quot;</span>, <span class="st">&quot;Intermediate Risk&quot;</span>, <span class="st">&quot;High Risk&quot;</span>))</span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a>  )</span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="co"># Risk group distribution</span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Risk Group Distribution:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a>risk_dist <span class="ot">&lt;-</span> <span class="fu">table</span>(risk_data<span class="sc">$</span>risk_group)</span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="fu">print</span>(risk_dist)</span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Percentages:&quot;</span>, <span class="fu">round</span>(<span class="fu">prop.table</span>(risk_dist) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">&quot;%</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a></span>
+<span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a><span class="co"># Survival by risk group</span></span>
+<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">requireNamespace</span>(<span class="st">&quot;survival&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a>  surv_risk <span class="ot">&lt;-</span> <span class="fu">Surv</span>(risk_data<span class="sc">$</span>Overall_Survival_Months, risk_data<span class="sc">$</span>Death_Event)</span>
+<span id="cb8-38"><a href="#cb8-38" tabindex="-1"></a>  km_risk <span class="ot">&lt;-</span> <span class="fu">survfit</span>(surv_risk <span class="sc">~</span> risk_group, <span class="at">data =</span> risk_data)</span>
+<span id="cb8-39"><a href="#cb8-39" tabindex="-1"></a>  </span>
+<span id="cb8-40"><a href="#cb8-40" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Survival by Risk Group:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-41"><a href="#cb8-41" tabindex="-1"></a>  risk_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_risk, <span class="at">times =</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">24</span>, <span class="dv">36</span>, <span class="dv">48</span>))<span class="sc">$</span>table</span>
+<span id="cb8-42"><a href="#cb8-42" tabindex="-1"></a>  <span class="fu">print</span>(risk_summary)</span>
+<span id="cb8-43"><a href="#cb8-43" tabindex="-1"></a>  </span>
+<span id="cb8-44"><a href="#cb8-44" tabindex="-1"></a>  <span class="co"># Risk group medians</span></span>
+<span id="cb8-45"><a href="#cb8-45" tabindex="-1"></a>  risk_medians <span class="ot">&lt;-</span> <span class="fu">summary</span>(km_risk)<span class="sc">$</span>table[, <span class="st">&quot;median&quot;</span>]</span>
+<span id="cb8-46"><a href="#cb8-46" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Median Survival by Risk Group:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-47"><a href="#cb8-47" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(risk_medians)) {</span>
+<span id="cb8-48"><a href="#cb8-48" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">levels</span>(risk_data<span class="sc">$</span>risk_group)[i], <span class="st">&quot;:&quot;</span>, risk_medians[i], <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-49"><a href="#cb8-49" tabindex="-1"></a>  }</span>
+<span id="cb8-50"><a href="#cb8-50" tabindex="-1"></a>  </span>
+<span id="cb8-51"><a href="#cb8-51" tabindex="-1"></a>  <span class="co"># Statistical test for risk stratification</span></span>
+<span id="cb8-52"><a href="#cb8-52" tabindex="-1"></a>  logrank_risk <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(surv_risk <span class="sc">~</span> risk_group, <span class="at">data =</span> risk_data)</span>
+<span id="cb8-53"><a href="#cb8-53" tabindex="-1"></a>  chi_sq_risk <span class="ot">&lt;-</span> logrank_risk<span class="sc">$</span>chisq</span>
+<span id="cb8-54"><a href="#cb8-54" tabindex="-1"></a>  df_risk <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">levels</span>(risk_data<span class="sc">$</span>risk_group)) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb8-55"><a href="#cb8-55" tabindex="-1"></a>  p_risk <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pchisq</span>(chi_sq_risk, df_risk)</span>
+<span id="cb8-56"><a href="#cb8-56" tabindex="-1"></a>  </span>
+<span id="cb8-57"><a href="#cb8-57" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Risk Stratification Test:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-58"><a href="#cb8-58" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Chi-square:&quot;</span>, <span class="fu">round</span>(chi_sq_risk, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-59"><a href="#cb8-59" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;P-value:&quot;</span>, <span class="fu">round</span>(p_risk, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-60"><a href="#cb8-60" tabindex="-1"></a>  </span>
+<span id="cb8-61"><a href="#cb8-61" tabindex="-1"></a>  <span class="co"># Trend test</span></span>
+<span id="cb8-62"><a href="#cb8-62" tabindex="-1"></a>  risk_numeric <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(risk_data<span class="sc">$</span>risk_group)</span>
+<span id="cb8-63"><a href="#cb8-63" tabindex="-1"></a>  cox_trend <span class="ot">&lt;-</span> <span class="fu">coxph</span>(surv_risk <span class="sc">~</span> risk_numeric, <span class="at">data =</span> risk_data)</span>
+<span id="cb8-64"><a href="#cb8-64" tabindex="-1"></a>  trend_p <span class="ot">&lt;-</span> <span class="fu">summary</span>(cox_trend)<span class="sc">$</span>coefficients[, <span class="st">&quot;Pr(&gt;|z|)&quot;</span>]</span>
+<span id="cb8-65"><a href="#cb8-65" tabindex="-1"></a>  hr_trend <span class="ot">&lt;-</span> <span class="fu">exp</span>(cox_trend<span class="sc">$</span>coefficients)</span>
+<span id="cb8-66"><a href="#cb8-66" tabindex="-1"></a>  </span>
+<span id="cb8-67"><a href="#cb8-67" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Trend Analysis:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-68"><a href="#cb8-68" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Hazard ratio per risk level:&quot;</span>, <span class="fu">round</span>(hr_trend, <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-69"><a href="#cb8-69" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Trend test p-value:&quot;</span>, <span class="fu">round</span>(trend_p, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-70"><a href="#cb8-70" tabindex="-1"></a>  </span>
+<span id="cb8-71"><a href="#cb8-71" tabindex="-1"></a>  <span class="co"># Model performance</span></span>
+<span id="cb8-72"><a href="#cb8-72" tabindex="-1"></a>  c_index <span class="ot">&lt;-</span> <span class="fu">summary</span>(cox_trend)<span class="sc">$</span>concordance[<span class="dv">1</span>]</span>
+<span id="cb8-73"><a href="#cb8-73" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Concordance index:&quot;</span>, <span class="fu">round</span>(c_index, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-74"><a href="#cb8-74" tabindex="-1"></a>  </span>
+<span id="cb8-75"><a href="#cb8-75" tabindex="-1"></a>  <span class="cf">if</span>(c_index <span class="sc">&gt;=</span> <span class="fl">0.7</span>) {</span>
+<span id="cb8-76"><a href="#cb8-76" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Risk model performance: Excellent (C-index ≥ 0.7)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-77"><a href="#cb8-77" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span>(c_index <span class="sc">&gt;=</span> <span class="fl">0.6</span>) {</span>
+<span id="cb8-78"><a href="#cb8-78" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Risk model performance: Good (C-index 0.6-0.7)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-79"><a href="#cb8-79" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb8-80"><a href="#cb8-80" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Risk model performance: Poor (C-index &lt; 0.6)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-81"><a href="#cb8-81" tabindex="-1"></a>  }</span>
+<span id="cb8-82"><a href="#cb8-82" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+<div id="statistical-considerations" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Statistical
+Considerations</h1>
+<div id="power-and-sample-size" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> Power and Sample
+Size</h2>
+<p>Important considerations for survival comparisons.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Sample Size and Power Considerations</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Sample Size and Power Analysis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;==============================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co"># Current study characteristics</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>total_n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(ihc_molecular_comprehensive)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>events <span class="ot">&lt;-</span> <span class="fu">sum</span>(ihc_molecular_comprehensive<span class="sc">$</span>Death_Event)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>event_rate <span class="ot">&lt;-</span> <span class="fu">mean</span>(ihc_molecular_comprehensive<span class="sc">$</span>Death_Event)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Current Study Characteristics:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Total sample size:&quot;</span>, total_n, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Total events:&quot;</span>, events, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Overall event rate:&quot;</span>, <span class="fu">round</span>(event_rate <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">&quot;%</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co"># Group sizes for major comparisons</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>egfr_groups <span class="ot">&lt;-</span> <span class="fu">table</span>(ihc_molecular_comprehensive<span class="sc">$</span>EGFR_Mutation)</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">EGFR Group Sizes:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="fu">print</span>(egfr_groups)</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co"># Events per group</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>egfr_events <span class="ot">&lt;-</span> ihc_molecular_comprehensive <span class="sc">%&gt;%</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>  <span class="fu">group_by</span>(EGFR_Mutation) <span class="sc">%&gt;%</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a>    <span class="at">events =</span> <span class="fu">sum</span>(Death_Event),</span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a>    <span class="at">event_rate =</span> <span class="fu">round</span>(<span class="fu">mean</span>(Death_Event) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a>  )</span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Events by EGFR Status:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="fu">print</span>(egfr_events)</span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="co"># Power estimation guidelines</span></span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a>min_events_per_group <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a>adequate_events <span class="ot">&lt;-</span> <span class="fu">all</span>(egfr_events<span class="sc">$</span>events <span class="sc">&gt;=</span> min_events_per_group)</span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a></span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Power Assessment:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Minimum events per group recommended:&quot;</span>, min_events_per_group, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Adequate events per group:&quot;</span>, adequate_events, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="cf">if</span>(adequate_events) {</span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Conclusion: Adequate power for primary comparisons</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Conclusion: Limited power - consider pooling groups or longer follow-up</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a>}</span>
+<span id="cb9-46"><a href="#cb9-46" tabindex="-1"></a></span>
+<span id="cb9-47"><a href="#cb9-47" tabindex="-1"></a><span class="co"># Effect size detectability</span></span>
+<span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a>median_diff_detectable <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">4</span> <span class="sc">/</span> <span class="fu">min</span>(egfr_events<span class="sc">$</span>events)) <span class="sc">*</span> <span class="dv">12</span>  <span class="co"># Rough approximation</span></span>
+<span id="cb9-49"><a href="#cb9-49" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Approximately detectable median survival difference:&quot;</span>, <span class="fu">round</span>(median_diff_detectable, <span class="dv">1</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+<div id="multiple-comparisons" class="section level2" number="5.2">
+<h2><span class="header-section-number">5.2</span> Multiple
+Comparisons</h2>
+<p>Addressing multiple testing in survival comparisons.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Multiple Comparisons Adjustment</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Multiple Comparisons Consideration</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;=================================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co"># Collect all p-values from biomarker analyses</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>all_p_values <span class="ot">&lt;-</span> <span class="fu">sapply</span>(biomarker_results, <span class="cf">function</span>(x) x<span class="sc">$</span>p_value)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>all_p_values <span class="ot">&lt;-</span> all_p_values[<span class="sc">!</span><span class="fu">is.na</span>(all_p_values)]</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Raw P-values from Biomarker Analyses:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(all_p_values)) {</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">names</span>(all_p_values)[i], <span class="st">&quot;:&quot;</span>, <span class="fu">round</span>(all_p_values[i], <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>}</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co"># Bonferroni correction</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>bonferroni_alpha <span class="ot">&lt;-</span> <span class="fl">0.05</span> <span class="sc">/</span> <span class="fu">length</span>(all_p_values)</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>bonferroni_significant <span class="ot">&lt;-</span> all_p_values <span class="sc">&lt;</span> bonferroni_alpha</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Bonferroni Correction:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Adjusted alpha level:&quot;</span>, <span class="fu">round</span>(bonferroni_alpha, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Significant after Bonferroni correction:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">any</span>(bonferroni_significant)) {</span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">which</span>(bonferroni_significant)) {</span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">names</span>(all_p_values)[i], <span class="st">&quot;: p =&quot;</span>, <span class="fu">round</span>(all_p_values[i], <span class="dv">4</span>), <span class="st">&quot;&lt; α =&quot;</span>, <span class="fu">round</span>(bonferroni_alpha, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a>  }</span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;None remain significant after correction</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a>}</span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co"># False Discovery Rate (FDR) control</span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">requireNamespace</span>(<span class="st">&quot;stats&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a>  fdr_adjusted <span class="ot">&lt;-</span> <span class="fu">p.adjust</span>(all_p_values, <span class="at">method =</span> <span class="st">&quot;fdr&quot;</span>)</span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a>  fdr_significant <span class="ot">&lt;-</span> fdr_adjusted <span class="sc">&lt;</span> <span class="fl">0.05</span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a>  </span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">False Discovery Rate (FDR) Adjustment:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(all_p_values)) {</span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">names</span>(all_p_values)[i], <span class="st">&quot;: raw p =&quot;</span>, <span class="fu">round</span>(all_p_values[i], <span class="dv">4</span>), </span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a>        <span class="st">&quot;, FDR p =&quot;</span>, <span class="fu">round</span>(fdr_adjusted[i], <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a>  }</span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a>  </span>
+<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Significant after FDR correction:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">any</span>(fdr_significant)) {</span>
+<span id="cb10-42"><a href="#cb10-42" tabindex="-1"></a>    <span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">which</span>(fdr_significant)) {</span>
+<span id="cb10-43"><a href="#cb10-43" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="fu">names</span>(all_p_values)[i], <span class="st">&quot;: FDR p =&quot;</span>, <span class="fu">round</span>(fdr_adjusted[i], <span class="dv">4</span>), <span class="st">&quot;&lt; 0.05</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a>    }</span>
+<span id="cb10-45"><a href="#cb10-45" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb10-46"><a href="#cb10-46" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;None remain significant after FDR correction</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-47"><a href="#cb10-47" tabindex="-1"></a>  }</span>
+<span id="cb10-48"><a href="#cb10-48" tabindex="-1"></a>}</span>
+<span id="cb10-49"><a href="#cb10-49" tabindex="-1"></a></span>
+<span id="cb10-50"><a href="#cb10-50" tabindex="-1"></a><span class="co"># Recommendation</span></span>
+<span id="cb10-51"><a href="#cb10-51" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Recommendation:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-52"><a href="#cb10-52" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(all_p_values) <span class="sc">&lt;=</span> <span class="dv">3</span>) {</span>
+<span id="cb10-53"><a href="#cb10-53" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;With&quot;</span>, <span class="fu">length</span>(all_p_values), <span class="st">&quot;comparisons, multiple testing adjustment may not be necessary</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-54"><a href="#cb10-54" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span>(<span class="fu">any</span>(fdr_significant)) {</span>
+<span id="cb10-55"><a href="#cb10-55" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Use FDR-adjusted p-values for interpretation</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-56"><a href="#cb10-56" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span>(<span class="fu">any</span>(bonferroni_significant)) {</span>
+<span id="cb10-57"><a href="#cb10-57" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Conservative Bonferroni correction identifies significant findings</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-58"><a href="#cb10-58" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb10-59"><a href="#cb10-59" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Consider exploratory interpretation due to multiple testing</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-60"><a href="#cb10-60" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+<div id="best-practices-and-interpretation" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Best Practices and
+Interpretation</h1>
+<div id="clinical-significance" class="section level2" number="6.1">
+<h2><span class="header-section-number">6.1</span> Clinical
+Significance</h2>
+<p>Guidelines for interpreting survival differences.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Clinical Significance Assessment</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Clinical Significance Guidelines</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;===============================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co"># Establish clinical significance thresholds</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>clinically_meaningful_months <span class="ot">&lt;-</span> <span class="dv">6</span>  <span class="co"># Minimum meaningful difference</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>highly_meaningful_months <span class="ot">&lt;-</span> <span class="dv">12</span>     <span class="co"># Highly meaningful difference</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Clinical Significance Thresholds:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Meaningful difference: ≥&quot;</span>, clinically_meaningful_months, <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Highly meaningful difference: ≥&quot;</span>, highly_meaningful_months, <span class="st">&quot;months</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co"># Assess each comparison</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Clinical Significance Assessment:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;=================================</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co"># EGFR comparison example</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="cf">if</span>(<span class="st">&quot;EGFR_Mutation&quot;</span> <span class="sc">%in%</span> <span class="fu">names</span>(biomarker_results) <span class="sc">&amp;&amp;</span> biomarker_results[[<span class="st">&quot;EGFR_Mutation&quot;</span>]]<span class="sc">$</span>significant) {</span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>  egfr_medians <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">survfit</span>(<span class="fu">Surv</span>(Overall_Survival_Months, Death_Event) <span class="sc">~</span> EGFR_Mutation, </span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>                                 <span class="at">data =</span> ihc_molecular_comprehensive))<span class="sc">$</span>table[, <span class="st">&quot;median&quot;</span>]</span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>  egfr_diff <span class="ot">&lt;-</span> <span class="fu">abs</span>(<span class="fu">diff</span>(egfr_medians))</span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>  </span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;EGFR Mutation Status:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Median survival difference:&quot;</span>, <span class="fu">round</span>(egfr_diff, <span class="dv">1</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Statistical significance: Yes (p &lt; 0.05)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>  </span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a>  <span class="cf">if</span>(egfr_diff <span class="sc">&gt;=</span> highly_meaningful_months) {</span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Clinical significance: Highly meaningful (≥12 months)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span>(egfr_diff <span class="sc">&gt;=</span> clinically_meaningful_months) {</span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Clinical significance: Meaningful (6-12 months)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;Clinical significance: Limited (&lt;6 months)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a>  }</span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a>  </span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a>  <span class="co"># Additional considerations</span></span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Additional considerations:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a>  <span class="cf">if</span>(egfr_diff <span class="sc">&gt;=</span> clinically_meaningful_months) {</span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;- Difference likely to be noticeable to patients and families</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;- May influence treatment decisions</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;- Consider for biomarker-guided therapy</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;- Difference may be too small to be clinically relevant</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;- Statistical significance may not translate to clinical utility</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;- Consider as prognostic information only</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a>  }</span>
+<span id="cb11-46"><a href="#cb11-46" tabindex="-1"></a>}</span>
+<span id="cb11-47"><a href="#cb11-47" tabindex="-1"></a></span>
+<span id="cb11-48"><a href="#cb11-48" tabindex="-1"></a><span class="co"># General interpretation framework</span></span>
+<span id="cb11-49"><a href="#cb11-49" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">General Interpretation Framework:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-50"><a href="#cb11-50" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Statistical significance indicates reliable difference</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-51"><a href="#cb11-51" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Clinical significance requires meaningful survival benefit</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-52"><a href="#cb11-52" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Consider both statistical and clinical significance together</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-53"><a href="#cb11-53" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Account for confidence intervals and uncertainty</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-54"><a href="#cb11-54" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Evaluate biological plausibility of findings</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+<div id="reporting-guidelines" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> Reporting
+Guidelines</h2>
+<p>Comprehensive reporting of survival comparisons.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Reporting Guidelines for Survival Comparisons</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Reporting Guidelines</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;===================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Essential Elements to Report:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;1. Study Population:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Total sample size:&quot;</span>, <span class="fu">nrow</span>(ihc_molecular_comprehensive), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Follow-up characteristics</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Censoring pattern</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;2. Descriptive Statistics:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Group sizes and event rates</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Median follow-up time</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Median survival times with confidence intervals</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;3. Statistical Tests:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Log-rank test statistics and p-values</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Hazard ratios with 95% confidence intervals</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Multiple comparison adjustments (if applicable)</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;4. Visualization:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Kaplan-Meier survival curves</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Number at risk tables</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Confidence bands (optional)</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;5. Clinical Interpretation:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Clinical significance assessment</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Biological plausibility</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Limitations and potential biases</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a></span>
+<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a><span class="co"># Example results summary</span></span>
+<span id="cb12-32"><a href="#cb12-32" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Example Results Summary:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-33"><a href="#cb12-33" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;========================</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-34"><a href="#cb12-34" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Among&quot;</span>, <span class="fu">nrow</span>(ihc_molecular_comprehensive), <span class="st">&quot;patients with comprehensive molecular profiling,&quot;</span>)</span>
+<span id="cb12-35"><a href="#cb12-35" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;survival comparisons were performed for key biomarkers.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-36"><a href="#cb12-36" tabindex="-1"></a></span>
+<span id="cb12-37"><a href="#cb12-37" tabindex="-1"></a>significant_findings <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">sapply</span>(biomarker_results, <span class="cf">function</span>(x) x<span class="sc">$</span>significant))</span>
+<span id="cb12-38"><a href="#cb12-38" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Of&quot;</span>, <span class="fu">length</span>(biomarker_results), <span class="st">&quot;biomarkers evaluated,&quot;</span>, significant_findings, </span>
+<span id="cb12-39"><a href="#cb12-39" tabindex="-1"></a>    <span class="st">&quot;showed statistically significant survival differences.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-40"><a href="#cb12-40" tabindex="-1"></a></span>
+<span id="cb12-41"><a href="#cb12-41" tabindex="-1"></a><span class="cf">if</span>(significant_findings <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb12-42"><a href="#cb12-42" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;These findings suggest potential prognostic value for molecular stratification&quot;</span>)</span>
+<span id="cb12-43"><a href="#cb12-43" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;in this patient population.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-44"><a href="#cb12-44" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb12-45"><a href="#cb12-45" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;No significant prognostic biomarkers were identified in this analysis.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-46"><a href="#cb12-46" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+<div id="integration-with-jamovi" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> Integration with
+jamovi</h1>
+<div id="using-comparingsurvival-in-jamovi" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> Using
+comparingsurvival in jamovi</h2>
+<p>Step-by-step guide for jamovi users.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># jamovi Integration Guide</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Using comparingsurvival in jamovi</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;=================================</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Step-by-Step Instructions:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;1. Data Preparation:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Ensure survival time variable (continuous)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Event indicator variable (0/1 or logical)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Grouping variable (categorical)</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;2. Access the Function:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Navigate to: jSurvival → Comparing Survival</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Or use: Analyses → ClinicoPath → jSurvival → Comparing Survival</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;3. Variable Assignment:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Time Variable: Select survival time column</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Event Variable: Select event indicator</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Groups: Select grouping variable</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;4. Output Options:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Survival curves: Check for Kaplan-Meier plots</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Statistics: Check for detailed statistical output</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Risk tables: Check for number at risk tables</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;5. Interpretation:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Review log-rank test p-value</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Examine survival curves visually</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-28"><a href="#cb13-28" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Check median survival differences</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-29"><a href="#cb13-29" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;   - Consider clinical significance</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-30"><a href="#cb13-30" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" tabindex="-1"></a><span class="co"># Common variable formats</span></span>
+<span id="cb13-32"><a href="#cb13-32" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Common Variable Formats:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-33"><a href="#cb13-33" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Time: months, days, years (numeric)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-34"><a href="#cb13-34" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Event: 1=event, 0=censored (or TRUE/FALSE)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-35"><a href="#cb13-35" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Groups: factor levels (e.g., &#39;Control&#39;, &#39;Treatment&#39;)</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-36"><a href="#cb13-36" tabindex="-1"></a></span>
+<span id="cb13-37"><a href="#cb13-37" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Troubleshooting:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-38"><a href="#cb13-38" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Ensure no missing values in key variables</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-39"><a href="#cb13-39" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Check that event rates are reasonable (&gt;5% per group)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-40"><a href="#cb13-40" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Verify adequate sample sizes per group</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-41"><a href="#cb13-41" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Confirm proper variable types</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="conclusion" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> Conclusion</h1>
+<p>The <strong>comparingsurvival</strong> function provides
+comprehensive tools for group-wise survival comparisons, from basic
+two-group analyses to complex multi-biomarker evaluations. Proper
+application requires attention to both statistical methodology and
+clinical interpretation.</p>
+<div id="key-takeaways" class="section level2" number="8.1">
+<h2><span class="header-section-number">8.1</span> Key Takeaways</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Statistical Rigor</strong>: Use appropriate methods
+(Kaplan-Meier, log-rank tests)</li>
+<li><strong>Clinical Relevance</strong>: Consider both statistical and
+clinical significance</li>
+<li><strong>Multiple Comparisons</strong>: Adjust for multiple testing
+when appropriate</li>
+<li><strong>Sample Size</strong>: Ensure adequate power for meaningful
+comparisons</li>
+<li><strong>Interpretation</strong>: Balance statistical findings with
+biological plausibility</li>
+</ol>
+</div>
+<div id="next-steps" class="section level2" number="8.2">
+<h2><span class="header-section-number">8.2</span> Next Steps</h2>
+<ul>
+<li>Explore advanced survival modeling with Cox regression</li>
+<li>Consider competing risks analysis for complex outcomes</li>
+<li>Integrate findings with other ClinicoPath modules</li>
+<li>Develop prognostic models based on significant biomarkers</li>
+</ul>
+<hr />
+<p><em>This vignette demonstrates comprehensive survival comparison
+methodology using the comparingsurvival function. Apply these principles
+to your own clinical datasets for robust survival analysis.</em></p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

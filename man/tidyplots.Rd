@@ -2,22 +2,51 @@
 % Please edit documentation in R/tidyplots.h.R
 \name{tidyplots}
 \alias{tidyplots}
-\title{Tidy Plots}
+\title{Comprehensive Tidy Plots}
 \usage{
 tidyplots(
   data,
   xvar,
   yvar,
   color,
+  group,
+  facet,
   plotType = "points",
   pointType = "basic",
+  lineType = "direct",
+  barType = "mean",
   showMean = FALSE,
+  meanType = "dash",
+  showMedian = FALSE,
+  medianType = "dash",
   showSEM = FALSE,
+  showSD = FALSE,
   showCI = FALSE,
+  ciType = "errorbar",
+  showRange = FALSE,
+  showDistribution = FALSE,
+  distributionType = "density",
+  showOutliers = TRUE,
+  violinPoints = FALSE,
+  histogramBins = 30,
+  areaType = "absolute",
+  showPValue = FALSE,
+  showSignificance = FALSE,
   colorScheme = "friendly",
+  alpha = 1,
+  fontSize = 12,
   plotTitle = "",
   xLabel = "",
-  yLabel = ""
+  yLabel = "",
+  legendTitle = "",
+  removeLegend = FALSE,
+  removePadding = FALSE,
+  removeXAxis = FALSE,
+  removeXAxisLabels = FALSE,
+  removeXAxisTitle = FALSE,
+  removeYAxis = FALSE,
+  removeYAxisLabels = FALSE,
+  removeYAxisTitle = FALSE
 )
 }
 \arguments{
@@ -29,23 +58,81 @@ tidyplots(
 
 \item{color}{.}
 
+\item{group}{.}
+
+\item{facet}{.}
+
 \item{plotType}{.}
 
 \item{pointType}{.}
 
+\item{lineType}{.}
+
+\item{barType}{.}
+
 \item{showMean}{.}
+
+\item{meanType}{.}
+
+\item{showMedian}{.}
+
+\item{medianType}{.}
 
 \item{showSEM}{.}
 
+\item{showSD}{.}
+
 \item{showCI}{.}
 
+\item{ciType}{.}
+
+\item{showRange}{.}
+
+\item{showDistribution}{.}
+
+\item{distributionType}{.}
+
+\item{showOutliers}{.}
+
+\item{violinPoints}{.}
+
+\item{histogramBins}{.}
+
+\item{areaType}{.}
+
+\item{showPValue}{.}
+
+\item{showSignificance}{.}
+
 \item{colorScheme}{.}
+
+\item{alpha}{.}
+
+\item{fontSize}{.}
 
 \item{plotTitle}{.}
 
 \item{xLabel}{.}
 
 \item{yLabel}{.}
+
+\item{legendTitle}{.}
+
+\item{removeLegend}{.}
+
+\item{removePadding}{.}
+
+\item{removeXAxis}{.}
+
+\item{removeXAxisLabels}{.}
+
+\item{removeXAxisTitle}{.}
+
+\item{removeYAxis}{.}
+
+\item{removeYAxisLabels}{.}
+
+\item{removeYAxisTitle}{.}
 }
 \value{
 A results object containing:
@@ -55,5 +142,9 @@ A results object containing:
 }
 }
 \description{
-Tidy Plots
+Create publication-ready plots using the tidyplots framework with extensive
+customization options, statistical features, and advanced visualization
+capabilities. Comprehensive implementation of tidyplots for jamovi with
+advanced statistical visualization features including multiple plot types,
+statistical testing, and extensive customization options.
 }

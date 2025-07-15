@@ -1,0 +1,251 @@
+"patient_id","age","sex","treatment_group","study_site","bmi","systolic_bp","diastolic_bp","diabetes","smoking_status","education_level","hemoglobin","glucose","cholesterol"
+"PT_001",76,"Female","Control","Site_C",24.1,144,79,"No","Never","High School",12.5,115,213
+"PT_002",59,"Male","Control","Site_E",30.6,110,85,"Type 2","Never","Some College",13.7,95,164
+"PT_003",64,"Male","Treatment A","Site_C",36.6,141,77,"No","Never","Graduate",9.6,78,193
+"PT_004",57,"Female","Treatment A","Site_B",29.6,189,105,"No","Current","High School",13.4,153,235
+"PT_005",84,"Male","Treatment A","Site_E",25.6,155,87,"No","Never","Some College",12.8,70,153
+"PT_006",65,"Female","Treatment B","Site_E",23.2,138,96,"Type 2","Never","Bachelor's",12.2,108,202
+"PT_007",35,"Female","Control","Site_E",22.7,153,91,"No","Never","Some College",9.5,152,216
+"PT_008",61,"Female","Treatment A","Site_D",21,112,83,"Type 2","Never","Bachelor's",13.3,107,246
+"PT_009",47,"Female","Treatment A","Site_C",28,135,76,"No","Current","Bachelor's",11.9,139,163
+"PT_010",55,"Male","Control","Site_A",33.6,134,88,"Type 2","Never","High School",13.8,94,169
+"PT_011",56,"Male","Control","Site_C",34.6,97,103,"No","Current","High School",13.4,87,189
+"PT_012",63,"Female","Control","Site_C",26,155,83,"No","Never","Some College",14.8,105,155
+"PT_013",60,"Female","Treatment B","Site_D",32.1,99,104,"Type 2","Former","Less than HS",14.5,119,148
+"PT_014",67,"Female","Treatment B","Site_E",17.7,154,76,"No","Former","High School",12.9,137,198
+"PT_015",87,"Male","Treatment A","Site_A",31.9,163,98,"Type 2","Never","Less than HS",15.2,105,259
+"PT_016",61,"Male","Treatment B","Site_A",23.7,132,109,"No","Never","Some College",12.7,92,208
+"PT_017",63,"Female","Treatment A","Site_C",28.4,135,85,"No","Never","Some College",13.2,107,252
+"PT_018",70,"Female","Control","Site_D",NA,148,68,"No","Never","Some College",13.1,99,NA
+"PT_019",65,"Male","Control","Site_B",29.5,136,81,"Type 2","Former","Bachelor's",11.1,136,223
+"PT_020",54,"Female","Treatment A","Site_B",32.1,120,80,"No","Current","Some College",14.1,106,188
+"PT_021",53,"Female","Control","Site_F",25.6,133,92,"Type 2","Never","Graduate",13.2,105,235
+"PT_022",68,"Male","Treatment A","Site_B",31.1,127,96,"No","Never","Some College",17.2,112,292
+"PT_023",69,"Male","Treatment A","Site_B",30.8,107,86,"No","Former","Less than HS",16.3,146,188
+"PT_024",70,"Female","Treatment A","Site_F",22.4,143,75,"No","Former","Less than HS",13.4,115,170
+"PT_025",52,"Female","Treatment A","Site_C",19.7,135,78,"No","Never","High School",14.1,94,284
+"PT_026",58,"Female","Treatment A","Site_F",24.1,172,98,"No","Former","Some College",12,159,141
+"PT_027",70,"Female","Control","Site_B",30.6,112,69,"No","Former","Some College",13.3,95,232
+"PT_028",69,"Female","Treatment B","Site_C",16.6,171,84,"Type 1","Former","Graduate",14,70,148
+"PT_029",55,"Female","Control","Site_F",26,134,95,"Type 2","Current","High School",12.2,139,193
+"PT_030",71,"Female","Control","Site_C",28.9,131,94,"Type 1","Current","Bachelor's",10.4,133,188
+"PT_031",64,"Male","Treatment A","Site_A",20.1,134,96,"No","Never","Bachelor's",12.1,118,170
+"PT_032",62,"Female","Control","Site_D",31,142,81,"No","Former","Bachelor's",14.3,130,238
+"PT_033",62,"Female","Control","Site_C",24.1,129,61,"No","Never","High School",10.6,95,175
+"PT_034",45,"Female","Treatment B","Site_D",23.6,158,60,"No","Never","Bachelor's",12.9,70,155
+"PT_035",80,"Male","Control","Site_C",29.2,114,98,"Type 2","Former","High School",13.4,90,153
+"PT_036",66,"Male","Control","Site_A",28.9,138,99,"No","Former","Bachelor's",16.4,135,240
+"PT_037",48,"Male","Treatment A","Site_F",24.6,124,73,"Type 2","Never","High School",14.2,78,193
+"PT_038",50,"Male","Treatment A","Site_F",37.1,133,82,"Type 2","Current","High School",11.5,115,207
+"PT_039",79,"Male","Treatment B","Site_C",17.1,153,104,"No","Never","Bachelor's",14.9,70,232
+"PT_040",54,"Male","Treatment B","Site_C",24.1,126,89,"No","Current","Bachelor's",13.9,112,219
+"PT_041",55,"Female","Treatment B","Site_A",16,123,96,"Type 2","Current","High School",12.6,132,203
+"PT_042",43,"Male","Treatment A","Site_D",26.1,106,65,"Type 1","Never","High School",14.2,90,190
+"PT_043",56,"Male","Treatment A","Site_E",20.3,146,98,"Type 1","Former","Some College",13.9,120,152
+"PT_044",83,"Female","Treatment A","Site_A",20.8,156,78,"Type 2","Never","Less than HS",14.1,76,253
+"PT_045",64,"Male","Treatment A","Site_A",28.3,144,106,"No","Current","Graduate",13.6,117,249
+"PT_046",69,"Male","Control","Site_C",25.8,117,78,"Type 2","Never","Bachelor's",15.7,110,120
+"PT_047",56,"Male","Treatment B","Site_B",26.7,118,68,"Type 2","Never","Less than HS",16.2,131,241
+"PT_048",51,"Male","Control","Site_C",28.5,125,84,"No","Never","Some College",15.2,116,202
+"PT_049",62,"Female","Treatment B","Site_A",22.5,127,85,"No","Never","Less than HS",12.5,131,202
+"PT_050",83,"Female","Control","Site_E",25.9,175,93,"No","Former","Some College",12.8,103,205
+"PT_051",59,"Male","Treatment A","Site_A",24.5,125,79,"No","Never","Some College",15.6,137,188
+"PT_052",71,"Male","Treatment A","Site_E",30.9,129,78,"No","Current","Graduate",16,117,236
+"PT_053",59,"Male","Treatment B","Site_E",24.2,137,86,"No","Former","Less than HS",15.3,114,NA
+"PT_054",69,"Male","Control","Site_F",22.4,151,74,"No","Never","Some College",14.1,83,239
+"PT_055",73,"Female","Control","Site_D",24.6,127,91,"No","Current","High School",11.8,139,120
+"PT_056",75,"Female","Control","Site_B",19.5,138,90,"Type 2","Former","High School",10.7,81,245
+"PT_057",58,"Female","Control","Site_B",29.8,158,84,"No","Never","Bachelor's",14,94,NA
+"PT_058",53,"Male","Treatment B","Site_B",27.8,121,92,"No","Never","Graduate",13.6,116,165
+"PT_059",54,"Male","Treatment A","Site_A",20.7,109,86,"No","Never","Graduate",17.4,94,156
+"PT_060",89,"Female","Treatment A","Site_D",31.6,135,76,"No","Never","High School",11,111,206
+"PT_061",52,"Female","Treatment B","Site_D",27.2,114,90,"No","Never","Some College",14.6,114,214
+"PT_062",54,"Female","Treatment A","Site_D",20.6,130,76,"Type 2","Never","High School",14.9,126,223
+"PT_063",70,"Male","Treatment A","Site_E",28.1,132,60,"No","Never","Graduate",12.2,142,189
+"PT_064",63,"Male","Treatment B","Site_F",20.7,139,103,"No","Former","High School",12,105,230
+"PT_065",70,"Female","Treatment A","Site_C",28.3,120,73,"Type 2","Never","Bachelor's",14.6,97,178
+"PT_066",62,"Male","Control","Site_F",20.9,98,81,"Type 2","Never","Some College",17.5,113,209
+"PT_067",59,"Female","Control","Site_D",29.1,119,80,"No","Never","Some College",15,110,165
+"PT_068",65,"Female","Treatment A","Site_B",24.3,149,102,"No","Current","Some College",8.8,90,177
+"PT_069",85,"Male","Treatment A","Site_C",24.2,135,99,"No","Current","Bachelor's",14.6,71,261
+"PT_070",90,"Male","Control","Site_F",32.3,141,81,"No","Current","High School",12.3,78,NA
+"PT_071",80,"Female","Treatment A","Site_A",26.9,152,107,"Type 2","Never","Some College",8,107,187
+"PT_072",87,"Female","Control","Site_B",NA,118,102,"No","Never","Some College",13.5,105,160
+"PT_073",55,"Female","Control","Site_F",24.4,108,77,"No","Never","High School",11.7,150,170
+"PT_074",68,"Female","Treatment B","Site_B",23.8,156,75,"No","Former","Graduate",12.5,118,208
+"PT_075",59,"Male","Treatment B","Site_C",27.4,157,95,"No","Never","Some College",13,107,256
+"PT_076",90,"Male","Control","Site_B",27.9,134,92,"No","Current","Bachelor's",13,93,144
+"PT_077",78,"Female","Treatment A","Site_F",30,118,87,"No","Never","Less than HS",13.2,129,177
+"PT_078",44,"Male","Treatment B","Site_A",24.5,116,83,"No","Current","Less than HS",14.5,83,259
+"PT_079",56,"Male","Treatment A","Site_A",25.9,104,89,"No","Never","Bachelor's",15.6,87,203
+"PT_080",74,"Male","Control","Site_F",27.1,149,87,"Type 2","Never","Less than HS",11.7,143,309
+"PT_081",73,"Male","Control","Site_E",31.3,125,78,"Type 2","Never","Bachelor's",16.8,132,227
+"PT_082",67,"Female","Control","Site_B",26,138,95,"Type 2","Never","High School",15.2,110,247
+"PT_083",74,"Female","Treatment B","Site_D",NA,151,72,"No","Never","Bachelor's",15.7,128,237
+"PT_084",66,"Male","Treatment A","Site_A",23.8,145,102,"Type 1","Never","Graduate",16.1,100,174
+"PT_085",64,"Female","Control","Site_F",31.3,148,71,"Type 1","Former","Graduate",16,151,211
+"PT_086",63,"Male","Control","Site_C",33.1,122,78,"No","Never","Some College",16.6,87,166
+"PT_087",71,"Male","Control","Site_C",26.2,116,91,"No","Former","Some College",13.5,70,207
+"PT_088",84,"Female","Treatment B","Site_C",31.2,109,98,"No","Former","High School",13.5,114,216
+"PT_089",53,"Male","Treatment B","Site_B",23.3,90,96,"No","Never","Bachelor's",14.4,121,198
+"PT_090",43,"Female","Treatment A","Site_B",22.4,148,70,"Type 2","Former","Bachelor's",16.6,73,227
+"PT_091",67,"Female","Control","Site_C",23.6,130,105,"Type 2","Never","Graduate",14.1,93,240
+"PT_092",58,"Male","Treatment A","Site_A",24,134,70,"No","Current","Bachelor's",17.5,105,210
+"PT_093",64,"Male","Treatment B","Site_C",35.6,162,84,"Type 2","Former","Less than HS",16.2,136,195
+"PT_094",67,"Male","Treatment B","Site_F",29,143,92,"No","Never","High School",14.8,103,178
+"PT_095",53,"Female","Control","Site_C",28.8,142,96,"No","Never","Less than HS",18,70,277
+"PT_096",64,"Male","Treatment B","Site_E",28,164,76,"No","Never","High School",16.2,122,211
+"PT_097",84,"Male","Treatment A","Site_A",25,115,78,"No","Never","High School",15.6,82,213
+"PT_098",37,"Female","Treatment A","Site_B",28.6,131,94,"No","Former","High School",12.9,122,240
+"PT_099",82,"Female","Treatment A","Site_A",27.6,136,104,"No","Never","Bachelor's",12.8,70,239
+"PT_100",69,"Female","Control","Site_B",22.1,130,85,"No","Never","Graduate",13.2,91,239
+"PT_101",47,"Female","Control","Site_E",32.2,159,92,"No","Never","Some College",11.6,92,238
+"PT_102",70,"Female","Control","Site_D",24,141,71,"No","Former","Some College",15.4,86,225
+"PT_103",79,"Male","Treatment A","Site_E",19.2,147,73,"No","Former","Some College",11,151,188
+"PT_104",56,"Female","Treatment A","Site_B",24.6,145,81,"Type 1","Never","Some College",12.2,116,122
+"PT_105",72,"Male","Treatment B","Site_A",29,159,69,"No","Former","Some College",13.4,97,253
+"PT_106",74,"Female","Treatment B","Site_C",16,165,75,"No","Never","Graduate",12.5,191,242
+"PT_107",53,"Male","Treatment B","Site_B",26.8,178,86,"No","Never","High School",11.7,111,215
+"PT_108",77,"Male","Treatment A","Site_B",28.6,158,60,"Type 2","Never","High School",12.6,95,252
+"PT_109",55,"Male","Treatment A","Site_B",28.7,105,77,"No","Current","Graduate",13.3,120,199
+"PT_110",75,"Female","Treatment B","Site_A",19.6,139,73,"Type 2","Never","Graduate",13.9,131,129
+"PT_111",73,"Male","Treatment B","Site_A",25.5,138,90,"Type 1","Never","Bachelor's",13.8,99,265
+"PT_112",80,"Male","Treatment B","Site_A",NA,145,103,"No","Former","Bachelor's",13.6,113,262
+"PT_113",48,"Female","Control","Site_C",26.9,145,78,"No","Former","Some College",12.8,100,156
+"PT_114",85,"Female","Control","Site_E",27.3,128,92,"Type 2","Never","Graduate",10.4,104,168
+"PT_115",82,"Male","Control","Site_D",21.2,151,90,"No","Current","High School",13.9,118,206
+"PT_116",74,"Female","Control","Site_C",27.3,143,91,"No","Never","Less than HS",10.6,78,249
+"PT_117",79,"Male","Control","Site_E",28.1,151,83,"No","Former","Less than HS",16.2,105,197
+"PT_118",68,"Male","Control","Site_F",22.5,132,60,"No","Never","Less than HS",13.9,70,226
+"PT_119",70,"Female","Treatment B","Site_E",22.9,157,80,"No","Never","Some College",9,83,186
+"PT_120",68,"Male","Treatment B","Site_B",29.6,162,90,"No","Never","High School",12,70,185
+"PT_121",77,"Male","Control","Site_C",30.1,142,89,"No","Never","Bachelor's",14.3,85,248
+"PT_122",42,"Male","Treatment A","Site_B",28.8,117,109,"No","Never","Graduate",15.6,135,167
+"PT_123",47,"Male","Treatment A","Site_C",26.5,162,88,"Type 1","Former","Less than HS",16.3,95,123
+"PT_124",45,"Male","Control","Site_A",32,157,94,"No","Current","Less than HS",14.8,103,238
+"PT_125",66,"Female","Treatment B","Site_E",34.6,141,97,"Type 2","Former","Less than HS",15.7,95,256
+"PT_126",56,"Male","Control","Site_D",25.7,142,69,"Type 1","Never","High School",11.3,143,204
+"PT_127",58,"Male","Control","Site_B",27.6,146,93,"No","Former","Some College",14.9,80,127
+"PT_128",53,"Female","Treatment B","Site_D",27.4,163,80,"Type 1","Never","Bachelor's",12,88,162
+"PT_129",80,"Female","Control","Site_B",29.6,166,75,"No","Never","Bachelor's",12.8,104,229
+"PT_130",73,"Female","Control","Site_B",30,146,92,"No","Former","Bachelor's",11.4,121,158
+"PT_131",72,"Female","Treatment A","Site_E",23.2,133,81,"No","Former","High School",10.3,70,227
+"PT_132",49,"Male","Control","Site_B",32.3,135,81,"Type 2","Former","High School",13,70,181
+"PT_133",70,"Female","Treatment B","Site_E",35.2,125,79,"No","Former","Some College",11.8,73,192
+"PT_134",59,"Male","Treatment A","Site_B",NA,148,83,"Type 2","Never","Some College",16.8,136,232
+"PT_135",61,"Female","Treatment A","Site_E",20.6,152,93,"No","Never","Graduate",10.7,123,258
+"PT_136",83,"Male","Treatment A","Site_E",25.4,111,68,"Type 2","Former","Some College",14,106,195
+"PT_137",57,"Male","Treatment B","Site_C",28.5,125,92,"No","Never","High School",17.2,169,210
+"PT_138",77,"Male","Treatment B","Site_F",21,145,88,"Type 2","Former","High School",11.7,136,183
+"PT_139",70,"Male","Control","Site_A",29.4,133,79,"Type 2","Never","Bachelor's",14.6,102,190
+"PT_140",60,"Female","Treatment B","Site_C",25.9,165,66,"No","Never","Bachelor's",13.3,122,249
+"PT_141",66,"Male","Treatment A","Site_D",20.8,142,79,"No","Never","Some College",14,77,234
+"PT_142",52,"Female","Control","Site_E",25.5,149,101,"Type 2","Current","Bachelor's",13.7,99,187
+"PT_143",69,"Female","Treatment A","Site_F",29.1,127,90,"No","Former","Bachelor's",14.4,82,158
+"PT_144",76,"Female","Treatment B","Site_F",NA,138,74,"Type 2","Current","Graduate",13.3,74,276
+"PT_145",80,"Male","Treatment A","Site_F",28.6,112,68,"No","Former","High School",15.3,91,143
+"PT_146",62,"Female","Treatment B","Site_D",26.5,157,113,"No","Never","Bachelor's",11.7,80,172
+"PT_147",41,"Male","Treatment B","Site_F",24,141,69,"Type 2","Never","Some College",14.5,98,NA
+"PT_148",49,"Male","Treatment B","Site_F",26.2,141,103,"No","Never","High School",15.2,70,182
+"PT_149",67,"Male","Treatment B","Site_D",28.9,135,91,"Type 2","Never","Some College",16.4,88,182
+"PT_150",53,"Female","Control","Site_E",31.1,126,90,"No","Current","Bachelor's",10.1,98,191
+"PT_151",65,"Female","Treatment B","Site_B",32.7,99,77,"No","Never","Bachelor's",17.1,135,221
+"PT_152",61,"Female","Control","Site_C",24.8,131,97,"Type 2","Never","High School",15.1,104,120
+"PT_153",66,"Female","Treatment A","Site_B",29.6,114,97,"No","Former","Some College",13.6,118,207
+"PT_154",62,"Male","Treatment B","Site_B",23.9,132,78,"No","Former","Bachelor's",14.7,70,215
+"PT_155",65,"Female","Control","Site_B",28.3,141,92,"No","Current","Bachelor's",14.9,104,190
+"PT_156",54,"Male","Control","Site_E",21.8,144,84,"Type 2","Former","Bachelor's",14.4,111,155
+"PT_157",51,"Male","Treatment A","Site_E",16.4,125,89,"No","Never","Bachelor's",13.4,116,192
+"PT_158",81,"Male","Treatment A","Site_A",25.9,133,75,"No","Never","Bachelor's",11.8,105,231
+"PT_159",67,"Female","Control","Site_B",20.6,119,77,"Type 2","Former","Graduate",13.4,90,180
+"PT_160",71,"Male","Control","Site_B",19.2,159,85,"No","Never","Graduate",13.2,105,221
+"PT_161",85,"Female","Control","Site_C",25.7,124,95,"Type 2","Never","Less than HS",15.3,112,138
+"PT_162",62,"Male","Control","Site_D",33.4,127,79,"No","Former","High School",16.9,124,208
+"PT_163",47,"Male","Treatment A","Site_F",31.6,152,91,"No","Current","Bachelor's",13.4,79,233
+"PT_164",53,"Male","Treatment A","Site_E",25.6,130,96,"No","Current","Graduate",17.1,102,163
+"PT_165",83,"Female","Treatment A","Site_C",27.7,125,73,"No","Never","Some College",9.9,77,311
+"PT_166",53,"Male","Control","Site_E",26.9,140,76,"Type 2","Former","Some College",15.2,128,259
+"PT_167",50,"Male","Control","Site_C",31.6,139,94,"No","Never","Bachelor's",15.3,78,207
+"PT_168",74,"Male","Treatment B","Site_E",29,125,87,"Type 2","Former","High School",12.6,96,185
+"PT_169",57,"Female","Control","Site_A",28.7,162,85,"No","Never","Bachelor's",13.9,109,178
+"PT_170",55,"Male","Control","Site_C",31.1,165,87,"No","Former","Some College",16.5,134,212
+"PT_171",65,"Female","Control","Site_A",20.2,158,93,"No","Never","Less than HS",14.7,144,209
+"PT_172",53,"Male","Treatment B","Site_F",33.5,125,73,"No","Former","High School",18,92,NA
+"PT_173",71,"Male","Treatment B","Site_E",25.9,120,78,"No","Current","High School",11,127,120
+"PT_174",54,"Male","Control","Site_E",NA,141,92,"Type 2","Never","Bachelor's",16,101,200
+"PT_175",69,"Male","Treatment B","Site_D",26.6,165,75,"Type 2","Never","Some College",14.4,132,210
+"PT_176",77,"Male","Treatment B","Site_D",32.4,164,88,"No","Former","Less than HS",13.2,73,120
+"PT_177",62,"Male","Control","Site_B",27.9,121,87,"No","Never","High School",15.3,131,135
+"PT_178",67,"Female","Treatment B","Site_A",21.3,121,87,"No","Never","Graduate",18,107,242
+"PT_179",75,"Male","Control","Site_C",23.9,158,93,"No","Current","Some College",15,127,155
+"PT_180",82,"Male","Treatment B","Site_A",29.2,123,87,"No","Never","High School",12.9,119,237
+"PT_181",72,"Female","Control","Site_F",23,132,97,"Type 2","Current","Less than HS",12.7,117,195
+"PT_182",78,"Male","Treatment B","Site_D",27.5,111,85,"No","Never","Some College",16.8,109,210
+"PT_183",53,"Female","Control","Site_C",31.9,149,66,"No","Never","Less than HS",10.3,70,202
+"PT_184",71,"Female","Treatment B","Site_B",25.5,132,73,"No","Never","Bachelor's",11.8,106,237
+"PT_185",71,"Male","Treatment B","Site_B",32.1,134,78,"Type 2","Never","High School",9.5,107,236
+"PT_186",75,"Male","Treatment A","Site_F",33.9,122,82,"Type 2","Current","High School",16.6,110,199
+"PT_187",65,"Male","Treatment A","Site_A",29.6,151,64,"No","Former","High School",17.6,141,228
+"PT_188",51,"Female","Treatment A","Site_C",26.7,153,95,"Type 2","Current","Graduate",13.9,149,233
+"PT_189",59,"Male","Control","Site_E",23.7,131,71,"No","Never","Graduate",11.6,70,229
+"PT_190",82,"Male","Control","Site_D",28.4,113,111,"No","Current","High School",12.2,152,135
+"PT_191",63,"Male","Treatment A","Site_C",27.9,140,105,"No","Former","Some College",15.5,120,179
+"PT_192",54,"Female","Control","Site_E",28.9,176,88,"Type 2","Never","Less than HS",11.5,99,236
+"PT_193",62,"Male","Treatment A","Site_E",24.1,123,83,"Type 2","Never","Bachelor's",14.7,108,174
+"PT_194",54,"Female","Treatment A","Site_C",25,132,72,"No","Never","Some College",12.9,70,220
+"PT_195",55,"Female","Treatment A","Site_E",30.2,107,73,"Type 2","Former","Bachelor's",14.2,133,173
+"PT_196",67,"Female","Treatment B","Site_A",16,160,99,"No","Former","Some College",11.1,124,180
+"PT_197",55,"Female","Treatment A","Site_D",22.4,138,99,"No","Never","Some College",9.9,108,220
+"PT_198",62,"Male","Control","Site_A",27.7,114,85,"No","Former","Less than HS",15.8,79,193
+"PT_199",72,"Female","Control","Site_F",20.9,131,82,"Type 2","Current","High School",13.9,87,134
+"PT_200",63,"Male","Control","Site_E",30.5,90,81,"No","Never","Less than HS",14.1,113,219
+"PT_201",60,"Female","Control","Site_B",27.3,143,74,"No","Never","Graduate",13.3,121,215
+"PT_202",69,"Male","Treatment A","Site_B",27.2,128,97,"No","Never","Graduate",15.4,124,120
+"PT_203",55,"Male","Control","Site_E",32.3,168,84,"Type 2","Current","Some College",15.3,111,236
+"PT_204",70,"Male","Control","Site_D",30.9,103,66,"No","Former","Some College",14.1,128,162
+"PT_205",86,"Male","Control","Site_D",28.6,138,74,"No","Current","Some College",13.9,108,NA
+"PT_206",62,"Male","Control","Site_B",27.8,135,78,"Type 2","Current","Graduate",15.9,108,266
+"PT_207",87,"Female","Treatment B","Site_F",29.7,103,95,"Type 2","Never","High School",11.5,121,205
+"PT_208",64,"Male","Treatment B","Site_E",24.6,112,101,"No","Former","Graduate",12.2,116,221
+"PT_209",42,"Female","Treatment B","Site_C",28.1,134,81,"Type 2","Former","Less than HS",12.4,125,126
+"PT_210",62,"Male","Control","Site_B",19.4,152,96,"Type 2","Never","Bachelor's",13.4,115,207
+"PT_211",53,"Female","Treatment A","Site_E",32.2,142,81,"No","Former","Bachelor's",15.3,126,185
+"PT_212",86,"Female","Control","Site_D",26.3,148,66,"No","Never","Some College",12.3,70,NA
+"PT_213",73,"Female","Treatment B","Site_D",28,144,81,"Type 2","Never","Bachelor's",11.9,70,196
+"PT_214",60,"Male","Treatment A","Site_D",19,171,84,"No","Current","Some College",18,105,139
+"PT_215",53,"Male","Control","Site_C",30.1,146,81,"No","Never","Some College",12.9,108,186
+"PT_216",67,"Female","Control","Site_F",31.7,137,78,"No","Former","Some College",9.3,87,250
+"PT_217",66,"Male","Control","Site_B",24.5,149,74,"No","Former","High School",11.1,83,233
+"PT_218",85,"Female","Control","Site_D",23.9,153,74,"No","Never","Less than HS",13.2,148,165
+"PT_219",70,"Female","Control","Site_B",27.6,120,60,"No","Never","High School",15.1,119,202
+"PT_220",64,"Male","Treatment B","Site_C",NA,164,104,"No","Former","Some College",13.3,78,237
+"PT_221",75,"Male","Control","Site_F",21.9,161,90,"No","Former","Some College",15.1,87,NA
+"PT_222",70,"Female","Control","Site_B",31.4,112,92,"Type 2","Never","High School",13.4,97,NA
+"PT_223",46,"Female","Treatment B","Site_F",30.7,149,88,"Type 1","Never","Graduate",11.7,122,230
+"PT_224",64,"Male","Control","Site_C",22.2,112,87,"No","Never","Some College",13.4,113,245
+"PT_225",70,"Female","Treatment A","Site_A",24.7,127,82,"Type 2","Former","Some College",11.2,89,270
+"PT_226",47,"Female","Treatment B","Site_C",32.7,160,91,"No","Never","High School",11.6,111,230
+"PT_227",65,"Female","Control","Site_E",27.1,132,81,"No","Never","Some College",15,114,181
+"PT_228",74,"Male","Treatment B","Site_A",31.1,147,91,"Type 2","Never","Less than HS",16.4,81,192
+"PT_229",74,"Male","Treatment A","Site_C",21.2,153,79,"No","Never","Less than HS",18,130,259
+"PT_230",71,"Male","Treatment A","Site_D",25.5,143,65,"No","Former","Bachelor's",14.9,90,178
+"PT_231",67,"Male","Treatment B","Site_D",25.2,151,77,"No","Never","Bachelor's",15.4,70,203
+"PT_232",48,"Male","Control","Site_B",30.1,123,75,"No","Never","High School",13.2,73,123
+"PT_233",67,"Female","Control","Site_D",32.7,152,81,"No","Never","High School",16.9,70,191
+"PT_234",48,"Female","Treatment B","Site_A",28.9,136,98,"Type 2","Current","High School",12.3,118,NA
+"PT_235",65,"Male","Treatment A","Site_E",31.3,90,76,"Type 2","Never","Bachelor's",17.5,70,160
+"PT_236",73,"Male","Control","Site_F",29.8,137,88,"No","Former","Some College",12.3,104,213
+"PT_237",55,"Male","Control","Site_B",28.3,123,82,"No","Former","Less than HS",13.4,91,191
+"PT_238",53,"Female","Control","Site_C",28.7,138,81,"No","Current","High School",11.2,101,207
+"PT_239",79,"Male","Treatment B","Site_D",29.1,134,60,"No","Former","Less than HS",15.5,76,192
+"PT_240",77,"Male","Treatment B","Site_A",23.6,160,70,"No","Never","Less than HS",12.4,95,120
+"PT_241",51,"Male","Control","Site_B",26.3,166,85,"Type 1","Never","Less than HS",14.6,111,174
+"PT_242",56,"Male","Treatment A","Site_A",31.6,136,81,"No","Current","Some College",14.8,87,227
+"PT_243",59,"Male","Treatment B","Site_B",26.8,149,86,"No","Current","Some College",16.9,137,NA
+"PT_244",73,"Male","Control","Site_C",29.8,106,81,"Type 2","Never","High School",14.8,70,139
+"PT_245",62,"Male","Treatment B","Site_D",27.3,122,84,"No","Current","High School",15.2,129,201
+"PT_246",56,"Female","Control","Site_A",28.7,113,74,"No","Never","Graduate",14.7,83,217
+"PT_247",62,"Female","Treatment B","Site_C",20.3,156,79,"No","Current","High School",16.5,114,146
+"PT_248",61,"Male","Control","Site_B",21.8,155,81,"No","Current","Some College",17.8,70,148
+"PT_249",77,"Female","Control","Site_A",30.3,132,97,"No","Never","High School",12,74,242
+"PT_250",37,"Female","Control","Site_D",26.2,138,85,"No","Former","Bachelor's",14.8,138,244

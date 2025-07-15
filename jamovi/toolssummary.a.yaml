@@ -3,7 +3,7 @@ name:  toolssummary
 title: Tools for data summary
 menuGroup: ExplorationD
 menuSubgroup: ClinicoPath Descriptives
-version: '0.0.3'
+version: '0.0.4'
 jas: '1.2'
 
 options:
@@ -34,3 +34,47 @@ options:
       title: Show Statistics
       type: Bool
       default: true
+
+    - name: useSummarytools
+      title: Use summarytools package
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use summarytools package for enhanced data summaries
+
+    - name: showDfSummary
+      title: Show Data Frame Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show comprehensive data frame summary using summarytools::dfSummary
+
+    - name: showDescr
+      title: Show Descriptive Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed descriptive statistics using summarytools::descr
+
+    - name: groupVar
+      title: Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            Variable to group by for stratified summaries
+
+    - name: showCrosstabs
+      title: Show Cross-tabulations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show cross-tabulation tables for categorical variables

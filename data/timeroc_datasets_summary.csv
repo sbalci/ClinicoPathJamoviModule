@@ -1,0 +1,7 @@
+"Dataset","Observations","Description","Key_Features","Primary_Endpoint","Biomarker_Variable"
+"timeroc_cancer_biomarker",300,"Cancer biomarker study with tumor marker and survival outcomes","Cancer staging, tumor biomarker, 60-month follow-up","death_event","tumor_biomarker"
+"timeroc_cardiovascular_risk",400,"Cardiovascular risk prediction with troponin and clinical events","CV risk factors, troponin/CRP, 36-month follow-up","cv_event","troponin_level or risk_score"
+"timeroc_multi_biomarker",250,"Multi-biomarker comparison study with different predictive abilities","3 biomarkers with AUC ~0.85, 0.75, 0.65","primary_event","biomarker_alpha, biomarker_beta, biomarker_gamma"
+"timeroc_landmark_biomarker",200,"Landmark biomarker analysis with 6-month conditional survival","Landmark analysis, biomarker change over time","post_landmark_event","month6_biomarker"
+"timeroc_edge_cases",150,"Edge cases and quality testing scenarios with various challenges","Outliers, missing data, extreme values","event_status","biomarker"
+"timeroc_competing_risks",180,"Competing risks study with disease-specific and other-cause mortality","Competing events, comorbidity effects","disease_death","disease_biomarker"

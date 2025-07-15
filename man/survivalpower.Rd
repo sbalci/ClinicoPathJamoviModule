@@ -25,7 +25,12 @@ survivalpower(
   events_input = 50,
   show_summary = TRUE,
   show_formulas = FALSE,
-  show_interpretation = TRUE
+  show_interpretation = TRUE,
+  show_power_plot = FALSE,
+  show_timeline_plot = FALSE,
+  power_plot_range = "auto",
+  export_results = FALSE,
+  export_power_curve = FALSE
 )
 }
 \arguments{
@@ -74,6 +79,19 @@ method.}
 
 \item{show_interpretation}{Whether to include clinical interpretation of
 results.}
+
+\item{show_power_plot}{Whether to display power curve visualization.}
+
+\item{show_timeline_plot}{Whether to display study timeline visualization
+for Lachin-Foulkes method.}
+
+\item{power_plot_range}{Sample size range for power plots (format 'min,max'
+or 'auto').}
+
+\item{export_results}{Whether to export detailed results for external
+analysis.}
+
+\item{export_power_curve}{Whether to export power curve data points.}
 }
 \value{
 A results object containing:
@@ -82,6 +100,11 @@ A results object containing:
 \code{results$power_results} \tab \tab \tab \tab \tab a html \cr
 \code{results$formulas} \tab \tab \tab \tab \tab a html \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$power_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$timeline_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$exported_results} \tab \tab \tab \tab \tab an output \cr
+\code{results$exported_power_curve} \tab \tab \tab \tab \tab an output \cr
+\code{results$export_summary} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

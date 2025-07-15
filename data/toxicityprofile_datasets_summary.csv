@@ -1,0 +1,7 @@
+"Dataset","Events","Patients","Unique_AEs","Description","Key_Features","Primary_Use_Case"
+"toxicityprofile_oncology_trial",2061,250,22,"Oncology clinical trial with 3 treatment arms","CTCAE grading, multiple treatment arms, common oncology AEs","Standard oncology safety analysis"
+"toxicityprofile_immunotherapy",541,171,20,"Immunotherapy safety profile with immune-related AEs","Immune-related adverse events, delayed onset patterns","Immune-related AE monitoring"
+"toxicityprofile_targeted_therapy",1142,200,24,"Targeted therapy with characteristic toxicity pattern","Targeted therapy specific toxicities, early onset","Targeted therapy safety profiling"
+"toxicityprofile_dose_escalation",603,148,20,"Dose escalation study with dose-dependent toxicity","Dose-dependent toxicity, escalating severity","Dose-limiting toxicity assessment"
+"toxicityprofile_pediatric",387,114,18,"Pediatric safety study with age-appropriate AEs","Pediatric-specific AEs, milder severity profile","Pediatric safety monitoring"
+"toxicityprofile_small_sample",15,15,3,"Small sample for edge case testing","Minimal data for edge case validation","Edge case and validation testing"

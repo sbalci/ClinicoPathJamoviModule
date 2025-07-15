@@ -9,7 +9,12 @@ toolssummaryOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             vars = NULL,
             excludeNA = FALSE,
             showFreq = TRUE,
-            showStats = TRUE, ...) {
+            showStats = TRUE,
+            useSummarytools = TRUE,
+            showDfSummary = TRUE,
+            showDescr = TRUE,
+            groupVar = NULL,
+            showCrosstabs = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -32,22 +37,61 @@ toolssummaryOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "showStats",
                 showStats,
                 default=TRUE)
+            private$..useSummarytools <- jmvcore::OptionBool$new(
+                "useSummarytools",
+                useSummarytools,
+                default=TRUE)
+            private$..showDfSummary <- jmvcore::OptionBool$new(
+                "showDfSummary",
+                showDfSummary,
+                default=TRUE)
+            private$..showDescr <- jmvcore::OptionBool$new(
+                "showDescr",
+                showDescr,
+                default=TRUE)
+            private$..groupVar <- jmvcore::OptionVariable$new(
+                "groupVar",
+                groupVar,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..showCrosstabs <- jmvcore::OptionBool$new(
+                "showCrosstabs",
+                showCrosstabs,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..excludeNA)
             self$.addOption(private$..showFreq)
             self$.addOption(private$..showStats)
+            self$.addOption(private$..useSummarytools)
+            self$.addOption(private$..showDfSummary)
+            self$.addOption(private$..showDescr)
+            self$.addOption(private$..groupVar)
+            self$.addOption(private$..showCrosstabs)
         }),
     active = list(
         vars = function() private$..vars$value,
         excludeNA = function() private$..excludeNA$value,
         showFreq = function() private$..showFreq$value,
-        showStats = function() private$..showStats$value),
+        showStats = function() private$..showStats$value,
+        useSummarytools = function() private$..useSummarytools$value,
+        showDfSummary = function() private$..showDfSummary$value,
+        showDescr = function() private$..showDescr$value,
+        groupVar = function() private$..groupVar$value,
+        showCrosstabs = function() private$..showCrosstabs$value),
     private = list(
         ..vars = NA,
         ..excludeNA = NA,
         ..showFreq = NA,
-        ..showStats = NA)
+        ..showStats = NA,
+        ..useSummarytools = NA,
+        ..showDfSummary = NA,
+        ..showDescr = NA,
+        ..groupVar = NA,
+        ..showCrosstabs = NA)
 )
 
 toolssummaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -56,8 +100,12 @@ toolssummaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
+        dfSummary = function() private$.items[["dfSummary"]],
+        descrStats = function() private$.items[["descrStats"]],
         frequencies = function() private$.items[["frequencies"]],
-        numericStats = function() private$.items[["numericStats"]]),
+        summaryToolsFreq = function() private$.items[["summaryToolsFreq"]],
+        numericStats = function() private$.items[["numericStats"]],
+        crosstabs = function() private$.items[["crosstabs"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -98,9 +146,24 @@ toolssummaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="dfSummary",
+                title="Data Frame Summary (summarytools)",
+                visible="(useSummarytools && showDfSummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="descrStats",
+                title="Descriptive Statistics (summarytools)",
+                visible="(useSummarytools && showDescr)"))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="frequencies",
                 title="Frequency Tables",
                 visible="(showFreq)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summaryToolsFreq",
+                title="Enhanced Frequency Tables (summarytools)",
+                visible="(useSummarytools && showFreq)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="numericStats",
@@ -130,7 +193,12 @@ toolssummaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     list(
                         `name`="max", 
                         `title`="Max", 
-                        `type`="number"))))}))
+                        `type`="number"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="crosstabs",
+                title="Cross-tabulation Tables",
+                visible="(useSummarytools && showCrosstabs)"))}))
 
 toolssummaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "toolssummaryBase",
@@ -140,7 +208,7 @@ toolssummaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "toolssummary",
-                version = c(0,0,3),
+                version = c(0,0,4),
                 options = options,
                 results = toolssummaryResults$new(options=options),
                 data = data,
@@ -161,12 +229,23 @@ toolssummaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param excludeNA .
 #' @param showFreq .
 #' @param showStats .
+#' @param useSummarytools Use summarytools package for enhanced data summaries
+#' @param showDfSummary Show comprehensive data frame summary using
+#'   summarytools::dfSummary
+#' @param showDescr Show detailed descriptive statistics using
+#'   summarytools::descr
+#' @param groupVar Variable to group by for stratified summaries
+#' @param showCrosstabs Show cross-tabulation tables for categorical variables
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$dfSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$descrStats} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$frequencies} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summaryToolsFreq} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$numericStats} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$crosstabs} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -181,23 +260,36 @@ toolssummary <- function(
     vars,
     excludeNA = FALSE,
     showFreq = TRUE,
-    showStats = TRUE) {
+    showStats = TRUE,
+    useSummarytools = TRUE,
+    showDfSummary = TRUE,
+    showDescr = TRUE,
+    groupVar,
+    showCrosstabs = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("toolssummary requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(groupVar)) groupVar <- jmvcore::resolveQuo(jmvcore::enquo(groupVar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(vars), vars, NULL))
+            `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(groupVar), groupVar, NULL))
 
+    for (v in groupVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- toolssummaryOptions$new(
         vars = vars,
         excludeNA = excludeNA,
         showFreq = showFreq,
-        showStats = showStats)
+        showStats = showStats,
+        useSummarytools = useSummarytools,
+        showDfSummary = showDfSummary,
+        showDescr = showDescr,
+        groupVar = groupVar,
+        showCrosstabs = showCrosstabs)
 
     analysis <- toolssummaryClass$new(
         options = options,

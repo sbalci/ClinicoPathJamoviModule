@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
-Title: Analysis for Clinicopathological Research
-Version: 0.0.3.56
-Date: 2025-07-13
+Title: Comprehensive Analysis for Clinicopathological Research
+Version: 0.0.3.59
+Date: 2025-07-15
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -10,10 +10,22 @@ Authors@R:
            email = "drserdarbalci@gmail.com",
            comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <drserdarbalci@gmail.com>
-Description: Analysis for Clinicopathological Research. ClinicoPath helps
-    researchers to generate natural language summaries of their dataset,
-    generate cross tables with statistical tests, and survival analysis
-    with survival tables, survival plots, and natural language summaries.
+Description: ClinicoPath is a comprehensive jamovi module designed specifically 
+    for clinicopathological research and medical data analysis. It provides an 
+    integrated suite of statistical tools, visualization methods, and reporting 
+    functions tailored for pathology, clinical research, and medical decision-making. 
+    The package organizes analysis tools into five main functional areas: 
+    ClinicoPath Descriptives (Table One generation, cross-tabulation, data quality 
+    assessment), ClinicoPath Survival (Kaplan-Meier curves, Cox regression, 
+    competing risks), Medical Decision Analysis (ROC curves, diagnostic tests, 
+    decision curves), Statistical Plots (publication-ready visualizations), and 
+    Specialized Visualizations (waterfall plots, alluvial diagrams, forest plots). 
+    Key features include integration with jamovi's user-friendly interface, 
+    clinical terminology familiar to researchers, reproducible research capabilities, 
+    and advanced statistical methods including bootstrap confidence intervals and 
+    effect size calculations. The package serves as an umbrella coordinating 
+    multiple specialized sub-modules and can be used through jamovi's GUI or 
+    directly in R for programmatic analysis.
 License: GPL-2
 URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
     https://github.com/sbalci/ClinicoPathJamoviModule/,
@@ -121,6 +133,7 @@ Imports:
     binom,
     pROC,
     plotROC,
+    timeROC,
     UpSetR,
     ComplexUpset,
     htmlTable,
@@ -187,18 +200,19 @@ Imports:
     grid,
     mlr3measures,
     vcdExtra,
-    ggoncoplot
+    ggoncoplot,
+    UpSetR,
+    ComplexUpset,
+    vtree
 VignetteBuilder: 
     knitr, 
     tiff, 
     quarto
 Remotes:
-    nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489,
     gastonstat/arcdiagram,
     hrbrmstr/streamgraph,
     hrbrmstr/ggeconodist,
     jbengler/tidyplots,
-    hms-dbmi/UpSetR,
     CHOP-CGTInformatics/ggswim,
     alstockdale/sumvar,
     mlr-org/mlr3extralearners@v1.0.0,

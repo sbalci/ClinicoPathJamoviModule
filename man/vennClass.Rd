@@ -9,13 +9,60 @@ The function produces a Venn diagram and an Upset diagram.
 \description{
 Generates a Venn Diagram and an Upset diagram from selected categorical variables.
 This function converts specified variables to logical values based on a chosen "true" level.
-Two visual outputs are produced: a Venn diagram (via ggvenn) and an Upset plot (via UpSetR).
+Two visual outputs are produced: a Venn diagram (via ggvenn) and an Upset plot (via UpSetR or ComplexUpset).
 Additionally, a summary table of "true" counts for each variable is provided.
+
+ComplexUpset features include advanced styling, statistical annotations, custom sorting,
+and enhanced theming options for publication-ready figures.
 }
 \examples{
-# Load the data
-data("iris")
+\dontrun{
+# Example 1: Basic 2-variable Venn diagram
+data("mtcars")
+mtcars$vs <- factor(mtcars$vs, levels = c(0, 1), labels = c("V-shaped", "Straight"))
+mtcars$am <- factor(mtcars$am, levels = c(0, 1), labels = c("Automatic", "Manual"))
 
+# Create Venn diagram showing overlap between V-shaped engines and Manual transmission
+venn(data = mtcars, var1 = "vs", var1true = "V-shaped", 
+     var2 = "am", var2true = "Manual")
+
+# Example 2: 3-variable Venn diagram with penguins data
+library(palmerpenguins)
+data("penguins")
+penguins$large_bill <- factor(ifelse(penguins$bill_length_mm > 45, "Large", "Small"))
+penguins$heavy_weight <- factor(ifelse(penguins$body_mass_g > 4000, "Heavy", "Light"))
+penguins$adelie_species <- factor(ifelse(penguins$species == "Adelie", "Adelie", "Other"))
+
+venn(data = penguins, 
+     var1 = "large_bill", var1true = "Large",
+     var2 = "heavy_weight", var2true = "Heavy", 
+     var3 = "adelie_species", var3true = "Adelie")
+
+# Example 3: Medical/Clinical example
+# Create sample clinical data
+clinical_data <- data.frame(
+  patient_id = 1:100,
+  diabetes = sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.3, 0.7)),
+  hypertension = sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.4, 0.6)),
+  obesity = sample(c("Yes", "No"), 100, replace = TRUE, prob = c(0.25, 0.75))
+)
+
+# Analyze comorbidity patterns
+venn(data = clinical_data,
+     var1 = "diabetes", var1true = "Yes",
+     var2 = "hypertension", var2true = "Yes",
+     var3 = "obesity", var3true = "Yes")
+
+# Example 4: Using ComplexUpset for advanced features
+venn(data = clinical_data,
+     var1 = "diabetes", var1true = "Yes",
+     var2 = "hypertension", var2true = "Yes",
+     var3 = "obesity", var3true = "Yes",
+     upsetType = "complexUpset",
+     sortBy = "freq",
+     minSize = 5,
+     showAnnotations = TRUE)
+}
 
 }
 \section{Super classes}{

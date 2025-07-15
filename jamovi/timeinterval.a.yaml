@@ -1,107 +1,191 @@
 ---
 name: timeinterval
-title: Time Interval Calculator
+title: Comprehensive Time Interval Calculator
 menuGroup: SurvivalD
 menuSubgroup: Data Preparation
-menuSubtitle: Calculate time intervals from dates or values
-version: '0.0.3'
+menuSubtitle: Advanced time interval analysis with quality assessment
+version: '1.0.0'
 jas: '1.2'
 
 description:
     main: >-
-        Calculates time intervals between dates or from pre-calculated values. Time intervals form the basis
-        of person-time follow-up calculations in survival analysis. Person-time follows the accumulated time
-        that participants contribute to a study while being at risk for the event of interest, accounting for
-        varying entry times and censoring. Person-time is typically expressed in person-days, person-months, 
-        or person-years depending on the study duration and outcome frequency.
+        Advanced time interval calculator designed for survival analysis, epidemiological studies, 
+        and person-time analysis. Features intelligent date parsing, comprehensive data quality 
+        assessment, landmark analysis, and robust statistical summaries. Time intervals form the 
+        foundation of person-time follow-up calculations, capturing both participant counts and 
+        observation duration for accurate incidence rate calculations.
     R:
         dontrun: false
         usage: |
-            # Calculate time intervals for person-time analysis:
-            # timeinterval(
-            #   data = study_data,
-            #   dx_date = "diagnosis_date", 
-            #   fu_date = "followup_date",
-            #   output_unit = "months"
-            # )
+            # Basic time interval calculation:
+            timeinterval(
+              data = study_data,
+              dx_date = "diagnosis_date", 
+              fu_date = "followup_date",
+              time_format = "ymd",
+              output_unit = "months"
+            )
+            
+            # With landmark analysis:
+            timeinterval(
+              data = study_data,
+              dx_date = "start_date",
+              fu_date = "end_date", 
+              use_landmark = TRUE,
+              landmark_time = 6,
+              output_unit = "months"
+            )
 
 options:
-    # Data input options
+    # === CORE DATA INPUT ===
     - name: data
       type: Data
       description:
           R: >
-            The data as a data frame.
+            The data as a data frame containing date columns for interval calculation.
 
-
-    # Time input options
-
+    # === DATE VARIABLES ===
     - name: dx_date
-      title: Start Date
+      title: Start Date Variable
       type: Variable
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - factor
+        - numeric
       description:
           R: >
-            Column containing start dates
+            Column containing start dates (e.g., diagnosis date, study entry, treatment start).
+            Supports various date formats including text and numeric representations.
 
     - name: fu_date
-      title: End Date
+      title: End Date Variable  
       type: Variable
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - factor
+        - numeric
       description:
           R: >
-            Column containing end dates
+            Column containing end dates (e.g., follow-up date, event date, study exit).
+            Must be in the same format as the start date variable.
 
-    # Time format options
+    # === DATE FORMAT CONFIGURATION ===
     - name: time_format
       title: Date Format
       type: List
       options:
+        - name: auto
+          title: Auto-detect Format
         - name: ymdhms
           title: YYYY-MM-DD HH:MM:SS
         - name: ymd
           title: YYYY-MM-DD
         - name: dmy
-          title: DD-MM-YYYY
+          title: DD-MM-YYYY (or DD/MM/YYYY)
         - name: mdy
-          title: MM-DD-YYYY
+          title: MM-DD-YYYY (or MM/DD/YYYY)
         - name: ydm
-          title: YY-DD-MM
+          title: YYYY-DD-MM
         - name: myd
-          title: MM-YY-DD
+          title: MM-YYYY-DD
         - name: dym
-          title: DD-YY-MM
-      default: ymd
+          title: DD-YYYY-MM
+      default: auto
+      description:
+          R: >
+            Date format specification. 'Auto-detect' attempts to identify the format automatically.
+            Manual selection ensures accurate parsing for specific date formats.
 
     - name: output_unit
-      title: Output Time Unit
+      title: Time Unit for Results
       type: List
       options:
         - name: days
           title: Days
         - name: weeks
-          title: Weeks
+          title: Weeks  
         - name: months
           title: Months
         - name: years
           title: Years
       default: months
+      description:
+          R: >
+            Unit for calculated time intervals. Affects person-time calculations and 
+            statistical summaries. Choose based on study duration and event frequency.
 
-    # Additional options
-
-
+    # === LANDMARK ANALYSIS ===
     - name: use_landmark
-      title: Use Landmark Time
+      title: Enable Landmark Analysis
       type: Bool
       default: false
+      description:
+          R: >
+            Enables conditional analysis from a specific time point. Useful for 
+            studying outcomes after a landmark time (e.g., 6-month survivors only).
 
     - name: landmark_time
-      title: Landmark Time
+      title: Landmark Time Point
       type: Number
-      default: 3
+      default: 6
+      min: 0
+      description:
+          R: >
+            Time point for landmark analysis in the specified output units. 
+            Only participants surviving past this time are included in analysis.
 
-    - name: add_times
-      title: Add calculated times to data
+    # === DATA QUALITY OPTIONS ===
+    - name: remove_negative
+      title: Remove Negative Intervals
       type: Bool
       default: true
+      description:
+          R: >
+            Automatically exclude negative time intervals (end date before start date).
+            Recommended for data quality assurance.
+
+    - name: remove_extreme
+      title: Flag Extreme Values
+      type: Bool
+      default: true
+      description:
+          R: >
+            Identify and flag potentially extreme time intervals for quality review.
+            Uses statistical outlier detection methods.
+
+    # === OUTPUT OPTIONS ===
+    - name: add_times
+      title: Add Calculated Times to Dataset
+      type: Bool
+      default: true
+      description:
+          R: >
+            Appends calculated time intervals as a new variable for downstream analysis.
+            Useful for subsequent survival analysis or person-time calculations.
+
+    - name: include_quality_metrics
+      title: Include Data Quality Assessment
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provides comprehensive data quality assessment including missing values,
+            negative intervals, and distribution statistics.
+
+    - name: confidence_level
+      title: Confidence Level (%)
+      type: Number
+      default: 95
+      min: 90
+      max: 99
+      description:
+          R: >
+            Confidence level for statistical intervals (mean confidence intervals).
+            Standard epidemiological practice uses 95% confidence intervals.
 
 
 ...

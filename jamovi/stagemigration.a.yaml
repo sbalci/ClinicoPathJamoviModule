@@ -487,6 +487,119 @@ options:
         Apply optimism correction to performance metrics using bootstrap
         validation to avoid overly optimistic estimates.
 
+    # Multifactorial Analysis Options
+    - name: enableMultifactorialAnalysis
+      title: 'Enable Multifactorial Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Enable advanced multifactorial stage migration analysis that includes
+        additional covariates in the comparison. This allows for adjusted
+        comparisons between staging systems after accounting for other
+        prognostic factors.
+
+    - name: continuousCovariates
+      title: 'Continuous Covariates'
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >-
+        Continuous variables to include as covariates in the multifactorial
+        analysis (e.g., age, tumor size, biomarker levels). These will be
+        included in Cox regression models for both staging systems.
+
+    - name: categoricalCovariates
+      title: 'Categorical Covariates'
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >-
+        Categorical variables to include as covariates in the multifactorial
+        analysis (e.g., sex, histology, treatment type). These will be
+        included in Cox regression models for both staging systems.
+
+    - name: multifactorialComparisonType
+      title: 'Multifactorial Comparison Type'
+      type: List
+      options:
+        - title: "Adjusted C-index comparison"
+          name: adjusted_cindex
+        - title: "Nested model comparison"
+          name: nested_models
+        - title: "Stepwise model selection"
+          name: stepwise
+        - title: "Comprehensive comparison"
+          name: comprehensive
+      default: comprehensive
+      description: >-
+        Type of multifactorial comparison to perform. Comprehensive includes
+        all methods for thorough evaluation of staging systems in the context
+        of other prognostic factors.
+
+    - name: baselineModel
+      title: 'Baseline Model'
+      type: List
+      options:
+        - title: "Covariates only"
+          name: covariates_only
+        - title: "Original staging + covariates"
+          name: original_plus_covariates
+        - title: "New staging + covariates"
+          name: new_plus_covariates
+      default: covariates_only
+      description: >-
+        Baseline model for multifactorial comparisons. This determines the
+        reference model against which staging systems are compared.
+
+    - name: performInteractionTests
+      title: 'Test Stage-Covariate Interactions'
+      type: Bool
+      default: false
+      description: >-
+        Test for interactions between staging systems and covariates. This
+        helps identify if the staging system performance varies across
+        different patient subgroups.
+
+    - name: stratifiedAnalysis
+      title: 'Stratified Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform stratified analysis by categorical covariates to evaluate
+        staging system performance within subgroups.
+
+    - name: showMultifactorialTables
+      title: 'Show Multifactorial Tables'
+      type: Bool
+      default: false
+      description: >-
+        Display detailed tables showing multifactorial model results,
+        including adjusted hazard ratios and model comparison statistics.
+
+    - name: showAdjustedCIndexComparison
+      title: 'Show Adjusted C-index Comparison'
+      type: Bool
+      default: false
+      description: >-
+        Display comparison of C-indices for staging systems adjusted for
+        covariates. This shows the discriminative ability of each staging
+        system after accounting for other prognostic factors.
+
+    - name: showNestedModelTests
+      title: 'Show Nested Model Tests'
+      type: Bool
+      default: false
+      description: >-
+        Display likelihood ratio tests comparing nested models to formally
+        test the added value of each staging system over the baseline model.
+
+    - name: showStepwiseResults
+      title: 'Show Stepwise Selection Results'
+      type: Bool
+      default: false
+      description: >-
+        Display results of stepwise model selection showing which variables
+        (including staging systems) are selected in the final model.
 
     - name: showExplanations
       title: 'Explanations for Results'

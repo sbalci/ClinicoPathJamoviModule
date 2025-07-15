@@ -1,9 +1,10 @@
-#' @title Tools for data summary
+#' @title Tools for data summary with summarytools integration
 #' @return Table
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore toNumeric
 #' @importFrom stats median sd quantile
 #' @importFrom utils head tail
+#' @importFrom summarytools dfSummary freq descr ctable
 
 toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "toolssummaryClass",
@@ -15,19 +16,25 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(self$options$vars) == 0) {
                 # Show welcome message if no variables selected
                 todo <- "
-                <br>Welcome to ClinicoPath Data Summary Tool
+                <br>Welcome to ClinicoPath Data Summary Tool with summarytools Integration
                 <br><br>
-                This tool provides comprehensive summaries of your data:
+                This enhanced tool provides comprehensive summaries of your data:
                 <br>
-                - Basic variable information (type, missing values, unique values)
-                - Missing value analysis
-                - Frequency distributions for categorical variables
-                - Summary statistics for numeric variables
+                <strong>Standard Features:</strong>
+                <br>- Basic variable information (type, missing values, unique values)
+                <br>- Missing value analysis
+                <br>- Frequency distributions for categorical variables
+                <br>- Summary statistics for numeric variables
+                <br><br>
+                <strong>summarytools Enhanced Features:</strong>
+                <br>- Data Frame Summary (dfSummary): Complete overview with plots and statistics
+                <br>- Enhanced Descriptive Statistics (descr): Comprehensive numeric summaries
+                <br>- Professional Frequency Tables (freq): Publication-ready frequency analysis
+                <br>- Cross-tabulation Tables (ctable): Cross-tabs for categorical analysis
+                <br>- Grouped Analysis: Stratified summaries by grouping variables
                 <br><br>
                 Select variables from your dataset to begin the analysis.
-                <br><br>
-                The frequency tables will show counts and percentages for each category,
-                properly formatted for clinical research presentations.
+                <br>Use the 'Use summarytools package' option for enhanced professional output.
                 "
                 html <- self$results$todo
                 html$setContent(todo)
@@ -229,6 +236,199 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 # Set the formatted content
                 self$results$frequencies$setContent(freqTables)
+            }
+
+            # summarytools Integration
+            if (self$options$useSummarytools) {
+                private$.generateSummaryToolsOutput()
+            }
+        },
+
+        .generateSummaryToolsOutput = function() {
+            # Check if summarytools is available
+            if (!requireNamespace("summarytools", quietly = TRUE)) {
+                warning("summarytools package not available. Skipping enhanced summaries.")
+                return()
+            }
+
+            data <- self$data
+            varsNames <- self$options$vars
+            mydata <- jmvcore::select(data, varsNames)
+            
+            # Add grouping variable if specified
+            groupVar <- self$options$groupVar
+            if (!is.null(groupVar) && length(groupVar) > 0) {
+                mydata[[groupVar]] <- data[[groupVar]]
+            }
+
+            # Handle missing values if requested
+            if (self$options$excludeNA) {
+                mydata <- jmvcore::naOmit(mydata)
+            }
+
+            # Data Frame Summary using dfSummary
+            if (self$options$showDfSummary) {
+                tryCatch({
+                    if (!is.null(groupVar) && length(groupVar) > 0) {
+                        # Grouped dfSummary
+                        dfsum_result <- summarytools::dfSummary(
+                            mydata[varsNames], 
+                            style = "grid",
+                            graph.magnif = 0.75,
+                            valid.col = TRUE,
+                            tmp.img.dir = "/tmp"
+                        )
+                    } else {
+                        # Standard dfSummary
+                        dfsum_result <- summarytools::dfSummary(
+                            mydata[varsNames], 
+                            style = "grid",
+                            graph.magnif = 0.75,
+                            valid.col = TRUE,
+                            tmp.img.dir = "/tmp"
+                        )
+                    }
+                    
+                    # Convert to HTML
+                    dfsum_html <- print(dfsum_result, 
+                                      method = "render", 
+                                      file = tempfile(fileext = ".html"),
+                                      report.title = "Data Frame Summary")
+                    
+                    # Read and set content
+                    dfsum_content <- paste(readLines(dfsum_html, warn = FALSE), collapse = "\n")
+                    self$results$dfSummary$setContent(dfsum_content)
+                    
+                }, error = function(e) {
+                    warning(paste("Error generating dfSummary:", e$message))
+                    self$results$dfSummary$setContent(paste("Error generating data frame summary:", e$message))
+                })
+            }
+
+            # Enhanced Descriptive Statistics using descr
+            if (self$options$showDescr) {
+                tryCatch({
+                    # Get only numeric variables for descr
+                    numeric_vars <- varsNames[sapply(mydata[varsNames], is.numeric)]
+                    
+                    if (length(numeric_vars) > 0) {
+                        if (!is.null(groupVar) && length(groupVar) > 0) {
+                            # Grouped descriptive statistics
+                            descr_result <- summarytools::descr(
+                                mydata[numeric_vars], 
+                                stats = c("mean", "sd", "min", "q1", "med", "q3", "max", "mad", "iqr", "cv", "skewness", "se.skewness", "kurtosis"),
+                                transpose = TRUE,
+                                headings = TRUE,
+                                style = "rmarkdown"
+                            )
+                        } else {
+                            # Standard descriptive statistics
+                            descr_result <- summarytools::descr(
+                                mydata[numeric_vars], 
+                                stats = c("mean", "sd", "min", "q1", "med", "q3", "max", "mad", "iqr", "cv", "skewness", "se.skewness", "kurtosis"),
+                                transpose = TRUE,
+                                headings = TRUE,
+                                style = "rmarkdown"
+                            )
+                        }
+                        
+                        # Convert to HTML
+                        descr_html <- print(descr_result, method = "render", file = tempfile(fileext = ".html"))
+                        descr_content <- paste(readLines(descr_html, warn = FALSE), collapse = "\n")
+                        self$results$descrStats$setContent(descr_content)
+                    } else {
+                        self$results$descrStats$setContent("No numeric variables selected for descriptive statistics.")
+                    }
+                    
+                }, error = function(e) {
+                    warning(paste("Error generating descriptive statistics:", e$message))
+                    self$results$descrStats$setContent(paste("Error generating descriptive statistics:", e$message))
+                })
+            }
+
+            # Enhanced Frequency Tables using freq
+            if (self$options$showFreq) {
+                tryCatch({
+                    freq_html_content <- ""
+                    
+                    # Get categorical and low-cardinality numeric variables
+                    cat_vars <- varsNames[sapply(mydata[varsNames], function(x) {
+                        is.factor(x) || is.character(x) || (is.numeric(x) && length(unique(x)) <= 10)
+                    })]
+                    
+                    if (length(cat_vars) > 0) {
+                        for (var in cat_vars) {
+                            freq_result <- summarytools::freq(
+                                mydata[[var]], 
+                                style = "rmarkdown",
+                                plain.ascii = FALSE,
+                                justify = "left",
+                                cumul = TRUE,
+                                report.nas = TRUE,
+                                headings = TRUE
+                            )
+                            
+                            # Convert to HTML
+                            freq_html <- print(freq_result, method = "render", file = tempfile(fileext = ".html"))
+                            freq_var_content <- paste(readLines(freq_html, warn = FALSE), collapse = "\n")
+                            freq_html_content <- paste(freq_html_content, 
+                                                     sprintf("<h3>%s</h3>", var),
+                                                     freq_var_content,
+                                                     "<br>", sep = "\n")
+                        }
+                        
+                        self$results$summaryToolsFreq$setContent(freq_html_content)
+                    } else {
+                        self$results$summaryToolsFreq$setContent("No categorical variables selected for frequency analysis.")
+                    }
+                    
+                }, error = function(e) {
+                    warning(paste("Error generating frequency tables:", e$message))
+                    self$results$summaryToolsFreq$setContent(paste("Error generating frequency tables:", e$message))
+                })
+            }
+
+            # Cross-tabulation Tables using ctable
+            if (self$options$showCrosstabs && !is.null(groupVar) && length(groupVar) > 0) {
+                tryCatch({
+                    crosstab_html_content <- ""
+                    
+                    # Get categorical variables for cross-tabulation
+                    cat_vars <- varsNames[sapply(mydata[varsNames], function(x) {
+                        is.factor(x) || is.character(x) || (is.numeric(x) && length(unique(x)) <= 10)
+                    })]
+                    
+                    if (length(cat_vars) > 0) {
+                        for (var in cat_vars) {
+                            if (var != groupVar) {  # Don't cross-tabulate with itself
+                                ctable_result <- summarytools::ctable(
+                                    mydata[[var]], 
+                                    mydata[[groupVar]],
+                                    style = "rmarkdown",
+                                    prop = "r",  # Row proportions
+                                    chisq = TRUE,
+                                    headings = TRUE
+                                )
+                                
+                                # Convert to HTML
+                                ctable_html <- print(ctable_result, method = "render", file = tempfile(fileext = ".html"))
+                                ctable_var_content <- paste(readLines(ctable_html, warn = FALSE), collapse = "\n")
+                                crosstab_html_content <- paste(crosstab_html_content,
+                                                             sprintf("<h3>%s by %s</h3>", var, groupVar),
+                                                             ctable_var_content,
+                                                             "<br>", sep = "\n")
+                            }
+                        }
+                        
+                        self$results$crosstabs$setContent(crosstab_html_content)
+                    } else {
+                        self$results$crosstabs$setContent("No categorical variables available for cross-tabulation.")
+                    }
+                    
+                }, error = function(e) {
+                    warning(paste("Error generating cross-tabulation tables:", e$message))
+                    self$results$crosstabs$setContent(paste("Error generating cross-tabulation tables:", e$message))
+                })
             }
         }
     )

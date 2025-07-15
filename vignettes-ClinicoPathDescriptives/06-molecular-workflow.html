@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="ClinicoPath Development Team" />
+
+<meta name="date" content="2025-06-30" />
+
+<title>Modern Molecular Pathology Workflow: Integrated Morphologic and Molecular Diagnostics</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Modern Molecular Pathology Workflow:
+Integrated Morphologic and Molecular Diagnostics</h1>
+<h4 class="author">ClinicoPath Development Team</h4>
+<h4 class="date">2025-06-30</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction</a>
+<ul>
+<li><a href="#clinical-context" id="toc-clinical-context"><span class="toc-section-number">1.1</span> Clinical Context</a></li>
+</ul></li>
+<li><a href="#dataset-overview" id="toc-dataset-overview"><span class="toc-section-number">2</span> Dataset Overview</a>
+<ul>
+<li><a href="#enhanced-molecular-pathology-dataset" id="toc-enhanced-molecular-pathology-dataset"><span class="toc-section-number">2.1</span> Enhanced Molecular Pathology
+Dataset</a></li>
+<li><a href="#key-variables-categories" id="toc-key-variables-categories"><span class="toc-section-number">2.2</span> Key Variables Categories</a>
+<ul>
+<li><a href="#patient-demographics-and-clinical-data" id="toc-patient-demographics-and-clinical-data"><span class="toc-section-number">2.2.1</span> Patient Demographics and
+Clinical Data</a></li>
+<li><a href="#tumor-classification" id="toc-tumor-classification"><span class="toc-section-number">2.2.2</span> Tumor Classification</a></li>
+<li><a href="#molecular-biomarkers" id="toc-molecular-biomarkers"><span class="toc-section-number">2.2.3</span> Molecular Biomarkers</a></li>
+<li><a href="#predictive-biomarkers" id="toc-predictive-biomarkers"><span class="toc-section-number">2.2.4</span> Predictive Biomarkers</a></li>
+<li><a href="#quality-metrics" id="toc-quality-metrics"><span class="toc-section-number">2.2.5</span> Quality Metrics</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#quality-assurance-in-molecular-pathology" id="toc-quality-assurance-in-molecular-pathology"><span class="toc-section-number">3</span> Quality Assurance in Molecular
+Pathology</a>
+<ul>
+<li><a href="#pre-analytical-quality-assessment" id="toc-pre-analytical-quality-assessment"><span class="toc-section-number">3.1</span> Pre-analytical Quality
+Assessment</a></li>
+<li><a href="#external-quality-assessment-eqa" id="toc-external-quality-assessment-eqa"><span class="toc-section-number">3.2</span> External Quality Assessment
+(EQA)</a></li>
+</ul></li>
+<li><a href="#digital-pathology-integration" id="toc-digital-pathology-integration"><span class="toc-section-number">4</span> Digital Pathology Integration</a>
+<ul>
+<li><a href="#ai-assisted-quantification" id="toc-ai-assisted-quantification"><span class="toc-section-number">4.1</span> AI-Assisted
+Quantification</a></li>
+<li><a href="#bland-altman-analysis-for-method-comparison" id="toc-bland-altman-analysis-for-method-comparison"><span class="toc-section-number">4.2</span> Bland-Altman Analysis for Method
+Comparison</a></li>
+</ul></li>
+<li><a href="#multi-platform-biomarker-validation" id="toc-multi-platform-biomarker-validation"><span class="toc-section-number">5</span> Multi-Platform Biomarker
+Validation</a>
+<ul>
+<li><a href="#platform-harmonization-studies" id="toc-platform-harmonization-studies"><span class="toc-section-number">5.1</span> Platform Harmonization
+Studies</a></li>
+<li><a href="#statistical-validation-methods" id="toc-statistical-validation-methods"><span class="toc-section-number">5.2</span> Statistical Validation Methods</a>
+<ul>
+<li><a href="#roc-analysis-for-biomarker-performance" id="toc-roc-analysis-for-biomarker-performance"><span class="toc-section-number">5.2.1</span> ROC Analysis for Biomarker
+Performance</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#precision-oncology-applications" id="toc-precision-oncology-applications"><span class="toc-section-number">6</span> Precision Oncology Applications</a>
+<ul>
+<li><a href="#biomarker-guided-treatment-selection" id="toc-biomarker-guided-treatment-selection"><span class="toc-section-number">6.1</span> Biomarker-Guided Treatment
+Selection</a></li>
+<li><a href="#biomarker-outcome-correlations" id="toc-biomarker-outcome-correlations"><span class="toc-section-number">6.2</span> Biomarker-Outcome
+Correlations</a></li>
+</ul></li>
+<li><a href="#comprehensive-workflow-example" id="toc-comprehensive-workflow-example"><span class="toc-section-number">7</span> Comprehensive Workflow Example</a>
+<ul>
+<li><a href="#case-study-lung-adenocarcinoma-molecular-profiling" id="toc-case-study-lung-adenocarcinoma-molecular-profiling"><span class="toc-section-number">7.1</span> Case Study: Lung Adenocarcinoma
+Molecular Profiling</a></li>
+</ul></li>
+<li><a href="#quality-control-and-reporting" id="toc-quality-control-and-reporting"><span class="toc-section-number">8</span> Quality Control and Reporting</a>
+<ul>
+<li><a href="#turnaround-time-analysis" id="toc-turnaround-time-analysis"><span class="toc-section-number">8.1</span> Turnaround Time Analysis</a></li>
+<li><a href="#diagnostic-confidence-assessment" id="toc-diagnostic-confidence-assessment"><span class="toc-section-number">8.2</span> Diagnostic Confidence
+Assessment</a></li>
+</ul></li>
+<li><a href="#statistical-analysis-workflows" id="toc-statistical-analysis-workflows"><span class="toc-section-number">9</span> Statistical Analysis Workflows</a>
+<ul>
+<li><a href="#survival-analysis-with-molecular-stratification" id="toc-survival-analysis-with-molecular-stratification"><span class="toc-section-number">9.1</span> Survival Analysis with Molecular
+Stratification</a></li>
+<li><a href="#decision-analysis-for-treatment-selection" id="toc-decision-analysis-for-treatment-selection"><span class="toc-section-number">9.2</span> Decision Analysis for Treatment
+Selection</a></li>
+</ul></li>
+<li><a href="#best-practices-and-guidelines" id="toc-best-practices-and-guidelines"><span class="toc-section-number">10</span> Best Practices and Guidelines</a>
+<ul>
+<li><a href="#quality-assurance-checklist" id="toc-quality-assurance-checklist"><span class="toc-section-number">10.1</span> Quality Assurance Checklist</a>
+<ul>
+<li><a href="#pre-analytical-phase" id="toc-pre-analytical-phase"><span class="toc-section-number">10.1.1</span> Pre-analytical Phase</a></li>
+<li><a href="#analytical-phase" id="toc-analytical-phase"><span class="toc-section-number">10.1.2</span> Analytical Phase</a></li>
+<li><a href="#post-analytical-phase" id="toc-post-analytical-phase"><span class="toc-section-number">10.1.3</span> Post-analytical Phase</a></li>
+</ul></li>
+<li><a href="#reporting-standards" id="toc-reporting-standards"><span class="toc-section-number">10.2</span> Reporting Standards</a>
+<ul>
+<li><a href="#essential-elements" id="toc-essential-elements"><span class="toc-section-number">10.2.1</span> Essential Elements</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#conclusion" id="toc-conclusion"><span class="toc-section-number">11</span> Conclusion</a>
+<ul>
+<li><a href="#further-reading" id="toc-further-reading"><span class="toc-section-number">11.1</span> Further Reading</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>Modern pathology practice requires integration of traditional
+morphologic assessment with cutting-edge molecular diagnostics. This
+comprehensive workflow demonstrates how ClinicoPath modules support the
+complete molecular pathology pipeline from specimen processing through
+precision oncology applications.</p>
+<p><strong>Learning Objectives:</strong></p>
+<ul>
+<li>Understand modern molecular pathology workflows</li>
+<li>Learn quality assurance practices for molecular diagnostics</li>
+<li>Master biomarker validation and platform harmonization</li>
+<li>Apply precision oncology principles in clinical practice</li>
+<li>Integrate digital pathology tools with molecular analysis</li>
+</ul>
+<div id="clinical-context" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Clinical Context</h2>
+<p>Contemporary cancer diagnosis and treatment selection requires:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Morphologic Assessment</strong>: Traditional H&amp;E
+histopathology</li>
+<li><strong>Immunohistochemical Analysis</strong>: Protein expression
+patterns</li>
+<li><strong>Molecular Characterization</strong>: DNA/RNA
+alterations</li>
+<li><strong>Digital Integration</strong>: AI-assisted
+quantification</li>
+<li><strong>Platform Validation</strong>: Multi-assay harmonization</li>
+<li><strong>Precision Oncology</strong>: Biomarker-guided therapy
+selection</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(ClinicoPath)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(pROC)</span></code></pre></div>
+</div>
+</div>
+<div id="dataset-overview" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Dataset Overview</h1>
+<div id="enhanced-molecular-pathology-dataset" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Enhanced Molecular
+Pathology Dataset</h2>
+<p>The <code>ihc_molecular_comprehensive</code> dataset represents 400
+cancer cases with integrated molecular profiling, designed to reflect
+real-world laboratory scenarios.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Load the comprehensive molecular pathology dataset</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">data</span>(ihc_molecular_comprehensive)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># Overview of dataset structure</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">str</span>(ihc_molecular_comprehensive)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Dataset dimensions:&quot;</span>, <span class="fu">nrow</span>(ihc_molecular_comprehensive), <span class="st">&quot;patients ×&quot;</span>, </span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    <span class="fu">ncol</span>(ihc_molecular_comprehensive), <span class="st">&quot;variables</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+<div id="key-variables-categories" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Key Variables
+Categories</h2>
+<div id="patient-demographics-and-clinical-data" class="section level3" number="2.2.1">
+<h3><span class="header-section-number">2.2.1</span> Patient
+Demographics and Clinical Data</h3>
+<ul>
+<li><strong>Patient_ID</strong>: Unique identifier</li>
+<li><strong>Age, Gender</strong>: Demographics</li>
+<li><strong>Institution, Pathologist_Experience</strong>: Quality
+factors</li>
+</ul>
+</div>
+<div id="tumor-classification" class="section level3" number="2.2.2">
+<h3><span class="header-section-number">2.2.2</span> Tumor
+Classification</h3>
+<ul>
+<li><strong>Tumor_Type</strong>: 16 major cancer types</li>
+<li><strong>T_Stage, N_Stage, M_Stage</strong>: TNM staging</li>
+<li><strong>Grade</strong>: Histologic grade</li>
+</ul>
+</div>
+<div id="molecular-biomarkers" class="section level3" number="2.2.3">
+<h3><span class="header-section-number">2.2.3</span> Molecular
+Biomarkers</h3>
+<ul>
+<li><strong>Actionable Mutations</strong>: EGFR, KRAS, BRAF, PIK3CA,
+BRCA1/2</li>
+<li><strong>Fusion Genes</strong>: ALK, ROS1, RET</li>
+<li><strong>Genomic Instability</strong>: MSI status, TMB</li>
+</ul>
+</div>
+<div id="predictive-biomarkers" class="section level3" number="2.2.4">
+<h3><span class="header-section-number">2.2.4</span> Predictive
+Biomarkers</h3>
+<ul>
+<li><strong>HER2 Testing</strong>: IHC + FISH</li>
+<li><strong>PD-L1 Expression</strong>: Multiple scoring systems</li>
+<li><strong>Hormone Receptors</strong>: ER/PR percentages</li>
+</ul>
+</div>
+<div id="quality-metrics" class="section level3" number="2.2.5">
+<h3><span class="header-section-number">2.2.5</span> Quality
+Metrics</h3>
+<ul>
+<li><strong>Specimen_Adequacy</strong>: Pre-analytical quality</li>
+<li><strong>Fixation_Time</strong>: Technical factors</li>
+<li><strong>EQA_Score</strong>: External quality assessment</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="quality-assurance-in-molecular-pathology" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Quality Assurance in
+Molecular Pathology</h1>
+<div id="pre-analytical-quality-assessment" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Pre-analytical
+Quality Assessment</h2>
+<p>Quality starts with specimen handling and processing.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Specimen adequacy assessment</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>specimen_quality <span class="ot">&lt;-</span> <span class="fu">table</span>(ihc_molecular_comprehensive<span class="sc">$</span>Specimen_Adequacy)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Specimen Adequacy Distribution:&quot;</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">print</span>(specimen_quality)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># Fixation time impact analysis</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>fixation_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(ihc_molecular_comprehensive<span class="sc">$</span>Fixation_Time_Hours)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Fixation Time Statistics (hours):&quot;</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">print</span>(fixation_summary)</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co"># Quality by institution type</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>quality_by_institution <span class="ot">&lt;-</span> ihc_molecular_comprehensive <span class="sc">%&gt;%</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="fu">group_by</span>(Institution, Specimen_Adequacy) <span class="sc">%&gt;%</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">count =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  <span class="fu">group_by</span>(Institution) <span class="sc">%&gt;%</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">percentage =</span> <span class="fu">round</span>(count<span class="sc">/</span><span class="fu">sum</span>(count) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>))</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Quality Metrics by Institution:&quot;</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="fu">print</span>(quality_by_institution)</span></code></pre></div>
+</div>
+<div id="external-quality-assessment-eqa" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> External Quality
+Assessment (EQA)</h2>
+<p>EQA scores reflect proficiency testing performance.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># EQA score distribution</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>eqa_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(ihc_molecular_comprehensive<span class="sc">$</span>EQA_Score)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;EQA Score Distribution:&quot;</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">print</span>(eqa_summary)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co"># EQA performance by pathologist experience</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>eqa_by_experience <span class="ot">&lt;-</span> ihc_molecular_comprehensive <span class="sc">%&gt;%</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="fu">group_by</span>(Pathologist_Experience) <span class="sc">%&gt;%</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>    <span class="at">mean_eqa =</span> <span class="fu">round</span>(<span class="fu">mean</span>(EQA_Score), <span class="dv">1</span>),</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    <span class="at">sd_eqa =</span> <span class="fu">round</span>(<span class="fu">sd</span>(EQA_Score), <span class="dv">1</span>),</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  )</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;EQA Performance by Experience Level:&quot;</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="fu">print</span>(eqa_by_experience)</span></code></pre></div>
+</div>
+</div>
+<div id="digital-pathology-integration" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Digital Pathology
+Integration</h1>
+<div id="ai-assisted-quantification" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> AI-Assisted
+Quantification</h2>
+<p>Modern pathology increasingly uses AI tools for objective
+measurement.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Load digital pathology validation dataset</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">data</span>(digital_pathology_validation)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># Ki-67 manual vs AI comparison</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>ki67_correlation <span class="ot">&lt;-</span> <span class="fu">cor</span>(digital_pathology_validation<span class="sc">$</span>Ki67_Manual, </span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                       digital_pathology_validation<span class="sc">$</span>Ki67_AI_Assisted)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Ki-67 Manual vs AI Correlation:&quot;</span>, <span class="fu">round</span>(ki67_correlation, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co"># Agreement analysis</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>agreement_rate <span class="ot">&lt;-</span> <span class="fu">mean</span>(digital_pathology_validation<span class="sc">$</span>Ki67_Agreement)</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Manual-AI Agreement Rate:&quot;</span>, <span class="fu">round</span>(agreement_rate <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">&quot;%</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co"># Agreement by pathologist experience</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>agreement_by_exp <span class="ot">&lt;-</span> digital_pathology_validation <span class="sc">%&gt;%</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="fu">group_by</span>(Pathologist_Experience) <span class="sc">%&gt;%</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>    <span class="at">agreement_rate =</span> <span class="fu">round</span>(<span class="fu">mean</span>(Ki67_Agreement) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  )</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Digital-Manual Agreement by Experience:&quot;</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="fu">print</span>(agreement_by_exp)</span></code></pre></div>
+</div>
+<div id="bland-altman-analysis-for-method-comparison" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Bland-Altman Analysis
+for Method Comparison</h2>
+<p>Assess systematic differences between manual and AI scoring.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Calculate differences and means for Bland-Altman plot</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>digital_pathology_validation <span class="ot">&lt;-</span> digital_pathology_validation <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>    <span class="at">ki67_diff =</span> Ki67_AI_Assisted <span class="sc">-</span> Ki67_Manual,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>    <span class="at">ki67_mean =</span> (Ki67_AI_Assisted <span class="sc">+</span> Ki67_Manual) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  )</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co"># Bland-Altman statistics</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>mean_diff <span class="ot">&lt;-</span> <span class="fu">mean</span>(digital_pathology_validation<span class="sc">$</span>ki67_diff)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>sd_diff <span class="ot">&lt;-</span> <span class="fu">sd</span>(digital_pathology_validation<span class="sc">$</span>ki67_diff)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>upper_limit <span class="ot">&lt;-</span> mean_diff <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> sd_diff</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>lower_limit <span class="ot">&lt;-</span> mean_diff <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> sd_diff</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Bland-Altman Analysis:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Mean difference:&quot;</span>, <span class="fu">round</span>(mean_diff, <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;95% Limits of Agreement:&quot;</span>, <span class="fu">round</span>(lower_limit, <span class="dv">2</span>), <span class="st">&quot;to&quot;</span>, <span class="fu">round</span>(upper_limit, <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="multi-platform-biomarker-validation" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Multi-Platform
+Biomarker Validation</h1>
+<div id="platform-harmonization-studies" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> Platform
+Harmonization Studies</h2>
+<p>Different platforms may yield different results for the same
+biomarker.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Load biomarker validation dataset</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">data</span>(biomarker_validation_study)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># PD-L1 cross-platform comparison</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>platform_correlation <span class="ot">&lt;-</span> <span class="fu">cor</span>(biomarker_validation_study<span class="sc">$</span>Platform_A_PD_L1, </span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>                           biomarker_validation_study<span class="sc">$</span>Platform_B_PD_L1)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;PD-L1 Cross-Platform Correlation:&quot;</span>, <span class="fu">round</span>(platform_correlation, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># Platform agreement analysis</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>platform_agreement_rate <span class="ot">&lt;-</span> <span class="fu">mean</span>(biomarker_validation_study<span class="sc">$</span>Platform_Agreement)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Cross-Platform Agreement Rate:&quot;</span>, <span class="fu">round</span>(platform_agreement_rate <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">&quot;%</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co"># Agreement by tumor type</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>agreement_by_tumor <span class="ot">&lt;-</span> biomarker_validation_study <span class="sc">%&gt;%</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  <span class="fu">group_by</span>(Tumor_Type) <span class="sc">%&gt;%</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>    <span class="at">agreement_rate =</span> <span class="fu">round</span>(<span class="fu">mean</span>(Platform_Agreement) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>  )</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Platform Agreement by Tumor Type:&quot;</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="fu">print</span>(agreement_by_tumor)</span></code></pre></div>
+</div>
+<div id="statistical-validation-methods" class="section level2" number="5.2">
+<h2><span class="header-section-number">5.2</span> Statistical
+Validation Methods</h2>
+<div id="roc-analysis-for-biomarker-performance" class="section level3" number="5.2.1">
+<h3><span class="header-section-number">5.2.1</span> ROC Analysis for
+Biomarker Performance</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Create binary outcome for PD-L1 high expression</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>pdl1_high <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(biomarker_validation_study<span class="sc">$</span>PD_L1_TPS <span class="sc">&gt;=</span> <span class="dv">50</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># ROC analysis for Platform A</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">requireNamespace</span>(<span class="st">&quot;pROC&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="fu">library</span>(pROC)</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  </span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  roc_platform_a <span class="ot">&lt;-</span> <span class="fu">roc</span>(pdl1_high, biomarker_validation_study<span class="sc">$</span>Platform_A_PD_L1, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  roc_platform_b <span class="ot">&lt;-</span> <span class="fu">roc</span>(pdl1_high, biomarker_validation_study<span class="sc">$</span>Platform_B_PD_L1, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  </span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Platform A AUC:&quot;</span>, <span class="fu">round</span>(<span class="fu">auc</span>(roc_platform_a), <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Platform B AUC:&quot;</span>, <span class="fu">round</span>(<span class="fu">auc</span>(roc_platform_b), <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  </span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="co"># DeLong test for AUC comparison</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  roc_comparison <span class="ot">&lt;-</span> <span class="fu">roc.test</span>(roc_platform_a, roc_platform_b)</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;AUC Comparison p-value:&quot;</span>, <span class="fu">round</span>(roc_comparison<span class="sc">$</span>p.value, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="precision-oncology-applications" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Precision Oncology
+Applications</h1>
+<div id="biomarker-guided-treatment-selection" class="section level2" number="6.1">
+<h2><span class="header-section-number">6.1</span> Biomarker-Guided
+Treatment Selection</h2>
+<p>Modern cancer care requires biomarker-driven therapy selection.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Load precision oncology dataset</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">data</span>(precision_oncology_data)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co"># Actionable biomarker assessment</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>precision_oncology_data <span class="ot">&lt;-</span> precision_oncology_data <span class="sc">%&gt;%</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>    <span class="co"># Targeted therapy candidates</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>    <span class="at">targeted_therapy_candidate =</span> <span class="fu">case_when</span>(</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>      EGFR_Mutation <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span> <span class="sc">~</span> <span class="st">&quot;EGFR Inhibitor&quot;</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>      HER2_IHC <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;2+&quot;</span>, <span class="st">&quot;3+&quot;</span>) <span class="sc">&amp;</span> HER2_FISH_Status <span class="sc">==</span> <span class="st">&quot;Amplified&quot;</span> <span class="sc">~</span> <span class="st">&quot;HER2 Targeted&quot;</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>      BRAF_Mutation <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span> <span class="sc">~</span> <span class="st">&quot;BRAF Inhibitor&quot;</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Standard Care&quot;</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>    ),</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>    </span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>    <span class="co"># Immunotherapy candidates</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>    <span class="at">immunotherapy_candidate =</span> <span class="fu">case_when</span>(</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>      MSI_Status <span class="sc">==</span> <span class="st">&quot;MSI-High&quot;</span> <span class="sc">~</span> <span class="st">&quot;MSI-High&quot;</span>,</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>      PD_L1_TPS <span class="sc">&gt;=</span> <span class="dv">50</span> <span class="sc">~</span> <span class="st">&quot;PD-L1 High&quot;</span>,</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>      PD_L1_TPS <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">&quot;PD-L1 Positive&quot;</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;PD-L1 Negative&quot;</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>    )</span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>  )</span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co"># Treatment selection summary</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a>targeted_therapy_summary <span class="ot">&lt;-</span> <span class="fu">table</span>(precision_oncology_data<span class="sc">$</span>targeted_therapy_candidate)</span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a>immunotherapy_summary <span class="ot">&lt;-</span> <span class="fu">table</span>(precision_oncology_data<span class="sc">$</span>immunotherapy_candidate)</span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Targeted Therapy Selection:&quot;</span>)</span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="fu">print</span>(targeted_therapy_summary)</span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Immunotherapy Selection:&quot;</span>)</span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="fu">print</span>(immunotherapy_summary)</span></code></pre></div>
+</div>
+<div id="biomarker-outcome-correlations" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> Biomarker-Outcome
+Correlations</h2>
+<p>Assess the relationship between molecular markers and clinical
+outcomes.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Progression-free survival by biomarker status</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>pfs_by_egfr <span class="ot">&lt;-</span> precision_oncology_data <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">group_by</span>(EGFR_Mutation) <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>    <span class="at">median_pfs =</span> <span class="fu">median</span>(PFS_Months),</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>    <span class="at">progression_rate =</span> <span class="fu">round</span>(<span class="fu">mean</span>(Progression_Event) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  )</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;PFS by EGFR Status:&quot;</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="fu">print</span>(pfs_by_egfr)</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co"># Treatment response by MSI status</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>response_by_msi <span class="ot">&lt;-</span> <span class="fu">table</span>(precision_oncology_data<span class="sc">$</span>MSI_Status, </span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>                        precision_oncology_data<span class="sc">$</span>Treatment_Response)</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Treatment Response by MSI Status:&quot;</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="fu">print</span>(response_by_msi)</span></code></pre></div>
+</div>
+</div>
+<div id="comprehensive-workflow-example" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> Comprehensive Workflow
+Example</h1>
+<div id="case-study-lung-adenocarcinoma-molecular-profiling" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> Case Study: Lung
+Adenocarcinoma Molecular Profiling</h2>
+<p>This example demonstrates the complete workflow for a lung
+adenocarcinoma case.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Filter lung adenocarcinoma cases</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>lung_cases <span class="ot">&lt;-</span> ihc_molecular_comprehensive <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">filter</span>(Tumor_Type <span class="sc">==</span> <span class="st">&quot;Lung_Adenocarcinoma&quot;</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Lung Adenocarcinoma Cases:&quot;</span>, <span class="fu">nrow</span>(lung_cases), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co"># Molecular profiling summary</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>molecular_profile <span class="ot">&lt;-</span> lung_cases <span class="sc">%&gt;%</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>    <span class="at">egfr_positive =</span> <span class="fu">sum</span>(EGFR_Mutation <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span>),</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>    <span class="at">kras_positive =</span> <span class="fu">sum</span>(KRAS_Mutation <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span>),</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>    <span class="at">alk_positive =</span> <span class="fu">sum</span>(ALK_Fusion <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span>),</span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>    <span class="at">ros1_positive =</span> <span class="fu">sum</span>(ROS1_Fusion <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span>),</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>    <span class="at">pdl1_high =</span> <span class="fu">sum</span>(PD_L1_TPS <span class="sc">&gt;=</span> <span class="dv">50</span>),</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>    <span class="at">msi_high =</span> <span class="fu">sum</span>(MSI_Status <span class="sc">==</span> <span class="st">&quot;MSI-High&quot;</span>),</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>  )</span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Lung Adenocarcinoma Molecular Profile:&quot;</span>)</span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="fu">print</span>(molecular_profile)</span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co"># Treatment implications</span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a>lung_cases <span class="ot">&lt;-</span> lung_cases <span class="sc">%&gt;%</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>    <span class="at">treatment_recommendation =</span> <span class="fu">case_when</span>(</span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>      EGFR_Mutation <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span> <span class="sc">~</span> <span class="st">&quot;EGFR TKI&quot;</span>,</span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a>      ALK_Fusion <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span> <span class="sc">~</span> <span class="st">&quot;ALK Inhibitor&quot;</span>, </span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a>      ROS1_Fusion <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span> <span class="sc">~</span> <span class="st">&quot;ROS1 Inhibitor&quot;</span>,</span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a>      PD_L1_TPS <span class="sc">&gt;=</span> <span class="dv">50</span> <span class="sc">~</span> <span class="st">&quot;Anti-PD-1 Monotherapy&quot;</span>,</span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a>      PD_L1_TPS <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">&quot;Combination Immunotherapy&quot;</span>,</span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Chemotherapy&quot;</span></span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a>    )</span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a>  )</span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a></span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a>treatment_recommendations <span class="ot">&lt;-</span> <span class="fu">table</span>(lung_cases<span class="sc">$</span>treatment_recommendation)</span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Treatment Recommendations:&quot;</span>)</span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a><span class="fu">print</span>(treatment_recommendations)</span></code></pre></div>
+</div>
+</div>
+<div id="quality-control-and-reporting" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> Quality Control and
+Reporting</h1>
+<div id="turnaround-time-analysis" class="section level2" number="8.1">
+<h2><span class="header-section-number">8.1</span> Turnaround Time
+Analysis</h2>
+<p>Monitor laboratory performance metrics.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Molecular testing turnaround time</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>tat_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(ihc_molecular_comprehensive<span class="sc">$</span>Molecular_TAT_Days)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Molecular Testing Turnaround Time (days):&quot;</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="fu">print</span>(tat_summary)</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co"># TAT by institution</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>tat_by_institution <span class="ot">&lt;-</span> ihc_molecular_comprehensive <span class="sc">%&gt;%</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>  <span class="fu">group_by</span>(Institution) <span class="sc">%&gt;%</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>    <span class="at">mean_tat =</span> <span class="fu">round</span>(<span class="fu">mean</span>(Molecular_TAT_Days), <span class="dv">1</span>),</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>    <span class="at">median_tat =</span> <span class="fu">median</span>(Molecular_TAT_Days),</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  )</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Turnaround Time by Institution:&quot;</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="fu">print</span>(tat_by_institution)</span></code></pre></div>
+</div>
+<div id="diagnostic-confidence-assessment" class="section level2" number="8.2">
+<h2><span class="header-section-number">8.2</span> Diagnostic Confidence
+Assessment</h2>
+<p>Evaluate pathologist confidence in molecular diagnostics.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Confidence distribution</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>confidence_dist <span class="ot">&lt;-</span> <span class="fu">table</span>(ihc_molecular_comprehensive<span class="sc">$</span>Diagnostic_Confidence)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Diagnostic Confidence Distribution:&quot;</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="fu">print</span>(confidence_dist)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co"># Confidence by pathologist experience</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>confidence_by_exp <span class="ot">&lt;-</span> ihc_molecular_comprehensive <span class="sc">%&gt;%</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  <span class="fu">group_by</span>(Pathologist_Experience) <span class="sc">%&gt;%</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>    <span class="at">high_confidence =</span> <span class="fu">round</span>(<span class="fu">mean</span>(Diagnostic_Confidence <span class="sc">==</span> <span class="st">&quot;High&quot;</span>) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>  )</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;High Confidence Rate by Experience:&quot;</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="fu">print</span>(confidence_by_exp)</span></code></pre></div>
+</div>
+</div>
+<div id="statistical-analysis-workflows" class="section level1" number="9">
+<h1><span class="header-section-number">9</span> Statistical Analysis
+Workflows</h1>
+<div id="survival-analysis-with-molecular-stratification" class="section level2" number="9.1">
+<h2><span class="header-section-number">9.1</span> Survival Analysis
+with Molecular Stratification</h2>
+<p>Assess prognostic impact of molecular markers.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># Overall survival by molecular subgroups</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">requireNamespace</span>(<span class="st">&quot;survival&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="fu">library</span>(survival)</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  </span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="co"># Create survival object</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  surv_obj <span class="ot">&lt;-</span> <span class="fu">Surv</span>(ihc_molecular_comprehensive<span class="sc">$</span>Overall_Survival_Months,</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>                   ihc_molecular_comprehensive<span class="sc">$</span>Death_Event)</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>  </span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  <span class="co"># Survival by EGFR status</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>  fit_egfr <span class="ot">&lt;-</span> <span class="fu">survfit</span>(surv_obj <span class="sc">~</span> ihc_molecular_comprehensive<span class="sc">$</span>EGFR_Mutation)</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>  summary_egfr <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit_egfr)</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>  </span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Median Survival by EGFR Status:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>  <span class="fu">print</span>(summary_egfr<span class="sc">$</span>table[, <span class="st">&quot;median&quot;</span>])</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>  </span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>  <span class="co"># Cox regression for molecular markers</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>  cox_model <span class="ot">&lt;-</span> <span class="fu">coxph</span>(surv_obj <span class="sc">~</span> EGFR_Mutation <span class="sc">+</span> MSI_Status <span class="sc">+</span> </span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>                     Tumor_Mutational_Burden <span class="sc">+</span> Age,</span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>                     <span class="at">data =</span> ihc_molecular_comprehensive)</span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>  </span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">&quot;Cox Regression Results:&quot;</span>)</span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">summary</span>(cox_model)<span class="sc">$</span>coefficients)</span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="decision-analysis-for-treatment-selection" class="section level2" number="9.2">
+<h2><span class="header-section-number">9.2</span> Decision Analysis for
+Treatment Selection</h2>
+<p>Economic evaluation of biomarker-guided therapy.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Create decision analysis data</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>decision_data <span class="ot">&lt;-</span> precision_oncology_data <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>    <span class="co"># Simulate costs based on treatment complexity</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>    <span class="at">treatment_cost =</span> <span class="fu">case_when</span>(</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>      EGFR_Mutation <span class="sc">==</span> <span class="st">&quot;Positive&quot;</span> <span class="sc">~</span> <span class="dv">120000</span>,  <span class="co"># Targeted therapy</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>      MSI_Status <span class="sc">==</span> <span class="st">&quot;MSI-High&quot;</span> <span class="sc">~</span> <span class="dv">150000</span>,     <span class="co"># Immunotherapy</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">80000</span>                           <span class="co"># Standard chemotherapy</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>    ),</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>    </span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>    <span class="co"># Simulate utilities based on response</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>    <span class="at">utility =</span> <span class="fu">case_when</span>(</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>      Treatment_Response <span class="sc">==</span> <span class="st">&quot;Complete_Response&quot;</span> <span class="sc">~</span> <span class="fl">0.9</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>      Treatment_Response <span class="sc">==</span> <span class="st">&quot;Partial_Response&quot;</span> <span class="sc">~</span> <span class="fl">0.8</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>      Treatment_Response <span class="sc">==</span> <span class="st">&quot;Stable_Disease&quot;</span> <span class="sc">~</span> <span class="fl">0.7</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>      Treatment_Response <span class="sc">==</span> <span class="st">&quot;Progressive_Disease&quot;</span> <span class="sc">~</span> <span class="fl">0.4</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="fl">0.5</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>    )</span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a>  )</span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="co"># Cost-effectiveness by biomarker status</span></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a>cost_effectiveness <span class="ot">&lt;-</span> decision_data <span class="sc">%&gt;%</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a>  <span class="fu">group_by</span>(EGFR_Mutation) <span class="sc">%&gt;%</span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a>    <span class="at">mean_cost =</span> <span class="fu">round</span>(<span class="fu">mean</span>(treatment_cost), <span class="dv">0</span>),</span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a>    <span class="at">mean_utility =</span> <span class="fu">round</span>(<span class="fu">mean</span>(utility), <span class="dv">2</span>),</span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a>    <span class="at">response_rate =</span> <span class="fu">round</span>(<span class="fu">mean</span>(Treatment_Response <span class="sc">%in%</span> </span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a>                             <span class="fu">c</span>(<span class="st">&quot;Complete_Response&quot;</span>, <span class="st">&quot;Partial_Response&quot;</span>)) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span></span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a>  )</span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a></span>
+<span id="cb15-33"><a href="#cb15-33" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Cost-Effectiveness by EGFR Status:&quot;</span>)</span>
+<span id="cb15-34"><a href="#cb15-34" tabindex="-1"></a><span class="fu">print</span>(cost_effectiveness)</span></code></pre></div>
+</div>
+</div>
+<div id="best-practices-and-guidelines" class="section level1" number="10">
+<h1><span class="header-section-number">10</span> Best Practices and
+Guidelines</h1>
+<div id="quality-assurance-checklist" class="section level2" number="10.1">
+<h2><span class="header-section-number">10.1</span> Quality Assurance
+Checklist</h2>
+<div id="pre-analytical-phase" class="section level3" number="10.1.1">
+<h3><span class="header-section-number">10.1.1</span> Pre-analytical
+Phase</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Specimen Adequacy</strong>: ≥70% of cases should be
+adequate</li>
+<li><strong>Fixation Time</strong>: 6-24 hours in neutral buffered
+formalin</li>
+<li><strong>Cold Ischemia</strong>: &lt;1 hour for optimal results</li>
+</ol>
+</div>
+<div id="analytical-phase" class="section level3" number="10.1.2">
+<h3><span class="header-section-number">10.1.2</span> Analytical
+Phase</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Platform Validation</strong>: Establish reference ranges and
+cut-offs</li>
+<li><strong>Quality Control</strong>: Daily controls and
+calibrators</li>
+<li><strong>Proficiency Testing</strong>: Participate in EQA
+programs</li>
+</ol>
+</div>
+<div id="post-analytical-phase" class="section level3" number="10.1.3">
+<h3><span class="header-section-number">10.1.3</span> Post-analytical
+Phase</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Turnaround Time</strong>: &lt;7 days for routine molecular
+testing</li>
+<li><strong>Result Interpretation</strong>: Clear clinical
+recommendations</li>
+<li><strong>Interdisciplinary Communication</strong>: Timely molecular
+tumor board review</li>
+</ol>
+</div>
+</div>
+<div id="reporting-standards" class="section level2" number="10.2">
+<h2><span class="header-section-number">10.2</span> Reporting
+Standards</h2>
+<div id="essential-elements" class="section level3" number="10.2.1">
+<h3><span class="header-section-number">10.2.1</span> Essential
+Elements</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Patient Information</strong>: Demographics and clinical
+context</li>
+<li><strong>Specimen Details</strong>: Type, site, fixation method</li>
+<li><strong>Testing Methods</strong>: Platforms, antibodies,
+protocols</li>
+<li><strong>Results</strong>: Quantitative and qualitative findings</li>
+<li><strong>Interpretation</strong>: Clinical significance and
+recommendations</li>
+<li><strong>Limitations</strong>: Technical and analytical
+considerations</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="conclusion" class="section level1" number="11">
+<h1><span class="header-section-number">11</span> Conclusion</h1>
+<p>Modern molecular pathology requires integration of multiple
+technologies and careful attention to quality at every step. This
+workflow demonstrates how ClinicoPath modules support:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Quality Assurance</strong>: Pre-analytical through
+post-analytical monitoring</li>
+<li><strong>Multi-platform Validation</strong>: Harmonization across
+different assays</li>
+<li><strong>Digital Integration</strong>: AI-assisted quantification and
+validation</li>
+<li><strong>Precision Oncology</strong>: Biomarker-guided treatment
+selection</li>
+<li><strong>Clinical Decision Making</strong>: Statistical analysis and
+economic evaluation</li>
+</ol>
+<p>The enhanced datasets provide realistic scenarios for training
+pathologists and clinicians in these essential modern pathology
+workflows.</p>
+<div id="further-reading" class="section level2" number="11.1">
+<h2><span class="header-section-number">11.1</span> Further Reading</h2>
+<ul>
+<li><em>Recommendations for reporting histopathology studies</em>
+(Virchows Arch, 2015)</li>
+<li><em>Clinical Laboratory Improvement Amendments (CLIA)
+guidelines</em></li>
+<li><em>College of American Pathologists (CAP) molecular pathology
+checklist</em></li>
+<li><em>Association for Molecular Pathology (AMP) clinical practice
+guidelines</em></li>
+</ul>
+<hr />
+<p><em>This vignette demonstrates advanced molecular pathology workflows
+using the ClinicoPath suite. For additional examples and tutorials,
+explore other vignettes in the package.</em></p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

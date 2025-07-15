@@ -1,4 +1,4 @@
-title: Time Interval Calculator
+title: Comprehensive Time Interval Calculator
 name: timeinterval
 jus: '3.0'
 stage: 0
@@ -9,14 +9,14 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Start Date
+        label: Start Date Variable
         children:
           - type: VariablesListBox
             name: dx_date
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: End Date
+        label: End Date Variable
         children:
           - type: VariablesListBox
             name: fu_date
@@ -47,4 +47,16 @@ children:
     margin: large
     children:
       - type: CheckBox
+        name: remove_negative
+      - type: CheckBox
+        name: remove_extreme
+      - type: CheckBox
         name: add_times
+      - type: CheckBox
+        name: include_quality_metrics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number

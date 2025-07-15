@@ -1,281 +1,415 @@
 ---
-name:  swimmerplot
-title: Swimmer Plot
-menuGroup: Exploration
+name: swimmerplot
+title: "Swimmer Plot"
+menuGroup: ExplorationD
 menuSubgroup: Patient Follow-Up Plots
 version: '0.0.3'
 jas: '1.2'
 
 description:
-    main: Creates a swimmer plot to visualize individual patient timelines and clinical events.
+    main: >
+        Creates comprehensive swimmer plots using the ggswim package to visualize patient timelines, 
+        clinical events, milestones, and treatment responses. Features enhanced data validation 
+        and complete ggswim integration for professional clinical visualization.
     R:
         dontrun: true
         usage: |
-            # Example will show patient timelines
+            # Clinical trial swimmer plot example
             data <- data.frame(
-                PatientID = paste0("PT", 1:10),
-                StartTime = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                EndTime = c(12, 8, 15, 6, 9, 11, 7, 14, 10, 5),
-                Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD"),
-                Surgery = c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1)
+                PatientID = paste0("PT", sprintf("\%03d", 1:20)),
+                StartTime = rep(0, 20),
+                EndTime = sample(6:24, 20, replace = TRUE),
+                Response = sample(c("CR", "PR", "SD", "PD"), 20, replace = TRUE),
+                Surgery = sample(c(1, 2, 3, NA), 20, replace = TRUE),
+                Progression = sample(c(8, 12, 16, NA), 20, replace = TRUE)
             )
+            
             swimmerplot(
                 data = data,
                 patientID = "PatientID",
-                start = "StartTime",
-                end = "EndTime",
-                event = "Event",
+                startTime = "StartTime", 
+                endTime = "EndTime",
+                responseVar = "Response",
                 milestone1Name = "Surgery",
-                milestone1Date = "Surgery"
+                milestone1Date = "Surgery",
+                milestone2Name = "Progression", 
+                milestone2Date = "Progression",
+                showEventMarkers = TRUE,
+                showInterpretation = TRUE
             )
 
 options:
+    # === Core Data Variables ===
     - name: data
       type: Data
       description:
           R: >
-            The data as a data frame.
+            The data as a data frame containing patient timeline information.
 
     - name: patientID
-      title: Patient ID
+      title: "Patient ID"
       type: Variable
-      suggested: [nominal]
+      suggested: [nominal, id]
       permitted: [numeric, factor, id]
       description:
           R: >
-            Variable containing patient identifiers.
+            Variable containing unique patient identifiers.
 
-    - name: start
-      title: Start Time
+    - name: startTime
+      title: "Start Time"
       type: Variable
+      suggested: [continuous]
+      permitted: [numeric, factor]
       description:
           R: >
             Time/date when observation/treatment started.
 
-    - name: end
-      title: End Time 
-      type: Variable  
+    - name: endTime
+      title: "End Time"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric, factor]
       description:
           R: >
             Time/date when observation/treatment ended.
 
-    - name: event
-      title: Event Type (optional)
+    - name: responseVar
+      title: "Response/Status Variable"
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor]
       required: false
       description:
           R: >
-            Optional variable for event types (e.g., CR, PR, PD).
+            Optional variable for response types (e.g., CR, PR, SD, PD) to color lanes.
 
-    - name: timetype
-      title: Time Input Type
+    # === Time Processing Options ===
+    - name: timeType
+      title: "Time Input Type"
       type: List
       options:
-        - title: Raw Values (numeric)
+        - title: "Raw Values (numeric)"
           name: raw
-        - title: Date/Time
+        - title: "Date/Time"
           name: datetime
       default: raw
       description:
           R: >
-            Select whether time values are raw numbers or dates
+            Select whether time values are raw numbers or dates/times.
 
-    - name: timetypedata
-      title: 'Time Format in Data'
+    - name: dateFormat
+      title: "Date Format in Data"
       type: List
       options:
-        - title: YYYY-MM-DD HH:MM:SS
+        - title: "YYYY-MM-DD HH:MM:SS"
           name: ymdhms
-        - title: YYYY-MM-DD
+        - title: "YYYY-MM-DD"
           name: ymd
-        - title: YYYY-DD-MM
+        - title: "YYYY-DD-MM"
           name: ydm
-        - title: MM-DD-YYYY
+        - title: "MM-DD-YYYY"
           name: mdy
-        - title: MM-YYYY-DD
+        - title: "MM-YYYY-DD"
           name: myd
-        - title: DD-MM-YYYY
+        - title: "DD-MM-YYYY"
           name: dmy
-        - title: DD-YYYY-MM
+        - title: "DD-YYYY-MM"
           name: dym
       default: ymd
       description:
           R: >
-            Select the time format in your data
+            Select the date/time format in your data (only used when Time Input Type is Date/Time).
 
-    - name: timetypeoutput
-      title: Time Unit in Output
+    - name: timeUnit
+      title: "Time Unit for Display"
       type: List
       options:
-        - title: Days
+        - title: "Days"
           name: days
-        - title: Weeks
+        - title: "Weeks"
           name: weeks
-        - title: Months
+        - title: "Months"
           name: months
-        - title: Years
+        - title: "Years"
           name: years
       default: months
       description:
           R: >
-            Select the time unit for display
+            Time unit to use for display and calculations.
 
-    - name: startType
-      title: Start Time Display
+    - name: timeDisplay
+      title: "Time Display Mode"
       type: List
       options:
-        - title: Relative (all start from 0)
+        - title: "Relative (all start from 0)"
           name: relative
-        - title: Absolute (use actual start times)
+        - title: "Absolute (use actual start times)"
           name: absolute
       default: relative
       description:
           R: >
-            Choose whether to align all start times to 0 or use absolute start times
+            Choose whether to align all start times to 0 or use absolute start times.
 
-    - name: sortVariable
-      title: Sort By Variable
-      type: Variable
-      required: false
-      description:
-          R: >
-            Variable to sort the patient timelines.
-
-    - name: barHeight
-      title: Bar Height
-      type: Number
-      min: 0.1
-      max: 10
-      default: 3
-      description:
-          R: >
-            Thickness of timeline bars
-
-    - name: referenceLines
-      title: Reference Lines
-      type: List
-      options:
-        - title: None
-          name: none
-        - title: Median Duration
-          name: median
-        - title: Protocol Times (6/12/24)
-          name: protocol
-        - title: Custom Time
-          name: custom
-      default: none
-      description:
-          R: >
-            Add reference time lines to the plot
-
-    - name: customReferenceTime
-      title: Custom Reference Time
-      type: Number
-      default: 12
-      description:
-          R: >
-            Custom time point to mark with a reference line
-
-    - name: useggswim
-      title: Use ggswim package
-      type: Bool
-      default: false
-
-    - name: markerSize
-      title: Marker Size
+    # === Milestone Configuration ===
+    - name: maxMilestones
+      title: "Maximum Milestones"
       type: Number
       min: 1
       max: 10
       default: 5
       description:
           R: >
-            Size of event markers on the plot
+            Maximum number of milestone events to support.
 
+    - name: milestone1Name
+      title: "Milestone 1 Name"
+      type: String
+      default: "Surgery"
+      description:
+          R: >
+            Name for the first milestone event (e.g., Surgery, Treatment Start).
 
-    # - name: milestone1Name
-    #   title: Milestone 1 Name
-    #   type: String
-    #   default: "Surgery"
-    #   description:
-    #       R: >
-    #         Name for the first milestone event (e.g., Surgery)
-            
-    # - name: milestone1Date
-    #   title: Milestone 1 Date
-    #   type: Variable
-    #   suggested: [continuous, nominal, ordinal]
-    #   required: false
-    #   description:
-    #       R: >
-    #         Date/time when milestone 1 occurred
+    - name: milestone1Date
+      title: "Milestone 1 Date"
+      type: Variable
+      suggested: [continuous, nominal, ordinal]
+      required: false
+      description:
+          R: >
+            Date/time variable when milestone 1 occurred.
 
-    # - name: milestone2Name
-    #   title: Milestone 2 Name
-    #   type: String
-    #   default: "Treatment Start"
-    #   description:
-    #       R: >
-    #         Name for the second milestone event (e.g., Treatment Start)
-            
-    # - name: milestone2Date
-    #   title: Milestone 2 Date
-    #   type: Variable
-    #   suggested: [continuous, nominal, ordinal]
-    #   required: false
-    #   description:
-    #       R: >
-    #         Date/time when milestone 2 occurred
+    - name: milestone2Name
+      title: "Milestone 2 Name"
+      type: String
+      default: "Treatment Start"
+      description:
+          R: >
+            Name for the second milestone event.
 
-    # - name: milestone3Name
-    #   title: Milestone 3 Name
-    #   type: String
-    #   default: "Response Assessment"
-    #   description:
-    #       R: >
-    #         Name for the third milestone event (e.g., Response Assessment)
-            
-    # - name: milestone3Date
-    #   title: Milestone 3 Date
-    #   type: Variable
-    #   suggested: [continuous, nominal, ordinal]
-    #   required: false
-    #   description:
-    #       R: >
-    #         Date/time when milestone 3 occurred
+    - name: milestone2Date
+      title: "Milestone 2 Date"
+      type: Variable
+      suggested: [continuous, nominal, ordinal]
+      required: false
+      description:
+          R: >
+            Date/time variable when milestone 2 occurred.
 
-    # - name: milestone4Name
-    #   title: Milestone 4 Name
-    #   type: String
-    #   default: "Progression"
-    #   description:
-    #       R: >
-    #         Name for the fourth milestone event (e.g., Progression)
-            
-    # - name: milestone4Date
-    #   title: Milestone 4 Date
-    #   type: Variable
-    #   suggested: [continuous, nominal, ordinal]
-    #   required: false
-    #   description:
-    #       R: >
-    #         Date/time when milestone 4 occurred
+    - name: milestone3Name
+      title: "Milestone 3 Name"
+      type: String
+      default: "Response Assessment"
+      description:
+          R: >
+            Name for the third milestone event.
 
-    # - name: milestone5Name
-    #   title: Milestone 5 Name
-    #   type: String
-    #   default: "Death/Last Follow-up"
-    #   description:
-    #       R: >
-    #         Name for the fifth milestone event (e.g., Death/Last Follow-up)
-            
-    # - name: milestone5Date
-    #   title: Milestone 5 Date
-    #   type: Variable
-    #   suggested: [continuous, nominal, ordinal]
-    #   required: false
-    #   description:
-    #       R: >
-    #         Date/time when milestone 5 occurred
+    - name: milestone3Date
+      title: "Milestone 3 Date"
+      type: Variable
+      suggested: [continuous, nominal, ordinal]
+      required: false
+      description:
+          R: >
+            Date/time variable when milestone 3 occurred.
+
+    - name: milestone4Name
+      title: "Milestone 4 Name"
+      type: String
+      default: "Progression"
+      description:
+          R: >
+            Name for the fourth milestone event.
+
+    - name: milestone4Date
+      title: "Milestone 4 Date"
+      type: Variable
+      suggested: [continuous, nominal, ordinal]
+      required: false
+      description:
+          R: >
+            Date/time variable when milestone 4 occurred.
+
+    - name: milestone5Name
+      title: "Milestone 5 Name"
+      type: String
+      default: "Death/Last Follow-up"
+      description:
+          R: >
+            Name for the fifth milestone event.
+
+    - name: milestone5Date
+      title: "Milestone 5 Date"
+      type: Variable
+      suggested: [continuous, nominal, ordinal]
+      required: false
+      description:
+          R: >
+            Date/time variable when milestone 5 occurred.
+
+    # === Event Markers ===
+    - name: showEventMarkers
+      title: "Show Event Markers"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to display event markers along patient timelines.
+
+    - name: eventVar
+      title: "Event Type Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      required: false
+      description:
+          R: >
+            Variable containing event type labels for markers.
+
+    - name: eventTimeVar
+      title: "Event Time Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric, factor]
+      required: false
+      description:
+          R: >
+            Variable containing event times (defaults to start time if not specified).
+
+    # === Visualization Options ===
+    - name: laneWidth
+      title: "Lane Width"
+      type: Number
+      min: 0.1
+      max: 10
+      default: 3
+      description:
+          R: >
+            Width/thickness of patient timeline lanes.
+
+    - name: markerSize
+      title: "Marker Size"
+      type: Number
+      min: 1
+      max: 15
+      default: 5
+      description:
+          R: >
+            Size of event markers and milestone markers.
+
+    - name: plotTheme
+      title: "Plot Theme"
+      type: List
+      options:
+        - title: "ggswim (Light)"
+          name: ggswim
+        - title: "ggswim (Dark)"
+          name: ggswim_dark
+        - title: "Minimal"
+          name: minimal
+      default: ggswim
+      description:
+          R: >
+            Visual theme for the swimmer plot.
+
+    - name: showLegend
+      title: "Show Legend"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display the plot legend.
+
+    # === Reference Lines ===
+    - name: referenceLines
+      title: "Reference Lines"
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "Median Duration"
+          name: median
+        - title: "Protocol Times (6/12/24/36)"
+          name: protocol
+        - title: "Custom Time"
+          name: custom
+      default: none
+      description:
+          R: >
+            Add reference time lines to the plot for clinical context.
+
+    - name: customReferenceTime
+      title: "Custom Reference Time"
+      type: Number
+      default: 12
+      description:
+          R: >
+            Custom time point to mark with a reference line (only used when Reference Lines is set to Custom).
+
+    # === Sorting and Display ===
+    - name: sortVariable
+      title: "Sort By Variable"
+      type: Variable
+      required: false
+      description:
+          R: >
+            Optional variable to sort patient timelines (defaults to duration-based sorting).
+
+    - name: sortOrder
+      title: "Sort Order"
+      type: List
+      options:
+        - title: "Duration (Longest First)"
+          name: duration_desc
+        - title: "Duration (Shortest First)"
+          name: duration_asc
+        - title: "Patient ID"
+          name: patient_id
+        - title: "Response Type"
+          name: response
+      default: duration_desc
+      description:
+          R: >
+            How to order patients in the visualization.
+
+    # === Analysis Options ===
+    - name: showInterpretation
+      title: "Show Clinical Interpretation"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display automated clinical interpretation of the timeline data.
+
+    - name: personTimeAnalysis
+      title: "Include Person-Time Analysis"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to include epidemiological person-time metrics in the analysis.
+
+    - name: responseAnalysis
+      title: "Include Response Analysis"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to analyze response patterns when response variable is provided.
+
+    # === Export Options ===
+    - name: exportTimeline
+      title: "Export Timeline Data"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Export processed timeline data for external analysis.
+
+    - name: exportSummary
+      title: "Export Summary Statistics"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Export comprehensive summary statistics and clinical metrics.
 ...

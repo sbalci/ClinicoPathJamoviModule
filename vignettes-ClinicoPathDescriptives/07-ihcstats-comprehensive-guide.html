@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Comprehensive IHC Analysis Guide</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Comprehensive IHC Analysis Guide</h1>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The <code>ihcstats</code> function in ClinicoPath provides
+comprehensive immunohistochemical (IHC) expression analysis implementing
+methodologies from landmark research papers:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Matsuoka et al. (2011)</strong> - Ward’s hierarchical
+clustering for colorectal cancer prognosis</li>
+<li><strong>Carvalho et al. (2011)</strong> - Iterative marker selection
+for renal oncocytoma diagnosis<br />
+</li>
+<li><strong>Olsen et al. (2006)</strong> - Differential diagnosis
+clustering for sarcomas</li>
+<li><strong>Sterlacci et al. (2019)</strong> - TIL signature analysis
+for NSCLC</li>
+</ol>
+</div>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(ClinicoPath)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co"># Load available dataset</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;ihc_test_data&quot;</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># Check available variables</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Available variables in ihc_test_data:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; Available variables in ihc_test_data:</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">names</span>(ihc_test_data))</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; [1] &quot;SampleID&quot; &quot;ER&quot;       &quot;PR&quot;       &quot;HER2&quot;     &quot;Ki67&quot;     &quot;p53&quot;      &quot;CD3&quot;     </span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; [8] &quot;CD20&quot;     &quot;CD45&quot;</span></span></code></pre></div>
+</div>
+<div id="core-functionality-overview" class="section level2">
+<h2>Core Functionality Overview</h2>
+<div id="clustering-methods-available" class="section level3">
+<h3>Clustering Methods Available</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;IHC Clustering Methods:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; IHC Clustering Methods:</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;1. Hierarchical clustering with multiple distance metrics</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; 1. Hierarchical clustering with multiple distance metrics</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;2. PAM (Partitioning Around Medoids) clustering</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; 2. PAM (Partitioning Around Medoids) clustering</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;3. K-means clustering</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; 3. K-means clustering</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;4. Fuzzy clustering</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; 4. Fuzzy clustering</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Distance Metrics:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; Distance Metrics:</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Gower: Mixed data types (categorical + continuous)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; - Gower: Mixed data types (categorical + continuous)</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Jaccard: Binary/categorical data</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; - Jaccard: Binary/categorical data</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Euclidean: Continuous data</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt; - Euclidean: Continuous data</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Manhattan: Robust to outliers</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; - Manhattan: Robust to outliers</span></span></code></pre></div>
+</div>
+</div>
+<div id="methodology-implementation" class="section level2">
+<h2>Methodology Implementation</h2>
+<div id="matsuoka-2011-methodology" class="section level3">
+<h3>Matsuoka 2011 Methodology</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Matsuoka 2011 Features:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; Matsuoka 2011 Features:</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Ward&#39;s hierarchical clustering (ward.D2)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; - Ward&#39;s hierarchical clustering (ward.D2)</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- 3-tier scoring system (0, 1, 2)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; - 3-tier scoring system (0, 1, 2)</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Prognostic clustering with survival analysis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; - Prognostic clustering with survival analysis</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Multi-region tumor analysis (central vs invasive)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; - Multi-region tumor analysis (central vs invasive)</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Cox regression for prognostic groups</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; - Cox regression for prognostic groups</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Target: Colorectal cancer prognosis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; Target: Colorectal cancer prognosis</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Key markers: p53, Ki67, VEGF, COX2</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; Key markers: p53, Ki67, VEGF, COX2</span></span></code></pre></div>
+</div>
+<div id="carvalho-2011-methodology" class="section level3">
+<h3>Carvalho 2011 Methodology</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Carvalho 2011 Features:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; Carvalho 2011 Features:</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Iterative marker selection algorithm</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; - Iterative marker selection algorithm</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Binary scoring system for specific markers</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; - Binary scoring system for specific markers</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Renal tumor differential diagnosis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; - Renal tumor differential diagnosis</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Automatic marker importance ranking</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; - Automatic marker importance ranking</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Diagnostic accuracy optimization</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; - Diagnostic accuracy optimization</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Target: Renal oncocytoma vs chromophobe RCC</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Target: Renal oncocytoma vs chromophobe RCC</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Key markers: CK7, CD117, E-cadherin, Claudin-7</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; Key markers: CK7, CD117, E-cadherin, Claudin-7</span></span></code></pre></div>
+</div>
+<div id="olsen-2006-methodology" class="section level3">
+<h3>Olsen 2006 Methodology</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Olsen 2006 Features:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; Olsen 2006 Features:</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Hierarchical clustering for sarcoma classification</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; - Hierarchical clustering for sarcoma classification</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Standard IHC scoring scale integration</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; - Standard IHC scoring scale integration</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Differential diagnosis clustering</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; - Differential diagnosis clustering</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Subtype-specific marker panels</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; - Subtype-specific marker panels</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Morphology correlation analysis</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; - Morphology correlation analysis</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Target: Sarcoma differential diagnosis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; Target: Sarcoma differential diagnosis</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Key markers: Vimentin, SMA, Desmin, S100, CD34</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; Key markers: Vimentin, SMA, Desmin, S100, CD34</span></span></code></pre></div>
+</div>
+<div id="sterlacci-2019-methodology" class="section level3">
+<h3>Sterlacci 2019 Methodology</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Sterlacci 2019 Features:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; Sterlacci 2019 Features:</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- TIL (Tumor-Infiltrating Lymphocytes) signature analysis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; - TIL (Tumor-Infiltrating Lymphocytes) signature analysis</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- CD3, CD8, CD20, PD-L1 integration</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; - CD3, CD8, CD20, PD-L1 integration</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Immune microenvironment clustering</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; - Immune microenvironment clustering</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- NSCLC histotype correlation</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; - NSCLC histotype correlation</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Prognostic immune signatures</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; - Prognostic immune signatures</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Target: NSCLC immune microenvironment</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; Target: NSCLC immune microenvironment</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Key markers: CD3, CD8, CD20, PD-L1, FOXP3</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; Key markers: CD3, CD8, CD20, PD-L1, FOXP3</span></span></code></pre></div>
+</div>
+</div>
+<div id="advanced-features" class="section level2">
+<h2>Advanced Features</h2>
+<div id="h-score-calculation" class="section level3">
+<h3>H-Score Calculation</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;H-Score Calculation:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; H-Score Calculation:</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Automated H-Score computation from IHC data</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; - Automated H-Score computation from IHC data</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Integration with clustering results</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; - Integration with clustering results</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Intensity and percentage scoring</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; - Intensity and percentage scoring</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Quality control and validation metrics</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; - Quality control and validation metrics</span></span></code></pre></div>
+</div>
+<div id="prognostic-analysis" class="section level3">
+<h3>Prognostic Analysis</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Prognostic Analysis Features:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; Prognostic Analysis Features:</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Survival time and event integration</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; - Survival time and event integration</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Cox proportional hazards modeling</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; - Cox proportional hazards modeling</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Kaplan-Meier survival curves</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; - Kaplan-Meier survival curves</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Log-rank test for cluster comparison</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; - Log-rank test for cluster comparison</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Hazard ratio calculation with confidence intervals</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; - Hazard ratio calculation with confidence intervals</span></span></code></pre></div>
+</div>
+<div id="visualization-options" class="section level3">
+<h3>Visualization Options</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Visualization Components:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; Visualization Components:</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Hierarchical clustering dendrograms</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; - Hierarchical clustering dendrograms</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- IHC expression heatmaps</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; - IHC expression heatmaps</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Cluster assignment plots</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; - Cluster assignment plots</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Survival curves by cluster</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; - Survival curves by cluster</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Marker importance rankings</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; - Marker importance rankings</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Correlation matrices</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; - Correlation matrices</span></span></code></pre></div>
+</div>
+</div>
+<div id="clinical-applications" class="section level2">
+<h2>Clinical Applications</h2>
+<div id="diagnostic-workflows" class="section level3">
+<h3>Diagnostic Workflows</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Diagnostic Applications:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; Diagnostic Applications:</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;1. Sarcoma subtype classification</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; 1. Sarcoma subtype classification</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;2. Renal tumor differential diagnosis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; 2. Renal tumor differential diagnosis</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;3. Colorectal cancer prognostic grouping</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; 3. Colorectal cancer prognostic grouping</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;4. NSCLC immune profiling</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; 4. NSCLC immune profiling</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;5. Custom marker panel optimization</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; 5. Custom marker panel optimization</span></span></code></pre></div>
+</div>
+<div id="research-applications" class="section level3">
+<h3>Research Applications</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Research Applications:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; Research Applications:</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;1. Biomarker discovery and validation</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; 1. Biomarker discovery and validation</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;2. Tumor heterogeneity analysis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; 2. Tumor heterogeneity analysis</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;3. Immune microenvironment characterization</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; 3. Immune microenvironment characterization</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;4. Multi-region tumor analysis</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; 4. Multi-region tumor analysis</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;5. Prognostic signature development</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; 5. Prognostic signature development</span></span></code></pre></div>
+</div>
+</div>
+<div id="data-requirements" class="section level2">
+<h2>Data Requirements</h2>
+<div id="input-data-format" class="section level3">
+<h3>Input Data Format</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Required Data Structure:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; Required Data Structure:</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Patient/case identifier column</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; - Patient/case identifier column</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- IHC marker expression variables</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; - IHC marker expression variables</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Optional: Survival time and event variables</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; - Optional: Survival time and event variables</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Optional: Clinical and pathological variables</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; - Optional: Clinical and pathological variables</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Optional: Multi-region scoring variables</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; - Optional: Multi-region scoring variables</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Scoring Systems Supported:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt; Scoring Systems Supported:</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Binary (0/1, negative/positive)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; - Binary (0/1, negative/positive)</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- 3-tier (0/1/2, negative/weak/strong)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; - 3-tier (0/1/2, negative/weak/strong)</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- 4-tier (0/1/2/3)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt; - 4-tier (0/1/2/3)</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- H-Score (0-300)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co">#&gt; - H-Score (0-300)</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;- Percentage (0-100)</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="co">#&gt; - Percentage (0-100)</span></span></code></pre></div>
+</div>
+</div>
+<div id="implementation-in-jamovi" class="section level2">
+<h2>Implementation in jamovi</h2>
+<p>All IHC analysis functions are available in jamovi:</p>
+<ol style="list-style-type: decimal">
+<li><strong>IHC Stats</strong>:
+<code>Exploration &gt; Specialized Analyses &gt; IHC Statistical Analysis</code></li>
+<li><strong>Data Input</strong>: Direct import of IHC scoring
+spreadsheets</li>
+<li><strong>Interactive Parameters</strong>: Point-and-click parameter
+selection</li>
+<li><strong>Visual Output</strong>: Integrated plots and tables in
+jamovi results</li>
+</ol>
+</div>
+<div id="best-practices" class="section level2">
+<h2>Best Practices</h2>
+<div id="data-preparation" class="section level3">
+<h3>Data Preparation</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Standardize Scoring</strong>: Use consistent scoring systems
+across observers</li>
+<li><strong>Quality Control</strong>: Implement inter-observer agreement
+assessment</li>
+<li><strong>Missing Data</strong>: Handle missing scores
+appropriately</li>
+<li><strong>Validation</strong>: Cross-validate results with independent
+datasets</li>
+</ol>
+</div>
+<div id="analysis-strategy" class="section level3">
+<h3>Analysis Strategy</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Method Selection</strong>: Choose methodology based on
+clinical question</li>
+<li><strong>Parameter Optimization</strong>: Test different clustering
+parameters</li>
+<li><strong>Validation</strong>: Validate clusters with clinical
+outcomes</li>
+<li><strong>Interpretation</strong>: Consider biological plausibility of
+results</li>
+</ol>
+</div>
+<div id="reporting-guidelines" class="section level3">
+<h3>Reporting Guidelines</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Methodology</strong>: Report complete analysis
+methodology</li>
+<li><strong>Parameters</strong>: Document all analysis parameters
+used</li>
+<li><strong>Validation</strong>: Include validation metrics and
+statistics</li>
+<li><strong>Clinical Relevance</strong>: Discuss clinical implications
+of findings</li>
+</ol>
+</div>
+</div>
+<div id="further-resources" class="section level2">
+<h2>Further Resources</h2>
+<ul>
+<li><strong>Individual Function Vignettes</strong>: For detailed
+parameter usage</li>
+<li><strong>Clinical Workflow Guide</strong>: For integrated analysis
+pipelines</li>
+<li><strong>Getting Started Guide</strong>: For basic ClinicoPath
+functionality</li>
+<li><strong>Visualization Gallery</strong>: For advanced plot
+customization</li>
+</ul>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>The <code>ihcstats</code> function provides a comprehensive platform
+for IHC analysis implementing proven methodologies from the literature.
+The integration with jamovi makes these advanced techniques accessible
+to clinical researchers and pathologists without programming
+experience.</p>
+<p>For specific use cases and detailed examples, consult the individual
+function vignettes and clinical workflow guides.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

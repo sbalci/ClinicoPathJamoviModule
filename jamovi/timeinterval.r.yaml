@@ -1,25 +1,44 @@
 ---
 name:  timeinterval
-title: Time Interval Calculator
+title: Comprehensive Time Interval Calculator
 jrs:   '1.1'
 
 items:
     - name: todo
-      title: ''
+      title: 'Getting Started'
       type: Html
-
+      visible: (dx_date === null || fu_date === null)
+      
     - name: personTimeInfo
-      title: About Person-Time Follow-Up
+      title: Understanding Person-Time Analysis
       type: Html
-      visible: true
-
+      
+    - name: qualityAssessment
+      title: Data Quality Assessment
+      type: Html
+      visible: (dx_date !== null && fu_date !== null)
+      
     - name: summary
-      title: Summary Statistics
+      title: Statistical Summary & Person-Time Analysis
       type: Html
-
+      visible: (dx_date !== null && fu_date !== null)
+      
     - name: calculated_time
       title: Calculated Time Intervals
       type: Output
       measureType: continuous
+      clearWith:
+          - dx_date
+          - fu_date
+          - time_format
+          - output_unit
+          - use_landmark
+          - landmark_time
+          - remove_negative
+          - remove_extreme
 
+refs:
+    - lubridate
+
+    
 ...

@@ -39,6 +39,18 @@ children:
             isTarget: true
           - type: LevelSelector
             name: eventLevel
+      - type: TargetLayoutBox
+        label: Continuous Covariates (Optional)
+        children:
+          - type: VariablesListBox
+            name: continuousCovariates
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Categorical Covariates (Optional)
+        children:
+          - type: VariablesListBox
+            name: categoricalCovariates
+            isTarget: true
 
 
   - type: CollapseBox
@@ -243,6 +255,55 @@ children:
               - type: CheckBox
                 name: showWillRogersAnalysis
                 label: Will Rogers Phenomenon Analysis
+  - type: CollapseBox
+    label: Multifactorial Analysis
+    collapsed: false
+    children:
+      - type: Label
+        label: Multifactorial Analysis Configuration
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: enableMultifactorialAnalysis
+                label: Enable Multifactorial Analysis
+              - type: ComboBox
+                name: multifactorialComparisonType
+                label: Multifactorial Comparison Type
+              - type: ComboBox
+                name: baselineModel
+                label: Baseline Model
+      - type: Label
+        label: Advanced Multifactorial Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performInteractionTests
+                label: Test Stage-Covariate Interactions
+              - type: CheckBox
+                name: stratifiedAnalysis
+                label: Stratified Analysis
+      - type: Label
+        label: Multifactorial Results Display
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showMultifactorialTables
+                label: Show Multifactorial Tables
+              - type: CheckBox
+                name: showAdjustedCIndexComparison
+                label: Show Adjusted C-index Comparison
+              - type: CheckBox
+                name: showNestedModelTests
+                label: Show Nested Model Tests
+              - type: CheckBox
+                name: showStepwiseResults
+                label: Show Stepwise Selection Results
   - type: CollapseBox
     label: Visualization Options
     collapsed: false

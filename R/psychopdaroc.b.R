@@ -764,8 +764,8 @@ psychopdarocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           tn <- confusionMatrix$tn[optimal_idx]
           fn <- confusionMatrix$fn[optimal_idx]
 
-          # Create HTML table
-          html_table <- print.sensSpecTable(
+          # Create HTML table using enhanced formatting
+          html_table <- private$.formatSensSpecTable(
             Title = paste("Confusion Matrix for", var, "at Optimal Cutpoint =",
                           round(results$optimal_cutpoint[1], 3)),
             TP = tp, FP = fp, TN = tn, FN = fn
@@ -1189,7 +1189,7 @@ psychopdarocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             "</p>")
         }
 
-        # Add analysis settings
+        # Add enhanced analysis settings with more detail
         procedureNotes <- paste0(
           procedureNotes,
           "<p>&nbsp;</p>",
@@ -1653,36 +1653,53 @@ psychopdarocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       # -----------------------------------------------------------------------
 
       if (self$options$delongTest) {
-        # Check if we have enough variables to compare
+        # Enhanced validation with better error handling
         if (length(self$options$dependentVars) < 2) {
           stop("Please specify at least two dependent variables to use DeLong's test.")
         }
 
         if (!is.null(self$options$subGroup)) {
-          stop("DeLong's test does not currently support the group variable.")
+          stop("DeLong's test does not currently support the group variable. If you would like to contribute/provide guidance, please use the contact information provided in the documentation.")
         } else {
-          # Run DeLong's test using the private method
-          delongResults <- private$.deLongTest(
-            data = data.frame(lapply(data[, self$options$dependentVars], as.numeric)),
-            classVar = as.character(data[, self$options$classVar]),
-            ref = NULL,
-            positiveClass = positiveClass,
-            conf.level = 0.95
-          )
+          # Run enhanced DeLong's test with better error handling
+          delongResults <- tryCatch({
+            private$.enhancedDelongTest(
+              data = data.frame(lapply(data[, self$options$dependentVars], as.numeric)),
+              classVar = as.character(data[, self$options$classVar]),
+              pos_class = positiveClass,
+              ref = NULL,
+              conf.level = 0.95
+            )
+          }, error = function(e) {
+            # Fallback to original implementation if enhanced version fails
+            warning(paste("Enhanced DeLong test failed, using fallback:", e$message))
+            private$.deLongTest(
+              data = data.frame(lapply(data[, self$options$dependentVars], as.numeric)),
+              classVar = as.character(data[, self$options$classVar]),
+              ref = NULL,
+              positiveClass = positiveClass,
+              conf.level = 0.95
+            )
+          })
 
           # Display results
           self$results$delongTest$setVisible(visible = TRUE)
 
-          # Format output for display
-          output_text <- paste0(
-            "Estimated AUC's:\n",
-            capture.output(print(round(delongResults$AUC, 3))),
-            "\n\nPairwise comparisons:\n",
-            capture.output(print(round(delongResults$difference, 3))),
-            "\n\nOverall test:\n p-value = ", format.pval(delongResults$global.p, digits = 3)
-          )
-
-          self$results$delongTest$setContent(paste0(output_text, collapse = "\n"))
+          # Use enhanced formatting if available
+          if (inherits(delongResults, "EnhancedDeLong")) {
+            formatted_output <- private$.printEnhancedDeLong(delongResults)
+            self$results$delongTest$setContent(formatted_output)
+          } else {
+            # Format output for display (fallback)
+            output_text <- paste0(
+              "Estimated AUC's:\n",
+              capture.output(print(round(delongResults$AUC, 3))),
+              "\n\nPairwise comparisons:\n",
+              capture.output(print(round(delongResults$difference, 3))),
+              "\n\nOverall test:\n p-value = ", format.pval(delongResults$global.p, digits = 3)
+            )
+            self$results$delongTest$setContent(paste0(output_text, collapse = "\n"))
+          }
 
           # Format results for the DeLong comparison table
           delongTable <- self$results$delongComparisonTable
@@ -2994,6 +3011,351 @@ psychopdarocClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       print(plot)
       return(TRUE)
+    },
+
+    # ============================================================================
+    # ENHANCED FUNCTIONS FROM LEGACY TESTROC IMPLEMENTATION
+    # ============================================================================
+
+    # Enhanced HTML table formatting for sensitivity/specificity results
+    .formatSensSpecTable = function(Title, TP, FP, TN, FN) {
+      res <- paste0(
+        "<style type='text/css'>
+        .tg  {border-collapse:collapse;border-spacing:0;border-width:1px;border-style:solid;border-color:black;}
+        .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
+        .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
+        .tg .tg-s6z2{text-align:center}
+        .tg .tg-uys7{border-color:inherit;text-align:center}
+        .tg .tg-h0x1{text-align:center}
+        </style>
+        <table class='tg'>
+          <tr>
+            <th class='tg-0lax' colspan='4'>",
+        Title,
+        "</th>
+          </tr>
+          <tr>
+            <td class='tg-s6z2'></td>
+            <td class='tg-uys7' colspan='3'>DECISION BASED ON MEASURE</td>
+          </tr>
+          <tr>
+            <td class='tg-h0x1' rowspan='3'>CRITERION</td>
+            <td class='tg-h0x1'></td>
+            <td class='tg-h0x1'>Negative</td>
+            <td class='tg-h0x1'>Positive</td>
+          </tr>
+          <tr>
+            <td class='tg-s6z2'>Negative</td>
+            <td class='tg-s6z2'>",
+        TN,
+        " (TN)</td>
+            <td class='tg-s6z2'>",
+        FP,
+        " (FP)</td>
+          </tr>
+          <tr>
+            <td class='tg-h0x1'>Positive</td>
+            <td class='tg-h0x1'>",
+        FN,
+        " (FN)</td>
+            <td class='tg-h0x1'>",
+        TP,
+        " (TP)</td>
+          </tr>
+          <tr>
+            <td class='tg-tf2e'></td>
+            <td class='tg-tf2e'></td>
+            <td class='tg-tf2e'></td>
+            <td class='tg-tf2e'></td>
+          </tr>
+        </table>"
+      )
+      return(res)
+    },
+
+    # Enhanced percentage formatter with better handling
+    .formatPercentage = function(x) {
+      resToReturn = character()
+      for (i in 1:length(x)) {
+        if (is.na(x[i])) {
+          resToReturn[i] <- "NA"
+        } else {
+          number = round(x[i], 2)
+          if (number == 0) {
+            resToReturn[i] <- "0.00%"
+          } else if (abs(number) < 0.01) {
+            resToReturn[i] <- paste0("<", ifelse(number < 0, "-", ""), "0.01%")
+          } else if (length(as.character(number)) <= 3) {
+            # For small numbers, ensure .00% format
+            resToReturn[i] <- jmvcore::format("{}.00%", number)
+          } else {
+            resToReturn[i] <- jmvcore::format("{}%", number)
+          }
+        }
+      }
+      return(resToReturn)
+    },
+
+    # Enhanced DeLong test implementation with better error handling
+    .enhancedDelongTest = function(data, classVar, pos_class, ref = NULL, conf.level = 0.95) {
+      # Enhanced validation
+      if (length(classVar) != nrow(data)) {
+        stop("The number of rows in data must match the length of classVar")
+      }
+
+      id.pos <- classVar == pos_class
+      
+      if (sum(id.pos) < 1) {
+        stop("Wrong positive class level specified.")
+      }
+      if (ncol(data) < 2) {
+        stop("Data must contain at least two columns.")
+      }
+      if (nrow(data) < 2) {
+        stop("Data must contain at least two dependent variables for DeLong's test.")
+      }
+
+      nn <- sum(!id.pos)
+      np <- sum(id.pos)
+      nauc <- ncol(data)
+
+      # Enhanced matrix setup with better error handling
+      if (is.null(ref)) {
+        L <- matrix(0, nrow = nauc * (nauc - 1) / 2, ncol = nauc)
+        newa <- 0
+        for (i in 1:(nauc - 1)) {
+          newl <- nauc - i
+          L[(newa + 1):(newa + newl), i] <- rep(1, newl)
+          L[(newa + 1):(newa + newl), ((i + 1):(i + newl))] <-
+            diag(-1, nrow = newl, ncol = newl)
+          newa <- newa + newl
+        }
+      } else {
+        if (ref > nauc) {
+          stop(paste("Reference ref must be one of the markers (1...", nauc, " in this case)", sep = ""))
+        }
+        L <- matrix(1, ncol = nauc, nrow = nauc - 1)
+        L[, -ref] <- diag(-1, nrow = nauc - 1, ncol = nauc - 1)
+      }
+
+      markern <- as.matrix(data[!id.pos, ])
+      markerp <- as.matrix(data[id.pos, ])
+
+      # Enhanced Wilcoxon statistic calculation
+      WK.STAT <- function(data, y) {
+        if (length(data) == 0 || length(y) == 0) {
+          return(NA)
+        }
+        r <- rank(c(data, y))
+        n.data <- length(data)
+        n.y <- length(y)
+        STATISTIC <- sum(r[seq_along(data)]) - n.data * (n.data + 1) / 2
+        return(STATISTIC)
+      }
+
+      auc <- numeric(nauc)
+      for (r in 1:nauc) {
+        stat_result <- WK.STAT(markerp[, r], markern[, r])
+        if (is.na(stat_result)) {
+          auc[r] <- NA
+        } else {
+          auc[r] <- stat_result
+        }
+      }
+      auc <- auc / (nn * np)
+
+      # Handle AUCs smaller than 0.5 with enhanced logic
+      if (any(auc < 0.5, na.rm = TRUE)) {
+        flip_indices <- which(auc < 0.5)
+        data[, flip_indices] <- -data[, flip_indices]
+        auc[flip_indices] <- 1 - auc[flip_indices]
+        markern <- as.matrix(data[!id.pos, ])
+        markerp <- as.matrix(data[id.pos, ])
+      }
+
+      # Enhanced covariance calculation with better error handling
+      V10 <- matrix(0, nrow = np, ncol = nauc)
+      V01 <- matrix(0, nrow = nn, ncol = nauc)
+
+      tryCatch({
+        tmn <- t(markern)
+        tmp <- t(markerp)
+        for (i in 1:np) {
+          V10[i, ] <- rowSums(tmn < tmp[, i]) + 0.5 * rowSums(tmn == tmp[, i])
+        }
+        for (i in 1:nn) {
+          V01[i, ] <- rowSums(tmp > tmn[, i]) + 0.5 * rowSums(tmp == tmn[, i])
+        }
+      }, error = function(e) {
+        stop(paste("Error in covariance calculation:", e$message))
+      })
+
+      V10 <- V10 / nn
+      V01 <- V01 / np
+
+      W10 <- cov(V10)
+      W01 <- cov(V01)
+
+      # Estimated covariance matrix
+      S <- W10 / np + W01 / nn
+
+      # Enhanced variance calculations
+      q1 <- auc / (2 - auc)
+      q2 <- 2 * auc^2 / (1 + auc)
+
+      # Hanley, McNeil (1982) / Bamber (1975) variance estimates
+      aucvar <- (auc * (1 - auc) + (np - 1) * (q1 - auc^2) + (nn - 1) * (q2 - auc^2)) / (np * nn)
+      zhalf <- (auc - 0.5) / sqrt(aucvar)
+      phalf <- 1 - pnorm(zhalf)
+      zdelong <- (auc - 0.5) / sqrt(diag(S))
+      pdelong <- 1 - pnorm(zdelong)
+
+      # Enhanced global p-value calculation
+      aucdiff <- L %*% auc
+      
+      # Use enhanced matrix inversion with better error handling
+      tryCatch({
+        LSL_matrix <- L %*% S %*% t(L)
+        z <- t(aucdiff) %*% MASS::ginv(LSL_matrix) %*% aucdiff
+        p <- pchisq(z, df = qr(LSL_matrix)$rank, lower.tail = FALSE)
+      }, error = function(e) {
+        warning(paste("Error in global test calculation:", e$message))
+        z <- NA
+        p <- NA
+      })
+
+      # Enhanced pairwise comparisons
+      if (is.null(ref)) {
+        cor.auc <- matrix(ncol = 1, nrow = nauc * (nauc - 1) / 2)
+        ci <- matrix(ncol = 2, nrow = nauc * (nauc - 1) / 2)
+        ctr <- 1
+        rows <- character(nauc * (nauc - 1) / 2)
+        pairp <- matrix(nrow = nauc * (nauc - 1) / 2, ncol = 1)
+        quantil <- qnorm(1 - (1 - conf.level) / 2)
+        
+        for (i in 1:(nauc - 1)) {
+          for (j in (i + 1):nauc) {
+            tryCatch({
+              cor.auc[ctr] <- S[i, j] / sqrt(S[i, i] * S[j, j])
+              LSL <- t(c(1, -1)) %*% S[c(j, i), c(j, i)] %*% c(1, -1)
+              tmpz <- (aucdiff[ctr]) %*% MASS::ginv(LSL) %*% aucdiff[ctr]
+              pairp[ctr] <- 1 - pchisq(tmpz, df = qr(LSL)$rank)
+              ci[ctr, ] <- c(aucdiff[ctr] - quantil * sqrt(LSL),
+                           aucdiff[ctr] + quantil * sqrt(LSL))
+              rows[ctr] <- paste(i, j, sep = " vs. ")
+            }, error = function(e) {
+              cor.auc[ctr] <- NA
+              pairp[ctr] <- NA
+              ci[ctr, ] <- c(NA, NA)
+              rows[ctr] <- paste(i, j, sep = " vs. ")
+            })
+            ctr <- ctr + 1
+          }
+        }
+      } else {
+        cor.auc <- matrix(ncol = 1, nrow = nauc - 1)
+        ci <- matrix(ncol = 2, nrow = nauc - 1)
+        rows <- character(nauc - 1)
+        pairp <- matrix(nrow = nauc - 1, ncol = 1)
+        comp <- (1:nauc)[-ref]
+        quantil <- qnorm(1 - (1 - conf.level) / 2)
+        
+        for (i in 1:(nauc - 1)) {
+          tryCatch({
+            cor.auc[i] <- S[ref, comp[i]] / sqrt(S[ref, ref] * S[comp[i], comp[i]])
+            LSL <- t(c(1, -1)) %*% S[c(ref, comp[i]), c(ref, comp[i])] %*% c(1, -1)
+            tmpz <- aucdiff[i] %*% MASS::ginv(LSL) %*% aucdiff[i]
+            pairp[i] <- 1 - pchisq(tmpz, df = qr(LSL)$rank)
+            ci[i, ] <- c(aucdiff[i] - quantil * sqrt(LSL),
+                        aucdiff[i] + quantil * sqrt(LSL))
+            rows[i] <- paste(ref, comp[i], sep = " vs. ")
+          }, error = function(e) {
+            cor.auc[i] <- NA
+            pairp[i] <- NA
+            ci[i, ] <- c(NA, NA)
+            rows[i] <- paste(ref, comp[i], sep = " vs. ")
+          })
+        }
+      }
+
+      # Enhanced results formatting
+      newres <- as.data.frame(cbind(aucdiff, ci, pairp, cor.auc))
+      names(newres) <- c("AUC Difference", "CI(lower)", "CI(upper)", "P.Value", "Correlation")
+      rownames(newres) <- rows
+      row.names(ci) <- row.names(cor.auc) <- row.names(aucdiff) <- row.names(pairp) <- rows
+      colnames(ci) <- c(paste0(100 * conf.level, "% CI (lower)"), paste0(100 * conf.level, "% CI (upper)"))
+      names(auc) <- 1:nauc
+      auc <- as.data.frame(cbind(auc, sqrt(aucvar), phalf, sqrt(diag(S)), pdelong))
+      colnames(auc) <- c("AUC", "SD(Hanley)", "P(H0: AUC=0.5)", "SD(DeLong)", "P(H0: AUC=0.5)")
+
+      ERG <- list(
+        AUC = auc,
+        difference = newres,
+        covariance = S,
+        global.z = z,
+        global.p = p
+      )
+      class(ERG) <- "EnhancedDeLong"
+      return(ERG)
+    },
+
+    # Enhanced print method for DeLong results
+    .printEnhancedDeLong = function(x, digits = max(3, getOption("digits") - 3), ...) {
+      output <- character()
+      
+      # Format AUC table
+      output <- c(output, "Estimated AUC's:")
+      auc_formatted <- format(round(x$AUC, digits = digits, ...), nsmall = digits, ...)
+      output <- c(output, capture.output(print(auc_formatted, quote = FALSE)))
+      
+      # Format pairwise comparisons
+      output <- c(output, "", "Pairwise comparisons:")
+      diff_formatted <- format(round(x$difference, digits = digits, ...), nsmall = digits, ...)
+      output <- c(output, capture.output(print(diff_formatted, quote = FALSE)))
+      
+      # Format overall test
+      if (!is.na(x$global.p)) {
+        output <- c(output, "", paste("Overall test:", "p-value =", format.pval(x$global.p, digits = digits)))
+      } else {
+        output <- c(output, "", "Overall test: p-value = NA (calculation failed)")
+      }
+      
+      return(paste(output, collapse = "\n"))
+    },
+    
+    # Enhanced input validation inspired by old testroc implementation
+    .validateInputs = function() {
+      # Enhanced validation for manual cutpoint method
+      if (self$options$method == "oc_manual") {
+        if (is.null(self$options$specifyCutScore) || self$options$specifyCutScore == "") {
+          return("Please specify a cut score for using the manual cutpoint method.")
+        }
+        
+        # Validate that cut score is numeric
+        tryCatch({
+          as.numeric(self$options$specifyCutScore)
+        }, error = function(e) {
+          return("Cut score must be a valid number.")
+        })
+      }
+      
+      # Enhanced validation for DeLong test
+      if (self$options$delongTest && length(self$options$dependentVars) < 2) {
+        return("Please specify at least two dependent variables to use DeLong's test.")
+      }
+      
+      # Enhanced validation for IDI/NRI
+      if ((self$options$calculateIDI || self$options$calculateNRI) && 
+          length(self$options$dependentVars) < 2) {
+        return("Please specify at least two dependent variables for IDI/NRI calculations.")
+      }
+      
+      # Enhanced validation for subgroup analysis with DeLong
+      if (self$options$delongTest && !is.null(self$options$subGroup)) {
+        return("DeLong's test does not currently support the group variable. Please remove grouping or disable DeLong test.")
+      }
+      
+      return(NULL)  # No errors found
     }
   )
 )

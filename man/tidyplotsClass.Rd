@@ -2,11 +2,23 @@
 % Please edit documentation in R/tidyplots.b.R
 \name{tidyplotsClass}
 \alias{tidyplotsClass}
-\title{Tidy Plots}
+\title{Comprehensive Tidy Plots with Advanced Statistical Visualization}
 \description{
-Tidy Plots
-
-Tidy Plots
+Create publication-ready plots using the tidyplots framework with extensive
+customization options, statistical features, and advanced visualization capabilities.
+This implementation provides a jamovi interface to the tidyplots package for
+streamlined scientific plotting.
+}
+\details{
+This function provides comprehensive plotting capabilities including:
+\itemize{
+\item Multiple plot types: points, lines, bars, boxplots, violin plots, histograms
+\item Advanced statistical features: means, medians, error bars, confidence intervals
+\item Statistical testing: p-values, significance asterisks
+\item Extensive color schemes: discrete, continuous, and diverging palettes
+\item Grouping and faceting capabilities
+\item Publication-ready customization options
+}
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::tidyplotsBase} -> \code{tidyplotsClass}

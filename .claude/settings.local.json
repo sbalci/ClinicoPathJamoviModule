@@ -28,7 +28,6 @@
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e 'library(jmvcore); source(\"R/advancedbarplot.h.R\"); cat(\"SUCCESS: Function loaded correctly!\\n\")')",
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"if (requireNamespace('ggrain', quietly = TRUE)) { cat('ggrain package available\\n') } else { cat('ggrain package NOT available\\n') }\")",
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"jmvtools::prepare()\" 2 >& 1)",
-      "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"jmvtools::prepare()\" 2 >& 1)",
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"if (requireNamespace('ggrain', quietly = TRUE)) { cat('ggrain available\\n'); library(jmvcore); source('R/advancedraincloud.h.R'); source('R/advancedraincloud.b.R'); cat('Function signature check - has default NULL values:\\n'); cat('fill_var default:', deparse(formals(advancedraincloud)\\$fill_var), '\\n'); cat('SUCCESS: Function loads with proper defaults!\\n') } else { cat('ggrain package not available\\n') }\")",
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e 'cat(\"Testing advancedraincloud function...\\n\"); library(jmvcore); source(\"R/advancedraincloud.h.R\"); cat(\"Function loaded successfully!\\n\")')",
       "Bash(RSTUDIO_PANDOC=\"/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64\" Rscript -e \"testthat::test_file('tests/testthat/test-advancedraincloud.R')\")",
@@ -41,7 +40,11 @@
       "Bash(echo:*)",
       "Bash(cp:*)",
       "Bash(awk:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "WebFetch(domain:chop-cgtinformatics.github.io)",
+      "WebFetch(domain:jbengler.github.io)",
+      "Bash(diff:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

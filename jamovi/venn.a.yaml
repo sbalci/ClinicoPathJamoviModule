@@ -100,4 +100,57 @@ options:
             The level in `var4` that represents the positive condition.
           jamovi: >
             The level in `var4` that represents the true condition.
+
+    - name: upsetType
+      title: 'UpSet Plot Type'
+      type: List
+      options:
+        - name: upsetR
+          title: 'UpSetR (Classic)'
+        - name: complexUpset
+          title: 'ComplexUpset (Advanced)'
+      default: upsetR
+      description:
+          R: >
+            Choose between UpSetR (classic) or ComplexUpset (advanced with more features).
+          jamovi: >
+            Choose the type of UpSet plot to generate.
+
+    - name: sortBy
+      title: 'Sort Intersections By'
+      type: List
+      options:
+        - name: freq
+          title: 'Frequency'
+        - name: degree
+          title: 'Degree'
+        - name: none
+          title: 'None'
+      default: freq
+      description:
+          R: >
+            How to sort the intersections in the UpSet plot.
+          jamovi: >
+            Choose how to sort the intersections.
+
+    - name: minSize
+      title: 'Minimum Intersection Size'
+      type: Integer
+      min: 0
+      default: 0
+      description:
+          R: >
+            Minimum size of intersections to display.
+          jamovi: >
+            Only show intersections with at least this many members.
+
+    - name: showAnnotations
+      title: 'Show Statistical Annotations'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add statistical annotations to the ComplexUpset plot.
+          jamovi: >
+            Add statistical information to the plot.
 ...

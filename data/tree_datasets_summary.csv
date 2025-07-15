@@ -1,0 +1,7 @@
+"Dataset","N_Patients","N_Variables","Description","Clinical_Context","Target_Variable","Spatial_Analysis"
+"cancer_biomarkers",500,12,"Cancer biomarker diagnosis with PSA, grade, stage","Oncology - Prostate Cancer","diagnosis","Yes"
+"cardiovascular_risk",400,18,"Cardiovascular risk assessment with traditional risk factors","Cardiology - Risk Assessment","cv_event","Yes"
+"pathology_diagnosis",300,16,"Pathology diagnosis with histological measurements","Pathology - Breast Cancer","malignancy","Yes"
+"drug_response",350,17,"Drug response prediction with genomic biomarkers","Pharmacogenomics - Drug Response","drug_response","Yes"
+"pediatric_growth",200,16,"Pediatric growth assessment with developmental measures","Pediatrics - Growth Assessment","growth_delay","Yes"
+"small_sample_tree",25,11,"Small sample dataset for edge case testing","General - Edge Cases","outcome","Yes"

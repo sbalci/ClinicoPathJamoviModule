@@ -11,6 +11,7 @@
 #' @importFrom ggplot2 ggplot aes geom_histogram geom_density labs theme_minimal
 #' @importFrom dplyr summarise group_by
 #' @importFrom htmltools HTML
+#' @importFrom stringr str_to_title
 
 tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityClass",
     inherit = tidydensityBase,
@@ -182,6 +183,12 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
             dist_type <- self$options$distribution_type
             n <- self$options$n_observations
             num_sims <- self$options$n_simulations
+            
+            # Comprehensive parameter validation
+            validation_result <- private$.validate_parameters()
+            if (!validation_result$valid) {
+                stop(validation_result$message)
+            }
             
             tryCatch({
                 switch(dist_type,
@@ -427,7 +434,94 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
                     ),
                     applications = "Time between hospital arrivals, survival analysis, reliability engineering"
                 ),
-                # Add more distributions as needed...
+                "uniform" = list(
+                    title = "Uniform Distribution",
+                    description = "The uniform distribution assigns equal probability to all values within a specified range. All outcomes are equally likely.",
+                    parameters = list(
+                        "Minimum" = paste("Lower bound, currently set to:", self$options$uniform_min),
+                        "Maximum" = paste("Upper bound, currently set to:", self$options$uniform_max)
+                    ),
+                    applications = "Random sampling, simulation studies, quality control limits"
+                ),
+                "chisquare" = list(
+                    title = "Chi-Square Distribution",
+                    description = "The chi-square distribution is used in hypothesis testing and confidence intervals. It's the distribution of the sum of squares of independent standard normal variables.",
+                    parameters = list(
+                        "Degrees of Freedom (df)" = paste("Shape parameter, currently set to:", self$options$chisq_df)
+                    ),
+                    applications = "Goodness of fit tests, variance testing, categorical data analysis"
+                ),
+                "t" = list(
+                    title = "Student's t Distribution",
+                    description = "The t distribution is used for small sample hypothesis testing and confidence intervals when population variance is unknown.",
+                    parameters = list(
+                        "Degrees of Freedom (df)" = paste("Shape parameter, currently set to:", self$options$t_df)
+                    ),
+                    applications = "Small sample testing, confidence intervals, regression analysis"
+                ),
+                "f" = list(
+                    title = "F Distribution",
+                    description = "The F distribution is used for comparing variances and in ANOVA. It's the ratio of two chi-square distributions.",
+                    parameters = list(
+                        "Numerator DF" = paste("Degrees of freedom for numerator, currently set to:", self$options$f_df1),
+                        "Denominator DF" = paste("Degrees of freedom for denominator, currently set to:", self$options$f_df2)
+                    ),
+                    applications = "ANOVA, variance comparison, regression model testing"
+                ),
+                "binomial" = list(
+                    title = "Binomial Distribution",
+                    description = "The binomial distribution models the number of successes in a fixed number of independent trials with constant success probability.",
+                    parameters = list(
+                        "Number of Trials (n)" = paste("Fixed number of trials, currently set to:", self$options$binomial_size),
+                        "Success Probability (p)" = paste("Probability of success per trial, currently set to:", self$options$binomial_prob)
+                    ),
+                    applications = "Clinical trial success rates, diagnostic test performance, treatment response"
+                ),
+                "poisson" = list(
+                    title = "Poisson Distribution",
+                    description = "The Poisson distribution models the number of events occurring in a fixed interval of time or space.",
+                    parameters = list(
+                        "Rate (λ)" = paste("Average rate of occurrence, currently set to:", self$options$poisson_lambda)
+                    ),
+                    applications = "Adverse event counting, hospital arrivals, infection rates"
+                ),
+                "weibull" = list(
+                    title = "Weibull Distribution",
+                    description = "The Weibull distribution is widely used in survival analysis and reliability engineering. It can model various hazard rate patterns.",
+                    parameters = list(
+                        "Shape (k)" = paste("Shape parameter controlling distribution form, currently set to:", self$options$weibull_shape),
+                        "Scale (λ)" = paste("Scale parameter affecting spread, currently set to:", self$options$weibull_scale)
+                    ),
+                    applications = "Survival analysis, time-to-failure, reliability studies"
+                ),
+                "lognormal" = list(
+                    title = "Log-Normal Distribution",
+                    description = "The log-normal distribution is the distribution of a variable whose logarithm is normally distributed. Common in biological and economic data.",
+                    parameters = list(
+                        "Mean of Log" = paste("Mean of the underlying normal distribution, currently set to:", self$options$lognormal_meanlog),
+                        "SD of Log" = paste("Standard deviation of the underlying normal distribution, currently set to:", self$options$lognormal_sdlog)
+                    ),
+                    applications = "Drug concentrations, income distributions, biological measurements"
+                ),
+                "logistic" = list(
+                    title = "Logistic Distribution",
+                    description = "The logistic distribution is similar to the normal distribution but has heavier tails. Used in logistic regression and growth models.",
+                    parameters = list(
+                        "Location" = paste("Location parameter (similar to mean), currently set to:", self$options$logistic_location),
+                        "Scale" = paste("Scale parameter affecting spread, currently set to:", self$options$logistic_scale)
+                    ),
+                    applications = "Logistic regression, growth models, dose-response relationships"
+                ),
+                "cauchy" = list(
+                    title = "Cauchy Distribution",
+                    description = "The Cauchy distribution has no defined mean or variance. It has very heavy tails and is used to model extreme events.",
+                    parameters = list(
+                        "Location" = paste("Location parameter (median), currently set to:", self$options$cauchy_location),
+                        "Scale" = paste("Scale parameter affecting spread, currently set to:", self$options$cauchy_scale)
+                    ),
+                    applications = "Robust statistics, extreme value modeling, physics applications"
+                ),
+                # Default case
                 list(
                     title = paste(stringr::str_to_title(dist_type), "Distribution"),
                     description = paste("Information about", dist_type, "distribution."),
@@ -515,6 +609,98 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
             )
             
             return(interpretation_html)
+        },
+        
+        .validate_parameters = function() {
+            dist_type <- self$options$distribution_type
+            
+            # Validate based on distribution type
+            switch(dist_type,
+                "normal" = {
+                    if (self$options$normal_sd <= 0) {
+                        return(list(valid = FALSE, message = "Normal distribution: Standard deviation must be positive"))
+                    }
+                },
+                "beta" = {
+                    if (self$options$beta_shape1 <= 0 || self$options$beta_shape2 <= 0) {
+                        return(list(valid = FALSE, message = "Beta distribution: Both shape parameters must be positive"))
+                    }
+                },
+                "gamma" = {
+                    if (self$options$gamma_shape <= 0 || self$options$gamma_scale <= 0) {
+                        return(list(valid = FALSE, message = "Gamma distribution: Shape and scale parameters must be positive"))
+                    }
+                },
+                "exponential" = {
+                    if (self$options$exponential_rate <= 0) {
+                        return(list(valid = FALSE, message = "Exponential distribution: Rate parameter must be positive"))
+                    }
+                },
+                "uniform" = {
+                    if (self$options$uniform_min >= self$options$uniform_max) {
+                        return(list(valid = FALSE, message = "Uniform distribution: Maximum value must be greater than minimum value"))
+                    }
+                },
+                "chisquare" = {
+                    if (self$options$chisq_df <= 0) {
+                        return(list(valid = FALSE, message = "Chi-square distribution: Degrees of freedom must be positive"))
+                    }
+                },
+                "t" = {
+                    if (self$options$t_df <= 0) {
+                        return(list(valid = FALSE, message = "t distribution: Degrees of freedom must be positive"))
+                    }
+                },
+                "f" = {
+                    if (self$options$f_df1 <= 0 || self$options$f_df2 <= 0) {
+                        return(list(valid = FALSE, message = "F distribution: Both degrees of freedom must be positive"))
+                    }
+                },
+                "binomial" = {
+                    if (self$options$binomial_size <= 0) {
+                        return(list(valid = FALSE, message = "Binomial distribution: Number of trials must be positive"))
+                    }
+                    if (self$options$binomial_prob <= 0 || self$options$binomial_prob >= 1) {
+                        return(list(valid = FALSE, message = "Binomial distribution: Probability must be between 0 and 1"))
+                    }
+                },
+                "poisson" = {
+                    if (self$options$poisson_lambda <= 0) {
+                        return(list(valid = FALSE, message = "Poisson distribution: Lambda parameter must be positive"))
+                    }
+                },
+                "weibull" = {
+                    if (self$options$weibull_shape <= 0 || self$options$weibull_scale <= 0) {
+                        return(list(valid = FALSE, message = "Weibull distribution: Shape and scale parameters must be positive"))
+                    }
+                },
+                "lognormal" = {
+                    if (self$options$lognormal_sdlog <= 0) {
+                        return(list(valid = FALSE, message = "Log-normal distribution: Standard deviation of log must be positive"))
+                    }
+                },
+                "logistic" = {
+                    if (self$options$logistic_scale <= 0) {
+                        return(list(valid = FALSE, message = "Logistic distribution: Scale parameter must be positive"))
+                    }
+                },
+                "cauchy" = {
+                    if (self$options$cauchy_scale <= 0) {
+                        return(list(valid = FALSE, message = "Cauchy distribution: Scale parameter must be positive"))
+                    }
+                }
+            )
+            
+            # General validations
+            if (self$options$n_observations < 10 || self$options$n_observations > 10000) {
+                return(list(valid = FALSE, message = "Number of observations must be between 10 and 10,000"))
+            }
+            
+            if (self$options$n_simulations < 1 || self$options$n_simulations > 20) {
+                return(list(valid = FALSE, message = "Number of simulations must be between 1 and 20"))
+            }
+            
+            return(list(valid = TRUE, message = "Parameters are valid"))
         }
 
     )

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="ClinicoPath Development Team" />
+
+<meta name="date" content="2025-06-30" />
+
+<title>Stage Migration Analysis: Understanding the Will Rogers Phenomenon</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Stage Migration Analysis: Understanding the
+Will Rogers Phenomenon</h1>
+<h4 class="author">ClinicoPath Development Team</h4>
+<h4 class="date">2025-06-30</h4>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The Will Rogers phenomenon is a statistical paradox that occurs in
+medicine when patients are reclassified between disease stages due to
+improvements in diagnostic technology or changes in staging criteria.
+This phenomenon gets its name from a humorous quote attributed to
+American humorist Will Rogers: “When the Okies left Oklahoma and moved
+to California, they raised the average intelligence level in both
+states.”</p>
+<p>In pathology and oncology, this phenomenon is particularly relevant
+when analyzing the impact of staging system revisions (such as TNM
+edition updates) on survival outcomes and treatment effectiveness.</p>
+<div id="what-is-the-will-rogers-phenomenon" class="section level2">
+<h2>What is the Will Rogers Phenomenon?</h2>
+<p>The Will Rogers phenomenon describes a situation where:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Stage Migration Occurs</strong>: Patients are
+reclassified into different disease stages due to improved diagnostic
+methods or revised staging criteria.</p></li>
+<li><p><strong>Apparent Improvement</strong>: This reclassification
+leads to apparent improvements in stage-specific outcomes without any
+actual improvement in individual patient outcomes.</p></li>
+<li><p><strong>Statistical Paradox</strong>: Both stages appear to have
+improved survival rates, but overall survival remains
+unchanged.</p></li>
+</ol>
+<div id="clinical-example" class="section level3">
+<h3>Clinical Example</h3>
+<p>Consider lung cancer staging between TNM 7th and 8th editions:</p>
+<ul>
+<li><strong>Original System (7th Edition)</strong>: A patient with a
+3.5cm tumor and 2 positive lymph nodes is classified as Stage II</li>
+<li><strong>New System (8th Edition)</strong>: The same patient is now
+classified as Stage IIB due to refined criteria</li>
+</ul>
+<p>If this patient has better survival than the average Stage II patient
+but worse survival than the average Stage IIB patient:</p>
+<ul>
+<li>Stage II survival improves (worst patients removed)</li>
+<li>Stage IIB survival improves (relatively good patients added)</li>
+<li>The patient’s actual prognosis hasn’t changed</li>
+</ul>
+</div>
+</div>
+<div id="the-stage-migration-analysis-module" class="section level2">
+<h2>The Stage Migration Analysis Module</h2>
+<p>The Stage Migration Analysis module in ClinicoPath helps you:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Quantify stage migration</strong> between different staging
+systems</li>
+<li><strong>Compare prognostic performance</strong> of old vs. new
+staging systems</li>
+<li><strong>Visualize migration patterns</strong> using flow
+diagrams</li>
+<li><strong>Detect the Will Rogers phenomenon</strong> through
+statistical analysis</li>
+<li><strong>Evaluate staging system improvements</strong>
+objectively</li>
+</ol>
+</div>
+</div>
+<div id="getting-started" class="section level1">
+<h1>Getting Started</h1>
+<div id="required-data" class="section level2">
+<h2>Required Data</h2>
+<p>To perform stage migration analysis, you need:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Patient identifiers</strong></li>
+<li><strong>Original staging variable</strong> (e.g., TNM 7th edition
+stages)</li>
+<li><strong>New staging variable</strong> (e.g., TNM 8th edition
+stages)</li>
+<li><strong>Survival time</strong> (in consistent units: months,
+years)</li>
+<li><strong>Event indicator</strong> (death, progression, etc.)</li>
+</ol>
+</div>
+<div id="data-format" class="section level2">
+<h2>Data Format</h2>
+<p>Your data should look like this:</p>
+<table style="width:100%;">
+<colgroup>
+<col width="16%" />
+<col width="15%" />
+<col width="15%" />
+<col width="23%" />
+<col width="9%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>patient_id</th>
+<th>old_stage</th>
+<th>new_stage</th>
+<th>survival_months</th>
+<th>event</th>
+<th>vital_status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PT0001</td>
+<td>Stage_I</td>
+<td>Stage_IA</td>
+<td>48.2</td>
+<td>0</td>
+<td>Alive</td>
+</tr>
+<tr class="even">
+<td>PT0002</td>
+<td>Stage_II</td>
+<td>Stage_IIB</td>
+<td>23.7</td>
+<td>1</td>
+<td>Deceased</td>
+</tr>
+<tr class="odd">
+<td>PT0003</td>
+<td>Stage_III</td>
+<td>Stage_IIIA</td>
+<td>15.3</td>
+<td>1</td>
+<td>Deceased</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="loading-your-data" class="section level2">
+<h2>Loading Your Data</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Import your dataset</strong> into jamovi (CSV, Excel, SPSS,
+etc.)</li>
+<li><strong>Ensure staging variables are factors</strong> with
+appropriate level ordering</li>
+<li><strong>Check survival time is numeric</strong> and in consistent
+units</li>
+<li><strong>Verify event variable</strong> is either 0/1 (numeric) or
+Alive/Dead (factor)</li>
+</ol>
+</div>
+</div>
+<div id="using-the-stage-migration-analysis-module" class="section level1">
+<h1>Using the Stage Migration Analysis Module</h1>
+<div id="step-1-access-the-module" class="section level2">
+<h2>Step 1: Access the Module</h2>
+<ol style="list-style-type: decimal">
+<li>Navigate to <strong>Analyses</strong> → <strong>SurvivalD</strong> →
+<strong>ClinicoPath Survival</strong></li>
+<li>Select <strong>Stage Migration Analysis</strong></li>
+</ol>
+</div>
+<div id="step-2-variable-selection" class="section level2">
+<h2>Step 2: Variable Selection</h2>
+<div id="required-variables" class="section level3">
+<h3>Required Variables</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Original Stage</strong>: Select the variable representing
+the original staging system
+<ul>
+<li>Must be a factor variable</li>
+<li>Example: <code>tnm_7th_edition</code>, <code>old_stage</code></li>
+</ul></li>
+<li><strong>New Stage</strong>: Select the variable representing the new
+staging system
+<ul>
+<li>Must be a factor variable<br />
+</li>
+<li>Example: <code>tnm_8th_edition</code>, <code>new_stage</code></li>
+</ul></li>
+<li><strong>Survival Time</strong>: Select the time-to-event variable
+<ul>
+<li>Must be numeric</li>
+<li>Should be in consistent units (months, years)</li>
+<li>Example: <code>survival_months</code>,
+<code>follow_up_time</code></li>
+</ul></li>
+<li><strong>Event</strong>: Select the event indicator variable
+<ul>
+<li>Can be numeric (0/1) or factor (Alive/Dead)</li>
+<li>Example: <code>event</code>, <code>vital_status</code></li>
+</ul></li>
+<li><strong>Event Level</strong>: If using a factor event variable,
+specify which level indicates the event
+<ul>
+<li>Example: “Deceased”, “Dead”, “Event”</li>
+</ul></li>
+</ol>
+</div>
+</div>
+<div id="step-3-configure-analysis-options" class="section level2">
+<h2>Step 3: Configure Analysis Options</h2>
+<div id="plot-options" class="section level3">
+<h3>Plot Options</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Show Migration Plot</strong>: Enables alluvial/Sankey
+diagram showing patient flow between stages
+<ul>
+<li>Recommended: <strong>Enabled</strong> for visual understanding</li>
+</ul></li>
+<li><strong>Survival Plot Type</strong>: Controls how survival curves
+are displayed
+<ul>
+<li><strong>Separate plots</strong>: Shows full Kaplan-Meier plots for
+each staging system</li>
+<li><strong>Side by side</strong>: Focuses on direct stage
+comparisons</li>
+</ul></li>
+<li><strong>Show Confidence Intervals</strong>: Adds 95% confidence
+intervals to survival curves
+<ul>
+<li>Recommended for formal presentations</li>
+</ul></li>
+</ol>
+</div>
+<div id="analysis-options" class="section level3">
+<h3>Analysis Options</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Analyze Will Rogers Phenomenon</strong>: Performs detailed
+analysis of the phenomenon
+<ul>
+<li>Recommended: <strong>Enabled</strong> for comprehensive
+analysis</li>
+<li>Compares survival within stages between migrated vs. non-migrated
+patients</li>
+</ul></li>
+</ol>
+</div>
+</div>
+<div id="step-4-interpret-results" class="section level2">
+<h2>Step 4: Interpret Results</h2>
+<p>The analysis produces several key outputs:</p>
+<div id="migration-summary-table" class="section level3">
+<h3>Migration Summary Table</h3>
+<p><strong>Key Metrics:</strong> - <strong>Total patients</strong>:
+Overall sample size - <strong>Unchanged stage</strong>: Number of
+patients remaining in the same stage - <strong>Stage migration
+(%)</strong>: Percentage of patients who changed stages -
+<strong>Upstaging (%)</strong>: Percentage moved to higher stages -
+<strong>Downstaging (%)</strong>: Percentage moved to lower stages -
+<strong>Chi-square</strong>: Statistical test for association between
+staging systems</p>
+<p><strong>Interpretation:</strong> - Migration rates &gt;20% indicate
+substantial staging changes - Significant chi-square suggests non-random
+migration patterns - Balance of upstaging vs. downstaging reveals
+revision direction</p>
+</div>
+<div id="stage-distribution-comparison" class="section level3">
+<h3>Stage Distribution Comparison</h3>
+<p>Shows how patient distribution changes between staging systems:</p>
+<p><strong>Columns:</strong> - <strong>Stage</strong>: Individual stage
+categories - <strong>Original Count/%)</strong>: Distribution in
+original system - <strong>New Count/(%)</strong>: Distribution in new
+system<br />
+- <strong>Change</strong>: Percentage point change</p>
+<p><strong>Interpretation:</strong> - Large changes indicate major
+revision impact - Shifts toward early/late stages reveal staging drift -
+Balanced changes suggest refinement rather than systematic bias</p>
+</div>
+<div id="stage-migration-matrix" class="section level3">
+<h3>Stage Migration Matrix</h3>
+<p>Cross-tabulation showing exact patient flow between stages:</p>
+<p><strong>Features:</strong> - Rows: Original staging system - Columns:
+New staging system - Values: Patient counts and percentages</p>
+<p><strong>Interpretation:</strong> - Diagonal elements: Patients
+remaining in equivalent stages - Off-diagonal elements: Migration
+patterns - High off-diagonal values indicate significant
+reclassification</p>
+</div>
+<div id="prognostic-performance-comparison" class="section level3">
+<h3>Prognostic Performance Comparison</h3>
+<p>Compares discriminative ability between staging systems:</p>
+<p><strong>Metrics:</strong> - <strong>C-index (Harrell’s)</strong>:
+Measures discriminative ability (0.5 = random, 1.0 = perfect) -
+<strong>Log-rank test</strong>: Tests for survival differences within
+each system - <strong>AIC</strong>: Model quality measure (lower is
+better)</p>
+<p><strong>Interpretation:</strong> - C-index improvement &gt;0.02 is
+clinically meaningful - Lower AIC in new system suggests better model
+fit - Stronger log-rank statistics indicate better stage separation</p>
+</div>
+<div id="will-rogers-phenomenon-analysis" class="section level3">
+<h3>Will Rogers Phenomenon Analysis</h3>
+<p>Identifies evidence of the phenomenon by comparing survival within
+stages:</p>
+<p><strong>Columns:</strong> - <strong>Stage</strong>: Original stage
+being analyzed - <strong>Unchanged N</strong>: Patients remaining in
+same stage - <strong>Unchanged Median</strong>: Median survival for
+unchanged patients - <strong>Migrated N</strong>: Patients moving to
+different stages - <strong>Migrated Median</strong>: Median survival for
+migrated patients - <strong>p-value</strong>: Test comparing unchanged
+vs. migrated survival</p>
+<p><strong>Interpretation:</strong> - Significant p-values indicate Will
+Rogers phenomenon - Different median survivals between groups confirm
+the effect - Multiple significant stages suggest systematic migration
+bias</p>
+</div>
+</div>
+<div id="step-5-visual-interpretation" class="section level2">
+<h2>Step 5: Visual Interpretation</h2>
+<div id="migration-flow-plot" class="section level3">
+<h3>Migration Flow Plot</h3>
+<p>The alluvial/Sankey diagram visualizes patient flow:</p>
+<p><strong>Elements:</strong> - <strong>Left axis</strong>: Original
+staging system - <strong>Right axis</strong>: New staging system -
+<strong>Flow bands</strong>: Patient migration pathways - <strong>Band
+thickness</strong>: Proportional to patient numbers</p>
+<p><strong>Interpretation:</strong> - Thick diagonal flows indicate
+stage stability - Curved flows show migration patterns - Complex flow
+patterns suggest major revision impact</p>
+</div>
+<div id="survival-comparison-plots" class="section level3">
+<h3>Survival Comparison Plots</h3>
+<p>Kaplan-Meier curves for each staging system:</p>
+<p><strong>Features:</strong> - <strong>Separate plots</strong>: Full
+survival curves for each system - <strong>Side-by-side</strong>: Direct
+comparison of equivalent stages - <strong>Confidence intervals</strong>:
+Statistical uncertainty bounds</p>
+<p><strong>Interpretation:</strong> - Better curve separation indicates
+improved discrimination - Crossing curves suggest staging
+inconsistencies - Similar overall survival confirms unchanged patient
+outcomes</p>
+</div>
+<div id="concordance-index-plot" class="section level3">
+<h3>Concordance Index Plot</h3>
+<p>Bar chart comparing discriminative performance:</p>
+<p><strong>Elements:</strong> - <strong>Original System</strong>:
+C-index for original staging - <strong>New System</strong>: C-index for
+new staging<br />
+- <strong>Improvement</strong>: Absolute and percentage change</p>
+<p><strong>Interpretation:</strong> - Higher bars indicate better
+discrimination - Positive improvement suggests staging enhancement -
+Magnitude reflects clinical significance</p>
+</div>
+</div>
+</div>
+<div id="clinical-applications" class="section level1">
+<h1>Clinical Applications</h1>
+<div id="use-case-1-tnm-staging-revision-impact" class="section level2">
+<h2>Use Case 1: TNM Staging Revision Impact</h2>
+<p><strong>Scenario</strong>: Evaluate impact of TNM 8th edition on lung
+cancer staging</p>
+<p><strong>Analysis Steps:</strong> 1. Load dataset with both TNM 7th
+and 8th edition stages 2. Set “tnm_7th” as original stage, “tnm_8th” as
+new stage 3. Use overall survival as endpoint 4. Enable Will Rogers
+analysis</p>
+<p><strong>Expected Findings:</strong> - Migration rate 25-40% for lung
+cancer - Improved C-index for 8th edition (typically +0.02 to +0.05) -
+Evidence of Will Rogers phenomenon in Stage II/III patients - Better
+survival separation in new system</p>
+</div>
+<div id="use-case-2-institutional-staging-consistency" class="section level2">
+<h2>Use Case 2: Institutional Staging Consistency</h2>
+<p><strong>Scenario</strong>: Compare staging between different time
+periods</p>
+<p><strong>Analysis Steps:</strong> 1. Create “era” variable (e.g.,
+2010-2015 vs. 2016-2020) 2. Compare staging distributions across eras 3.
+Assess for staging drift or improvement</p>
+<p><strong>Expected Findings:</strong> - Temporal changes in stage
+distribution - Improved prognostic performance over time - Evidence of
+stage migration due to better imaging</p>
+</div>
+<div id="use-case-3-pathology-subspecialty-analysis" class="section level2">
+<h2>Use Case 3: Pathology Subspecialty Analysis</h2>
+<p><strong>Scenario</strong>: Evaluate impact of subspecialist review on
+staging</p>
+<p><strong>Analysis Steps:</strong> 1. Compare initial staging
+vs. subspecialist review 2. Focus on difficult cases or borderline
+stages 3. Assess survival impact of reclassification</p>
+<p><strong>Expected Findings:</strong> - Systematic upstaging or
+downstaging patterns - Improved prognostic accuracy - Clinical impact of
+subspecialist expertise</p>
+</div>
+</div>
+<div id="advanced-analysis-tips" class="section level1">
+<h1>Advanced Analysis Tips</h1>
+<div id="sample-size-considerations" class="section level2">
+<h2>Sample Size Considerations</h2>
+<ul>
+<li><strong>Minimum</strong>: 100 patients with adequate follow-up</li>
+<li><strong>Recommended</strong>: 200+ patients for robust Will Rogers
+analysis</li>
+<li><strong>Power</strong>: Consider event rate and median follow-up
+time</li>
+</ul>
+</div>
+<div id="statistical-considerations" class="section level2">
+<h2>Statistical Considerations</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Censoring</strong>: Ensure adequate follow-up in both
+staging systems</li>
+<li><strong>Competing Risks</strong>: Consider disease-specific
+vs. overall survival</li>
+<li><strong>Time Bias</strong>: Account for temporal changes in
+treatment</li>
+<li><strong>Institution Bias</strong>: Consider multi-institutional
+validation</li>
+</ol>
+</div>
+<div id="interpretation-guidelines" class="section level2">
+<h2>Interpretation Guidelines</h2>
+<div id="evidence-of-will-rogers-phenomenon" class="section level3">
+<h3>Evidence of Will Rogers Phenomenon</h3>
+<p><strong>Strong Evidence:</strong> - Migration rate &gt;30% - Multiple
+stages with significant Will Rogers tests - Improved stage-specific
+survival without overall improvement - C-index improvement primarily
+from redistribution</p>
+<p><strong>Weak Evidence:</strong> - Migration rate &lt;15% - Few
+significant Will Rogers tests - Genuine improvement in C-index - Overall
+survival improvement</p>
+</div>
+<div id="clinical-significance" class="section level3">
+<h3>Clinical Significance</h3>
+<p><strong>Clinically Meaningful Changes:</strong> - C-index improvement
+&gt;0.02 - Stage migration affecting &gt;20% of patients - Survival
+differences &gt;6 months between systems - Impact on treatment decision
+thresholds</p>
+</div>
+</div>
+<div id="quality-assurance" class="section level2">
+<h2>Quality Assurance</h2>
+<div id="data-validation" class="section level3">
+<h3>Data Validation</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Staging Accuracy</strong>: Verify both staging systems use
+same criteria</li>
+<li><strong>Missing Data</strong>: Assess pattern and impact of missing
+stages</li>
+<li><strong>Follow-up Adequacy</strong>: Ensure sufficient events and
+follow-up</li>
+<li><strong>Covariate Balance</strong>: Check for confounding
+variables</li>
+</ol>
+</div>
+<div id="results-validation" class="section level3">
+<h3>Results Validation</h3>
+<ol style="list-style-type: decimal">
+<li><strong>External Validation</strong>: Test findings in independent
+cohort</li>
+<li><strong>Sensitivity Analysis</strong>: Test robustness to
+assumptions</li>
+<li><strong>Clinical Review</strong>: Confirm findings make clinical
+sense</li>
+<li><strong>Literature Comparison</strong>: Compare to published staging
+studies</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="reporting-results" class="section level1">
+<h1>Reporting Results</h1>
+<div id="key-elements-to-include" class="section level2">
+<h2>Key Elements to Include</h2>
+<div id="methods-section" class="section level3">
+<h3>Methods Section</h3>
+<pre><code>Stage migration analysis was performed using the ClinicoPath module in jamovi. 
+Patients were classified according to both [original system] and [new system] 
+staging criteria. Migration patterns were quantified using cross-tabulation 
+and chi-square tests. Prognostic performance was compared using Harrell&#39;s 
+C-index and log-rank tests. The Will Rogers phenomenon was assessed by 
+comparing survival between patients who remained in the same stage versus 
+those who migrated to different stages.</code></pre>
+</div>
+<div id="results-section" class="section level3">
+<h3>Results Section</h3>
+<pre><code>Of [N] patients analyzed, [X]% experienced stage migration between the 
+[original] and [new] staging systems (p&lt;0.001). The C-index improved from 
+[old C-index] to [new C-index] (improvement: +[change], [%] increase). 
+Evidence of the Will Rogers phenomenon was observed in [N] stages, with 
+significant survival differences between migrated and non-migrated patients 
+(p&lt;0.05). Migration predominantly involved [describe pattern].</code></pre>
+</div>
+<div id="visual-presentation" class="section level3">
+<h3>Visual Presentation</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Migration flow diagram</strong> showing patient
+pathways</li>
+<li><strong>Side-by-side survival curves</strong> for key stages</li>
+<li><strong>C-index comparison</strong> bar chart</li>
+<li><strong>Will Rogers analysis table</strong> for significant
+stages</li>
+</ol>
+</div>
+</div>
+<div id="common-pitfalls" class="section level2">
+<h2>Common Pitfalls</h2>
+<div id="analytical-pitfalls" class="section level3">
+<h3>Analytical Pitfalls</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Insufficient Follow-up</strong>: Premature analysis with
+inadequate follow-up</li>
+<li><strong>Selection Bias</strong>: Non-representative patient
+population</li>
+<li><strong>Temporal Confounding</strong>: Changes in treatment
+concurrent with staging</li>
+<li><strong>Multiple Testing</strong>: Not adjusting for multiple
+comparisons</li>
+</ol>
+</div>
+<div id="interpretation-pitfalls" class="section level3">
+<h3>Interpretation Pitfalls</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Causation vs. Association</strong>: Assuming staging changes
+cause outcome improvements</li>
+<li><strong>Clinical vs. Statistical</strong>: Overinterpreting small
+but significant changes</li>
+<li><strong>Generalizability</strong>: Extrapolating single-institution
+findings</li>
+<li><strong>Complexity</strong>: Over-interpreting complex migration
+patterns</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>The Stage Migration Analysis module provides comprehensive tools for
+understanding the impact of staging system changes on clinical outcomes.
+By systematically analyzing migration patterns, prognostic performance,
+and the Will Rogers phenomenon, researchers and clinicians can:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Objectively evaluate</strong> staging system revisions</li>
+<li><strong>Detect statistical artifacts</strong> that may mislead
+clinical interpretation</li>
+<li><strong>Quantify improvements</strong> in prognostic
+discrimination</li>
+<li><strong>Guide clinical practice</strong> based on evidence-based
+staging analysis</li>
+</ol>
+<p>Understanding stage migration is crucial for proper interpretation of
+cancer outcomes research and for making informed decisions about staging
+system adoption in clinical practice.</p>
+<div id="further-resources" class="section level2">
+<h2>Further Resources</h2>
+<ul>
+<li><strong>ClinicoPath Documentation</strong>: Comprehensive module
+reference</li>
+<li><strong>TNM Classification Guidelines</strong>: Official staging
+criteria</li>
+<li><strong>Survival Analysis Methods</strong>: Statistical background
+and methods</li>
+<li><strong>Will Rogers Literature</strong>: Published examples and
+methodological papers</li>
+</ul>
+<p>For questions or support, please refer to the ClinicoPath
+documentation or contact the development team.</p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

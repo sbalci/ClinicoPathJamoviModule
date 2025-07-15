@@ -1,0 +1,11 @@
+PatientID,StartDate,EndDate,BestResponse,Surgery,ProgressionAssessment,EventType,Site
+PT001,2023-01-15,2023-12-15,CR,2023-02-01,NA,Treatment Start,Center A
+PT002,2023-02-01,2023-08-15,PR,2023-02-15,2023-06-01,Dose Escalation,Center B
+PT003,2023-01-10,2024-01-10,CR,2023-02-10,NA,Response Assessment,Center A
+PT004,2023-03-01,2023-06-01,PD,NA,2023-04-15,Treatment Start,Center C
+PT005,2023-01-20,2024-02-20,PR,2023-03-01,2023-10-01,Follow-up,Center B
+PT006,2023-02-15,2023-09-15,SD,2023-03-15,2023-07-15,Treatment Start,Center A
+PT007,2023-04-01,2023-07-01,PD,2023-04-15,2023-05-15,Progression,Center C
+PT008,2023-01-05,2023-11-05,CR,2023-02-05,NA,Response Assessment,Center A
+PT009,2023-03-15,2023-08-15,SD,NA,2023-06-15,Treatment Start,Center B
+PT010,2023-01-30,2024-03-30,PR,2023-04-01,2023-12-01,Follow-up,Center C

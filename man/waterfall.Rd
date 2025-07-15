@@ -8,7 +8,7 @@ waterfall(
   data,
   patientID,
   responseVar,
-  timeVar,
+  timeVar = NULL,
   inputType = "percentage",
   sortBy = "response",
   showThresholds = FALSE,
@@ -19,8 +19,8 @@ waterfall(
   colorScheme = "jamovi",
   barAlpha = 1,
   barWidth = 0.7,
-  showWaterfallPlot = FALSE,
-  showSpiderPlot = FALSE
+  showWaterfallPlot = TRUE,
+  showSpiderPlot = TRUE
 )
 }
 \arguments{
@@ -28,7 +28,10 @@ waterfall(
 
 \item{patientID}{Variable containing patient identifiers.}
 
-\item{responseVar}{Percentage change in tumor size.}
+\item{responseVar}{Response variable: either raw tumor measurements or
+pre-calculated percentage changes. For raw measurements, requires a time
+variable with baseline (time = 0). For percentages, negative values
+indicate tumor shrinkage (improvement).}
 
 \item{timeVar}{Time point of measurement for spider plot (e.g., months from
 baseline)}
@@ -39,9 +42,9 @@ changes}
 
 \item{sortBy}{Sort the waterfall plot by best response or patient ID.}
 
-\item{showThresholds}{.}
+\item{showThresholds}{Show +20 percent and -30 percent RECIST thresholds.}
 
-\item{labelOutliers}{.}
+\item{labelOutliers}{Label responses exceeding the specified threshold.}
 
 \item{showMedian}{Show median response as a horizontal line.}
 
@@ -56,10 +59,11 @@ displayed.}
 
 \item{barWidth}{Width of bars in waterfall plot.}
 
-\item{showWaterfallPlot}{.}
+\item{showWaterfallPlot}{Display the waterfall plot showing best response
+for each patient.}
 
-\item{showSpiderPlot}{Create an additional spider plot showing response
-over time if longitudinal data available}
+\item{showSpiderPlot}{Display spider plot showing response trajectories
+over time (requires time variable).}
 }
 \value{
 A results object containing:
@@ -67,6 +71,7 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
 \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$waterfallplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
@@ -80,5 +85,37 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summaryTable)}
 }
 \description{
-Treatment Response Analysis
+Creates waterfall and spider plots to analyze tumor response data following
+RECIST criteria. Supports both raw tumor measurements and pre-calculated
+percentage changes. Provides comprehensive response analysis including ORR,
+DCR, and person-time metrics.
+}
+\examples{
+\donttest{
+# Example 1: Percentage data
+data_pct <- data.frame(
+    PatientID = paste0("PT", 1:5),
+    Response = c(-60, -35, -10, 15, 45)
+)
+waterfall(
+    data = data_pct,
+    patientID = "PatientID",
+    responseVar = "Response",
+    inputType = "percentage"
+)
+
+# Example 2: Raw measurements
+data_raw <- data.frame(
+    PatientID = rep(paste0("PT", 1:3), each = 3),
+    Time = rep(c(0, 2, 4), 3),
+    Measurement = c(50, 30, 25, 60, 45, 40, 55, 50, 48)
+)
+waterfall(
+    data = data_raw,
+    patientID = "PatientID",
+    responseVar = "Measurement",
+    timeVar = "Time",
+    inputType = "raw"
+)
+}
 }

@@ -23,3 +23,25 @@ children:
         name: showFreq
       - type: CheckBox
         name: showStats
+      - type: CheckBox
+        name: useSummarytools
+      - type: CheckBox
+        name: showDfSummary
+      - type: CheckBox
+        name: showDescr
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: groupVar
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showCrosstabs

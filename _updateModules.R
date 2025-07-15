@@ -14,7 +14,7 @@
 #
 # Author: Enhanced version with enterprise-grade features
 # Requires: R >= 4.0.0, yaml, future, digest packages
-# run  /Applications/jamovi.app/Contents/MacOS/jamovi 
+# run  /Applications/jamovi.app/Contents/MacOS/jamovi
 
 
 
@@ -36,18 +36,18 @@ script_dir <- tryCatch({
 setwd(script_dir)
 
 # Source utility functions with enhanced validation
-utility_file <- "module_utils.R"
+utility_file <- "_module_utils.R"
 if (!file.exists(utility_file)) {
-  warning("⚠️ module_utils.R not found in current directory: ", getwd())
-  cat("Looking for module_utils.R in script directory...\n")
+  warning("⚠️ _module_utils.R not found in current directory: ", getwd())
+  cat("Looking for _module_utils.R in script directory...\n")
 
   # Try to find in script directory
   script_utility <- file.path(script_dir, utility_file)
   if (file.exists(script_utility)) {
-    cat("✅ Found module_utils.R in script directory\n")
+    cat("✅ Found _module_utils.R in script directory\n")
     utility_file <- script_utility
   } else {
-    stop("❌ module_utils.R not found. Please ensure all required files are present.")
+    stop("❌ _module_utils.R not found. Please ensure all required files are present.")
   }
 }
 
@@ -56,7 +56,7 @@ tryCatch({
   source(utility_file)
   cat("✅ Successfully loaded module utilities\n")
 }, error = function(e) {
-  stop("❌ Failed to load module_utils.R: ", e$message)
+  stop("❌ Failed to load _module_utils.R: ", e$message)
 })
 
 # Load and validate configuration
@@ -643,9 +643,57 @@ if (!WIP) {
       cat("  ⏭️ Skipping", module_name, "test files (copy_test_files: false)\n")
     }
 
-    # Copy vignette files (manual files when domain-based is disabled)
-    if (copy_vignettes && length(module_cfg$vignette_files) > 0 &&
-        (!config$vignette_domains$copy_settings$use_domain_based %||% FALSE)) {
+    # Copy vignette files (folder-based copying)
+    if (copy_vignettes && (config$vignette_folders$copy_settings$use_folder_based %||% TRUE)) {
+      cat("  📄 Copying", module_name, "vignette files (folder-based)...\n")
+      vignette_dir <- file.path(module_dir, "vignettes")
+      if (!dir.exists(vignette_dir)) {
+        dir.create(vignette_dir, recursive = TRUE)
+      }
+
+      # Get folders that should be copied to this module
+      target_folders <- c()
+      for (folder_name in names(config$vignette_folders$folder_mapping)) {
+        if (module_name %in% config$vignette_folders$folder_mapping[[folder_name]]) {
+          target_folders <- c(target_folders, folder_name)
+        }
+      }
+
+      # Copy files from each target folder
+      for (folder_name in target_folders) {
+        folder_path <- file.path(main_repo_dir, folder_name)
+        if (dir.exists(folder_path)) {
+          cat("    📁 Copying from", folder_name, "...\n")
+
+          # Get all vignette files in this folder
+          extensions <- config$vignette_folders$extensions %||% c(".qmd", ".Rmd", ".md")
+          pattern <- paste0("\\(", paste(gsub("\\.", "\\\\.", extensions), collapse = "||"), ")$")
+
+          vignette_files <- list.files(folder_path, pattern = pattern, recursive = FALSE)
+
+          # Filter out excluded patterns
+          exclude_patterns <- config$vignette_folders$exclude_patterns %||% c()
+          for (pattern in exclude_patterns) {
+            vignette_files <- vignette_files[!grepl(pattern, vignette_files)]
+          }
+
+          # Copy each file
+          for (vignette_file in vignette_files) {
+            source_path <- file.path(folder_path, vignette_file)
+            dest_path <- file.path(vignette_dir, vignette_file)
+
+            tryCatch({
+              fs::file_copy(source_path, dest_path, overwrite = TRUE)
+            }, error = function(e) {
+              warning("⚠️ Error copying ", vignette_file, " from ", folder_name, ": ", e$message)
+            })
+          }
+        } else {
+          warning("⚠️ Vignette folder not found: ", folder_path)
+        }
+      }
+    } else if (copy_vignettes && length(module_cfg$vignette_files) > 0) {
+      # Fallback to manual file copying
       cat("  📄 Copying", module_name, "vignette files (manual)...\n")
       vignette_dir <- file.path(module_dir, "vignettes")
       if (!dir.exists(vignette_dir)) {
@@ -670,456 +718,18 @@ if (!WIP) {
   }
 }
 
-# Legacy copy example files to each module directory ----
+# All file copying is now handled by the configuration-based system above
+# This section is intentionally left empty - all file copying logic has been moved
+# to the enhanced configuration-based asset copying section.
+# To add files to modules, update the _updateModules_config.yaml file.
 
 if (!WIP) {
-  ## jjstatsplot_example_files ----
-  if (copy_data_files) {
-    cat("📁 Copying jjstatsplot data files...\n")
-
-    jjstatsplot_example_files <- c(
-      "histopathology.rda"
-      # "histopathologyGraphsPlots.omv"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(jjstatsplot_dir, "data"))) {
-      dir.create(file.path(jjstatsplot_dir, "data"), recursive = TRUE)
-    }
-
-    fs::file_copy(
-      file.path(main_repo_dir, "data", jjstatsplot_example_files),
-      file.path(jjstatsplot_dir, "data"),
-      overwrite = TRUE
-    )
-  } else {
-    cat("⏭️ Skipping jjstatsplot data files (copy_data_files: false)\n")
-  }
-
-  ## jjstatsplot_data_description_files ----
-  if (copy_r_files) {
-    cat("📁 Copying jjstatsplot R files...\n")
-
-    jjstatsplot_data_description_files <- c(
-      # "data-histopathology.R"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(jjstatsplot_dir, "R"))) {
-      dir.create(file.path(jjstatsplot_dir, "R"), recursive = TRUE)
-    }
-
-    if (length(jjstatsplot_data_description_files) > 0) {
-      fs::file_copy(
-        file.path(main_repo_dir, "R", jjstatsplot_data_description_files),
-        file.path(jjstatsplot_dir, "R"),
-        overwrite = TRUE
-      )
-    }
-  } else {
-    cat("⏭️ Skipping jjstatsplot R files (copy_r_files: false)\n")
-  }
-
-
-
-
-  ## jjstatsplot_vignettes ----
-  if (copy_vignettes) {
-    cat("📁 Copying jjstatsplot vignette files...\n")
-
-    jjstatsplot_vignette_files <- c(
-      "jjstatsplot-introduction.Rmd",
-      "correlations-scatterplots.Rmd",
-      "continuous-comparisons.Rmd",
-      "categorical-plots.Rmd"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(jjstatsplot_dir, "vignettes"))) {
-      dir.create(file.path(jjstatsplot_dir, "vignettes"), recursive = TRUE)
-    }
-
-    tryCatch({
-      fs::file_copy(
-        file.path(main_repo_dir, "vignettes", jjstatsplot_vignette_files),
-        file.path(jjstatsplot_dir, "vignettes"),
-        overwrite = TRUE
-      )
-    }, error = function(e) {
-      message("Error copying jjstatsplot vignette files: ", e$message)
-    })
-  } else {
-    cat("⏭️ Skipping jjstatsplot vignette files (copy_vignettes: false)\n")
-  }
-
-
-
-
-  ## meddecide_example_files ----
-  if (copy_data_files) {
-    cat("📁 Copying meddecide data files...\n")
-
-    meddecide_example_files <- c(
-      "histopathology.rda",
-      # "histopathologyMedicalDecision.omv"
-      "roc_analysis_test_data.RData",
-      "cancer_biomarker_data.csv",
-      "cardiac_troponin_data.csv",
-      "sepsis_biomarker_data.csv",
-      "thyroid_function_data.csv"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(meddecide_dir, "data"))) {
-      dir.create(file.path(meddecide_dir, "data"), recursive = TRUE)
-    }
-
-    fs::file_copy(
-      file.path(main_repo_dir, "data", meddecide_example_files),
-      file.path(meddecide_dir, "data"),
-      overwrite = TRUE
-    )
-  } else {
-    cat("⏭️ Skipping meddecide data files (copy_data_files: false)\n")
-  }
-
-
-  ## meddecide_utility_data_description_files ----
-  if (copy_r_files) {
-    cat("📁 Copying meddecide R files...\n")
-
-    meddecide_utility_data_description_files <- c(
-      "psychopdaroc_utilities.R",
-      "nomogrammer.R",
-      # "meddecide-package.R",
-      # "meddecide-data.R",
-      # "stats_utils.R",  # Replaces meddecide_stats_utils.R
-      # "data-histopathology.R",
-      "diagnostic_metrics.R"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(meddecide_dir, "R"))) {
-      dir.create(file.path(meddecide_dir, "R"), recursive = TRUE)
-    }
-
-    fs::file_copy(
-      file.path(
-        main_repo_dir,
-        "R",
-        meddecide_utility_data_description_files
-      ),
-      file.path(meddecide_dir, "R"),
-      overwrite = TRUE
-    )
-  } else {
-    cat("⏭️ Skipping meddecide R files (copy_r_files: false)\n")
-  }
-
-
-
-  ## meddecide_vignettes ----
-  if (copy_vignettes) {
-    cat("📁 Copying meddecide vignette files...\n")
-
-    meddecide_vignette_files <- c(
-      "nogoldstandard.Rmd",
-      "diagnostic-tests.Rmd",
-      "decisionpanel_advanced.Rmd",
-      "decisionpanel_optimisation.Rmd",
-      "decisionpanel_clinical.Rmd",
-      "meddecide-vignettes.Rmd",
-      "medical_decision_tree_guide.Rmd"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(meddecide_dir, "vignettes"))) {
-      dir.create(file.path(meddecide_dir, "vignettes"), recursive = TRUE)
-    }
-
-    tryCatch({
-      fs::file_copy(
-        file.path(main_repo_dir, "vignettes", meddecide_vignette_files),
-        file.path(meddecide_dir, "vignettes"),
-        overwrite = TRUE
-      )
-    }, error = function(e) {
-      message("Error copying meddecide vignette files: ", e$message)
-    })
-  } else {
-    cat("⏭️ Skipping meddecide vignette files (copy_vignettes: false)\n")
-  }
-
-
-
-  ## meddecide_testdata_files ----
-  if (copy_test_files) {
-    cat("📁 Copying meddecide test files...\n")
-
-    meddecide_data_description_files <- c("test-decision.R", "test-roc.R")
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(meddecide_dir, "tests/testthat"))) {
-      dir.create(file.path(meddecide_dir, "tests/testthat"), recursive = TRUE)
-    }
-
-    fs::file_copy(
-      file.path(
-        main_repo_dir,
-        "tests/testthat",
-        meddecide_data_description_files
-      ),
-      file.path(meddecide_dir, "tests/testthat"),
-      overwrite = TRUE
-    )
-  } else {
-    cat("⏭️ Skipping meddecide test files (copy_test_files: false)\n")
-  }
-
-
-
-
-
-  ## jsurvival_example_files ----
-  if (copy_data_files) {
-    cat("📁 Copying jsurvival data files...\n")
-
-    jsurvival_example_files <- c(
-      "histopathology.rda"
-      # "histopathologySurvival.omv"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(jsurvival_dir, "data"))) {
-      dir.create(file.path(jsurvival_dir, "data"), recursive = TRUE)
-    }
-
-    fs::file_copy(
-      file.path(main_repo_dir, "data", jsurvival_example_files),
-      file.path(jsurvival_dir, "data"),
-      overwrite = TRUE
-    )
-  } else {
-    cat("⏭️ Skipping jsurvival data files (copy_data_files: false)\n")
-  }
-
-  ## jsurvival_data_description_files ----
-  if (copy_r_files) {
-    cat("📁 Copying jsurvival R files...\n")
-
-    jsurvival_data_description_files <- c(
-      # "data-histopathology.R"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(jsurvival_dir, "R"))) {
-      dir.create(file.path(jsurvival_dir, "R"), recursive = TRUE)
-    }
-
-    if (length(jsurvival_data_description_files) > 0) {
-      fs::file_copy(
-        file.path(main_repo_dir, "R", jsurvival_data_description_files),
-        file.path(jsurvival_dir, "R"),
-        overwrite = TRUE
-      )
-    }
-  } else {
-    cat("⏭️ Skipping jsurvival R files (copy_r_files: false)\n")
-  }
-
-
-
-
-  ## jsurvival_vignettes ----
-  if (copy_vignettes) {
-    cat("📁 Copying jsurvival vignette files...\n")
-
-    jsurvival_vignette_files <- c("jsurvival.Rmd")
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(jsurvival_dir, "vignettes"))) {
-      dir.create(file.path(jsurvival_dir, "vignettes"), recursive = TRUE)
-    }
-
-    tryCatch({
-      fs::file_copy(
-        file.path(main_repo_dir, "vignettes", jsurvival_vignette_files),
-        file.path(jsurvival_dir, "vignettes"),
-        overwrite = TRUE
-      )
-    }, error = function(e) {
-      message("Error copying jsurvival vignette files: ", e$message)
-    })
-  } else {
-    cat("⏭️ Skipping jsurvival vignette files (copy_vignettes: false)\n")
-  }
-
-
-
-
-
-
-
-
-  ## ClinicoPathDescriptives_example_files ----
-  if (copy_data_files) {
-    cat("📁 Copying ClinicoPathDescriptives data files...\n")
-
-    ClinicoPathDescriptives_example_files <- c(
-      "histopathology.rda",
-      "histopathologyDescriptives.omv",
-      "treatmentResponse.omv",
-      "treatmentResponse.rda"
-      # "swimmer_data_raw.omv",
-      # "swimmer_data_raw.csv",
-      # "swimmer_data_raw.rda",
-      # "swimmer_data_date_formats.omv",
-      # "swimmer_data_date_formats.csv",
-      # "swimmer_data_date_formats.rda",
-      # "swimmer_data.csv",
-      # "swimmer_data.rda"
-      # "raw_with_time.rda",
-      # "raw_with_time.csv",
-      # "percent_with_time.rda",
-      # "percent_with_time.csv",
-      # "percent_no_time.rda",
-      # "percent_no_time.csv",
-      # "tumor_response_examples.rda"
-      # "swimmer_plot_base_data.csv",
-      # "swimmer_plot_milestone_data.csv"
-      # "patientTimelinesDates.rda",
-      # "patientTimelines.rda",
-      # "patientTimelinesDates.csv",
-      # "patientTimelines.csv"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(ClinicoPathDescriptives_dir, "data"))) {
-      dir.create(file.path(ClinicoPathDescriptives_dir, "data"),
-                 recursive = TRUE)
-    }
-
-    tryCatch({
-      fs::file_copy(
-        file.path(
-          main_repo_dir,
-          "data",
-          ClinicoPathDescriptives_example_files
-        ),
-        file.path(ClinicoPathDescriptives_dir, "data"),
-        overwrite = TRUE
-      )
-    }, error = function(e) {
-      message("Error copying ClinicoPathDescriptives example files: ",
-              e$message)
-    })
-  } else {
-    cat("⏭️ Skipping ClinicoPathDescriptives data files (copy_data_files: false)\n")
-  }
-
-
-
-  ## ClinicoPathDescriptives_data_description_files ----
-  if (copy_r_files) {
-    cat("📁 Copying ClinicoPathDescriptives R files...\n")
-
-    ClinicoPathDescriptives_data_description_files <- c(
-      # "data-histopathology.R",
-      # "data-treatmentResponse.R",
-      # "tumor_response_examples.R"
-      # "data-swimmer-plot-documentation.r"
-      # "ClinicoPathDescriptives-package.R"
-    )
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(ClinicoPathDescriptives_dir, "R"))) {
-      dir.create(file.path(ClinicoPathDescriptives_dir, "R"), recursive = TRUE)
-    }
-
-    if (length(ClinicoPathDescriptives_data_description_files) > 0) {
-      fs::file_copy(
-        file.path(
-          main_repo_dir,
-          "R",
-          ClinicoPathDescriptives_data_description_files
-        ),
-        file.path(ClinicoPathDescriptives_dir, "R"),
-        overwrite = TRUE
-      )
-    }
-  } else {
-    cat("⏭️ Skipping ClinicoPathDescriptives R files (copy_r_files: false)\n")
-  }
-
-
-
-  # ihc_test_data.csv
-
-  # tumor_response_data.csv
-  # oncology_response_data.csv
-  #
-  # heartdisease.omv
-  # heartdisease.xlsx
-  #
-  #
-  # BreastCancer.csv
-  # BreastCancer.omv
-  # BreastCancer.rda
-  # colon.csv
-  # colon.omv
-  # colon.rda
-  # melanoma.csv
-  # melanoma.omv
-  # melanoma.rda
-  #
-  # histopathology.csv
-  # histopathology.omv
-  # histopathology.rda
-  #
-  #
-  #
-  # pmid.omv
-  # retractiondio2.omv
-  # retractiondoi.omv
-  #
-  # rocdata.csv
-  # rocdata.omv
-  # rocdata.rda
-
-
-
-  ## ClinicoPathDescriptives_vignettes ----
-  if (copy_vignettes) {
-    cat("📁 Copying ClinicoPathDescriptives vignette files...\n")
-
-    ClinicoPathDescriptives_vignette_files <- c("data-summary.Rmd", "visualization.Rmd")
-
-    # Create directories if they do not exist
-    if (!dir.exists(file.path(ClinicoPathDescriptives_dir, "vignettes"))) {
-      dir.create(file.path(ClinicoPathDescriptives_dir, "vignettes"),
-                 recursive = TRUE)
-    }
-
-    tryCatch({
-      fs::file_copy(
-        file.path(
-          main_repo_dir,
-          "vignettes",
-          ClinicoPathDescriptives_vignette_files
-        ),
-        file.path(ClinicoPathDescriptives_dir, "vignettes"),
-        overwrite = TRUE
-      )
-    }, error = function(e) {
-      message("Error copying ClinicoPathDescriptives vignette files: ",
-              e$message)
-    })
-  } else {
-    cat("⏭️ Skipping ClinicoPathDescriptives vignette files (copy_vignettes: false)\n")
-  }
-
-
-
+  # All legacy file copying sections have been removed
+  # File copying is now handled by the configuration-based system above
+  cat("📁 Legacy file copying sections have been removed - using configuration-based system\n")
+  # All legacy hardcoded file copying has been removed
+  # File copying is now handled by the configuration-based system in the main loop above
+  # To modify which files are copied, edit the _updateModules_config.yaml file
 
 }
 
