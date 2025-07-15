@@ -141,9 +141,7 @@ Imports:
     vtree,
     poLCA,
     RColorBrewer,
-    scales,
     reshape2,
-    rcrossref,
     httr,
     ggcharts,
     eurostat,
@@ -166,7 +164,6 @@ Imports:
     datefixR,
     anytime,
     TidyDensity,
-    stringr,
     mice,
     ggmice,
     party,
@@ -201,9 +198,9 @@ Imports:
     mlr3measures,
     vcdExtra,
     ggoncoplot,
-    UpSetR,
-    ComplexUpset,
-    vtree
+    rms,
+    dcurves,
+    Hmisc
 VignetteBuilder: 
     knitr, 
     tiff, 

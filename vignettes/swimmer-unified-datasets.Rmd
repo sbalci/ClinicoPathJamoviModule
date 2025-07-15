@@ -21,7 +21,9 @@ knitr::opts_chunk$set(
   fig.width = 8,
   fig.height = 6,
   warning = FALSE,
-  message = FALSE
+  message = FALSE,
+  eval = FALSE
+  
 )
 
 # Load required packages
@@ -74,7 +76,15 @@ basic_result <- swimmerplot(
   responseVar = "Response",
   timeUnit = "months",
   plotTheme = "ggswim",
-  showLegend = TRUE
+  showLegend = TRUE,
+  eventVar = NULL,
+  milestone1Date = NULL,
+  milestone2Date = NULL,
+  milestone3Date = NULL,
+  milestone4Date = NULL,
+  milestone5Date = NULL,
+  eventTimeVar = NULL,
+  sortVariable = NULL
 )
 
 print(basic_result)

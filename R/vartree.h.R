@@ -10,6 +10,8 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             percvar = NULL,
             percvarLevel = NULL,
             summaryvar = NULL,
+            summarylocation = "leafonly",
+            style = "default",
             prunebelow = NULL,
             pruneLevel1 = NULL,
             pruneLevel2 = NULL,
@@ -31,7 +33,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             mytitle = "",
             useprunesmaller = FALSE,
             prunesmaller = 5,
-            summarylocation = "leafonly", ...) {
+            showInterpretation = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -66,6 +68,21 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..summarylocation <- jmvcore::OptionList$new(
+                "summarylocation",
+                summarylocation,
+                options=list(
+                    "allnodes",
+                    "leafonly"),
+                default="leafonly")
+            private$..style <- jmvcore::OptionList$new(
+                "style",
+                style,
+                options=list(
+                    "default",
+                    "clean",
+                    "minimal"),
+                default="default")
             private$..prunebelow <- jmvcore::OptionVariable$new(
                 "prunebelow",
                 prunebelow,
@@ -162,18 +179,17 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "prunesmaller",
                 prunesmaller,
                 default=5)
-            private$..summarylocation <- jmvcore::OptionList$new(
-                "summarylocation",
-                summarylocation,
-                options=list(
-                    "allnodes",
-                    "leafonly"),
-                default="leafonly")
+            private$..showInterpretation <- jmvcore::OptionBool$new(
+                "showInterpretation",
+                showInterpretation,
+                default=TRUE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..percvar)
             self$.addOption(private$..percvarLevel)
             self$.addOption(private$..summaryvar)
+            self$.addOption(private$..summarylocation)
+            self$.addOption(private$..style)
             self$.addOption(private$..prunebelow)
             self$.addOption(private$..pruneLevel1)
             self$.addOption(private$..pruneLevel2)
@@ -195,13 +211,15 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..mytitle)
             self$.addOption(private$..useprunesmaller)
             self$.addOption(private$..prunesmaller)
-            self$.addOption(private$..summarylocation)
+            self$.addOption(private$..showInterpretation)
         }),
     active = list(
         vars = function() private$..vars$value,
         percvar = function() private$..percvar$value,
         percvarLevel = function() private$..percvarLevel$value,
         summaryvar = function() private$..summaryvar$value,
+        summarylocation = function() private$..summarylocation$value,
+        style = function() private$..style$value,
         prunebelow = function() private$..prunebelow$value,
         pruneLevel1 = function() private$..pruneLevel1$value,
         pruneLevel2 = function() private$..pruneLevel2$value,
@@ -223,12 +241,14 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         mytitle = function() private$..mytitle$value,
         useprunesmaller = function() private$..useprunesmaller$value,
         prunesmaller = function() private$..prunesmaller$value,
-        summarylocation = function() private$..summarylocation$value),
+        showInterpretation = function() private$..showInterpretation$value),
     private = list(
         ..vars = NA,
         ..percvar = NA,
         ..percvarLevel = NA,
         ..summaryvar = NA,
+        ..summarylocation = NA,
+        ..style = NA,
         ..prunebelow = NA,
         ..pruneLevel1 = NA,
         ..pruneLevel2 = NA,
@@ -250,7 +270,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..mytitle = NA,
         ..useprunesmaller = NA,
         ..prunesmaller = NA,
-        ..summarylocation = NA)
+        ..showInterpretation = NA)
 )
 
 vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -307,39 +327,64 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Variable Tree
 #'
-#' Function for Generating Tree Summaries of Variables.
+#' Enhanced function for generating comprehensive tree summaries of variables. 
+#' Supports current CRAN vtree package with advanced styling, statistical 
+#' summaries, and interpretation features. Consolidates functionality from 
+#' legacy versions with modern vtree capabilities.
+#' 
 #'
 #' @examples
 #' \donttest{
-#' # example will be added
+#' # Basic variable tree
+#' vartree(
+#'     data = mydata,
+#'     vars = c("var1", "var2", "var3"),
+#'     style = "default",
+#'     showInterpretation = TRUE
+#' )
+#'
+#' # Enhanced tree with statistical summaries
+#' vartree(
+#'     data = mydata,
+#'     vars = c("treatment", "response"),
+#'     summaryvar = "age",
+#'     summarylocation = "allnodes",
+#'     style = "clean",
+#'     showInterpretation = TRUE
+#' )
 #'}
 #' @param data The data as a data frame.
-#' @param vars .
-#' @param percvar .
-#' @param percvarLevel .
-#' @param summaryvar .
-#' @param prunebelow .
-#' @param pruneLevel1 .
-#' @param pruneLevel2 .
-#' @param follow .
-#' @param followLevel1 .
-#' @param followLevel2 .
-#' @param excl .
-#' @param vp .
-#' @param horizontal .
-#' @param sline .
-#' @param varnames .
-#' @param nodelabel .
-#' @param pct .
-#' @param showcount .
-#' @param legend .
-#' @param pattern .
-#' @param sequence .
-#' @param ptable .
-#' @param mytitle .
-#' @param useprunesmaller .
-#' @param prunesmaller .
-#' @param summarylocation .
+#' @param vars Categorical variables for tree construction.
+#' @param percvar Variable for percentage calculations.
+#' @param percvarLevel Specific level for percentage calculations.
+#' @param summaryvar Continuous variable for statistical summaries (mean, SD)
+#'   in tree nodes.
+#' @param summarylocation Where to display statistical summaries in the tree.
+#' @param style Visual style preset: default (colored), clean (minimal
+#'   colors),  minimal (simplified layout).
+#' @param prunebelow Variable for conditional pruning of tree branches.
+#' @param pruneLevel1 First level for pruning condition.
+#' @param pruneLevel2 Second level for pruning condition.
+#' @param follow Variable for conditional following of tree branches.
+#' @param followLevel1 First level for follow condition.
+#' @param followLevel2 Second level for follow condition.
+#' @param excl Exclude rows with missing values from analysis.
+#' @param vp Calculate percentages based on valid (non-missing) values.
+#' @param horizontal Display tree in horizontal orientation.
+#' @param sline Display variable names and values on same line.
+#' @param varnames Show variable names in tree nodes.
+#' @param nodelabel Show labels for tree nodes.
+#' @param pct Display percentages in tree nodes.
+#' @param showcount Display counts in tree nodes.
+#' @param legend Show legend for tree visualization.
+#' @param pattern Generate pattern-based tree analysis.
+#' @param sequence Generate sequence-based tree analysis.
+#' @param ptable Display pattern table alongside tree.
+#' @param mytitle Custom title for the tree root.
+#' @param useprunesmaller Enable pruning of nodes with small counts.
+#' @param prunesmaller Minimum count threshold for node pruning.
+#' @param showInterpretation Generate and display automatic interpretation of
+#'   tree results.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -354,6 +399,8 @@ vartree <- function(
     percvar,
     percvarLevel,
     summaryvar,
+    summarylocation = "leafonly",
+    style = "default",
     prunebelow,
     pruneLevel1,
     pruneLevel2,
@@ -375,7 +422,7 @@ vartree <- function(
     mytitle = "",
     useprunesmaller = FALSE,
     prunesmaller = 5,
-    summarylocation = "leafonly") {
+    showInterpretation = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("vartree requires jmvcore to be installed (restart may be required)")
@@ -404,6 +451,8 @@ vartree <- function(
         percvar = percvar,
         percvarLevel = percvarLevel,
         summaryvar = summaryvar,
+        summarylocation = summarylocation,
+        style = style,
         prunebelow = prunebelow,
         pruneLevel1 = pruneLevel1,
         pruneLevel2 = pruneLevel2,
@@ -425,7 +474,7 @@ vartree <- function(
         mytitle = mytitle,
         useprunesmaller = useprunesmaller,
         prunesmaller = prunesmaller,
-        summarylocation = summarylocation)
+        showInterpretation = showInterpretation)
 
     analysis <- vartreeClass$new(
         options = options,

@@ -271,9 +271,11 @@ children:
               - type: ComboBox
                 name: multifactorialComparisonType
                 label: Multifactorial Comparison Type
+                enable: (enableMultifactorialAnalysis)
               - type: ComboBox
                 name: baselineModel
                 label: Baseline Model
+                enable: (enableMultifactorialAnalysis)
       - type: Label
         label: Advanced Multifactorial Options
         children:
@@ -283,9 +285,11 @@ children:
               - type: CheckBox
                 name: performInteractionTests
                 label: Test Stage-Covariate Interactions
+                enable: (enableMultifactorialAnalysis)
               - type: CheckBox
                 name: stratifiedAnalysis
                 label: Stratified Analysis
+                enable: (enableMultifactorialAnalysis)
       - type: Label
         label: Multifactorial Results Display
         children:
@@ -295,15 +299,19 @@ children:
               - type: CheckBox
                 name: showMultifactorialTables
                 label: Show Multifactorial Tables
+                enable: (enableMultifactorialAnalysis)
               - type: CheckBox
                 name: showAdjustedCIndexComparison
                 label: Show Adjusted C-index Comparison
+                enable: (enableMultifactorialAnalysis)
               - type: CheckBox
                 name: showNestedModelTests
                 label: Show Nested Model Tests
+                enable: (enableMultifactorialAnalysis)
               - type: CheckBox
                 name: showStepwiseResults
                 label: Show Stepwise Selection Results
+                enable: (enableMultifactorialAnalysis)
   - type: CollapseBox
     label: Visualization Options
     collapsed: false

@@ -135,7 +135,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "continuous",
                     "nominal",
                     "ordinal"),
-                required=FALSE)
+                required=FALSE,
+                default=NULL)
             private$..milestone2Name <- jmvcore::OptionString$new(
                 "milestone2Name",
                 milestone2Name,
@@ -147,7 +148,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "continuous",
                     "nominal",
                     "ordinal"),
-                required=FALSE)
+                required=FALSE,
+                default=NULL)
             private$..milestone3Name <- jmvcore::OptionString$new(
                 "milestone3Name",
                 milestone3Name,
@@ -159,7 +161,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "continuous",
                     "nominal",
                     "ordinal"),
-                required=FALSE)
+                required=FALSE,
+                default=NULL)
             private$..milestone4Name <- jmvcore::OptionString$new(
                 "milestone4Name",
                 milestone4Name,
@@ -171,7 +174,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "continuous",
                     "nominal",
                     "ordinal"),
-                required=FALSE)
+                required=FALSE,
+                default=NULL)
             private$..milestone5Name <- jmvcore::OptionString$new(
                 "milestone5Name",
                 milestone5Name,
@@ -183,7 +187,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "continuous",
                     "nominal",
                     "ordinal"),
-                required=FALSE)
+                required=FALSE,
+                default=NULL)
             private$..showEventMarkers <- jmvcore::OptionBool$new(
                 "showEventMarkers",
                 showEventMarkers,
@@ -196,7 +201,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "ordinal"),
                 permitted=list(
                     "factor"),
-                required=FALSE)
+                required=FALSE,
+                default=NULL)
             private$..eventTimeVar <- jmvcore::OptionVariable$new(
                 "eventTimeVar",
                 eventTimeVar,
@@ -205,7 +211,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 permitted=list(
                     "numeric",
                     "factor"),
-                required=FALSE)
+                required=FALSE,
+                default=NULL)
             private$..laneWidth <- jmvcore::OptionNumber$new(
                 "laneWidth",
                 laneWidth,
@@ -246,7 +253,8 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..sortVariable <- jmvcore::OptionVariable$new(
                 "sortVariable",
                 sortVariable,
-                required=FALSE)
+                required=FALSE,
+                default=NULL)
             private$..sortOrder <- jmvcore::OptionList$new(
                 "sortOrder",
                 sortOrder,
@@ -498,7 +506,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="personTimeTable",
                 title="Person-Time Analysis",
-                visible="(personTimeAnalysis && responseVar)",
+                visible="(personTimeAnalysis)",
                 rows=0,
                 columns=list(
                     list(
@@ -533,7 +541,6 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="milestoneTable",
                 title="Milestone Event Summary",
-                visible="(milestone1Date || milestone2Date || milestone3Date || milestone4Date || milestone5Date)",
                 rows=0,
                 columns=list(
                     list(
@@ -568,7 +575,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="eventMarkerTable",
                 title="Event Marker Summary",
-                visible="(showEventMarkers && eventVar)",
+                visible="(showEventMarkers)",
                 rows=0,
                 columns=list(
                     list(
@@ -638,7 +645,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="advancedMetrics",
                 title="Advanced Clinical Metrics",
-                visible="(personTimeAnalysis && responseVar)",
+                visible="(personTimeAnalysis)",
                 rows=0,
                 columns=list(
                     list(
@@ -698,7 +705,7 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \donttest{
 #' # Clinical trial swimmer plot example
 #' data <- data.frame(
-#'     PatientID = paste0("PT", sprintf("\%03d", 1:20)),
+#'     PatientID = paste0("PT", formatC(1:20, width = 3, flag = "0")),
 #'     StartTime = rep(0, 20),
 #'     EndTime = sample(6:24, 20, replace = TRUE),
 #'     Response = sample(c("CR", "PR", "SD", "PD"), 20, replace = TRUE),
@@ -805,25 +812,25 @@ swimmerplot <- function(
     timeDisplay = "relative",
     maxMilestones = 5,
     milestone1Name = "Surgery",
-    milestone1Date,
+    milestone1Date = NULL,
     milestone2Name = "Treatment Start",
-    milestone2Date,
+    milestone2Date = NULL,
     milestone3Name = "Response Assessment",
-    milestone3Date,
+    milestone3Date = NULL,
     milestone4Name = "Progression",
-    milestone4Date,
+    milestone4Date = NULL,
     milestone5Name = "Death/Last Follow-up",
-    milestone5Date,
+    milestone5Date = NULL,
     showEventMarkers = FALSE,
-    eventVar,
-    eventTimeVar,
+    eventVar = NULL,
+    eventTimeVar = NULL,
     laneWidth = 3,
     markerSize = 5,
     plotTheme = "ggswim",
     showLegend = TRUE,
     referenceLines = "none",
     customReferenceTime = 12,
-    sortVariable,
+    sortVariable = NULL,
     sortOrder = "duration_desc",
     showInterpretation = TRUE,
     personTimeAnalysis = TRUE,

@@ -54,6 +54,17 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             generateExecutiveSummary = FALSE,
             cancerType = "general",
             useOptimismCorrection = FALSE,
+            enableMultifactorialAnalysis = FALSE,
+            continuousCovariates = NULL,
+            categoricalCovariates = NULL,
+            multifactorialComparisonType = "comprehensive",
+            baselineModel = "covariates_only",
+            performInteractionTests = FALSE,
+            stratifiedAnalysis = FALSE,
+            showMultifactorialTables = FALSE,
+            showAdjustedCIndexComparison = FALSE,
+            showNestedModelTests = FALSE,
+            showStepwiseResults = FALSE,
             showExplanations = TRUE, ...) {
 
             super$initialize(
@@ -300,6 +311,66 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "useOptimismCorrection",
                 useOptimismCorrection,
                 default=FALSE)
+            private$..enableMultifactorialAnalysis <- jmvcore::OptionBool$new(
+                "enableMultifactorialAnalysis",
+                enableMultifactorialAnalysis,
+                default=FALSE)
+            private$..continuousCovariates <- jmvcore::OptionVariables$new(
+                "continuousCovariates",
+                continuousCovariates,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..categoricalCovariates <- jmvcore::OptionVariables$new(
+                "categoricalCovariates",
+                categoricalCovariates,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..multifactorialComparisonType <- jmvcore::OptionList$new(
+                "multifactorialComparisonType",
+                multifactorialComparisonType,
+                options=list(
+                    "adjusted_cindex",
+                    "nested_models",
+                    "stepwise",
+                    "comprehensive"),
+                default="comprehensive")
+            private$..baselineModel <- jmvcore::OptionList$new(
+                "baselineModel",
+                baselineModel,
+                options=list(
+                    "covariates_only",
+                    "original_plus_covariates",
+                    "new_plus_covariates"),
+                default="covariates_only")
+            private$..performInteractionTests <- jmvcore::OptionBool$new(
+                "performInteractionTests",
+                performInteractionTests,
+                default=FALSE)
+            private$..stratifiedAnalysis <- jmvcore::OptionBool$new(
+                "stratifiedAnalysis",
+                stratifiedAnalysis,
+                default=FALSE)
+            private$..showMultifactorialTables <- jmvcore::OptionBool$new(
+                "showMultifactorialTables",
+                showMultifactorialTables,
+                default=FALSE)
+            private$..showAdjustedCIndexComparison <- jmvcore::OptionBool$new(
+                "showAdjustedCIndexComparison",
+                showAdjustedCIndexComparison,
+                default=FALSE)
+            private$..showNestedModelTests <- jmvcore::OptionBool$new(
+                "showNestedModelTests",
+                showNestedModelTests,
+                default=FALSE)
+            private$..showStepwiseResults <- jmvcore::OptionBool$new(
+                "showStepwiseResults",
+                showStepwiseResults,
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -353,6 +424,17 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..generateExecutiveSummary)
             self$.addOption(private$..cancerType)
             self$.addOption(private$..useOptimismCorrection)
+            self$.addOption(private$..enableMultifactorialAnalysis)
+            self$.addOption(private$..continuousCovariates)
+            self$.addOption(private$..categoricalCovariates)
+            self$.addOption(private$..multifactorialComparisonType)
+            self$.addOption(private$..baselineModel)
+            self$.addOption(private$..performInteractionTests)
+            self$.addOption(private$..stratifiedAnalysis)
+            self$.addOption(private$..showMultifactorialTables)
+            self$.addOption(private$..showAdjustedCIndexComparison)
+            self$.addOption(private$..showNestedModelTests)
+            self$.addOption(private$..showStepwiseResults)
             self$.addOption(private$..showExplanations)
         }),
     active = list(
@@ -404,6 +486,17 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         generateExecutiveSummary = function() private$..generateExecutiveSummary$value,
         cancerType = function() private$..cancerType$value,
         useOptimismCorrection = function() private$..useOptimismCorrection$value,
+        enableMultifactorialAnalysis = function() private$..enableMultifactorialAnalysis$value,
+        continuousCovariates = function() private$..continuousCovariates$value,
+        categoricalCovariates = function() private$..categoricalCovariates$value,
+        multifactorialComparisonType = function() private$..multifactorialComparisonType$value,
+        baselineModel = function() private$..baselineModel$value,
+        performInteractionTests = function() private$..performInteractionTests$value,
+        stratifiedAnalysis = function() private$..stratifiedAnalysis$value,
+        showMultifactorialTables = function() private$..showMultifactorialTables$value,
+        showAdjustedCIndexComparison = function() private$..showAdjustedCIndexComparison$value,
+        showNestedModelTests = function() private$..showNestedModelTests$value,
+        showStepwiseResults = function() private$..showStepwiseResults$value,
         showExplanations = function() private$..showExplanations$value),
     private = list(
         ..oldStage = NA,
@@ -454,6 +547,17 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..generateExecutiveSummary = NA,
         ..cancerType = NA,
         ..useOptimismCorrection = NA,
+        ..enableMultifactorialAnalysis = NA,
+        ..continuousCovariates = NA,
+        ..categoricalCovariates = NA,
+        ..multifactorialComparisonType = NA,
+        ..baselineModel = NA,
+        ..performInteractionTests = NA,
+        ..stratifiedAnalysis = NA,
+        ..showMultifactorialTables = NA,
+        ..showAdjustedCIndexComparison = NA,
+        ..showNestedModelTests = NA,
+        ..showStepwiseResults = NA,
         ..showExplanations = NA)
 )
 
@@ -480,6 +584,13 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         nriResults = function() private$.items[["nriResults"]],
         idiResultsExplanation = function() private$.items[["idiResultsExplanation"]],
         idiResults = function() private$.items[["idiResults"]],
+        multifactorialAnalysisExplanation = function() private$.items[["multifactorialAnalysisExplanation"]],
+        multifactorialResults = function() private$.items[["multifactorialResults"]],
+        adjustedCIndexComparison = function() private$.items[["adjustedCIndexComparison"]],
+        nestedModelTests = function() private$.items[["nestedModelTests"]],
+        stepwiseResults = function() private$.items[["stepwiseResults"]],
+        interactionTests = function() private$.items[["interactionTests"]],
+        stratifiedAnalysis = function() private$.items[["stratifiedAnalysis"]],
         rocAnalysis = function() private$.items[["rocAnalysis"]],
         dcaResults = function() private$.items[["dcaResults"]],
         bootstrapResults = function() private$.items[["bootstrapResults"]],
@@ -850,6 +961,233 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `name`="Interpretation", 
                         `title`="Interpretation", 
                         `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multifactorialAnalysisExplanation",
+                title="Understanding Multifactorial Stage Migration Analysis",
+                visible="(enableMultifactorialAnalysis && showExplanations)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="multifactorialResults",
+                title="Multifactorial Model Results",
+                visible="(enableMultifactorialAnalysis && showMultifactorialTables)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "continuousCovariates",
+                    "categoricalCovariates",
+                    "multifactorialComparisonType",
+                    "baselineModel"),
+                columns=list(
+                    list(
+                        `name`="Model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="C_Index", 
+                        `title`="C-Index", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="SE", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="AIC", 
+                        `title`="AIC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="BIC", 
+                        `title`="BIC", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="adjustedCIndexComparison",
+                title="Adjusted C-Index Comparison (Multifactorial)",
+                visible="(enableMultifactorialAnalysis && showAdjustedCIndexComparison)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "continuousCovariates",
+                    "categoricalCovariates"),
+                columns=list(
+                    list(
+                        `name`="Comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="C_Index_Difference", 
+                        `title`="C-Index Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="SE", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="nestedModelTests",
+                title="Nested Model Tests",
+                visible="(enableMultifactorialAnalysis && showNestedModelTests)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "continuousCovariates",
+                    "categoricalCovariates"),
+                columns=list(
+                    list(
+                        `name`="Model_Comparison", 
+                        `title`="Model Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="Chi_Square", 
+                        `title`="Chi-Square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Decision", 
+                        `title`="Decision", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stepwiseResults",
+                title="Stepwise Model Selection Results",
+                visible="(enableMultifactorialAnalysis && showStepwiseResults)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "continuousCovariates",
+                    "categoricalCovariates"),
+                columns=list(
+                    list(
+                        `name`="Variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="Step", 
+                        `title`="Step", 
+                        `type`="text"),
+                    list(
+                        `name`="Action", 
+                        `title`="Action", 
+                        `type`="text"),
+                    list(
+                        `name`="AIC", 
+                        `title`="AIC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="interactionTests",
+                title="Stage-Covariate Interaction Tests",
+                visible="(enableMultifactorialAnalysis && performInteractionTests)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "performInteractionTests",
+                    "continuousCovariates",
+                    "categoricalCovariates"),
+                columns=list(
+                    list(
+                        `name`="Interaction", 
+                        `title`="Interaction", 
+                        `type`="text"),
+                    list(
+                        `name`="Chi_Square", 
+                        `title`="Chi-Square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stratifiedAnalysis",
+                title="Stratified Analysis Results",
+                visible="(enableMultifactorialAnalysis && stratifiedAnalysis)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "stratifiedAnalysis",
+                    "categoricalCovariates"),
+                columns=list(
+                    list(
+                        `name`="Stratum", 
+                        `title`="Stratum", 
+                        `type`="text"),
+                    list(
+                        `name`="N", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="C_Index_Old", 
+                        `title`="C-Index (Original)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="C_Index_New", 
+                        `title`="C-Index (New)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Difference", 
+                        `title`="Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rocAnalysis",
@@ -1579,6 +1917,39 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   literature.
 #' @param useOptimismCorrection Apply optimism correction to performance
 #'   metrics using bootstrap validation to avoid overly optimistic estimates.
+#' @param enableMultifactorialAnalysis Enable advanced multifactorial stage
+#'   migration analysis that includes additional covariates in the comparison.
+#'   This allows for adjusted comparisons between staging systems after
+#'   accounting for other prognostic factors.
+#' @param continuousCovariates Continuous variables to include as covariates
+#'   in the multifactorial analysis (e.g., age, tumor size, biomarker levels).
+#'   These will be included in Cox regression models for both staging systems.
+#' @param categoricalCovariates Categorical variables to include as covariates
+#'   in the multifactorial analysis (e.g., sex, histology, treatment type).
+#'   These will be included in Cox regression models for both staging systems.
+#' @param multifactorialComparisonType Type of multifactorial comparison to
+#'   perform. Comprehensive includes all methods for thorough evaluation of
+#'   staging systems in the context of other prognostic factors.
+#' @param baselineModel Baseline model for multifactorial comparisons. This
+#'   determines the reference model against which staging systems are compared.
+#' @param performInteractionTests Test for interactions between staging
+#'   systems and covariates. This helps identify if the staging system
+#'   performance varies across different patient subgroups.
+#' @param stratifiedAnalysis Perform stratified analysis by categorical
+#'   covariates to evaluate staging system performance within subgroups.
+#' @param showMultifactorialTables Display detailed tables showing
+#'   multifactorial model results, including adjusted hazard ratios and model
+#'   comparison statistics.
+#' @param showAdjustedCIndexComparison Display comparison of C-indices for
+#'   staging systems adjusted for covariates. This shows the discriminative
+#'   ability of each staging system after accounting for other prognostic
+#'   factors.
+#' @param showNestedModelTests Display likelihood ratio tests comparing nested
+#'   models to formally test the added value of each staging system over the
+#'   baseline model.
+#' @param showStepwiseResults Display results of stepwise model selection
+#'   showing which variables (including staging systems) are selected in the
+#'   final model.
 #' @param showExplanations Include detailed explanations for results.
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -1601,6 +1972,13 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$nriResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$idiResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$idiResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$multifactorialAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multifactorialResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$adjustedCIndexComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$nestedModelTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stepwiseResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interactionTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$dcaResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
@@ -1688,6 +2066,17 @@ stagemigration <- function(
     generateExecutiveSummary = FALSE,
     cancerType = "general",
     useOptimismCorrection = FALSE,
+    enableMultifactorialAnalysis = FALSE,
+    continuousCovariates,
+    categoricalCovariates,
+    multifactorialComparisonType = "comprehensive",
+    baselineModel = "covariates_only",
+    performInteractionTests = FALSE,
+    stratifiedAnalysis = FALSE,
+    showMultifactorialTables = FALSE,
+    showAdjustedCIndexComparison = FALSE,
+    showNestedModelTests = FALSE,
+    showStepwiseResults = FALSE,
     showExplanations = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -1697,16 +2086,21 @@ stagemigration <- function(
     if ( ! missing(newStage)) newStage <- jmvcore::resolveQuo(jmvcore::enquo(newStage))
     if ( ! missing(survivalTime)) survivalTime <- jmvcore::resolveQuo(jmvcore::enquo(survivalTime))
     if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
+    if ( ! missing(continuousCovariates)) continuousCovariates <- jmvcore::resolveQuo(jmvcore::enquo(continuousCovariates))
+    if ( ! missing(categoricalCovariates)) categoricalCovariates <- jmvcore::resolveQuo(jmvcore::enquo(categoricalCovariates))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(oldStage), oldStage, NULL),
             `if`( ! missing(newStage), newStage, NULL),
             `if`( ! missing(survivalTime), survivalTime, NULL),
-            `if`( ! missing(event), event, NULL))
+            `if`( ! missing(event), event, NULL),
+            `if`( ! missing(continuousCovariates), continuousCovariates, NULL),
+            `if`( ! missing(categoricalCovariates), categoricalCovariates, NULL))
 
     for (v in oldStage) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in newStage) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in categoricalCovariates) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- stagemigrationOptions$new(
         oldStage = oldStage,
@@ -1757,6 +2151,17 @@ stagemigration <- function(
         generateExecutiveSummary = generateExecutiveSummary,
         cancerType = cancerType,
         useOptimismCorrection = useOptimismCorrection,
+        enableMultifactorialAnalysis = enableMultifactorialAnalysis,
+        continuousCovariates = continuousCovariates,
+        categoricalCovariates = categoricalCovariates,
+        multifactorialComparisonType = multifactorialComparisonType,
+        baselineModel = baselineModel,
+        performInteractionTests = performInteractionTests,
+        stratifiedAnalysis = stratifiedAnalysis,
+        showMultifactorialTables = showMultifactorialTables,
+        showAdjustedCIndexComparison = showAdjustedCIndexComparison,
+        showNestedModelTests = showNestedModelTests,
+        showStepwiseResults = showStepwiseResults,
         showExplanations = showExplanations)
 
     analysis <- stagemigrationClass$new(

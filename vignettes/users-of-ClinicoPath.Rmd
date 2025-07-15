@@ -5,6 +5,7 @@ vignette: >
   %\VignetteIndexEntry{Users of ClinicoPath}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteKeepMd{true}
 ---
 
 ```{r, include = FALSE}

@@ -54,6 +54,17 @@ stagemigration(
   generateExecutiveSummary = FALSE,
   cancerType = "general",
   useOptimismCorrection = FALSE,
+  enableMultifactorialAnalysis = FALSE,
+  continuousCovariates,
+  categoricalCovariates,
+  multifactorialComparisonType = "comprehensive",
+  baselineModel = "covariates_only",
+  performInteractionTests = FALSE,
+  stratifiedAnalysis = FALSE,
+  showMultifactorialTables = FALSE,
+  showAdjustedCIndexComparison = FALSE,
+  showNestedModelTests = FALSE,
+  showStepwiseResults = FALSE,
   showExplanations = TRUE
 )
 }
@@ -239,6 +250,50 @@ literature.}
 \item{useOptimismCorrection}{Apply optimism correction to performance
 metrics using bootstrap validation to avoid overly optimistic estimates.}
 
+\item{enableMultifactorialAnalysis}{Enable advanced multifactorial stage
+migration analysis that includes additional covariates in the comparison.
+This allows for adjusted comparisons between staging systems after
+accounting for other prognostic factors.}
+
+\item{continuousCovariates}{Continuous variables to include as covariates
+in the multifactorial analysis (e.g., age, tumor size, biomarker levels).
+These will be included in Cox regression models for both staging systems.}
+
+\item{categoricalCovariates}{Categorical variables to include as covariates
+in the multifactorial analysis (e.g., sex, histology, treatment type).
+These will be included in Cox regression models for both staging systems.}
+
+\item{multifactorialComparisonType}{Type of multifactorial comparison to
+perform. Comprehensive includes all methods for thorough evaluation of
+staging systems in the context of other prognostic factors.}
+
+\item{baselineModel}{Baseline model for multifactorial comparisons. This
+determines the reference model against which staging systems are compared.}
+
+\item{performInteractionTests}{Test for interactions between staging
+systems and covariates. This helps identify if the staging system
+performance varies across different patient subgroups.}
+
+\item{stratifiedAnalysis}{Perform stratified analysis by categorical
+covariates to evaluate staging system performance within subgroups.}
+
+\item{showMultifactorialTables}{Display detailed tables showing
+multifactorial model results, including adjusted hazard ratios and model
+comparison statistics.}
+
+\item{showAdjustedCIndexComparison}{Display comparison of C-indices for
+staging systems adjusted for covariates. This shows the discriminative
+ability of each staging system after accounting for other prognostic
+factors.}
+
+\item{showNestedModelTests}{Display likelihood ratio tests comparing nested
+models to formally test the added value of each staging system over the
+baseline model.}
+
+\item{showStepwiseResults}{Display results of stepwise model selection
+showing which variables (including staging systems) are selected in the
+final model.}
+
 \item{showExplanations}{Include detailed explanations for results.}
 }
 \value{
@@ -263,6 +318,13 @@ A results object containing:
 \code{results$nriResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$idiResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$idiResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$multifactorialAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$multifactorialResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedCIndexComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$nestedModelTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$stepwiseResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$interactionTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$dcaResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr

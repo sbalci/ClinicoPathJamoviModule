@@ -125,3 +125,13 @@ children:
                     name: ptable
                   - type: ComboBox
                     name: summarylocation
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: showInterpretation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: style
