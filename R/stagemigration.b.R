@@ -4214,9 +4214,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     lrt_old <- anova(models$baseline, models$old_plus_covariates, test = "LRT")
                     nested_tests$old_vs_baseline <- list(
                         comparison = "Original Staging vs Covariates Only",
-                        chi_square = lrt_old$`Pr(>Chi)`[2],
+                        chi_square = lrt_old$Chisq[2],
                         df = lrt_old$Df[2],
-                        p_value = lrt_old$`Pr(>Chi)`[2]
+                        p_value = lrt_old$`Pr(>|Chi|)`[2]
                     )
                 }
                 
@@ -4224,9 +4224,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     lrt_new <- anova(models$baseline, models$new_plus_covariates, test = "LRT")
                     nested_tests$new_vs_baseline <- list(
                         comparison = "New Staging vs Covariates Only",
-                        chi_square = lrt_new$`Pr(>Chi)`[2],
+                        chi_square = lrt_new$Chisq[2],
                         df = lrt_new$Df[2],
-                        p_value = lrt_new$`Pr(>Chi)`[2]
+                        p_value = lrt_new$`Pr(>|Chi|)`[2]
                     )
                 }
             }

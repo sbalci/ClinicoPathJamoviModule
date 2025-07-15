@@ -3,8 +3,8 @@
 
 # Global settings
 global:
-  new_version: "0.0.3.59"
-  new_date: "2025-07-15"
+  new_version: "0.0.3.60"
+  new_date: "2025-07-16"
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 # Operation modes
@@ -202,7 +202,7 @@ modules:
       - "jamovi"
 
   ClinicoPathDescriptives:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     menuGroup_pattern: "menuGroup: Exploration$"
     menuGroup_pattern_wip: "menuGroup: Exploration"
