@@ -16,7 +16,7 @@ description:
         usage: |
             # Clinical trial swimmer plot example
             data <- data.frame(
-                PatientID = paste0("PT", sprintf("\%03d", 1:20)),
+                PatientID = paste0("PT", formatC(1:20, width = 3, flag = "0")),
                 StartTime = rep(0, 20),
                 EndTime = sample(6:24, 20, replace = TRUE),
                 Response = sample(c("CR", "PR", "SD", "PD"), 20, replace = TRUE),
@@ -177,6 +177,7 @@ options:
       description:
           R: >
             Date/time variable when milestone 1 occurred.
+      default: NULL
 
     - name: milestone2Name
       title: "Milestone 2 Name"
@@ -194,6 +195,7 @@ options:
       description:
           R: >
             Date/time variable when milestone 2 occurred.
+      default: NULL
 
     - name: milestone3Name
       title: "Milestone 3 Name"
@@ -211,6 +213,7 @@ options:
       description:
           R: >
             Date/time variable when milestone 3 occurred.
+      default: NULL
 
     - name: milestone4Name
       title: "Milestone 4 Name"
@@ -228,6 +231,7 @@ options:
       description:
           R: >
             Date/time variable when milestone 4 occurred.
+      default: NULL
 
     - name: milestone5Name
       title: "Milestone 5 Name"
@@ -245,6 +249,7 @@ options:
       description:
           R: >
             Date/time variable when milestone 5 occurred.
+      default: NULL
 
     # === Event Markers ===
     - name: showEventMarkers
@@ -264,6 +269,7 @@ options:
       description:
           R: >
             Variable containing event type labels for markers.
+      default: NULL
 
     - name: eventTimeVar
       title: "Event Time Variable"
@@ -274,6 +280,7 @@ options:
       description:
           R: >
             Variable containing event times (defaults to start time if not specified).
+      default: NULL
 
     # === Visualization Options ===
     - name: laneWidth
@@ -353,7 +360,8 @@ options:
       description:
           R: >
             Optional variable to sort patient timelines (defaults to duration-based sorting).
-
+      default: NULL
+      
     - name: sortOrder
       title: "Sort Order"
       type: List

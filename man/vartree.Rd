@@ -10,6 +10,8 @@ vartree(
   percvar,
   percvarLevel,
   summaryvar,
+  summarylocation = "leafonly",
+  style = "default",
   prunebelow,
   pruneLevel1,
   pruneLevel2,
@@ -31,63 +33,70 @@ vartree(
   mytitle = "",
   useprunesmaller = FALSE,
   prunesmaller = 5,
-  summarylocation = "leafonly"
+  showInterpretation = TRUE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{vars}{.}
+\item{vars}{Categorical variables for tree construction.}
 
-\item{percvar}{.}
+\item{percvar}{Variable for percentage calculations.}
 
-\item{percvarLevel}{.}
+\item{percvarLevel}{Specific level for percentage calculations.}
 
-\item{summaryvar}{.}
+\item{summaryvar}{Continuous variable for statistical summaries (mean, SD)
+in tree nodes.}
 
-\item{prunebelow}{.}
+\item{summarylocation}{Where to display statistical summaries in the tree.}
 
-\item{pruneLevel1}{.}
+\item{style}{Visual style preset: default (colored), clean (minimal
+colors),  minimal (simplified layout).}
 
-\item{pruneLevel2}{.}
+\item{prunebelow}{Variable for conditional pruning of tree branches.}
 
-\item{follow}{.}
+\item{pruneLevel1}{First level for pruning condition.}
 
-\item{followLevel1}{.}
+\item{pruneLevel2}{Second level for pruning condition.}
 
-\item{followLevel2}{.}
+\item{follow}{Variable for conditional following of tree branches.}
 
-\item{excl}{.}
+\item{followLevel1}{First level for follow condition.}
 
-\item{vp}{.}
+\item{followLevel2}{Second level for follow condition.}
 
-\item{horizontal}{.}
+\item{excl}{Exclude rows with missing values from analysis.}
 
-\item{sline}{.}
+\item{vp}{Calculate percentages based on valid (non-missing) values.}
 
-\item{varnames}{.}
+\item{horizontal}{Display tree in horizontal orientation.}
 
-\item{nodelabel}{.}
+\item{sline}{Display variable names and values on same line.}
 
-\item{pct}{.}
+\item{varnames}{Show variable names in tree nodes.}
 
-\item{showcount}{.}
+\item{nodelabel}{Show labels for tree nodes.}
 
-\item{legend}{.}
+\item{pct}{Display percentages in tree nodes.}
 
-\item{pattern}{.}
+\item{showcount}{Display counts in tree nodes.}
 
-\item{sequence}{.}
+\item{legend}{Show legend for tree visualization.}
 
-\item{ptable}{.}
+\item{pattern}{Generate pattern-based tree analysis.}
 
-\item{mytitle}{.}
+\item{sequence}{Generate sequence-based tree analysis.}
 
-\item{useprunesmaller}{.}
+\item{ptable}{Display pattern table alongside tree.}
 
-\item{prunesmaller}{.}
+\item{mytitle}{Custom title for the tree root.}
 
-\item{summarylocation}{.}
+\item{useprunesmaller}{Enable pruning of nodes with small counts.}
+
+\item{prunesmaller}{Minimum count threshold for node pruning.}
+
+\item{showInterpretation}{Generate and display automatic interpretation of
+tree results.}
 }
 \value{
 A results object containing:
@@ -98,10 +107,29 @@ A results object containing:
 }
 }
 \description{
-Function for Generating Tree Summaries of Variables.
+Enhanced function for generating comprehensive tree summaries of variables.
+Supports current CRAN vtree package with advanced styling, statistical
+summaries, and interpretation features. Consolidates functionality from
+legacy versions with modern vtree capabilities.
 }
 \examples{
 \donttest{
-# example will be added
+# Basic variable tree
+vartree(
+    data = mydata,
+    vars = c("var1", "var2", "var3"),
+    style = "default",
+    showInterpretation = TRUE
+)
+
+# Enhanced tree with statistical summaries
+vartree(
+    data = mydata,
+    vars = c("treatment", "response"),
+    summaryvar = "age",
+    summarylocation = "allnodes",
+    style = "clean",
+    showInterpretation = TRUE
+)
 }
 }

@@ -177,13 +177,22 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             required_vars <- c(self$options$oldStage, self$options$newStage, 
                              self$options$survivalTime, self$options$event)
             
+            # Add covariate variables if they exist
+            all_vars <- required_vars
+            if (length(self$options$continuousCovariates) > 0) {
+                all_vars <- c(all_vars, self$options$continuousCovariates)
+            }
+            if (length(self$options$categoricalCovariates) > 0) {
+                all_vars <- c(all_vars, self$options$categoricalCovariates)
+            }
+            
             missing_vars <- setdiff(required_vars, names(self$data))
             if (length(missing_vars) > 0) {
                 stop(paste("Missing variables:", paste(missing_vars, collapse = ", ")))
             }
             
-            # Extract and validate data
-            data <- self$data[required_vars]
+            # Extract and validate data (including covariates)
+            data <- self$data[all_vars]
             
             # Check for rows with invalid data before removing them
             incomplete_rows <- which(!complete.cases(data))
@@ -1773,6 +1782,14 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 all_results$will_rogers <- private$.analyzeWillRogers(data)
             }
             
+            # Multifactorial analysis
+            if (self$options$enableMultifactorialAnalysis) {
+                all_results$multifactorial_analysis <- private$.performMultifactorialAnalysis(data)
+            } else if (self$options$performInteractionTests) {
+                # Create interaction tests even when multifactorial analysis is disabled
+                all_results$multifactorial_analysis <- private$.performInteractionTestsOnly(data)
+            }
+            
             # Generate clinical interpretation
             if (self$options$showClinicalInterpretation) {
                 all_results$clinical_interpretation <- private$.generateClinicalInterpretation(all_results)
@@ -2291,6 +2308,36 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 </div>
                 '
                 self$results$methodologyNotes$setContent(methodology_html)
+            }
+            
+            # Multifactorial Analysis Population
+            if (self$options$enableMultifactorialAnalysis && !is.null(all_results$multifactorial_analysis)) {
+                # Add explanatory text for multifactorial analysis
+                if (self$options$showExplanations) {
+                    multifactorial_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Multifactorial Stage Migration Analysis</h4>
+                        <p style="margin-bottom: 10px;">This analysis evaluates staging system performance after adjusting for other prognostic factors:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Adjusted C-index:</strong> Discriminative ability after accounting for covariates</li>
+                            <li><strong>Nested Model Tests:</strong> Formal comparison of staging systems using likelihood ratio tests</li>
+                            <li><strong>Stepwise Selection:</strong> Automated variable selection showing importance of each staging system</li>
+                            <li><strong>Interaction Tests:</strong> Whether staging system performance varies by patient subgroups</li>
+                            <li><strong>Stratified Analysis:</strong> Separate evaluation within categorical covariate levels</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical significance:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Adjusted analysis shows real-world staging system performance</li>
+                            <li>Accounts for confounding by other prognostic factors</li>
+                            <li>Identifies which staging system adds most value in multifactorial setting</li>
+                            <li>Reveals if staging system benefit varies across patient subgroups</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$multifactorialAnalysisExplanation$setContent(multifactorial_explanation_html)
+                }
+                
+                private$.populateMultifactorialResults(all_results$multifactorial_analysis)
             }
             
             # Configure plots
@@ -4028,6 +4075,804 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     C_Slope_CI_Upper = new_cal$cal_slope_ci_upper,
                     Interpretation = new_cal$interpretation
                 ))
+            }
+        },
+        
+        .performMultifactorialAnalysis = function(data) {
+            # Comprehensive multifactorial analysis for stage migration
+            
+            # Extract covariate information
+            continuous_vars <- self$options$continuousCovariates
+            categorical_vars <- self$options$categoricalCovariates
+            
+            # Check if we have any covariates
+            if (length(continuous_vars) == 0 && length(categorical_vars) == 0) {
+                return(list(
+                    error = "No covariates selected for multifactorial analysis",
+                    models = NULL,
+                    comparisons = NULL
+                ))
+            }
+            
+            # Prepare covariate data
+            covariate_data <- data
+            all_covariates <- c(continuous_vars, categorical_vars)
+            
+            # Validate covariates exist in data
+            missing_covariates <- setdiff(all_covariates, names(data))
+            if (length(missing_covariates) > 0) {
+                return(list(
+                    error = paste("Missing covariates:", paste(missing_covariates, collapse = ", ")),
+                    models = NULL,
+                    comparisons = NULL
+                ))
+            }
+            
+            # Remove rows with missing covariates
+            covariate_data <- covariate_data[complete.cases(covariate_data[all_covariates]), ]
+            
+            if (nrow(covariate_data) < 50) {
+                return(list(
+                    error = "Insufficient sample size for multifactorial analysis after covariate cleaning",
+                    models = NULL,
+                    comparisons = NULL
+                ))
+            }
+            
+            # Build model formulas
+            old_stage <- self$options$oldStage
+            new_stage <- self$options$newStage
+            survival_time <- self$options$survivalTime
+            
+            # Build covariate formula component
+            covariate_formula <- paste(all_covariates, collapse = " + ")
+            
+            # Define model formulas based on baseline model selection
+            baseline_type <- self$options$baselineModel
+            
+            formulas <- list()
+            
+            if (baseline_type == "covariates_only") {
+                formulas$baseline <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", covariate_formula))
+                formulas$old_plus_covariates <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", old_stage, "+", covariate_formula))
+                formulas$new_plus_covariates <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", new_stage, "+", covariate_formula))
+            } else if (baseline_type == "original_plus_covariates") {
+                formulas$baseline <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", old_stage, "+", covariate_formula))
+                formulas$new_plus_covariates <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", new_stage, "+", covariate_formula))
+            } else if (baseline_type == "new_plus_covariates") {
+                formulas$baseline <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", new_stage, "+", covariate_formula))
+                formulas$old_plus_covariates <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", old_stage, "+", covariate_formula))
+            }
+            
+            # Fit Cox models
+            models <- list()
+            model_results <- list()
+            
+            tryCatch({
+                for (model_name in names(formulas)) {
+                    models[[model_name]] <- survival::coxph(formulas[[model_name]], data = covariate_data)
+                    
+                    # Calculate C-index
+                    cindex <- survival::concordance(models[[model_name]])
+                    
+                    model_results[[model_name]] <- list(
+                        model = models[[model_name]],
+                        c_index = cindex$concordance,
+                        c_index_se = sqrt(cindex$var),
+                        c_index_ci_lower = cindex$concordance - 1.96 * sqrt(cindex$var),
+                        c_index_ci_upper = cindex$concordance + 1.96 * sqrt(cindex$var),
+                        aic = AIC(models[[model_name]]),
+                        bic = BIC(models[[model_name]])
+                    )
+                }
+            }, error = function(e) {
+                return(list(
+                    error = paste("Error fitting Cox models:", e$message),
+                    models = NULL,
+                    comparisons = NULL
+                ))
+            })
+            
+            # Perform model comparisons
+            comparisons <- list()
+            
+            # C-index comparisons
+            if (length(model_results) >= 2) {
+                model_names <- names(model_results)
+                for (i in 1:(length(model_names) - 1)) {
+                    for (j in (i + 1):length(model_names)) {
+                        model1 <- model_names[i]
+                        model2 <- model_names[j]
+                        
+                        # Calculate C-index difference
+                        c_diff <- model_results[[model2]]$c_index - model_results[[model1]]$c_index
+                        se_diff <- sqrt(model_results[[model1]]$c_index_se^2 + model_results[[model2]]$c_index_se^2)
+                        
+                        # Z-test for difference
+                        z_stat <- c_diff / se_diff
+                        p_value <- 2 * (1 - pnorm(abs(z_stat)))
+                        
+                        comparisons[[paste(model1, "vs", model2)]] <- list(
+                            model1 = model1,
+                            model2 = model2,
+                            c_index_diff = c_diff,
+                            se_diff = se_diff,
+                            ci_lower = c_diff - 1.96 * se_diff,
+                            ci_upper = c_diff + 1.96 * se_diff,
+                            p_value = p_value
+                        )
+                    }
+                }
+            }
+            
+            # Likelihood ratio tests for nested models
+            nested_tests <- list()
+            
+            if (baseline_type == "covariates_only" && length(model_results) >= 3) {
+                # Test if adding staging improves the covariate-only model
+                if ("baseline" %in% names(models) && "old_plus_covariates" %in% names(models)) {
+                    lrt_old <- anova(models$baseline, models$old_plus_covariates, test = "LRT")
+                    nested_tests$old_vs_baseline <- list(
+                        comparison = "Original Staging vs Covariates Only",
+                        chi_square = lrt_old$`Pr(>Chi)`[2],
+                        df = lrt_old$Df[2],
+                        p_value = lrt_old$`Pr(>Chi)`[2]
+                    )
+                }
+                
+                if ("baseline" %in% names(models) && "new_plus_covariates" %in% names(models)) {
+                    lrt_new <- anova(models$baseline, models$new_plus_covariates, test = "LRT")
+                    nested_tests$new_vs_baseline <- list(
+                        comparison = "New Staging vs Covariates Only",
+                        chi_square = lrt_new$`Pr(>Chi)`[2],
+                        df = lrt_new$Df[2],
+                        p_value = lrt_new$`Pr(>Chi)`[2]
+                    )
+                }
+            }
+            
+            # Stepwise model selection if requested
+            stepwise_results <- NULL
+            if (self$options$multifactorialComparisonType %in% c("stepwise", "comprehensive")) {
+                tryCatch({
+                    # Build full model with all variables
+                    full_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                   old_stage, "+", new_stage, "+", covariate_formula))
+                    full_model <- survival::coxph(full_formula, data = covariate_data)
+                    
+                    # Perform stepwise selection
+                    stepwise_model <- step(full_model, direction = "both", trace = FALSE)
+                    
+                    stepwise_results <- list(
+                        final_model = stepwise_model,
+                        selected_variables = names(stepwise_model$coefficients),
+                        final_aic = AIC(stepwise_model),
+                        final_c_index = survival::concordance(stepwise_model)$concordance
+                    )
+                }, error = function(e) {
+                    stepwise_results <- list(error = paste("Stepwise selection failed:", e$message))
+                })
+            }
+            
+            # Interaction tests if requested
+            interaction_tests <- NULL
+            if (self$options$performInteractionTests) {
+                interaction_tests <- list()
+                
+                for (covar in all_covariates) {
+                    # Test interaction with old staging
+                    tryCatch({
+                        int_formula_old <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                          old_stage, "*", covar, "+", 
+                                                          paste(setdiff(all_covariates, covar), collapse = " + ")))
+                        int_model_old <- survival::coxph(int_formula_old, data = covariate_data)
+                        
+                        # Compare with model without interaction
+                        base_formula_old <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                           old_stage, "+", covariate_formula))
+                        base_model_old <- survival::coxph(base_formula_old, data = covariate_data)
+                        
+                        lrt_int_old <- anova(base_model_old, int_model_old, test = "LRT")
+                        
+                        interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
+                            interaction = paste("Original Staging x", covar),
+                            chi_square = lrt_int_old$`LR Chisq`[2],
+                            df = lrt_int_old$Df[2],
+                            p_value = lrt_int_old$`Pr(>Chi)`[2]
+                        )
+                    }, error = function(e) {
+                        interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
+                            interaction = paste("Original Staging x", covar),
+                            error = e$message
+                        )
+                    })
+                    
+                    # Test interaction with new staging
+                    tryCatch({
+                        int_formula_new <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                          new_stage, "*", covar, "+", 
+                                                          paste(setdiff(all_covariates, covar), collapse = " + ")))
+                        int_model_new <- survival::coxph(int_formula_new, data = covariate_data)
+                        
+                        # Compare with model without interaction
+                        base_formula_new <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                           new_stage, "+", covariate_formula))
+                        base_model_new <- survival::coxph(base_formula_new, data = covariate_data)
+                        
+                        lrt_int_new <- anova(base_model_new, int_model_new, test = "LRT")
+                        
+                        interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
+                            interaction = paste("New Staging x", covar),
+                            chi_square = lrt_int_new$`LR Chisq`[2],
+                            df = lrt_int_new$Df[2],
+                            p_value = lrt_int_new$`Pr(>Chi)`[2]
+                        )
+                    }, error = function(e) {
+                        interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
+                            interaction = paste("New Staging x", covar),
+                            error = e$message
+                        )
+                    })
+                }
+            }
+            
+            # Stratified analysis if requested
+            stratified_results <- NULL
+            if (self$options$stratifiedAnalysis && length(categorical_vars) > 0) {
+                stratified_results <- list()
+                
+                for (strat_var in categorical_vars) {
+                    strata <- unique(covariate_data[[strat_var]])
+                    strata <- strata[!is.na(strata)]
+                    
+                    for (stratum in strata) {
+                        subset_data <- covariate_data[covariate_data[[strat_var]] == stratum, ]
+                        
+                        if (nrow(subset_data) >= 20) {  # Minimum sample size for stratified analysis
+                            tryCatch({
+                                # Fit models for this stratum
+                                old_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", old_stage))
+                                new_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", new_stage))
+                                
+                                old_model_strat <- survival::coxph(old_formula, data = subset_data)
+                                new_model_strat <- survival::coxph(new_formula, data = subset_data)
+                                
+                                old_cindex <- survival::concordance(old_model_strat)
+                                new_cindex <- survival::concordance(new_model_strat)
+                                
+                                # Calculate difference
+                                c_diff <- new_cindex$concordance - old_cindex$concordance
+                                se_diff <- sqrt(old_cindex$var + new_cindex$var)
+                                z_stat <- c_diff / se_diff
+                                p_value <- 2 * (1 - pnorm(abs(z_stat)))
+                                
+                                stratified_results[[paste(strat_var, stratum, sep = "_")]] <- list(
+                                    stratum = paste(strat_var, "=", stratum),
+                                    n = nrow(subset_data),
+                                    c_index_old = old_cindex$concordance,
+                                    c_index_new = new_cindex$concordance,
+                                    difference = c_diff,
+                                    p_value = p_value
+                                )
+                            }, error = function(e) {
+                                stratified_results[[paste(strat_var, stratum, sep = "_")]] <- list(
+                                    stratum = paste(strat_var, "=", stratum),
+                                    error = e$message
+                                )
+                            })
+                        }
+                    }
+                }
+            }
+            
+            return(list(
+                models = model_results,
+                comparisons = comparisons,
+                nested_tests = nested_tests,
+                stepwise_results = stepwise_results,
+                interaction_tests = interaction_tests,
+                stratified_results = stratified_results,
+                sample_size = nrow(covariate_data),
+                covariates_used = all_covariates,
+                error = NULL
+            ))
+        },
+        
+        .performInteractionTestsOnly = function(data) {
+            # Perform only interaction tests when multifactorial analysis is disabled
+            
+            # Extract covariate information
+            continuous_vars <- self$options$continuousCovariates
+            categorical_vars <- self$options$categoricalCovariates
+            
+            # Check if covariates are available
+            if (is.null(continuous_vars) && is.null(categorical_vars)) {
+                return(list(
+                    interaction_tests = NULL,
+                    error = "No covariates specified for interaction tests"
+                ))
+            }
+            
+            # Get stage variables
+            old_stage <- self$options$oldStage
+            new_stage <- self$options$newStage
+            survival_time <- self$options$survivalTime
+            event_var <- self$options$event
+            
+            # Process covariates
+            all_covariates <- c()
+            if (!is.null(continuous_vars)) {
+                all_covariates <- c(all_covariates, continuous_vars)
+            }
+            if (!is.null(categorical_vars)) {
+                all_covariates <- c(all_covariates, categorical_vars)
+            }
+            
+            # Create event binary variable
+            event_binary <- private$.createEventBinary(data, event_var, self$options$eventLevel)
+            data$event_binary <- event_binary
+            
+            # Create covariate data
+            covariate_data <- data[, c(old_stage, new_stage, survival_time, "event_binary", all_covariates)]
+            covariate_data <- covariate_data[complete.cases(covariate_data), ]
+            
+            if (nrow(covariate_data) == 0) {
+                return(list(
+                    interaction_tests = NULL,
+                    error = "No complete cases available for interaction tests"
+                ))
+            }
+            
+            # Perform interaction tests
+            interaction_tests <- list()
+            
+            for (covar in all_covariates) {
+                # Create covariate formula
+                covariate_formula <- if (is.factor(covariate_data[[covar]])) {
+                    paste("as.factor(", covar, ")", sep = "")
+                } else {
+                    covar
+                }
+                
+                # Test interaction with old staging
+                tryCatch({
+                    int_formula_old <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~",
+                                                       "as.factor(", old_stage, ") *", covariate_formula))
+                    int_model_old <- survival::coxph(int_formula_old, data = covariate_data)
+                    
+                    base_formula_old <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~",
+                                                        "as.factor(", old_stage, ") +", covariate_formula))
+                    base_model_old <- survival::coxph(base_formula_old, data = covariate_data)
+                    
+                    lrt_int_old <- anova(base_model_old, int_model_old, test = "LRT")
+                    
+                    interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
+                        interaction = paste("Original Staging x", covar),
+                        chi_square = lrt_int_old$`LR Chisq`[2],
+                        df = lrt_int_old$Df[2],
+                        p_value = lrt_int_old$`Pr(>Chi)`[2]
+                    )
+                }, error = function(e) {
+                    interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
+                        interaction = paste("Original Staging x", covar),
+                        error = e$message
+                    )
+                })
+                
+                # Test interaction with new staging
+                tryCatch({
+                    int_formula_new <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~",
+                                                       "as.factor(", new_stage, ") *", covariate_formula))
+                    int_model_new <- survival::coxph(int_formula_new, data = covariate_data)
+                    
+                    base_formula_new <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~",
+                                                        "as.factor(", new_stage, ") +", covariate_formula))
+                    base_model_new <- survival::coxph(base_formula_new, data = covariate_data)
+                    
+                    lrt_int_new <- anova(base_model_new, int_model_new, test = "LRT")
+                    
+                    interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
+                        interaction = paste("New Staging x", covar),
+                        chi_square = lrt_int_new$`LR Chisq`[2],
+                        df = lrt_int_new$Df[2],
+                        p_value = lrt_int_new$`Pr(>Chi)`[2]
+                    )
+                }, error = function(e) {
+                    interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
+                        interaction = paste("New Staging x", covar),
+                        error = e$message
+                    )
+                })
+            }
+            
+            return(list(
+                interaction_tests = interaction_tests,
+                error = NULL
+            ))
+        },
+        
+        .createEventBinary = function(data, event_var, event_level) {
+            # Create binary event variable from the event column
+            event_col <- data[[event_var]]
+            
+            if (is.factor(event_col) || is.character(event_col)) {
+                # Convert to binary based on event level
+                event_binary <- ifelse(event_col == event_level, 1, 0)
+            } else {
+                # Assume numeric and convert to binary
+                event_binary <- as.numeric(event_col)
+            }
+            
+            return(event_binary)
+        },
+        
+        .populateMultifactorialResults = function(multifactorial_results) {
+            # Populate multifactorial analysis result tables
+            
+            # Check if there was an error
+            if (!is.null(multifactorial_results$error)) {
+                # Set error message on all relevant tables
+                if (self$options$showMultifactorialTables) {
+                    self$results$multifactorialResults$setError(multifactorial_results$error)
+                }
+                if (self$options$showAdjustedCIndexComparison) {
+                    self$results$adjustedCIndexComparison$setError(multifactorial_results$error)
+                }
+                if (self$options$showNestedModelTests) {
+                    self$results$nestedModelTests$setError(multifactorial_results$error)
+                }
+                if (self$options$showStepwiseResults) {
+                    self$results$stepwiseResults$setError(multifactorial_results$error)
+                }
+                return()
+            }
+            
+            # 1. Populate main multifactorial results table
+            if (self$options$showMultifactorialTables && !is.null(multifactorial_results$models)) {
+                # Add explanatory text for multifactorial results table
+                if (self$options$showExplanations) {
+                    multifactorial_results_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Multifactorial Model Results</h4>
+                        <p style="margin-bottom: 10px;">This table compares the performance of different models that combine staging systems with covariates:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Model:</strong> The specific combination of staging system and covariates</li>
+                            <li><strong>C-Index:</strong> Concordance index (discrimination ability) of the model</li>
+                            <li><strong>SE:</strong> Standard error of the C-index estimate</li>
+                            <li><strong>95% CI:</strong> Confidence interval for the C-index</li>
+                            <li><strong>AIC:</strong> Akaike Information Criterion (lower is better)</li>
+                            <li><strong>BIC:</strong> Bayesian Information Criterion (lower is better)</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Compare C-index values to assess discrimination improvement</li>
+                            <li>Lower AIC/BIC values indicate better model fit</li>
+                            <li>Models with overlapping confidence intervals may not be significantly different</li>
+                            <li>Choose the model that balances discrimination with simplicity</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$multifactorialResultsExplanation$setContent(multifactorial_results_explanation_html)
+                }
+                
+                table <- self$results$multifactorialResults
+                
+                for (model_name in names(multifactorial_results$models)) {
+                    model_info <- multifactorial_results$models[[model_name]]
+                    
+                    # Clean up model name for display
+                    display_name <- switch(model_name,
+                        "baseline" = "Baseline (Covariates Only)",
+                        "old_plus_covariates" = "Original Staging + Covariates",
+                        "new_plus_covariates" = "New Staging + Covariates",
+                        model_name
+                    )
+                    
+                    table$addRow(rowKey = model_name, values = list(
+                        Model = display_name,
+                        C_Index = model_info$c_index,
+                        SE = model_info$c_index_se,
+                        CI_Lower = model_info$c_index_ci_lower,
+                        CI_Upper = model_info$c_index_ci_upper,
+                        AIC = model_info$aic,
+                        BIC = model_info$bic
+                    ))
+                }
+            }
+            
+            # 2. Populate adjusted C-index comparison table
+            if (self$options$showAdjustedCIndexComparison && !is.null(multifactorial_results$comparisons)) {
+                table <- self$results$adjustedCIndexComparison
+                
+                for (comp_name in names(multifactorial_results$comparisons)) {
+                    comp_info <- multifactorial_results$comparisons[[comp_name]]
+                    
+                    # Clean up comparison name for display
+                    display_name <- gsub("_", " ", comp_name)
+                    display_name <- gsub("baseline", "Baseline", display_name)
+                    display_name <- gsub("old plus covariates", "Original + Covariates", display_name)
+                    display_name <- gsub("new plus covariates", "New + Covariates", display_name)
+                    
+                    table$addRow(rowKey = comp_name, values = list(
+                        Comparison = display_name,
+                        C_Index_Difference = comp_info$c_index_diff,
+                        SE = comp_info$se_diff,
+                        CI_Lower = comp_info$ci_lower,
+                        CI_Upper = comp_info$ci_upper,
+                        p_value = comp_info$p_value
+                    ))
+                }
+                
+                # Add explanatory output for adjusted C-index comparison
+                if (self$options$showExplanations) {
+                    adjusted_cindex_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Adjusted C-Index Comparison</h4>
+                        <p style="margin-bottom: 10px;">This table compares the discriminative ability (C-index) of models adjusted for covariates:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Comparison:</strong> Specific model comparison being evaluated</li>
+                            <li><strong>C-Index Difference:</strong> Difference in discrimination between models</li>
+                            <li><strong>SE:</strong> Standard error of the difference estimate</li>
+                            <li><strong>95% CI:</strong> Confidence interval for the difference</li>
+                            <li><strong>p-value:</strong> Statistical significance of the improvement</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Positive differences indicate improvement in the new staging system</li>
+                            <li>Differences >0.05 are generally considered clinically meaningful</li>
+                            <li>p-values <0.05 indicate statistically significant improvements</li>
+                            <li>Consider both statistical significance and clinical relevance</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$adjustedCIndexComparisonExplanation$setContent(adjusted_cindex_explanation_html)
+                }
+            }
+            
+            # 3. Populate nested model tests table
+            if (self$options$showNestedModelTests && !is.null(multifactorial_results$nested_tests)) {
+                table <- self$results$nestedModelTests
+                
+                for (test_name in names(multifactorial_results$nested_tests)) {
+                    test_info <- multifactorial_results$nested_tests[[test_name]]
+                    
+                    # Determine decision based on p-value
+                    decision <- if (!is.null(test_info$p_value) && !is.na(test_info$p_value)) {
+                        if (test_info$p_value < 0.001) "Highly significant improvement"
+                        else if (test_info$p_value < 0.01) "Significant improvement"
+                        else if (test_info$p_value < 0.05) "Marginally significant improvement"
+                        else "No significant improvement"
+                    } else {
+                        "Unable to determine"
+                    }
+                    
+                    table$addRow(rowKey = test_name, values = list(
+                        Model_Comparison = test_info$comparison,
+                        Chi_Square = test_info$chi_square,
+                        df = test_info$df,
+                        p_value = test_info$p_value,
+                        Decision = decision
+                    ))
+                }
+                
+                # Add explanatory output for nested model tests
+                if (self$options$showExplanations) {
+                    nested_model_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Nested Model Tests</h4>
+                        <p style="margin-bottom: 10px;">These likelihood ratio tests compare nested models to assess if adding variables significantly improves model fit:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Model Comparison:</strong> Specific models being compared (simpler vs. more complex)</li>
+                            <li><strong>Chi-Square:</strong> Test statistic measuring improvement in model fit</li>
+                            <li><strong>df:</strong> Degrees of freedom (difference in parameters between models)</li>
+                            <li><strong>p-value:</strong> Statistical significance of the improvement</li>
+                            <li><strong>Decision:</strong> Interpretation of the statistical result</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Significant p-values indicate the more complex model fits significantly better</li>
+                            <li>Non-significant results suggest the simpler model is adequate</li>
+                            <li>Balance model complexity with clinical interpretability</li>
+                            <li>Consider effect sizes alongside statistical significance</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$nestedModelTestsExplanation$setContent(nested_model_explanation_html)
+                }
+            }
+            
+            # 4. Populate stepwise results table
+            if (self$options$showStepwiseResults && !is.null(multifactorial_results$stepwise_results)) {
+                table <- self$results$stepwiseResults
+                stepwise_info <- multifactorial_results$stepwise_results
+                
+                if (!is.null(stepwise_info$error)) {
+                    table$setError(stepwise_info$error)
+                } else if (!is.null(stepwise_info$selected_variables)) {
+                    # Add summary row
+                    table$addRow(rowKey = "summary", values = list(
+                        Variable = "Final Model Summary",
+                        Step = "Final",
+                        Action = paste("Selected", length(stepwise_info$selected_variables), "variables"),
+                        AIC = stepwise_info$final_aic,
+                        p_value = NA
+                    ))
+                    
+                    # Add individual variables
+                    for (i in seq_along(stepwise_info$selected_variables)) {
+                        var_name <- stepwise_info$selected_variables[i]
+                        
+                        # Clean up variable name for display
+                        display_var <- gsub("^[^:]*:", "", var_name)  # Remove prefix before colon
+                        
+                        table$addRow(rowKey = paste("var", i, sep = "_"), values = list(
+                            Variable = display_var,
+                            Step = as.character(i),
+                            Action = "Selected",
+                            AIC = stepwise_info$final_aic,
+                            p_value = NA
+                        ))
+                    }
+                }
+                
+                # Add explanatory output for stepwise results
+                if (self$options$showExplanations) {
+                    stepwise_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stepwise Selection Results</h4>
+                        <p style="margin-bottom: 10px;">This table shows the results of automatic variable selection to identify the most important predictors:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Variable:</strong> The predictor variable being evaluated</li>
+                            <li><strong>Step:</strong> Order in which variables were selected</li>
+                            <li><strong>Action:</strong> Whether the variable was selected or removed</li>
+                            <li><strong>AIC:</strong> Akaike Information Criterion of the final model</li>
+                            <li><strong>p-value:</strong> Statistical significance (when available)</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Selected variables are the most important predictors in the dataset</li>
+                            <li>Lower AIC values indicate better model fit</li>
+                            <li>Earlier selection steps indicate stronger predictive ability</li>
+                            <li>Consider clinical relevance alongside statistical selection</li>
+                            <li>Validate selected variables in independent datasets when possible</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$stepwiseResultsExplanation$setContent(stepwise_explanation_html)
+                }
+            }
+            
+            # 5. Populate interaction tests table
+            if (self$options$performInteractionTests && !is.null(multifactorial_results$interaction_tests)) {
+                table <- self$results$interactionTests
+                
+                for (int_name in names(multifactorial_results$interaction_tests)) {
+                    int_info <- multifactorial_results$interaction_tests[[int_name]]
+                    
+                    if (!is.null(int_info$error)) {
+                        interpretation <- paste("Error:", int_info$error)
+                        chi_square <- NA
+                        df <- NA
+                        p_value <- NA
+                    } else {
+                        # Determine interpretation based on p-value
+                        interpretation <- if (!is.null(int_info$p_value) && !is.na(int_info$p_value)) {
+                            if (int_info$p_value < 0.001) "Highly significant interaction"
+                            else if (int_info$p_value < 0.01) "Significant interaction"
+                            else if (int_info$p_value < 0.05) "Marginally significant interaction"
+                            else "No significant interaction"
+                        } else {
+                            "Unable to determine"
+                        }
+                        
+                        chi_square <- int_info$chi_square
+                        df <- int_info$df
+                        p_value <- int_info$p_value
+                    }
+                    
+                    table$addRow(rowKey = int_name, values = list(
+                        Interaction = int_info$interaction,
+                        Chi_Square = chi_square,
+                        df = df,
+                        p_value = p_value,
+                        Interpretation = interpretation
+                    ))
+                }
+                
+                # Add explanatory output for interaction tests
+                if (self$options$showExplanations) {
+                    interaction_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage-Covariate Interaction Tests</h4>
+                        <p style="margin-bottom: 10px;">These tests examine whether the effect of staging systems varies across different covariate levels:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Interaction:</strong> Specific stage-covariate interaction being tested</li>
+                            <li><strong>Chi-Square:</strong> Test statistic measuring the interaction effect</li>
+                            <li><strong>df:</strong> Degrees of freedom for the interaction test</li>
+                            <li><strong>p-value:</strong> Statistical significance of the interaction</li>
+                            <li><strong>Interpretation:</strong> Clinical meaning of the statistical result</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Significant interactions suggest staging performance varies by patient subgroups</li>
+                            <li>Non-significant results indicate consistent staging performance across groups</li>
+                            <li>Strong interactions may require stratified analysis or subgroup-specific models</li>
+                            <li>Consider biological plausibility of identified interactions</li>
+                            <li>Validate significant interactions in independent datasets</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$interactionTestsExplanation$setContent(interaction_explanation_html)
+                }
+            }
+            
+            # 6. Populate stratified analysis table
+            if (self$options$stratifiedAnalysis && !is.null(multifactorial_results$stratified_results)) {
+                table <- self$results$stratifiedAnalysis
+                
+                for (strat_name in names(multifactorial_results$stratified_results)) {
+                    strat_info <- multifactorial_results$stratified_results[[strat_name]]
+                    
+                    if (!is.null(strat_info$error)) {
+                        table$addRow(rowKey = strat_name, values = list(
+                            Stratum = strat_info$stratum,
+                            N = NA,
+                            C_Index_Old = NA,
+                            C_Index_New = NA,
+                            Difference = NA,
+                            p_value = NA
+                        ))
+                        table$addFootnote(rowKey = strat_name, "N", paste("Error:", strat_info$error))
+                    } else {
+                        table$addRow(rowKey = strat_name, values = list(
+                            Stratum = strat_info$stratum,
+                            N = strat_info$n,
+                            C_Index_Old = strat_info$c_index_old,
+                            C_Index_New = strat_info$c_index_new,
+                            Difference = strat_info$difference,
+                            p_value = strat_info$p_value
+                        ))
+                    }
+                }
+                
+                # Add explanatory output for stratified analysis
+                if (self$options$showExplanations) {
+                    stratified_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stratified Analysis</h4>
+                        <p style="margin-bottom: 10px;">This analysis examines staging system performance within specific patient subgroups:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Stratum:</strong> Patient subgroup being analyzed</li>
+                            <li><strong>N:</strong> Sample size within the stratum</li>
+                            <li><strong>C-Index Old:</strong> Discrimination of the original staging system</li>
+                            <li><strong>C-Index New:</strong> Discrimination of the new staging system</li>
+                            <li><strong>Difference:</strong> Improvement in discrimination (New - Old)</li>
+                            <li><strong>p-value:</strong> Statistical significance of the difference</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Compare performance across different patient subgroups</li>
+                            <li>Positive differences indicate improvement in the new staging system</li>
+                            <li>Look for consistent improvements across all strata</li>
+                            <li>Large variations between strata may indicate interaction effects</li>
+                            <li>Consider clinical relevance of subgroup-specific differences</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$stratifiedAnalysisExplanation$setContent(stratified_explanation_html)
+                }
+            }
+            
+            # Add summary note about the analysis
+            if (self$options$showMultifactorialTables) {
+                summary_note <- paste(
+                    "Multifactorial analysis included", 
+                    length(multifactorial_results$covariates_used), 
+                    "covariates with", 
+                    multifactorial_results$sample_size, 
+                    "patients after complete case analysis."
+                )
+                self$results$multifactorialResults$setNote("summary", summary_note)
             }
         }
     )

@@ -82,7 +82,7 @@ items:
     - name: personTimeTable
       title: "Person-Time Analysis"
       type: Table
-      visible: (personTimeAnalysis && responseVar)
+      visible: (personTimeAnalysis)
       rows: 0
       columns:
           - name: response_type
@@ -112,7 +112,6 @@ items:
     - name: milestoneTable
       title: "Milestone Event Summary"
       type: Table
-      visible: (milestone1Date || milestone2Date || milestone3Date || milestone4Date || milestone5Date)
       rows: 0
       columns:
           - name: milestone_name
@@ -143,7 +142,7 @@ items:
     - name: eventMarkerTable
       title: "Event Marker Summary"
       type: Table
-      visible: (showEventMarkers && eventVar)
+      visible: (showEventMarkers)
       rows: 0
       columns:
           - name: event_type
@@ -209,7 +208,7 @@ items:
     - name: advancedMetrics
       title: "Advanced Clinical Metrics"
       type: Table
-      visible: (personTimeAnalysis && responseVar)
+      visible: (personTimeAnalysis)
       rows: 0
       columns:
           - name: metric_name

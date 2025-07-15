@@ -93,10 +93,10 @@ analyses:
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
-      Enhanced function for generating comprehensive tree summaries of variables.
-      Supports current CRAN vtree package with advanced styling, statistical summaries,
-      and interpretation features. Includes multiple style presets, pruning controls,
-      and automatic interpretation generation.
+      Enhanced function for generating comprehensive tree summaries of
+      variables. Supports current CRAN vtree package with advanced styling,
+      statistical summaries, and interpretation features. Consolidates
+      functionality from legacy versions with modern vtree capabilities.
     ribbon: analyses
     category: analyses
   - title: Cross Tables

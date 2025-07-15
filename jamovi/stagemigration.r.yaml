@@ -312,6 +312,206 @@ items:
             title: "Interpretation"
             type: text
 
+    # Multifactorial Analysis Results Explanation
+    - name: multifactorialAnalysisExplanation
+      title: Understanding Multifactorial Stage Migration Analysis
+      type: Html
+      visible: (enableMultifactorialAnalysis && showExplanations)
+      clearWith:
+          - enableMultifactorialAnalysis
+
+    # Multifactorial Model Results
+    - name: multifactorialResults
+      title: Multifactorial Model Results
+      type: Table
+      visible: (enableMultifactorialAnalysis && showMultifactorialTables)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - continuousCovariates
+          - categoricalCovariates
+          - multifactorialComparisonType
+          - baselineModel
+      columns:
+          - name: Model
+            title: "Model"
+            type: text
+          - name: C_Index
+            title: "C-Index"
+            type: number
+            format: zto
+          - name: SE
+            title: "SE"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: AIC
+            title: "AIC"
+            type: number
+            format: zto
+          - name: BIC
+            title: "BIC"
+            type: number
+            format: zto
+
+    # Adjusted C-Index Comparison
+    - name: adjustedCIndexComparison
+      title: Adjusted C-Index Comparison (Multifactorial)
+      type: Table
+      visible: (enableMultifactorialAnalysis && showAdjustedCIndexComparison)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - continuousCovariates
+          - categoricalCovariates
+      columns:
+          - name: Comparison
+            title: "Comparison"
+            type: text
+          - name: C_Index_Difference
+            title: "C-Index Difference"
+            type: number
+            format: zto
+          - name: SE
+            title: "SE"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Nested Model Tests
+    - name: nestedModelTests
+      title: Nested Model Tests
+      type: Table
+      visible: (enableMultifactorialAnalysis && showNestedModelTests)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - continuousCovariates
+          - categoricalCovariates
+      columns:
+          - name: Model_Comparison
+            title: "Model Comparison"
+            type: text
+          - name: Chi_Square
+            title: "Chi-Square"
+            type: number
+            format: zto
+          - name: df
+            title: "df"
+            type: integer
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Decision
+            title: "Decision"
+            type: text
+
+    # Stepwise Selection Results
+    - name: stepwiseResults
+      title: Stepwise Model Selection Results
+      type: Table
+      visible: (enableMultifactorialAnalysis && showStepwiseResults)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - continuousCovariates
+          - categoricalCovariates
+      columns:
+          - name: Variable
+            title: "Variable"
+            type: text
+          - name: Step
+            title: "Step"
+            type: text
+          - name: Action
+            title: "Action"
+            type: text
+          - name: AIC
+            title: "AIC"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Interaction Tests Results
+    - name: interactionTests
+      title: Stage-Covariate Interaction Tests
+      type: Table
+      visible: (enableMultifactorialAnalysis && performInteractionTests)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - performInteractionTests
+          - continuousCovariates
+          - categoricalCovariates
+      columns:
+          - name: Interaction
+            title: "Interaction"
+            type: text
+          - name: Chi_Square
+            title: "Chi-Square"
+            type: number
+            format: zto
+          - name: df
+            title: "df"
+            type: integer
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Stratified Analysis Results
+    - name: stratifiedAnalysis
+      title: Stratified Analysis Results
+      type: Table
+      visible: (enableMultifactorialAnalysis && stratifiedAnalysis)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - stratifiedAnalysis
+          - categoricalCovariates
+      columns:
+          - name: Stratum
+            title: "Stratum"
+            type: text
+          - name: N
+            title: "N"
+            type: integer
+          - name: C_Index_Old
+            title: "C-Index (Original)"
+            type: number
+            format: zto
+          - name: C_Index_New
+            title: "C-Index (New)"
+            type: number
+            format: zto
+          - name: Difference
+            title: "Difference"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
     # Time-dependent ROC Analysis
     - name: rocAnalysis
       title: Time-dependent ROC Analysis
