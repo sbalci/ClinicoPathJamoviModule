@@ -360,6 +360,15 @@ items:
             type: number
             format: zto
 
+    # Multifactorial Results Explanation
+    - name: multifactorialResultsExplanation
+      title: Understanding Multifactorial Model Results
+      type: Html
+      visible: (enableMultifactorialAnalysis && showMultifactorialTables && showExplanations)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - showMultifactorialTables
+
     # Adjusted C-Index Comparison
     - name: adjustedCIndexComparison
       title: Adjusted C-Index Comparison (Multifactorial)
@@ -394,6 +403,15 @@ items:
             type: number
             format: zto,pvalue
 
+    # Adjusted C-Index Comparison Explanation
+    - name: adjustedCIndexComparisonExplanation
+      title: Understanding Adjusted C-Index Comparison
+      type: Html
+      visible: (enableMultifactorialAnalysis && showAdjustedCIndexComparison && showExplanations)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - showAdjustedCIndexComparison
+
     # Nested Model Tests
     - name: nestedModelTests
       title: Nested Model Tests
@@ -421,6 +439,15 @@ items:
           - name: Decision
             title: "Decision"
             type: text
+
+    # Nested Model Tests Explanation
+    - name: nestedModelTestsExplanation
+      title: Understanding Nested Model Tests
+      type: Html
+      visible: (enableMultifactorialAnalysis && showNestedModelTests && showExplanations)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - showNestedModelTests
 
     # Stepwise Selection Results
     - name: stepwiseResults
@@ -450,6 +477,15 @@ items:
             type: number
             format: zto,pvalue
 
+    # Stepwise Results Explanation
+    - name: stepwiseResultsExplanation
+      title: Understanding Stepwise Selection Results
+      type: Html
+      visible: (enableMultifactorialAnalysis && showStepwiseResults && showExplanations)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - showStepwiseResults
+
     # Interaction Tests Results
     - name: interactionTests
       title: Stage-Covariate Interaction Tests
@@ -478,6 +514,15 @@ items:
           - name: Interpretation
             title: "Interpretation"
             type: text
+
+    # Interaction Tests Explanation
+    - name: interactionTestsExplanation
+      title: Understanding Stage-Covariate Interaction Tests
+      type: Html
+      visible: (enableMultifactorialAnalysis && performInteractionTests && showExplanations)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - performInteractionTests
 
     # Stratified Analysis Results
     - name: stratifiedAnalysis
@@ -511,6 +556,15 @@ items:
             title: "p-value"
             type: number
             format: zto,pvalue
+
+    # Stratified Analysis Explanation
+    - name: stratifiedAnalysisExplanation
+      title: Understanding Stratified Analysis
+      type: Html
+      visible: (enableMultifactorialAnalysis && stratifiedAnalysis && showExplanations)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - stratifiedAnalysis
 
     # Time-dependent ROC Analysis
     - name: rocAnalysis
