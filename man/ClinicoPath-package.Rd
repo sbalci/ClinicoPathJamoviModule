@@ -4,34 +4,228 @@
 \name{ClinicoPath-package}
 \alias{ClinicoPath-package}
 \alias{ClinicoPath}
-\title{ClinicoPath: Analysis for Clinicopathological Research}
+\title{ClinicoPath: Comprehensive Analysis for Clinicopathological Research}
 \description{
-\code{ClinicoPath} ClinicoPath help researchers to generate natural
-language summaries of their dataset, generate cross tables with statistical
-tests, and survival analysis with survival tables, survival plots,
-and natural language summaries.
-
-For more documentation, see the
-\href{https://sbalci.github.io/ClinicoPathJamoviModule/}{Website}.
+ClinicoPath is a comprehensive jamovi module designed specifically for
+clinicopathological research and medical data analysis. It provides an
+integrated suite of statistical tools, visualization methods, and reporting
+functions tailored for pathology, clinical research, and medical decision-making.
 }
 \details{
-\code{ClinicoPath}
-}
-\seealso{
-Useful links:
+\subsection{Main Analysis Categories}{
+
+ClinicoPath organizes analysis tools into five main functional areas:
+\subsection{ClinicoPath Descriptives}{
+
+Comprehensive descriptive statistics and data exploration tools:
 \itemize{
-  \item \url{https://www.serdarbalci.com/ClinicoPathJamoviModule}
-  \item \url{https://github.com/sbalci/ClinicoPathJamoviModule/}
-  \item \url{https://github.com/sbalci/ClinicoPathDescriptives/}
-  \item \url{https://github.com/sbalci/jsurvival}
-  \item \url{https://github.com/sbalci/meddecide}
-  \item \url{https://github.com/sbalci/jjstatsplot}
-  \item \url{https://sbalci.github.io/ClinicoPathJamoviModule/}
-  \item Report bugs at \url{https://github.com/sbalci/ClinicoPathJamoviModule/issues/}
+\item Table One generation with automated statistical tests
+\item Cross-tabulation with chi-square and Fisher's exact tests
+\item Data quality assessment and missing data analysis
+\item Outlier detection and data validation
+\item Summary statistics with clinical interpretation
+}
 }
 
+\subsection{ClinicoPath Survival}{
+
+Advanced survival analysis for time-to-event data:
+\itemize{
+\item Kaplan-Meier survival curves with risk tables
+\item Cox proportional hazards regression
+\item Competing risks analysis
+\item Log-rank and other survival tests
+\item Survival power calculations
+\item Swimmer plots for treatment timelines
+}
+}
+
+\subsection{Medical Decision Analysis (meddecide)}{
+
+Diagnostic test evaluation and clinical decision support:
+\itemize{
+\item ROC curve analysis with confidence intervals
+\item Sensitivity, specificity, and predictive values
+\item Likelihood ratios and diagnostic odds ratios
+\item Decision curve analysis for clinical utility
+\item Fagan nomograms for Bayesian diagnosis
+\item Net reclassification improvement (NRI) and IDI
+}
+}
+
+\subsection{Statistical Plots (JJStatsPlot)}{
+
+Advanced statistical visualization with publication-ready graphics:
+\itemize{
+\item Between-groups and within-subjects comparisons
+\item Correlation matrices and scatter plots
+\item Distribution plots with statistical annotations
+\item Effect size visualizations
+\item Grouped and stratified analyses
+}
+}
+
+\subsection{Specialized Visualizations}{
+
+Domain-specific plots for clinical research:
+\itemize{
+\item Waterfall plots for treatment response
+\item Alluvial diagrams for patient flow
+\item Forest plots for meta-analysis
+\item Upset plots for set intersections
+\item Age pyramids and demographic visualizations
+}
+}
+
+}
+
+\subsection{Key Features}{
+\subsection{Integration with jamovi}{
+\itemize{
+\item User-friendly graphical interface
+\item Point-and-click analysis workflow
+\item Integrated results viewer
+\item Export capabilities for reports
+}
+}
+
+\subsection{Clinical Focus}{
+\itemize{
+\item Terminology and methods familiar to clinicians
+\item Pathology-specific analysis options
+\item Medical decision-making frameworks
+\item Regulatory-compliant reporting
+}
+}
+
+\subsection{Reproducible Research}{
+\itemize{
+\item Syntax generation for R users
+\item Version control integration
+\item Comprehensive documentation
+\item Example datasets included
+}
+}
+
+\subsection{Advanced Statistics}{
+\itemize{
+\item Bootstrap confidence intervals
+\item Multiple comparison corrections
+\item Effect size calculations
+\item Power analysis tools
+}
+}
+
+}
+
+\subsection{Getting Started}{
+
+ClinicoPath can be used in multiple ways:
+\enumerate{
+\item \strong{jamovi Module}: Install through jamovi's module library
+\item \strong{R Package}: Install and use functions directly in R
+\item \strong{Standalone Functions}: Individual analysis components
+}
+}
+
+\subsection{Example Datasets}{
+
+The package includes several example datasets:
+\itemize{
+\item \code{histopathology}: Histopathological diagnosis data
+\item \code{melanoma}: Melanoma survival data
+\item \code{treatmentResponse}: Treatment response analysis
+\item Various domain-specific test datasets
+}
+}
+
+\subsection{Package Architecture}{
+
+ClinicoPath serves as an umbrella package that coordinates multiple
+specialized sub-modules:
+\itemize{
+\item \strong{ClinicoPathDescriptives}: Descriptive statistics
+\item \strong{jsurvival}: Survival analysis
+\item \strong{meddecide}: Medical decision analysis
+\item \strong{jjstatsplot}: Statistical visualizations
+}
+
+Each module can be used independently or as part of the integrated workflow.
+}
+}
+\section{Author}{
+
+Serdar Balci MD, Pathologist
+
+\itemize{
+\item Email: \email{drserdarbalci@gmail.com}
+\item ORCID: \href{https://orcid.org/0000-0002-7852-3851}{0000-0002-7852-3851}
+\item Website: \url{https://www.serdarbalci.com/}
+}
+}
+
+\section{Citation}{
+
+To cite ClinicoPath in publications, please use:
+
+Balci, S. (2025). ClinicoPath: Comprehensive Analysis for Clinicopathological Research.
+R package version 0.0.3.58.
+\url{https://github.com/sbalci/ClinicoPathJamoviModule}
+}
+
+\section{License}{
+
+GPL-2
+}
+
+\section{Links}{
+
+\itemize{
+\item Package website: \url{https://sbalci.github.io/ClinicoPathJamoviModule/}
+\item GitHub repository: \url{https://github.com/sbalci/ClinicoPathJamoviModule/}
+\item Bug reports: \url{https://github.com/sbalci/ClinicoPathJamoviModule/issues/}
+\item jamovi library: \url{https://www.jamovi.org/}
+}
+}
+
+\examples{
+\dontrun{
+# Load the package
+library(ClinicoPath)
+
+# Example 1: Descriptive analysis
+data(histopathology)
+summary(histopathology)
+
+# Example 2: Survival analysis (requires jamovi interface)
+# Use jamovi GUI for interactive analysis
+
+# Example 3: ROC analysis
+# See meddecide module documentation for examples
+
+# Example 4: Statistical plots
+# See jjstatsplot module documentation for examples
+}
+
+}
+\seealso{
+\itemize{
+\item \code{\link[survival]{survival-package}} for survival analysis fundamentals
+\item \code{\link[pROC]{pROC-package}} for ROC analysis
+\item \code{\link[tableone]{tableone}} for descriptive tables
+\item \code{\link[ggplot2]{ggplot2-package}} for visualization
+}
 }
 \author{
 \strong{Maintainer}: Serdar Balci \email{drserdarbalci@gmail.com} (\href{https://orcid.org/0000-0002-7852-3851}{ORCID})
 
 }
+\keyword{clinicopathology}
+\keyword{jamovi}
+\keyword{medical-research}
+\keyword{package}
+\keyword{pathology}
+\keyword{roc-analysis}
+\keyword{statistics}
+\keyword{survival-analysis}
+\keyword{visualization}

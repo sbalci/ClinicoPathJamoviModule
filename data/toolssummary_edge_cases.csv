@@ -1,0 +1,151 @@
+"id","scenario","numeric_extreme","numeric_decimal","categorical_many","categorical_few","categorical_special","constant_numeric","constant_factor","text_variable","date_variable","binary_numeric"
+"EDGE_001","5",0,0.54764397,"Cat_06","A","Missing",42,"SAME","Text with special characters: @#$%^&*()",2023-11-06,0
+"EDGE_002","4",0,0.72694614,"Cat_10","A","N/A",42,"SAME","Text with special characters: @#$%^&*()",2022-11-14,1
+"EDGE_003","4",0,0.81503598,"Cat_13","B","",42,"SAME","Text with special characters: @#$%^&*()",2021-11-08,0
+"EDGE_004","4",0,0.14553824,"Cat_21","A","N/A",42,"SAME","Medium length text",2021-12-03,0
+"EDGE_005","1",0,0.61583997,"Cat_05","A","Missing",42,"SAME","Text with special characters: @#$%^&*()",2023-07-26,0
+"EDGE_006","2",NA,0.76929256,"Cat_10","B","",42,"SAME","Text with special characters: @#$%^&*()",2020-02-21,0
+"EDGE_007","6",0,0.98707062,NA,"A","Unknown",42,"SAME",NA,2024-01-29,1
+"EDGE_008","2",0,0.65386333,"Cat_13","A","",42,"SAME","This is a very long text string that might cause formatting issues in tables",2024-12-11,0
+"EDGE_009","6",0,0.56333975,"Cat_23","B","",42,"SAME",NA,2025-06-09,0
+"EDGE_010","6",0,0.69121938,"Cat_15","B","Missing",42,"SAME",NA,2020-08-07,0
+"EDGE_011","2",0,0.35959736,"Cat_13","A","Missing",42,"SAME","Short",2022-09-25,1
+"EDGE_012","6",NA,0.51719022,"Cat_12","A","Unknown",42,"SAME",NA,2024-03-30,0
+"EDGE_013","3",0,0.49845355,"Cat_10","A","",42,"SAME","Text with special characters: @#$%^&*()",2022-08-21,0
+"EDGE_014","1",0,0.12686001,NA,"B","Normal",42,"SAME","Text with special characters: @#$%^&*()",2020-04-20,1
+"EDGE_015","1",0,0.11455748,"Cat_08","A","Normal",42,"SAME","Text with special characters: @#$%^&*()",2021-06-18,1
+"EDGE_016","5",0,0.03790596,"Cat_02","B","N/A",42,"SAME","Short",2023-02-07,0
+"EDGE_017","2",0,0.83466241,"Cat_04","B","N/A",42,"SAME","Short",2023-02-19,0
+"EDGE_018","2",NA,0.8057361,"Cat_17","B","Normal",42,"SAME","This is a very long text string that might cause formatting issues in tables",2024-07-05,0
+"EDGE_019","6",0,0.75859569,"Cat_29","A","",42,"SAME",NA,2025-10-05,0
+"EDGE_020","4",0,0.91660471,"Cat_13","A","N/A",42,"SAME","Short",2020-12-06,1
+"EDGE_021","5",0,0.15939677,NA,"A","",42,"SAME","Text with special characters: @#$%^&*()",2023-06-22,1
+"EDGE_022","3",0,0.7906132,"Cat_11","B","",42,"SAME","This is a very long text string that might cause formatting issues in tables",2021-04-03,0
+"EDGE_023","5",0,0.8753639,"Cat_01","B","Unknown",42,"SAME","Medium length text",2021-08-04,0
+"EDGE_024","1",NA,0.50734536,"Cat_10","A","Normal",42,"SAME","Short",2023-01-21,1
+"EDGE_025","3",0,0.55778024,"Cat_03","A","Missing",42,"SAME","Text with special characters: @#$%^&*()",2020-09-01,0
+"EDGE_026","2",-1000,0.12649871,"Cat_02","B","Normal",42,"SAME","Medium length text",2024-10-11,1
+"EDGE_027","3",-999,0.56343739,"Cat_12","A","Normal",42,"SAME","Medium length text",2022-09-25,1
+"EDGE_028","1",-10000,0.37781317,NA,"B","N/A",42,"SAME","Short",2025-11-27,1
+"EDGE_029","4",-1000,0.16339824,"Cat_02","B","",42,"SAME","Text with special characters: @#$%^&*()",2021-12-31,0
+"EDGE_030","3",NA,0.61037514,"Cat_10","A","N/A",42,"SAME","Short",2020-07-03,1
+"EDGE_031","3",-10000,0.52917644,"Cat_08","A","N/A",42,"SAME","Medium length text",2025-03-09,1
+"EDGE_032","5",-1000,0.98898658,"Cat_05","B","",42,"SAME","Medium length text",2025-11-20,1
+"EDGE_033","5",-999,0.30975785,"Cat_17","A","N/A",42,"SAME","Short",2022-03-06,0
+"EDGE_034","1",-1000,0.36774081,"Cat_26","B","N/A",42,"SAME","This is a very long text string that might cause formatting issues in tables",2025-05-01,1
+"EDGE_035","5",-1000,0.27152675,NA,"B","",42,"SAME","Text with special characters: @#$%^&*()",2021-08-07,1
+"EDGE_036","6",NA,0.78764503,"Cat_12","B","Normal",42,"SAME",NA,2023-10-07,1
+"EDGE_037","1",-999,0.87240619,"Cat_23","B","Unknown",42,"SAME","Medium length text",2020-05-01,0
+"EDGE_038","6",-999,0.58283039,"Cat_14","A","",42,"SAME",NA,2022-04-12,0
+"EDGE_039","3",-10000,0.36802069,"Cat_06","A","N/A",42,"SAME","Text with special characters: @#$%^&*()",2025-04-03,0
+"EDGE_040","4",-999,0.1207111,"Cat_03","A","Normal",42,"SAME","This is a very long text string that might cause formatting issues in tables",2024-06-03,1
+"EDGE_041","2",-10000,0.75863371,"Cat_26","A","",42,"SAME","Short",2021-05-25,1
+"EDGE_042","5",NA,0.69798351,NA,"B","",42,"SAME","Text with special characters: @#$%^&*()",2025-12-09,0
+"EDGE_043","1",-1000,0.1176452,"Cat_07","A","",42,"SAME","Medium length text",2023-08-01,0
+"EDGE_044","3",-10000,0.21669993,"Cat_04","A","Unknown",42,"SAME","Text with special characters: @#$%^&*()",2024-06-22,1
+"EDGE_045","2",-1000,0.16854179,"Cat_19","B","Missing",42,"SAME","Short",2023-03-09,1
+"EDGE_046","3",-999,0.79980136,"Cat_27","B","N/A",42,"SAME","This is a very long text string that might cause formatting issues in tables",2025-09-07,1
+"EDGE_047","2",-10000,0.72217152,"Cat_01","B","N/A",42,"SAME","Medium length text",2024-10-26,1
+"EDGE_048","1",NA,0.78803658,"Cat_04","A","Missing",42,"SAME","Text with special characters: @#$%^&*()",2023-05-21,1
+"EDGE_049","2",-1000,0.72142805,NA,"B","Normal",42,"SAME","Medium length text",2025-11-14,0
+"EDGE_050","1",-1000,0.55937814,"Cat_13","B","Missing",42,"SAME","This is a very long text string that might cause formatting issues in tables",2025-05-15,0
+"EDGE_051","1",10000,0.28764638,"Cat_03","A","Unknown",42,"SAME","Short",2021-02-01,1
+"EDGE_052","3",1000,0.50021842,"Cat_04","B","Normal",42,"SAME","Text with special characters: @#$%^&*()",2021-04-06,0
+"EDGE_053","4",999,0.38598581,"Cat_15","A","Missing",42,"SAME","Short",2022-10-01,1
+"EDGE_054","5",NA,0.61192546,"Cat_17","A","",42,"SAME","Short",2024-01-05,0
+"EDGE_055","5",999,0.65386689,"Cat_16","B","N/A",42,"SAME","Short",2022-11-24,1
+"EDGE_056","2",999,0.86255818,NA,"B","",42,"SAME","Text with special characters: @#$%^&*()",2021-02-10,0
+"EDGE_057","3",999,0.46889779,"Cat_10","A","Unknown",42,"SAME","Medium length text",2022-11-12,1
+"EDGE_058","1",1000,0.98335482,"Cat_01","B","Missing",42,"SAME","Text with special characters: @#$%^&*()",2021-01-28,1
+"EDGE_059","2",1000,0.90983903,"Cat_16","B","",42,"SAME","Medium length text",2025-12-31,1
+"EDGE_060","5",NA,0.18510934,"Cat_09","B","Unknown",42,"SAME","This is a very long text string that might cause formatting issues in tables",2024-11-17,1
+"EDGE_061","5",1000,0.32793235,"Cat_08","A","N/A",42,"SAME","Medium length text",2020-02-16,0
+"EDGE_062","5",10000,0.21300764,"Cat_28","A","",42,"SAME","This is a very long text string that might cause formatting issues in tables",2025-01-25,1
+"EDGE_063","1",999,0.55510922,NA,"B","",42,"SAME","This is a very long text string that might cause formatting issues in tables",2020-09-16,1
+"EDGE_064","4",1000,0.97226384,"Cat_11","A","Unknown",42,"SAME","Medium length text",2023-11-10,0
+"EDGE_065","6",10000,0.81162367,"Cat_11","B","N/A",42,"SAME",NA,2021-03-18,0
+"EDGE_066","5",NA,0.5287484,"Cat_21","B","Missing",42,"SAME","Short",2020-02-28,1
+"EDGE_067","5",1000,0.7527082,"Cat_13","A","Missing",42,"SAME","Text with special characters: @#$%^&*()",2020-05-17,0
+"EDGE_068","3",10000,0.32119899,"Cat_08","A","N/A",42,"SAME","Text with special characters: @#$%^&*()",2020-05-03,1
+"EDGE_069","1",10000,0.99377022,"Cat_13","B","Normal",42,"SAME","Short",2022-09-24,1
+"EDGE_070","2",10000,0.74633538,NA,"A","N/A",42,"SAME","This is a very long text string that might cause formatting issues in tables",2025-08-19,0
+"EDGE_071","3",10000,0.82705723,"Cat_17","A","Missing",42,"SAME","This is a very long text string that might cause formatting issues in tables",2021-02-09,1
+"EDGE_072","1",NA,0.98379214,"Cat_22","B","Missing",42,"SAME","Text with special characters: @#$%^&*()",2021-06-23,1
+"EDGE_073","2",10000,0.60921799,"Cat_23","A","",42,"SAME","Text with special characters: @#$%^&*()",2020-12-28,1
+"EDGE_074","3",1000,0.3565817,"Cat_06","B","",42,"SAME","Medium length text",2020-12-21,1
+"EDGE_075","3",999,0.94169135,"Cat_22","A","N/A",42,"SAME","This is a very long text string that might cause formatting issues in tables",2021-07-29,0
+"EDGE_076","5",0.000227,0.68627715,"Cat_27","B","Missing",42,"SAME","Short",2023-03-03,0
+"EDGE_077","3",0.000975,0.23708036,NA,"B","Missing",42,"SAME","Text with special characters: @#$%^&*()",2025-02-04,1
+"EDGE_078","3",NA,0.74954793,"Cat_24","B","",42,"SAME","Short",2020-05-15,1
+"EDGE_079","3",0.000191,0.72370271,"Cat_20","B","",42,"SAME","This is a very long text string that might cause formatting issues in tables",2022-08-06,0
+"EDGE_080","5",0.000873,0.44748588,"Cat_17","A","",42,"SAME","This is a very long text string that might cause formatting issues in tables",2023-06-21,0
+"EDGE_081","1",0.000654,0.65336089,"Cat_20","B","Missing",42,"SAME","This is a very long text string that might cause formatting issues in tables",2021-12-17,1
+"EDGE_082","2",0.000513,0.91135083,"Cat_27","B","",42,"SAME","Text with special characters: @#$%^&*()",2024-06-11,1
+"EDGE_083","2",0.000881,0.11214631,"Cat_04","B","",42,"SAME","Text with special characters: @#$%^&*()",2022-02-23,1
+"EDGE_084","5",NA,0.56338705,NA,"A","Missing",42,"SAME","Text with special characters: @#$%^&*()",2021-07-16,1
+"EDGE_085","6",0.000627,0.82597398,"Cat_02","A","Normal",42,"SAME",NA,2022-02-09,1
+"EDGE_086","3",0.000982,0.14780679,"Cat_21","B","N/A",42,"SAME","Text with special characters: @#$%^&*()",2022-04-12,1
+"EDGE_087","5",0.000619,0.1662154,"Cat_11","B","Unknown",42,"SAME","Text with special characters: @#$%^&*()",2021-09-27,0
+"EDGE_088","6",0.000407,0.77723788,"Cat_10","A","",42,"SAME",NA,2021-03-02,1
+"EDGE_089","6",0.000543,0.2659925,"Cat_29","A","Unknown",42,"SAME",NA,2023-09-27,1
+"EDGE_090","4",NA,0.81410037,"Cat_28","A","Unknown",42,"SAME","Short",2024-03-24,0
+"EDGE_091","2",0.000874,0.85285365,NA,"A","Normal",42,"SAME","Medium length text",2024-07-31,1
+"EDGE_092","6",0.000888,0.67298531,"Cat_19","B","N/A",42,"SAME",NA,2021-06-10,0
+"EDGE_093","2",0.000965,0.37439147,"Cat_11","B","Missing",42,"SAME","This is a very long text string that might cause formatting issues in tables",2025-07-30,0
+"EDGE_094","1",0.000578,0.72230992,"Cat_01","B","N/A",42,"SAME","This is a very long text string that might cause formatting issues in tables",2022-02-04,0
+"EDGE_095","6",0.000313,0.22293519,"Cat_23","A","Missing",42,"SAME",NA,2023-02-22,1
+"EDGE_096","1",NA,0.85887109,"Cat_20","A","N/A",42,"SAME","This is a very long text string that might cause formatting issues in tables",2025-08-22,1
+"EDGE_097","1",0.000741,0.77231579,"Cat_24","A","",42,"SAME","Short",2024-04-24,1
+"EDGE_098","2",0.000747,0.60369779,NA,"A","Unknown",42,"SAME","This is a very long text string that might cause formatting issues in tables",2020-09-29,1
+"EDGE_099","1",0.000985,0.29355947,"Cat_12","A","N/A",42,"SAME","Text with special characters: @#$%^&*()",2020-11-19,0
+"EDGE_100","4",0.000727,0.43702673,"Cat_25","A","Missing",42,"SAME","Short",2023-01-16,1
+"EDGE_101","5",-0.088206,0.97257244,"Cat_06","B","",42,"SAME","Medium length text",2024-12-05,1
+"EDGE_102","4",NA,0.02489711,"Cat_24","B","N/A",42,"SAME","This is a very long text string that might cause formatting issues in tables",2022-09-02,0
+"EDGE_103","3",0.03395,0.23281533,"Cat_06","B","N/A",42,"SAME","Medium length text",2025-01-30,1
+"EDGE_104","3",0.107111,0.72670729,"Cat_10","A","Missing",42,"SAME","This is a very long text string that might cause formatting issues in tables",2021-06-05,0
+"EDGE_105","3",-0.069805,0.22221896,NA,"B","N/A",42,"SAME","Medium length text",2025-12-06,0
+"EDGE_106","1",0.035884,0.26417032,"Cat_21","B","",42,"SAME","This is a very long text string that might cause formatting issues in tables",2022-10-23,0
+"EDGE_107","1",-0.117416,0.13832811,"Cat_13","B","N/A",42,"SAME","Medium length text",2023-09-12,1
+"EDGE_108","2",NA,0.58179213,"Cat_25","B","",42,"SAME","Short",2023-02-27,0
+"EDGE_109","6",-0.008308,0.12871664,"Cat_10","B","Normal",42,"SAME",NA,2021-09-02,0
+"EDGE_110","6",-0.153352,0.28647766,"Cat_13","B","Unknown",42,"SAME",NA,2020-03-08,1
+"EDGE_111","1",0.141395,0.02334492,"Cat_22","B","Missing",42,"SAME","Text with special characters: @#$%^&*()",2024-04-09,0
+"EDGE_112","3",-0.021827,0.08038699,NA,"A","Normal",42,"SAME","Short",2023-11-28,1
+"EDGE_113","6",-0.015808,0.02727057,"Cat_06","B","Normal",42,"SAME",NA,2021-08-05,0
+"EDGE_114","1",NA,0.00941061,"Cat_03","A","Normal",42,"SAME","Text with special characters: @#$%^&*()",2024-04-30,1
+"EDGE_115","6",0.002609,0.71352791,"Cat_13","A","Unknown",42,"SAME",NA,2023-04-28,0
+"EDGE_116","6",-0.01604,0.53158819,"Cat_23","A","",42,"SAME",NA,2023-03-31,1
+"EDGE_117","3",-0.076133,0.81202143,"Cat_09","B","",42,"SAME","Text with special characters: @#$%^&*()",2025-10-26,1
+"EDGE_118","6",-0.146285,0.88966985,"Cat_14","A","Normal",42,"SAME",NA,2021-12-19,0
+"EDGE_119","2",0.083654,0.99018269,NA,"B","Normal",42,"SAME","Text with special characters: @#$%^&*()",2023-06-14,1
+"EDGE_120","4",NA,0.49316898,"Cat_06","A","Missing",42,"SAME","Text with special characters: @#$%^&*()",2022-04-03,1
+"EDGE_121","5",0.041958,0.76814701,"Cat_04","A","",42,"SAME","Short",2024-05-27,0
+"EDGE_122","2",0.092742,0.83473518,"Cat_15","B","",42,"SAME","Short",2021-11-08,0
+"EDGE_123","1",-0.15851,0.63944553,"Cat_16","B","",42,"SAME","This is a very long text string that might cause formatting issues in tables",2022-06-24,1
+"EDGE_124","5",-0.070923,0.96754251,"Cat_26","B","",42,"SAME","This is a very long text string that might cause formatting issues in tables",2025-06-03,0
+"EDGE_125","6",0.016206,0.02373354,"Cat_14","A","N/A",42,"SAME",NA,2021-11-05,0
+"EDGE_126","5",NA,0.2132792,NA,"B","",42,"SAME","Medium length text",2022-01-11,0
+"EDGE_127","4",NA,0.90279784,"Cat_17","B","Unknown",42,"SAME","Short",2024-04-11,0
+"EDGE_128","5",NA,0.43511544,"Cat_12","B","Unknown",42,"SAME","Short",2024-02-09,1
+"EDGE_129","5",NA,0.95973782,"Cat_14","B","Unknown",42,"SAME","Short",2020-05-02,0
+"EDGE_130","6",NA,0.28192969,"Cat_15","B","Unknown",42,"SAME",NA,2020-08-14,0
+"EDGE_131","3",NA,0.25407755,"Cat_12","B","N/A",42,"SAME","Short",2022-07-17,0
+"EDGE_132","6",NA,0.4977683,"Cat_09","B","Normal",42,"SAME",NA,2023-09-02,1
+"EDGE_133","3",NA,0.66251079,NA,"A","N/A",42,"SAME","This is a very long text string that might cause formatting issues in tables",2022-10-05,1
+"EDGE_134","6",NA,0.207286,"Cat_11","A","Missing",42,"SAME",NA,2022-08-08,1
+"EDGE_135","2",NA,0.10485067,"Cat_20","A","Missing",42,"SAME","Text with special characters: @#$%^&*()",2022-09-03,1
+"EDGE_136","1",NA,0.16190093,"Cat_19","A","",42,"SAME","Medium length text",2025-11-26,0
+"EDGE_137","5",NA,0.30756456,"Cat_07","B","",42,"SAME","Medium length text",2021-04-15,0
+"EDGE_138","4",NA,0.36531889,"Cat_17","A","",42,"SAME","Short",2020-10-09,1
+"EDGE_139","6",NA,0.40131859,"Cat_01","A","Unknown",42,"SAME",NA,2024-05-27,1
+"EDGE_140","2",NA,0.86654271,NA,"A","Missing",42,"SAME","This is a very long text string that might cause formatting issues in tables",2021-04-14,0
+"EDGE_141","3",NA,0.26201653,"Cat_09","B","Normal",42,"SAME","Text with special characters: @#$%^&*()",2020-01-31,0
+"EDGE_142","3",NA,0.23564894,"Cat_18","B","Missing",42,"SAME","This is a very long text string that might cause formatting issues in tables",2022-03-01,0
+"EDGE_143","3",NA,0.4104749,"Cat_11","B","Unknown",42,"SAME","Short",2020-08-15,0
+"EDGE_144","5",NA,0.30383838,"Cat_21","A","Missing",42,"SAME","Text with special characters: @#$%^&*()",2022-05-21,1
+"EDGE_145","5",NA,0.25621594,"Cat_14","A","Unknown",42,"SAME","This is a very long text string that might cause formatting issues in tables",2020-03-09,0
+"EDGE_146","2",NA,0.33742261,"Cat_02","B","Normal",42,"SAME","Short",2022-03-09,1
+"EDGE_147","2",NA,0.68985482,NA,"A","Normal",42,"SAME","This is a very long text string that might cause formatting issues in tables",2021-11-19,0
+"EDGE_148","2",NA,0.09632345,"Cat_19","B","Unknown",42,"SAME","Short",2021-01-14,0
+"EDGE_149","2",NA,0.10133701,"Cat_23","B","Missing",42,"SAME","Text with special characters: @#$%^&*()",2022-05-08,0
+"EDGE_150","6",NA,0.22896236,"Cat_20","B","Missing",42,"SAME",NA,2020-09-06,0

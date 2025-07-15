@@ -4,7 +4,7 @@
 \alias{toxicityprofileClass}
 \title{Treatment Toxicity Profile}
 \description{
-Creates comprehensive visualizations of adverse event profiles
+Creates comprehensive visualizations of adverse event profiles with enhanced statistical analysis
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::toxicityprofileBase} -> \code{toxicityprofileClass}

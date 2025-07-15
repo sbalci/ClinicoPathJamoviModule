@@ -25,7 +25,12 @@ survivalpowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             events_input = 50,
             show_summary = TRUE,
             show_formulas = FALSE,
-            show_interpretation = TRUE, ...) {
+            show_interpretation = TRUE,
+            show_power_plot = FALSE,
+            show_timeline_plot = FALSE,
+            power_plot_range = "auto",
+            export_results = FALSE,
+            export_power_curve = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -153,6 +158,26 @@ survivalpowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "show_interpretation",
                 show_interpretation,
                 default=TRUE)
+            private$..show_power_plot <- jmvcore::OptionBool$new(
+                "show_power_plot",
+                show_power_plot,
+                default=FALSE)
+            private$..show_timeline_plot <- jmvcore::OptionBool$new(
+                "show_timeline_plot",
+                show_timeline_plot,
+                default=FALSE)
+            private$..power_plot_range <- jmvcore::OptionString$new(
+                "power_plot_range",
+                power_plot_range,
+                default="auto")
+            private$..export_results <- jmvcore::OptionBool$new(
+                "export_results",
+                export_results,
+                default=FALSE)
+            private$..export_power_curve <- jmvcore::OptionBool$new(
+                "export_power_curve",
+                export_power_curve,
+                default=FALSE)
 
             self$.addOption(private$..calculation_type)
             self$.addOption(private$..method)
@@ -174,6 +199,11 @@ survivalpowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..show_summary)
             self$.addOption(private$..show_formulas)
             self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..show_power_plot)
+            self$.addOption(private$..show_timeline_plot)
+            self$.addOption(private$..power_plot_range)
+            self$.addOption(private$..export_results)
+            self$.addOption(private$..export_power_curve)
         }),
     active = list(
         calculation_type = function() private$..calculation_type$value,
@@ -195,7 +225,12 @@ survivalpowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         events_input = function() private$..events_input$value,
         show_summary = function() private$..show_summary$value,
         show_formulas = function() private$..show_formulas$value,
-        show_interpretation = function() private$..show_interpretation$value),
+        show_interpretation = function() private$..show_interpretation$value,
+        show_power_plot = function() private$..show_power_plot$value,
+        show_timeline_plot = function() private$..show_timeline_plot$value,
+        power_plot_range = function() private$..power_plot_range$value,
+        export_results = function() private$..export_results$value,
+        export_power_curve = function() private$..export_power_curve$value),
     private = list(
         ..calculation_type = NA,
         ..method = NA,
@@ -216,7 +251,12 @@ survivalpowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..events_input = NA,
         ..show_summary = NA,
         ..show_formulas = NA,
-        ..show_interpretation = NA)
+        ..show_interpretation = NA,
+        ..show_power_plot = NA,
+        ..show_timeline_plot = NA,
+        ..power_plot_range = NA,
+        ..export_results = NA,
+        ..export_power_curve = NA)
 )
 
 survivalpowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -226,7 +266,12 @@ survivalpowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         instructions = function() private$.items[["instructions"]],
         power_results = function() private$.items[["power_results"]],
         formulas = function() private$.items[["formulas"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        power_plot = function() private$.items[["power_plot"]],
+        timeline_plot = function() private$.items[["timeline_plot"]],
+        exported_results = function() private$.items[["exported_results"]],
+        exported_power_curve = function() private$.items[["exported_power_curve"]],
+        export_summary = function() private$.items[["export_summary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -236,7 +281,8 @@ survivalpowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Survival Analysis Power & Sample Size",
                 refs=list(
                     "gsDesign",
-                    "survival"))
+                    "survival",
+                    "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -284,7 +330,89 @@ survivalpowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "hazard_ratio",
                     "alpha",
                     "beta",
-                    "power")))}))
+                    "power")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="power_plot",
+                title="Power Curve Analysis",
+                width=700,
+                height=500,
+                renderFun=".plot_power_curve",
+                visible="(calculation_type && method && show_power_plot)",
+                requiresData=FALSE,
+                clearWith=list(
+                    "calculation_type",
+                    "method",
+                    "show_power_plot",
+                    "hazard_control",
+                    "hazard_treatment",
+                    "hazard_ratio",
+                    "alpha",
+                    "beta",
+                    "power",
+                    "allocation_ratio",
+                    "power_plot_range")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="timeline_plot",
+                title="Study Timeline Visualization",
+                width=700,
+                height=400,
+                renderFun=".plot_timeline",
+                visible="(calculation_type && method == \"lachin_foulkes\" && show_timeline_plot)",
+                requiresData=FALSE,
+                clearWith=list(
+                    "calculation_type",
+                    "method",
+                    "show_timeline_plot",
+                    "study_duration",
+                    "accrual_duration",
+                    "hazard_control",
+                    "hazard_treatment")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="exported_results",
+                title="Export Power Analysis Results",
+                varTitle="Survival Power Results",
+                varDescription="Comprehensive survival power analysis results for external analysis",
+                clearWith=list(
+                    "export_results",
+                    "calculation_type",
+                    "method",
+                    "hazard_control",
+                    "hazard_treatment",
+                    "hazard_ratio",
+                    "study_duration",
+                    "accrual_duration",
+                    "alpha",
+                    "beta",
+                    "power",
+                    "allocation_ratio")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="exported_power_curve",
+                title="Export Power Curve Data",
+                varTitle="Power Curve Data",
+                varDescription="Power curve data points for external plotting and analysis",
+                clearWith=list(
+                    "export_power_curve",
+                    "calculation_type",
+                    "method",
+                    "hazard_control",
+                    "hazard_treatment",
+                    "hazard_ratio",
+                    "alpha",
+                    "beta",
+                    "allocation_ratio",
+                    "power_plot_range")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="export_summary",
+                title="Export Summary",
+                visible="(export_results || export_power_curve)",
+                clearWith=list(
+                    "export_results",
+                    "export_power_curve")))}))
 
 survivalpowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "survivalpowerBase",
@@ -346,12 +474,25 @@ survivalpowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param show_formulas Whether to display mathematical formulas used.
 #' @param show_interpretation Whether to include clinical interpretation of
 #'   results.
+#' @param show_power_plot Whether to display power curve visualization.
+#' @param show_timeline_plot Whether to display study timeline visualization
+#'   for Lachin-Foulkes method.
+#' @param power_plot_range Sample size range for power plots (format 'min,max'
+#'   or 'auto').
+#' @param export_results Whether to export detailed results for external
+#'   analysis.
+#' @param export_power_curve Whether to export power curve data points.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$power_results} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$formulas} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$power_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$timeline_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$exported_results} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$exported_power_curve} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$export_summary} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -376,7 +517,12 @@ survivalpower <- function(
     events_input = 50,
     show_summary = TRUE,
     show_formulas = FALSE,
-    show_interpretation = TRUE) {
+    show_interpretation = TRUE,
+    show_power_plot = FALSE,
+    show_timeline_plot = FALSE,
+    power_plot_range = "auto",
+    export_results = FALSE,
+    export_power_curve = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survivalpower requires jmvcore to be installed (restart may be required)")
@@ -406,7 +552,12 @@ survivalpower <- function(
         events_input = events_input,
         show_summary = show_summary,
         show_formulas = show_formulas,
-        show_interpretation = show_interpretation)
+        show_interpretation = show_interpretation,
+        show_power_plot = show_power_plot,
+        show_timeline_plot = show_timeline_plot,
+        power_plot_range = power_plot_range,
+        export_results = export_results,
+        export_power_curve = export_power_curve)
 
     analysis <- survivalpowerClass$new(
         options = options,

@@ -19,9 +19,27 @@ items:
       title: To Do
       type:  Html
 
-    # - title: Summary of True Counts
-    #   name: summary
-    #   type: Preformatted
+    - title: Summary of True Counts
+      name: summary
+      type: Table
+      rows: 0
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: trueCount
+          title: True Count
+          type: integer
+        - name: falseCount
+          title: False Count
+          type: integer
+        - name: totalCount
+          title: Total Count
+          type: integer
+        - name: truePercentage
+          title: True %
+          type: number
+          format: pc
 
     - title: Venn Diagram
       name: plot

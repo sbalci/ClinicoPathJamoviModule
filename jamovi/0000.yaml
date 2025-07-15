@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.56
+version: 0.0.3.59
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-07-13'
+date: '2025-07-15'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -92,7 +92,12 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
-    description: Function for Generating Tree Summaries of Variables.
+    description: >
+      Enhanced function for generating comprehensive tree summaries of variables.
+      Supports current CRAN vtree package with advanced styling, statistical summaries,
+      and interpretation features. Includes multiple style presets, pruning controls,
+      and automatic interpretation generation.
+    ribbon: analyses
     category: analyses
   - title: Cross Tables
     name: crosstable
@@ -109,21 +114,25 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
-    description: >-
-      Creates a waterfall plot and analyzes tumor response data following RECIST
-      criteria.
+    description: >
+      Creates waterfall and spider plots to analyze tumor response data
+      following RECIST criteria. Supports both raw tumor measurements and
+      pre-calculated percentage changes. Provides comprehensive response
+      analysis including ORR, DCR, and person-time metrics.
     menuSubtitle: Waterfall Plot, Spider Plot
     ribbon: analyses
     category: analyses
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
-    description: >-
-      Creates a swimmer plot to visualize individual patient timelines and
-      clinical events.
+    description: >
+      Creates comprehensive swimmer plots using the ggswim package to visualize
+      patient timelines,  clinical events, milestones, and treatment responses.
+      Features enhanced data validation  and complete ggswim integration for
+      professional clinical visualization.
     ribbon: analyses
     category: analyses
   - title: Genomic Landscape Visualization
@@ -517,15 +526,6 @@ analyses:
     menuTitle: IHC Expression Analysis
     ribbon: analyses
     category: analyses
-  - title: Swimmer Plot 2
-    name: swimmerplot2
-    ns: ClinicoPath
-    menuGroup: ExplorationD
-    menuTitle: Swimmer Plot 2
-    menuSubgroup: Patient Follow-Up Plots
-    description: Creates a swimmer plot to visualize subject response data over time.
-    ribbon: analyses
-    category: analyses
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
@@ -533,15 +533,6 @@ analyses:
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: Performs Chi-Square test and post-hoc pairwise comparisons.
-    ribbon: analyses
-    category: analyses
-  - title: Variable Tree V3
-    name: vtree3
-    ns: ClinicoPath
-    menuGroup: ExplorationD
-    menuTitle: Variable Tree V3
-    menuSubgroup: ClinicoPath Descriptive Plots
-    description: Function for Generating Enhanced Tree Summaries of Variables
     ribbon: analyses
     category: analyses
   - title: Group and Summarize
@@ -699,22 +690,21 @@ analyses:
     description: Function for Odds Ratio Table and Plot.
     ribbon: analyses
     category: analyses
-  - title: Time Interval Calculator
+  - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
     menuGroup: SurvivalD
-    menuTitle: Time Interval Calculator
+    menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
-    menuSubtitle: Calculate time intervals from dates or values
+    menuSubtitle: Advanced time interval analysis with quality assessment
     ribbon: analyses
     description: >-
-      Calculates time intervals between dates or from pre-calculated values.
-      Time intervals form the basis of person-time follow-up calculations in
-      survival analysis. Person-time follows the accumulated time that
-      participants contribute to a study while being at risk for the event of
-      interest, accounting for varying entry times and censoring. Person-time is
-      typically expressed in person-days, person-months,  or person-years
-      depending on the study duration and outcome frequency.
+      Advanced time interval calculator designed for survival analysis,
+      epidemiological studies,  and person-time analysis. Features intelligent
+      date parsing, comprehensive data quality  assessment, landmark analysis,
+      and robust statistical summaries. Time intervals form the  foundation of
+      person-time follow-up calculations, capturing both participant counts and 
+      observation duration for accurate incidence rate calculations.
     category: analyses
   - title: Grouped Hazard Forest Plot
     name: groupedforest
@@ -1549,13 +1539,19 @@ analyses:
       continuous variables across multiple categories or time periods.
     ribbon: analyses
     category: analyses
-  - title: Tidy Plots
+  - title: Comprehensive Tidy Plots
     name: tidyplots
     ns: ClinicoPath
     menuGroup: JJStatsPlotD
-    menuTitle: Tidy Plots
+    menuTitle: Comprehensive Tidy Plots
     ribbon: analyses
     category: analyses
+    description: >
+      Create publication-ready plots using the tidyplots framework with
+      extensive customization options, statistical features, and advanced
+      visualization capabilities. Comprehensive implementation of tidyplots for
+      jamovi with advanced statistical visualization features including multiple
+      plot types, statistical testing, and extensive customization options.
   - title: River Plots
     name: jjriverplot
     ns: ClinicoPath
@@ -1906,43 +1902,6 @@ analyses:
 
       Optionally, you can enable distribution diagnostics to examine normality,
       skewness, and kurtosis.
-  - title: Swimmer Plot
-    name: swimmerplot1
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: ExplorationD
-    menuSubgroup: Patient Follow-Up Plots
-    menuTitle: Swimmer Plot
-    description: >-
-      Creates a swimmer plot to visualize individual patient timelines and
-      clinical events.
-  - title: Variable Tree
-    name: vartree2
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: ExplorationD
-    menuSubgroup: ClinicoPath Descriptive Plots
-    menuTitle: Variable Tree
-    description: Function for Generating Tree Summaries of Variables.
-  - title: Venn Diagram
-    name: venn2
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: ExplorationD
-    menuSubgroup: ClinicoPath Descriptive Plots
-    menuTitle: Venn Diagram
-    menuSubtitle: Venn Diagram, UpSet Plot
-  - title: Treatment Response Analysis
-    name: waterfall2
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: ExplorationD
-    menuSubgroup: Patient Follow-Up Plots
-    menuTitle: Treatment Response Analysis
-    menuSubtitle: Waterfall Plot, Spider Plot
-    description: >-
-      Creates a waterfall plot and analyzes tumor response data following RECIST
-      criteria.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

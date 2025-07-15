@@ -2,14 +2,14 @@
 % Please edit documentation in R/toolssummary.b.R
 \name{toolssummaryClass}
 \alias{toolssummaryClass}
-\title{Tools for data summary}
+\title{Tools for data summary with summarytools integration}
 \value{
 Table
 }
 \description{
-Tools for data summary
+Tools for data summary with summarytools integration
 
-Tools for data summary
+Tools for data summary with summarytools integration
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::toolssummaryBase} -> \code{toolssummaryClass}

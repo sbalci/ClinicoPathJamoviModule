@@ -16,27 +16,6 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Start Time/Date
-        children:
-          - type: VariablesListBox
-            name: start
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: End Time/Date
-        children:
-          - type: VariablesListBox
-            name: end
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Event Type (optional)
-        children:
-          - type: VariablesListBox
-            name: event
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
         label: Sort By (optional)
         children:
           - type: VariablesListBox
@@ -50,25 +29,9 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: ComboBox
-            name: timetype
-          - type: ComboBox
-            name: timetypedata
-            enable: (timetype:datetime)
-          - type: ComboBox
-            name: timetypeoutput
-          - type: ComboBox
-            name: startType
-            label: Start Time Display
-      - type: LayoutBox
-        margin: large
-        children:
           - type: Label
             label: Display Options
             children:
-              - type: TextBox
-                name: barHeight
-                format: number
               - type: ComboBox
                 name: referenceLines
               - type: TextBox
@@ -80,13 +43,203 @@ children:
         children:
           - type: Label
             label: ggswim Integration
-            children:
-              - type: CheckBox
-                name: useggswim
-                label: Use ggswim Package
+            children: []
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sortOrder
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Start Time
+        children:
+          - type: VariablesListBox
+            name: startTime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: End Time
+        children:
+          - type: VariablesListBox
+            name: endTime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Response/Status Variable
+        children:
+          - type: VariablesListBox
+            name: responseVar
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showInterpretation
+      - type: CheckBox
+        name: personTimeAnalysis
+      - type: CheckBox
+        name: responseAnalysis
+      - type: CheckBox
+        name: exportTimeline
+      - type: CheckBox
+        name: exportSummary
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: markerSize
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: timeType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: plotTheme
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: dateFormat
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showLegend
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: timeUnit
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: timeDisplay
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: maxMilestones
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: milestone1Name
+        format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Milestone 1 Date
+        children:
+          - type: VariablesListBox
+            name: milestone1Date
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: milestone2Name
+        format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Milestone 2 Date
+        children:
+          - type: VariablesListBox
+            name: milestone2Date
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: milestone3Name
+        format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Milestone 3 Date
+        children:
+          - type: VariablesListBox
+            name: milestone3Date
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: milestone4Name
+        format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Milestone 4 Date
+        children:
+          - type: VariablesListBox
+            name: milestone4Date
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: milestone5Name
+        format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Milestone 5 Date
+        children:
+          - type: VariablesListBox
+            name: milestone5Date
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showEventMarkers
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Event Type Variable
+        children:
+          - type: VariablesListBox
+            name: eventVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Time Variable
+        children:
+          - type: VariablesListBox
+            name: eventTimeVar
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: laneWidth
         format: number

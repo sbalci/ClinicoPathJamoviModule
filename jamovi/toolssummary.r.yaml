@@ -28,10 +28,25 @@ items:
           title: "Statistics"
           type: text
 
+    - name: dfSummary
+      title: Data Frame Summary (summarytools)
+      type: Html
+      visible: (useSummarytools && showDfSummary)
+
+    - name: descrStats
+      title: Descriptive Statistics (summarytools)
+      type: Html
+      visible: (useSummarytools && showDescr)
+
     - name: frequencies
       title: Frequency Tables
       type: Html
       visible: (showFreq)
+
+    - name: summaryToolsFreq
+      title: Enhanced Frequency Tables (summarytools)
+      type: Html
+      visible: (useSummarytools && showFreq)
 
     - name: numericStats
       title: Numeric Variable Statistics
@@ -56,6 +71,11 @@ items:
         - name: max
           title: "Max"
           type: number
+
+    - name: crosstabs
+      title: Cross-tabulation Tables
+      type: Html
+      visible: (useSummarytools && showCrosstabs)
 
 refs:
     - ClinicoPathJamoviModule

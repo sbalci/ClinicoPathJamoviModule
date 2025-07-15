@@ -1,63 +1,242 @@
 ---
-name:  swimmerplot
-title: Patient Timeline Analysis
-jrs:   '1.1'
-
-clearWith:
-    - patientID
-    - start 
-    - end
-    - event
-    - sortVariable
-    - timetype
-    - timetypedata
-    - timetypeoutput
-    - barHeight
-    - startType
-    - milestone1Name
-    - milestone1Date
-    - milestone2Name
-    - milestone2Date
-    - milestone3Name
-    - milestone3Date
-    - milestone4Name
-    - milestone4Date
-    - milestone5Name
-    - milestone5Date
-    - referenceLines
-    - customReferenceTime
-    - useggswim
-    - markerSize
-
+name: swimmerplot
+title: "Swimmer Plot"
+jrs: '1.1'
 
 items:
-    - name: todo
-      title: To Do
+    - name: instructions
+      title: "Instructions"
       type: Html
-    
-    - name: summary
-      title: Timeline Summary
-      type: Table
-      rows: 0
-      columns:
-        - name: metric
-          title: "Metric"
-          type: text
-        - name: value
-          title: "Value"
-          type: number
-          format: ".1f"
 
     - name: plot
-      title: 'Swimmer Plot'
+      title: "Patient Timeline Visualization"
       type: Image
-      width: 800
+      width: 900
       height: 600
       renderFun: .plot
       requiresData: true
+      clearWith:
+          - patientID
+          - startTime
+          - endTime
+          - responseVar
+          - timeType
+          - dateFormat
+          - timeUnit
+          - timeDisplay
+          - milestone1Date
+          - milestone2Date
+          - milestone3Date
+          - milestone4Date
+          - milestone5Date
+          - showEventMarkers
+          - eventVar
+          - eventTimeVar
+          - laneWidth
+          - markerSize
+          - plotTheme
+          - showLegend
+          - referenceLines
+          - customReferenceTime
+          - sortVariable
+          - sortOrder
+
+    - name: summary
+      title: "Timeline Summary Statistics"
+      type: Table
+      rows: 0
+      columns:
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: value
+            title: "Value"
+            type: number
+      clearWith:
+          - patientID
+          - startTime
+          - endTime
+          - responseVar
+          - timeType
+          - dateFormat
+          - timeUnit
+          - timeDisplay
+
+    - name: interpretation
+      title: "Clinical Interpretation"
+      type: Html
+      visible: (showInterpretation)
+      clearWith:
+          - patientID
+          - startTime
+          - endTime
+          - responseVar
+          - timeType
+          - dateFormat
+          - timeUnit
+          - timeDisplay
+          - showInterpretation
+          - personTimeAnalysis
+          - responseAnalysis
+
+    - name: personTimeTable
+      title: "Person-Time Analysis"
+      type: Table
+      visible: (personTimeAnalysis && responseVar)
+      rows: 0
+      columns:
+          - name: response_type
+            title: "Response Type"
+            type: text
+          - name: n_patients
+            title: "Patients"
+            type: integer
+          - name: total_time
+            title: "Total Time"
+            type: number
+          - name: mean_time
+            title: "Mean Time"
+            type: number
+          - name: incidence_rate
+            title: "Incidence Rate"
+            type: number
+      clearWith:
+          - patientID
+          - startTime
+          - endTime
+          - responseVar
+          - timeType
+          - timeUnit
+          - personTimeAnalysis
+
+    - name: milestoneTable
+      title: "Milestone Event Summary"
+      type: Table
+      visible: (milestone1Date || milestone2Date || milestone3Date || milestone4Date || milestone5Date)
+      rows: 0
+      columns:
+          - name: milestone_name
+            title: "Milestone"
+            type: text
+          - name: n_events
+            title: "Events"
+            type: integer
+          - name: median_time
+            title: "Median Time"
+            type: number
+          - name: time_range
+            title: "Time Range"
+            type: text
+      clearWith:
+          - milestone1Date
+          - milestone2Date
+          - milestone3Date
+          - milestone4Date
+          - milestone5Date
+          - milestone1Name
+          - milestone2Name
+          - milestone3Name
+          - milestone4Name
+          - milestone5Name
+          - timeUnit
+
+    - name: eventMarkerTable
+      title: "Event Marker Summary"
+      type: Table
+      visible: (showEventMarkers && eventVar)
+      rows: 0
+      columns:
+          - name: event_type
+            title: "Event Type"
+            type: text
+          - name: n_events
+            title: "Count"
+            type: integer
+          - name: percent
+            title: "Percentage"
+            type: number
+            format: pc
+          - name: median_time
+            title: "Median Time"
+            type: number
+      clearWith:
+          - showEventMarkers
+          - eventVar
+          - eventTimeVar
+          - timeUnit
+
+    - name: timelineData
+      title: "Export Timeline Data"
+      type: Output
+      varTitle: "Timeline Data"
+      varDescription: "Processed timeline data for external analysis"
+      clearWith:
+          - exportTimeline
+          - patientID
+          - startTime
+          - endTime
+          - responseVar
+          - timeType
+          - timeUnit
+
+    - name: summaryData
+      title: "Export Summary Statistics"
+      type: Output
+      varTitle: "Summary Statistics"
+      varDescription: "Comprehensive summary statistics and clinical metrics"
+      clearWith:
+          - exportSummary
+          - patientID
+          - startTime
+          - endTime
+          - responseVar
+          - personTimeAnalysis
+          - responseAnalysis
+
+    - name: exportInfo
+      title: "Export Information"
+      type: Html
+      visible: (exportTimeline || exportSummary)
+      clearWith:
+          - exportTimeline
+          - exportSummary
+
+    - name: validationReport
+      title: "Data Validation Report"
+      type: Html
+      visible: false  # Only shown when there are validation issues
+
+    - name: advancedMetrics
+      title: "Advanced Clinical Metrics"
+      type: Table
+      visible: (personTimeAnalysis && responseVar)
+      rows: 0
+      columns:
+          - name: metric_name
+            title: "Metric"
+            type: text
+          - name: metric_value
+            title: "Value"
+            type: number
+          - name: metric_unit
+            title: "Unit"
+            type: text
+          - name: clinical_interpretation
+            title: "Clinical Interpretation"
+            type: text
+      clearWith:
+          - patientID
+          - startTime
+          - endTime
+          - responseVar
+          - timeUnit
+          - personTimeAnalysis
 
 refs:
-    - ClinicoPathJamoviModule
     - ggswim
-
+    - ggplot2
+    - dplyr
+    - lubridate
+    - RColorBrewer
+    - gridExtra
 ...

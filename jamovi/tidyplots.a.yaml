@@ -1,9 +1,17 @@
 ---
 name: tidyplots
-title: Tidy Plots
+title: Comprehensive Tidy Plots
 menuGroup: JJStatsPlotD
-version: '0.0.3'
+version: '1.0.0'
 jas: '1.2'
+
+description:
+  main: >
+      Create publication-ready plots using the tidyplots framework with extensive
+      customization options, statistical features, and advanced visualization capabilities.
+      Comprehensive implementation of tidyplots for jamovi with advanced statistical
+      visualization features including multiple plot types, statistical testing,
+      and extensive customization options.
 
 options:
     - name: data
@@ -12,34 +20,80 @@ options:
           R: >
             The data as a data frame.
 
+    # === CORE VARIABLES ===
     - name: xvar
       title: X Variable
       type: Variable
+      suggested:
+        - continuous
+        - ordinal
+        - nominal
+      permitted:
+        - numeric
+        - factor
 
     - name: yvar
-      title: Y Variable
+      title: Y Variable  
       type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
 
     - name: color
       title: Color Variable
       type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
 
-    # Plot Types
+    - name: group
+      title: Group Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+
+    - name: facet
+      title: Facet Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+
+    # === PLOT TYPES ===
     - name: plotType
-      title: Plot Type
+      title: Main Plot Type
       type: List
       options:
         - name: points
-          title: Points
+          title: Data Points
         - name: line
-          title: Line
+          title: Line Plot
         - name: bar
-          title: Bar
+          title: Bar Plot
         - name: boxplot
           title: Box Plot
+        - name: violin
+          title: Violin Plot
+        - name: histogram
+          title: Histogram
+        - name: area
+          title: Area Plot
+        - name: density
+          title: Density Plot
       default: points
 
-    # Point Options
+    # === PLOT STYLE OPTIONS ===
     - name: pointType
       title: Point Style
       type: List
@@ -52,35 +106,198 @@ options:
           title: Jittered
       default: basic
 
-    # Statistical Elements
+    - name: lineType
+      title: Line Type
+      type: List
+      options:
+        - name: direct
+          title: Direct Connection
+        - name: mean
+          title: Mean Line
+        - name: median
+          title: Median Line
+        - name: curve
+          title: Curve Fit
+      default: direct
+
+    - name: barType
+      title: Bar Type
+      type: List
+      options:
+        - name: mean
+          title: Mean Bar
+        - name: median
+          title: Median Bar
+        - name: count
+          title: Count Bar
+      default: mean
+
+    # === STATISTICAL ELEMENTS ===
     - name: showMean
       title: Show Mean
       type: Bool
       default: false
+
+    - name: meanType
+      title: Mean Display
+      type: List
+      options:
+        - name: dash
+          title: Dash
+        - name: dot
+          title: Dot
+        - name: value
+          title: Value Label
+      default: dash
+
+    - name: showMedian
+      title: Show Median
+      type: Bool
+      default: false
+
+    - name: medianType
+      title: Median Display
+      type: List
+      options:
+        - name: dash
+          title: Dash
+        - name: dot
+          title: Dot
+        - name: value
+          title: Value Label
+      default: dash
 
     - name: showSEM
       title: Show Standard Error
       type: Bool
       default: false
 
-    - name: showCI
-      title: Show Confidence Interval
+    - name: showSD
+      title: Show Standard Deviation
       type: Bool
       default: false
 
-    # Aesthetics
+    - name: showCI
+      title: Show 95% Confidence Interval
+      type: Bool
+      default: false
+
+    - name: ciType
+      title: CI Display
+      type: List
+      options:
+        - name: errorbar
+          title: Error Bars
+        - name: ribbon
+          title: Ribbon
+      default: errorbar
+
+    - name: showRange
+      title: Show Range (Min-Max)
+      type: Bool
+      default: false
+
+    # === DISTRIBUTION ELEMENTS ===
+    - name: showDistribution
+      title: Show Distribution
+      type: Bool
+      default: false
+
+    - name: distributionType
+      title: Distribution Type
+      type: List
+      options:
+        - name: density
+          title: Density Curve
+        - name: rug
+          title: Rug Plot
+      default: density
+
+    # === SPECIAL PLOT OPTIONS ===
+    - name: showOutliers
+      title: Show Outlier Points (Boxplot)
+      type: Bool
+      default: true
+
+    - name: violinPoints
+      title: Add Points to Violin Plot
+      type: Bool
+      default: false
+
+    - name: histogramBins
+      title: Histogram Bins
+      type: Integer
+      default: 30
+      min: 5
+      max: 100
+
+    - name: areaType
+      title: Area Type
+      type: List
+      options:
+        - name: absolute
+          title: Absolute
+        - name: relative
+          title: Relative (Stacked)
+      default: absolute
+
+    # === STATISTICAL TESTING ===
+    - name: showPValue
+      title: Show P-Values
+      type: Bool
+      default: false
+
+    - name: showSignificance
+      title: Show Significance Asterisks
+      type: Bool
+      default: false
+
+    # === COLOR SCHEMES ===
     - name: colorScheme
       title: Color Scheme
       type: List
       options:
+        # Discrete schemes
         - name: friendly
           title: Colorblind Friendly
-        - name: viridis
-          title: Viridis
         - name: seaside
           title: Seaside
+        - name: apple
+          title: Apple
+        - name: rainbow
+          title: Rainbow
+        # Continuous schemes
+        - name: viridis
+          title: Viridis
+        - name: inferno
+          title: Inferno
+        - name: magma
+          title: Magma
+        - name: turbo
+          title: Turbo
+        # Diverging schemes
+        - name: blue2red
+          title: Blue to Red
+        - name: blue2brown
+          title: Blue to Brown
       default: friendly
 
+    # === CUSTOMIZATION ===
+    - name: alpha
+      title: Transparency (0-1)
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 1.0
+
+    - name: fontSize
+      title: Font Size
+      type: Integer
+      default: 12
+      min: 8
+      max: 24
+
+    # === LABELS AND TITLES ===
     - name: plotTitle
       title: Plot Title
       type: String
@@ -95,4 +312,51 @@ options:
       title: Y Axis Label
       type: String
       default: ''
+
+    - name: legendTitle
+      title: Legend Title
+      type: String
+      default: ''
+
+    # === APPEARANCE OPTIONS ===
+    - name: removeLegend
+      title: Remove Legend
+      type: Bool
+      default: false
+
+    - name: removePadding
+      title: Remove Plot Padding
+      type: Bool
+      default: false
+
+    # === AXIS OPTIONS ===
+    - name: removeXAxis
+      title: Remove X Axis
+      type: Bool
+      default: false
+
+    - name: removeXAxisLabels
+      title: Remove X Axis Labels
+      type: Bool
+      default: false
+
+    - name: removeXAxisTitle
+      title: Remove X Axis Title
+      type: Bool
+      default: false
+
+    - name: removeYAxis
+      title: Remove Y Axis
+      type: Bool
+      default: false
+
+    - name: removeYAxisLabels
+      title: Remove Y Axis Labels
+      type: Bool
+      default: false
+
+    - name: removeYAxisTitle
+      title: Remove Y Axis Title
+      type: Bool
+      default: false
 ...

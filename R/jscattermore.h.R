@@ -59,14 +59,16 @@ jscattermoreOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "continuous"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..size_var <- jmvcore::OptionVariable$new(
                 "size_var",
                 size_var,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..plot_type <- jmvcore::OptionList$new(
                 "plot_type",
                 plot_type,
@@ -139,7 +141,8 @@ jscattermoreOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..log_transform_x <- jmvcore::OptionBool$new(
                 "log_transform_x",
                 log_transform_x,
@@ -358,8 +361,8 @@ jscattermore <- function(
     data,
     x_var,
     y_var,
-    color_var,
-    size_var,
+    color_var = NULL,
+    size_var = NULL,
     plot_type = "ggplot2",
     point_size = 0.5,
     alpha = 0.8,
@@ -370,7 +373,7 @@ jscattermore <- function(
     show_smooth = FALSE,
     smooth_method = "loess",
     show_density = FALSE,
-    facet_var,
+    facet_var = NULL,
     log_transform_x = FALSE,
     log_transform_y = FALSE,
     x_label = "",

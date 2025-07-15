@@ -19,8 +19,8 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             colorScheme = "jamovi",
             barAlpha = 1,
             barWidth = 0.7,
-            showWaterfallPlot = FALSE,
-            showSpiderPlot = FALSE, ...) {
+            showWaterfallPlot = TRUE,
+            showSpiderPlot = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -50,7 +50,8 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..inputType <- jmvcore::OptionList$new(
                 "inputType",
                 inputType,
@@ -110,11 +111,11 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showWaterfallPlot <- jmvcore::OptionBool$new(
                 "showWaterfallPlot",
                 showWaterfallPlot,
-                default=FALSE)
+                default=TRUE)
             private$..showSpiderPlot <- jmvcore::OptionBool$new(
                 "showSpiderPlot",
                 showSpiderPlot,
-                default=FALSE)
+                default=TRUE)
             private$..addResponseCategory <- jmvcore::OptionOutput$new(
                 "addResponseCategory")
 
@@ -178,6 +179,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         todo = function() private$.items[["todo"]],
         todo2 = function() private$.items[["todo2"]],
         summaryTable = function() private$.items[["summaryTable"]],
+        personTimeTable = function() private$.items[["personTimeTable"]],
         clinicalMetrics = function() private$.items[["clinicalMetrics"]],
         waterfallplot = function() private$.items[["waterfallplot"]],
         spiderplot = function() private$.items[["spiderplot"]],
@@ -234,6 +236,40 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="personTimeTable",
+                title="Person-Time Analysis",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="Response Category", 
+                        `type`="text"),
+                    list(
+                        `name`="patients", 
+                        `title`="Patients", 
+                        `type`="integer"),
+                    list(
+                        `name`="patient_pct", 
+                        `title`="% Patients", 
+                        `type`="text"),
+                    list(
+                        `name`="person_time", 
+                        `title`="Person-Time", 
+                        `type`="text"),
+                    list(
+                        `name`="time_pct", 
+                        `title`="% Time", 
+                        `type`="text"),
+                    list(
+                        `name`="median_time", 
+                        `title`="Median Time to Response", 
+                        `type`="text"),
+                    list(
+                        `name`="median_duration", 
+                        `title`="Median Duration", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="clinicalMetrics",
@@ -307,7 +343,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "waterfall",
-                version = c(0,0,2),
+                version = c(0,0,3),
                 options = options,
                 results = waterfallResults$new(options=options),
                 data = data,
@@ -322,18 +358,54 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Treatment Response Analysis
 #'
+#' Creates waterfall and spider plots to analyze tumor response data following 
+#' RECIST criteria. Supports both raw tumor measurements and pre-calculated 
+#' percentage changes. Provides comprehensive response analysis including ORR, 
+#' DCR, and person-time metrics.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Example 1: Percentage data
+#' data_pct <- data.frame(
+#'     PatientID = paste0("PT", 1:5),
+#'     Response = c(-60, -35, -10, 15, 45)
+#' )
+#' waterfall(
+#'     data = data_pct,
+#'     patientID = "PatientID",
+#'     responseVar = "Response",
+#'     inputType = "percentage"
+#' )
+#'
+#' # Example 2: Raw measurements
+#' data_raw <- data.frame(
+#'     PatientID = rep(paste0("PT", 1:3), each = 3),
+#'     Time = rep(c(0, 2, 4), 3),
+#'     Measurement = c(50, 30, 25, 60, 45, 40, 55, 50, 48)
+#' )
+#' waterfall(
+#'     data = data_raw,
+#'     patientID = "PatientID",
+#'     responseVar = "Measurement",
+#'     timeVar = "Time",
+#'     inputType = "raw"
+#' )
+#'}
 #' @param data The data as a data frame.
 #' @param patientID Variable containing patient identifiers.
-#' @param responseVar Percentage change in tumor size.
+#' @param responseVar Response variable: either raw tumor measurements or
+#'   pre-calculated percentage changes. For raw measurements, requires a time
+#'   variable with baseline (time = 0). For percentages, negative values
+#'   indicate tumor shrinkage (improvement).
 #' @param timeVar Time point of measurement for spider plot (e.g., months from
 #'   baseline)
 #' @param inputType Specify data format: 'raw' for actual measurements (will
 #'   calculate percent change) or 'percentage' for pre-calculated percentage
 #'   changes
 #' @param sortBy Sort the waterfall plot by best response or patient ID.
-#' @param showThresholds .
-#' @param labelOutliers .
+#' @param showThresholds Show +20 percent and -30 percent RECIST thresholds.
+#' @param labelOutliers Label responses exceeding the specified threshold.
 #' @param showMedian Show median response as a horizontal line.
 #' @param showCI Show confidence interval around median response.
 #' @param minResponseForLabel Minimum response value for labels to be
@@ -341,14 +413,16 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param colorScheme Color scheme for waterfall plot.
 #' @param barAlpha Transparency of bars in waterfall plot.
 #' @param barWidth Width of bars in waterfall plot.
-#' @param showWaterfallPlot .
-#' @param showSpiderPlot Create an additional spider plot showing response
-#'   over time if longitudinal data available
+#' @param showWaterfallPlot Display the waterfall plot showing best response
+#'   for each patient.
+#' @param showSpiderPlot Display spider plot showing response trajectories
+#'   over time (requires time variable).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$waterfallplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
@@ -366,7 +440,7 @@ waterfall <- function(
     data,
     patientID,
     responseVar,
-    timeVar,
+    timeVar = NULL,
     inputType = "percentage",
     sortBy = "response",
     showThresholds = FALSE,
@@ -377,8 +451,8 @@ waterfall <- function(
     colorScheme = "jamovi",
     barAlpha = 1,
     barWidth = 0.7,
-    showWaterfallPlot = FALSE,
-    showSpiderPlot = FALSE) {
+    showWaterfallPlot = TRUE,
+    showSpiderPlot = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("waterfall requires jmvcore to be installed (restart may be required)")

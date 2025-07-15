@@ -4,7 +4,18 @@
 \alias{toolssummary}
 \title{Tools for data summary}
 \usage{
-toolssummary(data, vars, excludeNA = FALSE, showFreq = TRUE, showStats = TRUE)
+toolssummary(
+  data,
+  vars,
+  excludeNA = FALSE,
+  showFreq = TRUE,
+  showStats = TRUE,
+  useSummarytools = TRUE,
+  showDfSummary = TRUE,
+  showDescr = TRUE,
+  groupVar,
+  showCrosstabs = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -16,14 +27,30 @@ toolssummary(data, vars, excludeNA = FALSE, showFreq = TRUE, showStats = TRUE)
 \item{showFreq}{.}
 
 \item{showStats}{.}
+
+\item{useSummarytools}{Use summarytools package for enhanced data summaries}
+
+\item{showDfSummary}{Show comprehensive data frame summary using
+summarytools::dfSummary}
+
+\item{showDescr}{Show detailed descriptive statistics using
+summarytools::descr}
+
+\item{groupVar}{Variable to group by for stratified summaries}
+
+\item{showCrosstabs}{Show cross-tabulation tables for categorical variables}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$dfSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$descrStats} \tab \tab \tab \tab \tab a html \cr
 \code{results$frequencies} \tab \tab \tab \tab \tab a html \cr
+\code{results$summaryToolsFreq} \tab \tab \tab \tab \tab a html \cr
 \code{results$numericStats} \tab \tab \tab \tab \tab a table \cr
+\code{results$crosstabs} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

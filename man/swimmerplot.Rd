@@ -7,59 +7,144 @@
 swimmerplot(
   data,
   patientID,
-  start,
-  end,
-  event,
-  timetype = "raw",
-  timetypedata = "ymd",
-  timetypeoutput = "months",
-  startType = "relative",
-  sortVariable,
-  barHeight = 3,
+  startTime,
+  endTime,
+  responseVar,
+  timeType = "raw",
+  dateFormat = "ymd",
+  timeUnit = "months",
+  timeDisplay = "relative",
+  maxMilestones = 5,
+  milestone1Name = "Surgery",
+  milestone1Date,
+  milestone2Name = "Treatment Start",
+  milestone2Date,
+  milestone3Name = "Response Assessment",
+  milestone3Date,
+  milestone4Name = "Progression",
+  milestone4Date,
+  milestone5Name = "Death/Last Follow-up",
+  milestone5Date,
+  showEventMarkers = FALSE,
+  eventVar,
+  eventTimeVar,
+  laneWidth = 3,
+  markerSize = 5,
+  plotTheme = "ggswim",
+  showLegend = TRUE,
   referenceLines = "none",
   customReferenceTime = 12,
-  useggswim = FALSE,
-  markerSize = 5
+  sortVariable,
+  sortOrder = "duration_desc",
+  showInterpretation = TRUE,
+  personTimeAnalysis = TRUE,
+  responseAnalysis = TRUE,
+  exportTimeline = FALSE,
+  exportSummary = FALSE
 )
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The data as a data frame containing patient timeline
+information.}
 
-\item{patientID}{Variable containing patient identifiers.}
+\item{patientID}{Variable containing unique patient identifiers.}
 
-\item{start}{Time/date when observation/treatment started.}
+\item{startTime}{Time/date when observation/treatment started.}
 
-\item{end}{Time/date when observation/treatment ended.}
+\item{endTime}{Time/date when observation/treatment ended.}
 
-\item{event}{Optional variable for event types (e.g., CR, PR, PD).}
+\item{responseVar}{Optional variable for response types (e.g., CR, PR, SD,
+PD) to color lanes.}
 
-\item{timetype}{Select whether time values are raw numbers or dates}
+\item{timeType}{Select whether time values are raw numbers or dates/times.}
 
-\item{timetypedata}{Select the time format in your data}
+\item{dateFormat}{Select the date/time format in your data (only used when
+Time Input Type is Date/Time).}
 
-\item{timetypeoutput}{Select the time unit for display}
+\item{timeUnit}{Time unit to use for display and calculations.}
 
-\item{startType}{Choose whether to align all start times to 0 or use
-absolute start times}
+\item{timeDisplay}{Choose whether to align all start times to 0 or use
+absolute start times.}
 
-\item{sortVariable}{Variable to sort the patient timelines.}
+\item{maxMilestones}{Maximum number of milestone events to support.}
 
-\item{barHeight}{Thickness of timeline bars}
+\item{milestone1Name}{Name for the first milestone event (e.g., Surgery,
+Treatment Start).}
 
-\item{referenceLines}{Add reference time lines to the plot}
+\item{milestone1Date}{Date/time variable when milestone 1 occurred.}
 
-\item{customReferenceTime}{Custom time point to mark with a reference line}
+\item{milestone2Name}{Name for the second milestone event.}
 
-\item{useggswim}{.}
+\item{milestone2Date}{Date/time variable when milestone 2 occurred.}
 
-\item{markerSize}{Size of event markers on the plot}
+\item{milestone3Name}{Name for the third milestone event.}
+
+\item{milestone3Date}{Date/time variable when milestone 3 occurred.}
+
+\item{milestone4Name}{Name for the fourth milestone event.}
+
+\item{milestone4Date}{Date/time variable when milestone 4 occurred.}
+
+\item{milestone5Name}{Name for the fifth milestone event.}
+
+\item{milestone5Date}{Date/time variable when milestone 5 occurred.}
+
+\item{showEventMarkers}{Whether to display event markers along patient
+timelines.}
+
+\item{eventVar}{Variable containing event type labels for markers.}
+
+\item{eventTimeVar}{Variable containing event times (defaults to start time
+if not specified).}
+
+\item{laneWidth}{Width/thickness of patient timeline lanes.}
+
+\item{markerSize}{Size of event markers and milestone markers.}
+
+\item{plotTheme}{Visual theme for the swimmer plot.}
+
+\item{showLegend}{Whether to display the plot legend.}
+
+\item{referenceLines}{Add reference time lines to the plot for clinical
+context.}
+
+\item{customReferenceTime}{Custom time point to mark with a reference line
+(only used when Reference Lines is set to Custom).}
+
+\item{sortVariable}{Optional variable to sort patient timelines (defaults
+to duration-based sorting).}
+
+\item{sortOrder}{How to order patients in the visualization.}
+
+\item{showInterpretation}{Whether to display automated clinical
+interpretation of the timeline data.}
+
+\item{personTimeAnalysis}{Whether to include epidemiological person-time
+metrics in the analysis.}
+
+\item{responseAnalysis}{Whether to analyze response patterns when response
+variable is provided.}
+
+\item{exportTimeline}{Export processed timeline data for external analysis.}
+
+\item{exportSummary}{Export comprehensive summary statistics and clinical
+metrics.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$milestoneTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$eventMarkerTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$timelineData} \tab \tab \tab \tab \tab an output \cr
+\code{results$summaryData} \tab \tab \tab \tab \tab an output \cr
+\code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$advancedMetrics} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -69,27 +154,35 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summary)}
 }
 \description{
-Creates a swimmer plot to visualize individual patient timelines and
-clinical events.
+Creates comprehensive swimmer plots using the ggswim package to visualize
+patient timelines,  clinical events, milestones, and treatment responses.
+Features enhanced data validation  and complete ggswim integration for
+professional clinical visualization.
 }
 \examples{
 \donttest{
-# Example will show patient timelines
+# Clinical trial swimmer plot example
 data <- data.frame(
-    PatientID = paste0("PT", 1:10),
-    StartTime = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-    EndTime = c(12, 8, 15, 6, 9, 11, 7, 14, 10, 5),
-    Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD"),
-    Surgery = c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1)
+    PatientID = paste0("PT", sprintf("%03d", 1:20)),
+    StartTime = rep(0, 20),
+    EndTime = sample(6:24, 20, replace = TRUE),
+    Response = sample(c("CR", "PR", "SD", "PD"), 20, replace = TRUE),
+    Surgery = sample(c(1, 2, 3, NA), 20, replace = TRUE),
+    Progression = sample(c(8, 12, 16, NA), 20, replace = TRUE)
 )
+
 swimmerplot(
     data = data,
     patientID = "PatientID",
-    start = "StartTime",
-    end = "EndTime",
-    event = "Event",
+    startTime = "StartTime",
+    endTime = "EndTime",
+    responseVar = "Response",
     milestone1Name = "Surgery",
-    milestone1Date = "Surgery"
+    milestone1Date = "Surgery",
+    milestone2Name = "Progression",
+    milestone2Date = "Progression",
+    showEventMarkers = TRUE,
+    showInterpretation = TRUE
 )
 }
 }

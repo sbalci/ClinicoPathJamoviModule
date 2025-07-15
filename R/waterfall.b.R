@@ -1,5 +1,6 @@
 #' @title Treatment Response Analysis
-#' @description Creates waterfall and spider plots to visualize tumor response data following RECIST criteria
+#' @description Creates waterfall and spider plots to visualize tumor response data following RECIST criteria.
+#' Supports both raw tumor measurements and pre-calculated percentage changes.
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import dplyr
@@ -8,17 +9,41 @@
 #' @import scales
 #' @param data Data frame containing response data
 #' @param patientID Column name for patient identifiers
-#' @param response Column name for response values (raw measurements or percent change)
-#' @param timeVar Optional column name for time points
-#' @param inputType Whether values are raw measurements or pre-calculated percentages
-#' @return A list containing plot object and summary statistics
+#' @param responseVar Column name for response values (raw measurements or percent change)
+#' @param timeVar Optional column name for time points (required for raw measurements and spider plots)
+#' @param inputType Data format: 'raw' for actual measurements or 'percentage' for pre-calculated percentage changes
+#' @return Waterfall and spider plots with response analysis tables
+#' @details 
+#' The function handles two data formats:
+#' 
+#' **Percentage Data**: Pre-calculated percentage changes from baseline
+#' - Negative values indicate tumor shrinkage (improvement)
+#' - Example: -30 means 30% decrease from baseline
+#' 
+#' **Raw Measurements**: Actual tumor measurements over time  
+#' - Requires baseline measurement at time = 0
+#' - Function calculates percentage changes automatically
+#' - Uses ((current - baseline) / baseline) * 100 formula
+#' 
+#' **RECIST Categories**:
+#' - Complete Response (CR): ≤ -100% (complete disappearance)
+#' - Partial Response (PR): ≤ -30% decrease
+#' - Stable Disease (SD): -30% to +20% change  
+#' - Progressive Disease (PD): > +20% increase
+#' 
 #' @examples
-#' data <- data.frame(
-#'   PatientID = paste0("PT", 1:10),
-#'   Response = c(-100, -45, -30, -20, -10, 0, 10, 20, 30, 40),
-#'   Time = c(1,2,3,4,5,6,7,8,9,10)
+#' # Percentage data example
+#' data_pct <- data.frame(
+#'   PatientID = paste0("PT", 1:5),
+#'   Response = c(-60, -35, -10, 15, 45)
 #' )
-#' waterfall(data, "PatientID", "Response", "Time")
+#' 
+#' # Raw measurements example  
+#' data_raw <- data.frame(
+#'   PatientID = rep(paste0("PT", 1:3), each = 3),
+#'   Time = rep(c(0, 2, 4), 3),
+#'   Measurement = c(50, 30, 25, 60, 45, 40, 55, 50, 48)
+#' )
 
 
 #' @export waterfallClass
@@ -34,6 +59,52 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       .validateData = function(df, patientID, inputType, responseVar, timeVar = NULL) {
         validation_messages <- character()
         data_valid <- TRUE
+
+        # Basic data validation
+        if (is.null(df) || nrow(df) == 0) {
+          validation_messages <- c(validation_messages, "<br>Error: No data provided or data is empty.")
+          data_valid <- FALSE
+          attr(df, "validation_messages") <- validation_messages
+          attr(df, "data_valid") <- data_valid
+          return(df)
+        }
+
+        # Check required columns exist
+        required_columns <- c(patientID, responseVar)
+        if (!is.null(timeVar)) {
+          required_columns <- c(required_columns, timeVar)
+        }
+        
+        missing_columns <- required_columns[!required_columns %in% names(df)]
+        if (length(missing_columns) > 0) {
+          validation_messages <- c(validation_messages, paste0(
+            "<br>Error: Missing required columns: ", paste(missing_columns, collapse = ", "),
+            "<br>Available columns: ", paste(names(df), collapse = ", ")
+          ))
+          data_valid <- FALSE
+        }
+
+        # Check minimum number of patients
+        if (patientID %in% names(df)) {
+          n_patients <- length(unique(df[[patientID]]))
+          if (n_patients < 2) {
+            validation_messages <- c(validation_messages, paste0(
+              "<br>Warning: Only ", n_patients, " patient found. ",
+              "Waterfall plots are more meaningful with multiple patients."
+            ))
+          }
+        }
+
+        # Check for missing response values
+        if (responseVar %in% names(df)) {
+          missing_responses <- sum(is.na(df[[responseVar]]))
+          if (missing_responses > 0) {
+            validation_messages <- c(validation_messages, paste0(
+              "<br>Warning: ", missing_responses, " missing response values found. ",
+              "These will be excluded from analysis."
+            ))
+          }
+        }
 
         # For raw measurements validation
         if (inputType == "raw") {
@@ -193,18 +264,30 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
         }
 
-        # Calculate RECIST categories
+        # Calculate RECIST categories - select best response (most negative for tumor shrinkage)
         df_waterfall <- processed_df %>%
           dplyr::group_by(!!rlang::sym(patientID)) %>%
-          dplyr::filter(abs(response) == max(abs(response), na.rm = TRUE)) %>%
+          dplyr::filter(response == min(response, na.rm = TRUE)) %>%
+          dplyr::slice(1) %>%  # Take first row if there are ties
           dplyr::ungroup() %>%
           dplyr::mutate(
             category = factor(
               cut(response,
-                  breaks = c(-Inf, -100, -30, 20, Inf),
-                  labels = c("CR", "PR", "SD", "PD"),
-                  right = TRUE),
-              levels = c("CR", "PR", "SD", "PD", "NA")
+                  breaks = c(-Inf, -30, 20, Inf),
+                  labels = c("Response", "Stable", "Progression"),
+                  right = FALSE),
+              levels = c("Response", "Stable", "Progression")
+            ),
+            # Also create detailed RECIST categories
+            recist_category = factor(
+              dplyr::case_when(
+                response <= -100 ~ "CR",  # Complete Response 
+                response <= -30 ~ "PR",   # Partial Response 
+                response <= 20 ~ "SD",    # Stable Disease
+                response > 20 ~ "PD",     # Progressive Disease
+                TRUE ~ "Unknown"
+              ),
+              levels = c("CR", "PR", "SD", "PD", "Unknown")
             )
           )
 
@@ -228,12 +311,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       ,
       # calculate clinical metrics ----
       .calculateMetrics = function(df) {
-        ## Calculate response rates ----
+        ## Calculate response rates using RECIST categories ----
         cats <- c("CR", "PR", "SD", "PD")
 
+        # Use recist_category for detailed analysis
         summary_table <- data.frame(
           category = cats,
-          n = sapply(cats, function(x) sum(df$category == x, na.rm = TRUE)),
+          n = sapply(cats, function(x) sum(df$recist_category == x, na.rm = TRUE)),
           stringsAsFactors = FALSE
         )
         summary_table$percent <- summary_table$n / sum(summary_table$n) * 100
@@ -288,7 +372,86 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           )
       }
 
+      ,
+      # Calculate person-time metrics for enhanced analysis
+      .calculatePersonTimeMetrics = function(df, patientID, timeVar, responseVar) {
+        # Requires time variable to calculate person-time
+        if (is.null(timeVar)) {
+          return(NULL)
+        }
 
+        # Ensure required columns exist and are properly formatted
+        if (!all(c(patientID, timeVar) %in% names(df))) {
+          warning("Required variables missing for person-time analysis")
+          return(NULL)
+        }
+
+        # Convert time variable to numeric if needed
+        df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
+
+        # Calculate person-time metrics by patient
+        pt_by_patient <- df %>%
+          dplyr::group_by(!!rlang::sym(patientID)) %>%
+          dplyr::summarise(
+            # Calculate total follow-up time (max time - baseline)
+            follow_up_time = max(!!rlang::sym(timeVar), na.rm = TRUE),
+            # Calculate best response
+            best_response = min(!!rlang::sym(responseVar), na.rm = TRUE),
+            # Determine response category
+            response_cat = factor(
+              cut(best_response,
+                  breaks = c(-Inf, -100, -30, 20, Inf),
+                  labels = c("CR", "PR", "SD", "PD"),
+                  right = TRUE),
+              levels = c("CR", "PR", "SD", "PD")
+            ),
+            # Calculate time to best response
+            time_to_best = !!rlang::sym(timeVar)[which.min(!!rlang::sym(responseVar))],
+            # Calculate time in response (for responders - PR or CR)
+            time_in_response = ifelse(
+              best_response <= -30,
+              # For responders, calculate time from first response to last follow-up
+              max(!!rlang::sym(timeVar)[!!rlang::sym(responseVar) <= -30], na.rm = TRUE) -
+                min(!!rlang::sym(timeVar)[!!rlang::sym(responseVar) <= -30], na.rm = TRUE),
+              0
+            ),
+            .groups = "drop"
+          )
+
+        # Calculate overall person-time metrics
+        total_patients <- nrow(pt_by_patient)
+        total_person_time <- sum(pt_by_patient$follow_up_time, na.rm = TRUE)
+        total_response_time <- sum(pt_by_patient$time_in_response, na.rm = TRUE)
+
+        # Calculate person-time by response category
+        pt_by_category <- pt_by_patient %>%
+          dplyr::group_by(response_cat, .drop = FALSE) %>%
+          dplyr::summarise(
+            patients = dplyr::n(),
+            person_time = sum(follow_up_time, na.rm = TRUE),
+            median_time_to_response = median(time_to_best, na.rm = TRUE),
+            median_duration = median(time_in_response, na.rm = TRUE),
+            .groups = "drop"
+          ) %>%
+          dplyr::mutate(
+            pct_patients = (patients / total_patients) * 100,
+            pct_time = (person_time / total_person_time) * 100
+          )
+
+        # Calculate summary metrics
+        summary_metrics <- list(
+          total_patients = total_patients,
+          total_person_time = total_person_time,
+          total_response_time = total_response_time,
+          response_rate_per_100 = (total_response_time / total_person_time) * 100
+        )
+
+        return(list(
+          by_patient = pt_by_patient,
+          by_category = pt_by_category,
+          summary = summary_metrics
+        ))
+      }
 
       ,
       # run ----
@@ -479,9 +642,66 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           value = paste0(metrics$DCR, "%")
         ))
 
+        # Calculate and add person-time metrics if time variable is available
+        person_time_metrics <- private$.calculatePersonTimeMetrics(
+          processed_data$spider,
+          self$options$patientID,
+          self$options$timeVar,
+          self$options$responseVar
+        )
 
+        # Add person-time metrics to the results if available
+        if (!is.null(person_time_metrics)) {
+          # Add response duration metrics to clinical metrics table
+          self$results$clinicalMetrics$addRow(rowKey = 3, values = list(
+            metric = "Median Time to Response",
+            value = sprintf("%.1f %s",
+                            person_time_metrics$by_category$median_time_to_response[
+                              person_time_metrics$by_category$response_cat %in% c("CR", "PR")
+                            ][1],
+                            "time units")
+          ))
 
+          self$results$clinicalMetrics$addRow(rowKey = 4, values = list(
+            metric = "Median Duration of Response",
+            value = sprintf("%.1f %s",
+                            median(person_time_metrics$by_patient$time_in_response[
+                              person_time_metrics$by_patient$time_in_response > 0
+                            ], na.rm = TRUE),
+                            "time units")
+          ))
 
+          self$results$clinicalMetrics$addRow(rowKey = 5, values = list(
+            metric = "Response Rate per 100 Person-Time Units",
+            value = sprintf("%.2f", person_time_metrics$summary$response_rate_per_100)
+          ))
+
+          # Add person-time table if it exists
+          if (!is.null(self$results$personTimeTable)) {
+            for (i in seq_len(nrow(person_time_metrics$by_category))) {
+              self$results$personTimeTable$addRow(rowKey = i, values = list(
+                category = person_time_metrics$by_category$response_cat[i],
+                patients = person_time_metrics$by_category$patients[i],
+                patient_pct = sprintf("%.1f%%", person_time_metrics$by_category$pct_patients[i]),
+                person_time = sprintf("%.1f", person_time_metrics$by_category$person_time[i]),
+                time_pct = sprintf("%.1f%%", person_time_metrics$by_category$pct_time[i]),
+                median_time = sprintf("%.1f", person_time_metrics$by_category$median_time_to_response[i]),
+                median_duration = sprintf("%.1f", person_time_metrics$by_category$median_duration[i])
+              ))
+            }
+
+            # Add total row
+            self$results$personTimeTable$addRow(rowKey = nrow(person_time_metrics$by_category) + 1, values = list(
+              category = "Total",
+              patients = person_time_metrics$summary$total_patients,
+              patient_pct = "100.0%",
+              person_time = sprintf("%.1f", person_time_metrics$summary$total_person_time),
+              time_pct = "100.0%",
+              median_time = "",
+              median_duration = ""
+            ))
+          }
+        }
 
         # mydataview ----
 
@@ -514,23 +734,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (is.null(self$options$timeVar) && self$options$addResponseCategory && self$results$addResponseCategory$isNotFilled()) {
           df <- processed_data$waterfall
           self$results$addResponseCategory$setRowNums(rownames(df))
-          self$results$addResponseCategory$setValues(df$category)
+          self$results$addResponseCategory$setValues(df$recist_category)
           }
 
         if (!is.null(self$options$timeVar) && self$options$addResponseCategory && self$results$addResponseCategory$isNotFilled()) {
           # Get waterfall data and extract unique patient categories
           df <- processed_data$waterfall %>%
-            dplyr::select(!!rlang::sym(self$options$patientID), category) %>%
+            dplyr::select(!!rlang::sym(self$options$patientID), recist_category) %>%
             dplyr::distinct()
-
-          # keys<-1:length(newVariables)
-          # measureTypes<-sapply(newVariables,function(x) { if (is.character(x)) "Nominal" else "Continuous"})
-          #
-          # self$results$sendSample$set(keys=keys,titles=names(newVariables),
-          #                             descriptions=rep("simulated",length(newVariables)),
-          #                             measureTypes=measureTypes
-          # )
-          # self$results$sendSample$setValues(newVariables)
 
           # Join with original data
           df2 <- self$data %>%
@@ -538,7 +749,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           # Update response category output
           self$results$addResponseCategory$setRowNums(rownames(df2))
-          self$results$addResponseCategory$setValues(df2$category)
+          self$results$addResponseCategory$setValues(df2$recist_category)
         }
 
 
@@ -632,7 +843,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         )) +
           ggplot2::geom_bar(
             stat = "identity",
-            ggplot2::aes(fill = category),
+            ggplot2::aes(fill = recist_category),
             width = plotData$options$barWidth,
             alpha = plotData$options$barAlpha
           ) +

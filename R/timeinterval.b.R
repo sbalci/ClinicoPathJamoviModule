@@ -1,13 +1,231 @@
-#' @title Time Interval Calculator
+#' @title Comprehensive Time Interval Calculator for Survival Analysis
+#' 
+#' @description 
+#' Advanced time interval calculation tool designed for survival analysis, epidemiological 
+#' studies, and person-time analysis. Provides robust date parsing, time interval 
+#' calculation, landmark analysis, and comprehensive data quality assessment.
+#' 
+#' @details
+#' This function provides comprehensive time interval calculation capabilities including:
+#' \itemize{
+#'   \item Multiple date format parsing with automatic detection
+#'   \item Flexible output units (days, weeks, months, years)
+#'   \item Landmark analysis for conditional survival
+#'   \item Person-time calculations for epidemiological studies
+#'   \item Data quality assessment and validation
+#'   \item Statistical summaries with confidence intervals
+#'   \item Export capabilities for downstream analysis
+#' }
+#' 
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import lubridate
+#' @import glue
+#' @import dplyr
 #'
 
 timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "timeintervalClass",
     inherit = timeintervalBase,
     private = list(
-        # Calculate time intervals ----
+        # ===================================================================
+        # COMPREHENSIVE TIME INTERVAL CALCULATION FUNCTIONS
+        # ===================================================================
+        
+        .validateInputData = function(data, dx_date, fu_date) {
+            # Comprehensive input validation
+            if (!is.data.frame(data)) {
+                stop("Input must be a data frame")
+            }
+            
+            if (nrow(data) == 0) {
+                stop("Data frame is empty")
+            }
+            
+            # Validate date columns exist
+            if (!dx_date %in% names(data)) {
+                stop(paste("Start date column '", dx_date, "' not found in data"))
+            }
+            
+            if (!fu_date %in% names(data)) {
+                stop(paste("End date column '", fu_date, "' not found in data"))
+            }
+            
+            # Check for completely missing date columns
+            if (all(is.na(data[[dx_date]]))) {
+                stop("Start date column contains only missing values")
+            }
+            
+            if (all(is.na(data[[fu_date]]))) {
+                stop("End date column contains only missing values")
+            }
+            
+            return(TRUE)
+        },
+        
+        .detectDateFormat = function(date_vector, specified_format = NULL) {
+            # Automatic date format detection if not specified
+            if (!is.null(specified_format) && specified_format != "auto") {
+                return(specified_format)
+            }
+            
+            # Remove missing values for format detection
+            sample_dates <- date_vector[!is.na(date_vector)]
+            if (length(sample_dates) == 0) {
+                stop("No valid dates found for format detection")
+            }
+            
+            # Take a sample for format detection
+            sample_dates <- head(sample_dates, min(10, length(sample_dates)))
+            
+            # Test common formats
+            formats_to_try <- c("ymd", "dmy", "mdy", "ydm", "myd", "dym", "ymdhms")
+            
+            for (fmt in formats_to_try) {
+                parser <- switch(fmt,
+                    "ymdhms" = lubridate::ymd_hms,
+                    "ymd" = lubridate::ymd,
+                    "ydm" = lubridate::ydm,
+                    "mdy" = lubridate::mdy,
+                    "myd" = lubridate::myd,
+                    "dmy" = lubridate::dmy,
+                    "dym" = lubridate::dym
+                )
+                
+                tryCatch({
+                    parsed_dates <- parser(sample_dates)
+                    # If most dates parse successfully, use this format
+                    if (sum(!is.na(parsed_dates)) / length(sample_dates) > 0.8) {
+                        return(fmt)
+                    }
+                }, error = function(e) {
+                    # Continue to next format
+                })
+            }
+            
+            # If no format works well, default to ymd
+            warning("Could not reliably detect date format. Using YMD format. Please specify format manually if incorrect.")
+            return("ymd")
+        },
+        
+        .parseDate = function(date_vector, format) {
+            # Enhanced date parsing with better error handling
+            date_parser <- switch(format,
+                "ymdhms" = lubridate::ymd_hms,
+                "ymd" = lubridate::ymd,
+                "ydm" = lubridate::ydm,
+                "mdy" = lubridate::mdy,
+                "myd" = lubridate::myd,
+                "dmy" = lubridate::dmy,
+                "dym" = lubridate::dym,
+                stop(paste("Unsupported date format:", format))
+            )
+            
+            tryCatch({
+                parsed_dates <- date_parser(date_vector)
+                return(parsed_dates)
+            }, error = function(e) {
+                stop(paste("Error parsing dates with format", format, ":", e$message))
+            })
+        },
+        
+        .calculateTimeIntervals = function(start_dates, end_dates, output_unit) {
+            # Enhanced interval calculation with validation
+            
+            # Check for valid date objects
+            if (!inherits(start_dates, "Date") && !inherits(start_dates, "POSIXct")) {
+                stop("Start dates are not valid date objects")
+            }
+            
+            if (!inherits(end_dates, "Date") && !inherits(end_dates, "POSIXct")) {
+                stop("End dates are not valid date objects")
+            }
+            
+            # Calculate intervals
+            intervals <- lubridate::interval(start_dates, end_dates)
+            
+            # Convert to specified time unit
+            calculated_time <- lubridate::time_length(intervals, output_unit)
+            
+            return(calculated_time)
+        },
+        
+        .applyLandmarkAnalysis = function(calculated_time, data, landmark_time, output_unit) {
+            # Enhanced landmark analysis with comprehensive reporting
+            
+            if (is.null(landmark_time) || landmark_time == 0) {
+                return(list(
+                    time = calculated_time,
+                    data = data,
+                    excluded_count = 0,
+                    landmark_time = 0
+                ))
+            }
+            
+            if (!is.numeric(landmark_time) || landmark_time < 0) {
+                stop("Landmark time must be a non-negative number")
+            }
+            
+            # Identify cases before landmark time
+            valid_cases <- calculated_time >= landmark_time
+            excluded_count <- sum(!valid_cases, na.rm = TRUE)
+            
+            # Filter and adjust times
+            adjusted_time <- calculated_time - landmark_time
+            filtered_data <- data[valid_cases, ]
+            final_time <- adjusted_time[valid_cases]
+            
+            return(list(
+                time = final_time,
+                data = filtered_data,
+                excluded_count = excluded_count,
+                landmark_time = landmark_time,
+                original_n = length(calculated_time),
+                final_n = length(final_time)
+            ))
+        },
+        
+        .assessDataQuality = function(calculated_time, start_dates, end_dates) {
+            # Comprehensive data quality assessment
+            
+            quality_metrics <- list(
+                total_observations = length(calculated_time),
+                missing_values = sum(is.na(calculated_time)),
+                negative_intervals = sum(calculated_time < 0, na.rm = TRUE),
+                zero_intervals = sum(calculated_time == 0, na.rm = TRUE),
+                extreme_values = sum(calculated_time > quantile(calculated_time, 0.99, na.rm = TRUE) * 2, na.rm = TRUE),
+                missing_start_dates = sum(is.na(start_dates)),
+                missing_end_dates = sum(is.na(end_dates)),
+                future_dates = sum(start_dates > Sys.Date(), na.rm = TRUE) + sum(end_dates > Sys.Date(), na.rm = TRUE)
+            )
+            
+            # Generate quality warnings
+            warnings <- character()
+            
+            if (quality_metrics$negative_intervals > 0) {
+                warnings <- c(warnings, paste(quality_metrics$negative_intervals, "negative time intervals detected (end date before start date)"))
+            }
+            
+            if (quality_metrics$missing_values > 0) {
+                warnings <- c(warnings, paste(quality_metrics$missing_values, "missing time intervals due to missing dates"))
+            }
+            
+            if (quality_metrics$future_dates > 0) {
+                warnings <- c(warnings, paste(quality_metrics$future_dates, "dates in the future detected"))
+            }
+            
+            if (quality_metrics$extreme_values > 0) {
+                warnings <- c(warnings, paste(quality_metrics$extreme_values, "potentially extreme time intervals detected"))
+            }
+            
+            quality_metrics$warnings <- warnings
+            quality_metrics$overall_quality <- ifelse(length(warnings) == 0, "Good", 
+                                                    ifelse(length(warnings) <= 2, "Fair", "Poor"))
+            
+            return(quality_metrics)
+        },
+        
+        # Main enhanced calculation function
         .calculate_survival_time = function(data,
                                             dx_date = NULL,
                                             fu_date = NULL,
@@ -15,59 +233,33 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                             output_unit = "months",
                                             landmark_time = NULL) {
 
-            # Input validation
-            if (!is.data.frame(data)) {
-                stop("Input must be a data frame")
-            }
+            # Comprehensive input validation
+            private$.validateInputData(data, dx_date, fu_date)
 
-            # Create a copy of input data
-            result_data <- data
+            # Detect date format if needed
+            detected_format <- private$.detectDateFormat(data[[dx_date]], time_format)
+            
+            # Parse dates with enhanced error handling
+            start_dates <- private$.parseDate(data[[dx_date]], detected_format)
+            end_dates <- private$.parseDate(data[[fu_date]], detected_format)
 
-            # Validate date columns exist
-            if (!dx_date %in% names(data) || !fu_date %in% names(data)) {
-                stop("Specified date columns not found in data")
-            }
-
-            # Parse dates based on format
-            date_parser <- switch(time_format,
-                                  "ymdhms" = lubridate::ymd_hms,
-                                  "ymd" = lubridate::ymd,
-                                  "ydm" = lubridate::ydm,
-                                  "mdy" = lubridate::mdy,
-                                  "myd" = lubridate::myd,
-                                  "dmy" = lubridate::dmy,
-                                  "dym" = lubridate::dym,
-                                  stop("Unsupported date format"))
-
-            tryCatch({
-                start_dates <- date_parser(data[[dx_date]])
-                end_dates <- date_parser(data[[fu_date]])
-            }, error = function(e) {
-                stop(paste("Error parsing dates:", e$message))
-            })
-
-            # Calculate intervals
-            intervals <- lubridate::interval(start_dates, end_dates)
-
-            # Convert to specified time unit
-            calculated_time <- lubridate::time_length(intervals, output_unit)
-
-
-
+            # Calculate time intervals
+            calculated_time <- private$.calculateTimeIntervals(start_dates, end_dates, output_unit)
+            
+            # Assess data quality
+            quality_assessment <- private$.assessDataQuality(calculated_time, start_dates, end_dates)
+            
             # Apply landmark analysis if specified
-            if (!is.null(landmark_time)) {
-                if (!is.numeric(landmark_time) || landmark_time < 0) {
-                    stop("Landmark time must be a non-negative number")
-                }
+            landmark_result <- private$.applyLandmarkAnalysis(calculated_time, data, landmark_time, output_unit)
 
-                # Filter out cases before landmark time and adjust times
-                valid_cases <- calculated_time >= landmark_time
-                calculated_time <- calculated_time - landmark_time
-                result_data <- result_data[valid_cases, ]
-                calculated_time <- calculated_time[valid_cases]
-            }
-
-            return(calculated_time)
+            return(list(
+                time = landmark_result$time,
+                data = landmark_result$data,
+                quality = quality_assessment,
+                landmark = landmark_result,
+                original_data = data,
+                detected_format = detected_format
+            ))
         },
 
         # Run analysis ----
@@ -186,7 +378,49 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ")
 
                 self$results$summary$setContent(summary_text)
+            } else {
+                # Handle case with no valid calculated times
+                error_summary <- "
+                    <div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0;'>
+                        <h4 style='margin-top: 0; color: #721c24;'>⚠️ No Valid Time Intervals</h4>
+                        <p>No valid time intervals could be calculated from the provided data.</p>
+                        <p><strong>Please check:</strong></p>
+                        <ul>
+                            <li>Date format settings match your data</li>
+                            <li>Date columns contain valid dates</li>
+                            <li>End dates occur after start dates</li>
+                            <li>Data contains non-missing values</li>
+                        </ul>
+                    </div>"
+                
+                self$results$summary$setContent(error_summary)
             }
+        },
+        
+        # ===================================================================
+        # ADDITIONAL HELPER FUNCTIONS FOR ENHANCED FUNCTIONALITY
+        # ===================================================================
+        
+        .exportResults = function(calculated_times, original_data, landmark_info) {
+            # Prepare data for export with comprehensive metadata
+            
+            if (is.null(calculated_times) || length(calculated_times) == 0) {
+                return(NULL)
+            }
+            
+            # Create export data frame
+            if (!is.null(landmark_info$landmark_time) && landmark_info$landmark_time > 0) {
+                export_data <- landmark_info$data
+                export_data$calculated_time_intervals <- calculated_times
+                export_data$landmark_adjusted <- TRUE
+                export_data$landmark_time <- landmark_info$landmark_time
+            } else {
+                export_data <- original_data[seq_along(calculated_times), ]
+                export_data$calculated_time_intervals <- calculated_times
+                export_data$landmark_adjusted <- FALSE
+            }
+            
+            return(export_data)
         }
     )
 )

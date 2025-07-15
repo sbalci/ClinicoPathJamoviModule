@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="ClinicoPath" />
+
+<meta name="date" content="2025-07-03" />
+
+<title>CONSORT Flow Charts for Clinical Trial Reporting</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">CONSORT Flow Charts for Clinical Trial
+Reporting</h1>
+<h4 class="author">ClinicoPath</h4>
+<h4 class="date">2025-07-03</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction-to-consort-flow-charts" id="toc-introduction-to-consort-flow-charts">Introduction to CONSORT
+Flow Charts</a>
+<ul>
+<li><a href="#why-consort-flow-charts-matter" id="toc-why-consort-flow-charts-matter">Why CONSORT Flow Charts
+Matter</a></li>
+<li><a href="#the-clinicopath-consort-function" id="toc-the-clinicopath-consort-function">The ClinicoPath CONSORT
+Function</a></li>
+</ul></li>
+<li><a href="#basic-consort-flow-chart" id="toc-basic-consort-flow-chart">Basic CONSORT Flow Chart</a></li>
+<li><a href="#real-world-examples-using-sample-data" id="toc-real-world-examples-using-sample-data">Real-World Examples Using
+Sample Data</a>
+<ul>
+<li><a href="#example-1-large-cardiovascular-outcomes-trial" id="toc-example-1-large-cardiovascular-outcomes-trial">Example 1: Large
+Cardiovascular Outcomes Trial</a></li>
+<li><a href="#example-2-cancer-immunotherapy-trial" id="toc-example-2-cancer-immunotherapy-trial">Example 2: Cancer
+Immunotherapy Trial</a></li>
+<li><a href="#example-3-small-pilot-study" id="toc-example-3-small-pilot-study">Example 3: Small Pilot
+Study</a></li>
+</ul></li>
+<li><a href="#advanced-usage-scenarios" id="toc-advanced-usage-scenarios">Advanced Usage Scenarios</a>
+<ul>
+<li><a href="#unequal-randomization-21-ratio" id="toc-unequal-randomization-21-ratio">Unequal Randomization (2:1
+Ratio)</a></li>
+<li><a href="#high-dropout-scenario" id="toc-high-dropout-scenario">High
+Dropout Scenario</a></li>
+</ul></li>
+<li><a href="#consort-guidelines-and-best-practices" id="toc-consort-guidelines-and-best-practices">CONSORT Guidelines and
+Best Practices</a>
+<ul>
+<li><a href="#essential-elements" id="toc-essential-elements">Essential
+Elements</a></li>
+<li><a href="#common-patterns-by-study-type" id="toc-common-patterns-by-study-type">Common Patterns by Study Type</a>
+<ul>
+<li><a href="#phase-i-dose-escalation" id="toc-phase-i-dose-escalation">Phase I Dose Escalation</a></li>
+<li><a href="#phase-ii-efficacy-studies" id="toc-phase-ii-efficacy-studies">Phase II Efficacy Studies</a></li>
+<li><a href="#phase-iii-confirmatory-trials" id="toc-phase-iii-confirmatory-trials">Phase III Confirmatory
+Trials</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#integration-with-jamovi" id="toc-integration-with-jamovi">Integration with jamovi</a>
+<ul>
+<li><a href="#tips-for-jamovi-users" id="toc-tips-for-jamovi-users">Tips
+for jamovi Users</a></li>
+</ul></li>
+<li><a href="#statistical-considerations" id="toc-statistical-considerations">Statistical Considerations</a>
+<ul>
+<li><a href="#sample-size-and-power" id="toc-sample-size-and-power">Sample Size and Power</a></li>
+<li><a href="#bias-assessment" id="toc-bias-assessment">Bias
+Assessment</a></li>
+<li><a href="#reporting-standards" id="toc-reporting-standards">Reporting Standards</a></li>
+</ul></li>
+<li><a href="#troubleshooting-common-issues" id="toc-troubleshooting-common-issues">Troubleshooting Common Issues</a>
+<ul>
+<li><a href="#inconsistent-numbers" id="toc-inconsistent-numbers">Inconsistent Numbers</a></li>
+<li><a href="#missing-data-handling" id="toc-missing-data-handling">Missing Data Handling</a></li>
+<li><a href="#complex-study-designs" id="toc-complex-study-designs">Complex Study Designs</a></li>
+</ul></li>
+<li><a href="#conclusion" id="toc-conclusion">Conclusion</a>
+<ul>
+<li><a href="#next-steps" id="toc-next-steps">Next Steps</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="introduction-to-consort-flow-charts" class="section level1">
+<h1>Introduction to CONSORT Flow Charts</h1>
+<p>The <strong>CONSORT (Consolidated Standards of Reporting
+Trials)</strong> statement provides evidence-based recommendations for
+reporting randomized controlled trials (RCTs). A key component is the
+flow diagram that tracks participants through each stage of the trial,
+from initial assessment through final analysis.</p>
+<div id="why-consort-flow-charts-matter" class="section level2">
+<h2>Why CONSORT Flow Charts Matter</h2>
+<p>CONSORT flow diagrams are essential for:</p>
+<ul>
+<li><strong>Transparency</strong>: Showing exactly how many participants
+entered and completed the study</li>
+<li><strong>Quality Assessment</strong>: Allowing readers to evaluate
+potential bias from dropout patterns</li>
+<li><strong>Reproducibility</strong>: Providing clear documentation of
+study conduct</li>
+<li><strong>Journal Requirements</strong>: Most medical journals require
+CONSORT-compliant reporting</li>
+<li><strong>Regulatory Compliance</strong>: FDA and EMA expect
+CONSORT-style reporting</li>
+</ul>
+</div>
+<div id="the-clinicopath-consort-function" class="section level2">
+<h2>The ClinicoPath CONSORT Function</h2>
+<p>The <code>consort()</code> function in ClinicoPath generates
+publication-ready CONSORT flow diagrams automatically. Simply input your
+trial numbers, and it creates both visual flowcharts and summary
+statistics.</p>
+</div>
+</div>
+<div id="basic-consort-flow-chart" class="section level1">
+<h1>Basic CONSORT Flow Chart</h1>
+<p>Let’s start with a simple two-arm trial example:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Basic cardiovascular trial</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>basic_consort <span class="ot">&lt;-</span> <span class="fu">consort</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(),  <span class="co"># consort doesn&#39;t analyze patient data</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">initialN =</span> <span class="dv">1000</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="at">notEligibleN =</span> <span class="dv">300</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="at">notEligibleText =</span> <span class="st">&quot;Age &gt;80 years (n=150), Prior MI &lt;6 months (n=100), Other (n=50)&quot;</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="at">randomizedN =</span> <span class="dv">700</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="at">arm1Label =</span> <span class="st">&quot;ACE Inhibitor&quot;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="at">arm1N =</span> <span class="dv">350</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  <span class="at">arm1ReceivedN =</span> <span class="dv">340</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  <span class="at">arm1LostN =</span> <span class="dv">45</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  <span class="at">arm1AnalyzedN =</span> <span class="dv">295</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>  <span class="at">arm2Label =</span> <span class="st">&quot;Placebo&quot;</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>  <span class="at">arm2N =</span> <span class="dv">350</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>  <span class="at">arm2ReceivedN =</span> <span class="dv">345</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>  <span class="at">arm2LostN =</span> <span class="dv">40</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>  <span class="at">arm2AnalyzedN =</span> <span class="dv">305</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  <span class="at">excludedText =</span> <span class="st">&quot;Lost to follow-up, protocol violations&quot;</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>)</span></code></pre></div>
+<p>The function produces: 1. <strong>Summary Table</strong>: Key numbers
+with percentages 2. <strong>Flow Diagram</strong>: Visual CONSORT chart
+3. <strong>Text Summary</strong>: Detailed narrative description</p>
+</div>
+<div id="real-world-examples-using-sample-data" class="section level1">
+<h1>Real-World Examples Using Sample Data</h1>
+<p>ClinicoPath includes the <code>consort_examples_data</code> dataset
+with realistic trial scenarios:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Load the example data</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">data</span>(consort_examples_data)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">str</span>(consort_examples_data)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co"># View the different trial types</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>consort_examples_data<span class="sc">$</span>trial_name</span></code></pre></div>
+<div id="example-1-large-cardiovascular-outcomes-trial" class="section level2">
+<h2>Example 1: Large Cardiovascular Outcomes Trial</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Extract cardiovascular trial data</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>cv_trial <span class="ot">&lt;-</span> consort_examples_data[<span class="dv">1</span>, ]</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># Create CONSORT flowchart</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>cv_consort <span class="ot">&lt;-</span> <span class="fu">consort</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(),</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">initialN =</span> cv_trial<span class="sc">$</span>initial_assessed,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">notEligibleN =</span> cv_trial<span class="sc">$</span>not_eligible,</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="at">notEligibleText =</span> cv_trial<span class="sc">$</span>not_eligible_reasons,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="at">randomizedN =</span> cv_trial<span class="sc">$</span>randomized,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="at">arm1Label =</span> cv_trial<span class="sc">$</span>arm1_label,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="at">arm1N =</span> cv_trial<span class="sc">$</span>arm1_allocated,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="at">arm1ReceivedN =</span> cv_trial<span class="sc">$</span>arm1_received,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  <span class="at">arm1LostN =</span> cv_trial<span class="sc">$</span>arm1_lost_followup,</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  <span class="at">arm1AnalyzedN =</span> cv_trial<span class="sc">$</span>arm1_analyzed,</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>  <span class="at">arm2Label =</span> cv_trial<span class="sc">$</span>arm2_label,</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>  <span class="at">arm2N =</span> cv_trial<span class="sc">$</span>arm2_allocated,</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>  <span class="at">arm2ReceivedN =</span> cv_trial<span class="sc">$</span>arm2_received,</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="at">arm2LostN =</span> cv_trial<span class="sc">$</span>arm2_lost_followup,</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="at">arm2AnalyzedN =</span> cv_trial<span class="sc">$</span>arm2_analyzed,</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="at">excludedText =</span> cv_trial<span class="sc">$</span>exclusion_reasons</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>)</span></code></pre></div>
+<p>This represents a typical large-scale cardiovascular outcomes trial
+with: - 5,000 patients initially screened - 30% exclusion rate (typical
+for cardiovascular studies) - Balanced randomization - ~10% dropout rate
+(acceptable for long-term studies)</p>
+</div>
+<div id="example-2-cancer-immunotherapy-trial" class="section level2">
+<h2>Example 2: Cancer Immunotherapy Trial</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Extract cancer trial data</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>cancer_trial <span class="ot">&lt;-</span> consort_examples_data[<span class="dv">2</span>, ]</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>cancer_consort <span class="ot">&lt;-</span> <span class="fu">consort</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(),</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">initialN =</span> cancer_trial<span class="sc">$</span>initial_assessed,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">notEligibleN =</span> cancer_trial<span class="sc">$</span>not_eligible,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="at">notEligibleText =</span> cancer_trial<span class="sc">$</span>not_eligible_reasons,</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="at">randomizedN =</span> cancer_trial<span class="sc">$</span>randomized,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="at">arm1Label =</span> cancer_trial<span class="sc">$</span>arm1_label,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">arm1N =</span> cancer_trial<span class="sc">$</span>arm1_allocated,</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  <span class="at">arm1ReceivedN =</span> cancer_trial<span class="sc">$</span>arm1_received,</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  <span class="at">arm1LostN =</span> cancer_trial<span class="sc">$</span>arm1_lost_followup,</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  <span class="at">arm1AnalyzedN =</span> cancer_trial<span class="sc">$</span>arm1_analyzed,</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="at">arm2Label =</span> cancer_trial<span class="sc">$</span>arm2_label,</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="at">arm2N =</span> cancer_trial<span class="sc">$</span>arm2_allocated,</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="at">arm2ReceivedN =</span> cancer_trial<span class="sc">$</span>arm2_received,</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  <span class="at">arm2LostN =</span> cancer_trial<span class="sc">$</span>arm2_lost_followup,</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  <span class="at">arm2AnalyzedN =</span> cancer_trial<span class="sc">$</span>arm2_analyzed,</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>  <span class="at">excludedText =</span> cancer_trial<span class="sc">$</span>exclusion_reasons</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>)</span></code></pre></div>
+<p>Cancer trials often have: - Strict inclusion criteria (29% exclusion
+here) - Higher dropout rates due to disease progression - Time-to-event
+endpoints requiring careful follow-up</p>
+</div>
+<div id="example-3-small-pilot-study" class="section level2">
+<h2>Example 3: Small Pilot Study</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Extract pilot study data</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>pilot_trial <span class="ot">&lt;-</span> consort_examples_data[<span class="dv">5</span>, ]</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>pilot_consort <span class="ot">&lt;-</span> <span class="fu">consort</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(),</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">initialN =</span> pilot_trial<span class="sc">$</span>initial_assessed,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">notEligibleN =</span> pilot_trial<span class="sc">$</span>not_eligible,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="at">notEligibleText =</span> pilot_trial<span class="sc">$</span>not_eligible_reasons,</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="at">randomizedN =</span> pilot_trial<span class="sc">$</span>randomized,</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="at">arm1Label =</span> pilot_trial<span class="sc">$</span>arm1_label,</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="at">arm1N =</span> pilot_trial<span class="sc">$</span>arm1_allocated,</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="at">arm1ReceivedN =</span> pilot_trial<span class="sc">$</span>arm1_received,</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="at">arm1LostN =</span> pilot_trial<span class="sc">$</span>arm1_lost_followup,</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  <span class="at">arm1AnalyzedN =</span> pilot_trial<span class="sc">$</span>arm1_analyzed,</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  <span class="at">arm2Label =</span> pilot_trial<span class="sc">$</span>arm2_label,</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="at">arm2N =</span> pilot_trial<span class="sc">$</span>arm2_allocated,</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="at">arm2ReceivedN =</span> pilot_trial<span class="sc">$</span>arm2_received,</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  <span class="at">arm2LostN =</span> pilot_trial<span class="sc">$</span>arm2_lost_followup,</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  <span class="at">arm2AnalyzedN =</span> pilot_trial<span class="sc">$</span>arm2_analyzed,</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  <span class="at">excludedText =</span> pilot_trial<span class="sc">$</span>exclusion_reasons</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>)</span></code></pre></div>
+<p>Pilot studies typically have: - Smaller sample sizes (150 assessed,
+100 randomized) - Focus on feasibility and safety - Higher proportional
+exclusions due to strict criteria</p>
+</div>
+</div>
+<div id="advanced-usage-scenarios" class="section level1">
+<h1>Advanced Usage Scenarios</h1>
+<div id="unequal-randomization-21-ratio" class="section level2">
+<h2>Unequal Randomization (2:1 Ratio)</h2>
+<p>Some trials use unequal randomization to get more safety data on the
+experimental treatment:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>unequal_consort <span class="ot">&lt;-</span> <span class="fu">consort</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(),</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">initialN =</span> <span class="dv">900</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">notEligibleN =</span> <span class="dv">300</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">notEligibleText =</span> <span class="st">&quot;Failed eligibility criteria&quot;</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">randomizedN =</span> <span class="dv">600</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">arm1Label =</span> <span class="st">&quot;Experimental Drug (2:1)&quot;</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">arm1N =</span> <span class="dv">400</span>,  <span class="co"># 2/3 of randomized patients</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="at">arm1ReceivedN =</span> <span class="dv">390</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="at">arm1LostN =</span> <span class="dv">60</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  <span class="at">arm1AnalyzedN =</span> <span class="dv">330</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="at">arm2Label =</span> <span class="st">&quot;Standard Care (2:1)&quot;</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="at">arm2N =</span> <span class="dv">200</span>,  <span class="co"># 1/3 of randomized patients</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  <span class="at">arm2ReceivedN =</span> <span class="dv">195</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  <span class="at">arm2LostN =</span> <span class="dv">25</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>  <span class="at">arm2AnalyzedN =</span> <span class="dv">170</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>  <span class="at">excludedText =</span> <span class="st">&quot;Lost to follow-up, adverse events&quot;</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="high-dropout-scenario" class="section level2">
+<h2>High Dropout Scenario</h2>
+<p>Some studies face high dropout rates that need careful
+documentation:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>high_dropout_consort <span class="ot">&lt;-</span> <span class="fu">consort</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(),</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">initialN =</span> <span class="dv">500</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">notEligibleN =</span> <span class="dv">100</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">notEligibleText =</span> <span class="st">&quot;High-risk population with multiple comorbidities&quot;</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">randomizedN =</span> <span class="dv">400</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="at">arm1Label =</span> <span class="st">&quot;Intensive Intervention&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="at">arm1N =</span> <span class="dv">200</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">arm1ReceivedN =</span> <span class="dv">185</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  <span class="at">arm1LostN =</span> <span class="dv">75</span>,  <span class="co"># 40% dropout</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  <span class="at">arm1AnalyzedN =</span> <span class="dv">110</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="at">arm2Label =</span> <span class="st">&quot;Standard Care&quot;</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  <span class="at">arm2N =</span> <span class="dv">200</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  <span class="at">arm2ReceivedN =</span> <span class="dv">195</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>  <span class="at">arm2LostN =</span> <span class="dv">45</span>,  <span class="co"># 23% dropout</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  <span class="at">arm2AnalyzedN =</span> <span class="dv">150</span>,</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  <span class="at">excludedText =</span> <span class="st">&quot;High burden intervention, patient withdrawal, adverse events&quot;</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+<div id="consort-guidelines-and-best-practices" class="section level1">
+<h1>CONSORT Guidelines and Best Practices</h1>
+<div id="essential-elements" class="section level2">
+<h2>Essential Elements</h2>
+<p>Every CONSORT flow diagram should include:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Enrollment</strong>:
+<ul>
+<li>Number assessed for eligibility</li>
+<li>Number excluded (with reasons)</li>
+<li>Number randomized</li>
+</ul></li>
+<li><strong>Allocation</strong>:
+<ul>
+<li>Number allocated to each intervention</li>
+<li>Number receiving intended treatment</li>
+</ul></li>
+<li><strong>Follow-up</strong>:
+<ul>
+<li>Number lost to follow-up (with reasons)</li>
+<li>Number discontinuing intervention</li>
+</ul></li>
+<li><strong>Analysis</strong>:
+<ul>
+<li>Number analyzed for primary outcome</li>
+<li>Exclusions from analysis</li>
+</ul></li>
+</ol>
+</div>
+<div id="common-patterns-by-study-type" class="section level2">
+<h2>Common Patterns by Study Type</h2>
+<div id="phase-i-dose-escalation" class="section level3">
+<h3>Phase I Dose Escalation</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Small numbers, safety focus</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>phase1_consort <span class="ot">&lt;-</span> <span class="fu">consort</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(),</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">initialN =</span> <span class="dv">60</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">notEligibleN =</span> <span class="dv">15</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">notEligibleText =</span> <span class="st">&quot;Strict safety criteria&quot;</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="at">randomizedN =</span> <span class="dv">45</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  <span class="at">arm1Label =</span> <span class="st">&quot;Dose Level 1&quot;</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  <span class="at">arm1N =</span> <span class="dv">15</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="at">arm1ReceivedN =</span> <span class="dv">15</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  <span class="at">arm1LostN =</span> <span class="dv">1</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  <span class="at">arm1AnalyzedN =</span> <span class="dv">14</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  <span class="at">arm2Label =</span> <span class="st">&quot;Dose Level 2&quot;</span>, </span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="at">arm2N =</span> <span class="dv">15</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  <span class="at">arm2ReceivedN =</span> <span class="dv">14</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>  <span class="at">arm2LostN =</span> <span class="dv">2</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>  <span class="at">arm2AnalyzedN =</span> <span class="dv">12</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="phase-ii-efficacy-studies" class="section level3">
+<h3>Phase II Efficacy Studies</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Moderate size, efficacy focus</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>phase2_consort <span class="ot">&lt;-</span> <span class="fu">consort</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(),</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">initialN =</span> <span class="dv">300</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">notEligibleN =</span> <span class="dv">80</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">randomizedN =</span> <span class="dv">220</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">arm1Label =</span> <span class="st">&quot;Experimental&quot;</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="at">arm1N =</span> <span class="dv">110</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="at">arm1AnalyzedN =</span> <span class="dv">95</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  <span class="at">arm2Label =</span> <span class="st">&quot;Control&quot;</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">arm2N =</span> <span class="dv">110</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">arm2AnalyzedN =</span> <span class="dv">98</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="phase-iii-confirmatory-trials" class="section level3">
+<h3>Phase III Confirmatory Trials</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Large scale, definitive evidence</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>phase3_consort <span class="ot">&lt;-</span> <span class="fu">consort</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">data.frame</span>(),</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">initialN =</span> <span class="dv">3000</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="at">notEligibleN =</span> <span class="dv">1000</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="at">randomizedN =</span> <span class="dv">2000</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="at">arm1Label =</span> <span class="st">&quot;New Treatment&quot;</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="at">arm1N =</span> <span class="dv">1000</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  <span class="at">arm1AnalyzedN =</span> <span class="dv">850</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  <span class="at">arm2Label =</span> <span class="st">&quot;Standard Care&quot;</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="at">arm2N =</span> <span class="dv">1000</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="at">arm2AnalyzedN =</span> <span class="dv">875</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="integration-with-jamovi" class="section level1">
+<h1>Integration with jamovi</h1>
+<p>The CONSORT function integrates seamlessly with jamovi:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Open jamovi</strong> and load your module</li>
+<li><strong>Navigate</strong> to Exploration → ClinicoPath Reports →
+CONSORT Flowchart</li>
+<li><strong>Enter your trial numbers</strong> in the interface:
+<ul>
+<li>Enrollment numbers</li>
+<li>Randomization details</li>
+<li>Arm-specific data</li>
+<li>Exclusion reasons</li>
+</ul></li>
+<li><strong>Review outputs</strong>:
+<ul>
+<li>Summary statistics table</li>
+<li>Visual flow diagram</li>
+<li>Text summary</li>
+</ul></li>
+</ol>
+<div id="tips-for-jamovi-users" class="section level2">
+<h2>Tips for jamovi Users</h2>
+<ul>
+<li><strong>Start with estimates</strong>: Begin with approximate
+numbers and refine</li>
+<li><strong>Use descriptive labels</strong>: Clear arm names improve
+readability</li>
+<li><strong>Include detailed reasons</strong>: Specific exclusion text
+enhances transparency</li>
+<li><strong>Export for publication</strong>: Use the generated diagrams
+directly in manuscripts</li>
+</ul>
+</div>
+</div>
+<div id="statistical-considerations" class="section level1">
+<h1>Statistical Considerations</h1>
+<div id="sample-size-and-power" class="section level2">
+<h2>Sample Size and Power</h2>
+<p>CONSORT diagrams help readers assess whether the study had adequate
+power:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Calculate effective sample sizes from our examples</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>cv_effective_n <span class="ot">&lt;-</span> cv_trial<span class="sc">$</span>arm1_analyzed <span class="sc">+</span> cv_trial<span class="sc">$</span>arm2_analyzed</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>cancer_effective_n <span class="ot">&lt;-</span> cancer_trial<span class="sc">$</span>arm1_analyzed <span class="sc">+</span> cancer_trial<span class="sc">$</span>arm2_analyzed</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Cardiovascular trial analyzed N:&quot;</span>, cv_effective_n, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Cancer trial analyzed N:&quot;</span>, cancer_effective_n, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co"># Dropout rates</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>cv_dropout_rate <span class="ot">&lt;-</span> (cv_trial<span class="sc">$</span>arm1_lost_followup <span class="sc">+</span> cv_trial<span class="sc">$</span>arm2_lost_followup) <span class="sc">/</span> cv_trial<span class="sc">$</span>randomized <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>cancer_dropout_rate <span class="ot">&lt;-</span> (cancer_trial<span class="sc">$</span>arm1_lost_followup <span class="sc">+</span> cancer_trial<span class="sc">$</span>arm2_lost_followup) <span class="sc">/</span> cancer_trial<span class="sc">$</span>randomized <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;CV trial dropout rate:&quot;</span>, <span class="fu">round</span>(cv_dropout_rate, <span class="dv">1</span>), <span class="st">&quot;%</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Cancer trial dropout rate:&quot;</span>, <span class="fu">round</span>(cancer_dropout_rate, <span class="dv">1</span>), <span class="st">&quot;%</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+<div id="bias-assessment" class="section level2">
+<h2>Bias Assessment</h2>
+<p>CONSORT diagrams help identify potential sources of bias:</p>
+<ul>
+<li><strong>Imbalanced dropout</strong>: Unequal loss between arms</li>
+<li><strong>High overall dropout</strong>: &gt;20% may compromise
+validity</li>
+<li><strong>Differential reasons</strong>: Different dropout reasons
+between arms</li>
+<li><strong>Post-randomization exclusions</strong>: Should be minimal
+and balanced</li>
+</ul>
+</div>
+<div id="reporting-standards" class="section level2">
+<h2>Reporting Standards</h2>
+<p>Different journals may have specific requirements:</p>
+<ul>
+<li><strong>High-impact journals</strong>: Often require detailed
+CONSORT compliance</li>
+<li><strong>Specialty journals</strong>: May have field-specific
+modifications</li>
+<li><strong>Regulatory submissions</strong>: FDA/EMA have specific
+formatting expectations</li>
+</ul>
+</div>
+</div>
+<div id="troubleshooting-common-issues" class="section level1">
+<h1>Troubleshooting Common Issues</h1>
+<div id="inconsistent-numbers" class="section level2">
+<h2>Inconsistent Numbers</h2>
+<p>Ensure logical flow:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Check: randomized = arm1 + arm2</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>randomized_check <span class="ot">&lt;-</span> arm1N <span class="sc">+</span> arm2N <span class="sc">==</span> randomizedN</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co"># Check: analyzed &lt;= received &lt;= allocated</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>arm1_logic <span class="ot">&lt;-</span> arm1AnalyzedN <span class="sc">&lt;=</span> arm1ReceivedN <span class="sc">&amp;</span> arm1ReceivedN <span class="sc">&lt;=</span> arm1N</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>arm2_logic <span class="ot">&lt;-</span> arm2AnalyzedN <span class="sc">&lt;=</span> arm2ReceivedN <span class="sc">&amp;</span> arm2ReceivedN <span class="sc">&lt;=</span> arm2N</span></code></pre></div>
+</div>
+<div id="missing-data-handling" class="section level2">
+<h2>Missing Data Handling</h2>
+<p>Be explicit about: - Patients with missing primary endpoint data -
+Protocol violations - Consent withdrawals - Lost to follow-up vs. study
+discontinuation</p>
+</div>
+<div id="complex-study-designs" class="section level2">
+<h2>Complex Study Designs</h2>
+<p>For crossover, cluster randomized, or adaptive designs: - Modify the
+standard CONSORT template - Add additional flowchart elements as needed
+- Consult CONSORT extensions for specific designs</p>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>The ClinicoPath CONSORT function provides:</p>
+<p>✅ <strong>Easy generation</strong> of publication-ready flow
+diagrams<br />
+✅ <strong>Automatic calculations</strong> of percentages and
+summaries<br />
+✅ <strong>Professional formatting</strong> meeting journal
+standards<br />
+✅ <strong>Comprehensive examples</strong> for different trial
+types<br />
+✅ <strong>Integration with jamovi</strong> for interactive use</p>
+<div id="next-steps" class="section level2">
+<h2>Next Steps</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Practice</strong> with the provided examples</li>
+<li><strong>Adapt</strong> the parameters to your own trial data</li>
+<li><strong>Export</strong> diagrams for your publications</li>
+<li><strong>Combine</strong> with other ClinicoPath functions for
+complete trial reporting</li>
+</ol>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li>Schulz KF, Altman DG, Moher D, for the CONSORT Group. CONSORT 2010
+Statement: updated guidelines for reporting parallel group randomised
+trials. BMJ 2010;340:c332.</li>
+<li>CONSORT website: <a href="http://www.consort-statement.org/" class="uri">http://www.consort-statement.org/</a></li>
+<li>Clinical trial reporting guidelines: <a href="https://www.equator-network.org/" class="uri">https://www.equator-network.org/</a></li>
+</ul>
+<hr />
+<p><em>For more information about ClinicoPath, visit our documentation
+at <a href="https://www.serdarbalci.com/ClinicoPathJamoviModule/">ClinicoPath
+Guide</a></em></p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

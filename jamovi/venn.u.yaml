@@ -51,3 +51,24 @@ children:
           - type: LevelSelector
             name: var4true
             enable: (var4)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: upsetType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sortBy
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: minSize
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showAnnotations

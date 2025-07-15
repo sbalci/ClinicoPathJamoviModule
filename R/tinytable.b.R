@@ -5,10 +5,12 @@
 #' @import jmvcore
 #' @importFrom magrittr %>%
 #' @importFrom tinytable tt style_tt group_tt format_tt theme_tt
-#' @importFrom dplyr select group_by summarise n across where
+#' @importFrom dplyr select group_by summarise n across where all_of
 #' @importFrom dplyr mutate case_when
 #' @importFrom stats sd median quantile
 #' @importFrom htmltools HTML
+#' @importFrom stringr str_to_title
+#' @importFrom rlang .data
 
 tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
     inherit = tinytableBase,
@@ -72,15 +74,30 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 stop("Error: The provided dataset contains no complete rows. Please check your data and try again.")
             }
 
-            # Safely require tinytable
+            # Enhanced package checking with better error messages
+            missing_packages <- character(0)
+            
             if (!requireNamespace("tinytable", quietly = TRUE)) {
-                error_msg <- "
+                missing_packages <- c(missing_packages, "tinytable")
+            }
+            if (!requireNamespace("stringr", quietly = TRUE)) {
+                missing_packages <- c(missing_packages, "stringr")
+            }
+            if (!requireNamespace("rlang", quietly = TRUE)) {
+                missing_packages <- c(missing_packages, "rlang")
+            }
+            
+            if (length(missing_packages) > 0) {
+                pkg_list <- paste(missing_packages, collapse = ", ")
+                error_msg <- paste0("
                 <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
-                <h4>tinytable Package Required</h4>
-                <p>The tinytable package is required for modern table formatting.</p>
-                <p>Please install it using: <code>install.packages('tinytable')</code></p>
-                <p>Or from R-universe: <code>install.packages('tinytable', repos = c('https://vincentarelbundock.r-universe.dev', 'https://cloud.r-project.org'))</code></p>
-                </div>"
+                <h4>Missing Required Packages</h4>
+                <p>The following packages are required for modern table formatting: <strong>", pkg_list, "</strong></p>
+                <p>Please install them using:</p>
+                <pre><code>install.packages(c('", paste(missing_packages, collapse = "', '"), "'))</code></pre>
+                <p>For tinytable, you can also use R-universe:</p>
+                <pre><code>install.packages('tinytable', repos = c('https://vincentarelbundock.r-universe.dev', 'https://cloud.r-project.org'))</code></pre>
+                </div>")
                 self$results$interpretation$setContent(error_msg)
                 return()
             }
@@ -105,15 +122,42 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 stop("Error: No data available for the selected variables.")
             }
 
-            # Generate table based on type
-            table_html <- private$.generate_table(analysis_data, vars, group_var, table_type)
-            self$results$table$setContent(table_html)
-            
-            # Generate interpretation guide
-            if (self$options$show_interpretation) {
-                interpretation_html <- private$.generate_interpretation_guide(analysis_data, vars, group_var, table_type)
-                self$results$interpretation$setContent(interpretation_html)
-            }
+            # Generate table based on type with error handling
+            tryCatch({
+                table_html <- private$.generate_table(analysis_data, vars, group_var, table_type)
+                self$results$table$setContent(table_html)
+                
+                # Generate interpretation guide
+                if (self$options$show_interpretation) {
+                    interpretation_html <- private$.generate_interpretation_guide(analysis_data, vars, group_var, table_type)
+                    self$results$interpretation$setContent(interpretation_html)
+                }
+            }, error = function(e) {
+                error_msg <- paste0("
+                <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
+                <h4>Table Generation Error</h4>
+                <p><strong>Error:</strong> ", e$message, "</p>
+                
+                <h5>Troubleshooting Tips:</h5>
+                <ul>
+                <li>Ensure selected variables have compatible data types for the chosen table type</li>
+                <li>Check that grouping variables are categorical (factor) types</li>
+                <li>Verify numeric variables have sufficient non-missing values</li>
+                <li>Try a different table type if the current one fails</li>
+                </ul>
+                
+                <h5>Common Solutions:</h5>
+                <ul>
+                <li><strong>For grouped tables:</strong> Ensure grouping variable is a factor</li>
+                <li><strong>For descriptive statistics:</strong> Include at least one numeric variable</li>
+                <li><strong>For missing value errors:</strong> Choose variables with more complete data</li>
+                </ul>
+                </div>")
+                self$results$interpretation$setContent(error_msg)
+                
+                # Set a simple error message for the table
+                self$results$table$setContent("<p style='color: red;'>Table generation failed. See interpretation section for details.</p>")
+            })
 
         },
 
@@ -375,10 +419,33 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
             if (font_size != "1em") {
                 tt_obj <- tt_obj %>%
                     tinytable::style_tt(
-                        i = NULL,  # All rows
-                        fontSize = font_size
+                        i = 1:nrow(table_data),  # All data rows
+                        fontsize = font_size
                     )
             }
+            
+            # Apply border styling
+            border_style <- self$options$style_borders
+            if (border_style == "horizontal") {
+                tt_obj <- tt_obj %>%
+                    tinytable::style_tt(
+                        i = 0,  # Header
+                        line = "b"  # Bottom border
+                    ) %>%
+                    tinytable::style_tt(
+                        i = nrow(table_data),  # Last row
+                        line = "b"  # Bottom border
+                    )
+            } else if (border_style == "minimal") {
+                tt_obj <- tt_obj %>%
+                    tinytable::style_tt(
+                        i = 0,  # Header only
+                        line = "b"
+                    )
+            } else if (border_style == "none") {
+                # No additional borders (tinytable default handles this)
+            }
+            # "all" borders is the default tinytable behavior
             
             return(tt_obj)
         },

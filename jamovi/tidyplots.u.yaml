@@ -1,4 +1,4 @@
-title: Tidy Plots
+title: Comprehensive Tidy Plots
 name: tidyplots
 jus: '3.0'
 stage: 0
@@ -30,13 +30,27 @@ children:
             name: color
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Group Variable
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Facet Variable
+        children:
+          - type: VariablesListBox
+            name: facet
+            maxItemCount: 1
+            isTarget: true
 
   - type: CollapseBox
     label: Plot Type
-    collapsed: true
+    collapsed: false
     children:
       - type: Label
-        label: Main Plot
+        label: Main Plot Type
         children:
           - type: ComboBox
             name: plotType
@@ -46,38 +60,183 @@ children:
           - type: ComboBox
             name: pointType
             enable: (plotType=="points")
+      - type: Label
+        label: Line Type
+        children:
+          - type: ComboBox
+            name: lineType
+            enable: (plotType=="line")
+      - type: Label
+        label: Bar Type
+        children:
+          - type: ComboBox
+            name: barType
+            enable: (plotType=="bar")
+      - type: Label
+        label: Area Type
+        children:
+          - type: ComboBox
+            name: areaType
+            enable: (plotType=="area")
 
   - type: CollapseBox
-    label: Statistics
+    label: Central Tendency
     collapsed: true
     children:
       - type: CheckBox
         name: showMean
+      - type: Label
+        label: Mean Display Type
+        children:
+          - type: ComboBox
+            name: meanType
+            enable: (showMean)
       - type: CheckBox
-        name: showSEM
-        enable: (showMean)
-      - type: CheckBox
-        name: showCI
-        enable: (showMean)
+        name: showMedian
+      - type: Label
+        label: Median Display Type
+        children:
+          - type: ComboBox
+            name: medianType
+            enable: (showMedian)
 
   - type: CollapseBox
-    label: Appearance
+    label: Uncertainty & Spread
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showSEM
+      - type: CheckBox
+        name: showSD
+      - type: CheckBox
+        name: showCI
+      - type: Label
+        label: CI Display Type
+        children:
+          - type: ComboBox
+            name: ciType
+            enable: (showCI)
+      - type: CheckBox
+        name: showRange
+
+  - type: CollapseBox
+    label: Distribution
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showDistribution
+      - type: Label
+        label: Distribution Type
+        children:
+          - type: ComboBox
+            name: distributionType
+            enable: (showDistribution)
+
+  - type: CollapseBox
+    label: Special Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showOutliers
+        enable: (plotType=="boxplot")
+      - type: CheckBox
+        name: violinPoints
+        enable: (plotType=="violin")
+      - type: Label
+        label: Histogram Bins
+        children:
+          - type: TextBox
+            name: histogramBins
+            format: number
+            enable: (plotType=="histogram")
+
+  - type: CollapseBox
+    label: Statistical Testing
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showPValue
+      - type: CheckBox
+        name: showSignificance
+
+  - type: CollapseBox
+    label: Colors & Theme
     collapsed: true
     children:
       - type: Label
-        label: Colors & Theme
+        label: Color Scheme
         children:
           - type: ComboBox
             name: colorScheme
       - type: Label
-        label: Labels
+        label: Transparency
+        children:
+          - type: TextBox
+            name: alpha
+            format: number
+      - type: Label
+        label: Font Size
+        children:
+          - type: TextBox
+            name: fontSize
+            format: number
+      - type: CheckBox
+        name: removeLegend
+      - type: CheckBox
+        name: removePadding
+
+  - type: CollapseBox
+    label: Labels & Titles
+    collapsed: true
+    children:
+      - type: Label
+        label: Plot Title
         children:
           - type: TextBox
             name: plotTitle
             format: string
+      - type: Label
+        label: X Axis Label
+        children:
           - type: TextBox
             name: xLabel
             format: string
+      - type: Label
+        label: Y Axis Label
+        children:
           - type: TextBox
             name: yLabel
             format: string
+      - type: Label
+        label: Legend Title
+        children:
+          - type: TextBox
+            name: legendTitle
+            format: string
+
+  - type: CollapseBox
+    label: Axis Options
+    collapsed: true
+    children:
+      - type: Label
+        label: X Axis
+        children:
+          - type: CheckBox
+            name: removeXAxis
+          - type: CheckBox
+            name: removeXAxisLabels
+            enable: (!removeXAxis)
+          - type: CheckBox
+            name: removeXAxisTitle
+            enable: (!removeXAxis)
+      - type: Label
+        label: Y Axis
+        children:
+          - type: CheckBox
+            name: removeYAxis
+          - type: CheckBox
+            name: removeYAxisLabels
+            enable: (!removeYAxis)
+          - type: CheckBox
+            name: removeYAxisTitle
+            enable: (!removeYAxis)

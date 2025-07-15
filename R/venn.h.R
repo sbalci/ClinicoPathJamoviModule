@@ -13,7 +13,11 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             var3 = NULL,
             var3true = NULL,
             var4 = NULL,
-            var4true = NULL, ...) {
+            var4true = NULL,
+            upsetType = "upsetR",
+            sortBy = "freq",
+            minSize = 0,
+            showAnnotations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -69,6 +73,30 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "var4true",
                 var4true,
                 variable="(var4)")
+            private$..upsetType <- jmvcore::OptionList$new(
+                "upsetType",
+                upsetType,
+                options=list(
+                    "upsetR",
+                    "complexUpset"),
+                default="upsetR")
+            private$..sortBy <- jmvcore::OptionList$new(
+                "sortBy",
+                sortBy,
+                options=list(
+                    "freq",
+                    "degree",
+                    "none"),
+                default="freq")
+            private$..minSize <- jmvcore::OptionInteger$new(
+                "minSize",
+                minSize,
+                min=0,
+                default=0)
+            private$..showAnnotations <- jmvcore::OptionBool$new(
+                "showAnnotations",
+                showAnnotations,
+                default=FALSE)
 
             self$.addOption(private$..var1)
             self$.addOption(private$..var1true)
@@ -78,6 +106,10 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..var3true)
             self$.addOption(private$..var4)
             self$.addOption(private$..var4true)
+            self$.addOption(private$..upsetType)
+            self$.addOption(private$..sortBy)
+            self$.addOption(private$..minSize)
+            self$.addOption(private$..showAnnotations)
         }),
     active = list(
         var1 = function() private$..var1$value,
@@ -87,7 +119,11 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         var3 = function() private$..var3$value,
         var3true = function() private$..var3true$value,
         var4 = function() private$..var4$value,
-        var4true = function() private$..var4true$value),
+        var4true = function() private$..var4true$value,
+        upsetType = function() private$..upsetType$value,
+        sortBy = function() private$..sortBy$value,
+        minSize = function() private$..minSize$value,
+        showAnnotations = function() private$..showAnnotations$value),
     private = list(
         ..var1 = NA,
         ..var1true = NA,
@@ -96,7 +132,11 @@ vennOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..var3 = NA,
         ..var3true = NA,
         ..var4 = NA,
-        ..var4true = NA)
+        ..var4true = NA,
+        ..upsetType = NA,
+        ..sortBy = NA,
+        ..minSize = NA,
+        ..showAnnotations = NA)
 )
 
 vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -104,6 +144,7 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        summary = function() private$.items[["summary"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]]),
     private = list(),
@@ -128,6 +169,33 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="To Do"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                title="Summary of True Counts",
+                name="summary",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="trueCount", 
+                        `title`="True Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="falseCount", 
+                        `title`="False Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="totalCount", 
+                        `title`="Total Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="truePercentage", 
+                        `title`="True %", 
+                        `type`="number", 
+                        `format`="pc"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Venn Diagram",
@@ -157,7 +225,7 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "venn",
-                version = c(0,0,2),
+                version = c(0,0,3),
                 options = options,
                 results = vennResults$new(options=options),
                 data = data,
@@ -191,12 +259,25 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis.
 #' @param var4true The level in \code{var4} that represents the positive
 #'   condition.
+#' @param upsetType Choose between UpSetR (classic) or ComplexUpset (advanced
+#'   with more features).
+#' @param sortBy How to sort the intersections in the UpSet plot.
+#' @param minSize Minimum size of intersections to display.
+#' @param showAnnotations Add statistical annotations to the ComplexUpset
+#'   plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 venn <- function(
@@ -208,7 +289,11 @@ venn <- function(
     var3,
     var3true,
     var4,
-    var4true) {
+    var4true,
+    upsetType = "upsetR",
+    sortBy = "freq",
+    minSize = 0,
+    showAnnotations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("venn requires jmvcore to be installed (restart may be required)")
@@ -238,7 +323,11 @@ venn <- function(
         var3 = var3,
         var3true = var3true,
         var4 = var4,
-        var4true = var4true)
+        var4true = var4true,
+        upsetType = upsetType,
+        sortBy = sortBy,
+        minSize = minSize,
+        showAnnotations = showAnnotations)
 
     analysis <- vennClass$new(
         options = options,

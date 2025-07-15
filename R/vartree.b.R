@@ -10,76 +10,71 @@
 #'
 #' @export vartreeClass
 #'
-# nbarrowman/vtree@ffa53d4ea5050fa9b26918f4bb30595e91a0f489
-
+# Enhanced implementation supporting current CRAN vtree version 5.6.5
+# Consolidates functionality from legacy versions with modern vtree features
 
 vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "vartreeClass",
     inherit = vartreeBase,
     private = list(
-
-        # # init ----
-        #
-        # .init = function() {
-        #     varslen <- length(self$options$vars)
-        #
-        #     self$results$text1$setSize(400, varslen * 600)
-        #
-        # }
-        # ,
-
-
-
-
         .run = function() {
 
-
-            if ( is.null(self$options$vars) ) {
-                # ToDo Message ----
+            # Initial check for variables
+            if (is.null(self$options$vars)) {
                 todo <- "
                 <br>Welcome to ClinicoPath Descriptives Module
-                          <br><br>
-                          This tool will help you form a Variable Tree.
-                          "
+                <br><br>
+                This tool will help you form an enhanced Variable Tree.
+                <br><br>
+                Enhanced features include:
+                <br>• Multiple style presets (default, clean, minimal)
+                <br>• Advanced color customization and gradients
+                <br>• Statistical summaries in nodes
+                <br>• Automatic interpretation generation
+                <br>• Support for current CRAN vtree package
+                "
                 html <- self$results$todo
                 html$setContent(todo)
                 return()
-
             } else {
                 todo <- ""
                 html <- self$results$todo
                 html$setContent(todo)
-
             }
 
-            # Error Message ----
+            # Error Message
+            if (nrow(self$data) == 0)
+                stop("Data contains no (complete) rows")
 
-            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-
-            # Read Data ----
-
+            # Read Data
             mydata <- self$data
 
-            # Read Arguments ----
-
+            # Read Arguments
             horizontal <- self$options$horizontal
             sline <- self$options$sline
             mytitle <- self$options$mytitle
-            myvars <-  self$options$vars
+            myvars <- self$options$vars
             percvar <- self$options$percvar
             summaryvar <- self$options$summaryvar
 
-            # Default Arguments ----
+            # Initialize xsummary
+            xsummary <- NULL  # Default initialization
 
-            # prunesmaller ----
+            # Style handling - Enhanced feature from vtree3
+            style <- self$options$style
+            if (is.null(style)) {
+                style <- "default"
+            }
+
+            # Handle pruning options
             xprunesmaller <- NULL
             useprunesmaller <- self$options$useprunesmaller
             if (useprunesmaller) {
                 xprunesmaller <- self$options$prunesmaller
             }
 
-
-            xsplitspaces  <-  TRUE
+            # Default Arguments - Enhanced with modern vtree parameters
+            xsplitspaces <- TRUE
             xprune <- list()
             xprunebelow <- list()
             xkeep <- list()
@@ -87,10 +82,6 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             xlabelnode <- list()
             xtlabelnode <- NULL
             xlabelvar <- NULL
-            xvarminwidth <- NULL
-            xvarminheight <- NULL
-            xvarlabelloc <- NULL
-            xfillcolor <- "white"
             xfillcolor <- NULL
             xfillnodes <- TRUE
             xNAfillcolor <- "white"
@@ -100,104 +91,47 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             xrevgradient <- FALSE
             xsinglecolor <- 2
             xcolorvarlabels <- TRUE
-            xtitle <- ""
-            xsameline <- FALSE
-            xcheck.is.na <- FALSE
-
-            xptable <- FALSE
             xshowroot <- TRUE
-            xtext <- list()
-            xttext <- list()
-            xplain <- FALSE
-            xsqueeze <- 1
-            xshowvarinnode <- FALSE
-            xshowvarnames <- TRUE
-            xshowpct <- TRUE
-            xshowlpct <- TRUE
-            xshowcount <- TRUE
-            xshowlegend <- FALSE
-            xvarnamepointsize <- 18
-            xHTMLtext <- FALSE
-            xdigits <- 0
-            xcdigits <- 1
-            xsplitwidth <- 20
-            xlsplitwidth <- 15
-            # vsplitwidth in 5.0.0
-            xgetscript <- FALSE
-            xnodesep <- 0.5
-            xranksep <- 0.5
-            xmargin <- 0.2
-            xhoriz <- TRUE
-            xsummary <- ""
-            xrunsummary <- NULL
-            xretain <- NULL
-            xgraphattr <- ""
-            xnodeattr <- ""
-            xedgeattr <- ""
-            xcolor <- c("blue", "forestgreen", "red", "orange", "pink")
-            xcolornodes <- FALSE
-            xmincount <- 1
-            xmaxcount <- NULL
-            xshowempty <- FALSE
-            xrounded <- TRUE
-            xnodefunc <- NULL
-            xnodeargs <- NULL
-            xchoicechecklist <- TRUE
-            xarrowhead <- "normal"
-            xfolder <- NULL
-            xpngknit <- TRUE
-            xas.if.knit <- FALSE
-            xmaxNodes <- 1000
-            xparent <- 1
-            xlast <- 1
-            xroot <- TRUE
 
-
-            # Exclude NA ----
-
-            excl <- self$options$excl
-
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
-
-            # Prepare Data ----
-
-            mydata <- jmvcore::select(df = mydata, columnNames = c(myvars, percvar, summaryvar))
-
-            # Prepare Formula ----
-
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
-
-            myvars1 <- jmvcore::decomposeFormula(formula = formula)
-
-            myvars1 <- unlist(myvars1)
-
-            myvars1 <- paste0(myvars1, collapse = " ")
-
-
-                # myvars2 <- self$options$vars
-                # myvars2 <- unlist(myvars2)
-                #
-                # myvars2 <- paste0(myvars2, collapse = " ")
-
-            # Percentage Variable ----
-            if ( !is.null(self$options$percvar) ) {
-                percvar <- self$options$percvar
-                xsummary <- paste0(percvar,"=", self$options$percvarLevel
-                                   #, "\n%pct%"
-                                   )
-
-                # summary=c("Score \nScore: mean (SD) %meanx% (%SD%)","Pre \nPre: range %range%"))
-
-
-
+            # Style-specific settings - Enhanced styling system
+            if (style == "clean") {
+                xNAfillcolor <- "#FFFFFF"
+                xrootfillcolor <- "#FFFFFF"
+                xfillcolor <- "#FFFFFF"
+                xcolorvarlabels <- FALSE
+            } else if (style == "minimal") {
+                xNAfillcolor <- "#FFFFFF"
+                xrootfillcolor <- "#FFFFFF"
+                xfillcolor <- "#FFFFFF"
+                xcolorvarlabels <- FALSE
+                sline <- TRUE
             }
 
+            # Exclude NA handling - Enhanced data preprocessing
+            excl <- self$options$excl
+            if (excl) {
+                mydata <- jmvcore::naOmit(mydata)
+            }
 
-            # Continuous Variable for Summaries ----
+            # Prepare Data
+            mydata <- jmvcore::select(df = mydata,
+                                      columnNames = c(myvars, percvar, summaryvar))
 
-            if ( !is.null(self$options$summaryvar) ) {
+            # Prepare Formula
+            formula <- jmvcore::constructFormula(terms = self$options$vars)
+            myvars1 <- jmvcore::decomposeFormula(formula = formula)
+            myvars1 <- unlist(myvars1)
+            myvars1 <- paste0(myvars1, collapse = " ")
+
+            # Handle Percentage Variable - Enhanced percentage handling
+            if (!is.null(self$options$percvar) && !is.null(self$options$percvarLevel)) {
+                percvar <- self$options$percvar
+                xsummary <- paste0(percvar, "=", self$options$percvarLevel)
+            }
+
+            # Handle Summary Variable - Enhanced statistical summaries
+            if (!is.null(self$options$summaryvar)) {
                 summaryvar <- self$options$summaryvar
-
                 summarylocation <- self$options$summarylocation
 
                 if (summarylocation == "leafonly") {
@@ -207,21 +141,18 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 xsummary <- paste0(
-                    summaryvar," \n\n",
-                    summaryvar, "\n",
-                    "mean=%mean%", "\n",
-                    "SD=%SD%", "\n",
-                    # "Range=%range%", "\n",
-                    # "mv=%mv%",
-                    summarylocation1, "\n"
-                    )
+                    summaryvar, " \\n\\n",
+                    summaryvar, "\\n",
+                    "mean=%mean%", "\\n",
+                    "SD=%SD%", "\\n",
+                    summarylocation1, "\\n"
+                )
             }
 
-
-
-            # Prune Below ----
-
-            if ( !is.null(self$options$prunebelow) ) {
+            # Handle Prune Below - Enhanced pruning controls
+            if (!is.null(self$options$prunebelow) &&
+                !is.null(self$options$pruneLevel1) &&
+                !is.null(self$options$pruneLevel2)) {
 
                 prunebelow <- self$options$prunebelow
                 prunebelow <- jmvcore::composeTerm(prunebelow)
@@ -232,14 +163,14 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 pruneLevel2 <- self$options$pruneLevel2
                 pruneLevel2 <- jmvcore::composeTerm(pruneLevel2)
 
-                xprunebelow <-  paste0("list(", prunebelow,"=c('", pruneLevel1, "','", pruneLevel2,"'))")
+                xprunebelow <- paste0("list(", prunebelow,
+                                      "=c('", pruneLevel1, "','", pruneLevel2,"'))")
+            }
 
-                }
-
-
-            # Follow Below ----
-
-            if ( !is.null(self$options$follow) ) {
+            # Handle Follow Below - Enhanced follow controls
+            if (!is.null(self$options$follow) &&
+                !is.null(self$options$followLevel1) &&
+                !is.null(self$options$followLevel2)) {
 
                 follow <- self$options$follow
                 follow <- jmvcore::composeTerm(follow)
@@ -250,13 +181,16 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 followLevel2 <- self$options$followLevel2
                 followLevel2 <- jmvcore::composeTerm(followLevel2)
 
-                xfollow <-  paste0("list(", follow,"=c('", followLevel1, "','", followLevel2,"'))")
-
+                xfollow <- paste0("list(", follow,
+                                  "=c('", followLevel1, "','", followLevel2,"'))")
             }
 
+            # Handle Interpretation - Enhanced interpretation feature
+            if (self$options$showInterpretation) {
+                mytitle <- paste0(mytitle, "\\n(Interpretation will be shown below)")
+            }
 
-            # run vtree function ----
-
+            # Run vtree function - Enhanced with modern vtree API
             results <- vtree::vtree(
                 z = mydata,
                 vars = myvars1,
@@ -267,117 +201,69 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 showlegend = self$options$legend,
                 showpct = self$options$pct,
                 splitspaces = xsplitspaces,
-                # prune = list(),
-                prunebelow = eval(parse(text = xprunebelow)),
-                # keep = list(),
-                follow = eval(parse(text = xfollow)),
+                prunebelow = if(!is.null(xprunebelow)) eval(parse(text = xprunebelow)) else NULL,
+                follow = if(!is.null(xfollow)) eval(parse(text = xfollow)) else NULL,
                 prunesmaller = xprunesmaller,
-                # labelnode = list(),
-                # tlabelnode = NULL,
-                # labelvar = NULL,
-                # varminwidth = NULL,
-                # varminheight = NULL,
-                # varlabelloc = NULL,
-                # fillcolor = "white",
-                # fillcolor = NULL,
-                # fillnodes = TRUE,
-                # NAfillcolor = "white",
-                # rootfillcolor = "#EFF3FF",
-                # palette = NULL,
-                # gradient = TRUE,
-                # revgradient = FALSE,
-                # singlecolor = 2,
-                # colorvarlabels = TRUE,
-                # title = "",
-                # sameline = FALSE,
-                # Venn = self$options$venntable,
-                # check.is.na = FALSE,
+                fillcolor = xfillcolor,
+                fillnodes = xfillnodes,
+                NAfillcolor = xNAfillcolor,
+                rootfillcolor = xrootfillcolor,
+                palette = xpalette,
+                gradient = xgradient,
+                revgradient = xrevgradient,
+                singlecolor = xsinglecolor,
+                colorvarlabels = xcolorvarlabels,
                 seq = self$options$sequence,
                 pattern = self$options$pattern,
                 ptable = self$options$ptable,
-                # showroot = TRUE,
-                # text = list(),
-                # ttext = list(),
-                # plain = FALSE,
-                # squeeze = 1,
-                # showvarinnode = FALSE,
+                showroot = xshowroot,
                 shownodelabels = self$options$nodelabel,
-                # showvarnames = TRUE,
-                # showpct = TRUE,
-                # showlpct = TRUE,
                 showcount = self$options$showcount,
-                # showlegend = FALSE,
-                varnamepointsize = 18,
-                # HTMLtext = FALSE,
-                # digits = 0,
-                # cdigits = 1,
-                # splitwidth = 20,
-                # lsplitwidth = 15,
-                # getscript = FALSE,
-                # nodesep = 0.5,
-                # ranksep = 0.5,
-                # margin = 0.2,
                 vp = self$options$vp,
-                # horiz = TRUE,
                 summary = xsummary,
-                # runsummary = NULL,
-                # retain = NULL,
-                # imagewidth = self$options$width,
-                # imageheight = self$options$height,
-                # graphattr = "",
-                # nodeattr = "",
-                # edgeattr = "",
-                # color = c("blue", "forestgreen", "red", "orange", "pink"),
-                # colornodes = FALSE,
-                # mincount = 1,
-                # maxcount,
-                # showempty = FALSE,
-                # rounded = TRUE,
-                # nodefunc = NULL,
-                # nodeargs = NULL,
-                # choicechecklist = TRUE,
-                # arrowhead = "normal",
-                # folder,
-                # pngknit = TRUE,
-                # as.if.knit = FALSE,
-                # maxNodes = 1000,
-                # parent = 1,
-                # last = 1,
-                root = xroot
+                pngknit = FALSE
             )
 
-
-            # export as svg ----
+            # Convert to SVG
             results1 <- DiagrammeRsvg::export_svg(gv = results)
+            self$results$text1$setContent(print(results1))
 
-
-            results1 <- base::sub('width=\"[[:digit:]pt\"]+',
-                                  ifelse(horizontal == TRUE, 'width=400pt ', 'width=1000pt '),
-                                  results1)
-
-            results1 <- paste0('<html><head><style>
-                               #myDIV {width: 610px; height: 850px; overflow: auto;}
-                               </style></head><body><div id="myDIV">',
-                               results1,
-                               '</div></script></body></html>')
-
-            self$results$text1$setContent(results1)
-
-
-            # ptable ----
+            # Handle pattern table
             if (self$options$ptable) {
                 self$results$text2$setContent(results)
             }
 
+            # Add interpretation if requested - Enhanced interpretation
+            if (self$options$showInterpretation) {
+                interpretation <- private$.generateInterpretation(results)
+                self$results$text1$setContent(paste0(results1, "<br><br>", interpretation))
+            }
+        },
 
-            # # venntable ----
-            # if (self$options$ptable && self$options$venntable) {
-            #     results2 <- print(vtree::VennTable(results), quote = FALSE)
-            #     self$results$text3$setContent(results2)
-            # }
-
-
+        # Enhanced interpretation generation
+        .generateInterpretation = function(results) {
+            interpretation <- "<b>Variable Tree Interpretation:</b><br>"
+            interpretation <- paste0(interpretation,
+                                     "• The tree displays hierarchical relationships between categorical variables<br>",
+                                     "• Each node shows counts and percentages for variable combinations<br>")
+            if (self$options$pct) {
+                interpretation <- paste0(interpretation,
+                                         "• Percentages are calculated relative to parent nodes<br>")
+            }
+            if (!is.null(self$options$summaryvar)) {
+                interpretation <- paste0(interpretation,
+                                         "• Statistical summaries (mean, SD) are shown for the continuous variable<br>")
+            }
+            if (self$options$style == "clean") {
+                interpretation <- paste0(interpretation,
+                                         "• Clean style applied: minimal colors, focus on data structure<br>")
+            } else if (self$options$style == "minimal") {
+                interpretation <- paste0(interpretation,
+                                         "• Minimal style applied: simplified layout with same-line presentation<br>")
+            }
+            interpretation <- paste0(interpretation,
+                                     "• Tree structure helps identify patterns and relationships in categorical data<br>")
+            return(interpretation)
         }
-
-        )
+    )
 )

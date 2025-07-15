@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="ClinicoPath Team" />
+
+<meta name="date" content="2025-06-30" />
+
+<title>Diagnostic Style Clustering: Identifying Pathologist ‘Schools’ and Diagnostic Preferences</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Diagnostic Style Clustering: Identifying
+Pathologist ‘Schools’ and Diagnostic Preferences</h1>
+<h4 class="author">ClinicoPath Team</h4>
+<h4 class="date">2025-06-30</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a>
+<ul>
+<li><a href="#clinical-significance" id="toc-clinical-significance">Clinical Significance</a></li>
+<li><a href="#the-usubutun-2012-study" id="toc-the-usubutun-2012-study">The Usubutun 2012 Study</a></li>
+</ul></li>
+<li><a href="#getting-started" id="toc-getting-started">Getting
+Started</a>
+<ul>
+<li><a href="#data-requirements" id="toc-data-requirements">Data
+Requirements</a></li>
+<li><a href="#example-dataset-structure" id="toc-example-dataset-structure">Example Dataset Structure</a></li>
+</ul></li>
+<li><a href="#analysis-walkthrough" id="toc-analysis-walkthrough">Analysis Walkthrough</a>
+<ul>
+<li><a href="#dataset-1-endometrial-pathology-classic-usubutun-study" id="toc-dataset-1-endometrial-pathology-classic-usubutun-study">Dataset
+1: Endometrial Pathology (Classic Usubutun Study)</a>
+<ul>
+<li><a href="#step-1-basic-agreement-analysis" id="toc-step-1-basic-agreement-analysis">Step 1: Basic Agreement
+Analysis</a></li>
+<li><a href="#step-2-enable-diagnostic-style-clustering" id="toc-step-2-enable-diagnostic-style-clustering">Step 2: Enable
+Diagnostic Style Clustering</a></li>
+<li><a href="#step-3-include-rater-characteristics" id="toc-step-3-include-rater-characteristics">Step 3: Include Rater
+Characteristics</a></li>
+<li><a href="#step-4-identify-discordant-cases" id="toc-step-4-identify-discordant-cases">Step 4: Identify Discordant
+Cases</a></li>
+</ul></li>
+<li><a href="#dataset-2-breast-pathology-diagnostic-styles" id="toc-dataset-2-breast-pathology-diagnostic-styles">Dataset 2: Breast
+Pathology Diagnostic Styles</a>
+<ul>
+<li><a href="#key-features" id="toc-key-features">Key Features:</a></li>
+<li><a href="#expected-style-groups" id="toc-expected-style-groups">Expected Style Groups:</a></li>
+<li><a href="#analysis-setup" id="toc-analysis-setup">Analysis
+Setup:</a></li>
+</ul></li>
+<li><a href="#dataset-3-lymphoma-classification-styles" id="toc-dataset-3-lymphoma-classification-styles">Dataset 3: Lymphoma
+Classification Styles</a>
+<ul>
+<li><a href="#key-features-1" id="toc-key-features-1">Key
+Features:</a></li>
+<li><a href="#expected-style-groups-1" id="toc-expected-style-groups-1">Expected Style Groups:</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#understanding-the-results" id="toc-understanding-the-results">Understanding the Results</a>
+<ul>
+<li><a href="#diagnostic-style-table" id="toc-diagnostic-style-table">Diagnostic Style Table</a></li>
+<li><a href="#style-summary-table" id="toc-style-summary-table">Style
+Summary Table</a></li>
+<li><a href="#discordant-cases-table" id="toc-discordant-cases-table">Discordant Cases Table</a></li>
+</ul></li>
+<li><a href="#visualization-guide" id="toc-visualization-guide">Visualization Guide</a>
+<ul>
+<li><a href="#dendrogram-plot" id="toc-dendrogram-plot">Dendrogram
+Plot</a></li>
+<li><a href="#style-heatmap" id="toc-style-heatmap">Style
+Heatmap</a></li>
+</ul></li>
+<li><a href="#clinical-applications" id="toc-clinical-applications">Clinical Applications</a>
+<ul>
+<li><a href="#quality-assurance-programs" id="toc-quality-assurance-programs">Quality Assurance Programs</a></li>
+<li><a href="#training-program-evaluation" id="toc-training-program-evaluation">Training Program
+Evaluation</a></li>
+<li><a href="#consensus-conference-planning" id="toc-consensus-conference-planning">Consensus Conference
+Planning</a></li>
+</ul></li>
+<li><a href="#advanced-features" id="toc-advanced-features">Advanced
+Features</a>
+<ul>
+<li><a href="#custom-distance-metrics" id="toc-custom-distance-metrics">Custom Distance Metrics</a></li>
+<li><a href="#clustering-methods" id="toc-clustering-methods">Clustering
+Methods</a></li>
+<li><a href="#optimal-group-number" id="toc-optimal-group-number">Optimal Group Number</a></li>
+</ul></li>
+<li><a href="#troubleshooting" id="toc-troubleshooting">Troubleshooting</a>
+<ul>
+<li><a href="#common-issues-and-solutions" id="toc-common-issues-and-solutions">Common Issues and Solutions</a>
+<ul>
+<li><a href="#issue-all-pathologists-assigned-to-one-style-group" id="toc-issue-all-pathologists-assigned-to-one-style-group">Issue: All
+pathologists assigned to one style group</a></li>
+<li><a href="#issue-style-groups-dont-correlate-with-characteristics" id="toc-issue-style-groups-dont-correlate-with-characteristics">Issue:
+Style groups don’t correlate with characteristics</a></li>
+<li><a href="#issue-poor-within-group-agreement" id="toc-issue-poor-within-group-agreement">Issue: Poor within-group
+agreement</a></li>
+<li><a href="#issue-no-discordant-cases-identified" id="toc-issue-no-discordant-cases-identified">Issue: No discordant cases
+identified</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#best-practices" id="toc-best-practices">Best Practices</a>
+<ul>
+<li><a href="#study-design-recommendations" id="toc-study-design-recommendations">Study Design
+Recommendations</a></li>
+<li><a href="#analysis-strategy" id="toc-analysis-strategy">Analysis
+Strategy</a></li>
+<li><a href="#reporting-results" id="toc-reporting-results">Reporting
+Results</a></li>
+</ul></li>
+<li><a href="#references-and-further-reading" id="toc-references-and-further-reading">References and Further
+Reading</a>
+<ul>
+<li><a href="#primary-literature" id="toc-primary-literature">Primary
+Literature</a></li>
+<li><a href="#ihc-clustering-and-related-methods" id="toc-ihc-clustering-and-related-methods">IHC Clustering and Related
+Methods</a></li>
+<li><a href="#methodological-references" id="toc-methodological-references">Methodological References</a></li>
+<li><a href="#clinical-applications-1" id="toc-clinical-applications-1">Clinical Applications</a></li>
+</ul></li>
+<li><a href="#conclusion" id="toc-conclusion">Conclusion</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The <strong>Diagnostic Style Clustering</strong> feature in
+ClinicoPath implements the methodology from Usubutun et al. (2012) to
+identify diagnostic “schools” or “styles” among pathologists. This
+powerful analysis reveals whether pathologists cluster based on:</p>
+<ul>
+<li><strong>Training institution</strong> (e.g., different medical
+schools create distinct diagnostic approaches)</li>
+<li><strong>Experience level</strong> (junior vs. senior
+pathologists)<br />
+</li>
+<li><strong>Geographic region</strong> (regional diagnostic
+preferences)</li>
+<li><strong>Specialty focus</strong> (generalist vs. specialist
+approaches)</li>
+<li><strong>Institutional culture</strong> (academic vs. community
+practice patterns)</li>
+</ul>
+<div id="clinical-significance" class="section level2">
+<h2>Clinical Significance</h2>
+<p>Understanding diagnostic styles is crucial for:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Quality Assurance</strong>: Identifying systematic biases in
+diagnostic patterns</li>
+<li><strong>Training Programs</strong>: Recognizing the influence of
+different educational approaches</li>
+<li><strong>Consensus Development</strong>: Understanding why certain
+cases generate disagreement</li>
+<li><strong>Standardization Efforts</strong>: Targeting training to
+reduce style-based variation</li>
+<li><strong>Case Consultation</strong>: Selecting appropriate experts
+based on diagnostic philosophy</li>
+</ol>
+</div>
+<div id="the-usubutun-2012-study" class="section level2">
+<h2>The Usubutun 2012 Study</h2>
+<p>The original study analyzed endometrial intraepithelial neoplasia
+(EIN) diagnoses among 20 pathologists and found <strong>three distinct
+diagnostic styles</strong> that correlated with training background and
+diagnostic philosophy. This methodology has been adapted for various
+pathology subspecialties.</p>
+<hr />
+</div>
+</div>
+<div id="getting-started" class="section level1">
+<h1>Getting Started</h1>
+<div id="data-requirements" class="section level2">
+<h2>Data Requirements</h2>
+<p>Your dataset should contain:</p>
+<p><strong>Required:</strong> - <strong>Multiple rater columns</strong>:
+Each column represents one pathologist’s diagnoses - <strong>Case
+identifiers</strong>: Unique identifier for each case</p>
+<p><strong>Optional but Recommended:</strong> - <strong>Pathologist
+characteristics</strong>: Experience, training institution, current
+institution, specialty - <strong>True diagnoses</strong>: Gold standard
+for accuracy assessment - <strong>Case features</strong>: Difficulty
+level, confounding factors</p>
+</div>
+<div id="example-dataset-structure" class="section level2">
+<h2>Example Dataset Structure</h2>
+<table>
+<caption>Example Dataset Structure for Diagnostic Style
+Analysis</caption>
+<thead>
+<tr class="header">
+<th align="left">case_id</th>
+<th align="left">true_diagnosis</th>
+<th align="left">Path_01</th>
+<th align="left">Path_02</th>
+<th align="left">Path_03</th>
+<th align="left">difficulty</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Case_1</td>
+<td align="left">Benign</td>
+<td align="left">Benign</td>
+<td align="left">Benign</td>
+<td align="left">EIN</td>
+<td align="left">Easy</td>
+</tr>
+<tr class="even">
+<td align="left">Case_2</td>
+<td align="left">EIN</td>
+<td align="left">EIN</td>
+<td align="left">Benign</td>
+<td align="left">EIN</td>
+<td align="left">Moderate</td>
+</tr>
+<tr class="odd">
+<td align="left">Case_3</td>
+<td align="left">Carcinoma</td>
+<td align="left">Carcinoma</td>
+<td align="left">Carcinoma</td>
+<td align="left">Carcinoma</td>
+<td align="left">Easy</td>
+</tr>
+<tr class="even">
+<td align="left">Case_4</td>
+<td align="left">Benign</td>
+<td align="left">Benign</td>
+<td align="left">EIN</td>
+<td align="left">Benign</td>
+<td align="left">Difficult</td>
+</tr>
+<tr class="odd">
+<td align="left">Case_5</td>
+<td align="left">EIN</td>
+<td align="left">Benign</td>
+<td align="left">EIN</td>
+<td align="left">EIN</td>
+<td align="left">Moderate</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+<div id="analysis-walkthrough" class="section level1">
+<h1>Analysis Walkthrough</h1>
+<div id="dataset-1-endometrial-pathology-classic-usubutun-study" class="section level2">
+<h2>Dataset 1: Endometrial Pathology (Classic Usubutun Study)</h2>
+<p>Let’s demonstrate the analysis using synthetic data modeled after the
+original study.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Load the endometrial diagnostic styles dataset</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(ClinicoPath)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;endometrial_diagnostic_styles&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># View structure</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">head</span>(endometrial_diagnostic_styles<span class="sc">$</span>diagnosis_data)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">head</span>(endometrial_diagnostic_styles<span class="sc">$</span>pathologist_info)</span></code></pre></div>
+<div id="step-1-basic-agreement-analysis" class="section level3">
+<h3>Step 1: Basic Agreement Analysis</h3>
+<p>Start with standard interrater reliability:</p>
+<p><strong>jamovi Instructions:</strong> 1. Open the
+endometrial_diagnostic_styles.csv file 2. Go to
+<strong>meddecide</strong> → <strong>Agreement</strong> →
+<strong>Interrater Reliability</strong> 3. Select pathologist columns
+(Path_01 through Path_15) as <strong>Raters/Observers</strong> 4. Check
+<strong>Show Interpretation Guidelines</strong> 5. Check
+<strong>Pairwise Rater Analysis</strong></p>
+<p><strong>Expected Results:</strong> - Overall agreement: ~65-75% -
+Fleiss’ Kappa: 0.60-0.72 (substantial agreement) - Individual
+pathologist accuracies vary by experience</p>
+</div>
+<div id="step-2-enable-diagnostic-style-clustering" class="section level3">
+<h3>Step 2: Enable Diagnostic Style Clustering</h3>
+<p>Enable the core diagnostic style analysis:</p>
+<p><strong>jamovi Instructions:</strong> 1. Check <strong>Diagnostic
+Style Clustering (Usubutun Method)</strong> 2. Set clustering
+parameters: - <strong>Style Clustering Method</strong>: Ward’s Linkage
+(default) - <strong>Style Distance Metric</strong>: Percentage Agreement
+(default) - <strong>Number of Style Groups</strong>: 3 (as found in
+original study)</p>
+<p><strong>Expected Results:</strong> - <strong>3 distinct diagnostic
+styles</strong> identified - Style 1: Conservative (tend to undercall
+EIN) - Style 2: Moderate (balanced approach)<br />
+- Style 3: Aggressive (more likely to diagnose EIN)</p>
+</div>
+<div id="step-3-include-rater-characteristics" class="section level3">
+<h3>Step 3: Include Rater Characteristics</h3>
+<p>Add pathologist background information:</p>
+<p><strong>jamovi Instructions:</strong> 1. Check <strong>Include Rater
+Characteristics</strong> 2. Select characteristic variables: -
+<strong>Experience Variable</strong>: experience_level -
+<strong>Training Institution Variable</strong>: training_institution -
+<strong>Current Institution Variable</strong>: current_institution -
+<strong>Specialty Variable</strong>: specialty_focus</p>
+<p><strong>Expected Results:</strong> - <strong>Style 1</strong>
+(Conservative): Predominantly community pathologists, general practice -
+<strong>Style 2</strong> (Moderate): Mix of academic and community,
+mid-level experience - <strong>Style 3</strong> (Aggressive): Academic
+specialists, gynecologic pathology focus</p>
+</div>
+<div id="step-4-identify-discordant-cases" class="section level3">
+<h3>Step 4: Identify Discordant Cases</h3>
+<p>Find cases that distinguish diagnostic styles:</p>
+<p><strong>jamovi Instructions:</strong> 1. Check <strong>Identify
+Discordant Cases</strong></p>
+<p><strong>Expected Results:</strong> - Cases with polyps show high
+inter-style disagreement - Hormonal effect cases distinguish
+conservative vs. aggressive styles - Poor quality preparations increase
+random disagreement</p>
+<hr />
+</div>
+</div>
+<div id="dataset-2-breast-pathology-diagnostic-styles" class="section level2">
+<h2>Dataset 2: Breast Pathology Diagnostic Styles</h2>
+<p>Breast pathology offers distinct diagnostic philosophies around
+atypia and DCIS.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Load breast diagnostic data</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;breast_diagnostic_styles&quot;</span>)</span></code></pre></div>
+<div id="key-features" class="section level3">
+<h3>Key Features:</h3>
+<ul>
+<li><strong>4 diagnostic categories</strong>: Benign, Atypical, DCIS,
+Invasive</li>
+<li><strong>12 pathologists</strong> with different training
+backgrounds</li>
+<li><strong>Diagnostic philosophies</strong>: Conservative, Moderate,
+Aggressive</li>
+</ul>
+</div>
+<div id="expected-style-groups" class="section level3">
+<h3>Expected Style Groups:</h3>
+<p><strong>Style 1 - Conservative Breast Pathologists:</strong> - Tend
+to undercall atypical lesions - Require more evidence for DCIS diagnosis
+- Often community-based generalists</p>
+<p><strong>Style 2 - Moderate Breast Pathologists:</strong> - Balanced
+diagnostic approach - Follow standard guidelines closely - Mix of
+academic and community practice</p>
+<p><strong>Style 3 - Aggressive Breast Pathologists:</strong> - More
+liberal with atypia diagnosis - Lower threshold for DCIS - Often
+specialist breast pathologists</p>
+</div>
+<div id="analysis-setup" class="section level3">
+<h3>Analysis Setup:</h3>
+<p><strong>jamovi Instructions:</strong> 1. Load
+breast_diagnostic_styles.csv 2. Select BreastPath_01 through
+BreastPath_12 as raters 3. Use true_diagnosis as gold standard
+(optional) 4. Enable diagnostic style clustering with 3 groups 5.
+Include specialty_focus and diagnostic_philosophy as characteristics</p>
+<hr />
+</div>
+</div>
+<div id="dataset-3-lymphoma-classification-styles" class="section level2">
+<h2>Dataset 3: Lymphoma Classification Styles</h2>
+<p>Hematopathology demonstrates classification approach differences.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Load lymphoma diagnostic data  </span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;lymphoma_diagnostic_styles&quot;</span>)</span></code></pre></div>
+<div id="key-features-1" class="section level3">
+<h3>Key Features:</h3>
+<ul>
+<li><strong>5 diagnostic categories</strong>: Reactive, DLBCL,
+Follicular, Marginal Zone, Mantle Cell</li>
+<li><strong>10 hematopathologists</strong> with different classification
+approaches</li>
+<li><strong>Methodological styles</strong>: WHO-strict, Molecular-heavy,
+Morphology-first</li>
+</ul>
+</div>
+<div id="expected-style-groups-1" class="section level3">
+<h3>Expected Style Groups:</h3>
+<p><strong>Style 1 - Traditional Morphologists:</strong> - Heavy
+reliance on histologic features - Conservative with molecular
+classifications - Prefer established diagnostic categories</p>
+<p><strong>Style 2 - Molecular-Integrated Pathologists:</strong> -
+Emphasize molecular and genetic findings - More comfortable with newer
+WHO categories - Research-oriented institutions</p>
+<p><strong>Style 3 - Clinical-Context Pathologists:</strong> - Consider
+clinical presentation heavily - Pragmatic diagnostic approach - Often
+community-based practice</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="understanding-the-results" class="section level1">
+<h1>Understanding the Results</h1>
+<div id="diagnostic-style-table" class="section level2">
+<h2>Diagnostic Style Table</h2>
+<p>This table shows each pathologist’s assigned style group:</p>
+<table>
+<colgroup>
+<col width="9%" />
+<col width="16%" />
+<col width="28%" />
+<col width="15%" />
+<col width="12%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Rater</th>
+<th>Style Group</th>
+<th>Within-Group Agreement</th>
+<th>Experience</th>
+<th>Training</th>
+<th>Institution</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Path_01</td>
+<td>Style 1</td>
+<td>85.2%</td>
+<td>Junior</td>
+<td>Harvard</td>
+<td>Academic_A</td>
+</tr>
+<tr class="even">
+<td>Path_02</td>
+<td>Style 1</td>
+<td>83.7%</td>
+<td>Mid-level</td>
+<td>Harvard</td>
+<td>Academic_A</td>
+</tr>
+<tr class="odd">
+<td>Path_03</td>
+<td>Style 2</td>
+<td>78.1%</td>
+<td>Senior</td>
+<td>Mayo</td>
+<td>Academic_B</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation:</strong> - <strong>Within-Group
+Agreement</strong>: How well this pathologist agrees with others in
+their style group - <strong>High values</strong> (&gt;80%): Strong style
+group membership - <strong>Low values</strong> (&lt;70%): May be
+transitional between styles</p>
+</div>
+<div id="style-summary-table" class="section level2">
+<h2>Style Summary Table</h2>
+<p>Overview of each diagnostic style group:</p>
+<table>
+<colgroup>
+<col width="16%" />
+<col width="11%" />
+<col width="19%" />
+<col width="28%" />
+<col width="24%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Style Group</th>
+<th>Members</th>
+<th>Avg Agreement</th>
+<th>Predominant Experience</th>
+<th>Predominant Training</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Style 1</td>
+<td>6</td>
+<td>84.3%</td>
+<td>Senior</td>
+<td>Academic_Eastern</td>
+</tr>
+<tr class="even">
+<td>Style 2</td>
+<td>5</td>
+<td>79.8%</td>
+<td>Mixed</td>
+<td>Mixed</td>
+</tr>
+<tr class="odd">
+<td>Style 3</td>
+<td>4</td>
+<td>87.1%</td>
+<td>Junior</td>
+<td>Community_Training</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation:</strong> - <strong>Style 1</strong>:
+Conservative senior academics - <strong>Style 2</strong>: Mixed
+transitional group - <strong>Style 3</strong>: Aggressive
+community-trained pathologists</p>
+</div>
+<div id="discordant-cases-table" class="section level2">
+<h2>Discordant Cases Table</h2>
+<p>Cases that distinguish different style groups:</p>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="24%" />
+<col width="34%" />
+<col width="26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Case ID</th>
+<th>Discord Score</th>
+<th>Style Group Diagnoses</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Case_042</td>
+<td>0.85</td>
+<td>Style 1: Benign; Style 2: EIN; Style 3: EIN</td>
+<td>Conservative vs. aggressive split</td>
+</tr>
+<tr class="even">
+<td>Case_067</td>
+<td>0.78</td>
+<td>Style 1: EIN; Style 2: Carcinoma; Style 3: Carcinoma</td>
+<td>Severity assessment differences</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation:</strong> - <strong>High discord
+scores</strong> (&gt;0.7): Cases that reveal diagnostic philosophy
+differences - <strong>Pattern analysis</strong>: Shows systematic biases
+between style groups</p>
+<hr />
+</div>
+</div>
+<div id="visualization-guide" class="section level1">
+<h1>Visualization Guide</h1>
+<div id="dendrogram-plot" class="section level2">
+<h2>Dendrogram Plot</h2>
+<p>The <strong>Diagnostic Style Dendrogram</strong> shows hierarchical
+clustering of pathologists:</p>
+<p><strong>Key Features:</strong> - <strong>Branch height</strong>:
+Distance between pathologists/groups - <strong>Groupings</strong>: Clear
+separation indicates distinct styles - <strong>Outliers</strong>:
+Pathologists that don’t fit cleanly into groups</p>
+<p><strong>Interpretation:</strong> - <strong>Short branches within
+groups</strong>: High similarity within diagnostic styles - <strong>Long
+branches between groups</strong>: Clear separation of diagnostic
+approaches - <strong>Branch order</strong>: Pathologists cluster by
+diagnostic similarity, not alphabetically</p>
+</div>
+<div id="style-heatmap" class="section level2">
+<h2>Style Heatmap</h2>
+<p>The <strong>Diagnostic Style Heatmap</strong> visualizes diagnostic
+patterns:</p>
+<p><strong>Key Features:</strong> - <strong>Rows</strong>: Pathologists
+(grouped by style) - <strong>Columns</strong>: Diagnostic categories -
+<strong>Colors</strong>: Frequency of each diagnosis (blue=low,
+red=high) - <strong>Patterns</strong>: Style groups show similar color
+patterns</p>
+<p><strong>Interpretation:</strong> - <strong>Conservative
+styles</strong>: More blue in aggressive categories (EIN, Carcinoma) -
+<strong>Aggressive styles</strong>: More red in higher-grade categories
+- <strong>Consistent patterns within groups</strong>: Confirms style
+group validity</p>
+<hr />
+</div>
+</div>
+<div id="clinical-applications" class="section level1">
+<h1>Clinical Applications</h1>
+<div id="quality-assurance-programs" class="section level2">
+<h2>Quality Assurance Programs</h2>
+<p><strong>Use Case</strong>: Medical center wants to identify
+diagnostic outliers</p>
+<p><strong>Analysis Approach:</strong> 1. Collect routine sign-out
+diagnoses from all pathologists 2. Run diagnostic style clustering
+analysis 3. Identify pathologists with unusual diagnostic patterns 4.
+Implement targeted training or consultation protocols</p>
+<p><strong>Expected Outcome:</strong> - Detection of systematic
+over/under-diagnosis - Identification of pathologists needing additional
+training - Development of case consultation guidelines</p>
+</div>
+<div id="training-program-evaluation" class="section level2">
+<h2>Training Program Evaluation</h2>
+<p><strong>Use Case</strong>: Residency program assesses training
+effectiveness</p>
+<p><strong>Analysis Approach:</strong> 1. Compare diagnostic styles of
+residents vs. attendings 2. Track style evolution throughout residency
+training 3. Identify influence of different faculty mentors 4. Assess
+correlation with board exam performance</p>
+<p><strong>Expected Outcome:</strong> - Documentation of training
+program influence on diagnostic approach - Identification of
+mentor-specific diagnostic “signatures” - Curriculum modifications to
+address style biases</p>
+</div>
+<div id="consensus-conference-planning" class="section level2">
+<h2>Consensus Conference Planning</h2>
+<p><strong>Use Case</strong>: Professional society planning consensus
+guidelines</p>
+<p><strong>Analysis Approach:</strong> 1. Identify expert pathologists
+representing different diagnostic styles 2. Select cases that
+demonstrate style-specific disagreements<br />
+3. Focus consensus discussion on style-distinguishing features 4.
+Develop guidelines that address common style biases</p>
+<p><strong>Expected Outcome:</strong> - More effective consensus
+development - Guidelines that address real-world diagnostic variation -
+Reduced inter-pathologist disagreement</p>
+<hr />
+</div>
+</div>
+<div id="advanced-features" class="section level1">
+<h1>Advanced Features</h1>
+<div id="custom-distance-metrics" class="section level2">
+<h2>Custom Distance Metrics</h2>
+<p>Choose distance metric based on your analysis goals:</p>
+<p><strong>Percentage Agreement (Default):</strong> - <strong>Best
+for</strong>: Categorical diagnoses with equal weight -
+<strong>Interpretation</strong>: Direct measure of diagnostic
+concordance - <strong>Use when</strong>: Standard agreement analysis</p>
+<p><strong>Correlation:</strong> - <strong>Best for</strong>: Ordinal
+diagnoses with grade/stage relationships -
+<strong>Interpretation</strong>: Measures linear diagnostic relationship
+- <strong>Use when</strong>: Severity/grade assessments</p>
+<p><strong>Euclidean:</strong> - <strong>Best for</strong>: Quantitative
+diagnostic scores - <strong>Interpretation</strong>: Geometric distance
+in diagnostic space - <strong>Use when</strong>: Continuous diagnostic
+measurements</p>
+</div>
+<div id="clustering-methods" class="section level2">
+<h2>Clustering Methods</h2>
+<p>Select clustering approach based on group structure:</p>
+<p><strong>Ward’s Linkage (Default - Usubutun Method):</strong> -
+<strong>Best for</strong>: Compact, similar-sized groups -
+<strong>Advantage</strong>: Minimizes within-group variance -
+<strong>Use when</strong>: Following original Usubutun methodology</p>
+<p><strong>Complete Linkage:</strong> - <strong>Best for</strong>:
+Distinct, well-separated groups - <strong>Advantage</strong>: Creates
+tight clusters - <strong>Use when</strong>: Clear diagnostic “schools”
+expected</p>
+<p><strong>Average Linkage:</strong> - <strong>Best for</strong>:
+Moderate cluster separation - <strong>Advantage</strong>: Balanced
+approach - <strong>Use when</strong>: Uncertain about group
+structure</p>
+</div>
+<div id="optimal-group-number" class="section level2">
+<h2>Optimal Group Number</h2>
+<p>Determining the right number of style groups:</p>
+<p><strong>Clinical Guidance:</strong> - <strong>2 groups</strong>:
+Conservative vs. Aggressive - <strong>3 groups</strong>: Conservative,
+Moderate, Aggressive (Usubutun finding) - <strong>4+ groups</strong>:
+Subspecialty-specific approaches</p>
+<p><strong>Statistical Methods:</strong> - <strong>Dendrogram
+inspection</strong>: Look for natural breakpoints - <strong>Within-group
+agreement</strong>: Higher values indicate good grouping -
+<strong>Clinical interpretability</strong>: Groups should make clinical
+sense</p>
+<hr />
+</div>
+</div>
+<div id="troubleshooting" class="section level1">
+<h1>Troubleshooting</h1>
+<div id="common-issues-and-solutions" class="section level2">
+<h2>Common Issues and Solutions</h2>
+<div id="issue-all-pathologists-assigned-to-one-style-group" class="section level3">
+<h3>Issue: All pathologists assigned to one style group</h3>
+<p><strong>Likely Causes:</strong> - Too few pathologists (need minimum
+6-8) - Very high agreement (limited style variation) - Inappropriate
+distance metric</p>
+<p><strong>Solutions:</strong> - Increase number of raters - Use more
+challenging cases - Try correlation distance metric - Reduce number of
+style groups to 2</p>
+</div>
+<div id="issue-style-groups-dont-correlate-with-characteristics" class="section level3">
+<h3>Issue: Style groups don’t correlate with characteristics</h3>
+<p><strong>Likely Causes:</strong> - Characteristics don’t actually
+influence diagnostic style - Sample size too small - Confounding
+variables present</p>
+<p><strong>Solutions:</strong> - Collect additional characteristic
+variables - Increase case numbers - Focus on cases with known diagnostic
+challenges - Consider interaction between characteristics</p>
+</div>
+<div id="issue-poor-within-group-agreement" class="section level3">
+<h3>Issue: Poor within-group agreement</h3>
+<p><strong>Likely Causes:</strong> - Inappropriate number of style
+groups - High random diagnostic error - Case mix not suitable for style
+analysis</p>
+<p><strong>Solutions:</strong> - Adjust number of style groups - Focus
+on cases with moderate diagnostic difficulty - Exclude cases with
+technical problems - Use expert consensus gold standard</p>
+</div>
+<div id="issue-no-discordant-cases-identified" class="section level3">
+<h3>Issue: No discordant cases identified</h3>
+<p><strong>Likely Causes:</strong> - Style groups too similar - Cases
+too easy/too difficult - Limited diagnostic options</p>
+<p><strong>Solutions:</strong> - Include cases across difficulty
+spectrum - Ensure adequate sample of borderline cases - Use cases known
+to generate disagreement - Lower discordant case threshold</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="best-practices" class="section level1">
+<h1>Best Practices</h1>
+<div id="study-design-recommendations" class="section level2">
+<h2>Study Design Recommendations</h2>
+<p><strong>Pathologist Selection:</strong> - Include range of experience
+levels (junior to senior) - Represent different training institutions -
+Mix of practice settings (academic, community, specialty) - Minimum 8-10
+pathologists for meaningful clustering</p>
+<p><strong>Case Selection:</strong> - Include diagnostic spectrum
+(benign to malignant) - Focus on challenging/borderline cases - Avoid
+cases with obvious technical problems - Include 50-100 cases for robust
+analysis - Balance case difficulty levels</p>
+<p><strong>Data Collection:</strong> - Standardize case presentation
+format - Blind pathologists to clinical information (if appropriate) -
+Collect diagnoses independently - Document pathologist characteristics
+comprehensively</p>
+</div>
+<div id="analysis-strategy" class="section level2">
+<h2>Analysis Strategy</h2>
+<p><strong>Initial Analysis:</strong> 1. Start with basic agreement
+analysis 2. Examine overall diagnostic accuracy 3. Identify obvious
+outliers or problems</p>
+<p><strong>Style Clustering:</strong> 1. Begin with 3 groups (Usubutun
+standard) 2. Use Ward’s linkage and percentage agreement 3. Examine
+dendrogram for natural groupings 4. Validate groups with characteristic
+analysis</p>
+<p><strong>Interpretation:</strong> 1. Focus on clinically meaningful
+patterns 2. Consider alternative explanations for clustering 3. Validate
+findings with additional cases 4. Discuss results with participating
+pathologists</p>
+</div>
+<div id="reporting-results" class="section level2">
+<h2>Reporting Results</h2>
+<p><strong>Essential Elements:</strong> - Clear description of
+pathologist characteristics - Justification for number of style groups -
+Validation of style groups with known characteristics - Clinical
+interpretation of style differences - Limitations and alternative
+explanations</p>
+<p><strong>Visualization:</strong> - Include dendrogram showing
+clustering - Present style heatmap with diagnostic patterns - Show
+characteristic distributions by style group - Highlight discordant cases
+with clinical relevance</p>
+<hr />
+</div>
+</div>
+<div id="references-and-further-reading" class="section level1">
+<h1>References and Further Reading</h1>
+<div id="primary-literature" class="section level2">
+<h2>Primary Literature</h2>
+<ol style="list-style-type: decimal">
+<li><p><strong>Usubutun A, Mutter GL, Saglam A, Dolgun A, Ozkan EA, Ince
+T, Akyol A, Bulbul HD, Calay Z, Eren F, Gumurdulu D, Haberal AN, Ilvan
+S, Karaveli S, Koyuncuoglu M, Muezzinoglu B, Muftuoglu KH, Ozdemir N,
+Ozen O, Baykara S, Pestereli E, Ulukus EC, Zekioglu O.</strong> (2012).
+Reproducibility of endometrial intraepithelial neoplasia diagnosis is
+good, but influenced by the diagnostic style of pathologists. <em>Modern
+Pathology</em>, 25(6), 877-884. doi: 10.1038/modpathol.2011.220. PMID:
+22301705.</p></li>
+<li><p><strong>Allsbrook WC Jr, et al.</strong> (2001). Interobserver
+reproducibility of Gleason grading of prostatic carcinoma: urologic
+pathologists. <em>Human Pathology</em>, 32(1), 74-80.</p></li>
+<li><p><strong>Elmore JG, et al.</strong> (2015). Diagnostic concordance
+among pathologists interpreting breast biopsy specimens. <em>JAMA</em>,
+313(11), 1122-1132.</p></li>
+</ol>
+</div>
+<div id="ihc-clustering-and-related-methods" class="section level2">
+<h2>IHC Clustering and Related Methods</h2>
+<ol start="4" style="list-style-type: decimal">
+<li><p><strong>Sterlacci W, Fiegl M, Juskevicius D, Tzankov A.</strong>
+(2020). Cluster Analysis According to Immunohistochemistry is a Robust
+Tool for Non-Small Cell Lung Cancer and Reveals a Distinct, Immune
+Signature-defined Subgroup. <em>Applied Immunohistochemistry &amp;
+Molecular Morphology</em>, 28(4), 274-283. doi:
+10.1097/PAI.0000000000000751. PMID: 31058655.</p></li>
+<li><p><strong>Olsen SH, Thomas DG, Lucas DR.</strong> (2006). Cluster
+analysis of immunohistochemical profiles in synovial sarcoma, malignant
+peripheral nerve sheath tumor, and Ewing sarcoma. <em>Modern
+Pathology</em>, 19(5), 659-668. doi: 10.1038/modpathol.3800569. PMID:
+16528378.</p></li>
+<li><p><strong>Matsuoka T, Mitomi H, Fukui N, Kanazawa H, Saito T,
+Hayashi T, Yao T.</strong> (2011). Cluster analysis of claudin-1 and -4,
+E-cadherin, and β-catenin expression in colorectal cancers. <em>Journal
+of Surgical Oncology</em>, 103(7), 674-686. doi: 10.1002/jso.21854.
+PMID: 21360533.</p></li>
+<li><p><strong>Carvalho JC, Wasco MJ, Kunju LP, Thomas DG, Shah
+RB.</strong> (2011). Cluster analysis of immunohistochemical profiles
+delineates CK7, vimentin, S100A1 and C-kit (CD117) as an optimal panel
+in the differential diagnosis of renal oncocytoma from its mimics.
+<em>Histopathology</em>, 58(2), 169-179. doi:
+10.1111/j.1365-2559.2011.03753.x. PMID: 21323945.</p></li>
+<li><p><strong>Laas E, Ballester M, Cortez A, Graesslin O, Daraï
+E.</strong> (2019). Unsupervised Clustering of Immunohistochemical
+Markers to Define High-Risk Endometrial Cancer. <em>Pathology &amp;
+Oncology Research</em>, 25(2), 461-469. doi: 10.1007/s12253-017-0335-y.
+PMID: 29264761.</p></li>
+</ol>
+</div>
+<div id="methodological-references" class="section level2">
+<h2>Methodological References</h2>
+<ol start="9" style="list-style-type: decimal">
+<li><p><strong>Ward JH Jr.</strong> (1963). Hierarchical grouping to
+optimize an objective function. <em>Journal of the American Statistical
+Association</em>, 58(301), 236-244.</p></li>
+<li><p><strong>Fleiss JL, et al.</strong> (2003). Statistical methods
+for rates and proportions. <em>3rd Edition</em>, John Wiley &amp;
+Sons.</p></li>
+</ol>
+</div>
+<div id="clinical-applications-1" class="section level2">
+<h2>Clinical Applications</h2>
+<ol start="11" style="list-style-type: decimal">
+<li><p><strong>Kronz JD, et al.</strong> (1999). Interobserver agreement
+in the classification of prostatic adenocarcinoma. <em>Urology</em>,
+53(2), 271-276.</p></li>
+<li><p><strong>Robbins P, et al.</strong> (1995). Histological grading
+of breast carcinomas: a study of interobserver agreement. <em>Human
+Pathology</em>, 26(8), 873-879.</p></li>
+</ol>
+<hr />
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>The Diagnostic Style Clustering feature provides a powerful tool for
+understanding patterns of diagnostic disagreement among pathologists. By
+identifying diagnostic “schools” or “styles,” this analysis offers
+insights into:</p>
+<ul>
+<li><strong>Quality improvement opportunities</strong></li>
+<li><strong>Training program effectiveness</strong><br />
+</li>
+<li><strong>Consensus development priorities</strong></li>
+<li><strong>Expert consultation strategies</strong></li>
+</ul>
+<p>The methodology, based on the seminal Usubutun et al. (2012) study,
+has broad applications across pathology subspecialties and can inform
+evidence-based approaches to reducing diagnostic variation.</p>
+<p>Remember that diagnostic style differences often reflect legitimate
+variations in clinical judgment rather than errors. The goal is not to
+eliminate all variation, but to understand its sources and ensure that
+diagnostic approaches are appropriate, consistent, and
+well-reasoned.</p>
+<hr />
+<p><em>For technical support or questions about the diagnostic style
+clustering analysis, please contact the ClinicoPath development team or
+refer to the package documentation.</em></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

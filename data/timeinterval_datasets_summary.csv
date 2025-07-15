@@ -1,0 +1,7 @@
+"Dataset","Observations","Description","Key_Features"
+"timeinterval_clinical_trial",200,"Clinical trial with YMD format and treatment groups","Staggered enrollment, missing values"
+"timeinterval_european_dates",150,"European dates in DD/MM/YYYY format with disease staging","European format, disease outcomes"
+"timeinterval_us_datetime",180,"US datetime data with admission/discharge times","Datetime precision, negative intervals"
+"timeinterval_epidemiological",250,"Epidemiological cohort with various exit reasons","Population study, extreme values"
+"timeinterval_landmark",120,"Landmark analysis cancer study data","6-month landmark analysis"
+"timeinterval_mixed_formats",100,"Mixed date formats for auto-detection testing","Multiple formats, quality issues"

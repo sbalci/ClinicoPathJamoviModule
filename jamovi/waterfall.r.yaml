@@ -56,6 +56,33 @@ items:
 
 
 
+    - name: personTimeTable
+      title: Person-Time Analysis
+      type: Table
+      rows: 0
+      columns:
+        - name: category
+          title: "Response Category"
+          type: text
+        - name: patients
+          title: "Patients"
+          type: integer
+        - name: patient_pct
+          title: "% Patients"
+          type: text
+        - name: person_time
+          title: "Person-Time"
+          type: text
+        - name: time_pct
+          title: "% Time"
+          type: text
+        - name: median_time
+          title: "Median Time to Response"
+          type: text
+        - name: median_duration
+          title: "Median Duration"
+          type: text
+
     - name: clinicalMetrics
       title: Clinical Response Metrics
       type: Table

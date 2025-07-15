@@ -4,18 +4,49 @@
 \alias{waterfallClass}
 \title{Treatment Response Analysis}
 \value{
-A list containing plot object and summary statistics
+Waterfall and spider plots with response analysis tables
 }
 \description{
-Creates waterfall and spider plots to visualize tumor response data following RECIST criteria
+Creates waterfall and spider plots to visualize tumor response data following RECIST criteria.
+Supports both raw tumor measurements and pre-calculated percentage changes.
+}
+\details{
+The function handles two data formats:
+
+\strong{Percentage Data}: Pre-calculated percentage changes from baseline
+\itemize{
+\item Negative values indicate tumor shrinkage (improvement)
+\item Example: -30 means 30\% decrease from baseline
+}
+
+\strong{Raw Measurements}: Actual tumor measurements over time
+\itemize{
+\item Requires baseline measurement at time = 0
+\item Function calculates percentage changes automatically
+\item Uses ((current - baseline) / baseline) * 100 formula
+}
+
+\strong{RECIST Categories}:
+\itemize{
+\item Complete Response (CR): ≤ -100\% (complete disappearance)
+\item Partial Response (PR): ≤ -30\% decrease
+\item Stable Disease (SD): -30\% to +20\% change
+\item Progressive Disease (PD): > +20\% increase
+}
 }
 \examples{
-data <- data.frame(
-  PatientID = paste0("PT", 1:10),
-  Response = c(-100, -45, -30, -20, -10, 0, 10, 20, 30, 40),
-  Time = c(1,2,3,4,5,6,7,8,9,10)
+# Percentage data example
+data_pct <- data.frame(
+  PatientID = paste0("PT", 1:5),
+  Response = c(-60, -35, -10, 15, 45)
 )
-waterfall(data, "PatientID", "Response", "Time")
+
+# Raw measurements example  
+data_raw <- data.frame(
+  PatientID = rep(paste0("PT", 1:3), each = 3),
+  Time = rep(c(0, 2, 4), 3),
+  Measurement = c(50, 30, 25, 60, 45, 40, 55, 50, 48)
+)
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::waterfallBase} -> \code{waterfallClass}

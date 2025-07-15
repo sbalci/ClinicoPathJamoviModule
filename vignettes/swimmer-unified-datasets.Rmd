@@ -1,0 +1,386 @@
+---
+title: "Swimmer Plot Function: Example Datasets Guide"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    fig_width: 8
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{Swimmer Plot Function: Example Datasets Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE
+)
+
+# Load required packages
+library(ClinicoPath)
+
+# Check if ggswim is available
+ggswim_available <- requireNamespace("ggswim", quietly = TRUE)
+if (!ggswim_available) {
+  knitr::opts_chunk$set(eval = FALSE)
+  message("Note: ggswim package not available. Code examples shown but not executed.")
+}
+```
+
+# Introduction
+
+This vignette demonstrates the example datasets created specifically for the swimmer plot function (`swimmerplot`). Each dataset showcases different features and use cases, from basic timeline visualization to complex clinical trial analysis.
+
+## Available Datasets
+
+The ClinicoPath package includes five specialized datasets for swimmer plot demonstrations:
+
+1. **`swimmer_unified_basic`** - Simple swimmer plot with basic features
+2. **`swimmer_unified_comprehensive`** - Advanced features with multiple milestones
+3. **`swimmer_unified_datetime`** - Date/time handling demonstration
+4. **`swimmer_unified_events`** - Event markers and longitudinal data
+5. **`swimmer_unified_oncology`** - Realistic oncology clinical trial data
+
+# Basic Swimmer Plot Dataset
+
+## swimmer_unified_basic
+
+This dataset demonstrates fundamental swimmer plot functionality with clean, simple data.
+
+```{r basic-dataset}
+# Load the basic dataset
+data(swimmer_unified_basic)
+
+# Examine the structure
+str(swimmer_unified_basic)
+head(swimmer_unified_basic)
+```
+
+```{r basic-plot, eval=ggswim_available}
+# Create basic swimmer plot
+basic_result <- swimmerplot(
+  data = swimmer_unified_basic,
+  patientID = "PatientID",
+  startTime = "StartTime",
+  endTime = "EndTime",
+  responseVar = "Response",
+  timeUnit = "months",
+  plotTheme = "ggswim",
+  showLegend = TRUE
+)
+
+print(basic_result)
+```
+
+**Key Features Demonstrated:**
+- Basic patient timeline visualization
+- Response-based color coding
+- Simple time intervals
+- Clean, professional styling
+
+# Comprehensive Dataset with Milestones
+
+## swimmer_unified_comprehensive
+
+This dataset showcases advanced swimmer plot features including multiple clinical milestones and patient characteristics.
+
+```{r comprehensive-dataset}
+# Load the comprehensive dataset
+data(swimmer_unified_comprehensive)
+
+# Examine the structure
+str(swimmer_unified_comprehensive)
+head(swimmer_unified_comprehensive)
+```
+
+```{r comprehensive-plot, eval=ggswim_available}
+# Create comprehensive swimmer plot with milestones
+comprehensive_result <- swimmerplot(
+  data = swimmer_unified_comprehensive,
+  patientID = "PatientID",
+  startTime = "StartTime",
+  endTime = "EndTime",
+  responseVar = "BestResponse",
+  milestone1Name = "Surgery",
+  milestone1Date = "Surgery",
+  milestone2Name = "First Response",
+  milestone2Date = "FirstResponse",
+  milestone3Name = "Progression",
+  milestone3Date = "Progression",
+  milestone4Name = "Death/Last FU",
+  milestone4Date = "DeathLastFU",
+  referenceLines = "median",
+  showInterpretation = TRUE,
+  personTimeAnalysis = TRUE,
+  responseAnalysis = TRUE,
+  plotTheme = "ggswim",
+  sortOrder = "duration_desc"
+)
+
+print(comprehensive_result)
+```
+
+**Key Features Demonstrated:**
+- Multiple milestone events (up to 4 milestones)
+- Patient demographics integration
+- Person-time analysis
+- Clinical interpretation
+- Reference lines for context
+- Advanced sorting options
+
+# DateTime Handling Dataset
+
+## swimmer_unified_datetime
+
+This dataset demonstrates how to work with actual calendar dates and datetime formats.
+
+```{r datetime-dataset}
+# Load the datetime dataset
+data(swimmer_unified_datetime)
+
+# Examine the structure
+str(swimmer_unified_datetime)
+head(swimmer_unified_datetime)
+```
+
+```{r datetime-plot, eval=ggswim_available}
+# Create datetime swimmer plot with relative display
+datetime_result <- swimmerplot(
+  data = swimmer_unified_datetime,
+  patientID = "PatientID",
+  startTime = "StartDate",
+  endTime = "EndDate",
+  responseVar = "BestResponse",
+  timeType = "datetime",
+  dateFormat = "ymd",
+  timeUnit = "months",
+  timeDisplay = "relative",
+  milestone1Name = "Surgery",
+  milestone1Date = "Surgery",
+  referenceLines = "protocol",
+  plotTheme = "ggswim"
+)
+
+print(datetime_result)
+```
+
+**Key Features Demonstrated:**
+- Real calendar date handling
+- Date format specification (YYYY-MM-DD)
+- Relative vs. absolute time display
+- Protocol reference lines
+- Multi-site clinical trial data
+
+# Event Markers Dataset
+
+## swimmer_unified_events
+
+This longitudinal dataset shows how to display clinical events along patient timelines.
+
+```{r events-dataset}
+# Load the events dataset
+data(swimmer_unified_events)
+
+# Examine the structure
+str(swimmer_unified_events)
+head(swimmer_unified_events, 10)
+```
+
+```{r events-plot, eval=ggswim_available}
+# Create event markers swimmer plot
+events_result <- swimmerplot(
+  data = swimmer_unified_events,
+  patientID = "PatientID",
+  startTime = "StartTime",
+  endTime = "EndTime",
+  responseVar = "Response",
+  showEventMarkers = TRUE,
+  eventVar = "EventType",
+  eventTimeVar = "EventTime",
+  markerSize = 6,
+  laneWidth = 4,
+  plotTheme = "ggswim",
+  showLegend = TRUE
+)
+
+print(events_result)
+```
+
+**Key Features Demonstrated:**
+- Event markers along timelines
+- Multiple events per patient
+- Treatment cycle tracking
+- Adverse event severity coding
+- Longitudinal data handling
+
+# Oncology Clinical Trial Dataset
+
+## swimmer_unified_oncology
+
+This realistic dataset represents a comprehensive oncology clinical trial with detailed clinical milestones and biomarker information.
+
+```{r oncology-dataset}
+# Load the oncology dataset
+data(swimmer_unified_oncology)
+
+# Examine the structure
+str(swimmer_unified_oncology)
+head(swimmer_unified_oncology)
+
+# Summary of key variables
+table(swimmer_unified_oncology$BestResponse)
+table(swimmer_unified_oncology$TumorType)
+table(swimmer_unified_oncology$Stage)
+```
+
+```{r oncology-plot, eval=ggswim_available}
+# Create comprehensive oncology swimmer plot
+oncology_result <- swimmerplot(
+  data = swimmer_unified_oncology,
+  patientID = "PatientID",
+  startTime = "StartTime",
+  endTime = "EndTime",
+  responseVar = "BestResponse",
+  milestone1Name = "Surgery",
+  milestone1Date = "Surgery",
+  milestone2Name = "Biopsy",
+  milestone2Date = "Biopsy",
+  milestone3Name = "First Response",
+  milestone3Date = "FirstResponse",
+  milestone4Name = "Progression",
+  milestone4Date = "Progression",
+  milestone5Name = "Death/Last FU",
+  milestone5Date = "DeathLastFU",
+  referenceLines = "protocol",
+  showInterpretation = TRUE,
+  personTimeAnalysis = TRUE,
+  responseAnalysis = TRUE,
+  plotTheme = "ggswim",
+  sortOrder = "duration_desc"
+)
+
+print(oncology_result)
+```
+
+**Key Features Demonstrated:**
+- Realistic oncology trial structure
+- Multiple tumor types and stages
+- Biomarker integration
+- Complete milestone tracking
+- Regulatory-ready analysis
+- Publication-quality visualization
+
+# Dataset Comparison Summary
+
+## Data Structure Overview
+
+```{r dataset-comparison, eval=ggswim_available}
+# Compare dataset characteristics
+datasets <- list(
+  "Basic" = swimmer_unified_basic,
+  "Comprehensive" = swimmer_unified_comprehensive,
+  "DateTime" = swimmer_unified_datetime,
+  "Events" = swimmer_unified_events,
+  "Oncology" = swimmer_unified_oncology
+)
+
+comparison <- data.frame(
+  Dataset = names(datasets),
+  Rows = sapply(datasets, nrow),
+  Columns = sapply(datasets, ncol),
+  Patients = sapply(datasets, function(x) length(unique(x[[1]]))),
+  Has_Milestones = c("No", "Yes", "Yes", "No", "Yes"),
+  Has_Events = c("No", "No", "No", "Yes", "No"),
+  Time_Type = c("Numeric", "Numeric", "DateTime", "Numeric", "Numeric"),
+  Clinical_Focus = c("General", "Advanced", "Multi-site", "Longitudinal", "Oncology"),
+  stringsAsFactors = FALSE
+)
+
+print(comparison)
+```
+
+## Use Case Recommendations
+
+### For Learning and Testing
+- **swimmer_unified_basic**: Start here for initial exploration
+- **swimmer_unified_comprehensive**: Learn advanced features
+
+### For Development and Validation
+- **swimmer_unified_events**: Test event marker functionality
+- **swimmer_unified_datetime**: Validate date/time handling
+
+### For Clinical Applications
+- **swimmer_unified_oncology**: Template for oncology trials
+- **swimmer_unified_comprehensive**: General clinical research
+
+# Best Practices with Example Datasets
+
+## Data Preparation Tips
+
+1. **Column Naming**: Use consistent, descriptive names
+2. **Missing Values**: Handle NA values appropriately
+3. **Data Types**: Ensure proper variable types
+4. **Date Formats**: Use standard ISO formats (YYYY-MM-DD)
+
+## Visualization Guidelines
+
+1. **Color Coding**: Use standard clinical response codes
+2. **Reference Lines**: Add clinical context
+3. **Sorting**: Choose appropriate patient ordering
+4. **Themes**: Select professional styling
+
+## Analysis Features
+
+1. **Person-Time**: Enable for epidemiological insights
+2. **Interpretation**: Use for automated clinical insights
+3. **Export**: Generate data for regulatory submissions
+
+# Extending the Examples
+
+## Creating Custom Datasets
+
+You can create your own datasets following these patterns:
+
+```r
+# Template for custom swimmer plot data
+custom_data <- data.frame(
+  PatientID = paste0("PT", sprintf("%03d", 1:n)),
+  StartTime = rep(0, n),  # or actual start times
+  EndTime = sample(6:36, n, replace = TRUE),
+  Response = sample(c("CR", "PR", "SD", "PD"), n, replace = TRUE),
+  # Add your specific variables here
+  stringsAsFactors = FALSE
+)
+```
+
+## Integration with Clinical Systems
+
+These datasets serve as templates for integrating swimmer plots with:
+
+- Electronic Health Records (EHR)
+- Clinical Trial Management Systems (CTMS)
+- Regulatory submission packages
+- Publication manuscripts
+
+# Conclusion
+
+The swimmer plot unified function example datasets provide comprehensive coverage of clinical timeline visualization needs. From basic exploration to regulatory submissions, these datasets demonstrate the full capabilities of the ClinicoPath swimmer plot functionality.
+
+## Next Steps
+
+1. **Explore**: Try each dataset with different parameters
+2. **Adapt**: Modify datasets for your specific use case
+3. **Implement**: Apply to your clinical data
+4. **Share**: Contribute improvements back to the package
+
+---
+
+*For more information about ClinicoPath swimmer plot functionality, see the main vignette and package documentation.*

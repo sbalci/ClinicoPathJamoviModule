@@ -1,0 +1,22 @@
+PatientID,StartTime,EndTime,Response,EventType,EventTime,Severity,Cycle
+PT001,0,6,PR,Treatment Start,0,Mild,1
+PT001,6,12,CR,Dose Escalation,6,Moderate,2
+PT001,12,18,CR,Response Assessment,12,Mild,3
+PT002,0,4,SD,Treatment Start,0,None,1
+PT002,4,8,PR,AE Management,4,Severe,2
+PT002,8,12,PR,Response Assessment,8,Mild,3
+PT003,0,9,CR,Treatment Start,0,Mild,1
+PT003,9,18,CR,Maintenance,9,None,2
+PT003,18,27,CR,Follow-up,18,None,3
+PT004,0,3,PD,Treatment Start,0,Moderate,1
+PT004,3,6,PD,Dose Reduction,3,Severe,2
+PT005,0,8,PR,Treatment Start,0,Mild,1
+PT005,8,16,CR,Dose Escalation,8,Moderate,2
+PT005,16,24,CR,Response Assessment,16,Mild,3
+PT006,0,5,SD,Treatment Start,0,None,1
+PT006,5,10,SD,Cycle Delay,5,Moderate,2
+PT006,10,15,PD,Progression,10,Severe,3
+PT007,0,7,CR,Treatment Start,0,Mild,1
+PT007,7,14,CR,Maintenance,7,None,2
+PT008,0,4,PD,Treatment Start,0,Severe,1
+PT008,4,8,PD,Treatment Stop,4,Severe,2

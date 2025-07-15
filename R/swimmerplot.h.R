@@ -7,19 +7,40 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     public = list(
         initialize = function(
             patientID = NULL,
-            start = NULL,
-            end = NULL,
-            event = NULL,
-            timetype = "raw",
-            timetypedata = "ymd",
-            timetypeoutput = "months",
-            startType = "relative",
-            sortVariable = NULL,
-            barHeight = 3,
+            startTime = NULL,
+            endTime = NULL,
+            responseVar = NULL,
+            timeType = "raw",
+            dateFormat = "ymd",
+            timeUnit = "months",
+            timeDisplay = "relative",
+            maxMilestones = 5,
+            milestone1Name = "Surgery",
+            milestone1Date = NULL,
+            milestone2Name = "Treatment Start",
+            milestone2Date = NULL,
+            milestone3Name = "Response Assessment",
+            milestone3Date = NULL,
+            milestone4Name = "Progression",
+            milestone4Date = NULL,
+            milestone5Name = "Death/Last Follow-up",
+            milestone5Date = NULL,
+            showEventMarkers = FALSE,
+            eventVar = NULL,
+            eventTimeVar = NULL,
+            laneWidth = 3,
+            markerSize = 5,
+            plotTheme = "ggswim",
+            showLegend = TRUE,
             referenceLines = "none",
             customReferenceTime = 12,
-            useggswim = FALSE,
-            markerSize = 5, ...) {
+            sortVariable = NULL,
+            sortOrder = "duration_desc",
+            showInterpretation = TRUE,
+            personTimeAnalysis = TRUE,
+            responseAnalysis = TRUE,
+            exportTimeline = FALSE,
+            exportSummary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -31,36 +52,47 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "patientID",
                 patientID,
                 suggested=list(
-                    "nominal"),
+                    "nominal",
+                    "id"),
                 permitted=list(
                     "numeric",
                     "factor",
                     "id"))
-            private$..start <- jmvcore::OptionVariable$new(
-                "start",
-                start)
-            private$..end <- jmvcore::OptionVariable$new(
-                "end",
-                end)
-            private$..event <- jmvcore::OptionVariable$new(
-                "event",
-                event,
+            private$..startTime <- jmvcore::OptionVariable$new(
+                "startTime",
+                startTime,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
+            private$..endTime <- jmvcore::OptionVariable$new(
+                "endTime",
+                endTime,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
+            private$..responseVar <- jmvcore::OptionVariable$new(
+                "responseVar",
+                responseVar,
                 suggested=list(
                     "nominal",
                     "ordinal"),
                 permitted=list(
                     "factor"),
                 required=FALSE)
-            private$..timetype <- jmvcore::OptionList$new(
-                "timetype",
-                timetype,
+            private$..timeType <- jmvcore::OptionList$new(
+                "timeType",
+                timeType,
                 options=list(
                     "raw",
                     "datetime"),
                 default="raw")
-            private$..timetypedata <- jmvcore::OptionList$new(
-                "timetypedata",
-                timetypedata,
+            private$..dateFormat <- jmvcore::OptionList$new(
+                "dateFormat",
+                dateFormat,
                 options=list(
                     "ymdhms",
                     "ymd",
@@ -70,32 +102,134 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "dmy",
                     "dym"),
                 default="ymd")
-            private$..timetypeoutput <- jmvcore::OptionList$new(
-                "timetypeoutput",
-                timetypeoutput,
+            private$..timeUnit <- jmvcore::OptionList$new(
+                "timeUnit",
+                timeUnit,
                 options=list(
                     "days",
                     "weeks",
                     "months",
                     "years"),
                 default="months")
-            private$..startType <- jmvcore::OptionList$new(
-                "startType",
-                startType,
+            private$..timeDisplay <- jmvcore::OptionList$new(
+                "timeDisplay",
+                timeDisplay,
                 options=list(
                     "relative",
                     "absolute"),
                 default="relative")
-            private$..sortVariable <- jmvcore::OptionVariable$new(
-                "sortVariable",
-                sortVariable,
+            private$..maxMilestones <- jmvcore::OptionNumber$new(
+                "maxMilestones",
+                maxMilestones,
+                min=1,
+                max=10,
+                default=5)
+            private$..milestone1Name <- jmvcore::OptionString$new(
+                "milestone1Name",
+                milestone1Name,
+                default="Surgery")
+            private$..milestone1Date <- jmvcore::OptionVariable$new(
+                "milestone1Date",
+                milestone1Date,
+                suggested=list(
+                    "continuous",
+                    "nominal",
+                    "ordinal"),
                 required=FALSE)
-            private$..barHeight <- jmvcore::OptionNumber$new(
-                "barHeight",
-                barHeight,
+            private$..milestone2Name <- jmvcore::OptionString$new(
+                "milestone2Name",
+                milestone2Name,
+                default="Treatment Start")
+            private$..milestone2Date <- jmvcore::OptionVariable$new(
+                "milestone2Date",
+                milestone2Date,
+                suggested=list(
+                    "continuous",
+                    "nominal",
+                    "ordinal"),
+                required=FALSE)
+            private$..milestone3Name <- jmvcore::OptionString$new(
+                "milestone3Name",
+                milestone3Name,
+                default="Response Assessment")
+            private$..milestone3Date <- jmvcore::OptionVariable$new(
+                "milestone3Date",
+                milestone3Date,
+                suggested=list(
+                    "continuous",
+                    "nominal",
+                    "ordinal"),
+                required=FALSE)
+            private$..milestone4Name <- jmvcore::OptionString$new(
+                "milestone4Name",
+                milestone4Name,
+                default="Progression")
+            private$..milestone4Date <- jmvcore::OptionVariable$new(
+                "milestone4Date",
+                milestone4Date,
+                suggested=list(
+                    "continuous",
+                    "nominal",
+                    "ordinal"),
+                required=FALSE)
+            private$..milestone5Name <- jmvcore::OptionString$new(
+                "milestone5Name",
+                milestone5Name,
+                default="Death/Last Follow-up")
+            private$..milestone5Date <- jmvcore::OptionVariable$new(
+                "milestone5Date",
+                milestone5Date,
+                suggested=list(
+                    "continuous",
+                    "nominal",
+                    "ordinal"),
+                required=FALSE)
+            private$..showEventMarkers <- jmvcore::OptionBool$new(
+                "showEventMarkers",
+                showEventMarkers,
+                default=FALSE)
+            private$..eventVar <- jmvcore::OptionVariable$new(
+                "eventVar",
+                eventVar,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"),
+                required=FALSE)
+            private$..eventTimeVar <- jmvcore::OptionVariable$new(
+                "eventTimeVar",
+                eventTimeVar,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric",
+                    "factor"),
+                required=FALSE)
+            private$..laneWidth <- jmvcore::OptionNumber$new(
+                "laneWidth",
+                laneWidth,
                 min=0.1,
                 max=10,
                 default=3)
+            private$..markerSize <- jmvcore::OptionNumber$new(
+                "markerSize",
+                markerSize,
+                min=1,
+                max=15,
+                default=5)
+            private$..plotTheme <- jmvcore::OptionList$new(
+                "plotTheme",
+                plotTheme,
+                options=list(
+                    "ggswim",
+                    "ggswim_dark",
+                    "minimal"),
+                default="ggswim")
+            private$..showLegend <- jmvcore::OptionBool$new(
+                "showLegend",
+                showLegend,
+                default=TRUE)
             private$..referenceLines <- jmvcore::OptionList$new(
                 "referenceLines",
                 referenceLines,
@@ -109,114 +243,221 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "customReferenceTime",
                 customReferenceTime,
                 default=12)
-            private$..useggswim <- jmvcore::OptionBool$new(
-                "useggswim",
-                useggswim,
+            private$..sortVariable <- jmvcore::OptionVariable$new(
+                "sortVariable",
+                sortVariable,
+                required=FALSE)
+            private$..sortOrder <- jmvcore::OptionList$new(
+                "sortOrder",
+                sortOrder,
+                options=list(
+                    "duration_desc",
+                    "duration_asc",
+                    "patient_id",
+                    "response"),
+                default="duration_desc")
+            private$..showInterpretation <- jmvcore::OptionBool$new(
+                "showInterpretation",
+                showInterpretation,
+                default=TRUE)
+            private$..personTimeAnalysis <- jmvcore::OptionBool$new(
+                "personTimeAnalysis",
+                personTimeAnalysis,
+                default=TRUE)
+            private$..responseAnalysis <- jmvcore::OptionBool$new(
+                "responseAnalysis",
+                responseAnalysis,
+                default=TRUE)
+            private$..exportTimeline <- jmvcore::OptionBool$new(
+                "exportTimeline",
+                exportTimeline,
                 default=FALSE)
-            private$..markerSize <- jmvcore::OptionNumber$new(
-                "markerSize",
-                markerSize,
-                min=1,
-                max=10,
-                default=5)
+            private$..exportSummary <- jmvcore::OptionBool$new(
+                "exportSummary",
+                exportSummary,
+                default=FALSE)
 
             self$.addOption(private$..patientID)
-            self$.addOption(private$..start)
-            self$.addOption(private$..end)
-            self$.addOption(private$..event)
-            self$.addOption(private$..timetype)
-            self$.addOption(private$..timetypedata)
-            self$.addOption(private$..timetypeoutput)
-            self$.addOption(private$..startType)
-            self$.addOption(private$..sortVariable)
-            self$.addOption(private$..barHeight)
+            self$.addOption(private$..startTime)
+            self$.addOption(private$..endTime)
+            self$.addOption(private$..responseVar)
+            self$.addOption(private$..timeType)
+            self$.addOption(private$..dateFormat)
+            self$.addOption(private$..timeUnit)
+            self$.addOption(private$..timeDisplay)
+            self$.addOption(private$..maxMilestones)
+            self$.addOption(private$..milestone1Name)
+            self$.addOption(private$..milestone1Date)
+            self$.addOption(private$..milestone2Name)
+            self$.addOption(private$..milestone2Date)
+            self$.addOption(private$..milestone3Name)
+            self$.addOption(private$..milestone3Date)
+            self$.addOption(private$..milestone4Name)
+            self$.addOption(private$..milestone4Date)
+            self$.addOption(private$..milestone5Name)
+            self$.addOption(private$..milestone5Date)
+            self$.addOption(private$..showEventMarkers)
+            self$.addOption(private$..eventVar)
+            self$.addOption(private$..eventTimeVar)
+            self$.addOption(private$..laneWidth)
+            self$.addOption(private$..markerSize)
+            self$.addOption(private$..plotTheme)
+            self$.addOption(private$..showLegend)
             self$.addOption(private$..referenceLines)
             self$.addOption(private$..customReferenceTime)
-            self$.addOption(private$..useggswim)
-            self$.addOption(private$..markerSize)
+            self$.addOption(private$..sortVariable)
+            self$.addOption(private$..sortOrder)
+            self$.addOption(private$..showInterpretation)
+            self$.addOption(private$..personTimeAnalysis)
+            self$.addOption(private$..responseAnalysis)
+            self$.addOption(private$..exportTimeline)
+            self$.addOption(private$..exportSummary)
         }),
     active = list(
         patientID = function() private$..patientID$value,
-        start = function() private$..start$value,
-        end = function() private$..end$value,
-        event = function() private$..event$value,
-        timetype = function() private$..timetype$value,
-        timetypedata = function() private$..timetypedata$value,
-        timetypeoutput = function() private$..timetypeoutput$value,
-        startType = function() private$..startType$value,
-        sortVariable = function() private$..sortVariable$value,
-        barHeight = function() private$..barHeight$value,
+        startTime = function() private$..startTime$value,
+        endTime = function() private$..endTime$value,
+        responseVar = function() private$..responseVar$value,
+        timeType = function() private$..timeType$value,
+        dateFormat = function() private$..dateFormat$value,
+        timeUnit = function() private$..timeUnit$value,
+        timeDisplay = function() private$..timeDisplay$value,
+        maxMilestones = function() private$..maxMilestones$value,
+        milestone1Name = function() private$..milestone1Name$value,
+        milestone1Date = function() private$..milestone1Date$value,
+        milestone2Name = function() private$..milestone2Name$value,
+        milestone2Date = function() private$..milestone2Date$value,
+        milestone3Name = function() private$..milestone3Name$value,
+        milestone3Date = function() private$..milestone3Date$value,
+        milestone4Name = function() private$..milestone4Name$value,
+        milestone4Date = function() private$..milestone4Date$value,
+        milestone5Name = function() private$..milestone5Name$value,
+        milestone5Date = function() private$..milestone5Date$value,
+        showEventMarkers = function() private$..showEventMarkers$value,
+        eventVar = function() private$..eventVar$value,
+        eventTimeVar = function() private$..eventTimeVar$value,
+        laneWidth = function() private$..laneWidth$value,
+        markerSize = function() private$..markerSize$value,
+        plotTheme = function() private$..plotTheme$value,
+        showLegend = function() private$..showLegend$value,
         referenceLines = function() private$..referenceLines$value,
         customReferenceTime = function() private$..customReferenceTime$value,
-        useggswim = function() private$..useggswim$value,
-        markerSize = function() private$..markerSize$value),
+        sortVariable = function() private$..sortVariable$value,
+        sortOrder = function() private$..sortOrder$value,
+        showInterpretation = function() private$..showInterpretation$value,
+        personTimeAnalysis = function() private$..personTimeAnalysis$value,
+        responseAnalysis = function() private$..responseAnalysis$value,
+        exportTimeline = function() private$..exportTimeline$value,
+        exportSummary = function() private$..exportSummary$value),
     private = list(
         ..patientID = NA,
-        ..start = NA,
-        ..end = NA,
-        ..event = NA,
-        ..timetype = NA,
-        ..timetypedata = NA,
-        ..timetypeoutput = NA,
-        ..startType = NA,
-        ..sortVariable = NA,
-        ..barHeight = NA,
+        ..startTime = NA,
+        ..endTime = NA,
+        ..responseVar = NA,
+        ..timeType = NA,
+        ..dateFormat = NA,
+        ..timeUnit = NA,
+        ..timeDisplay = NA,
+        ..maxMilestones = NA,
+        ..milestone1Name = NA,
+        ..milestone1Date = NA,
+        ..milestone2Name = NA,
+        ..milestone2Date = NA,
+        ..milestone3Name = NA,
+        ..milestone3Date = NA,
+        ..milestone4Name = NA,
+        ..milestone4Date = NA,
+        ..milestone5Name = NA,
+        ..milestone5Date = NA,
+        ..showEventMarkers = NA,
+        ..eventVar = NA,
+        ..eventTimeVar = NA,
+        ..laneWidth = NA,
+        ..markerSize = NA,
+        ..plotTheme = NA,
+        ..showLegend = NA,
         ..referenceLines = NA,
         ..customReferenceTime = NA,
-        ..useggswim = NA,
-        ..markerSize = NA)
+        ..sortVariable = NA,
+        ..sortOrder = NA,
+        ..showInterpretation = NA,
+        ..personTimeAnalysis = NA,
+        ..responseAnalysis = NA,
+        ..exportTimeline = NA,
+        ..exportSummary = NA)
 )
 
 swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "swimmerplotResults",
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
+        instructions = function() private$.items[["instructions"]],
+        plot = function() private$.items[["plot"]],
         summary = function() private$.items[["summary"]],
-        plot = function() private$.items[["plot"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        personTimeTable = function() private$.items[["personTimeTable"]],
+        milestoneTable = function() private$.items[["milestoneTable"]],
+        eventMarkerTable = function() private$.items[["eventMarkerTable"]],
+        timelineData = function() private$.items[["timelineData"]],
+        summaryData = function() private$.items[["summaryData"]],
+        exportInfo = function() private$.items[["exportInfo"]],
+        validationReport = function() private$.items[["validationReport"]],
+        advancedMetrics = function() private$.items[["advancedMetrics"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Patient Timeline Analysis",
+                title="Swimmer Plot",
                 refs=list(
-                    "ClinicoPathJamoviModule",
-                    "ggswim"),
-                clearWith=list(
-                    "patientID",
-                    "start",
-                    "end",
-                    "event",
-                    "sortVariable",
-                    "timetype",
-                    "timetypedata",
-                    "timetypeoutput",
-                    "barHeight",
-                    "startType",
-                    "milestone1Name",
-                    "milestone1Date",
-                    "milestone2Name",
-                    "milestone2Date",
-                    "milestone3Name",
-                    "milestone3Date",
-                    "milestone4Name",
-                    "milestone4Date",
-                    "milestone5Name",
-                    "milestone5Date",
-                    "referenceLines",
-                    "customReferenceTime",
-                    "useggswim",
-                    "markerSize"))
+                    "ggswim",
+                    "ggplot2",
+                    "dplyr",
+                    "lubridate",
+                    "RColorBrewer",
+                    "gridExtra"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="todo",
-                title="To Do"))
+                name="instructions",
+                title="Instructions"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Patient Timeline Visualization",
+                width=900,
+                height=600,
+                renderFun=".plot",
+                requiresData=TRUE,
+                clearWith=list(
+                    "patientID",
+                    "startTime",
+                    "endTime",
+                    "responseVar",
+                    "timeType",
+                    "dateFormat",
+                    "timeUnit",
+                    "timeDisplay",
+                    "milestone1Date",
+                    "milestone2Date",
+                    "milestone3Date",
+                    "milestone4Date",
+                    "milestone5Date",
+                    "showEventMarkers",
+                    "eventVar",
+                    "eventTimeVar",
+                    "laneWidth",
+                    "markerSize",
+                    "plotTheme",
+                    "showLegend",
+                    "referenceLines",
+                    "customReferenceTime",
+                    "sortVariable",
+                    "sortOrder")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
-                title="Timeline Summary",
+                title="Timeline Summary Statistics",
                 rows=0,
                 columns=list(
                     list(
@@ -226,16 +467,203 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="number", 
-                        `format`=".1f"))))
-            self$add(jmvcore::Image$new(
+                        `type`="number")),
+                clearWith=list(
+                    "patientID",
+                    "startTime",
+                    "endTime",
+                    "responseVar",
+                    "timeType",
+                    "dateFormat",
+                    "timeUnit",
+                    "timeDisplay")))
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="plot",
-                title="Swimmer Plot",
-                width=800,
-                height=600,
-                renderFun=".plot",
-                requiresData=TRUE))}))
+                name="interpretation",
+                title="Clinical Interpretation",
+                visible="(showInterpretation)",
+                clearWith=list(
+                    "patientID",
+                    "startTime",
+                    "endTime",
+                    "responseVar",
+                    "timeType",
+                    "dateFormat",
+                    "timeUnit",
+                    "timeDisplay",
+                    "showInterpretation",
+                    "personTimeAnalysis",
+                    "responseAnalysis")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="personTimeTable",
+                title="Person-Time Analysis",
+                visible="(personTimeAnalysis && responseVar)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="response_type", 
+                        `title`="Response Type", 
+                        `type`="text"),
+                    list(
+                        `name`="n_patients", 
+                        `title`="Patients", 
+                        `type`="integer"),
+                    list(
+                        `name`="total_time", 
+                        `title`="Total Time", 
+                        `type`="number"),
+                    list(
+                        `name`="mean_time", 
+                        `title`="Mean Time", 
+                        `type`="number"),
+                    list(
+                        `name`="incidence_rate", 
+                        `title`="Incidence Rate", 
+                        `type`="number")),
+                clearWith=list(
+                    "patientID",
+                    "startTime",
+                    "endTime",
+                    "responseVar",
+                    "timeType",
+                    "timeUnit",
+                    "personTimeAnalysis")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="milestoneTable",
+                title="Milestone Event Summary",
+                visible="(milestone1Date || milestone2Date || milestone3Date || milestone4Date || milestone5Date)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="milestone_name", 
+                        `title`="Milestone", 
+                        `type`="text"),
+                    list(
+                        `name`="n_events", 
+                        `title`="Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="median_time", 
+                        `title`="Median Time", 
+                        `type`="number"),
+                    list(
+                        `name`="time_range", 
+                        `title`="Time Range", 
+                        `type`="text")),
+                clearWith=list(
+                    "milestone1Date",
+                    "milestone2Date",
+                    "milestone3Date",
+                    "milestone4Date",
+                    "milestone5Date",
+                    "milestone1Name",
+                    "milestone2Name",
+                    "milestone3Name",
+                    "milestone4Name",
+                    "milestone5Name",
+                    "timeUnit")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="eventMarkerTable",
+                title="Event Marker Summary",
+                visible="(showEventMarkers && eventVar)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="event_type", 
+                        `title`="Event Type", 
+                        `type`="text"),
+                    list(
+                        `name`="n_events", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="median_time", 
+                        `title`="Median Time", 
+                        `type`="number")),
+                clearWith=list(
+                    "showEventMarkers",
+                    "eventVar",
+                    "eventTimeVar",
+                    "timeUnit")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="timelineData",
+                title="Export Timeline Data",
+                varTitle="Timeline Data",
+                varDescription="Processed timeline data for external analysis",
+                clearWith=list(
+                    "exportTimeline",
+                    "patientID",
+                    "startTime",
+                    "endTime",
+                    "responseVar",
+                    "timeType",
+                    "timeUnit")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="summaryData",
+                title="Export Summary Statistics",
+                varTitle="Summary Statistics",
+                varDescription="Comprehensive summary statistics and clinical metrics",
+                clearWith=list(
+                    "exportSummary",
+                    "patientID",
+                    "startTime",
+                    "endTime",
+                    "responseVar",
+                    "personTimeAnalysis",
+                    "responseAnalysis")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="exportInfo",
+                title="Export Information",
+                visible="(exportTimeline || exportSummary)",
+                clearWith=list(
+                    "exportTimeline",
+                    "exportSummary")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="validationReport",
+                title="Data Validation Report",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="advancedMetrics",
+                title="Advanced Clinical Metrics",
+                visible="(personTimeAnalysis && responseVar)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric_name", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="metric_value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="metric_unit", 
+                        `title`="Unit", 
+                        `type`="text"),
+                    list(
+                        `name`="clinical_interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "patientID",
+                    "startTime",
+                    "endTime",
+                    "responseVar",
+                    "timeUnit",
+                    "personTimeAnalysis")))}))
 
 swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "swimmerplotBase",
@@ -245,7 +673,7 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "swimmerplot",
-                version = c(0,0,2),
+                version = c(0,0,3),
                 options = options,
                 results = swimmerplotResults$new(options=options),
                 data = data,
@@ -260,50 +688,102 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Swimmer Plot
 #'
-#' Creates a swimmer plot to visualize individual patient timelines and 
-#' clinical events.
+#' Creates comprehensive swimmer plots using the ggswim package to visualize 
+#' patient timelines,  clinical events, milestones, and treatment responses. 
+#' Features enhanced data validation  and complete ggswim integration for 
+#' professional clinical visualization.
+#' 
 #'
 #' @examples
 #' \donttest{
-#' # Example will show patient timelines
+#' # Clinical trial swimmer plot example
 #' data <- data.frame(
-#'     PatientID = paste0("PT", 1:10),
-#'     StartTime = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-#'     EndTime = c(12, 8, 15, 6, 9, 11, 7, 14, 10, 5),
-#'     Event = c("CR", "PD", "PR", "SD", "CR", "PD", "PR", "SD", "CR", "PD"),
-#'     Surgery = c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1)
+#'     PatientID = paste0("PT", sprintf("\%03d", 1:20)),
+#'     StartTime = rep(0, 20),
+#'     EndTime = sample(6:24, 20, replace = TRUE),
+#'     Response = sample(c("CR", "PR", "SD", "PD"), 20, replace = TRUE),
+#'     Surgery = sample(c(1, 2, 3, NA), 20, replace = TRUE),
+#'     Progression = sample(c(8, 12, 16, NA), 20, replace = TRUE)
 #' )
+#'
 #' swimmerplot(
 #'     data = data,
 #'     patientID = "PatientID",
-#'     start = "StartTime",
-#'     end = "EndTime",
-#'     event = "Event",
+#'     startTime = "StartTime",
+#'     endTime = "EndTime",
+#'     responseVar = "Response",
 #'     milestone1Name = "Surgery",
-#'     milestone1Date = "Surgery"
+#'     milestone1Date = "Surgery",
+#'     milestone2Name = "Progression",
+#'     milestone2Date = "Progression",
+#'     showEventMarkers = TRUE,
+#'     showInterpretation = TRUE
 #' )
 #'}
-#' @param data The data as a data frame.
-#' @param patientID Variable containing patient identifiers.
-#' @param start Time/date when observation/treatment started.
-#' @param end Time/date when observation/treatment ended.
-#' @param event Optional variable for event types (e.g., CR, PR, PD).
-#' @param timetype Select whether time values are raw numbers or dates
-#' @param timetypedata Select the time format in your data
-#' @param timetypeoutput Select the time unit for display
-#' @param startType Choose whether to align all start times to 0 or use
-#'   absolute start times
-#' @param sortVariable Variable to sort the patient timelines.
-#' @param barHeight Thickness of timeline bars
-#' @param referenceLines Add reference time lines to the plot
+#' @param data The data as a data frame containing patient timeline
+#'   information.
+#' @param patientID Variable containing unique patient identifiers.
+#' @param startTime Time/date when observation/treatment started.
+#' @param endTime Time/date when observation/treatment ended.
+#' @param responseVar Optional variable for response types (e.g., CR, PR, SD,
+#'   PD) to color lanes.
+#' @param timeType Select whether time values are raw numbers or dates/times.
+#' @param dateFormat Select the date/time format in your data (only used when
+#'   Time Input Type is Date/Time).
+#' @param timeUnit Time unit to use for display and calculations.
+#' @param timeDisplay Choose whether to align all start times to 0 or use
+#'   absolute start times.
+#' @param maxMilestones Maximum number of milestone events to support.
+#' @param milestone1Name Name for the first milestone event (e.g., Surgery,
+#'   Treatment Start).
+#' @param milestone1Date Date/time variable when milestone 1 occurred.
+#' @param milestone2Name Name for the second milestone event.
+#' @param milestone2Date Date/time variable when milestone 2 occurred.
+#' @param milestone3Name Name for the third milestone event.
+#' @param milestone3Date Date/time variable when milestone 3 occurred.
+#' @param milestone4Name Name for the fourth milestone event.
+#' @param milestone4Date Date/time variable when milestone 4 occurred.
+#' @param milestone5Name Name for the fifth milestone event.
+#' @param milestone5Date Date/time variable when milestone 5 occurred.
+#' @param showEventMarkers Whether to display event markers along patient
+#'   timelines.
+#' @param eventVar Variable containing event type labels for markers.
+#' @param eventTimeVar Variable containing event times (defaults to start time
+#'   if not specified).
+#' @param laneWidth Width/thickness of patient timeline lanes.
+#' @param markerSize Size of event markers and milestone markers.
+#' @param plotTheme Visual theme for the swimmer plot.
+#' @param showLegend Whether to display the plot legend.
+#' @param referenceLines Add reference time lines to the plot for clinical
+#'   context.
 #' @param customReferenceTime Custom time point to mark with a reference line
-#' @param useggswim .
-#' @param markerSize Size of event markers on the plot
+#'   (only used when Reference Lines is set to Custom).
+#' @param sortVariable Optional variable to sort patient timelines (defaults
+#'   to duration-based sorting).
+#' @param sortOrder How to order patients in the visualization.
+#' @param showInterpretation Whether to display automated clinical
+#'   interpretation of the timeline data.
+#' @param personTimeAnalysis Whether to include epidemiological person-time
+#'   metrics in the analysis.
+#' @param responseAnalysis Whether to analyze response patterns when response
+#'   variable is provided.
+#' @param exportTimeline Export processed timeline data for external analysis.
+#' @param exportSummary Export comprehensive summary statistics and clinical
+#'   metrics.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$milestoneTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$eventMarkerTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$timelineData} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$summaryData} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$advancedMetrics} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -316,54 +796,111 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 swimmerplot <- function(
     data,
     patientID,
-    start,
-    end,
-    event,
-    timetype = "raw",
-    timetypedata = "ymd",
-    timetypeoutput = "months",
-    startType = "relative",
-    sortVariable,
-    barHeight = 3,
+    startTime,
+    endTime,
+    responseVar,
+    timeType = "raw",
+    dateFormat = "ymd",
+    timeUnit = "months",
+    timeDisplay = "relative",
+    maxMilestones = 5,
+    milestone1Name = "Surgery",
+    milestone1Date,
+    milestone2Name = "Treatment Start",
+    milestone2Date,
+    milestone3Name = "Response Assessment",
+    milestone3Date,
+    milestone4Name = "Progression",
+    milestone4Date,
+    milestone5Name = "Death/Last Follow-up",
+    milestone5Date,
+    showEventMarkers = FALSE,
+    eventVar,
+    eventTimeVar,
+    laneWidth = 3,
+    markerSize = 5,
+    plotTheme = "ggswim",
+    showLegend = TRUE,
     referenceLines = "none",
     customReferenceTime = 12,
-    useggswim = FALSE,
-    markerSize = 5) {
+    sortVariable,
+    sortOrder = "duration_desc",
+    showInterpretation = TRUE,
+    personTimeAnalysis = TRUE,
+    responseAnalysis = TRUE,
+    exportTimeline = FALSE,
+    exportSummary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("swimmerplot requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(patientID)) patientID <- jmvcore::resolveQuo(jmvcore::enquo(patientID))
-    if ( ! missing(start)) start <- jmvcore::resolveQuo(jmvcore::enquo(start))
-    if ( ! missing(end)) end <- jmvcore::resolveQuo(jmvcore::enquo(end))
-    if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
+    if ( ! missing(startTime)) startTime <- jmvcore::resolveQuo(jmvcore::enquo(startTime))
+    if ( ! missing(endTime)) endTime <- jmvcore::resolveQuo(jmvcore::enquo(endTime))
+    if ( ! missing(responseVar)) responseVar <- jmvcore::resolveQuo(jmvcore::enquo(responseVar))
+    if ( ! missing(milestone1Date)) milestone1Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone1Date))
+    if ( ! missing(milestone2Date)) milestone2Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone2Date))
+    if ( ! missing(milestone3Date)) milestone3Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone3Date))
+    if ( ! missing(milestone4Date)) milestone4Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone4Date))
+    if ( ! missing(milestone5Date)) milestone5Date <- jmvcore::resolveQuo(jmvcore::enquo(milestone5Date))
+    if ( ! missing(eventVar)) eventVar <- jmvcore::resolveQuo(jmvcore::enquo(eventVar))
+    if ( ! missing(eventTimeVar)) eventTimeVar <- jmvcore::resolveQuo(jmvcore::enquo(eventTimeVar))
     if ( ! missing(sortVariable)) sortVariable <- jmvcore::resolveQuo(jmvcore::enquo(sortVariable))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(patientID), patientID, NULL),
-            `if`( ! missing(start), start, NULL),
-            `if`( ! missing(end), end, NULL),
-            `if`( ! missing(event), event, NULL),
+            `if`( ! missing(startTime), startTime, NULL),
+            `if`( ! missing(endTime), endTime, NULL),
+            `if`( ! missing(responseVar), responseVar, NULL),
+            `if`( ! missing(milestone1Date), milestone1Date, NULL),
+            `if`( ! missing(milestone2Date), milestone2Date, NULL),
+            `if`( ! missing(milestone3Date), milestone3Date, NULL),
+            `if`( ! missing(milestone4Date), milestone4Date, NULL),
+            `if`( ! missing(milestone5Date), milestone5Date, NULL),
+            `if`( ! missing(eventVar), eventVar, NULL),
+            `if`( ! missing(eventTimeVar), eventTimeVar, NULL),
             `if`( ! missing(sortVariable), sortVariable, NULL))
 
-    for (v in event) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in responseVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in eventVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- swimmerplotOptions$new(
         patientID = patientID,
-        start = start,
-        end = end,
-        event = event,
-        timetype = timetype,
-        timetypedata = timetypedata,
-        timetypeoutput = timetypeoutput,
-        startType = startType,
-        sortVariable = sortVariable,
-        barHeight = barHeight,
+        startTime = startTime,
+        endTime = endTime,
+        responseVar = responseVar,
+        timeType = timeType,
+        dateFormat = dateFormat,
+        timeUnit = timeUnit,
+        timeDisplay = timeDisplay,
+        maxMilestones = maxMilestones,
+        milestone1Name = milestone1Name,
+        milestone1Date = milestone1Date,
+        milestone2Name = milestone2Name,
+        milestone2Date = milestone2Date,
+        milestone3Name = milestone3Name,
+        milestone3Date = milestone3Date,
+        milestone4Name = milestone4Name,
+        milestone4Date = milestone4Date,
+        milestone5Name = milestone5Name,
+        milestone5Date = milestone5Date,
+        showEventMarkers = showEventMarkers,
+        eventVar = eventVar,
+        eventTimeVar = eventTimeVar,
+        laneWidth = laneWidth,
+        markerSize = markerSize,
+        plotTheme = plotTheme,
+        showLegend = showLegend,
         referenceLines = referenceLines,
         customReferenceTime = customReferenceTime,
-        useggswim = useggswim,
-        markerSize = markerSize)
+        sortVariable = sortVariable,
+        sortOrder = sortOrder,
+        showInterpretation = showInterpretation,
+        personTimeAnalysis = personTimeAnalysis,
+        responseAnalysis = responseAnalysis,
+        exportTimeline = exportTimeline,
+        exportSummary = exportSummary)
 
     analysis <- swimmerplotClass$new(
         options = options,

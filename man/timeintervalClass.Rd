@@ -2,11 +2,23 @@
 % Please edit documentation in R/timeinterval.b.R
 \name{timeintervalClass}
 \alias{timeintervalClass}
-\title{Time Interval Calculator}
+\title{Comprehensive Time Interval Calculator for Survival Analysis}
 \description{
-Time Interval Calculator
-
-Time Interval Calculator
+Advanced time interval calculation tool designed for survival analysis, epidemiological
+studies, and person-time analysis. Provides robust date parsing, time interval
+calculation, landmark analysis, and comprehensive data quality assessment.
+}
+\details{
+This function provides comprehensive time interval calculation capabilities including:
+\itemize{
+\item Multiple date format parsing with automatic detection
+\item Flexible output units (days, weeks, months, years)
+\item Landmark analysis for conditional survival
+\item Person-time calculations for epidemiological studies
+\item Data quality assessment and validation
+\item Statistical summaries with confidence intervals
+\item Export capabilities for downstream analysis
+}
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::timeintervalBase} -> \code{timeintervalClass}

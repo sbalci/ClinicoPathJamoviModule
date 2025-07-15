@@ -2,61 +2,104 @@
 % Please edit documentation in R/timeinterval.h.R
 \name{timeinterval}
 \alias{timeinterval}
-\title{Time Interval Calculator}
+\title{Comprehensive Time Interval Calculator}
 \usage{
 timeinterval(
   data,
   dx_date,
   fu_date,
-  time_format = "ymd",
+  time_format = "auto",
   output_unit = "months",
   use_landmark = FALSE,
-  landmark_time = 3,
-  add_times = TRUE
+  landmark_time = 6,
+  remove_negative = TRUE,
+  remove_extreme = TRUE,
+  add_times = TRUE,
+  include_quality_metrics = TRUE,
+  confidence_level = 95
 )
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The data as a data frame containing date columns for interval
+calculation.}
 
-\item{dx_date}{Column containing start dates}
+\item{dx_date}{Column containing start dates (e.g., diagnosis date, study
+entry, treatment start). Supports various date formats including text and
+numeric representations.}
 
-\item{fu_date}{Column containing end dates}
+\item{fu_date}{Column containing end dates (e.g., follow-up date, event
+date, study exit). Must be in the same format as the start date variable.}
 
-\item{time_format}{.}
+\item{time_format}{Date format specification. 'Auto-detect' attempts to
+identify the format automatically. Manual selection ensures accurate
+parsing for specific date formats.}
 
-\item{output_unit}{.}
+\item{output_unit}{Unit for calculated time intervals. Affects person-time
+calculations and  statistical summaries. Choose based on study duration and
+event frequency.}
 
-\item{use_landmark}{.}
+\item{use_landmark}{Enables conditional analysis from a specific time
+point. Useful for  studying outcomes after a landmark time (e.g., 6-month
+survivors only).}
 
-\item{landmark_time}{.}
+\item{landmark_time}{Time point for landmark analysis in the specified
+output units.  Only participants surviving past this time are included in
+analysis.}
 
-\item{add_times}{.}
+\item{remove_negative}{Automatically exclude negative time intervals (end
+date before start date). Recommended for data quality assurance.}
+
+\item{remove_extreme}{Identify and flag potentially extreme time intervals
+for quality review. Uses statistical outlier detection methods.}
+
+\item{add_times}{Appends calculated time intervals as a new variable for
+downstream analysis. Useful for subsequent survival analysis or person-time
+calculations.}
+
+\item{include_quality_metrics}{Provides comprehensive data quality
+assessment including missing values, negative intervals, and distribution
+statistics.}
+
+\item{confidence_level}{Confidence level for statistical intervals (mean
+confidence intervals). Standard epidemiological practice uses 95\\%
+confidence intervals.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 }
 }
 \description{
-Calculates time intervals between dates or from pre-calculated values. Time
-intervals form the basis of person-time follow-up calculations in survival
-analysis. Person-time follows the accumulated time that participants
-contribute to a study while being at risk for the event of interest,
-accounting for varying entry times and censoring. Person-time is typically
-expressed in person-days, person-months,  or person-years depending on the
-study duration and outcome frequency.
+Advanced time interval calculator designed for survival analysis,
+epidemiological studies,  and person-time analysis. Features intelligent
+date parsing, comprehensive data quality  assessment, landmark analysis,
+and robust statistical summaries. Time intervals form the  foundation of
+person-time follow-up calculations, capturing both participant counts and
+observation duration for accurate incidence rate calculations.
 }
 \examples{
-# Calculate time intervals for person-time analysis:
-# timeinterval(
-#   data = study_data,
-#   dx_date = "diagnosis_date",
-#   fu_date = "followup_date",
-#   output_unit = "months"
-# )
+# Basic time interval calculation:
+timeinterval(
+  data = study_data,
+  dx_date = "diagnosis_date",
+  fu_date = "followup_date",
+  time_format = "ymd",
+  output_unit = "months"
+)
+
+# With landmark analysis:
+timeinterval(
+  data = study_data,
+  dx_date = "start_date",
+  fu_date = "end_date",
+  use_landmark = TRUE,
+  landmark_time = 6,
+  output_unit = "months"
+)
 
 }
