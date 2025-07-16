@@ -1,7 +1,8 @@
 # Using Gemini CLI for Large Codebase Analysis
 
 If there are errors simmilar to following, use Gemini CLI with the `-p` flag to analyze large codebases or multiple files that exceed the context limits of Claude or Gemini Pro.
-"Error: File content (40897 tokens) exceeds maximum allowed tokens (25000). Please use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific content."
+"Context low" or "Context window exceeded" or "Error: File content (40897 tokens) exceeds maximum allowed tokens (25000). Please use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific content."
+
 
 When analyzing large codebases or multiple files that might exceed context limits, use the Gemini CLI with its massive
 context window. Use `gemini -p` to leverage Google Gemini's large context capacity.
