@@ -55,8 +55,8 @@ stagemigration(
   cancerType = "general",
   useOptimismCorrection = FALSE,
   enableMultifactorialAnalysis = FALSE,
-  continuousCovariates,
-  categoricalCovariates,
+  continuousCovariates = NULL,
+  categoricalCovariates = NULL,
   multifactorialComparisonType = "comprehensive",
   baselineModel = "covariates_only",
   performInteractionTests = FALSE,
@@ -320,11 +320,17 @@ A results object containing:
 \code{results$idiResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$multifactorialAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$multifactorialResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$multifactorialResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$adjustedCIndexComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$adjustedCIndexComparisonExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$nestedModelTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$nestedModelTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$stepwiseResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$stepwiseResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$interactionTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$interactionTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$dcaResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
