@@ -3745,6 +3745,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             library(ggplot2)
             library(survival)
+            library(survminer)
+            library(gridExtra)
             
             data <- plot_data$data
             time_var <- plot_data$time_var
@@ -3769,86 +3771,65 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             time_range <- image$parent$options$plotTimeRange
             
             if (plot_type == "separate") {
-                # Create separate plots using basic ggplot approach
-                # Convert survival fits to data frames for plotting
-                
-                # Old staging system plot
-                old_surv_data <- data.frame(
-                    time = old_fit$time,
-                    surv = old_fit$surv,
-                    strata = rep(names(old_fit$strata), old_fit$strata),
-                    upper = old_fit$upper,
-                    lower = old_fit$lower
-                )
-                
                 # Determine x-axis limits
                 max_time <- if (!is.null(time_range) && time_range != "auto") {
                     as.numeric(time_range)
                 } else {
-                    max(old_surv_data$time, na.rm = TRUE)
+                    max(old_fit$time, new_fit$time, na.rm = TRUE)
                 }
                 
-                p1 <- ggplot(old_surv_data, aes(x = time, y = surv, color = strata)) +
-                    geom_step(linewidth = 1.2)
-                
-                # Add confidence intervals if requested
-                if (!is.null(show_ci) && show_ci) {
-                    p1 <- p1 + 
-                        geom_ribbon(aes(ymin = lower, ymax = upper, fill = strata), 
-                                   alpha = 0.2, linetype = 0)
-                }
-                
-                p1 <- p1 +
-                    labs(
-                        title = "Original Staging System - Survival Curves",
-                        x = "Time (months)",
-                        y = "Survival Probability",
-                        color = "Stage"
-                    ) +
-                    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
-                    scale_x_continuous(limits = c(0, max_time)) +
-                    theme_minimal() +
-                    theme(
-                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-                        legend.position = "bottom"
-                    )
-                
-                # New staging system plot
-                new_surv_data <- data.frame(
-                    time = new_fit$time,
-                    surv = new_fit$surv,
-                    strata = rep(names(new_fit$strata), new_fit$strata),
-                    upper = new_fit$upper,
-                    lower = new_fit$lower
+                # Create separate plots using survminer for risk table support
+                old_plot <- survminer::ggsurvplot(
+                    old_fit,
+                    data = data,
+                    title = "Original Staging System - Survival Curves",
+                    xlab = "Time (months)",
+                    ylab = "Survival Probability",
+                    conf.int = if (!is.null(show_ci)) show_ci else FALSE,
+                    risk.table = if (!is.null(show_risk)) show_risk else FALSE,
+                    risk.table.height = if (!is.null(show_risk) && show_risk) 0.25 else 0,
+                    xlim = c(0, max_time),
+                    legend.title = "Stage",
+                    ggtheme = theme_minimal(),
+                    font.main = c(14, "bold"),
+                    font.x = c(12, "plain"),
+                    font.y = c(12, "plain"),
+                    font.legend = c(10, "plain")
                 )
                 
-                p2 <- ggplot(new_surv_data, aes(x = time, y = surv, color = strata)) +
-                    geom_step(linewidth = 1.2)
-                
-                # Add confidence intervals if requested
-                if (!is.null(show_ci) && show_ci) {
-                    p2 <- p2 + 
-                        geom_ribbon(aes(ymin = lower, ymax = upper, fill = strata), 
-                                   alpha = 0.2, linetype = 0)
-                }
-                
-                p2 <- p2 +
-                    labs(
-                        title = "New Staging System - Survival Curves",
-                        x = "Time (months)",
-                        y = "Survival Probability",
-                        color = "Stage"
-                    ) +
-                    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
-                    scale_x_continuous(limits = c(0, max_time)) +
-                    theme_minimal() +
-                    theme(
-                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-                        legend.position = "bottom"
-                    )
+                new_plot <- survminer::ggsurvplot(
+                    new_fit,
+                    data = data,
+                    title = "New Staging System - Survival Curves",
+                    xlab = "Time (months)",
+                    ylab = "Survival Probability",
+                    conf.int = if (!is.null(show_ci)) show_ci else FALSE,
+                    risk.table = if (!is.null(show_risk)) show_risk else FALSE,
+                    risk.table.height = if (!is.null(show_risk) && show_risk) 0.25 else 0,
+                    xlim = c(0, max_time),
+                    legend.title = "Stage",
+                    ggtheme = theme_minimal(),
+                    font.main = c(14, "bold"),
+                    font.x = c(12, "plain"),
+                    font.y = c(12, "plain"),
+                    font.legend = c(10, "plain")
+                )
                 
                 # Combine plots vertically for separate display
-                combined_plot <- gridExtra::grid.arrange(p1, p2, nrow = 2)
+                if (!is.null(show_risk) && show_risk) {
+                    # With risk tables, arrange plots with their respective tables
+                    combined_plot <- gridExtra::grid.arrange(
+                        old_plot$plot, old_plot$table,
+                        new_plot$plot, new_plot$table,
+                        nrow = 4, heights = c(0.75, 0.25, 0.75, 0.25)
+                    )
+                } else {
+                    # Without risk tables, just arrange the plots
+                    combined_plot <- gridExtra::grid.arrange(
+                        old_plot$plot, new_plot$plot,
+                        nrow = 2
+                    )
+                }
                 print(combined_plot)
                 
             } else if (plot_type == "sidebyside") {
