@@ -3735,11 +3735,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return()
             }
             
-            # Get state data
-            plot_data <- image$parent$state
+            # Get state data (correct location is image$state, not image$parent$state)
+            plot_data <- image$state
             if (is.null(plot_data) || is.null(plot_data$data)) {
                 return()
             }
+            
+            tryCatch({
             
             library(ggplot2)
             library(survival)
@@ -3757,8 +3759,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             old_fit <- survfit(old_formula, data = data)
             new_fit <- survfit(new_formula, data = data)
             
-            # Get plot type option
+            # Get plot type option with proper default handling
             plot_type <- image$parent$options$survivalPlotType
+            if (is.null(plot_type)) {
+                plot_type <- "separate"  # Default value from a.yaml
+            }
             show_ci <- image$parent$options$showConfidenceIntervals
             show_risk <- image$parent$options$showRiskTables
             time_range <- image$parent$options$plotTimeRange
@@ -3808,17 +3813,274 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         legend.position = "bottom"
                     )
                 
-                print(p1)
+                # New staging system plot
+                new_surv_data <- data.frame(
+                    time = new_fit$time,
+                    surv = new_fit$surv,
+                    strata = rep(names(new_fit$strata), new_fit$strata),
+                    upper = new_fit$upper,
+                    lower = new_fit$lower
+                )
                 
-            } else {
-                # For other plot types, create a simple combined visualization
-                # Combine both staging systems in one plot
+                p2 <- ggplot(new_surv_data, aes(x = time, y = surv, color = strata)) +
+                    geom_step(linewidth = 1.2)
+                
+                # Add confidence intervals if requested
+                if (!is.null(show_ci) && show_ci) {
+                    p2 <- p2 + 
+                        geom_ribbon(aes(ymin = lower, ymax = upper, fill = strata), 
+                                   alpha = 0.2, linetype = 0)
+                }
+                
+                p2 <- p2 +
+                    labs(
+                        title = "New Staging System - Survival Curves",
+                        x = "Time (months)",
+                        y = "Survival Probability",
+                        color = "Stage"
+                    ) +
+                    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+                    scale_x_continuous(limits = c(0, max_time)) +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                        legend.position = "bottom"
+                    )
+                
+                # Print both plots
+                print(p1)
+                print(p2)
+                
+            } else if (plot_type == "sidebyside") {
+                # Create side-by-side plots
+                # Convert survival fits to data frames for plotting
+                
+                # Old staging system data
+                old_surv_data <- data.frame(
+                    time = old_fit$time,
+                    surv = old_fit$surv,
+                    strata = rep(names(old_fit$strata), old_fit$strata),
+                    upper = old_fit$upper,
+                    lower = old_fit$lower
+                )
+                
+                # New staging system data
+                new_surv_data <- data.frame(
+                    time = new_fit$time,
+                    surv = new_fit$surv,
+                    strata = rep(names(new_fit$strata), new_fit$strata),
+                    upper = new_fit$upper,
+                    lower = new_fit$lower
+                )
+                
+                # Determine x-axis limits
+                max_time <- if (!is.null(time_range) && time_range != "auto") {
+                    as.numeric(time_range)
+                } else {
+                    max(c(old_surv_data$time, new_surv_data$time), na.rm = TRUE)
+                }
+                
+                # Create plots
+                p1 <- ggplot(old_surv_data, aes(x = time, y = surv, color = strata)) +
+                    geom_step(linewidth = 1.2)
+                
+                if (!is.null(show_ci) && show_ci) {
+                    p1 <- p1 + 
+                        geom_ribbon(aes(ymin = lower, ymax = upper, fill = strata), 
+                                   alpha = 0.2, linetype = 0)
+                }
+                
+                p1 <- p1 +
+                    labs(
+                        title = "Original Staging System",
+                        x = "Time (months)",
+                        y = "Survival Probability",
+                        color = "Stage"
+                    ) +
+                    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+                    scale_x_continuous(limits = c(0, max_time)) +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),
+                        legend.position = "bottom"
+                    )
+                
+                p2 <- ggplot(new_surv_data, aes(x = time, y = surv, color = strata)) +
+                    geom_step(linewidth = 1.2)
+                
+                if (!is.null(show_ci) && show_ci) {
+                    p2 <- p2 + 
+                        geom_ribbon(aes(ymin = lower, ymax = upper, fill = strata), 
+                                   alpha = 0.2, linetype = 0)
+                }
+                
+                p2 <- p2 +
+                    labs(
+                        title = "New Staging System",
+                        x = "Time (months)",
+                        y = "Survival Probability",
+                        color = "Stage"
+                    ) +
+                    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+                    scale_x_continuous(limits = c(0, max_time)) +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),
+                        legend.position = "bottom"
+                    )
+                
+                # Combine plots side by side
+                combined_plot <- gridExtra::grid.arrange(p1, p2, ncol = 2)
+                print(combined_plot)
+                
+            } else if (plot_type == "overlay") {
+                # Create overlay plot with both staging systems
+                # Get survival summaries
+                old_surv_summary <- summary(old_fit)
+                new_surv_summary <- summary(new_fit)
+                
+                # Create combined data frame with proper stage names
+                old_data <- data.frame(
+                    time = old_surv_summary$time,
+                    surv = old_surv_summary$surv,
+                    system = "Original",
+                    stage = gsub(".*=", "", old_surv_summary$strata),
+                    strata = old_surv_summary$strata,
+                    upper = old_surv_summary$upper,
+                    lower = old_surv_summary$lower
+                )
+                
+                new_data <- data.frame(
+                    time = new_surv_summary$time,
+                    surv = new_surv_summary$surv,
+                    system = "New",
+                    stage = gsub(".*=", "", new_surv_summary$strata),
+                    strata = new_surv_summary$strata,
+                    upper = new_surv_summary$upper,
+                    lower = new_surv_summary$lower
+                )
+                
+                combined_data <- rbind(old_data, new_data)
+                combined_data$group <- paste(combined_data$system, combined_data$stage, sep = " - ")
+                
+                # Determine x-axis limits
+                max_time <- if (!is.null(time_range) && time_range != "auto") {
+                    as.numeric(time_range)
+                } else {
+                    max(combined_data$time, na.rm = TRUE)
+                }
+                
+                # Create overlay plot
+                p <- ggplot(combined_data, aes(x = time, y = surv, color = group)) +
+                    geom_step(linewidth = 1.2)
+                
+                if (!is.null(show_ci) && show_ci) {
+                    p <- p + 
+                        geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), 
+                                   alpha = 0.1, linetype = 0)
+                }
+                
+                p <- p +
+                    labs(
+                        title = "Staging System Comparison - Overlay",
+                        x = "Time (months)",
+                        y = "Survival Probability",
+                        color = "System - Stage"
+                    ) +
+                    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+                    scale_x_continuous(limits = c(0, max_time)) +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                        legend.position = "bottom",
+                        legend.title = element_text(size = 10),
+                        legend.text = element_text(size = 9)
+                    )
+                
+                print(p)
+                
+            } else if (plot_type == "keystages") {
+                # Create plot comparing key stages only (I/II vs III/IV)
+                # First, we need to group stages
                 
                 # Get survival summaries
                 old_surv_summary <- summary(old_fit)
                 new_surv_summary <- summary(new_fit)
                 
-                # Create combined data frame
+                # Extract stage names and group them
+                old_stages <- unique(gsub(".*=", "", old_surv_summary$strata))
+                new_stages <- unique(gsub(".*=", "", new_surv_summary$strata))
+                
+                # Define early and late stage groups
+                early_stages <- c("I", "II", "1", "2", "Stage I", "Stage II", "Stage 1", "Stage 2")
+                late_stages <- c("III", "IV", "3", "4", "Stage III", "Stage IV", "Stage 3", "Stage 4")
+                
+                # Create grouped data
+                old_data <- data.frame(
+                    time = old_surv_summary$time,
+                    surv = old_surv_summary$surv,
+                    stage = gsub(".*=", "", old_surv_summary$strata),
+                    upper = old_surv_summary$upper,
+                    lower = old_surv_summary$lower
+                )
+                old_data$stage_group <- ifelse(old_data$stage %in% early_stages, "Early (I/II)", "Late (III/IV)")
+                old_data$system <- "Original"
+                
+                new_data <- data.frame(
+                    time = new_surv_summary$time,
+                    surv = new_surv_summary$surv,
+                    stage = gsub(".*=", "", new_surv_summary$strata),
+                    upper = new_surv_summary$upper,
+                    lower = new_surv_summary$lower
+                )
+                new_data$stage_group <- ifelse(new_data$stage %in% early_stages, "Early (I/II)", "Late (III/IV)")
+                new_data$system <- "New"
+                
+                combined_data <- rbind(old_data, new_data)
+                combined_data$group <- paste(combined_data$system, combined_data$stage_group, sep = " - ")
+                
+                # Determine x-axis limits
+                max_time <- if (!is.null(time_range) && time_range != "auto") {
+                    as.numeric(time_range)
+                } else {
+                    max(combined_data$time, na.rm = TRUE)
+                }
+                
+                # Create key stages plot
+                p <- ggplot(combined_data, aes(x = time, y = surv, color = group)) +
+                    geom_step(linewidth = 1.2)
+                
+                if (!is.null(show_ci) && show_ci) {
+                    p <- p + 
+                        geom_ribbon(aes(ymin = lower, ymax = upper, fill = group), 
+                                   alpha = 0.1, linetype = 0)
+                }
+                
+                p <- p +
+                    labs(
+                        title = "Key Stage Groups Comparison",
+                        subtitle = "Early (I/II) vs Late (III/IV) Stages",
+                        x = "Time (months)",
+                        y = "Survival Probability",
+                        color = "System - Stage Group"
+                    ) +
+                    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+                    scale_x_continuous(limits = c(0, max_time)) +
+                    theme_minimal() +
+                    theme(
+                        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                        plot.subtitle = element_text(hjust = 0.5, size = 12),
+                        legend.position = "bottom"
+                    )
+                
+                print(p)
+                
+            } else {
+                # Default fallback - should not reach here
+                # Create a simple combined plot
+                old_surv_summary <- summary(old_fit)
+                new_surv_summary <- summary(new_fit)
+                
                 old_data <- data.frame(
                     time = old_surv_summary$time,
                     surv = old_surv_summary$surv,
@@ -3835,7 +4097,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 combined_data <- rbind(old_data, new_data)
                 
-                # Create combined plot
                 p <- ggplot(combined_data, aes(x = time, y = surv, color = system, linetype = stage)) +
                     geom_step(size = 1) +
                     labs(
@@ -3854,6 +4115,19 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 print(p)
             }
+            
+            TRUE
+            
+            }, error = function(e) {
+                # Handle any errors in survival curve plotting
+                p <- ggplot() +
+                    annotate("text", x = 0.5, y = 0.5, 
+                            label = paste("Error generating survival curves:", e$message), 
+                            hjust = 0.5, vjust = 0.5, size = 4, color = "red") +
+                    theme_void()
+                print(p)
+                return(TRUE)
+            })
             
             TRUE
         },
@@ -4240,14 +4514,102 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                                    old_stage, "+", new_stage, "+", covariate_formula))
                     full_model <- survival::coxph(full_formula, data = covariate_data)
                     
-                    # Perform stepwise selection
-                    stepwise_model <- step(full_model, direction = "both", trace = FALSE)
+                    # Custom stepwise selection with step tracking
+                    step_history <- list()
+                    current_model <- full_model
+                    step_num <- 0
+                    
+                    # Capture the process by enabling trace temporarily
+                    capture_output <- capture.output({
+                        stepwise_model <- step(full_model, direction = "both", trace = TRUE)
+                    })
+                    
+                    # Parse the step output to extract AIC progression
+                    aic_lines <- grep("AIC", capture_output, value = TRUE)
+                    selected_vars <- names(stepwise_model$coefficients)
+                    
+                    # Extract p-values from final model
+                    final_summary <- summary(stepwise_model)
+                    var_pvalues <- final_summary$coefficients[, "Pr(>|z|)"]
+                    
+                    # Build step history
+                    if (length(aic_lines) > 0) {
+                        # More robust AIC extraction - try multiple patterns
+                        extract_aic <- function(line) {
+                            # Try different AIC patterns
+                            patterns <- c(
+                                "AIC=([0-9]+\\.?[0-9]*)",  # AIC=2224.592
+                                "AIC\\s*=\\s*([0-9]+\\.?[0-9]*)",  # AIC = 2224.592
+                                "AIC:\\s*([0-9]+\\.?[0-9]*)",  # AIC: 2224.592
+                                "([0-9]+\\.?[0-9]*)\\s*AIC"   # 2224.592 AIC
+                            )
+                            
+                            for (pattern in patterns) {
+                                match <- regmatches(line, regexpr(pattern, line, perl = TRUE))
+                                if (length(match) > 0) {
+                                    aic_val <- as.numeric(gsub("[^0-9.]", "", match))
+                                    if (!is.na(aic_val)) return(aic_val)
+                                }
+                            }
+                            return(NA)
+                        }
+                        
+                        # Use final model AIC as default
+                        final_aic <- AIC(stepwise_model)
+                        
+                        for (i in seq_along(selected_vars)) {
+                            var_name <- selected_vars[i]
+                            
+                            # Build incremental model to get proper AIC for each step
+                            vars_up_to_step <- selected_vars[1:i]
+                            incremental_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                                   paste(vars_up_to_step, collapse = " + ")))
+                            
+                            step_model <- tryCatch({
+                                survival::coxph(incremental_formula, data = covariate_data)
+                            }, error = function(e) NULL)
+                            
+                            step_aic <- if (!is.null(step_model)) AIC(step_model) else final_aic
+                            
+                            step_history[[i]] <- list(
+                                variable = var_name,
+                                step = i,
+                                aic = step_aic,
+                                p_value = if (!is.null(var_pvalues) && var_name %in% names(var_pvalues)) var_pvalues[var_name] else NA
+                            )
+                        }
+                    } else {
+                        # Fallback if trace parsing fails
+                        final_aic <- AIC(stepwise_model)
+                        for (i in seq_along(selected_vars)) {
+                            var_name <- selected_vars[i]
+                            
+                            # Build incremental model for proper AIC calculation
+                            vars_up_to_step <- selected_vars[1:i]
+                            incremental_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                                   paste(vars_up_to_step, collapse = " + ")))
+                            
+                            step_model <- tryCatch({
+                                survival::coxph(incremental_formula, data = covariate_data)
+                            }, error = function(e) NULL)
+                            
+                            step_aic <- if (!is.null(step_model)) AIC(step_model) else final_aic
+                            
+                            step_history[[i]] <- list(
+                                variable = var_name,
+                                step = i,
+                                aic = step_aic,
+                                p_value = if (!is.null(var_pvalues) && var_name %in% names(var_pvalues)) var_pvalues[var_name] else NA
+                            )
+                        }
+                    }
                     
                     stepwise_results <- list(
                         final_model = stepwise_model,
-                        selected_variables = names(stepwise_model$coefficients),
+                        selected_variables = selected_vars,
                         final_aic = AIC(stepwise_model),
-                        final_c_index = survival::concordance(stepwise_model)$concordance
+                        final_c_index = survival::concordance(stepwise_model)$concordance,
+                        step_history = step_history
                     )
                 }, error = function(e) {
                     stepwise_results <- list(error = paste("Stepwise selection failed:", e$message))
@@ -4276,13 +4638,16 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         
                         interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
                             interaction = paste("Original Staging x", covar),
-                            chi_square = lrt_int_old$`LR Chisq`[2],
+                            chi_square = lrt_int_old$Chisq[2],
                             df = lrt_int_old$Df[2],
-                            p_value = lrt_int_old$`Pr(>Chi)`[2]
+                            p_value = lrt_int_old$`Pr(>|Chi|)`[2]
                         )
                     }, error = function(e) {
                         interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
                             interaction = paste("Original Staging x", covar),
+                            chi_square = NA,
+                            df = NA,
+                            p_value = NA,
                             error = e$message
                         )
                     })
@@ -4303,13 +4668,16 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         
                         interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
                             interaction = paste("New Staging x", covar),
-                            chi_square = lrt_int_new$`LR Chisq`[2],
+                            chi_square = lrt_int_new$Chisq[2],
                             df = lrt_int_new$Df[2],
-                            p_value = lrt_int_new$`Pr(>Chi)`[2]
+                            p_value = lrt_int_new$`Pr(>|Chi|)`[2]
                         )
                     }, error = function(e) {
                         interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
                             interaction = paste("New Staging x", covar),
+                            chi_square = NA,
+                            df = NA,
+                            p_value = NA,
                             error = e$message
                         )
                     })
@@ -4448,9 +4816,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     
                     interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
                         interaction = paste("Original Staging x", covar),
-                        chi_square = lrt_int_old$`LR Chisq`[2],
+                        chi_square = lrt_int_old$Chisq[2],
                         df = lrt_int_old$Df[2],
-                        p_value = lrt_int_old$`Pr(>Chi)`[2]
+                        p_value = lrt_int_old$`Pr(>|Chi|)`[2]
                     )
                 }, error = function(e) {
                     interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
@@ -4473,13 +4841,16 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     
                     interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
                         interaction = paste("New Staging x", covar),
-                        chi_square = lrt_int_new$`LR Chisq`[2],
+                        chi_square = lrt_int_new$Chisq[2],
                         df = lrt_int_new$Df[2],
-                        p_value = lrt_int_new$`Pr(>Chi)`[2]
+                        p_value = lrt_int_new$`Pr(>|Chi|)`[2]
                     )
                 }, error = function(e) {
                     interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
                         interaction = paste("New Staging x", covar),
+                        chi_square = NA,
+                        df = NA,
+                        p_value = NA,
                         error = e$message
                     )
                 })
@@ -4688,7 +5059,37 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 if (!is.null(stepwise_info$error)) {
                     table$setError(stepwise_info$error)
+                } else if (!is.null(stepwise_info$step_history) && length(stepwise_info$step_history) > 0) {
+                    # Use the improved step history with proper AIC progression and p-values
+                    
+                    # Add summary row
+                    table$addRow(rowKey = "summary", values = list(
+                        Variable = "Final Model Summary",
+                        Step = "Final",
+                        Action = paste("Selected", length(stepwise_info$step_history), "variables"),
+                        AIC = stepwise_info$final_aic,
+                        p_value = ""
+                    ))
+                    
+                    # Add individual variables using step history
+                    for (i in seq_along(stepwise_info$step_history)) {
+                        step_info <- stepwise_info$step_history[[i]]
+                        var_name <- step_info$variable
+                        
+                        # Clean up variable name for display
+                        display_var <- gsub("^[^:]*:", "", var_name)  # Remove prefix before colon
+                        
+                        table$addRow(rowKey = paste("var", i, sep = "_"), values = list(
+                            Variable = display_var,
+                            Step = as.character(step_info$step),
+                            Action = "Selected",
+                            AIC = step_info$aic,
+                            p_value = step_info$p_value
+                        ))
+                    }
                 } else if (!is.null(stepwise_info$selected_variables)) {
+                    # Fallback to original method if step history is not available
+                    
                     # Add summary row
                     table$addRow(rowKey = "summary", values = list(
                         Variable = "Final Model Summary",
@@ -4698,7 +5099,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         p_value = NA
                     ))
                     
-                    # Add individual variables
+                    # Add individual variables with fallback values
                     for (i in seq_along(stepwise_info$selected_variables)) {
                         var_name <- stepwise_info$selected_variables[i]
                         
