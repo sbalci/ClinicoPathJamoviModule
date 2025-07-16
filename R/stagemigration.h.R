@@ -321,7 +321,8 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..categoricalCovariates <- jmvcore::OptionVariables$new(
                 "categoricalCovariates",
                 categoricalCovariates,
@@ -329,7 +330,8 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..multifactorialComparisonType <- jmvcore::OptionList$new(
                 "multifactorialComparisonType",
                 multifactorialComparisonType,
@@ -586,11 +588,17 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         idiResults = function() private$.items[["idiResults"]],
         multifactorialAnalysisExplanation = function() private$.items[["multifactorialAnalysisExplanation"]],
         multifactorialResults = function() private$.items[["multifactorialResults"]],
+        multifactorialResultsExplanation = function() private$.items[["multifactorialResultsExplanation"]],
         adjustedCIndexComparison = function() private$.items[["adjustedCIndexComparison"]],
+        adjustedCIndexComparisonExplanation = function() private$.items[["adjustedCIndexComparisonExplanation"]],
         nestedModelTests = function() private$.items[["nestedModelTests"]],
+        nestedModelTestsExplanation = function() private$.items[["nestedModelTestsExplanation"]],
         stepwiseResults = function() private$.items[["stepwiseResults"]],
+        stepwiseResultsExplanation = function() private$.items[["stepwiseResultsExplanation"]],
         interactionTests = function() private$.items[["interactionTests"]],
+        interactionTestsExplanation = function() private$.items[["interactionTestsExplanation"]],
         stratifiedAnalysis = function() private$.items[["stratifiedAnalysis"]],
+        stratifiedAnalysisExplanation = function() private$.items[["stratifiedAnalysisExplanation"]],
         rocAnalysis = function() private$.items[["rocAnalysis"]],
         dcaResults = function() private$.items[["dcaResults"]],
         bootstrapResults = function() private$.items[["bootstrapResults"]],
@@ -1014,6 +1022,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="BIC", 
                         `type`="number", 
                         `format`="zto"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multifactorialResultsExplanation",
+                title="Understanding Multifactorial Model Results",
+                visible="(enableMultifactorialAnalysis && showMultifactorialTables && showExplanations)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "showMultifactorialTables")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="adjustedCIndexComparison",
@@ -1053,6 +1069,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="adjustedCIndexComparisonExplanation",
+                title="Understanding Adjusted C-Index Comparison",
+                visible="(enableMultifactorialAnalysis && showAdjustedCIndexComparison && showExplanations)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "showAdjustedCIndexComparison")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="nestedModelTests",
@@ -1085,6 +1109,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `name`="Decision", 
                         `title`="Decision", 
                         `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nestedModelTestsExplanation",
+                title="Understanding Nested Model Tests",
+                visible="(enableMultifactorialAnalysis && showNestedModelTests && showExplanations)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "showNestedModelTests")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="stepwiseResults",
@@ -1117,6 +1149,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="stepwiseResultsExplanation",
+                title="Understanding Stepwise Selection Results",
+                visible="(enableMultifactorialAnalysis && showStepwiseResults && showExplanations)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "showStepwiseResults")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="interactionTests",
@@ -1150,6 +1190,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `name`="Interpretation", 
                         `title`="Interpretation", 
                         `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interactionTestsExplanation",
+                title="Understanding Stage-Covariate Interaction Tests",
+                visible="(enableMultifactorialAnalysis && performInteractionTests && showExplanations)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "performInteractionTests")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="stratifiedAnalysis",
@@ -1188,6 +1236,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="stratifiedAnalysisExplanation",
+                title="Understanding Stratified Analysis",
+                visible="(enableMultifactorialAnalysis && stratifiedAnalysis && showExplanations)",
+                clearWith=list(
+                    "enableMultifactorialAnalysis",
+                    "stratifiedAnalysis")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rocAnalysis",
@@ -1974,11 +2030,17 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$idiResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multifactorialAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$multifactorialResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$multifactorialResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$adjustedCIndexComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$adjustedCIndexComparisonExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nestedModelTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$nestedModelTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$stepwiseResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stepwiseResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interactionTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interactionTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$dcaResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
@@ -2067,8 +2129,8 @@ stagemigration <- function(
     cancerType = "general",
     useOptimismCorrection = FALSE,
     enableMultifactorialAnalysis = FALSE,
-    continuousCovariates,
-    categoricalCovariates,
+    continuousCovariates = NULL,
+    categoricalCovariates = NULL,
     multifactorialComparisonType = "comprehensive",
     baselineModel = "covariates_only",
     performInteractionTests = FALSE,

@@ -507,6 +507,7 @@ options:
         Continuous variables to include as covariates in the multifactorial
         analysis (e.g., age, tumor size, biomarker levels). These will be
         included in Cox regression models for both staging systems.
+      default: NULL
 
     - name: categoricalCovariates
       title: 'Categorical Covariates'
@@ -517,6 +518,7 @@ options:
         Categorical variables to include as covariates in the multifactorial
         analysis (e.g., sex, histology, treatment type). These will be
         included in Cox regression models for both staging systems.
+      default: NULL
 
     - name: multifactorialComparisonType
       title: 'Multifactorial Comparison Type'

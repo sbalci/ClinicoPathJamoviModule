@@ -3847,9 +3847,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         legend.position = "bottom"
                     )
                 
-                # Print both plots
-                print(p1)
-                print(p2)
+                # Combine plots vertically for separate display
+                combined_plot <- gridExtra::grid.arrange(p1, p2, nrow = 2)
+                print(combined_plot)
                 
             } else if (plot_type == "sidebyside") {
                 # Create side-by-side plots
