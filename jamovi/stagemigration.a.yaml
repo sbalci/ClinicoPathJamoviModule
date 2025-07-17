@@ -386,8 +386,6 @@ options:
           name: sidebyside
         - title: "Overlay comparison"
           name: overlay
-        - title: "Key stages only"
-          name: keystages
       default: separate
       description: >-
         Controls display of survival curves for staging system comparison.

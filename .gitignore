@@ -50,3 +50,5 @@ inst/doc
 .venv/
 backups/
 
+/doc/
+/Meta/
