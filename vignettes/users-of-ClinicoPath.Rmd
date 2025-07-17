@@ -8,6 +8,7 @@ vignette: >
   %\VignetteKeepMd{true}
 ---
 
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
@@ -16,6 +17,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+
 
 Here is the list of articles, videos, websites, and other resources that have used ClinicoPath in their research or projects. If you have used ClinicoPath in your work and would like to be included in this list, 
 please let us know by creating an issue in the [GitHub repository](https://github.com/sbalci/ClinicoPathJamoviModule/issues). 
