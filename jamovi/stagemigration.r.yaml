@@ -630,6 +630,71 @@ items:
             type: number
             format: zto
 
+    # Pseudo R-squared Results Explanation
+    - name: pseudoR2ResultsExplanation
+      title: Understanding Pseudo R-squared Measures
+      type: Html
+      visible: (calculatePseudoR2 && showExplanations)
+      clearWith:
+          - calculatePseudoR2
+
+    # Pseudo R-squared Results
+    - name: pseudoR2Results
+      title: Pseudo R-squared Measures
+      type: Table
+      visible: (calculatePseudoR2)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - calculatePseudoR2
+      columns:
+          - name: Measure
+            title: "Measure"
+            type: text
+          - name: Original
+            title: "Original System"
+            type: number
+            format: zto
+          - name: New
+            title: "New System"
+            type: number
+            format: zto
+          - name: Improvement
+            title: "Improvement"
+            type: number
+            format: zto
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Decision Curves Explanation
+    - name: decisionCurvesExplanation
+      title: Understanding Decision Curve Analysis
+      type: Html
+      visible: (showDecisionCurves && showExplanations)
+      clearWith:
+          - showDecisionCurves
+
+    # Decision Curves
+    - name: decisionCurves
+      title: Decision Curves
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotDecisionCurves
+      visible: (showDecisionCurves)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showDecisionCurves
+          - performDCA
+
     # Bootstrap Validation Results
     - name: bootstrapResults
       title: Bootstrap Validation Results
@@ -715,6 +780,14 @@ items:
             type: number
             format: zto,pvalue
 
+    # Likelihood Ratio Tests Explanation
+    - name: likelihoodTestsExplanation
+      title: Understanding Likelihood Ratio Tests
+      type: Html
+      visible: (performLikelihoodTests && showExplanations)
+      clearWith:
+          - performLikelihoodTests
+
     # Likelihood Ratio Tests
     - name: likelihoodTests
       title: Likelihood Ratio Tests
@@ -742,6 +815,14 @@ items:
             title: "p-value"
             type: number
             format: zto,pvalue
+
+    # Stage Homogeneity Tests Explanation
+    - name: homogeneityTestsExplanation
+      title: Understanding Stage Homogeneity Tests
+      type: Html
+      visible: (performHomogeneityTests && showExplanations)
+      clearWith:
+          - performHomogeneityTests
 
     # Stage Homogeneity Tests
     - name: homogeneityTests
@@ -1038,30 +1119,6 @@ items:
           - showCalibrationPlots
           - performCalibration
 
-    # Decision Curves Explanation
-    - name: decisionCurvesExplanation
-      title: Understanding Decision Curve Analysis
-      type: Html
-      visible: (showDecisionCurves && showExplanations)
-      clearWith:
-          - showDecisionCurves
-
-    # Decision Curves
-    - name: decisionCurves
-      title: Decision Curves
-      type: Image
-      width: 700
-      height: 500
-      renderFun: .plotDecisionCurves
-      visible: (showDecisionCurves)
-      clearWith:
-          - oldStage
-          - newStage
-          - survivalTime
-          - event
-          - eventLevel
-          - showDecisionCurves
-          - performDCA
 
     # Survival Curves Explanation
     - name: survivalCurvesExplanation

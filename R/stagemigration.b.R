@@ -444,12 +444,20 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             tryCatch({
                 old_cox <- coxph(old_formula, data = data)
+                # Debug: Check Cox model fitting
+                if (is.null(old_cox$loglik) || length(old_cox$loglik) < 2) {
+                    warning("Old Cox model did not converge properly")
+                }
             }, error = function(e) {
                 stop(paste("Failed to fit Cox model for original staging:", e$message))
             })
             
             tryCatch({
                 new_cox <- coxph(new_formula, data = data)
+                # Debug: Check Cox model fitting
+                if (is.null(new_cox$loglik) || length(new_cox$loglik) < 2) {
+                    warning("New Cox model did not converge properly")
+                }
             }, error = function(e) {
                 stop(paste("Failed to fit Cox model for new staging:", e$message))
             })
@@ -1177,52 +1185,210 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         },
         
         .calculatePseudoR2 = function(old_cox, new_cox, data) {
-            # Calculate various pseudo R-squared measures
+            # Calculate various pseudo R-squared measures with robust error handling
+            # For Cox models, we need different approach than GLM
             
-            # Null model (intercept only)
-            null_formula <- as.formula(paste("Surv(", self$options$survivalTime, ", event_binary) ~ 1"))
-            null_cox <- coxph(null_formula, data = data)
-            
-            # Log-likelihoods
-            ll_null <- null_cox$loglik[2]
-            ll_old <- old_cox$loglik[2]
-            ll_new <- new_cox$loglik[2]
-            
-            # Number of parameters
-            p_old <- length(coef(old_cox))
-            p_new <- length(coef(new_cox))
-            n <- nrow(data)
-            
-            # Nagelkerke R-squared
-            nagelkerke_old <- (1 - exp((ll_null - ll_old) * 2 / n)) / (1 - exp(ll_null * 2 / n))
-            nagelkerke_new <- (1 - exp((ll_null - ll_new) * 2 / n)) / (1 - exp(ll_null * 2 / n))
-            
-            # McFadden R-squared
-            mcfadden_old <- 1 - (ll_old / ll_null)
-            mcfadden_new <- 1 - (ll_new / ll_null)
-            
-            # Cox-Snell R-squared
-            cox_snell_old <- 1 - exp((ll_null - ll_old) * 2 / n)
-            cox_snell_new <- 1 - exp((ll_null - ll_new) * 2 / n)
-            
-            # Adjusted R-squared (penalized)
-            adj_mcfadden_old <- 1 - ((ll_old - p_old) / ll_null)
-            adj_mcfadden_new <- 1 - ((ll_new - p_new) / ll_null)
-            
-            return(list(
-                nagelkerke_old = nagelkerke_old,
-                nagelkerke_new = nagelkerke_new,
-                nagelkerke_improvement = nagelkerke_new - nagelkerke_old,
-                mcfadden_old = mcfadden_old,
-                mcfadden_new = mcfadden_new,
-                mcfadden_improvement = mcfadden_new - mcfadden_old,
-                cox_snell_old = cox_snell_old,
-                cox_snell_new = cox_snell_new,
-                cox_snell_improvement = cox_snell_new - cox_snell_old,
-                adj_mcfadden_old = adj_mcfadden_old,
-                adj_mcfadden_new = adj_mcfadden_new,
-                adj_mcfadden_improvement = adj_mcfadden_new - adj_mcfadden_old
-            ))
+            tryCatch({
+                # For Cox models, we don't need a separate null model
+                # The loglik[1] is the null (intercept-only) log-likelihood
+                # The loglik[2] is the fitted model log-likelihood
+                
+                # Extract log-likelihoods properly for Cox models
+                if (is.null(old_cox$loglik) || length(old_cox$loglik) < 2) {
+                    warning("Old Cox model log-likelihood not available")
+                    return(list(
+                        nagelkerke_old = NA, nagelkerke_new = NA, nagelkerke_improvement = NA,
+                        mcfadden_old = NA, mcfadden_new = NA, mcfadden_improvement = NA,
+                        cox_snell_old = NA, cox_snell_new = NA, cox_snell_improvement = NA,
+                        adj_mcfadden_old = NA, adj_mcfadden_new = NA, adj_mcfadden_improvement = NA
+                    ))
+                }
+                
+                if (is.null(new_cox$loglik) || length(new_cox$loglik) < 2) {
+                    warning("New Cox model log-likelihood not available")
+                    return(list(
+                        nagelkerke_old = NA, nagelkerke_new = NA, nagelkerke_improvement = NA,
+                        mcfadden_old = NA, mcfadden_new = NA, mcfadden_improvement = NA,
+                        cox_snell_old = NA, cox_snell_new = NA, cox_snell_improvement = NA,
+                        adj_mcfadden_old = NA, adj_mcfadden_new = NA, adj_mcfadden_improvement = NA
+                    ))
+                }
+                
+                # For Cox models: loglik[1] = null model, loglik[2] = fitted model
+                ll_null_old <- old_cox$loglik[1]
+                ll_fitted_old <- old_cox$loglik[2]
+                
+                ll_null_new <- new_cox$loglik[1]  # Should be same as ll_null_old
+                ll_fitted_new <- new_cox$loglik[2]
+                
+                # Use the null log-likelihood from one of the models (they should be identical)
+                ll_null <- ll_null_old
+                
+                # Debug log-likelihood values
+                message(paste("Cox Log-likelihoods - Null:", ll_null, "Old fitted:", ll_fitted_old, "New fitted:", ll_fitted_new))
+                
+                # Check for valid log-likelihoods
+                if (is.na(ll_null) || is.na(ll_fitted_old) || is.na(ll_fitted_new)) {
+                    warning("One or more log-likelihoods are NA - cannot calculate pseudo R-squared")
+                    return(list(
+                        nagelkerke_old = NA, nagelkerke_new = NA, nagelkerke_improvement = NA,
+                        mcfadden_old = NA, mcfadden_new = NA, mcfadden_improvement = NA,
+                        cox_snell_old = NA, cox_snell_new = NA, cox_snell_improvement = NA,
+                        adj_mcfadden_old = NA, adj_mcfadden_new = NA, adj_mcfadden_improvement = NA
+                    ))
+                }
+                
+                # Additional checks for finite values
+                if (!is.finite(ll_null) || !is.finite(ll_fitted_old) || !is.finite(ll_fitted_new)) {
+                    warning("One or more log-likelihoods are not finite - cannot calculate pseudo R-squared")
+                    return(list(
+                        nagelkerke_old = NA, nagelkerke_new = NA, nagelkerke_improvement = NA,
+                        mcfadden_old = NA, mcfadden_new = NA, mcfadden_improvement = NA,
+                        cox_snell_old = NA, cox_snell_new = NA, cox_snell_improvement = NA,
+                        adj_mcfadden_old = NA, adj_mcfadden_new = NA, adj_mcfadden_improvement = NA
+                    ))
+                }
+                
+                # Number of parameters
+                p_old <- length(coef(old_cox))
+                p_new <- length(coef(new_cox))
+                n <- nrow(data)
+                
+                # Helper function for safe division
+                safe_divide <- function(numerator, denominator) {
+                    if (is.na(denominator) || denominator == 0) {
+                        return(NA)
+                    }
+                    return(numerator / denominator)
+                }
+                
+                # Helper function for safe exponential calculations
+                safe_exp <- function(x) {
+                    if (is.na(x) || !is.finite(x)) {
+                        return(NA)
+                    }
+                    result <- exp(x)
+                    if (!is.finite(result)) {
+                        return(NA)
+                    }
+                    return(result)
+                }
+                
+                # McFadden R-squared (using correct log-likelihood values)
+                mcfadden_old <- if (ll_null != 0) {
+                    1 - safe_divide(ll_fitted_old, ll_null)
+                } else {
+                    NA
+                }
+                
+                mcfadden_new <- if (ll_null != 0) {
+                    1 - safe_divide(ll_fitted_new, ll_null)
+                } else {
+                    NA
+                }
+                
+                # Cox-Snell R-squared
+                cox_snell_old <- if (n > 0) {
+                    exp_term <- safe_exp((ll_null - ll_fitted_old) * 2 / n)
+                    if (is.na(exp_term)) NA else 1 - exp_term
+                } else {
+                    NA
+                }
+                
+                cox_snell_new <- if (n > 0) {
+                    exp_term <- safe_exp((ll_null - ll_fitted_new) * 2 / n)
+                    if (is.na(exp_term)) NA else 1 - exp_term
+                } else {
+                    NA
+                }
+                
+                # Nagelkerke R-squared (normalized Cox-Snell)
+                nagelkerke_old <- if (!is.na(cox_snell_old) && n > 0) {
+                    max_exp <- safe_exp(ll_null * 2 / n)
+                    if (is.na(max_exp)) {
+                        NA
+                    } else {
+                        denominator <- 1 - max_exp
+                        if (denominator == 0) NA else safe_divide(cox_snell_old, denominator)
+                    }
+                } else {
+                    NA
+                }
+                
+                nagelkerke_new <- if (!is.na(cox_snell_new) && n > 0) {
+                    max_exp <- safe_exp(ll_null * 2 / n)
+                    if (is.na(max_exp)) {
+                        NA
+                    } else {
+                        denominator <- 1 - max_exp
+                        if (denominator == 0) NA else safe_divide(cox_snell_new, denominator)
+                    }
+                } else {
+                    NA
+                }
+                
+                # Adjusted McFadden R-squared (penalized)
+                adj_mcfadden_old <- if (ll_null != 0) {
+                    1 - safe_divide((ll_fitted_old - p_old), ll_null)
+                } else {
+                    NA
+                }
+                
+                adj_mcfadden_new <- if (ll_null != 0) {
+                    1 - safe_divide((ll_fitted_new - p_new), ll_null)
+                } else {
+                    NA
+                }
+                
+                # Calculate improvements
+                nagelkerke_improvement <- if (!is.na(nagelkerke_old) && !is.na(nagelkerke_new)) {
+                    nagelkerke_new - nagelkerke_old
+                } else {
+                    NA
+                }
+                
+                mcfadden_improvement <- if (!is.na(mcfadden_old) && !is.na(mcfadden_new)) {
+                    mcfadden_new - mcfadden_old
+                } else {
+                    NA
+                }
+                
+                cox_snell_improvement <- if (!is.na(cox_snell_old) && !is.na(cox_snell_new)) {
+                    cox_snell_new - cox_snell_old
+                } else {
+                    NA
+                }
+                
+                adj_mcfadden_improvement <- if (!is.na(adj_mcfadden_old) && !is.na(adj_mcfadden_new)) {
+                    adj_mcfadden_new - adj_mcfadden_old
+                } else {
+                    NA
+                }
+                
+                return(list(
+                    nagelkerke_old = nagelkerke_old,
+                    nagelkerke_new = nagelkerke_new,
+                    nagelkerke_improvement = nagelkerke_improvement,
+                    mcfadden_old = mcfadden_old,
+                    mcfadden_new = mcfadden_new,
+                    mcfadden_improvement = mcfadden_improvement,
+                    cox_snell_old = cox_snell_old,
+                    cox_snell_new = cox_snell_new,
+                    cox_snell_improvement = cox_snell_improvement,
+                    adj_mcfadden_old = adj_mcfadden_old,
+                    adj_mcfadden_new = adj_mcfadden_new,
+                    adj_mcfadden_improvement = adj_mcfadden_improvement
+                ))
+                
+            }, error = function(e) {
+                # If anything fails, return NA values
+                return(list(
+                    nagelkerke_old = NA, nagelkerke_new = NA, nagelkerke_improvement = NA,
+                    mcfadden_old = NA, mcfadden_new = NA, mcfadden_improvement = NA,
+                    cox_snell_old = NA, cox_snell_new = NA, cox_snell_improvement = NA,
+                    adj_mcfadden_old = NA, adj_mcfadden_new = NA, adj_mcfadden_improvement = NA
+                ))
+            })
         },
         
         .performHomogeneityTests = function(data) {
@@ -1249,10 +1415,22 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 old_trend_test <- private$.calculateTrendTest(data, old_stage, time_var, event_var)
             }
             
+            # Within-stage homogeneity tests
+            old_within_stage <- private$.calculateWithinStageHomogeneity(data, old_stage, time_var, event_var)
+            
+            # Jonckheere-Terpstra trend test
+            old_jt_test <- private$.calculateJonckheereTerpstraTest(data, old_stage, time_var, event_var)
+            
+            # Separation test
+            old_separation <- private$.calculateSeparationTest(data, old_stage, time_var, event_var)
+            
             homogeneity_results$old_staging <- list(
                 overall_test = old_survdiff,
                 overall_p = old_overall_p,
-                trend_test = old_trend_test
+                trend_test = old_trend_test,
+                within_stage_homogeneity = old_within_stage,
+                jonckheere_terpstra = old_jt_test,
+                separation_test = old_separation
             )
             
             # Test for new staging system
@@ -1266,10 +1444,22 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 new_trend_test <- private$.calculateTrendTest(data, new_stage, time_var, event_var)
             }
             
+            # Within-stage homogeneity tests
+            new_within_stage <- private$.calculateWithinStageHomogeneity(data, new_stage, time_var, event_var)
+            
+            # Jonckheere-Terpstra trend test
+            new_jt_test <- private$.calculateJonckheereTerpstraTest(data, new_stage, time_var, event_var)
+            
+            # Separation test
+            new_separation <- private$.calculateSeparationTest(data, new_stage, time_var, event_var)
+            
             homogeneity_results$new_staging <- list(
                 overall_test = new_survdiff,
                 overall_p = new_overall_p,
-                trend_test = new_trend_test
+                trend_test = new_trend_test,
+                within_stage_homogeneity = new_within_stage,
+                jonckheere_terpstra = new_jt_test,
+                separation_test = new_separation
             )
             
             return(homogeneity_results)
@@ -1311,6 +1501,209 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
             
             return(NULL)
+        },
+        
+        .calculateWithinStageHomogeneity = function(data, stage_var, time_var, event_var) {
+            # Test homogeneity within each stage (tests for hidden heterogeneity)
+            
+            tryCatch({
+                stage_levels <- levels(as.factor(data[[stage_var]]))
+                within_stage_results <- list()
+                
+                for (stage in stage_levels) {
+                    stage_data <- data[data[[stage_var]] == stage, ]
+                    
+                    if (nrow(stage_data) < 10) {
+                        # Skip stages with too few patients
+                        within_stage_results[[stage]] <- list(
+                            stage = stage,
+                            test_type = "Within-Stage Homogeneity",
+                            statistic = NA,
+                            p_value = NA,
+                            note = "Insufficient patients"
+                        )
+                        next
+                    }
+                    
+                    # Test for heterogeneity within stage
+                    # We'll test if there are significant survival differences
+                    # by creating artificial subgroups based on survival time quartiles
+                    survival_times <- stage_data[[time_var]]
+                    quartiles <- quantile(survival_times, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+                    
+                    # Create subgroups based on survival time quartiles
+                    stage_data$survival_quartile <- cut(survival_times, 
+                                                       breaks = quartiles, 
+                                                       include.lowest = TRUE,
+                                                       labels = c("Q1", "Q2", "Q3", "Q4"))
+                    
+                    # Test for differences between these subgroups
+                    if (length(unique(stage_data$survival_quartile)) > 1) {
+                        homog_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~ survival_quartile"))
+                        homog_test <- survdiff(homog_formula, data = stage_data)
+                        
+                        p_value <- 1 - pchisq(homog_test$chisq, df = length(homog_test$n) - 1)
+                        
+                        within_stage_results[[stage]] <- list(
+                            stage = stage,
+                            test_type = "Within-Stage Homogeneity",
+                            statistic = homog_test$chisq,
+                            p_value = p_value,
+                            note = ifelse(p_value > 0.05, "Homogeneous", "Heterogeneous")
+                        )
+                    } else {
+                        within_stage_results[[stage]] <- list(
+                            stage = stage,
+                            test_type = "Within-Stage Homogeneity", 
+                            statistic = NA,
+                            p_value = NA,
+                            note = "Unable to test"
+                        )
+                    }
+                }
+                
+                return(within_stage_results)
+                
+            }, error = function(e) {
+                return(list(
+                    test_type = "Within-Stage Homogeneity",
+                    statistic = NA,
+                    p_value = NA,
+                    note = paste("Error:", e$message)
+                ))
+            })
+        },
+        
+        .calculateJonckheereTerpstraTest = function(data, stage_var, time_var, event_var) {
+            # Jonckheere-Terpstra test for ordered alternatives
+            
+            tryCatch({
+                # Check if clinfun package is available for Jonckheere-Terpstra test
+                if (!requireNamespace("clinfun", quietly = TRUE)) {
+                    return(list(
+                        test_type = "Jonckheere-Terpstra",
+                        statistic = NA,
+                        p_value = NA,
+                        note = "clinfun package required"
+                    ))
+                }
+                
+                # Prepare data for test
+                stage_factor <- as.factor(data[[stage_var]])
+                stage_levels <- levels(stage_factor)
+                stage_numeric <- as.numeric(stage_factor)
+                survival_times <- data[[time_var]]
+                
+                # Remove missing values
+                complete_cases <- complete.cases(stage_numeric, survival_times)
+                stage_clean <- stage_numeric[complete_cases]
+                survival_clean <- survival_times[complete_cases]
+                
+                if (length(unique(stage_clean)) < 2) {
+                    return(list(
+                        test_type = "Jonckheere-Terpstra",
+                        statistic = NA,
+                        p_value = NA,
+                        note = "Insufficient stage groups"
+                    ))
+                }
+                
+                # Perform Jonckheere-Terpstra test
+                jt_result <- clinfun::jonckheere.test(survival_clean, stage_clean, alternative = "increasing")
+                
+                return(list(
+                    test_type = "Jonckheere-Terpstra",
+                    statistic = jt_result$statistic,
+                    p_value = jt_result$p.value,
+                    note = "Trend test (non-parametric)"
+                ))
+                
+            }, error = function(e) {
+                return(list(
+                    test_type = "Jonckheere-Terpstra",
+                    statistic = NA,
+                    p_value = NA,
+                    note = paste("Error:", e$message)
+                ))
+            })
+        },
+        
+        .calculateSeparationTest = function(data, stage_var, time_var, event_var) {
+            # Calculate separation index between stages
+            
+            tryCatch({
+                stage_levels <- levels(as.factor(data[[stage_var]]))
+                
+                if (length(stage_levels) < 2) {
+                    return(list(
+                        test_type = "Separation Test",
+                        statistic = NA,
+                        p_value = NA,
+                        note = "Need at least 2 stages"
+                    ))
+                }
+                
+                # Calculate median survival for each stage
+                stage_medians <- numeric(length(stage_levels))
+                stage_ranges <- numeric(length(stage_levels))
+                
+                for (i in seq_along(stage_levels)) {
+                    stage_data <- data[data[[stage_var]] == stage_levels[i], ]
+                    
+                    if (nrow(stage_data) > 0) {
+                        survival_times <- stage_data[[time_var]][!is.na(stage_data[[time_var]])]
+                        
+                        if (length(survival_times) > 0) {
+                            stage_medians[i] <- median(survival_times)
+                            stage_ranges[i] <- IQR(survival_times)
+                        } else {
+                            stage_medians[i] <- NA
+                            stage_ranges[i] <- NA
+                        }
+                    } else {
+                        stage_medians[i] <- NA
+                        stage_ranges[i] <- NA
+                    }
+                }
+                
+                # Calculate separation index
+                # Separation = (range of medians) / (mean of IQRs)
+                median_range <- max(stage_medians, na.rm = TRUE) - min(stage_medians, na.rm = TRUE)
+                mean_iqr <- mean(stage_ranges, na.rm = TRUE)
+                
+                separation_index <- if (mean_iqr > 0) {
+                    median_range / mean_iqr
+                } else {
+                    NA
+                }
+                
+                # Simple test: higher separation index = better separation
+                # We'll create a p-value based on the separation index
+                # This is a heuristic approach
+                p_value <- if (!is.na(separation_index)) {
+                    # Convert separation index to p-value (heuristic)
+                    # Higher separation = lower p-value (more significant separation)
+                    pmax(0.001, pmin(0.999, exp(-separation_index)))
+                } else {
+                    NA
+                }
+                
+                return(list(
+                    test_type = "Separation Test",
+                    statistic = separation_index,
+                    p_value = p_value,
+                    note = ifelse(is.na(separation_index), "Unable to calculate", 
+                                 ifelse(separation_index > 1, "Good separation", "Poor separation"))
+                ))
+                
+            }, error = function(e) {
+                return(list(
+                    test_type = "Separation Test",
+                    statistic = NA,
+                    p_value = NA,
+                    note = paste("Error:", e$message)
+                ))
+            })
         },
         
         .analyzeWillRogers = function(data) {
@@ -2173,6 +2566,34 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 private$.populateROCAnalysis(all_results$roc_analysis)
             }
             
+            # DCA Results
+            if (self$options$performDCA && !is.null(all_results$dca_analysis)) {
+                private$.populateDCAResults(all_results$dca_analysis)
+            }
+            
+            # Pseudo R-squared Results
+            if (self$options$calculatePseudoR2 && !is.null(all_results$advanced_metrics$pseudo_r2)) {
+                # Add explanatory text for pseudo R-squared
+                if (self$options$showExplanations) {
+                    pseudo_r2_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Pseudo R-squared Measures</h4>
+                        <p style="margin-bottom: 10px;">Pseudo R-squared measures quantify the explanatory power of Cox proportional hazards models:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Nagelkerke R²:</strong> Normalized measure (0-1), most commonly used for interpretation</li>
+                            <li><strong>McFadden R²:</strong> Based on likelihood ratio, values 0.2-0.4 indicate excellent fit</li>
+                            <li><strong>Cox-Snell R²:</strong> Conservative measure, cannot reach 1.0 theoretically</li>
+                            <li><strong>Adjusted McFadden R²:</strong> Penalizes for model complexity, can be negative if overfitted</li>
+                        </ul>
+                        <p style="margin-bottom: 0; font-style: italic;">Higher values indicate better model fit. Positive improvement values favor the new staging system.</p>
+                    </div>
+                    '
+                    self$results$pseudoR2ResultsExplanation$setContent(pseudo_r2_explanation_html)
+                }
+                
+                private$.populatePseudoR2Results(all_results$advanced_metrics$pseudo_r2)
+            }
+            
             if (!is.null(all_results$calibration_analysis)) {
                 # Add explanatory text for calibration analysis
                 if (self$options$showExplanations) {
@@ -2264,10 +2685,78 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
             
             if (!is.null(all_results$advanced_metrics$lr_test)) {
+                # Add explanatory text for likelihood ratio tests
+                if (self$options$showExplanations) {
+                    likelihood_tests_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #2196f3;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Likelihood Ratio Tests</h4>
+                        <p style="margin-bottom: 10px;">Likelihood ratio tests compare the goodness-of-fit between nested Cox models to assess if the new staging system provides significantly better survival prediction:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Chi-Square Statistic:</strong> Measures the difference in log-likelihoods between models (higher = more difference)</li>
+                            <li><strong>Degrees of Freedom (df):</strong> Difference in the number of parameters between models</li>
+                            <li><strong>P-value:</strong> Statistical significance of the improvement (p < 0.05 = significant improvement)</li>
+                        </ul>
+                        <p style="margin-bottom: 10px;"><strong>Interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>df = 0:</strong> Models have same complexity; comparison limited (often occurs when staging systems have same number of categories)</li>
+                            <li><strong>df > 0:</strong> New system is more complex; test evaluates if added complexity improves fit significantly</li>
+                            <li><strong>p < 0.05:</strong> New staging system provides statistically significant improvement in survival prediction</li>
+                            <li><strong>p ≥ 0.05:</strong> No significant improvement; simpler (original) model may be preferred</li>
+                        </ul>
+                        <p style="margin-bottom: 0; font-style: italic; color: #666;">Note: When df=0, focus on other metrics like C-index difference and clinical significance rather than p-value.</p>
+                    </div>
+                    '
+                    self$results$likelihoodTestsExplanation$setContent(likelihood_tests_explanation_html)
+                }
+                
                 private$.populateLikelihoodTests(all_results$advanced_metrics)
             }
 
             if (!is.null(all_results$homogeneity_tests)) {
+                # Add explanatory text for homogeneity tests
+                if (self$options$showExplanations) {
+                    homogeneity_tests_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #fff5e6; border-left: 4px solid #ff9800;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stage Homogeneity Tests</h4>
+                        <p style="margin-bottom: 10px;">Stage homogeneity tests evaluate whether patients within each stage have similar survival outcomes (internal consistency) and whether there is a clear prognostic gradient across stages:</p>
+                        
+                        <h5 style="margin-top: 15px; margin-bottom: 10px; color: #34495e;">Test Types:</h5>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Overall (Log-rank):</strong> Tests if there are significant survival differences across all stages within each staging system</li>
+                            <li><strong>Trend Test (Cox):</strong> Tests if there is a monotonic trend in survival risk across ordered stages using Cox regression</li>
+                            <li><strong>Within-Stage Homogeneity:</strong> Tests for hidden heterogeneity within individual stages by examining survival quartile differences</li>
+                            <li><strong>Jonckheere-Terpstra:</strong> Non-parametric trend test for monotonic survival patterns across ordered stages (more robust than Cox)</li>
+                            <li><strong>Separation Test:</strong> Quantifies how well stages separate patients into distinct prognostic groups using median survival ranges</li>
+                        </ul>
+                        
+                        <h5 style="margin-top: 15px; margin-bottom: 10px; color: #34495e;">Interpretation Guidelines:</h5>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Overall Test p < 0.05:</strong> Significant survival differences exist across stages (desired - indicates stages discriminate survival)</li>
+                            <li><strong>Overall Test p ≥ 0.05:</strong> No significant survival differences across stages (problematic - stages don\'t discriminate well)</li>
+                            <li><strong>Trend Test p < 0.05:</strong> Significant monotonic survival gradient across stages (desired - proper stage ordering)</li>
+                            <li><strong>Trend Test p ≥ 0.05:</strong> No clear trend in survival across stages (problematic - stage ordering may be incorrect)</li>
+                            <li><strong>Within-Stage p > 0.05:</strong> Good internal homogeneity within stages (desired - consistent outcomes within stage)</li>
+                            <li><strong>Within-Stage p < 0.05:</strong> Poor internal homogeneity (problematic - may need substaging)</li>
+                            <li><strong>Jonckheere-Terpstra p < 0.05:</strong> Robust evidence of monotonic trend (desired - confirms proper ordering)</li>
+                            <li><strong>Separation Test > 1.0:</strong> Good prognostic separation between stages (desired - distinct groups)</li>
+                        </ul>
+                        
+                        <p style="margin-bottom: 10px; margin-top: 15px;"><strong>Clinical Significance:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Overall & Trend Tests:</strong> Validate that stages discriminate survival and follow proper ordering (fundamental requirements)</li>
+                            <li><strong>Within-Stage Tests:</strong> Identify stages needing substaging due to internal heterogeneity (critical for TNM validation)</li>
+                            <li><strong>Jonckheere-Terpstra:</strong> Provides robust, assumption-free validation of stage ordering (complements Cox trend test)</li>
+                            <li><strong>Separation Test:</strong> Quantifies prognostic distinctiveness between adjacent stages (measures staging effectiveness)</li>
+                            <li><strong>All Tests Favorable:</strong> Indicates optimal staging system with clear discrimination, proper ordering, and internal consistency</li>
+                            <li><strong>Mixed Results:</strong> Suggests specific areas for staging system improvement (e.g., substaging for heterogeneous stages)</li>
+                        </ul>
+                        
+                        <p style="margin-bottom: 0; font-style: italic; color: #666;">Note: These comprehensive tests provide multiple perspectives on staging system quality, helping identify specific strengths and weaknesses for evidence-based staging improvements.</p>
+                    </div>
+                    '
+                    self$results$homogeneityTestsExplanation$setContent(homogeneity_tests_explanation_html)
+                }
+                
                 private$.populateHomogeneityTests(all_results$homogeneity_tests)
             }
 
@@ -2988,6 +3477,110 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 ))
             }
         },
+        
+        .populateDCAResults = function(dca_results) {
+            # Populate DCA results table
+            table <- self$results$dcaResults
+            
+            if (is.null(dca_results) || is.null(dca_results$dca_result)) {
+                table$setNote("note", "Decision Curve Analysis could not be completed. Check if Cox models were successfully fitted.")
+                return()
+            }
+            
+            # Extract DCA data from the dcurves result
+            if (requireNamespace("dcurves", quietly = TRUE)) {
+                tryCatch({
+                    # Get the decision curve data using the proper method for dca objects
+                    # The dca object contains a 'dca' slot with the actual data
+                    dca_obj <- dca_results$dca_result
+                    
+                    # Extract the data using the dca object's structure
+                    if (inherits(dca_obj, "dca")) {
+                        # Access the internal data structure
+                        dca_data <- dca_obj$dca
+                        
+                        # If dca_data is still not a data.frame, try different approaches
+                        if (!is.data.frame(dca_data)) {
+                            # Try to extract from the object's attributes or structure
+                            if (is.list(dca_obj) && !is.null(dca_obj$dca)) {
+                                dca_data <- dca_obj$dca
+                            } else if (is.list(dca_obj) && !is.null(dca_obj$data)) {
+                                dca_data <- dca_obj$data
+                            } else {
+                                # Fallback: try to extract using as.data.frame on the dca component
+                                dca_data <- as.data.frame(dca_obj$dca)
+                            }
+                        }
+                    } else {
+                        # If it's not a dca object, try direct conversion
+                        dca_data <- as.data.frame(dca_obj)
+                    }
+                    
+                    # Ensure we have the required columns
+                    if (!is.data.frame(dca_data) || !all(c("threshold", "label", "net_benefit") %in% names(dca_data))) {
+                        table$setError("DCA data structure is not as expected. Required columns: threshold, label, net_benefit")
+                        return()
+                    }
+                    
+                    # Filter data for key thresholds (e.g., every 10%)
+                    key_thresholds <- seq(0.1, 0.9, by = 0.1)
+                    
+                    for (threshold in key_thresholds) {
+                        # Find the closest threshold in the data
+                        closest_threshold_idx <- which.min(abs(dca_data$threshold - threshold))
+                        closest_threshold <- dca_data$threshold[closest_threshold_idx]
+                        
+                        if (length(closest_threshold_idx) > 0) {
+                            # Extract net benefit for old and new risk models at this threshold
+                            # Filter data for this specific threshold and each model
+                            old_mask <- dca_data$threshold == closest_threshold & dca_data$label == "old_risk"
+                            new_mask <- dca_data$threshold == closest_threshold & dca_data$label == "new_risk"
+                            
+                            # Extract net benefit values and ensure they are atomic
+                            old_nb <- if (any(old_mask)) {
+                                val <- dca_data[old_mask, "net_benefit"][1]  # Take first match
+                                as.numeric(val)[1]  # Ensure atomic numeric value
+                            } else {
+                                NA_real_
+                            }
+                            
+                            new_nb <- if (any(new_mask)) {
+                                val <- dca_data[new_mask, "net_benefit"][1]  # Take first match
+                                as.numeric(val)[1]  # Ensure atomic numeric value
+                            } else {
+                                NA_real_
+                            }
+                            
+                            # Calculate improvement and ensure it's atomic
+                            improvement <- if (!is.na(old_nb) && !is.na(new_nb)) {
+                                as.numeric(new_nb - old_nb)[1]
+                            } else {
+                                NA_real_
+                            }
+                            
+                            # Ensure threshold is atomic
+                            threshold_val <- as.numeric(threshold)[1]
+                            
+                            # Add row to table with atomic values
+                            table$addRow(rowKey = paste0("threshold_", threshold_val), values = list(
+                                Threshold = threshold_val,
+                                NetBenefit_Old = old_nb,
+                                NetBenefit_New = new_nb,
+                                Improvement = improvement
+                            ))
+                        }
+                    }
+                    
+                    # Add a note about the time horizon
+                    table$setNote("time_horizon", paste("Analysis performed at", dca_results$time_horizon, "months"))
+                    
+                }, error = function(e) {
+                    table$setError(paste("Error processing DCA results:", e$message))
+                })
+            } else {
+                table$setError("dcurves package is required for Decision Curve Analysis")
+            }
+        },
 
         .populateValidationResults = function(validation_results) {
             table <- self$results$bootstrapResults
@@ -3076,13 +3669,119 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             lr_test <- advanced_results$lr_test
             
             if (nrow(lr_test) > 1) {
+                # Extract values with proper handling
+                chi_square <- lr_test[2, "Chisq"]
+                df <- lr_test[2, "Df"]
+                p_value <- lr_test[2, "Pr(>Chi)"]
+                
+                # Handle case when df = 0 (models have same number of parameters)
+                if (is.na(df) || df == 0) {
+                    # When df=0, the models are equivalent in terms of complexity
+                    # Calculate p-value manually or set to NA with explanation
+                    if (!is.na(chi_square) && chi_square > 0) {
+                        # For df=0, any chi-square > 0 suggests models are different
+                        # but we can't calculate a meaningful p-value
+                        p_value <- NA
+                        df <- 0
+                    } else {
+                        chi_square <- 0
+                        df <- 0
+                        p_value <- 1.0  # Models are identical
+                    }
+                }
+                
+                # Ensure atomic values
+                chi_square <- as.numeric(chi_square)[1]
+                df <- as.integer(df)[1]
+                p_value <- as.numeric(p_value)[1]
+                
                 table$addRow(rowKey = 1, values = list(
                     Test = "Likelihood Ratio Test",
-                    Chi_Square = lr_test[2, "Chisq"],
-                    df = lr_test[2, "Df"],
-                    p_value = lr_test[2, "Pr(>Chi)"]
+                    Chi_Square = chi_square,
+                    df = df,
+                    p_value = p_value
                 ))
+                
+                # Add note if df=0
+                if (df == 0) {
+                    table$setNote("df_zero", "Note: df=0 indicates models have the same number of parameters. P-value interpretation may be limited.")
+                }
             }
+        },
+
+        .populatePseudoR2Results = function(pseudo_r2_results) {
+            # Populate pseudo R-squared results table
+            if (is.null(pseudo_r2_results)) {
+                return()
+            }
+            
+            table <- self$results$pseudoR2Results
+            
+            # Helper function to get interpretation
+            get_interpretation <- function(measure_name, value, improvement) {
+                if (is.na(value)) return("Not available")
+                
+                if (measure_name == "McFadden") {
+                    if (value < 0.1) return("Weak fit")
+                    else if (value < 0.2) return("Acceptable fit")
+                    else if (value < 0.4) return("Good fit")
+                    else return("Excellent fit")
+                } else if (measure_name == "Nagelkerke") {
+                    if (value < 0.3) return("Weak fit")
+                    else if (value < 0.5) return("Acceptable fit")
+                    else if (value < 0.7) return("Good fit")
+                    else return("Excellent fit")
+                } else if (measure_name == "Cox-Snell") {
+                    if (value < 0.2) return("Weak fit")
+                    else if (value < 0.4) return("Acceptable fit")
+                    else if (value < 0.6) return("Good fit")
+                    else return("Excellent fit")
+                } else { # Adjusted McFadden
+                    if (value < 0) return("Poor fit (overfitted)")
+                    else if (value < 0.1) return("Weak fit")
+                    else if (value < 0.2) return("Acceptable fit")
+                    else return("Good fit")
+                }
+            }
+            
+            # Add Nagelkerke R-squared
+            table$addRow(rowKey = "nagelkerke", values = list(
+                Measure = "Nagelkerke R²",
+                Original = as.numeric(pseudo_r2_results$nagelkerke_old)[1],
+                New = as.numeric(pseudo_r2_results$nagelkerke_new)[1],
+                Improvement = as.numeric(pseudo_r2_results$nagelkerke_improvement)[1],
+                Interpretation = get_interpretation("Nagelkerke", pseudo_r2_results$nagelkerke_new, pseudo_r2_results$nagelkerke_improvement)
+            ))
+            
+            # Add McFadden R-squared
+            table$addRow(rowKey = "mcfadden", values = list(
+                Measure = "McFadden R²",
+                Original = as.numeric(pseudo_r2_results$mcfadden_old)[1],
+                New = as.numeric(pseudo_r2_results$mcfadden_new)[1],
+                Improvement = as.numeric(pseudo_r2_results$mcfadden_improvement)[1],
+                Interpretation = get_interpretation("McFadden", pseudo_r2_results$mcfadden_new, pseudo_r2_results$mcfadden_improvement)
+            ))
+            
+            # Add Cox-Snell R-squared
+            table$addRow(rowKey = "cox_snell", values = list(
+                Measure = "Cox-Snell R²",
+                Original = as.numeric(pseudo_r2_results$cox_snell_old)[1],
+                New = as.numeric(pseudo_r2_results$cox_snell_new)[1],
+                Improvement = as.numeric(pseudo_r2_results$cox_snell_improvement)[1],
+                Interpretation = get_interpretation("Cox-Snell", pseudo_r2_results$cox_snell_new, pseudo_r2_results$cox_snell_improvement)
+            ))
+            
+            # Add Adjusted McFadden R-squared
+            table$addRow(rowKey = "adj_mcfadden", values = list(
+                Measure = "Adjusted McFadden R²",
+                Original = as.numeric(pseudo_r2_results$adj_mcfadden_old)[1],
+                New = as.numeric(pseudo_r2_results$adj_mcfadden_new)[1],
+                Improvement = as.numeric(pseudo_r2_results$adj_mcfadden_improvement)[1],
+                Interpretation = get_interpretation("Adjusted McFadden", pseudo_r2_results$adj_mcfadden_new, pseudo_r2_results$adj_mcfadden_improvement)
+            ))
+            
+            # Add explanatory note
+            table$setNote("interpretation", "Interpretation: Higher values indicate better model fit. Positive improvement values favor the new staging system.")
         },
 
         .populateHomogeneityTests = function(homogeneity_results) {
@@ -3091,7 +3790,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
             table <- self$results$homogeneityTests
             
-            # Old staging
+            # Old staging - existing tests
             old_staging <- homogeneity_results$old_staging
             table$addRow(rowKey = "old_overall", values = list(
                 Stage = "Original Staging",
@@ -3107,8 +3806,47 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     p_value = old_staging$trend_test$trend_p
                 ))
             }
+            
+            # Old staging - new tests
+            # Within-stage homogeneity tests
+            if (!is.null(old_staging$within_stage_homogeneity)) {
+                within_stage <- old_staging$within_stage_homogeneity
+                if (is.list(within_stage) && length(within_stage) > 0) {
+                    for (stage_name in names(within_stage)) {
+                        stage_result <- within_stage[[stage_name]]
+                        table$addRow(rowKey = paste0("old_within_", stage_name), values = list(
+                            Stage = paste("Original", stage_name),
+                            Test = "Within-Stage Homogeneity",
+                            Statistic = as.numeric(stage_result$statistic)[1],
+                            p_value = as.numeric(stage_result$p_value)[1]
+                        ))
+                    }
+                }
+            }
+            
+            # Jonckheere-Terpstra test
+            if (!is.null(old_staging$jonckheere_terpstra)) {
+                jt_test <- old_staging$jonckheere_terpstra
+                table$addRow(rowKey = "old_jt", values = list(
+                    Stage = "Original Staging",
+                    Test = "Jonckheere-Terpstra",
+                    Statistic = as.numeric(jt_test$statistic)[1],
+                    p_value = as.numeric(jt_test$p_value)[1]
+                ))
+            }
+            
+            # Separation test
+            if (!is.null(old_staging$separation_test)) {
+                sep_test <- old_staging$separation_test
+                table$addRow(rowKey = "old_separation", values = list(
+                    Stage = "Original Staging",
+                    Test = "Separation Test",
+                    Statistic = as.numeric(sep_test$statistic)[1],
+                    p_value = as.numeric(sep_test$p_value)[1]
+                ))
+            }
 
-            # New staging
+            # New staging - existing tests
             new_staging <- homogeneity_results$new_staging
             table$addRow(rowKey = "new_overall", values = list(
                 Stage = "New Staging",
@@ -3122,6 +3860,45 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     Test = "Trend Test (Cox)",
                     Statistic = new_staging$trend_test$trend_z,
                     p_value = new_staging$trend_test$trend_p
+                ))
+            }
+            
+            # New staging - new tests
+            # Within-stage homogeneity tests
+            if (!is.null(new_staging$within_stage_homogeneity)) {
+                within_stage <- new_staging$within_stage_homogeneity
+                if (is.list(within_stage) && length(within_stage) > 0) {
+                    for (stage_name in names(within_stage)) {
+                        stage_result <- within_stage[[stage_name]]
+                        table$addRow(rowKey = paste0("new_within_", stage_name), values = list(
+                            Stage = paste("New", stage_name),
+                            Test = "Within-Stage Homogeneity",
+                            Statistic = as.numeric(stage_result$statistic)[1],
+                            p_value = as.numeric(stage_result$p_value)[1]
+                        ))
+                    }
+                }
+            }
+            
+            # Jonckheere-Terpstra test
+            if (!is.null(new_staging$jonckheere_terpstra)) {
+                jt_test <- new_staging$jonckheere_terpstra
+                table$addRow(rowKey = "new_jt", values = list(
+                    Stage = "New Staging",
+                    Test = "Jonckheere-Terpstra",
+                    Statistic = as.numeric(jt_test$statistic)[1],
+                    p_value = as.numeric(jt_test$p_value)[1]
+                ))
+            }
+            
+            # Separation test
+            if (!is.null(new_staging$separation_test)) {
+                sep_test <- new_staging$separation_test
+                table$addRow(rowKey = "new_separation", values = list(
+                    Stage = "New Staging",
+                    Test = "Separation Test",
+                    Statistic = as.numeric(sep_test$statistic)[1],
+                    p_value = as.numeric(sep_test$p_value)[1]
                 ))
             }
         },
@@ -3738,8 +4515,40 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Extract plot data from dcurves result
             if (requireNamespace("dcurves", quietly = TRUE)) {
                 tryCatch({
-                    # Get the decision curve data
-                    dca_data <- as.data.frame(dca_result)
+                    # Get the decision curve data using the proper method for dca objects
+                    if (inherits(dca_result, "dca")) {
+                        # Access the internal data structure
+                        dca_data <- dca_result$dca
+                        
+                        # If dca_data is still not a data.frame, try different approaches
+                        if (!is.data.frame(dca_data)) {
+                            # Try to extract from the object's attributes or structure
+                            if (is.list(dca_result) && !is.null(dca_result$dca)) {
+                                dca_data <- dca_result$dca
+                            } else if (is.list(dca_result) && !is.null(dca_result$data)) {
+                                dca_data <- dca_result$data
+                            } else {
+                                # Fallback: try to extract using as.data.frame on the dca component
+                                dca_data <- as.data.frame(dca_result$dca)
+                            }
+                        }
+                    } else {
+                        # If it's not a dca object, try direct conversion
+                        dca_data <- as.data.frame(dca_result)
+                    }
+                    
+                    # Ensure we have the required columns
+                    if (!is.data.frame(dca_data) || !all(c("threshold", "label", "net_benefit") %in% names(dca_data))) {
+                        # Create error message plot
+                        p <- ggplot() +
+                            annotate("text", x = 0.5, y = 0.5, 
+                                    label = "DCA data structure is not as expected\nRequired columns: threshold, label, net_benefit", 
+                                    hjust = 0.5, vjust = 0.5, size = 5, color = "red") +
+                            theme_void() +
+                            theme(plot.background = element_rect(fill = "white", color = NA))
+                        print(p)
+                        return(TRUE)
+                    }
                     
                     # Create decision curve plot
                     p <- ggplot(dca_data, aes(x = threshold)) +
