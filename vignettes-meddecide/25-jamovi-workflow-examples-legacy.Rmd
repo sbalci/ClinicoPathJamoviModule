@@ -1,0 +1,273 @@
+---
+title: "Jamovi Workflow Examples for Decision Tree and Markov Analysis"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+# Overview
+
+This vignette provides step-by-step workflows for using the generated datasets in jamovi with the ClinicoPath decision analysis modules.
+
+# Load Data in jamovi
+
+## Step 1: Open jamovi and Import Data
+
+1. **Open jamovi**
+2. **Import data file:**
+   - File → Open → Browse to:
+   - `appendicitis_decision_tree.csv` (for decision tree)
+   - `heart_disease_markov.csv` (for Markov chain)
+   - Or use any of the test datasets in `inst/extdata/`
+
+# Decision Tree Analysis Workflow
+
+## Using: appendicitis_decision_tree.csv
+
+### Step 1: Navigate to Analysis
+
+1. **Navigate to:** ClinicoPath → meddecide → Decision → Decision Tree Graph
+
+### Step 2: Configure Variables
+
+Configure the following variables:
+
+- **Decision Nodes:** `treatment_choice`
+- **Probability Variables:** `prob_surgery_success`, `prob_conservative_success`
+- **Cost Variables:** `cost_surgery`, `cost_conservative`, `cost_complications`
+- **Utility Variables:** `utility_success`, `utility_minor_complications`
+- **Outcome Variables:** `clinical_outcome`
+
+### Step 3: Set Tree Structure
+
+- **Tree Type:** Cost-Effectiveness Tree
+- **Layout:** Horizontal (Left to Right)
+
+### Step 4: Configure Display Options
+
+Enable the following options:
+
+- ☑ Show Node Shapes
+- ☑ Show Probabilities  
+- ☑ Show Costs
+- ☑ Show Utilities
+- ☑ Show Node Labels
+- ☑ Show Branch Labels
+- **Color Scheme:** Medical Theme
+
+### Step 5: Configure Analysis Options
+
+- ☑ Calculate Expected Values
+- ☐ Sensitivity Analysis (optional)
+- **Discount Rate:** 3%
+- **Time Horizon:** 1 year
+
+### Step 6: Configure Output Options
+
+- ☑ Summary Table
+- ☐ Tornado Diagram (if sensitivity analysis enabled)
+
+## Expected Decision Tree Results
+
+The analysis should produce:
+
+- **Decision tree visualization** with nodes and branches
+- **Expected values table** showing:
+  - Strategy: Surgery vs Conservative
+  - Expected Cost: ~$12,315 vs ~$7,454
+  - Expected Utility: ~0.989 vs ~0.895 QALYs
+  - ICER: ~$51,744 per QALY
+  - Net Benefit: Varies by WTP threshold
+
+## Clinical Interpretation
+
+- Surgery costs $4,861 more but provides 0.094 additional QALYs
+- ICER of $51,744/QALY suggests surgery is marginally cost-effective
+- Decision depends on patient factors and willingness-to-pay threshold
+
+# Markov Chain Analysis Workflow
+
+## Using: heart_disease_markov.csv
+
+### Step 1: Navigate to Analysis
+
+1. **Navigate to:** ClinicoPath → meddecide → Decision → Decision Tree Graph
+
+### Step 2: Configure Variables
+
+Configure the following variables:
+
+- **Decision Nodes:** `management_strategy`
+- **Health States:** `management_strategy` (or create state variable)
+- **Transition Probabilities:** `prob_asymp_to_symp`, `prob_symp_to_hf`, `prob_hf_to_death`
+- **Cost Variables:** `cost_asymptomatic`, `cost_symptomatic`, `cost_heart_failure`
+- **Utility Variables:** `utility_asymptomatic`, `utility_symptomatic`, `utility_heart_failure`
+
+### Step 3: Set Tree Structure
+
+- **Tree Type:** Markov Model Tree
+- **Layout:** Horizontal (Left to Right)
+
+### Step 4: Configure Markov Options
+
+- **Cycle Length:** 1 year
+- **Time Horizon:** 20 years
+
+### Step 5: Configure Analysis Options
+
+- ☑ Calculate Expected Values
+- **Discount Rate:** 3%
+- **Time Horizon:** 20 years
+
+### Step 6: Configure Output Options
+
+- ☑ Summary Table
+- ☑ Cohort Trace Plot
+- ☑ Transition Matrix
+
+## Expected Markov Results
+
+The analysis should produce:
+
+- **Markov Transition Matrix** showing probabilities between states
+- **Markov Cohort Analysis** showing population distribution over time:
+  - Year 0: 100% Asymptomatic
+  - Year 5: 54% Asymptomatic, 24% Symptomatic, 12% Heart Failure, 11% Dead
+  - Year 20: 9% Asymptomatic, 7% Symptomatic, 16% Heart Failure, 68% Dead
+- **Cost-effectiveness results:**
+  - Total Lifetime Cost: ~$120,561
+  - Total Lifetime QALYs: ~8.39
+  - Cost per QALY: ~$14,370
+- **Markov State Transitions plot** showing progression over time
+
+## Clinical Interpretation
+
+- Standard care provides good value at $14,370/QALY
+- Disease progression shows 68% mortality at 20 years
+- Peak heart failure prevalence around year 15
+- Results support cost-effectiveness of standard care
+
+# Comparing Strategies
+
+## For Decision Trees
+
+- Compare expected values in the Summary Table
+- Look for dominant strategies (lower cost, higher utility)
+- Calculate ICERs for non-dominated strategies
+- Use sensitivity analysis to test robustness
+
+## For Markov Models
+
+- Run separate analyses for each strategy
+- Compare lifetime costs and QALYs
+- Calculate incremental cost-effectiveness ratios
+- Examine cohort traces to understand disease progression
+
+# Sensitivity Analysis
+
+## Step 1: Enable Sensitivity Analysis
+
+1. Enable 'Sensitivity Analysis' in Analysis Options
+2. Enable 'Tornado Diagram' in Output Options
+
+## Step 2: Review Results
+
+Results will show:
+
+- Parameter ranges and their impact on outcomes
+- Tornado diagram ranking parameters by influence
+- Threshold values where conclusions change
+
+# Interpreting Results
+
+## Key Metrics to Report
+
+- Expected costs (with confidence intervals)
+- Expected utilities/QALYs
+- ICERs with interpretation vs. thresholds
+- Net benefit at relevant WTP thresholds
+- Sensitivity analysis results
+
+## Cost-Effectiveness Thresholds
+
+- **< $50,000/QALY:** Highly cost-effective
+- **$50,000-$100,000/QALY:** Moderately cost-effective
+- **> $100,000/QALY:** Not cost-effective (US standards)
+- Thresholds vary by country and healthcare system
+
+# Reporting Results
+
+## Include in Publications
+
+- **Methods:** Model structure, data sources, assumptions
+- **Results:** Base-case cost-effectiveness results
+- **Sensitivity analysis:** Key drivers and uncertainty
+- **Limitations:** Model assumptions and data limitations
+- **Conclusions:** Policy implications and recommendations
+
+## Visual Elements
+
+- Decision tree or Markov model diagram
+- Cost-effectiveness plane (cost vs. utility)
+- Tornado diagram (for sensitivity analysis)
+- Cohort trace plot (for Markov models)
+
+# Example Test Datasets Available
+
+The following datasets are available for practice:
+
+1. `basic_decision_data.csv` - Simple treatment comparison
+2. `markov_decision_data.csv` - Multi-state disease progression
+3. `pharma_decision_data.csv` - Drug comparison study
+4. `screening_decision_data.csv` - Cancer screening programs
+5. `minimal_test_data.csv` - Basic functionality testing
+6. `edge_case_data.csv` - Error handling and edge cases
+7. `appendicitis_decision_tree.csv` - Acute treatment decision
+8. `heart_disease_markov.csv` - Chronic disease management
+
+All datasets are located in: `inst/extdata/`
+
+Load any of these files in jamovi to practice the analysis workflows.
+
+# Workflow Summary
+
+This workflow covers:
+
+- ✓ Data import and preparation
+- ✓ Decision tree analysis configuration
+- ✓ Markov chain analysis setup
+- ✓ Result interpretation and reporting
+- ✓ Sensitivity analysis implementation
+- ✓ Clinical and policy interpretation
+
+## Additional Help
+
+For additional assistance:
+
+- Review the `decision-tree-vs-markov-analysis.Rmd` vignette
+- Check the comprehensive vignettes in `vignettes/`
+- Examine test data generation scripts in `data-raw/`
+- Consult jamovi module documentation
+
+# Conclusion
+
+You are now ready to perform sophisticated decision analysis and cost-effectiveness research with jamovi using the ClinicoPath module!
+
+The workflows demonstrated in this vignette provide a systematic approach to:
+
+- Setting up decision tree and Markov chain analyses
+- Configuring appropriate variables and parameters
+- Interpreting cost-effectiveness results
+- Conducting sensitivity analyses
+- Reporting findings for clinical and policy applications
+
+Practice with the provided example datasets to build proficiency in these powerful analytical methods.

@@ -1,0 +1,93 @@
+---
+title: "Use jjstatsplot in R"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ClinicoPath)
+```
+
+
+All functions
+
+jjbarstats()
+	
+
+Bar Charts
+
+jjbarstatsClass
+	
+
+Bar Charts
+
+jjbetweenstats()
+	
+
+Box-Violin Plots to Compare Between Groups
+
+jjbetweenstatsClass
+	
+
+Violin Plots to Compare Between Groups
+
+jjcorrmat()
+	
+
+Correlation Matrix
+
+jjcorrmatClass
+	
+
+Correlation Matrix
+
+jjdotplotstats()
+	
+
+Dot Chart
+
+jjdotplotstatsClass
+	
+
+Dot Chart
+
+jjhistostats()
+	
+
+Histogram
+
+jjhistostatsClass
+	
+
+Histogram
+
+jjpiestats()
+	
+
+Pie Charts
+
+jjpiestatsClass
+	
+
+Pie Charts
+
+jjscatterstats()
+	
+
+Scatter Plot
+
+jjscatterstatsClass
+	
+
+Scatter Plot
+

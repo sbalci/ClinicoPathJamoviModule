@@ -1,0 +1,233 @@
+---
+title: "Quick Reference Guide for jjstatsplot"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE)
+```
+
+# jjstatsplot Quick Reference
+
+This quick reference provides essential information for using jjstatsplot efficiently in both jamovi and R.
+
+## Function Overview
+
+| Function | Purpose | Data Type | jamovi Location |
+|----------|---------|-----------|-----------------|
+| `jjhistostats()` | Distribution analysis | 1 continuous | Continuous → Histogram |
+| `jjscatterstats()` | Bivariate relationships | 2 continuous | Continuous vs Continuous → Scatter Plot |
+| `jjcorrmat()` | Multiple correlations | 2+ continuous | Continuous vs Continuous → Correlation Matrix |
+| `jjbetweenstats()` | Group comparisons | 1 continuous + 1 categorical | Categorical vs Continuous → Box-Violin (Between) |
+| `jjdotplotstats()` | Group means | 1 continuous + 1 categorical | Categorical vs Continuous → Dot Chart |
+| `jjwithinstats()` | Paired comparisons | 2+ continuous (paired) | Categorical vs Continuous → Box-Violin (Within) |
+| `jjbarstats()` | Categorical associations | 1-2 categorical | Categorical vs Categorical → Bar Charts |
+| `jjpiestats()` | Proportional data | 1 categorical | Categorical vs Categorical → Pie Charts |
+| `waffle()` | Distribution visualization | 1 categorical | Distribution → Waffle Charts |
+
+## Quick Start Templates
+
+### jamovi Workflow
+```
+1. Data → Open file
+2. JJStatsPlot → [Category] → [Analysis]
+3. Drag variables to appropriate boxes
+4. Adjust options as needed
+5. Export → Copy/Save plot
+```
+
+### R Workflow
+```{r r-workflow}
+library(ClinicoPath)
+
+# Basic pattern
+result <- jj[function](data = your_data, dep = "variable")
+result$plot  # Main plot
+
+# With grouping
+result <- jj[function](data = your_data, dep = "variable", grvar = "group")
+result$plot2  # Grouped plots
+```
+
+## Essential R Code Snippets
+
+### Data Preparation
+```{r data-prep}
+# Load and check data
+library(ClinicoPath)
+data(mtcars)
+str(mtcars)
+
+# Convert to factors
+mtcars$cyl <- factor(mtcars$cyl)
+mtcars$am <- factor(mtcars$am, labels = c("Auto", "Manual"))
+
+# Check missing data
+summary(mtcars)
+```
+
+### Single Variable Analysis
+```{r single-var}
+# Histogram
+hist_result <- jjhistostats(data = mtcars, dep = "mpg")
+hist_result$plot
+
+# Multiple variables
+multi_hist <- jjhistostats(data = mtcars, dep = c("mpg", "hp", "wt"))
+multi_hist$plot
+```
+
+### Bivariate Analysis
+```{r bivariate}
+# Scatter plot
+scatter_result <- jjscatterstats(data = mtcars, dep = "mpg", group = "hp")
+scatter_result$plot
+
+# Correlation matrix
+corr_result <- jjcorrmat(data = mtcars, dep = c("mpg", "hp", "wt"))
+corr_result$plot
+```
+
+### Group Comparisons
+```{r group-comparisons}
+# Between groups
+between_result <- jjbetweenstats(data = mtcars, dep = "mpg", group = "cyl")
+between_result$plot
+
+# Dot chart
+dot_result <- jjdotplotstats(data = mtcars, dep = "mpg", group = "cyl")
+dot_result$plot
+```
+
+### Categorical Analysis
+```{r categorical}
+# Bar chart
+bar_result <- jjbarstats(data = mtcars, dep = "cyl", group = "am")
+bar_result$plot
+
+# Pie chart
+pie_result <- jjpiestats(data = mtcars, dep = "cyl")
+pie_result$plot
+```
+
+### Grouped Analysis
+```{r grouped}
+# Any function with grvar parameter
+grouped_result <- jjhistostats(
+  data = mtcars, 
+  dep = "mpg", 
+  grvar = "cyl"
+)
+grouped_result$plot2  # Note: plot2 for grouped plots
+```
+
+## Common Options and Customizations
+
+### jamovi Interface Elements
+- **Dependent Variable(s)**: Main variables to analyze
+- **Grouping Variable**: Split data by categories
+- **Grouping Variable for Plots**: Create separate plots
+- **Statistical Options**: Test types, confidence levels
+- **Plot Options**: Themes, colors, labels
+
+### R Function Parameters
+```{r parameters}
+# Common parameters across functions
+jj[function](
+  data = your_data,           # Data frame
+  dep = "variable",           # Dependent variable(s)
+  group = "grouping_var",     # Grouping variable
+  grvar = "plot_grouping",    # Separate plots by group
+  # Function-specific options vary
+)
+```
+
+## Statistical Tests by Function
+
+| Function | Default Test | Alternative Tests |
+|----------|--------------|-------------------|
+| `jjhistostats()` | Shapiro-Wilk normality | Anderson-Darling, Kolmogorov-Smirnov |
+| `jjscatterstats()` | Pearson correlation | Spearman, robust correlation |
+| `jjbetweenstats()` | Welch's ANOVA | Student's t-test, Kruskal-Wallis |
+| `jjdotplotstats()` | Similar to between-stats | Non-parametric alternatives |
+| `jjwithinstats()` | Paired t-test | Wilcoxon signed-rank |
+| `jjbarstats()` | Chi-square test | Fisher's exact test |
+| `jjcorrmat()` | Pearson correlations | Spearman, partial correlations |
+
+## Troubleshooting Checklist
+
+### Before Analysis
+- [ ] Check variable types (`str(data)`)
+- [ ] Verify sufficient sample sizes (`table(group_var)`)
+- [ ] Handle missing values (`summary(data)`)
+- [ ] Ensure appropriate data format
+
+### Common Errors
+- **"No data to plot"**: Check variable selection and missing values
+- **"Object not found"**: Verify variable names (case-sensitive)
+- **Blank plots**: Use `result$plot2` for grouped analyses
+- **Statistical test failures**: Check assumptions and sample sizes
+
+### Performance Issues
+- Large datasets: Sample or subset data
+- Complex grouping: Reduce number of groups
+- Memory problems: Clean workspace with `rm()` and `gc()`
+
+## Export and Reporting
+
+### jamovi Export
+```
+Right-click plot → Copy
+File → Export → [Format]
+Results panel → Copy statistical output
+```
+
+### R Export
+```{r export}
+# Save plot
+result <- jjhistostats(data = mtcars, dep = "mpg")
+ggsave("histogram.png", result$plot, width = 8, height = 6, dpi = 300)
+
+# Extract for further modification
+my_plot <- result$plot + 
+  ggplot2::labs(title = "Custom Title") +
+  ggplot2::theme_minimal()
+```
+
+## Statistical Reporting Template
+
+When reporting results, include:
+
+1. **Sample size**: n = X
+2. **Test type**: "Welch's ANOVA was conducted..."
+3. **Test statistic**: F(df1, df2) = X.XX
+4. **p-value**: p < .001 or exact value
+5. **Effect size**: η² = .XX or Cohen's d = X.XX
+6. **Confidence intervals**: 95% CI [X.XX, X.XX]
+
+Example: "A Welch's ANOVA revealed a significant difference in fuel efficiency across cylinder groups, F(2, 18.03) = 39.70, p < .001, η² = .70, suggesting a large effect."
+
+## Documentation Links
+
+- **Complete jamovi Guide**: `vignette("jamovi-user-guide", package = "jjstatsplot")`
+- **R Programming Guide**: `vignette("r-programming-guide", package = "jjstatsplot")`
+- **Analysis Gallery**: `vignette("analysis-gallery", package = "jjstatsplot")`
+- **Troubleshooting**: `vignette("troubleshooting-faq", package = "jjstatsplot")`
+- **ggstatsplot Documentation**: [indrajeetpatil.github.io/ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/)
+
+## Getting Help
+
+### Quick Checks
+1. Try with built-in data (e.g., `mtcars`, `iris`)
+2. Simplify analysis (remove grouping variables)
+3. Check for recent updates
+4. Restart jamovi/R session
+
+### Report Issues
+- Include data example, error message, and steps
+- GitHub: [sbalci/ClinicoPathJamoviModule/issues](https://github.com/sbalci/ClinicoPathJamoviModule/issues)
+- Email: drserdarbalci@gmail.com
+
+This quick reference covers the essentials for efficient jjstatsplot usage. For detailed examples and advanced usage, consult the comprehensive vignettes listed above.

@@ -1,0 +1,527 @@
+---
+name:  simonmakuch
+title: Simon-Makuch Time-Dependent Survival Analysis
+jrs:   '1.1'
+
+items:
+    # Welcome Message
+    - name: welcomeMessage
+      title: Welcome to Simon-Makuch Analysis
+      type: Html
+      clearWith:
+          - survivalTime
+          - event
+          - timeDepVariable
+
+    # Simon-Makuch Methodology Explanation
+    - name: simonMakuchExplanation
+      title: Understanding Simon-Makuch Analysis
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - showExplanations
+
+    # Exposure Pattern Summary
+    - name: exposurePatterns
+      title: Time-Dependent Exposure Patterns
+      type: Table
+      visible: (showExposurePatterns)
+      clearWith:
+          - timeDepVariable
+          - timeDepTime
+          - timeDepStatus
+          - showExposurePatterns
+      columns:
+          - name: Pattern
+            title: "Exposure Pattern"
+            type: text
+          - name: N
+            title: "N"
+            type: integer
+          - name: Percentage
+            title: "Percentage"
+            type: text
+          - name: MedianTimeToExposure
+            title: "Median Time to Exposure"
+            type: number
+            format: zto
+          - name: MedianExposureDuration
+            title: "Median Exposure Duration"
+            type: number
+            format: zto
+
+    # Survival Estimates Table
+    - name: survivalEstimates
+      title: Simon-Makuch Survival Estimates
+      type: Table
+      visible: (showSurvivalEstimates)
+      clearWith:
+          - survivalTime
+          - event
+          - eventLevel
+          - timeDepVariable
+          - timeDepStatus
+          - exposedLevel
+      columns:
+          - name: TimePoint
+            title: "Time"
+            type: number
+            format: zto
+          - name: ExposureStatus
+            title: "Exposure Status"
+            type: text
+          - name: N_Risk
+            title: "N at Risk"
+            type: integer
+          - name: N_Events
+            title: "Events"
+            type: integer
+          - name: Survival
+            title: "Survival"
+            type: number
+            format: zto
+          - name: SE
+            title: "SE"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+
+    # Time-Dependent Cox Regression Results
+    - name: timeDependentCox
+      title: Time-Dependent Cox Regression
+      type: Table
+      visible: (performTimeDependentCox)
+      clearWith:
+          - survivalTime
+          - event
+          - eventLevel
+          - timeDepVariable
+          - timeDepStatus
+          - exposedLevel
+          - timeDependentCovariates
+      columns:
+          - name: Variable
+            title: "Variable"
+            type: text
+          - name: HazardRatio
+            title: "Hazard Ratio"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: SE
+            title: "SE"
+            type: number
+            format: zto
+          - name: Z_Value
+            title: "Z"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Hazard Ratios Table
+    - name: hazardRatios
+      title: Time-Dependent Hazard Ratios
+      type: Table
+      visible: (showHazardRatios)
+      clearWith:
+          - survivalTime
+          - event
+          - timeDepVariable
+          - timeDepStatus
+          - performTimeDependentCox
+      columns:
+          - name: Comparison
+            title: "Comparison"
+            type: text
+          - name: HazardRatio
+            title: "Hazard Ratio"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Statistical Tests Results
+    - name: statisticalTests
+      title: Statistical Tests for Time-Dependent Survival
+      type: Table
+      visible: (performLogRankTest || performMantelByarTest)
+      clearWith:
+          - survivalTime
+          - event
+          - timeDepVariable
+          - timeDepStatus
+      columns:
+          - name: Test
+            title: "Test"
+            type: text
+          - name: Statistic
+            title: "Test Statistic"
+            type: number
+            format: zto
+          - name: df
+            title: "df"
+            type: integer
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Method
+            title: "Method"
+            type: text
+
+    # Landmark Analysis Results
+    - name: landmarkResults
+      title: Landmark Analysis Results
+      type: Table
+      visible: (performLandmarkAnalysis && showLandmarkResults)
+      clearWith:
+          - survivalTime
+          - event
+          - timeDepVariable
+          - landmarkTimes
+          - performLandmarkAnalysis
+      columns:
+          - name: LandmarkTime
+            title: "Landmark Time"
+            type: number
+            format: zto
+          - name: N_Eligible
+            title: "N Eligible"
+            type: integer
+          - name: N_Exposed
+            title: "N Exposed"
+            type: integer
+          - name: N_Unexposed
+            title: "N Unexposed"
+            type: integer
+          - name: HazardRatio
+            title: "Hazard Ratio"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Immortal Time Bias Assessment
+    - name: immortalTimeBias
+      title: Immortal Time Bias Assessment
+      type: Table
+      visible: (assessImmortalTimeBias)
+      clearWith:
+          - survivalTime
+          - event
+          - timeDepVariable
+          - assessImmortalTimeBias
+      columns:
+          - name: Analysis
+            title: "Analysis Type"
+            type: text
+          - name: HazardRatio
+            title: "Hazard Ratio"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: BiasDirection
+            title: "Bias Direction"
+            type: text
+
+    # Time-Varying Effects Test
+    - name: timeVaryingEffects
+      title: Test for Time-Varying Effects
+      type: Table
+      visible: (testTimeVaryingEffect)
+      clearWith:
+          - timeDepVariable
+          - testTimeVaryingEffect
+      columns:
+          - name: Variable
+            title: "Variable"
+            type: text
+          - name: ChiSquare
+            title: "Chi-Square"
+            type: number
+            format: zto
+          - name: df
+            title: "df"
+            type: integer
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Conclusion
+            title: "Conclusion"
+            type: text
+
+    # Model Diagnostics
+    - name: modelDiagnostics
+      title: Time-Dependent Model Diagnostics
+      type: Table
+      visible: (showModelDiagnostics && performTimeDependentCox)
+      clearWith:
+          - performTimeDependentCox
+          - showModelDiagnostics
+      columns:
+          - name: Diagnostic
+            title: "Diagnostic Test"
+            type: text
+          - name: Statistic
+            title: "Test Statistic"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Bootstrap Validation Results
+    - name: bootstrapValidation
+      title: Bootstrap Validation Results
+      type: Table
+      visible: (performBootstrapValidation)
+      clearWith:
+          - performBootstrapValidation
+          - bootstrapSamples
+      columns:
+          - name: Parameter
+            title: "Parameter"
+            type: text
+          - name: Original
+            title: "Original"
+            type: number
+            format: zto
+          - name: Bootstrap_Mean
+            title: "Bootstrap Mean"
+            type: number
+            format: zto
+          - name: Bootstrap_SE
+            title: "Bootstrap SE"
+            type: number
+            format: zto
+          - name: Bias
+            title: "Bias"
+            type: number
+            format: zto
+          - name: Biascorrected
+            title: "Bias-Corrected"
+            type: number
+            format: zto
+
+    # Sensitivity Analysis Results
+    - name: sensitivityAnalysis
+      title: Sensitivity Analysis
+      type: Table
+      visible: (performSensitivityAnalysis)
+      clearWith:
+          - performSensitivityAnalysis
+      columns:
+          - name: Scenario
+            title: "Scenario"
+            type: text
+          - name: HazardRatio
+            title: "Hazard Ratio"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+
+    # Explanatory Sections
+    - name: landmarkAnalysisExplanation
+      title: Understanding Landmark Analysis
+      type: Html
+      visible: (performLandmarkAnalysis && showExplanations)
+      clearWith:
+          - performLandmarkAnalysis
+          - showExplanations
+
+    - name: immortalTimeBiasExplanation
+      title: Understanding Immortal Time Bias
+      type: Html
+      visible: (assessImmortalTimeBias && showExplanations)
+      clearWith:
+          - assessImmortalTimeBias
+          - showExplanations
+
+    - name: timeDependentCoxExplanation
+      title: Understanding Time-Dependent Cox Regression
+      type: Html
+      visible: (performTimeDependentCox && showExplanations)
+      clearWith:
+          - performTimeDependentCox
+          - showExplanations
+
+    # Clinical Interpretation Guidance
+    - name: clinicalGuidance
+      title: Clinical Interpretation of Time-Dependent Survival Analysis
+      type: Html
+      visible: (includeClinicalGuidance)
+      clearWith:
+          - includeClinicalGuidance
+
+    # Methodology Notes
+    - name: methodologyNotes
+      title: Simon-Makuch Methodology Notes
+      type: Html
+      visible: (showMethodologyNotes)
+      clearWith:
+          - showMethodologyNotes
+
+    # Plots Section
+    
+    # Simon-Makuch Plot Explanation
+    - name: simonMakuchPlotExplanation
+      title: Interpreting Simon-Makuch Plots
+      type: Html
+      visible: (showSimonMakuchPlot && showExplanations)
+      clearWith:
+          - showSimonMakuchPlot
+          - showExplanations
+
+    # Simon-Makuch Survival Plot
+    - name: simonMakuchPlot
+      title: Simon-Makuch Survival Curves
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotSimonMakuch
+      visible: (showSimonMakuchPlot)
+      clearWith:
+          - survivalTime
+          - event
+          - eventLevel
+          - timeDepVariable
+          - timeDepStatus
+          - exposedLevel
+          - showSimonMakuchPlot
+          - plotTimeRange
+          - showConfidenceIntervals
+          - showRiskTables
+
+    # Landmark Survival Plots
+    - name: landmarkPlots
+      title: Landmark Survival Analysis Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotLandmarkAnalysis
+      visible: (showLandmarkPlots && performLandmarkAnalysis)
+      clearWith:
+          - survivalTime
+          - event
+          - timeDepVariable
+          - landmarkTimes
+          - performLandmarkAnalysis
+          - showLandmarkPlots
+
+    # Cumulative Incidence Plot
+    - name: cumulativeIncidencePlot
+      title: Cumulative Incidence of Time-Dependent Exposure
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .plotCumulativeIncidence
+      visible: (showCumulativeIncidencePlot)
+      clearWith:
+          - timeDepVariable
+          - timeDepTime
+          - timeDepStatus
+          - showCumulativeIncidencePlot
+
+    # Exposure Status Over Time Plot
+    - name: exposureStatusPlot
+      title: Exposure Status Changes Over Time
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .plotExposureStatus
+      visible: (plotExposureStatus)
+      clearWith:
+          - timeDepVariable
+          - timeDepTime
+          - timeDepStatus
+          - plotExposureStatus
+
+    # Model Diagnostic Plots
+    - name: diagnosticPlots
+      title: Time-Dependent Cox Model Diagnostics
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotModelDiagnostics
+      visible: (showModelDiagnostics && performTimeDependentCox)
+      clearWith:
+          - performTimeDependentCox
+          - showModelDiagnostics
+
+refs:
+    - simon1984
+    - makuch1982
+    - therneau2000
+    - survival
+    - survminer
+    - ggplot2
+    - timereg
+
+...

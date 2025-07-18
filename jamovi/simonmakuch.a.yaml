@@ -1,0 +1,428 @@
+---
+name: simonmakuch
+title: Simon-Makuch Time-Dependent Survival Analysis
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Time-Dependent Variables, Simon-Makuch Plots, Landmark Analysis'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs survival analysis with time-dependent variables using the Simon-Makuch method.
+        This analysis is specifically designed for situations where patient characteristics or
+        treatments change during follow-up, such as biomarker changes, treatment switches,
+        or progression events. The Simon-Makuch approach properly accounts for these
+        time-varying exposures in survival estimation and comparison.
+        
+        Key features include Simon-Makuch plots (modified Kaplan-Meier curves), landmark
+        analysis, time-dependent Cox regression, and proper handling of immortal time bias.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Analyzing survival with time-dependent treatment status
+            # simonmakuch(
+            #   data = patient_data,
+            #   survivalTime = "follow_up_months",
+            #   event = "death_status", 
+            #   eventLevel = "Dead",
+            #   timeDepVariable = "treatment_received",
+            #   timeDepTime = "treatment_start_time",
+            #   timeDepStatus = "treatment_status",
+            #   analysisType = "comprehensive"
+            # )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The dataset containing survival and time-dependent variable information.
+
+    # Core Survival Variables
+    - name: survivalTime
+      title: 'Survival Time'
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >-
+        Time to event or censoring in consistent units (months recommended).
+        This should be the total follow-up time from study entry.
+
+    - name: event
+      title: 'Event Indicator'
+      type: Variable
+      suggested: [ordinal, nominal, continuous]
+      permitted: [factor, numeric]
+      description: >-
+        Event indicator (1 = event occurred, 0 = censored) or factor with event levels.
+        For overall survival, this represents death from any cause.
+
+    - name: eventLevel
+      title: Event Level
+      type: Level
+      variable: (event)
+      description: >-
+        The level indicating event occurrence when using factor variables.
+
+    # Time-Dependent Variable Configuration
+    - name: timeDepVariable
+      title: 'Time-Dependent Variable'
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >-
+        The main time-dependent variable of interest (e.g., treatment status,
+        biomarker status, disease progression). This variable can change
+        during follow-up.
+
+    - name: timeDepTime
+      title: 'Time-Dependent Change Time'
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >-
+        Time when the time-dependent variable changes status. Use 0 for baseline
+        status, and actual time for when the variable changes (e.g., time of
+        treatment initiation, biomarker conversion).
+
+    - name: timeDepStatus
+      title: 'Time-Dependent Status'
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >-
+        Status of the time-dependent variable at each time point.
+        For example: "Unexposed", "Exposed", or "Pre-treatment", "Post-treatment".
+
+    - name: exposedLevel
+      title: 'Exposed Level'
+      type: Level
+      variable: (timeDepStatus)
+      description: >-
+        The level that represents the "exposed" or "active" status of the
+        time-dependent variable.
+
+    # Multiple Time-Dependent Variables
+    - name: enableMultipleTimeDep
+      title: 'Multiple Time-Dependent Variables'
+      type: Bool
+      default: false
+      description: >-
+        Enable analysis of multiple time-dependent variables simultaneously.
+        Useful for complex exposure patterns or multiple biomarkers.
+
+    - name: additionalTimeDepVars
+      title: 'Additional Time-Dependent Variables'
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >-
+        Additional time-dependent variables to include in the analysis.
+        Each should have corresponding time and status variables.
+
+    # Analysis Configuration
+    - name: analysisType
+      title: 'Analysis Type'
+      type: List
+      options:
+        - title: "Basic Simon-Makuch Analysis"
+          name: basic
+        - title: "Comprehensive Time-Dependent Analysis"
+          name: comprehensive
+        - title: "Landmark Analysis"
+          name: landmark
+        - title: "Publication Ready"
+          name: publication
+      default: comprehensive
+      description: >-
+        Type of Simon-Makuch analysis to perform. Comprehensive includes
+        all methods for thorough time-dependent survival analysis.
+
+    - name: confidenceLevel
+      title: 'Confidence Level'
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description: >-
+        Confidence level for survival estimates and statistical tests.
+
+    # Landmark Analysis Options
+    - name: performLandmarkAnalysis
+      title: 'Landmark Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform landmark analysis at specified time points. This method
+        analyzes survival from specific landmark times, avoiding immortal
+        time bias when studying time-dependent exposures.
+
+    - name: landmarkTimes
+      title: 'Landmark Time Points'
+      type: String
+      default: "6, 12, 24"
+      description: >-
+        Comma-separated list of landmark time points for analysis.
+        Patients must survive to each landmark time to be included
+        in that analysis.
+
+    - name: landmarkWindow
+      title: 'Landmark Window'
+      type: Number
+      default: 1.0
+      description: >-
+        Time window around landmark time for determining exposure status.
+        Exposure status is determined within this window before the landmark.
+
+    # Time-Dependent Cox Regression
+    - name: performTimeDependentCox
+      title: 'Time-Dependent Cox Regression'
+      type: Bool
+      default: false
+      description: >-
+        Perform Cox regression with time-dependent covariates. This provides
+        hazard ratios that properly account for changing exposure status.
+
+    - name: timeDependentCovariates
+      title: 'Additional Covariates'
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description: >-
+        Additional covariates to include in time-dependent Cox regression.
+        These can be baseline variables or other time-dependent variables.
+
+    - name: testTimeVaryingEffect
+      title: 'Test Time-Varying Effects'
+      type: Bool
+      default: false
+      description: >-
+        Test whether the effect of the time-dependent variable changes
+        over time (non-proportional hazards for time-dependent covariates).
+
+    # Immortal Time Bias Assessment
+    - name: assessImmortalTimeBias
+      title: 'Assess Immortal Time Bias'
+      type: Bool
+      default: false
+      description: >-
+        Assess and correct for immortal time bias in the analysis.
+        Compares naive analysis (without proper time-dependent handling)
+        with corrected Simon-Makuch analysis.
+
+    - name: naiveComparison
+      title: 'Include Naive Comparison'
+      type: Bool
+      default: false
+      description: >-
+        Include comparison with naive analysis that ignores the time-dependent
+        nature of the exposure. This demonstrates the importance of proper
+        time-dependent analysis.
+
+    # Plot Options
+    - name: showSimonMakuchPlot
+      title: 'Simon-Makuch Plot'
+      type: Bool
+      default: true
+      description: >-
+        Display Simon-Makuch survival curves that properly account for
+        time-dependent exposure status changes during follow-up.
+
+    - name: showLandmarkPlots
+      title: 'Landmark Survival Plots'
+      type: Bool
+      default: false
+      description: >-
+        Display survival curves from each landmark time point, showing
+        how the effect of exposure varies with timing.
+
+    - name: showCumulativeIncidencePlot
+      title: 'Cumulative Incidence Plot'
+      type: Bool
+      default: false
+      description: >-
+        Display cumulative incidence curves for time-dependent exposures,
+        useful for understanding exposure patterns over time.
+
+    - name: plotTimeRange
+      title: 'Plot Time Range (months)'
+      type: String
+      default: "auto"
+      description: >-
+        Maximum time for survival plots. Use "auto" for automatic range or
+        specify maximum months (e.g., "60" for 5-year follow-up).
+
+    - name: showConfidenceIntervals
+      title: 'Show Confidence Intervals'
+      type: Bool
+      default: true
+      description: >-
+        Display confidence intervals around survival curves.
+
+    - name: showRiskTables
+      title: 'Show Risk Tables'
+      type: Bool
+      default: true
+      description: >-
+        Display at-risk tables below survival curves, stratified by
+        time-dependent exposure status.
+
+    - name: plotExposureStatus
+      title: 'Plot Exposure Status Over Time'
+      type: Bool
+      default: false
+      description: >-
+        Display plot showing how exposure status changes over time
+        for the study population.
+
+    # Statistical Testing Options
+    - name: performLogRankTest
+      title: 'Log-Rank Test'
+      type: Bool
+      default: true
+      description: >-
+        Perform log-rank test comparing survival between exposure groups,
+        properly accounting for time-dependent nature.
+
+    - name: performMantelByarTest
+      title: 'Mantel-Byar Test'
+      type: Bool
+      default: false
+      description: >-
+        Perform Mantel-Byar test, which is specifically designed for
+        comparing survival with time-dependent exposures.
+
+    - name: performTimeDepLRTest
+      title: 'Time-Dependent Log-Rank Test'
+      type: Bool
+      default: false
+      description: >-
+        Perform time-dependent log-rank test that allows for changing
+        effects of exposure over time.
+
+    # Advanced Options
+    - name: handleTieBreaking
+      title: 'Tie-Breaking Method'
+      type: List
+      options:
+        - title: "Efron (recommended)"
+          name: efron
+        - title: "Breslow"
+          name: breslow
+        - title: "Exact"
+          name: exact
+      default: efron
+      description: >-
+        Method for handling tied event times in Cox regression.
+
+    - name: robustVariance
+      title: 'Robust Variance Estimation'
+      type: Bool
+      default: false
+      description: >-
+        Use robust (sandwich) variance estimation for Cox regression
+        to account for potential model misspecification.
+
+    - name: clusterVariable
+      title: 'Cluster Variable'
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >-
+        Variable identifying clusters for robust variance estimation
+        (e.g., hospital, physician, family).
+
+    # Output Tables
+    - name: showSurvivalEstimates
+      title: 'Survival Estimates Table'
+      type: Bool
+      default: true
+      description: >-
+        Display table with survival estimates at key time points,
+        stratified by time-dependent exposure status.
+
+    - name: showHazardRatios
+      title: 'Hazard Ratios Table'
+      type: Bool
+      default: true
+      description: >-
+        Display hazard ratios from time-dependent Cox regression
+        with confidence intervals and p-values.
+
+    - name: showLandmarkResults
+      title: 'Landmark Analysis Results'
+      type: Bool
+      default: false
+      description: >-
+        Display detailed results from landmark analysis at each
+        specified time point.
+
+    - name: showExposurePatterns
+      title: 'Exposure Pattern Summary'
+      type: Bool
+      default: false
+      description: >-
+        Display summary of exposure patterns, including time to exposure,
+        exposure duration, and switching patterns.
+
+    - name: showModelDiagnostics
+      title: 'Model Diagnostics'
+      type: Bool
+      default: false
+      description: >-
+        Display diagnostic plots and statistics for time-dependent
+        Cox regression models.
+
+    # Validation Options  
+    - name: performBootstrapValidation
+      title: 'Bootstrap Validation'
+      type: Bool
+      default: false
+      description: >-
+        Perform bootstrap validation to assess stability of results
+        and provide bias-corrected estimates.
+
+    - name: bootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Number
+      min: 100
+      max: 2000
+      default: 500
+      description: >-
+        Number of bootstrap samples for validation analysis.
+
+    - name: performSensitivityAnalysis
+      title: 'Sensitivity Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform sensitivity analysis with different assumptions
+        about exposure timing and immortal time handling.
+
+    # Explanatory Output
+    - name: showExplanations
+      title: 'Show Explanations'
+      type: Bool
+      default: true
+      description: >-
+        Include detailed explanations for Simon-Makuch methodology
+        and interpretation of results.
+
+    - name: showMethodologyNotes
+      title: 'Methodology Notes'
+      type: Bool
+      default: false
+      description: >-
+        Display detailed notes on the statistical methods used
+        and their appropriate interpretation.
+
+    - name: includeClinicalGuidance
+      title: 'Clinical Interpretation Guidance'
+      type: Bool
+      default: false
+      description: >-
+        Include guidance for clinical interpretation of time-dependent
+        survival analysis results.
+
+...

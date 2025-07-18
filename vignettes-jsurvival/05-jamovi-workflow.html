@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="ClinicoPath Development Team" />
+
+<meta name="date" content="2025-06-30" />
+
+<title>Using jsurvival in jamovi: Complete Workflow</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Using jsurvival in jamovi: Complete
+Workflow</h1>
+<h4 class="author">ClinicoPath Development Team</h4>
+<h4 class="date">2025-06-30</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#overview" id="toc-overview"><span class="toc-section-number">1</span> Overview</a></li>
+<li><a href="#installation-in-jamovi" id="toc-installation-in-jamovi"><span class="toc-section-number">2</span> Installation in jamovi</a>
+<ul>
+<li><a href="#option-1-jamovi-library-recommended" id="toc-option-1-jamovi-library-recommended"><span class="toc-section-number">2.1</span> Option 1: jamovi Library
+(Recommended)</a></li>
+<li><a href="#option-2-manual-installation" id="toc-option-2-manual-installation"><span class="toc-section-number">2.2</span> Option 2: Manual
+Installation</a></li>
+</ul></li>
+<li><a href="#data-preparation" id="toc-data-preparation"><span class="toc-section-number">3</span> Data Preparation</a>
+<ul>
+<li><a href="#required-variables" id="toc-required-variables"><span class="toc-section-number">3.1</span> Required Variables</a></li>
+<li><a href="#optional-variables" id="toc-optional-variables"><span class="toc-section-number">3.2</span> Optional Variables</a></li>
+<li><a href="#example-data-structure" id="toc-example-data-structure"><span class="toc-section-number">3.3</span> Example Data Structure</a></li>
+</ul></li>
+<li><a href="#analysis-workflows" id="toc-analysis-workflows"><span class="toc-section-number">4</span> Analysis Workflows</a>
+<ul>
+<li><a href="#single-arm-survival-analysis" id="toc-single-arm-survival-analysis"><span class="toc-section-number">4.1</span> 1. Single Arm Survival
+Analysis</a></li>
+<li><a href="#survival-analysis-group-comparisons" id="toc-survival-analysis-group-comparisons"><span class="toc-section-number">4.2</span> 2. Survival Analysis (Group
+Comparisons)</a></li>
+<li><a href="#continuous-variable-survival-analysis" id="toc-continuous-variable-survival-analysis"><span class="toc-section-number">4.3</span> 3. Continuous Variable Survival
+Analysis</a></li>
+<li><a href="#multivariable-survival-analysis" id="toc-multivariable-survival-analysis"><span class="toc-section-number">4.4</span> 4. Multivariable Survival
+Analysis</a></li>
+<li><a href="#odds-ratio-analysis" id="toc-odds-ratio-analysis"><span class="toc-section-number">4.5</span> 5. Odds Ratio Analysis</a></li>
+<li><a href="#time-interval-calculator" id="toc-time-interval-calculator"><span class="toc-section-number">4.6</span> 6. Time Interval
+Calculator</a></li>
+</ul></li>
+<li><a href="#interpretation-guidelines" id="toc-interpretation-guidelines"><span class="toc-section-number">5</span> Interpretation Guidelines</a>
+<ul>
+<li><a href="#kaplan-meier-curves" id="toc-kaplan-meier-curves"><span class="toc-section-number">5.1</span> Kaplan-Meier Curves</a></li>
+<li><a href="#statistical-tests" id="toc-statistical-tests"><span class="toc-section-number">5.2</span> Statistical Tests</a></li>
+<li><a href="#clinical-interpretation" id="toc-clinical-interpretation"><span class="toc-section-number">5.3</span> Clinical Interpretation</a></li>
+</ul></li>
+<li><a href="#best-practices" id="toc-best-practices"><span class="toc-section-number">6</span> Best Practices</a>
+<ul>
+<li><a href="#data-quality" id="toc-data-quality"><span class="toc-section-number">6.1</span> Data Quality</a></li>
+<li><a href="#analysis-considerations" id="toc-analysis-considerations"><span class="toc-section-number">6.2</span> Analysis Considerations</a></li>
+<li><a href="#reporting" id="toc-reporting"><span class="toc-section-number">6.3</span> Reporting</a></li>
+</ul></li>
+<li><a href="#troubleshooting" id="toc-troubleshooting"><span class="toc-section-number">7</span> Troubleshooting</a>
+<ul>
+<li><a href="#common-issues" id="toc-common-issues"><span class="toc-section-number">7.1</span> Common Issues</a></li>
+<li><a href="#getting-help" id="toc-getting-help"><span class="toc-section-number">7.2</span> Getting Help</a></li>
+</ul></li>
+<li><a href="#further-reading" id="toc-further-reading"><span class="toc-section-number">8</span> Further Reading</a></li>
+</ul>
+</div>
+
+<div id="overview" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Overview</h1>
+<p>This vignette demonstrates how to use the jsurvival module within
+jamovi for comprehensive survival analysis. The jsurvival module is part
+of the ClinicoPath suite and provides a user-friendly interface for
+conducting survival analyses without programming.</p>
+</div>
+<div id="installation-in-jamovi" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Installation in
+jamovi</h1>
+<div id="option-1-jamovi-library-recommended" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Option 1: jamovi
+Library (Recommended)</h2>
+<ol style="list-style-type: decimal">
+<li>Open jamovi</li>
+<li>Click on the <strong>+</strong> button in the top-right corner</li>
+<li>Select <strong>jamovi library</strong></li>
+<li>Search for “ClinicoPath” or “jsurvival”</li>
+<li>Click <strong>Install</strong></li>
+</ol>
+</div>
+<div id="option-2-manual-installation" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Option 2: Manual
+Installation</h2>
+<ol style="list-style-type: decimal">
+<li>Download the latest <code>.jmo</code> file from <a href="https://github.com/sbalci/jsurvival/releases">releases</a></li>
+<li>Open jamovi</li>
+<li>Click <strong>+</strong> → <strong>Sideload</strong> → Select the
+<code>.jmo</code> file</li>
+</ol>
+</div>
+</div>
+<div id="data-preparation" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Data Preparation</h1>
+<div id="required-variables" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Required
+Variables</h2>
+<p>For survival analysis, you need at minimum:</p>
+<ul>
+<li><strong>Time variable</strong>: Time from start of study to event or
+censoring</li>
+<li><strong>Event indicator</strong>: Binary variable indicating whether
+event occurred (1 = event, 0 = censored)</li>
+</ul>
+</div>
+<div id="optional-variables" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Optional
+Variables</h2>
+<ul>
+<li><strong>Grouping factors</strong>: Categorical variables for group
+comparisons</li>
+<li><strong>Continuous predictors</strong>: Variables for cut-point
+analysis</li>
+<li><strong>Multiple explanatory variables</strong>: For multivariable
+analysis</li>
+</ul>
+</div>
+<div id="example-data-structure" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> Example Data
+Structure</h2>
+<pre><code>Patient_ID | Time_months | Death | Treatment | Age | Grade
+1          | 24.5        | 1     | A         | 65  | High
+2          | 36.2        | 0     | B         | 58  | Low
+3          | 12.1        | 1     | A         | 72  | High</code></pre>
+</div>
+</div>
+<div id="analysis-workflows" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Analysis Workflows</h1>
+<div id="single-arm-survival-analysis" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> 1. Single Arm
+Survival Analysis</h2>
+<p><strong>Use case</strong>: Overall survival characteristics of your
+entire study population</p>
+<p><strong>Steps</strong>: 1. Navigate to <strong>Survival</strong> →
+<strong>ClinicoPath Survival</strong> → <strong>Single Arm
+Survival</strong> 2. Assign variables: - <strong>Time Elapsed</strong>:
+Your time variable - <strong>Outcome</strong>: Your event indicator -
+<strong>Outcome Level</strong>: Select the level that indicates an event
+(usually “1”) 3. Configure options: - <strong>Cut Points</strong>: Time
+points for survival estimates (e.g., “12, 36, 60” for 1, 3, 5 years) -
+<strong>Time Type Output</strong>: Choose months or years -
+<strong>Confidence Intervals</strong>: Enable 95% CI - <strong>Risk
+Table</strong>: Show numbers at risk 4. Click <strong>Run</strong></p>
+<p><strong>Output includes</strong>: - Overall survival curve - Median
+survival time with 95% CI - Survival rates at specified time points -
+Natural language summary</p>
+</div>
+<div id="survival-analysis-group-comparisons" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> 2. Survival Analysis
+(Group Comparisons)</h2>
+<p><strong>Use case</strong>: Compare survival between different
+groups</p>
+<p><strong>Steps</strong>: 1. Navigate to <strong>Survival</strong> →
+<strong>ClinicoPath Survival</strong> → <strong>Survival
+Analysis</strong> 2. Assign variables: - <strong>Time Elapsed</strong>:
+Your time variable - <strong>Explanatory</strong>: Grouping variable
+(e.g., treatment, stage) - <strong>Outcome</strong>: Your event
+indicator - <strong>Outcome Level</strong>: Event level 3. Configure
+analysis: - <strong>Analysis Type</strong>: Choose overall, pairwise, or
+combination - <strong>P-value Adjustment</strong>: Method for multiple
+comparisons - <strong>Proportional Hazards</strong>: Enable Cox
+regression 4. Plotting options: - <strong>Risk Table</strong>: Show
+numbers at risk - <strong>Censored Points</strong>: Mark censored
+observations - <strong>Confidence Intervals</strong>: Display CI bands -
+<strong>End Plot</strong>: Set maximum time for plot</p>
+<p><strong>Output includes</strong>: - Kaplan-Meier curves by group -
+Log-rank test results - Cox regression hazard ratios - Pairwise
+comparisons (if selected) - Survival tables by group</p>
+</div>
+<div id="continuous-variable-survival-analysis" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> 3. Continuous
+Variable Survival Analysis</h2>
+<p><strong>Use case</strong>: Find optimal cut-point for a continuous
+biomarker</p>
+<p><strong>Steps</strong>: 1. Navigate to <strong>Survival</strong> →
+<strong>ClinicoPath Survival</strong> → <strong>Survival Analysis for
+Continuous Variable</strong> 2. Assign variables: - <strong>Time
+Elapsed</strong>: Your time variable - <strong>Continuous
+Explanatory</strong>: Your continuous predictor -
+<strong>Outcome</strong>: Your event indicator 3. Cut-point options: -
+<strong>Find Cut-point</strong>: Let algorithm find optimal threshold -
+<strong>Manual Cut-point</strong>: Specify your own threshold 4.
+Configure analysis similar to group comparisons</p>
+<p><strong>Output includes</strong>: - Optimal cut-point determination -
+Survival curves for high/low groups - Hazard ratio for dichotomized
+variable - ROC analysis for cut-point validation</p>
+</div>
+<div id="multivariable-survival-analysis" class="section level2" number="4.4">
+<h2><span class="header-section-number">4.4</span> 4. Multivariable
+Survival Analysis</h2>
+<p><strong>Use case</strong>: Adjust for multiple risk factors
+simultaneously</p>
+<p><strong>Steps</strong>: 1. Navigate to <strong>Survival</strong> →
+<strong>ClinicoPath Survival</strong> → <strong>Multivariable Survival
+Analysis</strong> 2. Assign variables: - <strong>Time Elapsed</strong>:
+Your time variable - <strong>Explanatory</strong>: Multiple explanatory
+variables - <strong>Outcome</strong>: Your event indicator 3. Model
+options: - <strong>Model Type</strong>: Choose Cox proportional hazards
+- <strong>Variable Selection</strong>: Manual or automated selection -
+<strong>Interaction Terms</strong>: Include interactions if needed</p>
+<p><strong>Output includes</strong>: - Multivariable Cox regression
+table - Adjusted hazard ratios with 95% CI - Model fit statistics -
+Adjusted survival curves</p>
+</div>
+<div id="odds-ratio-analysis" class="section level2" number="4.5">
+<h2><span class="header-section-number">4.5</span> 5. Odds Ratio
+Analysis</h2>
+<p><strong>Use case</strong>: Binary outcome analysis (case-control
+studies)</p>
+<p><strong>Steps</strong>: 1. Navigate to <strong>Survival</strong> →
+<strong>ClinicoPath Survival</strong> → <strong>Odds Ratio Table and
+Plot</strong> 2. Assign variables: - <strong>Outcome</strong>: Binary
+outcome variable - <strong>Explanatory</strong>: Risk factors 3.
+Configure: - <strong>Reference Level</strong>: Choose reference category
+- <strong>Confidence Level</strong>: Usually 95%</p>
+<p><strong>Output includes</strong>: - Odds ratio table - Forest plot -
+Chi-square test results</p>
+</div>
+<div id="time-interval-calculator" class="section level2" number="4.6">
+<h2><span class="header-section-number">4.6</span> 6. Time Interval
+Calculator</h2>
+<p><strong>Use case</strong>: Calculate time differences from dates</p>
+<p><strong>Steps</strong>: 1. Navigate to <strong>Survival</strong> →
+<strong>Data Preparation</strong> → <strong>Time Interval
+Calculator</strong> 2. Assign variables: - <strong>Start Date</strong>:
+Beginning date - <strong>End Date</strong>: End date or follow-up date
+3. Options: - <strong>Output Unit</strong>: Days, months, or years -
+<strong>Handle Missing</strong>: How to treat missing dates</p>
+</div>
+</div>
+<div id="interpretation-guidelines" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Interpretation
+Guidelines</h1>
+<div id="kaplan-meier-curves" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> Kaplan-Meier
+Curves</h2>
+<ul>
+<li><strong>Steep drops</strong>: High event rate at specific times</li>
+<li><strong>Flat portions</strong>: Low event rate (good prognosis
+periods)</li>
+<li><strong>Wide confidence intervals</strong>: High uncertainty due to
+small sample size</li>
+<li><strong>Crossing curves</strong>: Proportional hazards assumption
+may be violated</li>
+</ul>
+</div>
+<div id="statistical-tests" class="section level2" number="5.2">
+<h2><span class="header-section-number">5.2</span> Statistical
+Tests</h2>
+<ul>
+<li><strong>Log-rank test</strong>: Compares overall survival
+distributions</li>
+<li><strong>p &lt; 0.05</strong>: Statistically significant difference
+between groups</li>
+<li><strong>Hazard Ratio &gt; 1</strong>: Increased risk of event</li>
+<li><strong>Hazard Ratio &lt; 1</strong>: Decreased risk of event
+(protective factor)</li>
+</ul>
+</div>
+<div id="clinical-interpretation" class="section level2" number="5.3">
+<h2><span class="header-section-number">5.3</span> Clinical
+Interpretation</h2>
+<ul>
+<li><strong>Median survival</strong>: Time when 50% of subjects have
+experienced the event</li>
+<li><strong>5-year survival rate</strong>: Percentage alive at 5
+years</li>
+<li><strong>Confidence intervals</strong>: Uncertainty range around
+estimates</li>
+<li><strong>Numbers at risk</strong>: Sample size remaining at each time
+point</li>
+</ul>
+</div>
+</div>
+<div id="best-practices" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Best Practices</h1>
+<div id="data-quality" class="section level2" number="6.1">
+<h2><span class="header-section-number">6.1</span> Data Quality</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Check for data completeness</strong>: Missing time or event
+data</li>
+<li><strong>Validate event coding</strong>: Ensure consistent coding
+(0/1 or No/Yes)</li>
+<li><strong>Review follow-up times</strong>: Check for unrealistic or
+negative times</li>
+<li><strong>Assess censoring pattern</strong>: High censoring rates may
+bias results</li>
+</ol>
+</div>
+<div id="analysis-considerations" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> Analysis
+Considerations</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Sample size</strong>: Minimum 10 events per variable in Cox
+regression</li>
+<li><strong>Proportional hazards</strong>: Check assumption using
+Schoenfeld residuals</li>
+<li><strong>Multiple comparisons</strong>: Adjust p-values when testing
+multiple groups</li>
+<li><strong>Clinical relevance</strong>: Statistical significance
+vs. clinical importance</li>
+</ol>
+</div>
+<div id="reporting" class="section level2" number="6.3">
+<h2><span class="header-section-number">6.3</span> Reporting</h2>
+<ol style="list-style-type: decimal">
+<li><strong>CONSORT guidelines</strong>: Follow reporting standards for
+survival studies</li>
+<li><strong>Number at risk tables</strong>: Always include in survival
+plots</li>
+<li><strong>Confidence intervals</strong>: Report alongside point
+estimates</li>
+<li><strong>Effect sizes</strong>: Focus on hazard ratios and median
+survival differences</li>
+</ol>
+</div>
+</div>
+<div id="troubleshooting" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> Troubleshooting</h1>
+<div id="common-issues" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> Common Issues</h2>
+<ul>
+<li><strong>“No events observed”</strong>: Check event coding and
+follow-up time</li>
+<li><strong>“Convergence failed”</strong>: May indicate separation or
+small sample size</li>
+<li><strong>“Proportional hazards violated”</strong>: Consider
+stratified Cox model</li>
+<li><strong>Missing survival curves</strong>: Check variable assignments
+and data types</li>
+</ul>
+</div>
+<div id="getting-help" class="section level2" number="7.2">
+<h2><span class="header-section-number">7.2</span> Getting Help</h2>
+<ul>
+<li><strong>Documentation</strong>: Visit <a href="https://www.serdarbalci.com/jsurvival/">jsurvival website</a></li>
+<li><strong>Issues</strong>: Report bugs at <a href="https://github.com/sbalci/ClinicoPathJamoviModule/issues/">GitHub
+Issues</a></li>
+<li><strong>Contact</strong>: <a href="mailto:serdarbalci@serdarbalci.com" class="email">serdarbalci@serdarbalci.com</a></li>
+</ul>
+</div>
+</div>
+<div id="further-reading" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> Further Reading</h1>
+<ul>
+<li><a href="https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html">Survival
+Analysis in R Tutorial</a></li>
+<li><a href="https://sbalci.github.io/ClinicoPathJamoviModule/">ClinicoPath
+Documentation</a></li>
+<li><a href="https://www.jamovi.org/user-manual.html">jamovi User
+Guide</a></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

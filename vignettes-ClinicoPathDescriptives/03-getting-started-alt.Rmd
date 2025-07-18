@@ -1,0 +1,311 @@
+---
+title: "General 02: Getting Started with Statistical Analysis for Pathologists"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+ClinicoPathDescriptives is a comprehensive R package designed for descriptive analysis in clinicopathological research. It provides both programmatic R functions and a graphical user interface through jamovi, making advanced statistical analysis accessible to researchers with varying levels of programming experience.
+
+### Key Features
+
+- **Descriptive Statistics**: Generate comprehensive "Table One" summaries
+- **Cross-tabulations**: Create contingency tables with appropriate statistical tests  
+- **Visualization Tools**: Age pyramids, alluvial diagrams, Venn diagrams, and more
+- **Treatment Response Analysis**: Waterfall and swimmer plots for oncology research
+- **Data Quality Assessment**: Benford's law analysis for fraud detection
+- **Dual Interface**: Use in R or through jamovi's point-and-click interface
+
+## Installation
+
+### Install from GitHub
+
+```{r eval=FALSE}
+# Install development version
+if (!require("remotes")) install.packages("remotes")
+remotes::install_github("sbalci/ClinicoPathDescriptives")
+```
+
+### Install as jamovi Module
+
+Download the `.jmo` file from [Releases](https://github.com/sbalci/ClinicoPathDescriptives/releases) and install in jamovi via: `jamovi menu > Modules > Install from file`
+
+## Loading the Package
+
+```{r setup}
+library(ClinicoPath)
+library(dplyr)    # For data manipulation
+library(ggplot2)  # For additional plotting
+library(tidyr)   # For data reshaping 
+```
+
+## Example Dataset
+
+The package includes a comprehensive histopathology dataset with 250 cancer patients and 38 variables including demographics, pathological features, biomarkers, and outcomes.
+
+```{r}
+# Load the example dataset
+data(histopathology)
+
+# Examine the structure
+str(histopathology, give.attr = FALSE)
+```
+
+```{r}
+# Quick overview of key variables
+histopathology %>%
+  select(Age, Sex, Grade, TStage, Group, Outcome, OverallTime) %>%
+  head(10)
+```
+
+## Basic Descriptive Analysis
+
+### Table One
+
+Generate a comprehensive descriptive summary table - the cornerstone of clinical research manuscripts:
+
+```{r}
+# Basic Table One
+tableone(
+  data = histopathology,
+  vars = c("Age", "Sex", "Grade", "TStage", "LVI", "PNI")
+)
+```
+
+### Continuous Variables Summary
+
+Generate detailed summaries for continuous variables:
+
+```{r}
+summarydata(
+  data = histopathology,
+  vars = c("Age", "OverallTime", "MeasurementA"),
+  date_vars = NULL,
+  grvar = "Grade"
+)
+```
+
+### Categorical Variables Summary
+
+Analyze categorical variables with counts and percentages:
+
+```{r}
+reportcat(
+  data = histopathology,
+  vars = c("Sex", "Grade", "TStage", "LVI", "PNI")
+)
+```
+
+## Cross-tabulation Analysis
+
+Create contingency tables with appropriate statistical tests:
+
+```{r}
+crosstable(
+  data = histopathology,
+  vars = "Grade",
+  group = "Group"
+)
+```
+
+```{r}
+# Multiple variables cross-tabulation
+crosstable(
+  data = histopathology,
+  vars = c("Grade", "TStage"),
+  group = "LymphNodeMetastasis"
+)
+```
+
+## Data Visualization
+
+### Age Pyramid
+
+Visualize age and sex distribution:
+
+```{r}
+agepyramid(
+  data = histopathology,
+  age = "Age",
+  gender = "Sex",
+  female = "Female"
+)
+```
+
+### Alluvial Diagrams
+
+Show relationships between categorical variables:
+
+```{r}
+alluvial(
+  data = histopathology,
+  vars = c("Grade", "TStage", "LymphNodeMetastasis", "Outcome"),
+  condensationvar = "Outcome"
+)
+```
+
+### Venn Diagrams
+
+Analyze overlap between sets:
+
+```{r}
+# Create binary indicators for Venn diagram
+histopathology_venn <- histopathology %>%
+  mutate(
+    LVI_present = ifelse(LVI == "Present", 1, 0),
+    PNI_present = ifelse(PNI == "Present", 1, 0),
+    LN_positive = ifelse(LymphNodeMetastasis == "Present", 1, 0)
+  )
+
+venn(
+  data = histopathology_venn,
+  var1 = "LVI_present",
+  var1true = 1,
+  var2 = "PNI_present",
+  var2true = 1,
+  var3 = "LN_positive",
+  var3true = 1,
+  var4 = NULL,
+  var4true = NULL
+)
+```
+
+## Data Quality Assessment
+
+### Missing Value Analysis
+
+Check for missing values and data completeness:
+
+```{r}
+# Check data completeness
+missing_summary <- histopathology %>%
+  summarise_all(~sum(is.na(.))) %>%
+  gather(variable, missing_count) %>%
+  mutate(missing_percent = round(missing_count / nrow(histopathology) * 100, 1)) %>%
+  filter(missing_count > 0) %>%
+  arrange(desc(missing_count))
+
+print(missing_summary)
+```
+
+### Variable Tree Summary
+
+Get a hierarchical overview of your dataset:
+
+```{r eval=FALSE}
+# Variable tree visualization example
+# Note: vartree requires specific parameter configuration for optimal results
+# This is a demonstration of the function call structure
+vartree_result <- vartree(
+  data = histopathology,
+  vars = c("Grade", "TStage", "LVI", "PNI"),
+  percvar = NULL,
+  percvarLevel = NULL,
+  summaryvar = NULL,
+  prunebelow = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  follow = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL,
+  excl = FALSE,
+  vp = TRUE,
+  horizontal = FALSE,
+  sline = TRUE,
+  varnames = FALSE,
+  nodelabel = TRUE,
+  pct = FALSE
+)
+
+# For detailed vartree examples, see the vartree-specific vignette
+cat("Variable tree visualization complete. See vartree documentation for advanced usage.")
+```
+
+## Working with Treatment Response Data
+
+Load the treatment response dataset for oncology-specific analyses:
+
+```{r}
+# Load treatment response data
+data(treatmentResponse)
+if(exists("treatmentResponse")) {
+  head(treatmentResponse)
+} else {
+  cat("treatmentResponse dataset not found. Using histopathology dataset instead.\n")
+  head(histopathology)
+}
+```
+
+### Waterfall Plot
+
+Visualize individual patient treatment responses:
+
+```{r eval=FALSE}
+# Waterfall plot example (requires proper treatmentResponse dataset)
+if(exists("treatmentResponse") && "PatientID" %in% names(treatmentResponse)) {
+  waterfall(
+    data = treatmentResponse,
+    patientID = "PatientID",
+    responseVar = "ResponseValue",
+    timeVar = NULL,
+    showWaterfallPlot = TRUE
+  )
+} else {
+  cat("Waterfall plot requires treatmentResponse dataset with PatientID and ResponseValue columns.\n")
+  cat("See waterfall vignette for detailed examples with proper data structure.\n")
+}
+```
+
+## Integration with jamovi
+
+All functions in this package are also available through jamovi's graphical interface:
+
+1. **Install the module** in jamovi
+2. **Navigate to**: `Exploration > ClinicoPath Descriptives`
+3. **Select your analysis** function
+4. **Configure options** through the GUI
+5. **Generate results** with point-and-click ease
+
+### jamovi Advantages
+
+- No programming required
+- Interactive parameter adjustment
+- Real-time result updates
+- Export capabilities for reports
+- Accessible to non-programmers
+
+## Next Steps
+
+This vignette covered the basic functionality of ClinicoPathDescriptives. For more advanced usage, see:
+
+- **Clinical Workflow Vignette**: Complete analysis workflows for clinical research
+- **Treatment Response Analysis**: Advanced oncology analysis techniques  
+- **Data Quality and Exploration**: Comprehensive data assessment methods
+- **Visualization Gallery**: Advanced plotting techniques and customization
+
+## Citation
+
+```{r eval=FALSE}
+citation("ClinicoPathDescriptives")
+```
+
+## Support
+
+- 📖 [Documentation](https://www.serdarbalci.com/ClinicoPathDescriptives/)
+- 🐛 [Report Issues](https://github.com/sbalci/ClinicoPathJamoviModule/issues)
+- 🌐 [jamovi Module Hub](https://sbalci.github.io/ClinicoPathJamoviModule/)
