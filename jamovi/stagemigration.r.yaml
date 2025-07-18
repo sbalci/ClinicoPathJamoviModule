@@ -119,6 +119,36 @@ items:
 
 
 
+
+    # Migration Summary Explanation
+    - name: migrationSummaryExplanation
+      title: Understanding Statistical Tests for Migration
+      type: Html
+      visible: (showMigrationSummary && showExplanations)
+      clearWith:
+          - showMigrationSummary
+
+    # Migration Summary
+    - name: migrationSummary
+      title: Migration Summary
+      type: Table
+      visible: (showMigrationSummary)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+
+
     # Statistical Comparison Explanation
     - name: statisticalComparisonExplanation
       title: Understanding Statistical Comparison Metrics
@@ -151,36 +181,6 @@ items:
           - name: interpretation
             title: "Interpretation"
             type: text
-
-
-
-    # Migration Summary Explanation
-    - name: migrationSummaryExplanation
-      title: Understanding Statistical Tests for Migration
-      type: Html
-      visible: (showMigrationSummary && showExplanations)
-      clearWith:
-          - showMigrationSummary
-
-    # Migration Summary
-    - name: migrationSummary
-      title: Migration Summary
-      type: Table
-      visible: (showMigrationSummary)
-      clearWith:
-          - oldStage
-          - newStage
-          - survivalTime
-          - event
-          - eventLevel
-      columns:
-          - name: statistic
-            title: "Statistic"
-            type: text
-          - name: value
-            title: "Value"
-            type: text
-
 
 
 

@@ -4,6 +4,9 @@ Rscript -e 'tryCatch(pkgdown::build_articles(), error = function(e) cat("ERROR:"
 RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64" \
 Rscript -e 'tryCatch(devtools::build_vignettes(keep_md = TRUE), error = function(e) cat("ERROR:", conditionMessage(e), "\n"))' | claude
 
+Rscript -e 'source("/Users/serdarbalci/Downloads/test_pancreas_staging.R")' | claude
+
+  
 
 RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64" \
 Rscript -e "

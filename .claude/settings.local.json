@@ -44,7 +44,9 @@
       "WebFetch(domain:chop-cgtinformatics.github.io)",
       "WebFetch(domain:jbengler.github.io)",
       "Bash(diff:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(# Count opening and closing braces in the calculateAdvancedMetrics function\nsed -n ''735,970p'' /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/stagemigration.b.R | tr -cd ''{}'' | fold -w1 | sort | uniq -c)",
+      "Bash(# Check the .safeExecute call specifically around lines 780-810\nsed -n ''780,810p'' /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/stagemigration.b.R)"
     ],
     "deny": []
   }
