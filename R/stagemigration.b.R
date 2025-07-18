@@ -188,6 +188,322 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         },
         
+        # Helper function to safely convert values to atomic types
+        .safeAtomic = function(value, type = "numeric", default = NA) {
+            # Safely convert a value to atomic type with fallback
+            tryCatch({
+                if (is.null(value) || length(value) == 0) {
+                    return(default)
+                }
+                
+                # Convert based on type
+                if (type == "numeric") {
+                    result <- as.numeric(value)[1]
+                    return(if (is.finite(result)) result else default)
+                } else if (type == "integer") {
+                    result <- as.integer(value)[1]
+                    return(if (is.finite(result)) result else as.integer(default))
+                } else if (type == "character") {
+                    result <- as.character(value)[1]
+                    return(if (is.na(result)) as.character(default) else result)
+                } else if (type == "logical") {
+                    result <- as.logical(value)[1]
+                    return(if (is.na(result)) as.logical(default) else result)
+                } else {
+                    return(default)
+                }
+            }, error = function(e) {
+                return(default)
+            })
+        },
+        
+        # Standardized error handling wrapper
+        .safeExecute = function(expr, 
+                               errorReturn = NULL, 
+                               errorMessage = "Operation failed", 
+                               warningMessage = NULL,
+                               silent = FALSE) {
+            # Standardized error handling for consistent user experience
+            # expr: Expression to execute
+            # errorReturn: Value to return on error (default NULL)
+            # errorMessage: User-friendly error message
+            # warningMessage: Optional warning to show on error
+            # silent: If TRUE, suppress error messages
+            
+            result <- tryCatch({
+                expr
+            }, error = function(e) {
+                if (!silent) {
+                    # Log detailed error for debugging
+                    message(paste("DEBUG:", errorMessage, "-", e$message))
+                    
+                    # Show user-friendly warning if specified
+                    if (!is.null(warningMessage)) {
+                        warning(warningMessage, call. = FALSE)
+                    }
+                }
+                return(errorReturn)
+            }, warning = function(w) {
+                # Capture warnings but let execution continue
+                if (!silent) {
+                    message(paste("Warning in", errorMessage, ":", w$message))
+                }
+                # Re-evaluate the expression suppressing the warning
+                suppressWarnings(expr)
+            })
+            
+            return(result)
+        },
+        
+        # Helper function to get bootstrap repetitions consistently
+        .getBootstrapReps = function(maxReps = NULL) {
+            # Get bootstrap repetitions from options with optional maximum limit
+            # maxReps: Optional maximum number of repetitions for efficiency
+            
+            baseReps <- self$options$bootstrapReps
+            
+            # Validate base repetitions
+            if (is.null(baseReps) || !is.numeric(baseReps) || baseReps < 1) {
+                warning("Invalid bootstrap repetitions in options, using default 1000")
+                baseReps <- 1000
+            }
+            
+            # Apply maximum limit if specified
+            if (!is.null(maxReps) && is.numeric(maxReps) && maxReps > 0) {
+                return(min(baseReps, maxReps))
+            }
+            
+            return(baseReps)
+        },
+        
+        .setExplanationContent = function(resultName, htmlContent) {
+            # Centralized explanation content management
+            # Only set content if showExplanations is enabled to optimize memory usage
+            if (self$options$showExplanations) {
+                self$results[[resultName]]$setContent(htmlContent)
+            }
+        },
+        
+        .validateVisibilityLogic = function() {
+            # Validate consistency between visibility conditions and actual content generation
+            # This function ensures that results are only generated when they will be visible
+            
+            visibility_issues <- list()
+            
+            # Check for common visibility conflicts
+            visibility_rules <- list(
+                # Tables that should be visible when their primary option is enabled
+                "homogeneityTests" = "performHomogeneityTests",
+                "nriResults" = "calculateNRI",
+                "idiResults" = "calculateIDI",
+                "bootstrapResults" = "performBootstrap",
+                "rocAnalysis" = "performROCAnalysis",
+                "dcaResults" = "performDCA",
+                "calibrationAnalysis" = "performCalibration",
+                "pseudoR2Results" = "calculatePseudoR2",
+                "likelihoodTests" = "performLikelihoodTests",
+                "willRogersAnalysis" = "showWillRogersAnalysis",
+                "clinicalInterpretation" = "showClinicalInterpretation",
+                "executiveSummary" = "generateExecutiveSummary",
+                "statisticalSummary" = "showStatisticalSummary",
+                
+                # Multifactorial analysis results
+                "multifactorialResults" = "enableMultifactorialAnalysis",
+                "adjustedCIndexComparison" = "enableMultifactorialAnalysis",
+                "nestedModelTests" = "enableMultifactorialAnalysis",
+                "stepwiseResults" = "enableMultifactorialAnalysis",
+                "interactionTests" = "enableMultifactorialAnalysis",
+                "stratifiedAnalysis" = "enableMultifactorialAnalysis",
+                
+                # Visualization elements
+                "migrationHeatmap" = "showMigrationHeatmap",
+                "rocComparisonPlot" = "showROCComparison",
+                "forestPlot" = "showForestPlot",
+                "calibrationPlots" = "showCalibrationPlots",
+                "decisionCurves" = "showDecisionCurves",
+                "survivalCurves" = "showSurvivalCurves"
+            )
+            
+            # Check each visibility rule
+            for (result_name in names(visibility_rules)) {
+                option_name <- visibility_rules[[result_name]]
+                
+                # Check if option is enabled
+                if (!is.null(self$options[[option_name]]) && 
+                    isTRUE(self$options[[option_name]])) {
+                    
+                    # This result should be generated - no issue
+                    next
+                }
+                
+                # Check if result exists despite option being disabled
+                if (exists(result_name, envir = self$results)) {
+                    visibility_issues[[result_name]] <- paste(
+                        "Result", result_name, "may be generated despite option", 
+                        option_name, "being disabled"
+                    )
+                }
+            }
+            
+            # Return any visibility issues found
+            return(visibility_issues)
+        },
+        
+        # Option dependency validation system
+        .validateOptionDependencies = function() {
+            # Validate that option dependencies are properly satisfied
+            # Returns list with validation results and warnings
+            
+            issues <- list()
+            warnings <- list()
+            
+            # Define dependency rules
+            dependencies <- list(
+                # DCA depends on Cox models being fittable (requires basic survival data)
+                "performDCA" = list(
+                    requires = c("oldStage", "newStage", "survivalTime", "event"),
+                    analysis_type = "comprehensive",
+                    message = "Decision Curve Analysis requires Cox models to be fitted first"
+                ),
+                
+                # NRI depends on survival analysis capability
+                "calculateNRI" = list(
+                    requires = c("oldStage", "newStage", "survivalTime", "event"),
+                    analysis_type = "standard",
+                    message = "Net Reclassification Improvement requires survival analysis"
+                ),
+                
+                # IDI depends on Cox models and discrimination analysis
+                "calculateIDI" = list(
+                    requires = c("oldStage", "newStage", "survivalTime", "event"),
+                    analysis_type = "standard",
+                    message = "Integrated Discrimination Improvement requires Cox models"
+                ),
+                
+                # ROC Analysis depends on Cox models
+                "performROCAnalysis" = list(
+                    requires = c("oldStage", "newStage", "survivalTime", "event"),
+                    analysis_type = "standard",
+                    message = "Time-dependent ROC Analysis requires Cox models"
+                ),
+                
+                # Calibration depends on Cox models being fitted
+                "performCalibration" = list(
+                    requires = c("oldStage", "newStage", "survivalTime", "event"),
+                    analysis_type = "any",
+                    message = "Calibration Analysis requires Cox models to be fitted"
+                ),
+                
+                # Bootstrap validation depends on basic analysis capability
+                "performBootstrap" = list(
+                    requires = c("oldStage", "newStage", "survivalTime", "event"),
+                    analysis_type = "comprehensive",
+                    message = "Bootstrap validation requires basic survival analysis"
+                ),
+                
+                # Homogeneity tests need staging variables
+                "performHomogeneityTests" = list(
+                    requires = c("oldStage", "newStage", "survivalTime", "event"),
+                    analysis_type = "any",
+                    message = "Homogeneity tests require staging and survival variables"
+                ),
+                
+                # Pseudo R-squared depends on Cox models
+                "calculatePseudoR2" = list(
+                    requires = c("oldStage", "newStage", "survivalTime", "event"),
+                    analysis_type = "any",
+                    message = "Pseudo R-squared calculation requires Cox models"
+                )
+            )
+            
+            # Check each dependency
+            for (option_name in names(dependencies)) {
+                option_enabled <- self$options[[option_name]]
+                
+                if (!is.null(option_enabled) && isTRUE(option_enabled)) {
+                    dep_rule <- dependencies[[option_name]]
+                    
+                    # Check required options
+                    missing_reqs <- character(0)
+                    for (req in dep_rule$requires) {
+                        if (is.null(self$options[[req]]) || 
+                            (is.character(self$options[[req]]) && self$options[[req]] == "")) {
+                            missing_reqs <- c(missing_reqs, req)
+                        }
+                    }
+                    
+                    if (length(missing_reqs) > 0) {
+                        issues[[option_name]] <- list(
+                            option = option_name,
+                            missing = missing_reqs,
+                            message = paste(dep_rule$message, "- Missing:", paste(missing_reqs, collapse = ", "))
+                        )
+                    }
+                    
+                    # Check analysis type requirements
+                    if (dep_rule$analysis_type != "any") {
+                        current_type <- self$options$analysisType
+                        
+                        if (dep_rule$analysis_type == "standard" && 
+                            !current_type %in% c("standard", "comprehensive", "publication")) {
+                            warnings[[option_name]] <- list(
+                                option = option_name,
+                                message = paste(option_name, "is enabled but requires 'standard' or higher analysis type.",
+                                              "Current type:", current_type)
+                            )
+                        } else if (dep_rule$analysis_type == "comprehensive" && 
+                                   !current_type %in% c("comprehensive", "publication")) {
+                            warnings[[option_name]] <- list(
+                                option = option_name,
+                                message = paste(option_name, "is enabled but requires 'comprehensive' or 'publication' analysis type.",
+                                              "Current type:", current_type)
+                            )
+                        }
+                    }
+                }
+            }
+            
+            # Additional logical dependency checks
+            
+            # Bootstrap-dependent options
+            bootstrap_dependent <- c("calculateNRI", "calculateIDI")
+            for (option_name in bootstrap_dependent) {
+                if (!is.null(self$options[[option_name]]) && isTRUE(self$options[[option_name]])) {
+                    if (is.null(self$options$performBootstrap) || !isTRUE(self$options$performBootstrap)) {
+                        warnings[[paste0(option_name, "_bootstrap")]] <- list(
+                            option = option_name,
+                            message = paste(option_name, "is enabled but bootstrap validation is disabled.",
+                                          "Consider enabling 'performBootstrap' for confidence intervals.")
+                        )
+                    }
+                }
+            }
+            
+            # Multifactorial analysis dependencies
+            if (!is.null(self$options$enableMultifactorialAnalysis) && 
+                isTRUE(self$options$enableMultifactorialAnalysis)) {
+                
+                has_covariates <- (!is.null(self$options$continuousCovariates) && 
+                                  length(self$options$continuousCovariates) > 0) ||
+                                 (!is.null(self$options$categoricalCovariates) && 
+                                  length(self$options$categoricalCovariates) > 0)
+                
+                if (!has_covariates) {
+                    warnings[["multifactorial_no_covariates"]] <- list(
+                        option = "enableMultifactorialAnalysis",
+                        message = "Multifactorial analysis is enabled but no covariates are specified."
+                    )
+                }
+            }
+            
+            return(list(
+                issues = issues,
+                warnings = warnings,
+                has_issues = length(issues) > 0,
+                has_warnings = length(warnings) > 0
+            ))
+        },
+        
         .validateData = function() {
             # Comprehensive data validation for staging analysis
             if (is.null(self$data) || nrow(self$data) == 0) {
@@ -435,43 +751,56 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 stop(paste("Missing required columns for advanced metrics:", paste(missing_cols, collapse=", ")))
             }
             
-            # Fit Cox models with error handling
+            # Fit Cox models with standardized error handling
             old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
             new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
             
-            old_cox <- NULL
-            new_cox <- NULL
-            
-            tryCatch({
-                old_cox <- coxph(old_formula, data = data)
-                # Debug: Check Cox model fitting
-                if (is.null(old_cox$loglik) || length(old_cox$loglik) < 2) {
+            old_cox <- private$.safeExecute({
+                model <- coxph(old_formula, data = data)
+                # Check Cox model fitting
+                if (is.null(model$loglik) || length(model$loglik) < 2) {
                     warning("Old Cox model did not converge properly")
                 }
-            }, error = function(e) {
-                stop(paste("Failed to fit Cox model for original staging:", e$message))
-            })
+                return(model)
+            },
+            errorReturn = NULL,
+            errorMessage = "Failed to fit Cox model for original staging",
+            warningMessage = "Could not fit Cox model for original staging system")
             
-            tryCatch({
-                new_cox <- coxph(new_formula, data = data)
-                # Debug: Check Cox model fitting
-                if (is.null(new_cox$loglik) || length(new_cox$loglik) < 2) {
+            new_cox <- private$.safeExecute({
+                model <- coxph(new_formula, data = data)
+                # Check Cox model fitting
+                if (is.null(model$loglik) || length(model$loglik) < 2) {
                     warning("New Cox model did not converge properly")
                 }
-            }, error = function(e) {
-                stop(paste("Failed to fit Cox model for new staging:", e$message))
-            })
+                return(model)
+            },
+            errorReturn = NULL,
+            errorMessage = "Failed to fit Cox model for new staging",
+            warningMessage = "Could not fit Cox model for new staging system")
             
-            # Calculate C-index with error handling
-            old_concordance <- NULL
-            new_concordance <- NULL
+            if (is.null(old_cox) || is.null(new_cox)) {
+                stop("Failed to fit Cox models for advanced metrics calculation")
+            }
             
-            tryCatch({
-                old_concordance <- concordance(old_cox)
-                new_concordance <- concordance(new_cox)
-            }, error = function(e) {
-                stop(paste("Failed to calculate concordance indices:", e$message))
-            })
+            # Calculate C-index with standardized error handling
+            old_concordance <- private$.safeExecute({
+                concordance(old_cox)
+            },
+            errorReturn = NULL,
+            errorMessage = "Failed to calculate concordance for original staging",
+            warningMessage = "Could not calculate C-index for original staging system")
+            
+            new_concordance <- private$.safeExecute({
+                concordance(new_cox)
+            },
+            errorReturn = NULL,
+            errorMessage = "Failed to calculate concordance for new staging",
+            warningMessage = "Could not calculate C-index for new staging system")
+            
+            if (is.null(old_concordance) || is.null(new_concordance)) {
+                stop("Failed to calculate concordance indices for staging comparison")
+            }
             
             # Validate concordance objects for NULL, NA, or empty results
             old_c_val <- old_concordance$concordance
@@ -498,23 +827,36 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 c_bootstrap <- NULL
             }
             
-            # Model comparison tests with error handling
-            aic_old <- tryCatch(AIC(old_cox), error = function(e) NA)
-            aic_new <- tryCatch(AIC(new_cox), error = function(e) NA)
+            # Model comparison tests with standardized error handling
+            aic_old <- private$.safeExecute({
+                AIC(old_cox)
+            }, errorReturn = NA, errorMessage = "Failed to calculate AIC for original staging", silent = TRUE)
+            
+            aic_new <- private$.safeExecute({
+                AIC(new_cox)
+            }, errorReturn = NA, errorMessage = "Failed to calculate AIC for new staging", silent = TRUE)
+            
             aic_improvement <- if (!is.na(aic_old) && !is.na(aic_new)) aic_old - aic_new else NA
             
-            bic_old <- tryCatch(BIC(old_cox), error = function(e) NA)
-            bic_new <- tryCatch(BIC(new_cox), error = function(e) NA)
+            bic_old <- private$.safeExecute({
+                BIC(old_cox)
+            }, errorReturn = NA, errorMessage = "Failed to calculate BIC for original staging", silent = TRUE)
+            
+            bic_new <- private$.safeExecute({
+                BIC(new_cox)
+            }, errorReturn = NA, errorMessage = "Failed to calculate BIC for new staging", silent = TRUE)
+            
             bic_improvement <- if (!is.na(bic_old) && !is.na(bic_new)) bic_old - bic_new else NA
             
-            # Likelihood ratio test with error handling
+            # Likelihood ratio test with standardized error handling
             lr_test <- NULL
             if (self$options$performLikelihoodTests) {
-                tryCatch({
-                    lr_test <- anova(old_cox, new_cox, test = "Chisq")
-                }, error = function(e) {
-                    warning(paste("Likelihood ratio test failed:", e$message))
-                })
+                lr_test <- private$.safeExecute({
+                    anova(old_cox, new_cox, test = "Chisq")
+                },
+                errorReturn = NULL,
+                errorMessage = "Failed to perform likelihood ratio test",
+                warningMessage = "Likelihood ratio test could not be computed")
             }
             
             # Pseudo R-squared measures
@@ -547,6 +889,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Net Reclassification Improvement calculation
             if (!self$options$calculateNRI) return(NULL)
             
+            # Check dependencies
+            if (is.null(self$options$oldStage) || is.null(self$options$newStage) || 
+                is.null(self$options$survivalTime) || is.null(self$options$event)) {
+                warning("NRI requires staging and survival variables to be specified")
+                return(list(error = "Missing required variables for NRI"))
+            }
+            
             # Parse time points
             if (is.null(time_points)) {
                 time_points_str <- self$options$nriTimePoints
@@ -566,12 +915,31 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             nri_results <- list()
             
             for (t in time_points) {
-                # Calculate survival probabilities at time t
+                # Calculate survival probabilities at time t with error handling
                 old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
                 new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
                 
-                old_fit <- survfit(old_formula, data = data)
-                new_fit <- survfit(new_formula, data = data)
+                old_fit <- private$.safeExecute({
+                    survfit(old_formula, data = data)
+                }, 
+                errorReturn = NULL,
+                errorMessage = paste("Failed to fit survival model for original staging at time", t),
+                warningMessage = paste("Could not calculate NRI for original staging at", t, "months"))
+                
+                new_fit <- private$.safeExecute({
+                    survfit(new_formula, data = data)
+                }, 
+                errorReturn = NULL,
+                errorMessage = paste("Failed to fit survival model for new staging at time", t),
+                warningMessage = paste("Could not calculate NRI for new staging at", t, "months"))
+                
+                if (is.null(old_fit) || is.null(new_fit)) {
+                    nri_results[[as.character(t)]] <- list(
+                        time_point = t,
+                        error = "Failed to fit survival models"
+                    )
+                    next
+                }
                 
                 # Extract survival probabilities for each patient
                 old_surv_probs <- private$.extractSurvivalProbabilities(old_fit, data, t, old_stage)
@@ -699,6 +1067,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Integrated Discrimination Improvement calculation
             if (!self$options$calculateIDI) return(NULL)
             
+            # Check dependencies
+            if (is.null(self$options$oldStage) || is.null(self$options$newStage) || 
+                is.null(self$options$survivalTime) || is.null(self$options$event)) {
+                warning("IDI requires staging and survival variables to be specified")
+                return(list(error = "Missing required variables for IDI"))
+            }
+            
             old_stage <- self$options$oldStage
             new_stage <- self$options$newStage
             time_var <- self$options$survivalTime
@@ -757,6 +1132,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .performTimeROCAnalysis = function(data, force = FALSE) {
             # Time-dependent ROC analysis
             if (!force && !self$options$performROCAnalysis) return(NULL)
+            
+            # Check dependencies
+            if (is.null(self$options$oldStage) || is.null(self$options$newStage) || 
+                is.null(self$options$survivalTime) || is.null(self$options$event)) {
+                warning("ROC Analysis requires staging and survival variables to be specified")
+                return(list(error = "Missing required variables for ROC Analysis"))
+            }
             
             # Parse time points
             time_points_str <- self$options$rocTimePoints
@@ -941,17 +1323,39 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Decision Curve Analysis
             if (!self$options$performDCA) return(NULL)
             
+            # Check dependencies
+            if (is.null(self$options$oldStage) || is.null(self$options$newStage) || 
+                is.null(self$options$survivalTime) || is.null(self$options$event)) {
+                warning("DCA requires staging and survival variables to be specified")
+                return(list(error = "Missing required variables for DCA"))
+            }
+            
             old_stage <- self$options$oldStage
             new_stage <- self$options$newStage
             time_var <- self$options$survivalTime
             event_var <- "event_binary"
             
-            # Fit Cox models
+            # Fit Cox models with consistent error handling
             old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
             new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
             
-            old_cox <- coxph(old_formula, data = data)
-            new_cox <- coxph(new_formula, data = data)
+            old_cox <- private$.safeExecute({
+                coxph(old_formula, data = data)
+            },
+            errorReturn = NULL,
+            errorMessage = "Failed to fit Cox model for original staging in DCA",
+            warningMessage = "Decision Curve Analysis failed for original staging system")
+            
+            new_cox <- private$.safeExecute({
+                coxph(new_formula, data = data)
+            },
+            errorReturn = NULL,
+            errorMessage = "Failed to fit Cox model for new staging in DCA",
+            warningMessage = "Decision Curve Analysis failed for new staging system")
+            
+            if (is.null(old_cox) || is.null(new_cox)) {
+                return(list(error = "Failed to fit Cox models for DCA"))
+            }
             
             # Get predicted probabilities at specific time point (e.g., 5 years)
             time_horizon <- 60  # 5 years
@@ -984,17 +1388,22 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     new_risk = new_risk
                 )
                 
-                dca_result <- try({
+                dca_result <- private$.safeExecute({
                     dcurves::dca(
                         formula = outcome ~ old_risk + new_risk,
                         data = dca_data,
                         thresholds = seq(0.01, 0.99, by = 0.01)
                     )
-                }, silent = TRUE)
+                },
+                errorReturn = NULL,
+                errorMessage = "Failed to perform Decision Curve Analysis",
+                warningMessage = "Decision Curve Analysis could not be completed. Please check your data.")
                 
-                if (!inherits(dca_result, "try-error")) {
+                if (!is.null(dca_result)) {
                     dca_results$dca_result <- dca_result
                     dca_results$time_horizon <- time_horizon
+                } else {
+                    dca_results$error <- "DCA calculation failed"
                 }
             }
             
@@ -1012,12 +1421,20 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
         },
         
-        .performBootstrapValidation = function(data, n_bootstrap = NULL) {
+        .performBootstrapValidation = function(data, bootstrapReps = NULL) {
             # Bootstrap validation with optimism correction
             if (!self$options$performBootstrap) return(NULL)
             
-            if (is.null(n_bootstrap)) {
-                n_bootstrap <- self$options$bootstrapReps
+            # Check dependencies
+            if (is.null(self$options$oldStage) || is.null(self$options$newStage) || 
+                is.null(self$options$survivalTime) || is.null(self$options$event)) {
+                warning("Bootstrap validation requires staging and survival variables to be specified")
+                return(list(error = "Missing required variables for bootstrap validation"))
+            }
+            
+            # Get bootstrap repetitions using standardized helper
+            if (is.null(bootstrapReps)) {
+                bootstrapReps <- private$.getBootstrapReps()
             }
             
             old_stage <- self$options$oldStage
@@ -1033,21 +1450,32 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
                 new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
                 
-                old_cox_boot <- try(coxph(old_formula, data = boot_data), silent = TRUE)
-                new_cox_boot <- try(coxph(new_formula, data = boot_data), silent = TRUE)
+                old_cox_boot <- private$.safeExecute({
+                    coxph(old_formula, data = boot_data)
+                },
+                errorReturn = NULL,
+                errorMessage = "Bootstrap: Failed to fit old Cox model",
+                silent = TRUE)
                 
-                if (inherits(old_cox_boot, "try-error") || inherits(new_cox_boot, "try-error")) {
+                new_cox_boot <- private$.safeExecute({
+                    coxph(new_formula, data = boot_data)
+                },
+                errorReturn = NULL,
+                errorMessage = "Bootstrap: Failed to fit new Cox model",
+                silent = TRUE)
+                
+                if (is.null(old_cox_boot) || is.null(new_cox_boot)) {
                     return(c(NA, NA, NA))
                 }
 
-                # Helper to safely get concordance. It returns NA if the calculation fails,
-                # returns an empty result, or returns NA.
+                # Helper to safely get concordance using standardized error handling
                 safe_concordance <- function(model, newdata = NULL) {
-                    res <- try(concordance(model, newdata = newdata)$concordance, silent = TRUE)
-                    if (inherits(res, "try-error") || length(res) != 1 || is.na(res)) {
-                        return(NA)
-                    }
-                    return(res)
+                    return(private$.safeExecute({
+                        concordance(model, newdata = newdata)$concordance
+                    },
+                    errorReturn = NA,
+                    errorMessage = "Failed to calculate concordance",
+                    silent = TRUE))
                 }
 
                 # Calculate all four C-indices safely
@@ -1070,7 +1498,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 boot_results <- boot::boot(
                     data = data,
                     statistic = bootstrap_function,
-                    R = n_bootstrap
+                    R = bootstrapReps
                 )
                 
                 # Calculate optimism-corrected estimates
@@ -1080,9 +1508,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Bootstrap confidence intervals
                 if (all(!is.na(boot_results$t[, 2] - boot_results$t[, 1]))) {
-                    improvement_ci <- try({
+                    improvement_ci <- private$.safeExecute({
                         boot::boot.ci(boot_results, type = "perc", index = c(2, 1))
-                    }, silent = TRUE)
+                    },
+                    errorReturn = NULL,
+                    errorMessage = "Failed to calculate bootstrap confidence intervals",
+                    silent = TRUE)
                 } else {
                     improvement_ci <- NULL
                 }
@@ -1093,7 +1524,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     mean_optimism = mean_optimism,
                     optimism_corrected_improvement = optimism_corrected_improvement,
                     improvement_ci = improvement_ci,
-                    n_bootstrap = n_bootstrap
+                    bootstrapReps = bootstrapReps
                 ))
             }
             
@@ -1122,12 +1553,23 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 boot_results <- boot::boot(
                     data = data,
                     statistic = bootstrap_c,
-                    R = min(self$options$bootstrapReps, 500)  # Limit for efficiency
+                    R = private$.getBootstrapReps(500)  # Limit for efficiency
                 )
                 
-                # Calculate confidence intervals
-                old_ci <- try(boot::boot.ci(boot_results, type = "perc", index = 1), silent = TRUE)
-                new_ci <- try(boot::boot.ci(boot_results, type = "perc", index = 2), silent = TRUE)
+                # Calculate confidence intervals with standardized error handling
+                old_ci <- private$.safeExecute({
+                    boot::boot.ci(boot_results, type = "perc", index = 1)
+                },
+                errorReturn = NULL,
+                errorMessage = "Failed to calculate bootstrap CI for original staging",
+                silent = TRUE)
+                
+                new_ci <- private$.safeExecute({
+                    boot::boot.ci(boot_results, type = "perc", index = 2)
+                },
+                errorReturn = NULL,
+                errorMessage = "Failed to calculate bootstrap CI for new staging",
+                silent = TRUE)
                 
                 return(list(
                     boot_results = boot_results,
@@ -1170,10 +1612,15 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 boot_results <- boot::boot(
                     data = data,
                     statistic = bootstrap_idi,
-                    R = min(self$options$bootstrapReps, 500)
+                    R = private$.getBootstrapReps(500)  # Limit for efficiency
                 )
                 
-                idi_ci <- try(boot::boot.ci(boot_results, type = "perc"), silent = TRUE)
+                idi_ci <- private$.safeExecute({
+                    boot::boot.ci(boot_results, type = "perc")
+                },
+                errorReturn = NULL,
+                errorMessage = "Failed to calculate bootstrap CI for IDI",
+                silent = TRUE)
                 
                 return(list(
                     boot_results = boot_results,
@@ -1186,14 +1633,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         
         .calculatePseudoR2 = function(old_cox, new_cox, data) {
             # Calculate various pseudo R-squared measures with robust error handling
-            # For Cox models, we need different approach than GLM
+            # For Cox models, we need to fit a proper null model for comparison
+            # IMPORTANT: In multifactorial analysis, the null model should include covariates!
             
             tryCatch({
-                # For Cox models, we don't need a separate null model
-                # The loglik[1] is the null (intercept-only) log-likelihood
-                # The loglik[2] is the fitted model log-likelihood
-                
-                # Extract log-likelihoods properly for Cox models
+                # Extract fitted model log-likelihoods
                 if (is.null(old_cox$loglik) || length(old_cox$loglik) < 2) {
                     warning("Old Cox model log-likelihood not available")
                     return(list(
@@ -1214,18 +1658,88 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ))
                 }
                 
-                # For Cox models: loglik[1] = null model, loglik[2] = fitted model
-                ll_null_old <- old_cox$loglik[1]
-                ll_fitted_old <- old_cox$loglik[2]
+                # Extract the final (fitted) log-likelihoods from each model
+                ll_fitted_old <- old_cox$loglik[2]  # Final log-likelihood of old model
+                ll_fitted_new <- new_cox$loglik[2]  # Final log-likelihood of new model
                 
-                ll_null_new <- new_cox$loglik[1]  # Should be same as ll_null_old
-                ll_fitted_new <- new_cox$loglik[2]
+                # Determine the appropriate null model based on analysis type
+                time_var <- self$options$survivalTime
+                event_var <- "event_binary"
+                survival_obj <- survival::Surv(data[[time_var]], data[[event_var]])
                 
-                # Use the null log-likelihood from one of the models (they should be identical)
-                ll_null <- ll_null_old
+                # Check if multifactorial analysis is enabled
+                if (self$options$enableMultifactorialAnalysis) {
+                    # MULTIFACTORIAL ANALYSIS: Null model should include covariates
+                    # This measures the incremental value of staging beyond the covariates
+                    continuous_vars <- self$options$continuousCovariates
+                    categorical_vars <- self$options$categoricalCovariates
+                    all_covariates <- c(continuous_vars, categorical_vars)
+                    
+                    if (length(all_covariates) > 0) {
+                        # Build covariate-only null model
+                        covariate_formula <- paste(all_covariates, collapse = " + ")
+                        null_formula <- as.formula(paste("survival_obj ~", covariate_formula))
+                        
+                        null_model <- tryCatch({
+                            survival::coxph(null_formula, data = data)
+                        }, error = function(e) {
+                            message(paste("Covariate-only null model fitting failed:", e$message))
+                            NULL
+                        })
+                        
+                        if (!is.null(null_model) && !is.null(null_model$loglik) && 
+                            length(null_model$loglik) >= 2 && is.finite(null_model$loglik[2])) {
+                            ll_null <- null_model$loglik[2]
+                            message("Using covariate-only null model for multifactorial pseudo R-squared calculations")
+                        } else {
+                            # Fallback: use initial log-likelihood
+                            ll_null <- old_cox$loglik[1]
+                            message("Covariate-only null model failed - using initial log-likelihood as fallback")
+                        }
+                    } else {
+                        # No covariates specified - use intercept-only model
+                        ll_null <- old_cox$loglik[1]
+                        message("No covariates specified for multifactorial analysis - using intercept-only baseline")
+                    }
+                } else {
+                    # UNIVARIATE ANALYSIS: Use intercept-only null model
+                    null_model <- tryCatch({
+                        survival::coxph(survival_obj ~ 1, data = data)
+                    }, error = function(e) {
+                        # Intercept-only Cox models often fail - this is normal
+                        message(paste("Null model fitting failed (expected for Cox models):", e$message))
+                        NULL
+                    })
+                    
+                    # Extract null log-likelihood using the most robust approach
+                    if (!is.null(null_model) && !is.null(null_model$loglik) && 
+                        length(null_model$loglik) >= 2 && is.finite(null_model$loglik[2])) {
+                        # Use the proper null model log-likelihood if available
+                        ll_null <- null_model$loglik[2]
+                        message("Using properly fitted null model for pseudo R-squared calculations")
+                    } else {
+                        # Standard approach: use the initial log-likelihood from fitted models
+                        # This represents the log-likelihood before any covariates are added
+                        ll_null <- old_cox$loglik[1]
+                        
+                        # Verify both models have the same initial log-likelihood (they should)
+                        if (abs(old_cox$loglik[1] - new_cox$loglik[1]) > 1e-6) {
+                            warning("Old and new Cox models have different initial log-likelihoods - this suggests different datasets")
+                        }
+                        
+                        message("Using initial log-likelihood as null baseline (standard approach for Cox models)")
+                    }
+                }
                 
-                # Debug log-likelihood values
-                message(paste("Cox Log-likelihoods - Null:", ll_null, "Old fitted:", ll_fitted_old, "New fitted:", ll_fitted_new))
+                # Validate that the null log-likelihood makes sense
+                if (ll_null > ll_fitted_old || ll_null > ll_fitted_new) {
+                    warning("Null model log-likelihood is greater than fitted model log-likelihood - this suggests a calculation error")
+                }
+                
+                # Debug log-likelihood values with more detail
+                message(paste("Pseudo R² Calculation - Null LL:", round(ll_null, 4), 
+                            "Old fitted LL:", round(ll_fitted_old, 4), 
+                            "New fitted LL:", round(ll_fitted_new, 4)))
                 
                 # Check for valid log-likelihoods
                 if (is.na(ll_null) || is.na(ll_fitted_old) || is.na(ll_fitted_new)) {
@@ -1578,25 +2092,74 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Jonckheere-Terpstra test for ordered alternatives
             
             tryCatch({
-                # Check if clinfun package is available for Jonckheere-Terpstra test
-                if (!requireNamespace("clinfun", quietly = TRUE)) {
+                # First try with clinfun package
+                if (requireNamespace("clinfun", quietly = TRUE)) {
+                    # Prepare data for test
+                    stage_factor <- as.factor(data[[stage_var]])
+                    stage_levels <- levels(stage_factor)
+                    survival_times <- data[[time_var]]
+                    
+                    # Remove missing values
+                    complete_cases <- complete.cases(stage_factor, survival_times)
+                    stage_clean <- stage_factor[complete_cases]
+                    survival_clean <- survival_times[complete_cases]
+                    
+                    if (length(unique(stage_clean)) < 2) {
+                        return(list(
+                            test_type = "Jonckheere-Terpstra",
+                            statistic = NA,
+                            p_value = NA,
+                            note = "Insufficient stage groups"
+                        ))
+                    }
+                    
+                    # Ensure we have enough data points
+                    if (length(survival_clean) < 3) {
+                        return(list(
+                            test_type = "Jonckheere-Terpstra",
+                            statistic = NA,
+                            p_value = NA,
+                            note = "Insufficient data points"
+                        ))
+                    }
+                    
+                    # Perform Jonckheere-Terpstra test - note: x is the response variable, y is the grouping variable
+                    # Fixed parameter order: x = response (survival time), y = grouping (stage)
+                    jt_result <- clinfun::jonckheere.test(x = survival_clean, y = stage_clean, alternative = "decreasing")
+                    
+                    # Check if results are valid
+                    statistic_val <- private$.safeAtomic(jt_result$statistic, "numeric", NA)
+                    p_val <- private$.safeAtomic(jt_result$p.value, "numeric", NA)
+                    
                     return(list(
                         test_type = "Jonckheere-Terpstra",
-                        statistic = NA,
-                        p_value = NA,
-                        note = "clinfun package required"
+                        statistic = if (is.finite(statistic_val)) statistic_val else NA,
+                        p_value = if (is.finite(p_val)) p_val else NA,
+                        note = "Trend test (non-parametric)"
                     ))
+                } else {
+                    # Fallback: implement a simplified Jonckheere-Terpstra-like test
+                    return(private$.calculateSimpleJTTest(data, stage_var, time_var, event_var))
                 }
                 
-                # Prepare data for test
+            }, error = function(e) {
+                # If clinfun fails, try fallback implementation
+                return(private$.calculateSimpleJTTest(data, stage_var, time_var, event_var))
+            })
+        },
+        
+        .calculateSimpleJTTest = function(data, stage_var, time_var, event_var) {
+            # Simplified non-parametric trend test as fallback
+            
+            tryCatch({
+                # Prepare data
                 stage_factor <- as.factor(data[[stage_var]])
                 stage_levels <- levels(stage_factor)
-                stage_numeric <- as.numeric(stage_factor)
                 survival_times <- data[[time_var]]
                 
                 # Remove missing values
-                complete_cases <- complete.cases(stage_numeric, survival_times)
-                stage_clean <- stage_numeric[complete_cases]
+                complete_cases <- complete.cases(stage_factor, survival_times)
+                stage_clean <- stage_factor[complete_cases]
                 survival_clean <- survival_times[complete_cases]
                 
                 if (length(unique(stage_clean)) < 2) {
@@ -1608,14 +2171,68 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ))
                 }
                 
-                # Perform Jonckheere-Terpstra test
-                jt_result <- clinfun::jonckheere.test(survival_clean, stage_clean, alternative = "increasing")
+                if (length(survival_clean) < 3) {
+                    return(list(
+                        test_type = "Jonckheere-Terpstra",
+                        statistic = NA,
+                        p_value = NA,
+                        note = "Insufficient data points"
+                    ))
+                }
+                
+                # Calculate median survival for each stage
+                stage_medians <- tapply(survival_clean, stage_clean, median, na.rm = TRUE)
+                stage_counts <- table(stage_clean)
+                
+                # Remove stages with insufficient data
+                valid_stages <- stage_counts >= 2
+                if (sum(valid_stages) < 2) {
+                    return(list(
+                        test_type = "Jonckheere-Terpstra",
+                        statistic = NA,
+                        p_value = NA,
+                        note = "Insufficient valid stages"
+                    ))
+                }
+                
+                stage_medians_clean <- stage_medians[valid_stages]
+                stage_names <- names(stage_medians_clean)
+                
+                # Convert stage names to numeric order
+                stage_order <- seq_along(stage_medians_clean)
+                
+                # Check if we have enough stages and finite values
+                if (length(stage_medians_clean) < 2 || any(!is.finite(stage_medians_clean))) {
+                    return(list(
+                        test_type = "Jonckheere-Terpstra",
+                        statistic = NA,
+                        p_value = NA,
+                        note = "Non-finite median values or insufficient stages"
+                    ))
+                }
+                
+                # Calculate Spearman correlation between stage order and median survival
+                # For TNM staging, we expect decreasing survival with higher stages
+                cor_result <- cor.test(stage_order, stage_medians_clean, method = "spearman", exact = FALSE)
+                
+                # Extract correlation coefficient and p-value
+                rho <- as.numeric(cor_result$estimate)
+                p_value <- as.numeric(cor_result$p.value)
+                
+                # Convert correlation to Z-score approximation for test statistic
+                n_stages <- length(stage_medians_clean)
+                if (n_stages > 3) {
+                    z_score <- rho * sqrt(n_stages - 1)
+                    test_statistic <- abs(z_score)
+                } else {
+                    test_statistic <- abs(rho)
+                }
                 
                 return(list(
                     test_type = "Jonckheere-Terpstra",
-                    statistic = jt_result$statistic,
-                    p_value = jt_result$p.value,
-                    note = "Trend test (non-parametric)"
+                    statistic = if (is.finite(test_statistic)) test_statistic else NA,
+                    p_value = if (is.finite(p_value)) p_value else NA,
+                    note = "Simplified trend test (Spearman correlation)"
                 ))
                 
             }, error = function(e) {
@@ -1623,7 +2240,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     test_type = "Jonckheere-Terpstra",
                     statistic = NA,
                     p_value = NA,
-                    note = paste("Error:", e$message)
+                    note = paste("Error in fallback:", e$message)
                 ))
             })
         },
@@ -2143,6 +2760,22 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             self$results$welcomeMessage$setVisible(FALSE)
             
+            # Validate option dependencies
+            dep_validation <- private$.validateOptionDependencies()
+            
+            # Handle critical dependency issues
+            if (dep_validation$has_issues) {
+                error_messages <- sapply(dep_validation$issues, function(issue) issue$message)
+                stop(paste("Option dependency errors:", paste(error_messages, collapse = "; ")))
+            }
+            
+            # Show warnings for dependency issues
+            if (dep_validation$has_warnings) {
+                for (warning_info in dep_validation$warnings) {
+                    warning(warning_info$message, call. = FALSE)
+                }
+            }
+            
             # Validate and prepare data
             data <- private$.validateData()
             
@@ -2159,35 +2792,83 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Advanced metrics
             all_results$advanced_metrics <- private$.calculateAdvancedMetrics(data)
             
-            # Optional advanced analyses
+            # Optional advanced analyses based on analysis type
             isStandard <- analysisType %in% c("standard", "comprehensive", "publication")
             isComprehensive <- analysisType %in% c("comprehensive", "publication")
+            
+            # Check for analysis type mismatches and inform users
+            if (!isStandard && (self$options$calculateNRI || self$options$calculateIDI || self$options$performROCAnalysis)) {
+                message("Note: NRI, IDI, and ROC Analysis require 'standard' or higher analysis type. Current type: ", analysisType)
+            }
+            
+            if (!isComprehensive && (self$options$performDCA || self$options$performBootstrap)) {
+                message("Note: DCA and Bootstrap validation require 'comprehensive' or 'publication' analysis type. Current type: ", analysisType)
+            }
 
+            # NRI analysis (requires standard+ analysis type and Cox models)
             if (isStandard && self$options$calculateNRI) {
-                all_results$nri_analysis <- private$.calculateNRI(data)
+                nri_result <- private$.calculateNRI(data)
+                if (!is.null(nri_result) && !is.null(nri_result$error)) {
+                    message("NRI analysis failed: ", nri_result$error)
+                } else {
+                    all_results$nri_analysis <- nri_result
+                }
             }
             
+            # IDI analysis (requires standard+ analysis type and Cox models)
             if (isStandard && self$options$calculateIDI) {
-                all_results$idi_analysis <- private$.calculateIDI(data)
+                idi_result <- private$.calculateIDI(data)
+                if (!is.null(idi_result) && !is.null(idi_result$error)) {
+                    message("IDI analysis failed: ", idi_result$error)
+                } else {
+                    all_results$idi_analysis <- idi_result
+                }
             }
             
+            # ROC analysis (requires standard+ analysis type and Cox models)
             if (isStandard && self$options$performROCAnalysis) {
-                all_results$roc_analysis <- private$.performTimeROCAnalysis(data)
+                roc_result <- private$.performTimeROCAnalysis(data)
+                if (!is.null(roc_result) && !is.null(roc_result$error)) {
+                    message("ROC analysis failed: ", roc_result$error)
+                } else {
+                    all_results$roc_analysis <- roc_result
+                }
             }
             
+            # Calibration analysis (any analysis type, requires Cox models)
             if (self$options$performCalibration) {
-                all_results$calibration_analysis <- private$.performCalibrationAnalysis(data, all_results$advanced_metrics)
+                if (!is.null(all_results$advanced_metrics) && 
+                    !is.null(all_results$advanced_metrics$old_cox) &&
+                    !is.null(all_results$advanced_metrics$new_cox)) {
+                    all_results$calibration_analysis <- private$.performCalibrationAnalysis(data, all_results$advanced_metrics)
+                } else {
+                    message("Calibration analysis skipped: Cox models not available")
+                }
             }
             
+            # DCA analysis (requires comprehensive+ analysis type and Cox models)
             if (isComprehensive && self$options$performDCA) {
-                all_results$dca_analysis <- private$.performDCA(data)
+                dca_result <- private$.performDCA(data)
+                if (!is.null(dca_result) && !is.null(dca_result$error)) {
+                    message("DCA analysis failed: ", dca_result$error)
+                } else {
+                    all_results$dca_analysis <- dca_result
+                }
             }
             
+            # Bootstrap validation (requires comprehensive+ analysis type)
             if (isComprehensive && self$options$performBootstrap) {
-                all_results$validation_results <- private$.performBootstrapValidation(data)
+                bootstrap_result <- private$.performBootstrapValidation(data)
+                if (!is.null(bootstrap_result) && !is.null(bootstrap_result$error)) {
+                    message("Bootstrap validation failed: ", bootstrap_result$error)
+                } else {
+                    all_results$validation_results <- bootstrap_result
+                }
             }
             
-            if (isComprehensive && self$options$performHomogeneityTests) {
+            # Calculate homogeneity tests if requested, regardless of analysis type
+            # This ensures users can get homogeneity tests even with basic/standard analysis
+            if (self$options$performHomogeneityTests) {
                 all_results$homogeneity_tests <- private$.performHomogeneityTests(data)
             }
             
@@ -2196,9 +2877,24 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 all_results$will_rogers <- private$.analyzeWillRogers(data)
             }
             
-            # Multifactorial analysis
+            # Multifactorial analysis (requires covariates)
             if (self$options$enableMultifactorialAnalysis) {
-                all_results$multifactorial_analysis <- private$.performMultifactorialAnalysis(data)
+                # Check if covariates are specified
+                has_covariates <- (!is.null(self$options$continuousCovariates) && 
+                                  length(self$options$continuousCovariates) > 0) ||
+                                 (!is.null(self$options$categoricalCovariates) && 
+                                  length(self$options$categoricalCovariates) > 0)
+                
+                if (has_covariates) {
+                    multifactorial_result <- private$.performMultifactorialAnalysis(data)
+                    if (!is.null(multifactorial_result) && !is.null(multifactorial_result$error)) {
+                        message("Multifactorial analysis failed: ", multifactorial_result$error)
+                    } else {
+                        all_results$multifactorial_analysis <- multifactorial_result
+                    }
+                } else {
+                    message("Multifactorial analysis skipped: No covariates specified")
+                }
             } else if (self$options$performInteractionTests) {
                 # Create interaction tests even when multifactorial analysis is disabled
                 all_results$multifactorial_analysis <- private$.performInteractionTestsOnly(data)
@@ -2365,7 +3061,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     <p style="margin-bottom: 0;">A high migration rate suggests substantial changes in the staging criteria, while the balance between upstaging and downstaging indicates the direction of stage shift.</p>
                 </div>
                 '
-                    self$results$migrationOverviewExplanation$setContent(explanation_html)
+                    private$.setExplanationContent("migrationOverviewExplanation", explanation_html)
                 }
                 
                 private$.populateMigrationOverview(all_results$basic_migration)
@@ -2392,7 +3088,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         <p style="margin-bottom: 0; font-style: italic;">These tests validate whether observed migration patterns represent genuine staging improvements.</p>
                     </div>
                     '
-                    self$results$migrationSummaryExplanation$setContent(summary_explanation_html)
+                    private$.setExplanationContent("migrationSummaryExplanation", summary_explanation_html)
                 }
                 
                 private$.populateMigrationSummary(all_results$basic_migration)
@@ -2420,7 +3116,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         <p style="margin-bottom: 0; font-style: italic;">A good staging system should create distinct prognostic groups with meaningful separation in outcomes.</p>
                     </div>
                     '
-                    self$results$stageDistributionExplanation$setContent(distribution_explanation_html)
+                    private$.setExplanationContent("stageDistributionExplanation", distribution_explanation_html)
                 }
                 
                 private$.populateStageDistribution(all_results$basic_migration)
@@ -2444,7 +3140,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     <p style="margin-bottom: 0; font-style: italic;">Row totals show the original stage distribution; column totals show the new stage distribution.</p>
                 </div>
                 '
-                    self$results$migrationMatrixExplanation$setContent(matrix_explanation_html)
+                    private$.setExplanationContent("migrationMatrixExplanation", matrix_explanation_html)
                 }
                 
                 private$.populateMigrationMatrix(all_results$basic_migration)
@@ -2470,7 +3166,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         </ul>
                     </div>
                     '
-                    self$results$statisticalComparisonExplanation$setContent(statistical_explanation_html)
+                    private$.setExplanationContent("statisticalComparisonExplanation", statistical_explanation_html)
                 }
                 
                 private$.populateStatisticalComparison(all_results$advanced_metrics)
@@ -2499,7 +3195,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         </ul>
                     </div>
                     '
-                    self$results$concordanceComparisonExplanation$setContent(concordance_explanation_html)
+                    private$.setExplanationContent("concordanceComparisonExplanation", concordance_explanation_html)
                 }
                 
                 private$.populateConcordanceComparison(all_results$advanced_metrics)
@@ -2528,7 +3224,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         </ul>
                     </div>
                     '
-                    self$results$nriResultsExplanation$setContent(nri_explanation_html)
+                    private$.setExplanationContent("nriResultsExplanation", nri_explanation_html)
                 }
                 
                 private$.populateNRIAnalysis(all_results$nri_analysis)
@@ -2556,7 +3252,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         </ul>
                     </div>
                     '
-                    self$results$idiResultsExplanation$setContent(idi_explanation_html)
+                    private$.setExplanationContent("idiResultsExplanation", idi_explanation_html)
                 }
                 
                 private$.populateIDIAnalysis(all_results$idi_analysis)
@@ -2588,7 +3284,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         <p style="margin-bottom: 0; font-style: italic;">Higher values indicate better model fit. Positive improvement values favor the new staging system.</p>
                     </div>
                     '
-                    self$results$pseudoR2ResultsExplanation$setContent(pseudo_r2_explanation_html)
+                    private$.setExplanationContent("pseudoR2ResultsExplanation", pseudo_r2_explanation_html)
                 }
                 
                 private$.populatePseudoR2Results(all_results$advanced_metrics$pseudo_r2)
@@ -2754,7 +3450,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         <p style="margin-bottom: 0; font-style: italic; color: #666;">Note: These comprehensive tests provide multiple perspectives on staging system quality, helping identify specific strengths and weaknesses for evidence-based staging improvements.</p>
                     </div>
                     '
-                    self$results$homogeneityTestsExplanation$setContent(homogeneity_tests_explanation_html)
+                    private$.setExplanationContent("homogeneityTestsExplanation", homogeneity_tests_explanation_html)
                 }
                 
                 private$.populateHomogeneityTests(all_results$homogeneity_tests)
@@ -3297,101 +3993,240 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             new_c <- advanced_results$new_concordance
             
             # Row 1: Original Staging C-index
-            old_c_val <- old_c$concordance
-            old_c_se <- sqrt(old_c$var)
-            old_c_lower <- old_c_val - 1.96 * old_c_se
-            old_c_upper <- old_c_val + 1.96 * old_c_se
+            old_c_val <- private$.safeAtomic(old_c$concordance, "numeric", NA)
+            
+            # Safely calculate standard error
+            old_c_var <- private$.safeAtomic(old_c$var, "numeric", NA)
+            old_c_se <- if (!is.na(old_c_var) && old_c_var >= 0) {
+                sqrt(old_c_var)
+            } else {
+                NA
+            }
+            
+            # Calculate confidence intervals safely
+            old_c_lower <- if (!is.na(old_c_val) && !is.na(old_c_se)) {
+                old_c_val - 1.96 * old_c_se
+            } else {
+                NA
+            }
+            
+            old_c_upper <- if (!is.na(old_c_val) && !is.na(old_c_se)) {
+                old_c_val + 1.96 * old_c_se
+            } else {
+                NA
+            }
             
             table$addRow(rowKey = "c_old", values = list(
                 metric = "Original Staging C-index",
-                value = sprintf("%.4f", old_c_val),
-                ci = sprintf("[%.4f, %.4f]", old_c_lower, old_c_upper),
-                interpretation = if (old_c_val < 0.6) "Poor discrimination" 
-                                else if (old_c_val < 0.7) "Fair discrimination"
-                                else if (old_c_val < 0.8) "Good discrimination"
-                                else "Excellent discrimination"
+                value = if (!is.na(old_c_val)) sprintf("%.4f", old_c_val) else "NA",
+                ci = if (!is.na(old_c_lower) && !is.na(old_c_upper)) {
+                    sprintf("[%.4f, %.4f]", old_c_lower, old_c_upper)
+                } else {
+                    "NA"
+                },
+                interpretation = if (is.na(old_c_val)) {
+                    "Unable to calculate"
+                } else if (old_c_val < 0.6) {
+                    "Poor discrimination"
+                } else if (old_c_val < 0.7) {
+                    "Fair discrimination"
+                } else if (old_c_val < 0.8) {
+                    "Good discrimination"
+                } else {
+                    "Excellent discrimination"
+                }
             ))
             
             # Row 2: New Staging C-index
-            new_c_val <- new_c$concordance
-            new_c_se <- sqrt(new_c$var)
-            new_c_lower <- new_c_val - 1.96 * new_c_se
-            new_c_upper <- new_c_val + 1.96 * new_c_se
+            new_c_val <- private$.safeAtomic(new_c$concordance, "numeric", NA)
+            
+            # Safely calculate standard error
+            new_c_var <- private$.safeAtomic(new_c$var, "numeric", NA)
+            new_c_se <- if (!is.na(new_c_var) && new_c_var >= 0) {
+                sqrt(new_c_var)
+            } else {
+                NA
+            }
+            
+            # Calculate confidence intervals safely
+            new_c_lower <- if (!is.na(new_c_val) && !is.na(new_c_se)) {
+                new_c_val - 1.96 * new_c_se
+            } else {
+                NA
+            }
+            
+            new_c_upper <- if (!is.na(new_c_val) && !is.na(new_c_se)) {
+                new_c_val + 1.96 * new_c_se
+            } else {
+                NA
+            }
             
             table$addRow(rowKey = "c_new", values = list(
                 metric = "New Staging C-index",
-                value = sprintf("%.4f", new_c_val),
-                ci = sprintf("[%.4f, %.4f]", new_c_lower, new_c_upper),
-                interpretation = if (new_c_val < 0.6) "Poor discrimination" 
-                                else if (new_c_val < 0.7) "Fair discrimination"
-                                else if (new_c_val < 0.8) "Good discrimination"
-                                else "Excellent discrimination"
+                value = if (!is.na(new_c_val)) sprintf("%.4f", new_c_val) else "NA",
+                ci = if (!is.na(new_c_lower) && !is.na(new_c_upper)) {
+                    sprintf("[%.4f, %.4f]", new_c_lower, new_c_upper)
+                } else {
+                    "NA"
+                },
+                interpretation = if (is.na(new_c_val)) {
+                    "Unable to calculate"
+                } else if (new_c_val < 0.6) {
+                    "Poor discrimination"
+                } else if (new_c_val < 0.7) {
+                    "Fair discrimination"
+                } else if (new_c_val < 0.8) {
+                    "Good discrimination"
+                } else {
+                    "Excellent discrimination"
+                }
             ))
             
             # Row 3: C-index Improvement
-            c_diff_se <- sqrt(old_c_se^2 + new_c_se^2)  # Approximation
-            c_diff_lower <- advanced_results$c_improvement - 1.96 * c_diff_se
-            c_diff_upper <- advanced_results$c_improvement + 1.96 * c_diff_se
+            c_improvement <- private$.safeAtomic(advanced_results$c_improvement, "numeric", NA)
+            
+            # Safely calculate standard error for difference
+            c_diff_se <- if (!is.na(old_c_se) && !is.na(new_c_se)) {
+                sqrt(old_c_se^2 + new_c_se^2)  # Approximation
+            } else {
+                NA
+            }
+            
+            c_diff_lower <- if (!is.na(c_improvement) && !is.na(c_diff_se)) {
+                c_improvement - 1.96 * c_diff_se
+            } else {
+                NA
+            }
+            
+            c_diff_upper <- if (!is.na(c_improvement) && !is.na(c_diff_se)) {
+                c_improvement + 1.96 * c_diff_se
+            } else {
+                NA
+            }
             
             table$addRow(rowKey = "c_diff", values = list(
                 metric = "C-index Improvement",
-                value = sprintf("%+.4f", advanced_results$c_improvement),
-                ci = sprintf("[%+.4f, %+.4f]", c_diff_lower, c_diff_upper),
-                interpretation = if (advanced_results$c_improvement < 0.01) "Minimal improvement"
-                                else if (advanced_results$c_improvement < 0.02) "Small improvement"
-                                else if (advanced_results$c_improvement < 0.05) "Moderate improvement"
-                                else "Large improvement"
+                value = if (!is.na(c_improvement)) sprintf("%+.4f", c_improvement) else "NA",
+                ci = if (!is.na(c_diff_lower) && !is.na(c_diff_upper)) {
+                    sprintf("[%+.4f, %+.4f]", c_diff_lower, c_diff_upper)
+                } else {
+                    "NA"
+                },
+                interpretation = if (is.na(c_improvement)) {
+                    "Unable to calculate"
+                } else if (c_improvement < 0.01) {
+                    "Minimal improvement"
+                } else if (c_improvement < 0.02) {
+                    "Small improvement"
+                } else if (c_improvement < 0.05) {
+                    "Moderate improvement"
+                } else {
+                    "Large improvement"
+                }
             ))
             
             # Row 4: Percentage Improvement
-            pct_improvement <- (advanced_results$c_improvement / old_c_val) * 100
+            pct_improvement <- if (!is.na(c_improvement) && !is.na(old_c_val) && old_c_val > 0) {
+                (c_improvement / old_c_val) * 100
+            } else {
+                NA
+            }
+            
             table$addRow(rowKey = "c_pct", values = list(
                 metric = "Relative Improvement",
-                value = sprintf("%+.1f%%", pct_improvement),
+                value = if (!is.na(pct_improvement)) sprintf("%+.1f%%", pct_improvement) else "NA",
                 ci = "N/A",
-                interpretation = if (pct_improvement < 2) "Minimal"
-                                else if (pct_improvement < 5) "Moderate"
-                                else "Substantial"
+                interpretation = if (is.na(pct_improvement)) {
+                    "Unable to calculate"
+                } else if (pct_improvement < 2) {
+                    "Minimal"
+                } else if (pct_improvement < 5) {
+                    "Moderate"
+                } else {
+                    "Substantial"
+                }
             ))
             
             # Row 5: AIC Comparison
+            aic_improvement <- private$.safeAtomic(advanced_results$aic_improvement, "numeric", NA)
+            
             table$addRow(rowKey = "aic", values = list(
                 metric = "AIC Difference (Δ)",
-                value = sprintf("%.2f", advanced_results$aic_improvement),
+                value = if (!is.na(aic_improvement)) sprintf("%.2f", aic_improvement) else "NA",
                 ci = "N/A",
-                interpretation = if (advanced_results$aic_improvement > 10) "Strong evidence for new model"
-                                else if (advanced_results$aic_improvement > 4) "Moderate evidence for new model"
-                                else if (advanced_results$aic_improvement > 2) "Weak evidence for new model"
-                                else "No clear preference"
+                interpretation = if (is.na(aic_improvement)) {
+                    "Unable to calculate"
+                } else if (aic_improvement > 10) {
+                    "Strong evidence for new model"
+                } else if (aic_improvement > 4) {
+                    "Moderate evidence for new model"
+                } else if (aic_improvement > 2) {
+                    "Weak evidence for new model"
+                } else {
+                    "No clear preference"
+                }
             ))
             
             # Row 6: BIC Comparison
+            bic_improvement <- private$.safeAtomic(advanced_results$bic_improvement, "numeric", NA)
+            
             table$addRow(rowKey = "bic", values = list(
                 metric = "BIC Difference (Δ)",
-                value = sprintf("%.2f", advanced_results$bic_improvement),
+                value = if (!is.na(bic_improvement)) sprintf("%.2f", bic_improvement) else "NA",
                 ci = "N/A",
-                interpretation = if (advanced_results$bic_improvement > 10) "Very strong evidence"
-                                else if (advanced_results$bic_improvement > 6) "Strong evidence"
-                                else if (advanced_results$bic_improvement > 2) "Positive evidence"
-                                else "No evidence"
+                interpretation = if (is.na(bic_improvement)) {
+                    "Unable to calculate"
+                } else if (bic_improvement > 10) {
+                    "Very strong evidence"
+                } else if (bic_improvement > 6) {
+                    "Strong evidence"
+                } else if (bic_improvement > 2) {
+                    "Positive evidence"
+                } else {
+                    "No evidence"
+                }
             ))
             
             # Row 7: Clinical Significance
-            clinical_sig <- advanced_results$c_improvement >= self$options$clinicalSignificanceThreshold
+            c_improvement_safe <- private$.safeAtomic(advanced_results$c_improvement, "numeric", NA)
+            clinical_sig <- if (!is.na(c_improvement_safe)) {
+                c_improvement_safe >= self$options$clinicalSignificanceThreshold
+            } else {
+                FALSE
+            }
+            
             table$addRow(rowKey = "clinical_sig", values = list(
                 metric = "Clinical Significance",
-                value = if (clinical_sig) "Yes" else "No",
+                value = if (is.na(c_improvement_safe)) {
+                    "Unable to determine"
+                } else if (clinical_sig) {
+                    "Yes"
+                } else {
+                    "No"
+                },
                 ci = sprintf("Threshold: %.3f", self$options$clinicalSignificanceThreshold),
-                interpretation = if (clinical_sig) "Clinically meaningful improvement" else "Below clinical threshold"
+                interpretation = if (is.na(c_improvement_safe)) {
+                    "Unable to calculate"
+                } else if (clinical_sig) {
+                    "Clinically meaningful improvement"
+                } else {
+                    "Below clinical threshold"
+                }
             ))
             
             # Row 8: Overall Assessment
-            overall_score <- sum(c(
-                advanced_results$c_improvement > 0.02,  # C-index improvement
-                advanced_results$aic_improvement > 4,    # AIC evidence
-                advanced_results$bic_improvement > 2,    # BIC evidence
+            aic_improvement_safe <- private$.safeAtomic(advanced_results$aic_improvement, "numeric", NA)
+            bic_improvement_safe <- private$.safeAtomic(advanced_results$bic_improvement, "numeric", NA)
+            
+            # Calculate overall score with safe comparisons
+            criteria_met <- c(
+                if (!is.na(c_improvement_safe)) c_improvement_safe > 0.02 else FALSE,  # C-index improvement
+                if (!is.na(aic_improvement_safe)) aic_improvement_safe > 4 else FALSE,    # AIC evidence
+                if (!is.na(bic_improvement_safe)) bic_improvement_safe > 2 else FALSE,    # BIC evidence
                 clinical_sig                             # Clinical significance
-            ))
+            )
+            
+            overall_score <- sum(criteria_met, na.rm = TRUE)
             
             overall_assessment <- if (overall_score == 4) "Strong recommendation for new system"
                                  else if (overall_score >= 3) "Moderate recommendation for new system"
@@ -3408,8 +4243,59 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateConcordanceComparison = function(advanced_results) {
             table <- self$results$concordanceComparison
+            
+            # Check if advanced_results is NULL first
+            if (is.null(advanced_results)) {
+                # Add rows with NA values when advanced_results is missing
+                table$addRow(rowKey = "old", values = list(
+                    Model = "Original Staging",
+                    C_Index = NA,
+                    SE = NA,
+                    CI_Lower = NA,
+                    CI_Upper = NA,
+                    Difference = NA,
+                    p_value = NA
+                ))
+                
+                table$addRow(rowKey = "new", values = list(
+                    Model = "New Staging",
+                    C_Index = NA,
+                    SE = NA,
+                    CI_Lower = NA,
+                    CI_Upper = NA,
+                    Difference = NA,
+                    p_value = NA
+                ))
+                return()
+            }
+            
             old_c <- advanced_results$old_concordance
             new_c <- advanced_results$new_concordance
+
+            # Check if concordance objects exist
+            if (is.null(old_c) || is.null(new_c)) {
+                # Add rows with NA values when concordance objects are missing
+                table$addRow(rowKey = "old", values = list(
+                    Model = "Original Staging",
+                    C_Index = NA,
+                    SE = NA,
+                    CI_Lower = NA,
+                    CI_Upper = NA,
+                    Difference = NA,
+                    p_value = NA
+                ))
+                
+                table$addRow(rowKey = "new", values = list(
+                    Model = "New Staging",
+                    C_Index = NA,
+                    SE = NA,
+                    CI_Lower = NA,
+                    CI_Upper = NA,
+                    Difference = NA,
+                    p_value = NA
+                ))
+                return()
+            }
 
             # Safely get the p-value from the likelihood ratio test
             p_val <- NA
@@ -3417,24 +4303,58 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 p_val <- advanced_results$lr_test[2, "Pr(>Chi)"]
             }
             
+            # Safely calculate standard errors and confidence intervals
+            old_c_var <- private$.safeAtomic(old_c$var, "numeric", NA)
+            old_c_se <- if (!is.na(old_c_var) && old_c_var >= 0) {
+                sqrt(old_c_var)
+            } else {
+                NA
+            }
+            
+            new_c_var <- private$.safeAtomic(new_c$var, "numeric", NA)
+            new_c_se <- if (!is.na(new_c_var) && new_c_var >= 0) {
+                sqrt(new_c_var)
+            } else {
+                NA
+            }
+            
+            old_c_val <- private$.safeAtomic(old_c$concordance, "numeric", NA)
+            new_c_val <- private$.safeAtomic(new_c$concordance, "numeric", NA)
+            
             # Old Staging
             table$addRow(rowKey = "old", values = list(
                 Model = "Original Staging",
-                C_Index = old_c$concordance,
-                SE = sqrt(old_c$var),
-                CI_Lower = old_c$concordance - 1.96 * sqrt(old_c$var),
-                CI_Upper = old_c$concordance + 1.96 * sqrt(old_c$var)
+                C_Index = old_c_val,
+                SE = old_c_se,
+                CI_Lower = if (!is.na(old_c_val) && !is.na(old_c_se)) {
+                    old_c_val - 1.96 * old_c_se
+                } else {
+                    NA
+                },
+                CI_Upper = if (!is.na(old_c_val) && !is.na(old_c_se)) {
+                    old_c_val + 1.96 * old_c_se
+                } else {
+                    NA
+                }
             ))
             
             # New Staging
             table$addRow(rowKey = "new", values = list(
                 Model = "New Staging",
-                C_Index = new_c$concordance,
-                SE = sqrt(new_c$var),
-                CI_Lower = new_c$concordance - 1.96 * sqrt(new_c$var),
-                CI_Upper = new_c$concordance + 1.96 * sqrt(new_c$var),
-                Difference = advanced_results$c_improvement,
-                p_value = p_val
+                C_Index = new_c_val,
+                SE = new_c_se,
+                CI_Lower = if (!is.na(new_c_val) && !is.na(new_c_se)) {
+                    new_c_val - 1.96 * new_c_se
+                } else {
+                    NA
+                },
+                CI_Upper = if (!is.na(new_c_val) && !is.na(new_c_se)) {
+                    new_c_val + 1.96 * new_c_se
+                } else {
+                    NA
+                },
+                Difference = private$.safeAtomic(advanced_results$c_improvement, "numeric", NA),
+                p_value = private$.safeAtomic(p_val, "numeric", NA)
             ))
         },
 
@@ -3487,79 +4407,176 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return()
             }
             
-            # Extract DCA data from the dcurves result
+            # Extract DCA data from the dcurves result with robust error handling
             if (requireNamespace("dcurves", quietly = TRUE)) {
                 tryCatch({
-                    # Get the decision curve data using the proper method for dca objects
-                    # The dca object contains a 'dca' slot with the actual data
+                    # Get the decision curve data using a systematic approach
                     dca_obj <- dca_results$dca_result
+                    dca_data <- NULL
                     
-                    # Extract the data using the dca object's structure
-                    if (inherits(dca_obj, "dca")) {
-                        # Access the internal data structure
-                        dca_data <- dca_obj$dca
-                        
-                        # If dca_data is still not a data.frame, try different approaches
-                        if (!is.data.frame(dca_data)) {
-                            # Try to extract from the object's attributes or structure
-                            if (is.list(dca_obj) && !is.null(dca_obj$dca)) {
-                                dca_data <- dca_obj$dca
-                            } else if (is.list(dca_obj) && !is.null(dca_obj$data)) {
-                                dca_data <- dca_obj$data
-                            } else {
-                                # Fallback: try to extract using as.data.frame on the dca component
-                                dca_data <- as.data.frame(dca_obj$dca)
-                            }
-                        }
-                    } else {
-                        # If it's not a dca object, try direct conversion
-                        dca_data <- as.data.frame(dca_obj)
+                    # Method 1: Try direct extraction if it's already a data.frame
+                    if (is.data.frame(dca_obj)) {
+                        dca_data <- dca_obj
                     }
                     
-                    # Ensure we have the required columns
-                    if (!is.data.frame(dca_data) || !all(c("threshold", "label", "net_benefit") %in% names(dca_data))) {
-                        table$setError("DCA data structure is not as expected. Required columns: threshold, label, net_benefit")
+                    # Method 2: If it's a dca object, try various extraction methods
+                    else if (inherits(dca_obj, "dca")) {
+                        # Try different possible data extraction methods
+                        extraction_methods <- list(
+                            function(x) x$dca,           # Most common: dca_obj$dca
+                            function(x) x$data,         # Alternative: dca_obj$data
+                            function(x) x[["dca"]],     # Bracket notation
+                            function(x) x[["data"]],    # Bracket notation for data
+                            function(x) as.data.frame(x$dca),  # Force conversion
+                            function(x) as.data.frame(x),      # Direct conversion
+                            function(x) {               # Check for summary method
+                                if (exists("summary.dca", mode = "function")) {
+                                    summary(x)
+                                } else {
+                                    NULL
+                                }
+                            }
+                        )
+                        
+                        # Try each extraction method until one works
+                        for (method in extraction_methods) {
+                            tryCatch({
+                                temp_data <- method(dca_obj)
+                                if (is.data.frame(temp_data) && nrow(temp_data) > 0) {
+                                    dca_data <- temp_data
+                                    break
+                                }
+                            }, error = function(e) {
+                                # Continue to next method
+                            })
+                        }
+                    }
+                    
+                    # Method 3: If still no data, try to extract from attributes or structure
+                    if (is.null(dca_data) && is.list(dca_obj)) {
+                        possible_slots <- c("dca", "data", "results", "output", "curves")
+                        for (slot in possible_slots) {
+                            if (!is.null(dca_obj[[slot]]) && is.data.frame(dca_obj[[slot]])) {
+                                dca_data <- dca_obj[[slot]]
+                                break
+                            }
+                        }
+                    }
+                    
+                    # Final check: ensure we have a valid data.frame
+                    if (is.null(dca_data) || !is.data.frame(dca_data)) {
+                        table$setError("Unable to extract data from DCA object. Please check dcurves package version compatibility.")
+                        return()
+                    }
+                    
+                    # Standardize column names (dcurves package may use different naming conventions)
+                    required_cols <- c("threshold", "label", "net_benefit")
+                    alternative_names <- list(
+                        threshold = c("threshold", "prob_threshold", "risk_threshold", "pt"),
+                        label = c("label", "model", "strategy", "group"),
+                        net_benefit = c("net_benefit", "nb", "net.benefit", "netbenefit")
+                    )
+                    
+                    # Map column names to standardized names
+                    for (req_col in required_cols) {
+                        found_col <- NULL
+                        for (alt_name in alternative_names[[req_col]]) {
+                            if (alt_name %in% names(dca_data)) {
+                                found_col <- alt_name
+                                break
+                            }
+                        }
+                        
+                        if (!is.null(found_col) && found_col != req_col) {
+                            # Rename column to standard name
+                            names(dca_data)[names(dca_data) == found_col] <- req_col
+                        }
+                    }
+                    
+                    # Final validation of required columns
+                    missing_cols <- setdiff(required_cols, names(dca_data))
+                    if (length(missing_cols) > 0) {
+                        table$setError(paste("DCA data missing required columns:", paste(missing_cols, collapse = ", "), 
+                                           ". Available columns:", paste(names(dca_data), collapse = ", ")))
                         return()
                     }
                     
                     # Filter data for key thresholds (e.g., every 10%)
                     key_thresholds <- seq(0.1, 0.9, by = 0.1)
                     
+                    # Identify model labels in the data (DCA may use different naming conventions)
+                    unique_labels <- unique(dca_data$label)
+                    
+                    # Try to identify old and new model labels
+                    old_label_patterns <- c("old_risk", "old", "original", "model1", self$options$oldStage)
+                    new_label_patterns <- c("new_risk", "new", "revised", "model2", self$options$newStage)
+                    
+                    old_label <- NULL
+                    new_label <- NULL
+                    
+                    # Find matching labels
+                    for (pattern in old_label_patterns) {
+                        matching_labels <- unique_labels[grepl(pattern, unique_labels, ignore.case = TRUE)]
+                        if (length(matching_labels) > 0) {
+                            old_label <- matching_labels[1]
+                            break
+                        }
+                    }
+                    
+                    for (pattern in new_label_patterns) {
+                        matching_labels <- unique_labels[grepl(pattern, unique_labels, ignore.case = TRUE)]
+                        if (length(matching_labels) > 0) {
+                            new_label <- matching_labels[1]
+                            break
+                        }
+                    }
+                    
+                    # If no specific patterns found, use first two unique labels
+                    if (is.null(old_label) || is.null(new_label)) {
+                        if (length(unique_labels) >= 2) {
+                            old_label <- unique_labels[1]
+                            new_label <- unique_labels[2]
+                        } else {
+                            table$setError("DCA data does not contain sufficient model comparisons")
+                            return()
+                        }
+                    }
+                    
                     for (threshold in key_thresholds) {
                         # Find the closest threshold in the data
                         closest_threshold_idx <- which.min(abs(dca_data$threshold - threshold))
                         closest_threshold <- dca_data$threshold[closest_threshold_idx]
                         
-                        if (length(closest_threshold_idx) > 0) {
+                        if (length(closest_threshold_idx) > 0 && length(closest_threshold) > 0) {
                             # Extract net benefit for old and new risk models at this threshold
                             # Filter data for this specific threshold and each model
-                            old_mask <- dca_data$threshold == closest_threshold & dca_data$label == "old_risk"
-                            new_mask <- dca_data$threshold == closest_threshold & dca_data$label == "new_risk"
+                            old_mask <- abs(dca_data$threshold - closest_threshold) < 0.001 & dca_data$label == old_label
+                            new_mask <- abs(dca_data$threshold - closest_threshold) < 0.001 & dca_data$label == new_label
                             
                             # Extract net benefit values and ensure they are atomic
                             old_nb <- if (any(old_mask)) {
                                 val <- dca_data[old_mask, "net_benefit"][1]  # Take first match
-                                as.numeric(val)[1]  # Ensure atomic numeric value
+                                private$.safeAtomic(val, "numeric", NA_real_)  # Ensure atomic numeric value
                             } else {
                                 NA_real_
                             }
                             
                             new_nb <- if (any(new_mask)) {
                                 val <- dca_data[new_mask, "net_benefit"][1]  # Take first match
-                                as.numeric(val)[1]  # Ensure atomic numeric value
+                                private$.safeAtomic(val, "numeric", NA_real_)  # Ensure atomic numeric value
                             } else {
                                 NA_real_
                             }
                             
                             # Calculate improvement and ensure it's atomic
                             improvement <- if (!is.na(old_nb) && !is.na(new_nb)) {
-                                as.numeric(new_nb - old_nb)[1]
+                                private$.safeAtomic(new_nb - old_nb, "numeric", NA_real_)
                             } else {
                                 NA_real_
                             }
                             
                             # Ensure threshold is atomic
-                            threshold_val <- as.numeric(threshold)[1]
+                            threshold_val <- private$.safeAtomic(threshold, "numeric", NA_real_)
                             
                             # Add row to table with atomic values
                             table$addRow(rowKey = paste0("threshold_", threshold_val), values = list(
@@ -3571,8 +4588,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         }
                     }
                     
-                    # Add a note about the time horizon
+                    # Add informative notes about the analysis
                     table$setNote("time_horizon", paste("Analysis performed at", dca_results$time_horizon, "months"))
+                    table$setNote("models_compared", paste("Models compared: '", old_label, "' vs '", new_label, "'", sep = ""))
+                    table$setNote("data_extraction", paste("Successfully extracted", nrow(dca_data), "data points from DCA object"))
                     
                 }, error = function(e) {
                     table$setError(paste("Error processing DCA results:", e$message))
@@ -3691,9 +4710,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
                 
                 # Ensure atomic values
-                chi_square <- as.numeric(chi_square)[1]
-                df <- as.integer(df)[1]
-                p_value <- as.numeric(p_value)[1]
+                chi_square <- private$.safeAtomic(chi_square, "numeric", NA)
+                df <- private$.safeAtomic(df, "integer", NA)
+                p_value <- private$.safeAtomic(p_value, "numeric", NA)
                 
                 table$addRow(rowKey = 1, values = list(
                     Test = "Likelihood Ratio Test",
@@ -3747,36 +4766,36 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Add Nagelkerke R-squared
             table$addRow(rowKey = "nagelkerke", values = list(
                 Measure = "Nagelkerke R²",
-                Original = as.numeric(pseudo_r2_results$nagelkerke_old)[1],
-                New = as.numeric(pseudo_r2_results$nagelkerke_new)[1],
-                Improvement = as.numeric(pseudo_r2_results$nagelkerke_improvement)[1],
+                Original = private$.safeAtomic(pseudo_r2_results$nagelkerke_old, "numeric", NA),
+                New = private$.safeAtomic(pseudo_r2_results$nagelkerke_new, "numeric", NA),
+                Improvement = private$.safeAtomic(pseudo_r2_results$nagelkerke_improvement, "numeric", NA),
                 Interpretation = get_interpretation("Nagelkerke", pseudo_r2_results$nagelkerke_new, pseudo_r2_results$nagelkerke_improvement)
             ))
             
             # Add McFadden R-squared
             table$addRow(rowKey = "mcfadden", values = list(
                 Measure = "McFadden R²",
-                Original = as.numeric(pseudo_r2_results$mcfadden_old)[1],
-                New = as.numeric(pseudo_r2_results$mcfadden_new)[1],
-                Improvement = as.numeric(pseudo_r2_results$mcfadden_improvement)[1],
+                Original = private$.safeAtomic(pseudo_r2_results$mcfadden_old, "numeric", NA),
+                New = private$.safeAtomic(pseudo_r2_results$mcfadden_new, "numeric", NA),
+                Improvement = private$.safeAtomic(pseudo_r2_results$mcfadden_improvement, "numeric", NA),
                 Interpretation = get_interpretation("McFadden", pseudo_r2_results$mcfadden_new, pseudo_r2_results$mcfadden_improvement)
             ))
             
             # Add Cox-Snell R-squared
             table$addRow(rowKey = "cox_snell", values = list(
                 Measure = "Cox-Snell R²",
-                Original = as.numeric(pseudo_r2_results$cox_snell_old)[1],
-                New = as.numeric(pseudo_r2_results$cox_snell_new)[1],
-                Improvement = as.numeric(pseudo_r2_results$cox_snell_improvement)[1],
+                Original = private$.safeAtomic(pseudo_r2_results$cox_snell_old, "numeric", NA),
+                New = private$.safeAtomic(pseudo_r2_results$cox_snell_new, "numeric", NA),
+                Improvement = private$.safeAtomic(pseudo_r2_results$cox_snell_improvement, "numeric", NA),
                 Interpretation = get_interpretation("Cox-Snell", pseudo_r2_results$cox_snell_new, pseudo_r2_results$cox_snell_improvement)
             ))
             
             # Add Adjusted McFadden R-squared
             table$addRow(rowKey = "adj_mcfadden", values = list(
                 Measure = "Adjusted McFadden R²",
-                Original = as.numeric(pseudo_r2_results$adj_mcfadden_old)[1],
-                New = as.numeric(pseudo_r2_results$adj_mcfadden_new)[1],
-                Improvement = as.numeric(pseudo_r2_results$adj_mcfadden_improvement)[1],
+                Original = private$.safeAtomic(pseudo_r2_results$adj_mcfadden_old, "numeric", NA),
+                New = private$.safeAtomic(pseudo_r2_results$adj_mcfadden_new, "numeric", NA),
+                Improvement = private$.safeAtomic(pseudo_r2_results$adj_mcfadden_improvement, "numeric", NA),
                 Interpretation = get_interpretation("Adjusted McFadden", pseudo_r2_results$adj_mcfadden_new, pseudo_r2_results$adj_mcfadden_improvement)
             ))
             
@@ -3795,15 +4814,15 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             table$addRow(rowKey = "old_overall", values = list(
                 Stage = "Original Staging",
                 Test = "Overall (Log-rank)",
-                Statistic = old_staging$overall_test$chisq,
-                p_value = old_staging$overall_p
+                Statistic = private$.safeAtomic(old_staging$overall_test$chisq, "numeric", NA),
+                p_value = private$.safeAtomic(old_staging$overall_p, "numeric", NA)
             ))
             if (!is.null(old_staging$trend_test)) {
                 table$addRow(rowKey = "old_trend", values = list(
                     Stage = "Original Staging",
                     Test = "Trend Test (Cox)",
-                    Statistic = old_staging$trend_test$trend_z,
-                    p_value = old_staging$trend_test$trend_p
+                    Statistic = private$.safeAtomic(old_staging$trend_test$trend_z, "numeric", NA),
+                    p_value = private$.safeAtomic(old_staging$trend_test$trend_p, "numeric", NA)
                 ))
             }
             
@@ -3817,8 +4836,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         table$addRow(rowKey = paste0("old_within_", stage_name), values = list(
                             Stage = paste("Original", stage_name),
                             Test = "Within-Stage Homogeneity",
-                            Statistic = as.numeric(stage_result$statistic)[1],
-                            p_value = as.numeric(stage_result$p_value)[1]
+                            Statistic = private$.safeAtomic(stage_result$statistic, "numeric", NA),
+                            p_value = private$.safeAtomic(stage_result$p_value, "numeric", NA)
                         ))
                     }
                 }
@@ -3830,8 +4849,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 table$addRow(rowKey = "old_jt", values = list(
                     Stage = "Original Staging",
                     Test = "Jonckheere-Terpstra",
-                    Statistic = as.numeric(jt_test$statistic)[1],
-                    p_value = as.numeric(jt_test$p_value)[1]
+                    Statistic = private$.safeAtomic(jt_test$statistic, "numeric", NA),
+                    p_value = private$.safeAtomic(jt_test$p_value, "numeric", NA)
                 ))
             }
             
@@ -3841,8 +4860,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 table$addRow(rowKey = "old_separation", values = list(
                     Stage = "Original Staging",
                     Test = "Separation Test",
-                    Statistic = as.numeric(sep_test$statistic)[1],
-                    p_value = as.numeric(sep_test$p_value)[1]
+                    Statistic = private$.safeAtomic(sep_test$statistic, "numeric", NA),
+                    p_value = private$.safeAtomic(sep_test$p_value, "numeric", NA)
                 ))
             }
 
@@ -3851,15 +4870,15 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             table$addRow(rowKey = "new_overall", values = list(
                 Stage = "New Staging",
                 Test = "Overall (Log-rank)",
-                Statistic = new_staging$overall_test$chisq,
-                p_value = new_staging$overall_p
+                Statistic = private$.safeAtomic(new_staging$overall_test$chisq, "numeric", NA),
+                p_value = private$.safeAtomic(new_staging$overall_p, "numeric", NA)
             ))
             if (!is.null(new_staging$trend_test)) {
                 table$addRow(rowKey = "new_trend", values = list(
                     Stage = "New Staging",
                     Test = "Trend Test (Cox)",
-                    Statistic = new_staging$trend_test$trend_z,
-                    p_value = new_staging$trend_test$trend_p
+                    Statistic = private$.safeAtomic(new_staging$trend_test$trend_z, "numeric", NA),
+                    p_value = private$.safeAtomic(new_staging$trend_test$trend_p, "numeric", NA)
                 ))
             }
             
@@ -3873,8 +4892,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         table$addRow(rowKey = paste0("new_within_", stage_name), values = list(
                             Stage = paste("New", stage_name),
                             Test = "Within-Stage Homogeneity",
-                            Statistic = as.numeric(stage_result$statistic)[1],
-                            p_value = as.numeric(stage_result$p_value)[1]
+                            Statistic = private$.safeAtomic(stage_result$statistic, "numeric", NA),
+                            p_value = private$.safeAtomic(stage_result$p_value, "numeric", NA)
                         ))
                     }
                 }
@@ -3886,8 +4905,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 table$addRow(rowKey = "new_jt", values = list(
                     Stage = "New Staging",
                     Test = "Jonckheere-Terpstra",
-                    Statistic = as.numeric(jt_test$statistic)[1],
-                    p_value = as.numeric(jt_test$p_value)[1]
+                    Statistic = private$.safeAtomic(jt_test$statistic, "numeric", NA),
+                    p_value = private$.safeAtomic(jt_test$p_value, "numeric", NA)
                 ))
             }
             
@@ -3897,8 +4916,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 table$addRow(rowKey = "new_separation", values = list(
                     Stage = "New Staging",
                     Test = "Separation Test",
-                    Statistic = as.numeric(sep_test$statistic)[1],
-                    p_value = as.numeric(sep_test$p_value)[1]
+                    Statistic = private$.safeAtomic(sep_test$statistic, "numeric", NA),
+                    p_value = private$.safeAtomic(sep_test$p_value, "numeric", NA)
                 ))
             }
         },

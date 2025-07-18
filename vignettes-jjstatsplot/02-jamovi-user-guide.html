@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>General 01: jamovi User Guide for Statistical Analysis</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">General 01: jamovi User Guide for
+Statistical Analysis</h1>
+
+
+
+<div id="jamovi-user-guide-a-statistics-crash-course-for-pathologists-and-clinicians" class="section level1">
+<h1>jamovi User Guide: A Statistics Crash Course for Pathologists and
+Clinicians</h1>
+<p>This comprehensive guide introduces jamovi as a powerful,
+user-friendly statistical software for medical research. jamovi provides
+point-and-click access to sophisticated statistical analyses without
+requiring programming knowledge, making it ideal for pathologists and
+clinicians who need to analyze research data.</p>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<div id="installing-jjstatsplot-in-jamovi" class="section level3">
+<h3>Installing jjstatsplot in jamovi</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Open jamovi</strong></li>
+<li><strong>Access Modules</strong>: Click the “Modules” button (⊞) in
+the top menu</li>
+<li><strong>Open jamovi library</strong>: Select “jamovi library” from
+the dropdown</li>
+<li><strong>Search</strong>: Type “jjstatsplot” in the search box</li>
+<li><strong>Install</strong>: Click the “Install” button next to
+jjstatsplot</li>
+<li><strong>Restart</strong>: Close and reopen jamovi to activate the
+module</li>
+</ol>
+</div>
+<div id="verification" class="section level3">
+<h3>Verification</h3>
+<p>After installation, you should see “JJStatsPlot” in the main menu bar
+with submenus for different analysis types.</p>
+</div>
+</div>
+<div id="understanding-the-interface" class="section level2">
+<h2>Understanding the Interface</h2>
+<div id="menu-organization" class="section level3">
+<h3>Menu Organization</h3>
+<p>The jjstatsplot analyses are organized by data type:</p>
+<ul>
+<li><strong>Continuous</strong>: Histogram</li>
+<li><strong>Continuous vs Continuous</strong>: Scatter Plot, Correlation
+Matrix<br />
+</li>
+<li><strong>Categorical vs Continuous</strong>: Box-Violin Plots, Dot
+Charts</li>
+<li><strong>Categorical vs Categorical</strong>: Bar Charts, Pie
+Charts</li>
+<li><strong>Distribution</strong>: Waffle Charts</li>
+</ul>
+</div>
+<div id="common-interface-elements" class="section level3">
+<h3>Common Interface Elements</h3>
+<p>All jjstatsplot analyses share similar interface components:</p>
+<div id="variables-panel" class="section level4">
+<h4><strong>Variables Panel</strong></h4>
+<ul>
+<li><strong>Dependent Variable(s)</strong>: The main variable(s) you
+want to analyze</li>
+<li><strong>Grouping Variable</strong>: Optional variable to split
+analysis by groups</li>
+<li><strong>Grouping Variable for Plots</strong>: Creates separate plots
+for each group level</li>
+</ul>
+</div>
+<div id="options-panel" class="section level4">
+<h4><strong>Options Panel</strong></h4>
+<ul>
+<li><strong>Statistical Options</strong>: Choose test types, confidence
+levels</li>
+<li><strong>Plot Options</strong>: Customize appearance, themes,
+colors</li>
+<li><strong>Advanced Options</strong>: Fine-tune statistical
+parameters</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="data-types-and-requirements" class="section level2">
+<h2>Data Types and Requirements</h2>
+<div id="variable-types" class="section level3">
+<h3>Variable Types</h3>
+<p>jjstatsplot automatically detects variable types, but understanding
+them helps:</p>
+<ul>
+<li><strong>Continuous</strong>: Numeric variables (age, height,
+score)</li>
+<li><strong>Nominal</strong>: Categories without order (gender, color,
+treatment)</li>
+<li><strong>Ordinal</strong>: Categories with order (education level,
+satisfaction rating)</li>
+</ul>
+</div>
+<div id="data-format-requirements" class="section level3">
+<h3>Data Format Requirements</h3>
+<ul>
+<li><strong>Long format</strong>: Each row represents one
+observation</li>
+<li><strong>Complete cases</strong>: Missing values are handled
+automatically</li>
+<li><strong>Appropriate sample sizes</strong>: Minimum recommendations
+vary by analysis</li>
+</ul>
+</div>
+</div>
+<div id="analysis-walkthrough" class="section level2">
+<h2>Analysis Walkthrough</h2>
+<div id="histogram-analysis" class="section level3">
+<h3>1. Histogram Analysis</h3>
+<p><strong>Use case</strong>: Explore the distribution of a continuous
+variable</p>
+<p><strong>Steps</strong>: 1. Navigate to <strong>JJStatsPlot →
+Continuous → Histogram</strong> 2. Move your continuous variable to
+<strong>Dependent Variable</strong> 3. Optional: Add a <strong>Grouping
+Variable</strong> for separate histograms 4. Customize in
+<strong>Options</strong>: - <strong>Statistical</strong>: Choose
+normality test type - <strong>Plot</strong>: Adjust bins, colors, theme
+- <strong>Labels</strong>: Add title, axis labels</p>
+<p><strong>Example Output</strong>: - Histogram with density curve -
+Normality test results - Descriptive statistics overlay</p>
+</div>
+<div id="scatter-plot-analysis" class="section level3">
+<h3>2. Scatter Plot Analysis</h3>
+<p><strong>Use case</strong>: Examine relationship between two
+continuous variables</p>
+<p><strong>Steps</strong>: 1. Go to <strong>JJStatsPlot → Continuous vs
+Continuous → Scatter Plot</strong> 2. Set <strong>Dependent
+Variable</strong> (Y-axis) 3. Set <strong>Grouping Variable</strong>
+(X-axis) 4. Optional: Add <strong>Grouping Variable for Plots</strong>
+for separate panels 5. Configure <strong>Options</strong>: -
+<strong>Statistical</strong>: Correlation test, regression line -
+<strong>Plot</strong>: Point style, smoothing method - <strong>Marginal
+plots</strong>: Add distribution plots to margins</p>
+<p><strong>Example Output</strong>: - Scatter plot with regression line
+- Correlation coefficient and significance - Confidence intervals -
+Marginal distribution plots (optional)</p>
+</div>
+<div id="box-violin-plots-between-groups" class="section level3">
+<h3>3. Box-Violin Plots (Between Groups)</h3>
+<p><strong>Use case</strong>: Compare continuous variable across
+different groups</p>
+<p><strong>Steps</strong>: 1. Select <strong>JJStatsPlot → Categorical
+vs Continuous → Box-Violin Plots (Between Groups)</strong> 2. Add
+continuous variable to <strong>Dependent Variable</strong> 3. Add
+grouping variable to <strong>Grouping Variable</strong> 4. Adjust
+<strong>Options</strong>: - <strong>Statistical</strong>: Choose
+comparison test (t-test, ANOVA, non-parametric) - <strong>Plot</strong>:
+Combine box and violin plots - <strong>Pairwise</strong>: Enable
+post-hoc comparisons</p>
+<p><strong>Example Output</strong>: - Combined box and violin plots -
+Statistical test results - Effect size measures - Pairwise comparison
+results</p>
+</div>
+<div id="correlation-matrix" class="section level3">
+<h3>4. Correlation Matrix</h3>
+<p><strong>Use case</strong>: Explore relationships among multiple
+continuous variables</p>
+<p><strong>Steps</strong>: 1. Navigate to <strong>JJStatsPlot →
+Continuous vs Continuous → Correlation Matrix</strong> 2. Select
+multiple variables for <strong>Dependent Variables</strong> 3. Optional:
+Add <strong>Grouping Variable for Plots</strong> 4. Customize
+<strong>Options</strong>: - <strong>Statistical</strong>: Correlation
+method (Pearson, Spearman) - <strong>Plot</strong>: Color scheme,
+significance marking - <strong>Matrix type</strong>: Full, upper, or
+lower triangle</p>
+<p><strong>Example Output</strong>: - Color-coded correlation matrix -
+Significance indicators - Correlation coefficients</p>
+</div>
+<div id="bar-charts" class="section level3">
+<h3>5. Bar Charts</h3>
+<p><strong>Use case</strong>: Visualize frequency or proportions of
+categorical variables</p>
+<p><strong>Steps</strong>: 1. Go to <strong>JJStatsPlot → Categorical vs
+Categorical → Bar Charts</strong> 2. Set <strong>Dependent
+Variable</strong> (categories to count) 3. Optional: Set
+<strong>Grouping Variable</strong> for grouped bars 4. Configure
+<strong>Options</strong>: - <strong>Statistical</strong>: Chi-square
+test, effect size - <strong>Plot</strong>: Bar orientation, colors -
+<strong>Labels</strong>: Show counts, percentages</p>
+<p><strong>Example Output</strong>: - Bar chart with counts/proportions
+- Chi-square test results - Effect size (Cramér’s V)</p>
+</div>
+</div>
+<div id="advanced-features" class="section level2">
+<h2>Advanced Features</h2>
+<div id="grouped-analysis" class="section level3">
+<h3>Grouped Analysis</h3>
+<p>Most analyses support grouped analysis:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Multiple Dependent Variables</strong>: Creates subplot for
+each variable</li>
+<li><strong>Grouping Variable for Plots</strong>: Creates separate plot
+for each group level</li>
+<li><strong>Combination</strong>: Multiple variables × multiple groups =
+grid of plots</li>
+</ol>
+</div>
+<div id="theme-options" class="section level3">
+<h3>Theme Options</h3>
+<p>Choose between: - <strong>jamovi theme</strong>: Clean,
+publication-ready appearance - <strong>ggstatsplot theme</strong>: Rich
+statistical annotations and colors</p>
+</div>
+<div id="export-options" class="section level3">
+<h3>Export Options</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Copy Plot</strong>: Right-click plot → Copy</li>
+<li><strong>Save</strong>: File → Export → choose format (PNG, PDF,
+SVG)</li>
+<li><strong>Results</strong>: Copy statistical output from results
+panel</li>
+</ol>
+</div>
+</div>
+<div id="troubleshooting-common-issues" class="section level2">
+<h2>Troubleshooting Common Issues</h2>
+<div id="no-data-to-plot-error" class="section level3">
+<h3>“No data to plot” Error</h3>
+<ul>
+<li><strong>Check</strong>: Ensure variables are selected correctly</li>
+<li><strong>Missing data</strong>: Variables with all missing values
+can’t be plotted</li>
+<li><strong>Variable type</strong>: Ensure variable types match analysis
+requirements</li>
+</ul>
+</div>
+<div id="statistical-test-failures" class="section level3">
+<h3>Statistical Test Failures</h3>
+<ul>
+<li><strong>Sample size</strong>: Some tests require minimum sample
+sizes</li>
+<li><strong>Assumptions</strong>: Check if data meets test
+assumptions</li>
+<li><strong>Alternative tests</strong>: Try non-parametric
+alternatives</li>
+</ul>
+</div>
+<div id="plot-display-issues" class="section level3">
+<h3>Plot Display Issues</h3>
+<ul>
+<li><strong>Refresh</strong>: Try refreshing the analysis</li>
+<li><strong>Simplify</strong>: Remove grouping variables
+temporarily</li>
+<li><strong>Update</strong>: Ensure jamovi and module are up to
+date</li>
+</ul>
+</div>
+</div>
+<div id="tips-for-better-visualizations" class="section level2">
+<h2>Tips for Better Visualizations</h2>
+<div id="variable-selection" class="section level3">
+<h3>1. Variable Selection</h3>
+<ul>
+<li><strong>Meaningful groupings</strong>: Choose grouping variables
+with 2-8 levels</li>
+<li><strong>Sufficient data</strong>: Ensure adequate observations per
+group</li>
+<li><strong>Relevant comparisons</strong>: Select variables that make
+theoretical sense</li>
+</ul>
+</div>
+<div id="customization" class="section level3">
+<h3>2. Customization</h3>
+<ul>
+<li><strong>Titles</strong>: Add descriptive titles and axis labels</li>
+<li><strong>Colors</strong>: Use color schemes appropriate for your
+audience</li>
+<li><strong>Theme</strong>: Choose theme based on publication
+requirements</li>
+</ul>
+</div>
+<div id="statistical-interpretation" class="section level3">
+<h3>3. Statistical Interpretation</h3>
+<ul>
+<li><strong>Effect sizes</strong>: Always interpret alongside
+p-values</li>
+<li><strong>Assumptions</strong>: Check and report assumption
+violations</li>
+<li><strong>Multiple comparisons</strong>: Consider correction when
+doing many tests</li>
+</ul>
+</div>
+</div>
+<div id="example-workflow" class="section level2">
+<h2>Example Workflow</h2>
+<div id="research-question-does-engine-type-affect-fuel-efficiency" class="section level3">
+<h3>Research Question: “Does engine type affect fuel efficiency?”</h3>
+<ol style="list-style-type: decimal">
+<li><p><strong>Data</strong>: Load dataset with <code>mpg</code>
+(continuous) and <code>vs</code> (engine type, categorical)</p></li>
+<li><p><strong>Exploratory Analysis</strong>:</p>
+<ul>
+<li><strong>Histogram</strong>: Examine <code>mpg</code>
+distribution</li>
+<li><strong>Box-Violin Plot</strong>: Compare <code>mpg</code> between
+<code>vs</code> groups</li>
+</ul></li>
+<li><p><strong>Detailed Analysis</strong>:</p>
+<ul>
+<li>Use Box-Violin Plots (Between Groups)</li>
+<li>Set <code>mpg</code> as Dependent Variable</li>
+<li>Set <code>vs</code> as Grouping Variable</li>
+<li>Enable statistical tests and effect sizes</li>
+</ul></li>
+<li><p><strong>Interpretation</strong>:</p>
+<ul>
+<li>Examine group differences in plots</li>
+<li>Report statistical test results</li>
+<li>Include effect size measures</li>
+</ul></li>
+</ol>
+</div>
+</div>
+<div id="best-practices" class="section level2">
+<h2>Best Practices</h2>
+<div id="statistical-reporting" class="section level3">
+<h3>Statistical Reporting</h3>
+<ul>
+<li>Always report effect sizes alongside p-values</li>
+<li>Check and report assumption violations</li>
+<li>Use appropriate tests for your data type and distribution</li>
+</ul>
+</div>
+<div id="visualization-guidelines" class="section level3">
+<h3>Visualization Guidelines</h3>
+<ul>
+<li>Keep plots simple and interpretable</li>
+<li>Use consistent color schemes across related analyses</li>
+<li>Include appropriate titles and labels</li>
+<li>Consider your audience (academic, clinical, general public)</li>
+</ul>
+</div>
+<div id="reproducibility" class="section level3">
+<h3>Reproducibility</h3>
+<ul>
+<li>Document your analysis choices</li>
+<li>Save jamovi files with descriptive names</li>
+<li>Export high-quality images for publications</li>
+</ul>
+</div>
+</div>
+<div id="getting-help" class="section level2">
+<h2>Getting Help</h2>
+<div id="resources" class="section level3">
+<h3>Resources</h3>
+<ul>
+<li><strong>ggstatsplot documentation</strong>: <a href="https://indrajeetpatil.github.io/ggstatsplot/">indrajeetpatil.github.io/ggstatsplot</a></li>
+<li><strong>jamovi community</strong>: <a href="https://forum.jamovi.org">forum.jamovi.org</a></li>
+<li><strong>GitHub issues</strong>: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/issues">github.com/sbalci/ClinicoPathJamoviModule/issues</a></li>
+</ul>
+</div>
+<div id="support" class="section level3">
+<h3>Support</h3>
+<ul>
+<li>Check jamovi forum for similar questions</li>
+<li>Report bugs via GitHub issues</li>
+<li>Include sample data and screenshots when asking for help</li>
+</ul>
+<p>This guide provides a foundation for using jjstatsplot effectively in
+jamovi. Each analysis type offers extensive customization options -
+experiment with different settings to find what works best for your
+research needs.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

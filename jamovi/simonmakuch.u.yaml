@@ -1,0 +1,281 @@
+title: Simon-Makuch Time-Dependent Survival Analysis
+name: simonmakuch
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: survivalTime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: timeDepVariable
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: timeDepTime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: timeDepStatus
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 2
+    children:
+      - type: CollapseBox
+        label: Core Variables
+        collapsed: false
+        stretchFactor: 1
+        children:
+          - type: Supplier
+            name: survivalTime
+            label: Survival Time
+            showColumnHeaders: false
+            persistentItems: false
+            stretchFactor: 1
+            format: variable
+          - type: Supplier
+            name: event
+            label: Event Indicator
+            showColumnHeaders: false
+            persistentItems: false
+            stretchFactor: 1
+            format: variable
+          - type: ComboBox
+            name: eventLevel
+            label: Event Level
+
+      - type: CollapseBox
+        label: Time-Dependent Variables
+        collapsed: false
+        stretchFactor: 1
+        children:
+          - type: Supplier
+            name: timeDepVariable
+            label: Time-Dependent Variable
+            showColumnHeaders: false
+            persistentItems: false
+            stretchFactor: 1
+            format: variable
+          - type: Supplier
+            name: timeDepTime
+            label: Time of Change
+            showColumnHeaders: false
+            persistentItems: false
+            stretchFactor: 1
+            format: variable
+          - type: Supplier
+            name: timeDepStatus
+            label: Time-Dependent Status
+            showColumnHeaders: false
+            persistentItems: false
+            stretchFactor: 1
+            format: variable
+          - type: ComboBox
+            name: exposedLevel
+            label: Exposed Level
+
+      - type: CollapseBox
+        label: Analysis Options
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: ComboBox
+            name: analysisType
+            label: Analysis Type
+          - type: TextBox
+            name: confidenceLevel
+            label: Confidence Level
+            format: number
+          - type: CheckBox
+            name: enableMultipleTimeDep
+            label: Multiple Time-Dependent Variables
+          - type: Supplier
+            name: additionalTimeDepVars
+            label: Additional Time-Dependent Variables
+            showColumnHeaders: false
+            persistentItems: false
+            stretchFactor: 1
+            format: variables
+
+      - type: CollapseBox
+        label: Landmark Analysis
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: performLandmarkAnalysis
+            label: Perform Landmark Analysis
+          - type: TextBox
+            name: landmarkTimes
+            label: Landmark Time Points
+            format: string
+          - type: TextBox
+            name: landmarkWindow
+            label: Landmark Window
+            format: number
+
+      - type: CollapseBox
+        label: Cox Regression
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: performTimeDependentCox
+            label: Time-Dependent Cox Regression
+          - type: Supplier
+            name: timeDependentCovariates
+            label: Additional Covariates
+            showColumnHeaders: false
+            persistentItems: false
+            stretchFactor: 1
+            format: variables
+          - type: CheckBox
+            name: testTimeVaryingEffect
+            label: Test Time-Varying Effects
+          - type: ComboBox
+            name: handleTieBreaking
+            label: Tie-Breaking Method
+          - type: CheckBox
+            name: robustVariance
+            label: Robust Variance Estimation
+          - type: Supplier
+            name: clusterVariable
+            label: Cluster Variable
+            showColumnHeaders: false
+            persistentItems: false
+            stretchFactor: 1
+            format: variable
+
+      - type: CollapseBox
+        label: Statistical Tests
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: performLogRankTest
+            label: Log-Rank Test
+          - type: CheckBox
+            name: performMantelByarTest
+            label: Mantel-Byar Test
+          - type: CheckBox
+            name: performTimeDepLRTest
+            label: Time-Dependent Log-Rank Test
+
+      - type: CollapseBox
+        label: Bias Assessment
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: assessImmortalTimeBias
+            label: Assess Immortal Time Bias
+          - type: CheckBox
+            name: naiveComparison
+            label: Include Naive Comparison
+
+      - type: CollapseBox
+        label: Plots
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: showSimonMakuchPlot
+            label: Simon-Makuch Plot
+          - type: CheckBox
+            name: showLandmarkPlots
+            label: Landmark Survival Plots
+          - type: CheckBox
+            name: showCumulativeIncidencePlot
+            label: Cumulative Incidence Plot
+          - type: CheckBox
+            name: plotExposureStatus
+            label: Plot Exposure Status Over Time
+          - type: TextBox
+            name: plotTimeRange
+            label: Plot Time Range (months)
+            format: string
+          - type: CheckBox
+            name: showConfidenceIntervals
+            label: Show Confidence Intervals
+          - type: CheckBox
+            name: showRiskTables
+            label: Show Risk Tables
+
+      - type: CollapseBox
+        label: Output Tables
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: showSurvivalEstimates
+            label: Survival Estimates Table
+          - type: CheckBox
+            name: showHazardRatios
+            label: Hazard Ratios Table
+          - type: CheckBox
+            name: showLandmarkResults
+            label: Landmark Analysis Results
+          - type: CheckBox
+            name: showExposurePatterns
+            label: Exposure Pattern Summary
+          - type: CheckBox
+            name: showModelDiagnostics
+            label: Model Diagnostics
+
+      - type: CollapseBox
+        label: Validation & Sensitivity
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: performBootstrapValidation
+            label: Bootstrap Validation
+          - type: TextBox
+            name: bootstrapSamples
+            label: Bootstrap Samples
+            format: number
+          - type: CheckBox
+            name: performSensitivityAnalysis
+            label: Sensitivity Analysis
+
+      - type: CollapseBox
+        label: Explanations & Guidance
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: showExplanations
+            label: Show Explanations
+          - type: CheckBox
+            name: showMethodologyNotes
+            label: Methodology Notes
+          - type: CheckBox
+            name: includeClinicalGuidance
+            label: Clinical Interpretation Guidance

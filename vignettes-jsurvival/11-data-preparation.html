@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Data Preparation for Survival Analysis</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Data Preparation for Survival Analysis</h1>
+
+
+
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p>Proper data preparation is crucial for reliable survival analysis.
+This vignette provides comprehensive guidance on preparing data for use
+with jsurvival, covering common data issues and their solutions.</p>
+</div>
+<div id="essential-data-components" class="section level1">
+<h1>Essential Data Components</h1>
+<div id="required-variables" class="section level2">
+<h2>Required Variables</h2>
+<p>Every survival analysis requires at minimum:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Time variable</strong>: Time from study entry to event or
+censoring</li>
+<li><strong>Event indicator</strong>: Binary variable indicating whether
+event occurred</li>
+</ol>
+</div>
+<div id="optional-variables" class="section level2">
+<h2>Optional Variables</h2>
+<ul>
+<li><strong>Grouping factors</strong>: For comparing survival between
+groups</li>
+<li><strong>Continuous predictors</strong>: For cut-point analysis or
+multivariable models</li>
+<li><strong>Date variables</strong>: For calculating time intervals</li>
+<li><strong>Stratification variables</strong>: For adjusted
+analyses</li>
+</ul>
+</div>
+</div>
+<div id="time-variable-preparation" class="section level1">
+<h1>Time Variable Preparation</h1>
+<div id="calculating-time-from-dates" class="section level2">
+<h2>Calculating Time from Dates</h2>
+<div id="using-built-in-time-interval-calculator" class="section level3">
+<h3>Using Built-in Time Interval Calculator</h3>
+<p>The jsurvival module includes a time interval calculator:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># In jamovi: Survival → Data Preparation → Time Interval Calculator</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co"># Assign:</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># - Start Date: Study entry date (e.g., diagnosis_date)</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># - End Date: Event/censoring date (e.g., death_date or last_followup_date)</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># - Output Unit: months or years</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co"># This creates a new variable with calculated time intervals</span></span></code></pre></div>
+</div>
+<div id="manual-calculation-in-r" class="section level3">
+<h3>Manual Calculation in R</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Example data with dates</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>clinical_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">patient_id =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">diagnosis_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2020-01-01&quot;</span>) <span class="sc">+</span> <span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">365</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">death_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2020-01-01&quot;</span>) <span class="sc">+</span> <span class="fu">sample</span>(<span class="dv">200</span><span class="sc">:</span><span class="dv">1000</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="at">last_followup_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2023-12-31&quot;</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># Calculate time to death or censoring</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>clinical_data<span class="sc">$</span>death_occurred <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">is.na</span>(clinical_data<span class="sc">$</span>death_date)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>clinical_data<span class="sc">$</span>event_date <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(clinical_data<span class="sc">$</span>death_occurred,</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>                                   clinical_data<span class="sc">$</span>death_date,</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>                                   clinical_data<span class="sc">$</span>last_followup_date)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>clinical_data<span class="sc">$</span>event_date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(clinical_data<span class="sc">$</span>event_date, <span class="at">origin =</span> <span class="st">&quot;1970-01-01&quot;</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co"># Time in months</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>clinical_data<span class="sc">$</span>time_months <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>  <span class="fu">difftime</span>(clinical_data<span class="sc">$</span>event_date, clinical_data<span class="sc">$</span>diagnosis_date, <span class="at">units =</span> <span class="st">&quot;days&quot;</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>) <span class="sc">/</span> <span class="fl">30.44</span>  <span class="co"># Average days per month</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co"># Time in years</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>clinical_data<span class="sc">$</span>time_years <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>  <span class="fu">difftime</span>(clinical_data<span class="sc">$</span>event_date, clinical_data<span class="sc">$</span>diagnosis_date, <span class="at">units =</span> <span class="st">&quot;days&quot;</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>) <span class="sc">/</span> <span class="fl">365.25</span>  <span class="co"># Accounting for leap years</span></span></code></pre></div>
+</div>
+</div>
+<div id="handling-time-zero-issues" class="section level2">
+<h2>Handling Time Zero Issues</h2>
+<div id="left-truncation" class="section level3">
+<h3>Left Truncation</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Patients entering study at different times</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># Example: analyzing from landmark time (e.g., 3 months post-diagnosis)</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># Include only patients who survived to landmark</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>landmark_time <span class="ot">&lt;-</span> <span class="dv">3</span>  <span class="co"># months</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>eligible_data <span class="ot">&lt;-</span> <span class="fu">subset</span>(clinical_data, time_months <span class="sc">&gt;=</span> landmark_time)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># Adjust time origin to landmark</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>eligible_data<span class="sc">$</span>time_from_landmark <span class="ot">&lt;-</span> eligible_data<span class="sc">$</span>time_months <span class="sc">-</span> landmark_time</span></code></pre></div>
+</div>
+<div id="negative-time-values" class="section level3">
+<h3>Negative Time Values</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Check for and handle negative times</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>negative_times <span class="ot">&lt;-</span> clinical_data<span class="sc">$</span>time_months <span class="sc">&lt;</span> <span class="dv">0</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">any</span>(negative_times, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Found&quot;</span>, <span class="fu">sum</span>(negative_times, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="st">&quot;negative time values&quot;</span>))</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  </span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="co"># Options:</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="co"># 1. Exclude these patients</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  clinical_data <span class="ot">&lt;-</span> clinical_data[<span class="sc">!</span>negative_times <span class="sc">|</span> <span class="fu">is.na</span>(negative_times), ]</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  </span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="co"># 2. Set to small positive value</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="co"># clinical_data$time_months[negative_times] &lt;- 0.001</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  </span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  <span class="co"># 3. Investigate data entry errors</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  <span class="co"># View(clinical_data[negative_times, ])</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="event-indicator-preparation" class="section level1">
+<h1>Event Indicator Preparation</h1>
+<div id="creating-binary-event-variables" class="section level2">
+<h2>Creating Binary Event Variables</h2>
+<div id="death-as-event" class="section level3">
+<h3>Death as Event</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># From death status variable</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>clinical_data<span class="sc">$</span>death_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(clinical_data<span class="sc">$</span>vital_status <span class="sc">==</span> <span class="st">&quot;Dead&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># From death date</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>clinical_data<span class="sc">$</span>death_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(clinical_data<span class="sc">$</span>death_date), <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># Verify coding</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">table</span>(clinical_data<span class="sc">$</span>death_binary, clinical_data<span class="sc">$</span>vital_status, <span class="at">useNA =</span> <span class="st">&quot;always&quot;</span>)</span></code></pre></div>
+</div>
+<div id="other-events" class="section level3">
+<h3>Other Events</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Disease progression</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>clinical_data<span class="sc">$</span>progression <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(clinical_data<span class="sc">$</span>progression_status <span class="sc">==</span> <span class="st">&quot;Progressive Disease&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co"># Recurrence</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>clinical_data<span class="sc">$</span>recurrence <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(clinical_data<span class="sc">$</span>recurrence_date), <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co"># Composite endpoint (death or progression, whichever comes first)</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>clinical_data<span class="sc">$</span>death_or_progression <span class="ot">&lt;-</span> <span class="fu">pmax</span>(clinical_data<span class="sc">$</span>death_binary, </span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                                          clinical_data<span class="sc">$</span>progression, </span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                                          <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="multiple-event-types" class="section level2">
+<h2>Multiple Event Types</h2>
+<div id="competing-risks-setup" class="section level3">
+<h3>Competing Risks Setup</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Create separate indicators for different event types</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>clinical_data<span class="sc">$</span>death_cancer <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(clinical_data<span class="sc">$</span>death_cause <span class="sc">==</span> <span class="st">&quot;Cancer&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>clinical_data<span class="sc">$</span>death_other <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(clinical_data<span class="sc">$</span>death_cause <span class="sc">==</span> <span class="st">&quot;Other&quot;</span> <span class="sc">|</span> </span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>                                   clinical_data<span class="sc">$</span>death_cause <span class="sc">==</span> <span class="st">&quot;Cardiovascular&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co"># For patients still alive, both should be 0</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>alive_patients <span class="ot">&lt;-</span> clinical_data<span class="sc">$</span>vital_status <span class="sc">==</span> <span class="st">&quot;Alive&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>clinical_data<span class="sc">$</span>death_cancer[alive_patients] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>clinical_data<span class="sc">$</span>death_other[alive_patients] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co"># Verify: sum should equal total deaths</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="fu">table</span>(clinical_data<span class="sc">$</span>death_cancer <span class="sc">+</span> clinical_data<span class="sc">$</span>death_other, </span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>      clinical_data<span class="sc">$</span>vital_status)</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="data-quality-checks" class="section level1">
+<h1>Data Quality Checks</h1>
+<div id="consistency-checks" class="section level2">
+<h2>Consistency Checks</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Function to perform comprehensive data quality checks</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>check_survival_data <span class="ot">&lt;-</span> <span class="cf">function</span>(data, time_var, event_var) {</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  </span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  checks <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  </span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="co"># 1. Missing values</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  checks<span class="sc">$</span>missing_time <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(data[[time_var]]))</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  checks<span class="sc">$</span>missing_event <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(data[[event_var]]))</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  </span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="co"># 2. Negative or zero times</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  checks<span class="sc">$</span>negative_times <span class="ot">&lt;-</span> <span class="fu">sum</span>(data[[time_var]] <span class="sc">&lt;=</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  </span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  <span class="co"># 3. Event indicator values</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  event_values <span class="ot">&lt;-</span> <span class="fu">unique</span>(data[[event_var]])</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  checks<span class="sc">$</span>valid_events <span class="ot">&lt;-</span> <span class="fu">all</span>(event_values <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="cn">NA</span>))</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>  checks<span class="sc">$</span>event_table <span class="ot">&lt;-</span> <span class="fu">table</span>(data[[event_var]], <span class="at">useNA =</span> <span class="st">&quot;always&quot;</span>)</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>  </span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>  <span class="co"># 4. Extreme values</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>  checks<span class="sc">$</span>extreme_times <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>    <span class="at">max_time =</span> <span class="fu">max</span>(data[[time_var]], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>    <span class="at">min_time =</span> <span class="fu">min</span>(data[[time_var]], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>    <span class="at">outliers =</span> <span class="fu">sum</span>(data[[time_var]] <span class="sc">&gt;</span> <span class="fu">quantile</span>(data[[time_var]], <span class="fl">0.99</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>  )</span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>  </span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>  <span class="co"># 5. Event rate</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a>  checks<span class="sc">$</span>event_rate <span class="ot">&lt;-</span> <span class="fu">mean</span>(data[[event_var]], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a>  </span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a>  <span class="fu">return</span>(checks)</span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a>}</span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a></span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co"># Run checks</span></span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a>data_quality <span class="ot">&lt;-</span> <span class="fu">check_survival_data</span>(clinical_data, <span class="st">&quot;time_months&quot;</span>, <span class="st">&quot;death_binary&quot;</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="fu">print</span>(data_quality)</span></code></pre></div>
+</div>
+<div id="outlier-detection" class="section level2">
+<h2>Outlier Detection</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Identify potential outliers in survival times</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>Q1 <span class="ot">&lt;-</span> <span class="fu">quantile</span>(clinical_data<span class="sc">$</span>time_months, <span class="fl">0.25</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>Q3 <span class="ot">&lt;-</span> <span class="fu">quantile</span>(clinical_data<span class="sc">$</span>time_months, <span class="fl">0.75</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>IQR <span class="ot">&lt;-</span> Q3 <span class="sc">-</span> Q1</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co"># Define outliers using 1.5 * IQR rule</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>lower_bound <span class="ot">&lt;-</span> Q1 <span class="sc">-</span> <span class="fl">1.5</span> <span class="sc">*</span> IQR</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>upper_bound <span class="ot">&lt;-</span> Q3 <span class="sc">+</span> <span class="fl">1.5</span> <span class="sc">*</span> IQR</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>outliers <span class="ot">&lt;-</span> clinical_data<span class="sc">$</span>time_months <span class="sc">&lt;</span> lower_bound <span class="sc">|</span> clinical_data<span class="sc">$</span>time_months <span class="sc">&gt;</span> upper_bound</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Found&quot;</span>, <span class="fu">sum</span>(outliers, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="st">&quot;potential outliers&quot;</span>))</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co"># Review outliers</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">sum</span>(outliers, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  outlier_data <span class="ot">&lt;-</span> clinical_data[outliers <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(outliers), </span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>                               <span class="fu">c</span>(<span class="st">&quot;patient_id&quot;</span>, <span class="st">&quot;time_months&quot;</span>, <span class="st">&quot;death_binary&quot;</span>)]</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  <span class="fu">print</span>(outlier_data)</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+<div id="handling-missing-data" class="section level1">
+<h1>Handling Missing Data</h1>
+<div id="missing-data-patterns" class="section level2">
+<h2>Missing Data Patterns</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Assess missing data patterns</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">library</span>(VIM)  <span class="co"># Visualization and Imputation of Missing values</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co"># Create missingness indicator</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>clinical_data<span class="sc">$</span>time_missing <span class="ot">&lt;-</span> <span class="fu">is.na</span>(clinical_data<span class="sc">$</span>time_months)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>clinical_data<span class="sc">$</span>event_missing <span class="ot">&lt;-</span> <span class="fu">is.na</span>(clinical_data<span class="sc">$</span>death_binary)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co"># Missing data summary</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>missing_summary <span class="ot">&lt;-</span> clinical_data <span class="sc">%&gt;%</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>    <span class="at">n_total =</span> <span class="fu">n</span>(),</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>    <span class="at">time_missing =</span> <span class="fu">sum</span>(time_missing),</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    <span class="at">event_missing =</span> <span class="fu">sum</span>(event_missing),</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>    <span class="at">both_missing =</span> <span class="fu">sum</span>(time_missing <span class="sc">&amp;</span> event_missing),</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>    <span class="at">complete_cases =</span> <span class="fu">sum</span>(<span class="sc">!</span>time_missing <span class="sc">&amp;</span> <span class="sc">!</span>event_missing)</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  )</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="fu">print</span>(missing_summary)</span></code></pre></div>
+</div>
+<div id="strategies-for-missing-data" class="section level2">
+<h2>Strategies for Missing Data</h2>
+<div id="complete-case-analysis" class="section level3">
+<h3>Complete Case Analysis</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Use only patients with complete survival data</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>complete_data <span class="ot">&lt;-</span> clinical_data[<span class="sc">!</span><span class="fu">is.na</span>(clinical_data<span class="sc">$</span>time_months) <span class="sc">&amp;</span> </span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>                              <span class="sc">!</span><span class="fu">is.na</span>(clinical_data<span class="sc">$</span>death_binary), ]</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Complete cases:&quot;</span>, <span class="fu">nrow</span>(complete_data), <span class="st">&quot;of&quot;</span>, <span class="fu">nrow</span>(clinical_data)))</span></code></pre></div>
+</div>
+<div id="administrative-censoring" class="section level3">
+<h3>Administrative Censoring</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># For missing death dates, censor at last known follow-up</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>clinical_data<span class="sc">$</span>time_months_imputed <span class="ot">&lt;-</span> clinical_data<span class="sc">$</span>time_months</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>clinical_data<span class="sc">$</span>death_binary_imputed <span class="ot">&lt;-</span> clinical_data<span class="sc">$</span>death_binary</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co"># If death status missing but last follow-up available, assume alive</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>missing_death <span class="ot">&lt;-</span> <span class="fu">is.na</span>(clinical_data<span class="sc">$</span>death_binary) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(clinical_data<span class="sc">$</span>last_followup_date)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">any</span>(missing_death)) {</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>  clinical_data<span class="sc">$</span>death_binary_imputed[missing_death] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>  clinical_data<span class="sc">$</span>time_months_imputed[missing_death] <span class="ot">&lt;-</span> </span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>    <span class="fu">as.numeric</span>(<span class="fu">difftime</span>(clinical_data<span class="sc">$</span>last_followup_date[missing_death],</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>                       clinical_data<span class="sc">$</span>diagnosis_date[missing_death], </span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>                       <span class="at">units =</span> <span class="st">&quot;days&quot;</span>)) <span class="sc">/</span> <span class="fl">30.44</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="explanatory-variable-preparation" class="section level1">
+<h1>Explanatory Variable Preparation</h1>
+<div id="categorical-variables" class="section level2">
+<h2>Categorical Variables</h2>
+<div id="factor-ordering" class="section level3">
+<h3>Factor Ordering</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Ensure proper ordering for categorical variables</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>clinical_data<span class="sc">$</span>tumor_grade <span class="ot">&lt;-</span> <span class="fu">factor</span>(clinical_data<span class="sc">$</span>tumor_grade, </span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>                                   <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Grade 1&quot;</span>, <span class="st">&quot;Grade 2&quot;</span>, <span class="st">&quot;Grade 3&quot;</span>, <span class="st">&quot;Grade 4&quot;</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>                                   <span class="at">ordered =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>clinical_data<span class="sc">$</span>stage <span class="ot">&lt;-</span> <span class="fu">factor</span>(clinical_data<span class="sc">$</span>stage,</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>                             <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Stage I&quot;</span>, <span class="st">&quot;Stage II&quot;</span>, <span class="st">&quot;Stage III&quot;</span>, <span class="st">&quot;Stage IV&quot;</span>),</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>                             <span class="at">ordered =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co"># For unordered factors, set reference level</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>clinical_data<span class="sc">$</span>treatment <span class="ot">&lt;-</span> <span class="fu">factor</span>(clinical_data<span class="sc">$</span>treatment)</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>clinical_data<span class="sc">$</span>treatment <span class="ot">&lt;-</span> <span class="fu">relevel</span>(clinical_data<span class="sc">$</span>treatment, <span class="at">ref =</span> <span class="st">&quot;Standard&quot;</span>)</span></code></pre></div>
+</div>
+<div id="handling-rare-categories" class="section level3">
+<h3>Handling Rare Categories</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># Combine rare categories to ensure adequate sample sizes</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">table</span>(clinical_data<span class="sc">$</span>histology)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co"># Combine categories with &lt;10 patients</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>rare_histologies <span class="ot">&lt;-</span> <span class="fu">names</span>(<span class="fu">table</span>(clinical_data<span class="sc">$</span>histology))[<span class="fu">table</span>(clinical_data<span class="sc">$</span>histology) <span class="sc">&lt;</span> <span class="dv">10</span>]</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>clinical_data<span class="sc">$</span>histology_grouped <span class="ot">&lt;-</span> <span class="fu">as.character</span>(clinical_data<span class="sc">$</span>histology)</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>clinical_data<span class="sc">$</span>histology_grouped[clinical_data<span class="sc">$</span>histology_grouped <span class="sc">%in%</span> rare_histologies] <span class="ot">&lt;-</span> <span class="st">&quot;Other&quot;</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>clinical_data<span class="sc">$</span>histology_grouped <span class="ot">&lt;-</span> <span class="fu">factor</span>(clinical_data<span class="sc">$</span>histology_grouped)</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="fu">table</span>(clinical_data<span class="sc">$</span>histology_grouped)</span></code></pre></div>
+</div>
+</div>
+<div id="continuous-variables" class="section level2">
+<h2>Continuous Variables</h2>
+<div id="age-preparation" class="section level3">
+<h3>Age Preparation</h3>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Check age distribution</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">summary</span>(clinical_data<span class="sc">$</span>age_at_diagnosis)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co"># Create age groups if needed</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>clinical_data<span class="sc">$</span>age_group <span class="ot">&lt;-</span> <span class="fu">cut</span>(clinical_data<span class="sc">$</span>age_at_diagnosis,</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                              <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">65</span>, <span class="dv">80</span>, <span class="cn">Inf</span>),</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                              <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;≤50&quot;</span>, <span class="st">&quot;51-65&quot;</span>, <span class="st">&quot;66-80&quot;</span>, <span class="st">&quot;&gt;80&quot;</span>),</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>                              <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co"># Age as decades</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>clinical_data<span class="sc">$</span>age_decades <span class="ot">&lt;-</span> <span class="fu">floor</span>(clinical_data<span class="sc">$</span>age_at_diagnosis <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">*</span> <span class="dv">10</span></span></code></pre></div>
+</div>
+<div id="biomarker-preparation" class="section level3">
+<h3>Biomarker Preparation</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Log transformation for skewed biomarkers</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>clinical_data<span class="sc">$</span>log_biomarker <span class="ot">&lt;-</span> <span class="fu">log10</span>(clinical_data<span class="sc">$</span>biomarker_value <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co"># Standardization (z-score)</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>clinical_data<span class="sc">$</span>biomarker_zscore <span class="ot">&lt;-</span> <span class="fu">scale</span>(clinical_data<span class="sc">$</span>biomarker_value)[,<span class="dv">1</span>]</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co"># Handle extreme values</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>biomarker_99th <span class="ot">&lt;-</span> <span class="fu">quantile</span>(clinical_data<span class="sc">$</span>biomarker_value, <span class="fl">0.99</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>clinical_data<span class="sc">$</span>biomarker_winsorized <span class="ot">&lt;-</span> <span class="fu">pmin</span>(clinical_data<span class="sc">$</span>biomarker_value, biomarker_99th)</span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="data-validation" class="section level1">
+<h1>Data Validation</h1>
+<div id="cross-validation-with-source-data" class="section level2">
+<h2>Cross-Validation with Source Data</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Compare calculated times with expected ranges</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>validation_checks <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  issues <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  </span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="co"># Check if all events occurred before end of study</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>  study_end <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">&quot;2023-12-31&quot;</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>  late_events <span class="ot">&lt;-</span> data<span class="sc">$</span>event_date <span class="sc">&gt;</span> study_end <span class="sc">&amp;</span> data<span class="sc">$</span>death_binary <span class="sc">==</span> <span class="dv">1</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>  issues<span class="sc">$</span>late_events <span class="ot">&lt;-</span> <span class="fu">sum</span>(late_events, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>  </span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>  <span class="co"># Check if follow-up times are reasonable</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>  unreasonable_followup <span class="ot">&lt;-</span> data<span class="sc">$</span>time_months <span class="sc">&gt;</span> <span class="dv">240</span>  <span class="co"># &gt; 20 years</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>  issues<span class="sc">$</span>long_followup <span class="ot">&lt;-</span> <span class="fu">sum</span>(unreasonable_followup, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>  </span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>  <span class="co"># Check for impossible age at events</span></span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>  impossible_age <span class="ot">&lt;-</span> data<span class="sc">$</span>age_at_diagnosis <span class="sc">&lt;</span> <span class="dv">0</span> <span class="sc">|</span> data<span class="sc">$</span>age_at_diagnosis <span class="sc">&gt;</span> <span class="dv">120</span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a>  issues<span class="sc">$</span>impossible_age <span class="ot">&lt;-</span> <span class="fu">sum</span>(impossible_age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a>  </span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a>  <span class="fu">return</span>(issues)</span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a>}</span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a>validation_results <span class="ot">&lt;-</span> <span class="fu">validation_checks</span>(clinical_data)</span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a><span class="fu">print</span>(validation_results)</span></code></pre></div>
+</div>
+<div id="final-dataset-preparation" class="section level2">
+<h2>Final Dataset Preparation</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Create final analysis dataset</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>analysis_data <span class="ot">&lt;-</span> clinical_data <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>  <span class="co"># Include only complete cases for primary analysis</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(time_months), <span class="sc">!</span><span class="fu">is.na</span>(death_binary)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>  <span class="co"># Remove patients with negative or zero follow-up time</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>  <span class="fu">filter</span>(time_months <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>  <span class="co"># Remove patients with missing key covariates</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(age_at_diagnosis), <span class="sc">!</span><span class="fu">is.na</span>(stage)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>  <span class="co"># Select relevant variables</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>    patient_id,</span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a>    time_months,</span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>    death_binary,</span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>    age_at_diagnosis,</span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>    age_group,</span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>    sex,</span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a>    stage,</span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a>    tumor_grade,</span>
+<span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a>    treatment,</span>
+<span id="cb18-20"><a href="#cb18-20" tabindex="-1"></a>    biomarker_value,</span>
+<span id="cb18-21"><a href="#cb18-21" tabindex="-1"></a>    histology_grouped</span>
+<span id="cb18-22"><a href="#cb18-22" tabindex="-1"></a>  )</span>
+<span id="cb18-23"><a href="#cb18-23" tabindex="-1"></a></span>
+<span id="cb18-24"><a href="#cb18-24" tabindex="-1"></a><span class="co"># Final data summary</span></span>
+<span id="cb18-25"><a href="#cb18-25" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Final analysis dataset:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-26"><a href="#cb18-26" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;N =&quot;</span>, <span class="fu">nrow</span>(analysis_data), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-27"><a href="#cb18-27" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Events =&quot;</span>, <span class="fu">sum</span>(analysis_data<span class="sc">$</span>death_binary), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-28"><a href="#cb18-28" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Event rate =&quot;</span>, <span class="fu">round</span>(<span class="fu">mean</span>(analysis_data<span class="sc">$</span>death_binary) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="st">&quot;%</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-29"><a href="#cb18-29" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Median follow-up =&quot;</span>, <span class="fu">round</span>(<span class="fu">median</span>(analysis_data<span class="sc">$</span>time_months), <span class="dv">1</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="export-for-jamovi" class="section level1">
+<h1>Export for jamovi</h1>
+<div id="csv-export" class="section level2">
+<h2>CSV Export</h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Export cleaned data for use in jamovi</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">write.csv</span>(analysis_data, <span class="st">&quot;survival_analysis_data.csv&quot;</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co"># Include data dictionary</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>data_dictionary <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>  <span class="at">variable =</span> <span class="fu">names</span>(analysis_data),</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>  <span class="at">description =</span> <span class="fu">c</span>(</span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>    <span class="st">&quot;Patient identifier&quot;</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>    <span class="st">&quot;Time from diagnosis to death or censoring (months)&quot;</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a>    <span class="st">&quot;Death indicator (1=death, 0=alive/censored)&quot;</span>,</span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a>    <span class="st">&quot;Age at diagnosis (years)&quot;</span>,</span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a>    <span class="st">&quot;Age group categories&quot;</span>,</span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a>    <span class="st">&quot;Patient sex&quot;</span>,</span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a>    <span class="st">&quot;Cancer stage&quot;</span>,</span>
+<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a>    <span class="st">&quot;Tumor grade&quot;</span>,</span>
+<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a>    <span class="st">&quot;Treatment received&quot;</span>,</span>
+<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a>    <span class="st">&quot;Biomarker value&quot;</span>,</span>
+<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a>    <span class="st">&quot;Histology type (grouped)&quot;</span></span>
+<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a>  ),</span>
+<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a>  <span class="at">type =</span> <span class="fu">c</span>(</span>
+<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a>    <span class="st">&quot;Identifier&quot;</span>,</span>
+<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a>    <span class="st">&quot;Continuous&quot;</span>,</span>
+<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a>    <span class="st">&quot;Binary&quot;</span>,</span>
+<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a>    <span class="st">&quot;Continuous&quot;</span>, </span>
+<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a>    <span class="st">&quot;Categorical&quot;</span>,</span>
+<span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a>    <span class="st">&quot;Categorical&quot;</span>,</span>
+<span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a>    <span class="st">&quot;Ordinal&quot;</span>,</span>
+<span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a>    <span class="st">&quot;Ordinal&quot;</span>,</span>
+<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a>    <span class="st">&quot;Categorical&quot;</span>,</span>
+<span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a>    <span class="st">&quot;Continuous&quot;</span>,</span>
+<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a>    <span class="st">&quot;Categorical&quot;</span></span>
+<span id="cb19-32"><a href="#cb19-32" tabindex="-1"></a>  )</span>
+<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a>)</span>
+<span id="cb19-34"><a href="#cb19-34" tabindex="-1"></a></span>
+<span id="cb19-35"><a href="#cb19-35" tabindex="-1"></a><span class="fu">write.csv</span>(data_dictionary, <span class="st">&quot;data_dictionary.csv&quot;</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="quality-assurance-checklist" class="section level1">
+<h1>Quality Assurance Checklist</h1>
+<div id="pre-analysis-checklist" class="section level2">
+<h2>Pre-Analysis Checklist</h2>
+<p>Before proceeding with survival analysis, verify:</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Time variable contains no negative
+or zero values</label></li>
+<li><label><input type="checkbox"></input>Event indicator is properly coded
+(0/1 or No/Yes)</label></li>
+<li><label><input type="checkbox"></input>Missing data patterns have been
+assessed and addressed</label></li>
+<li><label><input type="checkbox"></input>Categorical variables have
+appropriate reference levels</label></li>
+<li><label><input type="checkbox"></input>Continuous variables have been
+checked for outliers</label></li>
+<li><label><input type="checkbox"></input>Data types are correct (numeric,
+factor, date)</label></li>
+<li><label><input type="checkbox"></input>Sample size is adequate (rule of
+thumb: 10 events per variable)</label></li>
+<li><label><input type="checkbox"></input>Follow-up time is sufficient for
+meaningful analysis</label></li>
+</ul>
+</div>
+<div id="common-data-preparation-mistakes" class="section level2">
+<h2>Common Data Preparation Mistakes</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Incorrect time calculation</strong>: Using calendar time
+instead of time from study entry</li>
+<li><strong>Wrong event coding</strong>: Mixing up 0 and 1 for events
+and censoring</li>
+<li><strong>Including impossible values</strong>: Negative times, events
+after last follow-up</li>
+<li><strong>Ignoring competing risks</strong>: Treating all deaths as
+same event type</li>
+<li><strong>Improper handling of missing data</strong>: Excluding too
+many patients without justification</li>
+<li><strong>Not checking assumptions</strong>: Ignoring data
+distribution and outliers</li>
+</ol>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>Proper data preparation is essential for reliable survival analysis
+results. Key principles include:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Careful time calculation</strong> with appropriate handling
+of dates and time zero</li>
+<li><strong>Consistent event coding</strong> with validation against
+source data</li>
+<li><strong>Comprehensive quality checks</strong> to identify and
+resolve data issues</li>
+<li><strong>Appropriate handling of missing data</strong> based on
+missingness patterns</li>
+<li><strong>Proper preparation of explanatory variables</strong> with
+attention to clinical meaning</li>
+</ol>
+<p>Taking time for thorough data preparation will ensure more reliable
+and interpretable survival analysis results in jsurvival.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

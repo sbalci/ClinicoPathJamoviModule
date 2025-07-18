@@ -155,10 +155,12 @@ children:
                 name: nriTimePoints
                 label: NRI Time Points (months)
                 format: string
+                enable: (calculateNRI)
               - type: TextBox
                 name: nriClinicalThreshold
                 label: NRI Clinical Threshold
                 format: number
+                enable: (calculateNRI)
               - type: CheckBox
                 name: calculateIDI
                 label: Integrated Discrimination Improvement (IDI)
@@ -175,6 +177,7 @@ children:
                 name: rocTimePoints
                 label: ROC Time Points (months)
                 format: string
+                enable: (performROCAnalysis)
       - type: Label
         label: Clinical Utility Assessment
         children:
@@ -208,9 +211,11 @@ children:
                 name: bootstrapReps
                 label: Bootstrap Repetitions
                 format: number
+                enable: (performBootstrap)
               - type: CheckBox
                 name: useOptimismCorrection
                 label: Apply Optimism Correction
+                enable: (performBootstrap)
       - type: Label
         label: Cross-Validation (Optional)
         children:
@@ -224,6 +229,7 @@ children:
                 name: cvFolds
                 label: CV Folds
                 format: number
+                enable: (performCrossValidation)
   - type: CollapseBox
     label: Model Comparison Tests
     collapsed: false
@@ -328,6 +334,7 @@ children:
               - type: CheckBox
                 name: showROCComparison
                 label: ROC Curve Comparison
+                enable: (performROCAnalysis)
               - type: CheckBox
                 name: showForestPlot
                 label: Hazard Ratio Forest Plot
@@ -357,16 +364,20 @@ children:
               - type: ComboBox
                 name: survivalPlotType
                 label: Survival Plot Display
+                enable: (showSurvivalCurves)
               - type: CheckBox
                 name: showConfidenceIntervals
                 label: Show Confidence Intervals
+                enable: (showSurvivalCurves)
               - type: CheckBox
                 name: showRiskTables
                 label: Show Risk Tables
+                enable: (showSurvivalCurves)
               - type: TextBox
                 name: plotTimeRange
                 label: Plot Time Range (months)
                 format: string
+                enable: (showSurvivalCurves)
   - type: CollapseBox
     label: Output and Reporting
     collapsed: false

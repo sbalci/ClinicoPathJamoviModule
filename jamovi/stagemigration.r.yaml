@@ -56,65 +56,30 @@ items:
             title: "Percentage"
             type: text
 
-    # Migration Summary Explanation
-    - name: migrationSummaryExplanation
-      title: Understanding Statistical Tests for Migration
-      type: Html
-      visible: (showMigrationSummary && showExplanations)
-      clearWith:
-          - showMigrationSummary
 
-    # Migration Summary
-    - name: migrationSummary
-      title: Migration Summary
+    # Migration Matrix Explanation
+    - name: migrationMatrixExplanation
+      title: Understanding the Migration Matrix
+      type: Html
+      visible: (showMigrationMatrix && showExplanations)
+      clearWith:
+          - showMigrationMatrix
+
+    # Migration Matrix
+    - name: migrationMatrix
+      title: Stage Migration Matrix
       type: Table
-      visible: (showMigrationSummary)
+      visible: (showMigrationMatrix)
       clearWith:
           - oldStage
           - newStage
-          - survivalTime
-          - event
-          - eventLevel
       columns:
-          - name: statistic
-            title: "Statistic"
-            type: text
-          - name: value
-            title: "Value"
-            type: text
+        - name: .name
+          title: "Original Stage"
+          type: text
 
-    # Statistical Comparison Explanation
-    - name: statisticalComparisonExplanation
-      title: Understanding Statistical Comparison Metrics
-      type: Html
-      visible: (showStatisticalComparison && showExplanations)
-      clearWith:
-          - showStatisticalComparison
 
-    # Statistical Comparison
-    - name: statisticalComparison
-      title: Statistical Comparison
-      type: Table
-      visible: (showStatisticalComparison)
-      clearWith:
-          - oldStage
-          - newStage
-          - survivalTime
-          - event
-          - eventLevel
-      columns:
-          - name: metric
-            title: "Metric"
-            type: text
-          - name: value
-            title: "Value"
-            type: text
-          - name: ci
-            title: "95% CI"
-            type: text
-          - name: interpretation
-            title: "Interpretation"
-            type: text
+
 
     # Stage Distribution Explanation
     - name: stageDistributionExplanation
@@ -152,26 +117,73 @@ items:
             title: "Change"
             type: text
 
-    # Migration Matrix Explanation
-    - name: migrationMatrixExplanation
-      title: Understanding the Migration Matrix
-      type: Html
-      visible: (showMigrationMatrix && showExplanations)
-      clearWith:
-          - showMigrationMatrix
 
-    # Migration Matrix
-    - name: migrationMatrix
-      title: Stage Migration Matrix
+
+    # Statistical Comparison Explanation
+    - name: statisticalComparisonExplanation
+      title: Understanding Statistical Comparison Metrics
+      type: Html
+      visible: (showStatisticalComparison && showExplanations)
+      clearWith:
+          - showStatisticalComparison
+
+    # Statistical Comparison
+    - name: statisticalComparison
+      title: Statistical Comparison
       type: Table
-      visible: (showMigrationMatrix)
+      visible: (showStatisticalComparison)
       clearWith:
           - oldStage
           - newStage
+          - survivalTime
+          - event
+          - eventLevel
       columns:
-        - name: .name
-          title: "Original Stage"
-          type: text
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+          - name: ci
+            title: "95% CI"
+            type: text
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+
+
+    # Migration Summary Explanation
+    - name: migrationSummaryExplanation
+      title: Understanding Statistical Tests for Migration
+      type: Html
+      visible: (showMigrationSummary && showExplanations)
+      clearWith:
+          - showMigrationSummary
+
+    # Migration Summary
+    - name: migrationSummary
+      title: Migration Summary
+      type: Table
+      visible: (showMigrationSummary)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+
+
+
 
     # Concordance Comparison Explanation
     - name: concordanceComparisonExplanation
