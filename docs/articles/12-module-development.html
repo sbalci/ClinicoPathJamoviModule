@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.59</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.61</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -254,13 +254,13 @@ folder (find via <code><a href="https://rdrr.io/r/base/libPaths.html" class="ext
 </h6>
 <p><a href="https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html" class="external-link uri">https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html</a></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">jmv</span><span class="fu">::</span><span class="fu">ANOVA</span><span class="op">(</span>formula <span class="op">=</span> <span class="va">len</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">*</span> <span class="va">dose</span>, <span class="va">ToothGrowth</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">len</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">*</span> <span class="va">dose</span>, <span class="va">ToothGrowth</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">jmv</span><span class="fu">::</span><span class="fu">ANOVA</span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="va">len</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">supp</span>, <span class="va">dose</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="va">len</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">supp</span>, <span class="va">dose</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">jmv</span><span class="fu">::</span><span class="fu">ANOVA</span><span class="op">(</span><span class="va">...</span>, emMeans <span class="op">=</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">+</span> <span class="va">dose</span><span class="op">:</span><span class="va">supp</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span><span class="va">...</span>, emMeans <span class="op">=</span> <span class="op">~</span> <span class="va">supp</span> <span class="op">+</span> <span class="va">dose</span><span class="op">:</span><span class="va">supp</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">jmv</span><span class="fu">::</span><span class="fu">ANOVA</span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="st">'len'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'supp'</span>, <span class="st">'dose'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="st">'len'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'supp'</span>, <span class="st">'dose'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <blockquote>
 <p>In this case, jmv will look for variables in ToothGrowth called ‘dep’
 or ‘factors’. This is tidy evaluation. To instruct jmv to use the
@@ -271,7 +271,7 @@ with the !! signifier. For example:</p>
 <code class="sourceCode R"><span><span class="va">dep</span> <span class="op">&lt;-</span> <span class="st">'len'</span></span>
 <span><span class="va">factors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'supp'</span>, <span class="st">'dose'</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">jmv</span><span class="fu">::</span><span class="fu">ANOVA</span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="op">!</span><span class="op">!</span><span class="va">dep</span>, <span class="op">!</span><span class="op">!</span><span class="va">factors</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">jmv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmv/man/ANOVA.html" class="external-link">ANOVA</a></span><span class="op">(</span><span class="va">ToothGrowth</span>, <span class="op">!</span><span class="op">!</span><span class="va">dep</span>, <span class="op">!</span><span class="op">!</span><span class="va">factors</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level6">
 <h6 id="warning-error-messages">Warning, Error Messages<a class="anchor" aria-label="anchor" href="#warning-error-messages"></a>
