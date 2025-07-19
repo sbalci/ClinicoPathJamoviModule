@@ -304,14 +304,14 @@ A results object containing:
 \code{results$mydataview2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$migrationOverviewExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$migrationOverview} \tab \tab \tab \tab \tab a table \cr
+\code{results$migrationMatrixExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$migrationMatrix} \tab \tab \tab \tab \tab a table \cr
+\code{results$stageDistributionExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$stageDistribution} \tab \tab \tab \tab \tab a table \cr
 \code{results$migrationSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$migrationSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$statisticalComparisonExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$statisticalComparison} \tab \tab \tab \tab \tab a table \cr
-\code{results$stageDistributionExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$stageDistribution} \tab \tab \tab \tab \tab a table \cr
-\code{results$migrationMatrixExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$migrationMatrix} \tab \tab \tab \tab \tab a table \cr
 \code{results$concordanceComparisonExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$concordanceComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$nriResultsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -333,10 +333,16 @@ A results object containing:
 \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$dcaResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$pseudoR2ResultsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$pseudoR2Results} \tab \tab \tab \tab \tab a table \cr
+\code{results$decisionCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$decisionCurves} \tab \tab \tab \tab \tab an image \cr
 \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$willRogersAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$willRogersAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$likelihoodTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$likelihoodTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$homogeneityTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$homogeneityTests} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalInterpretationExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a table \cr
@@ -355,8 +361,6 @@ A results object containing:
 \code{results$calibrationAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$calibrationPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$calibrationPlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$decisionCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$decisionCurves} \tab \tab \tab \tab \tab an image \cr
 \code{results$survivalCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$survivalCurves} \tab \tab \tab \tab \tab an image \cr
 }

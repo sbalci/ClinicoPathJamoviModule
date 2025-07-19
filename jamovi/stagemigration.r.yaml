@@ -613,6 +613,13 @@ items:
             format: zto,pvalue
 
     # Decision Curve Analysis
+    - name: dcaResultsExplanation
+      title: Understanding Decision Curve Analysis (DCA)
+      type: Html
+      visible: (performDCA && showExplanations)
+      clearWith:
+          - performDCA
+
     - name: dcaResults
       title: Decision Curve Analysis
       type: Table
@@ -864,6 +871,45 @@ items:
             type: number
             format: zto,pvalue
 
+    # Stage Trend Tests Explanation
+    - name: trendTestsExplanation
+      title: Understanding Stage Trend Analysis
+      type: Html
+      visible: (performTrendTests && showExplanations)
+      clearWith:
+          - performTrendTests
+
+    # Stage Trend Tests
+    - name: trendTests
+      title: Stage Trend Analysis
+      type: Table
+      visible: (performTrendTests)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performTrendTests
+      columns:
+          - name: System
+            title: "Staging System"
+            type: text
+          - name: Test
+            title: "Test"
+            type: text
+          - name: Statistic
+            title: "Statistic"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
     # Clinical Interpretation Explanation
     - name: clinicalInterpretationExplanation
       title: Understanding Clinical Interpretation Guide
@@ -1110,7 +1156,7 @@ items:
     - name: calibrationPlotsExplanation
       title: Understanding Calibration Plots
       type: Html
-      visible: (showCalibrationPlots && showExplanations)
+      visible: (performCalibration && showCalibrationPlots && showExplanations)
       clearWith:
           - showCalibrationPlots
 
@@ -1121,7 +1167,7 @@ items:
       width: 800
       height: 400
       renderFun: .plotCalibration
-      visible: (showCalibrationPlots)
+      visible: (performCalibration && showCalibrationPlots)
       clearWith:
           - oldStage
           - newStage
