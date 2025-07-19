@@ -542,7 +542,8 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 <img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 75% />
 
 
-##### Decision Calculator
+##### [Decision Calculator](vignettes-meddecide/35-screening-calculator-comprehensive.Rmd)
+
 
 
 <img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
@@ -552,9 +553,12 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 
 
 
-##### Decision Tree
+##### [Decision Tree](vignettes-meddecide/05-decision-tree-analysis.Rmd)
 
-###### explore
+
+
+##### [Decision Tree explore](vignettes-meddecide/05-decision-tree-analysis.Rmd)
+
 
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
@@ -582,7 +586,8 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 <img src="man/figures/jamovi-clinicopath-rpart-decision-tree.png" align="center" width = 75% />
 
 
-##### ROC
+##### [ROC Analysis](vignettes-meddecide/03-roc-analysis.Rmd)
+
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
