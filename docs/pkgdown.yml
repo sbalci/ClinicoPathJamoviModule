@@ -2,44 +2,12 @@ pandoc: 3.7.0.2
 pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
-  01-getting-started: 01-getting-started.html
-  01-jamovi-user-guide: 01-jamovi-user-guide.html
-  03-clinical-examples: 03-clinical-examples.html
-  03-getting-started-alt: 03-getting-started-alt.html
-  04-clinical-workflow: 04-clinical-workflow.html
-  05-jamovi-workflow: 05-jamovi-workflow.html
-  06-jamovi-workflow-examples: 06-jamovi-workflow-examples.html
-  07-pathology-jamovi: 07-pathology-jamovi.html
-  08-advanced-topics: 08-advanced-topics.html
-  09-analysis-gallery: 09-analysis-gallery.html
-  10-visualization-gallery: 10-visualization-gallery.html
-  11-data-preparation: 11-data-preparation.html
-  12-module-development: 12-module-development.html
-  13-quick-reference: 13-quick-reference.html
-  14-r-programming-guide: 14-r-programming-guide.html
-  15-troubleshooting-faq: 15-troubleshooting-faq.html
-  16-use-clinicopath-in-r: 16-use-clinicopath-in-r.html
-  17-users-of-clinicopath: 17-users-of-clinicopath.html
-  18-analysis-gallery-legacy: 18-analysis-gallery-legacy.html
-  19-clinical-examples-legacy: 19-clinical-examples-legacy.html
-  20-clinical-workflow-legacy: 20-clinical-workflow-legacy.html
-  21-visualization-gallery-legacy: 21-visualization-gallery-legacy.html
-  22-advanced-topics-legacy: 22-advanced-topics-legacy.html
-  23-data-preparation-legacy: 23-data-preparation-legacy.html
-  24-jamovi-user-guide-legacy: 24-jamovi-user-guide-legacy.html
-  25-jamovi-workflow-examples-legacy: 25-jamovi-workflow-examples-legacy.html
-  26-jamovi-workflow-legacy: 26-jamovi-workflow-legacy.html
-  28-pathology-jamovi-legacy: 28-pathology-jamovi-legacy.html
-  29-quick-reference-legacy: 29-quick-reference-legacy.html
-  30-r-programming-guide-legacy: 30-r-programming-guide-legacy.html
-  31-troubleshooting-faq-legacy: 31-troubleshooting-faq-legacy.html
+  clinical-workflow: clinical-workflow.html
   module-development-jamovi: module-development-jamovi.html
+  pathology-jamovi: pathology-jamovi.html
   pkgnet-report: pkgnet-report.html
-  swimmer-unified-datasets: swimmer-unified-datasets.html
-  swimmerplot-unified-comprehensive: swimmerplot-unified-comprehensive.html
-  use-jjstatsplot-in-R: use-jjstatsplot-in-R.html
   users-of-ClinicoPath: users-of-ClinicoPath.html
-last_built: 2025-07-18T06:25Z
+last_built: 2025-07-19T20:31Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles
