@@ -505,10 +505,13 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 ##### [Comprehensive Time Interval Calculator](https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/timeinterval_documentation.html)
 (Advanced time interval analysis with quality assessment)
 
-##### [Clinical Research Visualization with visR](https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/jvisr_documentation.html)
+##### [Jvisr](vignettes-jsurvival/jvisr_documentation.md)
+
+
 (Fit-for-Purpose Clinical Visualizations)
 
-##### Competing Survival
+##### [Competing Survival](vignettes-jsurvival/15-competing-survival.Rmd)
+
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
@@ -596,7 +599,7 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 
 ### Correlation
 
-#### [Correlation](vignettes/vignettes-ClinicoPathDescriptives/21-correlation-analysis.Rmd)
+#### [Correlation](vignettes-ClinicoPathDescriptives/01-correlation-analysis.Rmd)
 
 
 
