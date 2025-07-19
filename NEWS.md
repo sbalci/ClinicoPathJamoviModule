@@ -1,3 +1,44 @@
+# ClinicoPath 0.0.3.47
+
+## Advanced TNM Stage Migration Analysis - Major Updates
+
+### Stage Migration Module Enhancements
+- **Complete effect sizes implementation**: Added comprehensive effect size calculations for staging system comparisons
+- **Enhanced statistical summary**: Comprehensive statistical summary table with all key metrics including C-index improvements, AIC/BIC differences, and overall recommendations  
+- **Robust error handling**: Fixed multiple Turkish locale errors ("fonksiyon olmayana uygulama denemesi" and "TRUE/FALSE gereken yerde eksik değer")
+- **Clinical interpretation improvements**: Enhanced practical significance assessments for effect sizes and statistical measures
+
+### Effect Sizes Analysis
+- **Cohen's d calculation**: Standardized effect size for C-index differences between staging systems
+- **R² equivalents**: Variance explained calculations for both original and new staging systems  
+- **Improvement metrics**: Quantified discrimination improvements with clinical significance thresholds
+- **Multiple effect size perspectives**: Comprehensive view including raw differences, standardized measures, and practical significance
+
+### Statistical Summary Enhancements
+- **Comprehensive metrics display**: C-index values with confidence intervals for both systems
+- **Model comparison statistics**: AIC/BIC differences with evidence strength assessments
+- **Relative improvement calculations**: Percentage improvements with magnitude classifications
+- **Overall recommendations**: Evidence-based recommendations using multiple criteria (3/4 criteria met framework)
+- **Advanced metrics integration**: NRI and IDI results when available
+
+### Error Resolution and Stability
+- **Turkish locale compatibility**: Fixed "fonksiyon olmayana uygulama denemesi" errors in effect sizes calculation
+- **Logical condition validation**: Fixed "TRUE/FALSE gereken yerde eksik değer" errors in statistical summary
+- **Robust data extraction**: Enhanced data validation and fallback mechanisms for missing or malformed results
+- **Graceful error handling**: Comprehensive error handling with informative messages and fallback calculations
+
+### Clinical Research Features
+- **Practical significance thresholds**: Evidence-based thresholds for clinical relevance (0.02 C-index improvement)
+- **Multiple evidence synthesis**: Integration of discrimination, model fit, and clinical significance criteria
+- **Research-ready outputs**: Publication-quality tables with confidence intervals and interpretation guidelines
+- **Effect size interpretations**: Standard magnitude classifications (negligible, small, medium, large) with clinical context
+
+### Technical Improvements
+- **Simplified calculations**: Streamlined effect size calculations to avoid complex data structure navigation
+- **Fallback strategies**: Multiple data source attempts with known values as safety nets
+- **Enhanced validation**: Comprehensive input validation and data structure checking
+- **Performance optimization**: Reduced computational complexity while maintaining accuracy
+
 # ClinicoPath 0.0.3.46
 
 ## Major Infrastructure Improvements

@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.3.62
-Date: 2025-07-18
+Version: 0.0.3.63
+Date: 2025-07-19
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -197,10 +197,14 @@ Imports:
     grid,
     mlr3measures,
     vcdExtra,
-    ggoncoplot,
     rms,
     dcurves,
-    Hmisc
+    Hmisc,
+    assertions,
+    ggiraph,
+    mutationtypes,
+    rank,
+    patchwork
 VignetteBuilder: 
     knitr, 
     tiff, 
@@ -213,7 +217,6 @@ Remotes:
     CHOP-CGTInformatics/ggswim,
     alstockdale/sumvar,
     mlr-org/mlr3extralearners@v1.0.0,
-    selkamand/ggoncoplot,
     CCICB/ggEDA
 Encoding: UTF-8
 LazyData: true

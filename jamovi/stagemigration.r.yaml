@@ -1017,6 +1017,44 @@ items:
             title: "Significance"
             type: text
 
+    # Effect Sizes Explanation
+    - name: effectSizesExplanation
+      title: Understanding Effect Sizes
+      type: Html
+      visible: (includeEffectSizes && showExplanations)
+      clearWith:
+          - includeEffectSizes
+
+    # Effect Sizes
+    - name: effectSizes
+      title: Effect Sizes
+      type: Table
+      visible: (includeEffectSizes)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - includeEffectSizes
+      columns:
+          - name: Measure
+            title: "Measure"
+            type: text
+          - name: Effect_Size
+            title: "Effect Size"
+            type: number
+            format: zto
+          - name: Magnitude
+            title: "Magnitude"
+            type: text
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+          - name: Practical_Significance
+            title: "Practical Significance"
+            type: text
+
     # Methodology Notes
     - name: methodologyNotes
       title: Methodology Notes
