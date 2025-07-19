@@ -29,7 +29,7 @@ stagemigration(
   performHomogeneityTests = FALSE,
   performTrendTests = FALSE,
   performLikelihoodTests = FALSE,
-  calculatePseudoR2 = FALSE,
+  calculatePseudoR2 = TRUE,
   showMigrationOverview = TRUE,
   showMigrationSummary = TRUE,
   showStageDistribution = TRUE,
@@ -332,6 +332,7 @@ A results object containing:
 \code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$dcaResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$dcaResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$pseudoR2ResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$pseudoR2Results} \tab \tab \tab \tab \tab a table \cr
@@ -344,12 +345,16 @@ A results object containing:
 \code{results$likelihoodTests} \tab \tab \tab \tab \tab a table \cr
 \code{results$homogeneityTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$homogeneityTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$trendTestsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$trendTests} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalInterpretationExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a table \cr
 \code{results$executiveSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$executiveSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$statisticalSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$statisticalSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$effectSizesExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$effectSizes} \tab \tab \tab \tab \tab a table \cr
 \code{results$methodologyNotes} \tab \tab \tab \tab \tab a html \cr
 \code{results$migrationHeatmapExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$migrationHeatmap} \tab \tab \tab \tab \tab an image \cr

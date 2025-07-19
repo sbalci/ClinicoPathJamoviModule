@@ -29,7 +29,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             performHomogeneityTests = FALSE,
             performTrendTests = FALSE,
             performLikelihoodTests = FALSE,
-            calculatePseudoR2 = FALSE,
+            calculatePseudoR2 = TRUE,
             showMigrationOverview = TRUE,
             showMigrationSummary = TRUE,
             showStageDistribution = TRUE,
@@ -200,7 +200,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..calculatePseudoR2 <- jmvcore::OptionBool$new(
                 "calculatePseudoR2",
                 calculatePseudoR2,
-                default=FALSE)
+                default=TRUE)
             private$..showMigrationOverview <- jmvcore::OptionBool$new(
                 "showMigrationOverview",
                 showMigrationOverview,
@@ -599,6 +599,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         stratifiedAnalysis = function() private$.items[["stratifiedAnalysis"]],
         stratifiedAnalysisExplanation = function() private$.items[["stratifiedAnalysisExplanation"]],
         rocAnalysis = function() private$.items[["rocAnalysis"]],
+        dcaResultsExplanation = function() private$.items[["dcaResultsExplanation"]],
         dcaResults = function() private$.items[["dcaResults"]],
         pseudoR2ResultsExplanation = function() private$.items[["pseudoR2ResultsExplanation"]],
         pseudoR2Results = function() private$.items[["pseudoR2Results"]],
@@ -611,12 +612,16 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         likelihoodTests = function() private$.items[["likelihoodTests"]],
         homogeneityTestsExplanation = function() private$.items[["homogeneityTestsExplanation"]],
         homogeneityTests = function() private$.items[["homogeneityTests"]],
+        trendTestsExplanation = function() private$.items[["trendTestsExplanation"]],
+        trendTests = function() private$.items[["trendTests"]],
         clinicalInterpretationExplanation = function() private$.items[["clinicalInterpretationExplanation"]],
         clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
         executiveSummaryExplanation = function() private$.items[["executiveSummaryExplanation"]],
         executiveSummary = function() private$.items[["executiveSummary"]],
         statisticalSummaryExplanation = function() private$.items[["statisticalSummaryExplanation"]],
         statisticalSummary = function() private$.items[["statisticalSummary"]],
+        effectSizesExplanation = function() private$.items[["effectSizesExplanation"]],
+        effectSizes = function() private$.items[["effectSizes"]],
         methodologyNotes = function() private$.items[["methodologyNotes"]],
         migrationHeatmapExplanation = function() private$.items[["migrationHeatmapExplanation"]],
         migrationHeatmap = function() private$.items[["migrationHeatmap"]],
@@ -1285,6 +1290,13 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dcaResultsExplanation",
+                title="Understanding Decision Curve Analysis (DCA)",
+                visible="(performDCA && showExplanations)",
+                clearWith=list(
+                    "performDCA")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="dcaResults",
@@ -1557,6 +1569,48 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="trendTestsExplanation",
+                title="Understanding Stage Trend Analysis",
+                visible="(performTrendTests && showExplanations)",
+                clearWith=list(
+                    "performTrendTests")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="trendTests",
+                title="Stage Trend Analysis",
+                visible="(performTrendTests)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "performTrendTests"),
+                columns=list(
+                    list(
+                        `name`="System", 
+                        `title`="Staging System", 
+                        `type`="text"),
+                    list(
+                        `name`="Test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="Statistic", 
+                        `title`="Statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="clinicalInterpretationExplanation",
                 title="Understanding Clinical Interpretation Guide",
                 visible="(showClinicalInterpretation && showExplanations)",
@@ -1668,6 +1722,47 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="Significance", 
                         `title`="Significance", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="effectSizesExplanation",
+                title="Understanding Effect Sizes",
+                visible="(includeEffectSizes && showExplanations)",
+                clearWith=list(
+                    "includeEffectSizes")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="effectSizes",
+                title="Effect Sizes",
+                visible="(includeEffectSizes)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "includeEffectSizes"),
+                columns=list(
+                    list(
+                        `name`="Measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="Effect_Size", 
+                        `title`="Effect Size", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Magnitude", 
+                        `title`="Magnitude", 
+                        `type`="text"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"),
+                    list(
+                        `name`="Practical_Significance", 
+                        `title`="Practical Significance", 
                         `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -1806,7 +1901,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="calibrationPlotsExplanation",
                 title="Understanding Calibration Plots",
-                visible="(showCalibrationPlots && showExplanations)",
+                visible="(performCalibration && showCalibrationPlots && showExplanations)",
                 clearWith=list(
                     "showCalibrationPlots")))
             self$add(jmvcore::Image$new(
@@ -1816,7 +1911,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=800,
                 height=400,
                 renderFun=".plotCalibration",
-                visible="(showCalibrationPlots)",
+                visible="(performCalibration && showCalibrationPlots)",
                 clearWith=list(
                     "oldStage",
                     "newStage",
@@ -2102,6 +2197,7 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$dcaResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dcaResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pseudoR2ResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pseudoR2Results} \tab \tab \tab \tab \tab a table \cr
@@ -2114,12 +2210,16 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$likelihoodTests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$homogeneityTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$homogeneityTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$trendTestsExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$trendTests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalInterpretationExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$executiveSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$executiveSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$statisticalSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$statisticalSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$effectSizesExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$effectSizes} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$methodologyNotes} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$migrationHeatmapExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$migrationHeatmap} \tab \tab \tab \tab \tab an image \cr
@@ -2167,7 +2267,7 @@ stagemigration <- function(
     performHomogeneityTests = FALSE,
     performTrendTests = FALSE,
     performLikelihoodTests = FALSE,
-    calculatePseudoR2 = FALSE,
+    calculatePseudoR2 = TRUE,
     showMigrationOverview = TRUE,
     showMigrationSummary = TRUE,
     showStageDistribution = TRUE,
