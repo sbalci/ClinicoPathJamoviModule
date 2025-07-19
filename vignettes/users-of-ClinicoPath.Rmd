@@ -25,6 +25,8 @@ please let us know by creating an issue in the [GitHub repository](https://githu
 
 # General References
 
+- https://scholar.google.com.tr/citations?view_op=view_citation&hl=en&user=q40DcqYAAAAJ&cstart=20&pagesize=80&citation_for_view=q40DcqYAAAAJ:cSdaV2aYdYsC
+
 - Jamovi ve Jasp Programı ile Temel ve İleri Düzey Nicel Veri Analizi https://depo.pegem.net/9786258044089.pdf
 
 # Example Datasets
@@ -211,6 +213,8 @@ https://www.sciencedirect.com/science/article/abs/pii/S0003497523002540
 
 
 # meddecide 
+
+- Examining Paternal Care in Captive Sumatran and Hybrid Orangutans https://pubmed.ncbi.nlm.nih.gov/40662516/ https://onlinelibrary.wiley.com/doi/pdf/10.1002/zoo.70012 
 
 - The Role of Kidney Function in Predicting COVID-19 Severity and Clinical Outcomes: A Retrospective Analysis 
 https://www.mdpi.com/2036-7449/17/4/79 
