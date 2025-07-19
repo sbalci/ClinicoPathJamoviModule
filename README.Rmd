@@ -17,6 +17,25 @@ knitr::opts_chunk$set(
 
 ---
 
+## Abstract
+
+### **The ClinicoPathJamoviModule: A Comprehensive Open-Source Toolkit for Streamlining Clinicopathological Research**
+
+**Background:** Clinicopathological research is fundamental to advancing evidence-based medicine, but it requires the application of complex and specialized statistical methods. The technical barrier of programming-based statistical software can limit the ability of clinicians and researchers to perform these analyses efficiently and reproducibly. To address this gap, we have developed the ClinicoPathJamoviModule, an open-source extension for the user-friendly jamovi statistical platform.
+
+**Methods:** The ClinicoPathJamoviModule integrates a robust and comprehensive suite of analytical tools designed to address the typical workflow of clinicopathological data analysis. The module is built upon the R statistical language and provides a graphical user interface within jamovi for a wide range of functions. Key features include:
+
+*   **Descriptive Statistics:** Generation of publication-ready summary tables (`Table 1`).
+*   **Survival Analysis:** Tools for Kaplan-Meier estimation, log-rank tests, and Cox proportional hazards models for single, comparison, and multiple variable analyses.
+*   **Diagnostic Accuracy:** Evaluation of diagnostic tests using Receiver Operating Characteristic (ROC) curve analysis, decision curve analysis (DCA), and screening test calculators.
+*   **Agreement and Reliability:** Assessment of inter-rater reliability using statistics such as Cohen's Kappa and the Intraclass Correlation Coefficient (ICC).
+*   **Data Visualization:** A collection of advanced plotting tools, including waterfall plots, swimmer plots, raincloud plots, and advanced bar plots for intuitive data exploration and presentation.
+*   **Data Preprocessing:** Utilities for data quality checking, management of missing data, and date corrections.
+
+**Conclusion:** The ClinicoPathJamoviModule provides a powerful, accessible, and free-to-use toolkit that empowers medical researchers to conduct sophisticated statistical analyses without requiring extensive programming knowledge. By integrating these essential functions into the intuitive jamovi framework, the module aims to lower the barrier to high-quality data analysis, enhance research reproducibility, and accelerate the translation of clinical data into meaningful insights.
+
+---
+
 
 ## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
 
@@ -486,10 +505,13 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 ##### [Comprehensive Time Interval Calculator](https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/timeinterval_documentation.html)
 (Advanced time interval analysis with quality assessment)
 
-##### [Clinical Research Visualization with visR](https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/jvisr_documentation.html)
+##### [Jvisr](vignettes-jsurvival/jvisr_documentation.md)
+
+
 (Fit-for-Purpose Clinical Visualizations)
 
-##### Competing Survival
+##### [Competing Survival](vignettes-jsurvival/15-competing-survival.Rmd)
+
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
@@ -523,7 +545,8 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 <img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 75% />
 
 
-##### Decision Calculator
+##### [Decision Calculator](vignettes-meddecide/35-screening-calculator-comprehensive.Rmd)
+
 
 
 <img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
@@ -533,9 +556,12 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 
 
 
-##### Decision Tree
+##### [Decision Tree](vignettes-meddecide/05-decision-tree-analysis.Rmd)
 
-###### explore
+
+
+##### [Decision Tree explore](vignettes-meddecide/05-decision-tree-analysis.Rmd)
+
 
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
@@ -563,7 +589,8 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 <img src="man/figures/jamovi-clinicopath-rpart-decision-tree.png" align="center" width = 75% />
 
 
-##### ROC
+##### [ROC Analysis](vignettes-meddecide/03-roc-analysis.Rmd)
+
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
@@ -572,9 +599,8 @@ https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1v
 
 ### Correlation
 
-#### Correlation
+#### [Correlation](vignettes-ClinicoPathDescriptives/01-correlation-analysis.Rmd)
 
-🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
 
 
