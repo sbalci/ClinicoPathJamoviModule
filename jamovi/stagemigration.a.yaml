@@ -255,7 +255,7 @@ options:
     - name: calculatePseudoR2
       title: 'Pseudo R-squared Measures'
       type: Bool
-      default: false
+      default: true
       description: >-
         Calculate multiple pseudo R-squared measures for model comparison
         (Nagelkerke, McFadden, Cox-Snell).

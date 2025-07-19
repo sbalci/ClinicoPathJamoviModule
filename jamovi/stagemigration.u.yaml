@@ -345,13 +345,13 @@ children:
             margin: large
             children:
               - type: CheckBox
-                name: showCalibrationPlots
-                label: Calibration Plots
-                enable: (performCalibration)
-              - type: CheckBox
                 name: showDecisionCurves
                 label: Decision Curves
                 enable: (performDCA)
+              - type: CheckBox
+                name: showCalibrationPlots
+                label: Calibration Plots
+                enable: (performCalibration)
       - type: Label
         label: Survival Curve Options
         children:
