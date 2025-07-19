@@ -1144,16 +1144,6 @@ analyses:
       nomograms.
     ribbon: analyses
     category: analyses
-  - title: ROC
-    name: roc2
-    ns: ClinicoPath
-    menuGroup: meddecideD
-    menuSubgroup: ROC - Drafts
-    menuTitle: ROC
-    menuSubtitle: Decision
-    description: Function for ROC Analysis.
-    ribbon: analyses
-    category: analyses
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
@@ -1283,14 +1273,6 @@ analyses:
 
       and APA-style formatting for clinical research applications.
     menuSubtitle: Agreement
-    ribbon: analyses
-    category: analyses
-  - title: Test ROC
-    name: TestROC
-    ns: ClinicoPath
-    menuGroup: ExplorationD
-    menuSubgroup: PPDA
-    menuTitle: Test ROC
     ribbon: analyses
     category: analyses
   - title: Histogram
@@ -1460,18 +1442,6 @@ analyses:
       helps researchers understand the probability that their significant
       findings are actually true, considering factors like prior probability,
       statistical power, and research biases.
-  - title: ROC Curve Analysis
-    name: roc
-    ns: ClinicoPath
-    menuGroup: meddecideD
-    menuSubgroup: ROC - Drafts
-    menuTitle: ROC Curve Analysis
-    description: >
-      Function for ROC (Receiver Operating Characteristic) Curve Analysis.
-      Calculates sensitivity, specificity, AUC, Youden index, and more.
-    menuSubtitle: Sensitivity, Specificity, AUC, ...
-    ribbon: analyses
-    category: analyses
   - title: Graphs and Plots
     name: statsplot2
     ns: ClinicoPath

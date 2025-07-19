@@ -38,6 +38,7 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/29-quick-reference-legacy.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/30-r-programming-guide-legacy.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/31-troubleshooting-faq-legacy.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/clinical-workflow.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/clinicopath-biomarker-01-biomarkerresponse-comprehensive.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/clinicopath-checkdata-01-comprehensive-data-quality.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/clinicopath-descriptives-01-introduction.html</loc></url>
@@ -239,6 +240,7 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/meddecide-35-screening-calculator-comprehensive.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/meddecide-36-sequential-testing-comprehensive.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/module-development-jamovi.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/pathology-jamovi.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/pkgnet-report.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/swimmer-unified-datasets.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/swimmerplot-unified-comprehensive.html</loc></url>
@@ -547,6 +549,8 @@
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/screeningcalculatorClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtests.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/sequentialtestsClass.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/simonmakuch.html</loc></url>
+<url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/simonmakuchClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/singlearm.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/singlearmClass.html</loc></url>
 <url><loc>https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/small_sample_tree.html</loc></url>
