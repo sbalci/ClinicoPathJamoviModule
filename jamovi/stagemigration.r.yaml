@@ -612,6 +612,51 @@ items:
             type: number
             format: zto,pvalue
 
+    # Integrated AUC Analysis
+    - name: integratedAUCAnalysis
+      title: Integrated AUC Analysis
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+          - nriTimePoints
+      columns:
+          - name: Metric
+            title: "Metric"
+            type: text
+          - name: Original_System
+            title: "Original System"
+            type: number
+            format: zto
+          - name: New_System
+            title: "New System"
+            type: number
+            format: zto
+          - name: Difference
+            title: "Difference"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
     # Decision Curve Analysis
     - name: dcaResultsExplanation
       title: Understanding Decision Curve Analysis (DCA)
@@ -765,7 +810,7 @@ items:
           - showWillRogersAnalysis
 
     # Will Rogers Phenomenon Analysis
-    - name: willRogersAnalysis
+    - name: willRogersBasicAnalysis
       title: Will Rogers Phenomenon Analysis
       type: Table
       visible: (showWillRogersAnalysis)
@@ -1086,6 +1131,33 @@ items:
           - newStage
           - showMigrationHeatmap
 
+
+    # # Sankey Diagram Explanation
+    # - name: sankeyDiagramExplanation
+    #   title: Understanding Stage Migration Flow Diagram
+    #   type: Html
+    #   visible: (showSankeyDiagram && showExplanations)
+    #   clearWith:
+    #       - showSankeyDiagram
+
+    # # Sankey Diagram for Stage Migration
+    # - name: sankeyDiagram
+    #   title: Stage Migration Flow Diagram
+    #   type: Image
+    #   width: 900
+    #   height: 600
+    #   renderFun: .plotSankeyDiagram
+    #   visible: (showSankeyDiagram)
+    #   clearWith:
+    #       - oldStage
+    #       - newStage
+    #       - showSankeyDiagram
+
+
+
+
+
+
     # ROC Comparison Explanation
     - name: rocComparisonExplanation
       title: Understanding Time-dependent ROC Curves
@@ -1147,7 +1219,7 @@ items:
     - name: calibrationAnalysis
       title: Calibration Analysis
       type: Table
-      visible: (performCalibration)
+      visible: (performCalibration || advancedMigrationAnalysis)
       clearWith:
           - oldStage
           - newStage
@@ -1205,7 +1277,7 @@ items:
       width: 800
       height: 400
       renderFun: .plotCalibration
-      visible: (performCalibration && showCalibrationPlots)
+      visible: (showCalibrationPlots && (performCalibration || advancedMigrationAnalysis))
       clearWith:
           - oldStage
           - newStage
@@ -1214,6 +1286,342 @@ items:
           - eventLevel
           - showCalibrationPlots
           - performCalibration
+
+    # Advanced Migration Analysis Explanation
+    - name: advancedMigrationExplanation
+      title: Understanding Advanced Migration Analysis
+      type: Html
+      visible: (advancedMigrationAnalysis && showExplanations)
+      clearWith:
+          - advancedMigrationAnalysis
+
+    # Monotonicity Check
+    - name: monotonicityCheck
+      title: Monotonicity Assessment
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: System
+            title: "Staging System"
+            type: text
+          - name: Monotonic
+            title: "Monotonic"
+            type: text
+          - name: Violations
+            title: "Violations"
+            type: integer
+          - name: Details
+            title: "Details"
+            type: text
+          - name: Score
+            title: "Monotonicity Score"
+            type: number
+            format: zto
+
+    # Will Rogers Analysis
+    - name: willRogersAnalysis
+      title: Will Rogers Phenomenon Analysis
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Migration_Pattern
+            title: "Migration Pattern"
+            type: text
+          - name: Count
+            title: "Count"
+            type: integer
+          - name: Survival_Change_Old
+            title: "Old Stage Δ Survival"
+            type: number
+            format: zto
+          - name: Survival_Change_New
+            title: "New Stage Δ Survival"
+            type: number
+            format: zto
+          - name: Will_Rogers_Evidence
+            title: "Will Rogers Evidence"
+            type: text
+          - name: Clinical_Impact
+            title: "Clinical Impact"
+            type: text
+
+    # Will Rogers Visualization
+    - name: willRogersVisualization
+      title: Will Rogers Effect Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotWillRogersEffect
+      visible: (showWillRogersVisualization)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showWillRogersVisualization
+
+    # Migration Survival Comparison
+    - name: migrationSurvivalComparison
+      title: Migration Survival Curve Comparison
+      type: Image
+      width: 1400
+      height: 700
+      renderFun: .plotMigrationSurvivalComparison
+      visible: (showMigrationSurvivalComparison)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showMigrationSurvivalComparison
+
+    # Enhanced Will Rogers Analysis
+    - name: willRogersEnhancedAnalysis
+      title: Enhanced Will Rogers Statistical Analysis
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: Period
+            title: "Period"
+            type: text
+          - name: N_Patients
+            title: "N"
+            type: integer
+          - name: Median_Survival
+            title: "Median Survival"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: Survival_Change
+            title: "Δ Survival"
+            type: number
+            format: zto
+          - name: P_Value
+            title: "P-value"
+            type: number
+            format: zto.pvalue
+          - name: Statistical_Test
+            title: "Test"
+            type: text
+
+    # Stage-Specific C-Index
+    - name: stageSpecificCIndex
+      title: Stage-Specific C-Index Analysis
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Old_Stage
+            title: "Original Stage"
+            type: text
+          - name: N_Patients
+            title: "N"
+            type: integer
+          - name: New_System_CIndex
+            title: "New System C-Index"
+            type: number
+            format: zto
+          - name: SE
+            title: "SE"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: Prognostic_Value
+            title: "Prognostic Value"
+            type: text
+
+    # Enhanced Pseudo R-squared
+    - name: enhancedPseudoR2
+      title: Enhanced Pseudo R-squared Measures
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Measure
+            title: "Measure"
+            type: text
+          - name: Old_System
+            title: "Original System"
+            type: number
+            format: zto
+          - name: New_System
+            title: "New System"
+            type: number
+            format: zto
+          - name: Improvement
+            title: "Improvement"
+            type: number
+            format: zto
+          - name: Relative_Improvement
+            title: "Relative Improvement (%)"
+            type: number
+            format: zto
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Enhanced Reclassification Metrics
+    - name: enhancedReclassificationMetrics
+      title: Enhanced Reclassification Metrics
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Metric
+            title: "Metric"
+            type: text
+          - name: Value
+            title: "Value"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Proportional Hazards Test
+    - name: proportionalHazardsTest
+      title: Proportional Hazards Assumption Test
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Variable
+            title: "Staging System"
+            type: text
+          - name: Chi_Square
+            title: "Chi-Square"
+            type: number
+            format: zto
+          - name: df
+            title: "df"
+            type: integer
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Assumption_Status
+            title: "Assumption Status"
+            type: text
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Decision Curve Analysis
+    - name: decisionCurveAnalysis
+      title: Decision Curve Analysis
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+          - nriTimePoints
+      columns:
+          - name: Time_Point
+            title: "Time Point (months)"
+            type: number
+            format: zto
+          - name: Threshold_Probability
+            title: "Threshold (%)"
+            type: number
+            format: zto
+          - name: Net_Benefit_Original
+            title: "Net Benefit Original"
+            type: number
+            format: zto
+          - name: Net_Benefit_New
+            title: "Net Benefit New"
+            type: number
+            format: zto
+          - name: Difference
+            title: "Difference"
+            type: number
+            format: zto
+          - name: Clinical_Impact
+            title: "Clinical Impact"
+            type: text
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
 
 
     # Survival Curves Explanation
@@ -1243,6 +1651,54 @@ items:
           - showConfidenceIntervals
           - showRiskTables
           - plotTimeRange
+
+
+
+    # Comparative Analysis Dashboard Explanation
+    - name: dashboardExplanation
+      title: Understanding the Comparative Analysis Dashboard
+      type: Html
+      visible: (advancedMigrationAnalysis && showExplanations)
+      clearWith:
+          - advancedMigrationAnalysis
+
+    # Comparative Analysis Dashboard
+    - name: comparativeAnalysisDashboard
+      title: Comparative Analysis Dashboard
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Analysis_Category
+            title: "Analysis Category"
+            type: text
+          - name: Metric
+            title: "Metric"
+            type: text
+          - name: Original_System
+            title: "Original System"
+            type: text
+          - name: New_System
+            title: "New System"
+            type: text
+          - name: Improvement
+            title: "Improvement"
+            type: text
+          - name: Statistical_Significance
+            title: "Statistical Significance"
+            type: text
+          - name: Clinical_Relevance
+            title: "Clinical Relevance"
+            type: text
+          - name: Recommendation
+            title: "Recommendation"
+            type: text
 
 refs:
     - harrell2015

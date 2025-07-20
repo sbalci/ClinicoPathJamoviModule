@@ -51,6 +51,7 @@ stagemigration(
   showStatisticalSummary = FALSE,
   showMethodologyNotes = FALSE,
   includeEffectSizes = FALSE,
+  advancedMigrationAnalysis = FALSE,
   generateExecutiveSummary = FALSE,
   cancerType = "general",
   useOptimismCorrection = FALSE,
@@ -240,6 +241,11 @@ used and their interpretation.}
 comparisons to assess practical significance beyond statistical
 significance.}
 
+\item{advancedMigrationAnalysis}{Perform comprehensive stage migration
+analysis including monotonicity  checks, Will Rogers phenomenon detection,
+stage-specific validation,  and enhanced discrimination metrics. Provides
+detailed assessment of  staging system quality and migration patterns.}
+
 \item{generateExecutiveSummary}{Generate executive summary with key
 findings and recommendations for clinical and research stakeholders.}
 
@@ -340,7 +346,7 @@ A results object containing:
 \code{results$decisionCurves} \tab \tab \tab \tab \tab an image \cr
 \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$willRogersAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$willRogersAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$willRogersBasicAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$likelihoodTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$likelihoodTests} \tab \tab \tab \tab \tab a table \cr
 \code{results$homogeneityTestsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -366,6 +372,11 @@ A results object containing:
 \code{results$calibrationAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$calibrationPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$calibrationPlots} \tab \tab \tab \tab \tab an image \cr
+\code{results$advancedMigrationExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$monotonicityCheck} \tab \tab \tab \tab \tab a table \cr
+\code{results$willRogersAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$stageSpecificCIndex} \tab \tab \tab \tab \tab a table \cr
+\code{results$enhancedPseudoR2} \tab \tab \tab \tab \tab a table \cr
 \code{results$survivalCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$survivalCurves} \tab \tab \tab \tab \tab an image \cr
 }

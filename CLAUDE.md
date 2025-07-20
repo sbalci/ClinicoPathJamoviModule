@@ -196,6 +196,7 @@ This replaces the previous manual approach where vignette files had to be indivi
 ### File Update Instructions
 
 - Update NEWS.md when there is version change
+- When updating NEWS.md use the current version from DESCRIPTION file
 
 ### Module Update Command
 
