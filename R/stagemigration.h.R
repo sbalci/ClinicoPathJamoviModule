@@ -51,6 +51,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             showStatisticalSummary = FALSE,
             showMethodologyNotes = FALSE,
             includeEffectSizes = FALSE,
+            advancedMigrationAnalysis = FALSE,
             generateExecutiveSummary = FALSE,
             cancerType = "general",
             useOptimismCorrection = FALSE,
@@ -289,6 +290,10 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "includeEffectSizes",
                 includeEffectSizes,
                 default=FALSE)
+            private$..advancedMigrationAnalysis <- jmvcore::OptionBool$new(
+                "advancedMigrationAnalysis",
+                advancedMigrationAnalysis,
+                default=FALSE)
             private$..generateExecutiveSummary <- jmvcore::OptionBool$new(
                 "generateExecutiveSummary",
                 generateExecutiveSummary,
@@ -422,6 +427,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..showStatisticalSummary)
             self$.addOption(private$..showMethodologyNotes)
             self$.addOption(private$..includeEffectSizes)
+            self$.addOption(private$..advancedMigrationAnalysis)
             self$.addOption(private$..generateExecutiveSummary)
             self$.addOption(private$..cancerType)
             self$.addOption(private$..useOptimismCorrection)
@@ -484,6 +490,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         showStatisticalSummary = function() private$..showStatisticalSummary$value,
         showMethodologyNotes = function() private$..showMethodologyNotes$value,
         includeEffectSizes = function() private$..includeEffectSizes$value,
+        advancedMigrationAnalysis = function() private$..advancedMigrationAnalysis$value,
         generateExecutiveSummary = function() private$..generateExecutiveSummary$value,
         cancerType = function() private$..cancerType$value,
         useOptimismCorrection = function() private$..useOptimismCorrection$value,
@@ -545,6 +552,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..showStatisticalSummary = NA,
         ..showMethodologyNotes = NA,
         ..includeEffectSizes = NA,
+        ..advancedMigrationAnalysis = NA,
         ..generateExecutiveSummary = NA,
         ..cancerType = NA,
         ..useOptimismCorrection = NA,
@@ -599,6 +607,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         stratifiedAnalysis = function() private$.items[["stratifiedAnalysis"]],
         stratifiedAnalysisExplanation = function() private$.items[["stratifiedAnalysisExplanation"]],
         rocAnalysis = function() private$.items[["rocAnalysis"]],
+        integratedAUCAnalysis = function() private$.items[["integratedAUCAnalysis"]],
         dcaResultsExplanation = function() private$.items[["dcaResultsExplanation"]],
         dcaResults = function() private$.items[["dcaResults"]],
         pseudoR2ResultsExplanation = function() private$.items[["pseudoR2ResultsExplanation"]],
@@ -607,7 +616,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         decisionCurves = function() private$.items[["decisionCurves"]],
         bootstrapResults = function() private$.items[["bootstrapResults"]],
         willRogersAnalysisExplanation = function() private$.items[["willRogersAnalysisExplanation"]],
-        willRogersAnalysis = function() private$.items[["willRogersAnalysis"]],
+        willRogersBasicAnalysis = function() private$.items[["willRogersBasicAnalysis"]],
         likelihoodTestsExplanation = function() private$.items[["likelihoodTestsExplanation"]],
         likelihoodTests = function() private$.items[["likelihoodTests"]],
         homogeneityTestsExplanation = function() private$.items[["homogeneityTestsExplanation"]],
@@ -633,6 +642,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         calibrationAnalysis = function() private$.items[["calibrationAnalysis"]],
         calibrationPlotsExplanation = function() private$.items[["calibrationPlotsExplanation"]],
         calibrationPlots = function() private$.items[["calibrationPlots"]],
+        advancedMigrationExplanation = function() private$.items[["advancedMigrationExplanation"]],
+        monotonicityCheck = function() private$.items[["monotonicityCheck"]],
+        willRogersAnalysis = function() private$.items[["willRogersAnalysis"]],
+        stageSpecificCIndex = function() private$.items[["stageSpecificCIndex"]],
+        enhancedPseudoR2 = function() private$.items[["enhancedPseudoR2"]],
+        enhancedReclassificationMetrics = function() private$.items[["enhancedReclassificationMetrics"]],
+        proportionalHazardsTest = function() private$.items[["proportionalHazardsTest"]],
+        decisionCurveAnalysis = function() private$.items[["decisionCurveAnalysis"]],
         survivalCurvesExplanation = function() private$.items[["survivalCurvesExplanation"]],
         survivalCurves = function() private$.items[["survivalCurves"]]),
     private = list(),
@@ -1290,6 +1307,58 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="integratedAUCAnalysis",
+                title="Integrated AUC Analysis",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis",
+                    "nriTimePoints"),
+                columns=list(
+                    list(
+                        `name`="Metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="Original_System", 
+                        `title`="Original System", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="New_System", 
+                        `title`="New System", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Difference", 
+                        `title`="Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dcaResultsExplanation",
@@ -1453,7 +1522,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "showWillRogersAnalysis")))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="willRogersAnalysis",
+                name="willRogersBasicAnalysis",
                 title="Will Rogers Phenomenon Analysis",
                 visible="(showWillRogersAnalysis)",
                 clearWith=list(
@@ -1846,7 +1915,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="calibrationAnalysis",
                 title="Calibration Analysis",
-                visible="(performCalibration)",
+                visible="(performCalibration || advancedMigrationAnalysis)",
                 clearWith=list(
                     "oldStage",
                     "newStage",
@@ -1911,7 +1980,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=800,
                 height=400,
                 renderFun=".plotCalibration",
-                visible="(performCalibration && showCalibrationPlots)",
+                visible="(showCalibrationPlots && (performCalibration || advancedMigrationAnalysis))",
                 clearWith=list(
                     "oldStage",
                     "newStage",
@@ -1920,6 +1989,299 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "eventLevel",
                     "showCalibrationPlots",
                     "performCalibration")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="advancedMigrationExplanation",
+                title="Understanding Advanced Migration Analysis",
+                visible="(advancedMigrationAnalysis && showExplanations)",
+                clearWith=list(
+                    "advancedMigrationAnalysis")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="monotonicityCheck",
+                title="Monotonicity Assessment",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis"),
+                columns=list(
+                    list(
+                        `name`="System", 
+                        `title`="Staging System", 
+                        `type`="text"),
+                    list(
+                        `name`="Monotonic", 
+                        `title`="Monotonic", 
+                        `type`="text"),
+                    list(
+                        `name`="Violations", 
+                        `title`="Violations", 
+                        `type`="integer"),
+                    list(
+                        `name`="Details", 
+                        `title`="Details", 
+                        `type`="text"),
+                    list(
+                        `name`="Score", 
+                        `title`="Monotonicity Score", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="willRogersAnalysis",
+                title="Will Rogers Phenomenon Analysis",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis"),
+                columns=list(
+                    list(
+                        `name`="Migration_Pattern", 
+                        `title`="Migration Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="Count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="Survival_Change_Old", 
+                        `title`="Old Stage \u0394 Survival", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Survival_Change_New", 
+                        `title`="New Stage \u0394 Survival", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Will_Rogers_Evidence", 
+                        `title`="Will Rogers Evidence", 
+                        `type`="text"),
+                    list(
+                        `name`="Clinical_Impact", 
+                        `title`="Clinical Impact", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stageSpecificCIndex",
+                title="Stage-Specific C-Index Analysis",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis"),
+                columns=list(
+                    list(
+                        `name`="Old_Stage", 
+                        `title`="Original Stage", 
+                        `type`="text"),
+                    list(
+                        `name`="N_Patients", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="New_System_CIndex", 
+                        `title`="New System C-Index", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="SE", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Prognostic_Value", 
+                        `title`="Prognostic Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="enhancedPseudoR2",
+                title="Enhanced Pseudo R-squared Measures",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis"),
+                columns=list(
+                    list(
+                        `name`="Measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="Old_System", 
+                        `title`="Original System", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="New_System", 
+                        `title`="New System", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Improvement", 
+                        `title`="Improvement", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Relative_Improvement", 
+                        `title`="Relative Improvement (%)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="enhancedReclassificationMetrics",
+                title="Enhanced Reclassification Metrics",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis"),
+                columns=list(
+                    list(
+                        `name`="Metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="Value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="CI_Upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="proportionalHazardsTest",
+                title="Proportional Hazards Assumption Test",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis"),
+                columns=list(
+                    list(
+                        `name`="Variable", 
+                        `title`="Staging System", 
+                        `type`="text"),
+                    list(
+                        `name`="Chi_Square", 
+                        `title`="Chi-Square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Assumption_Status", 
+                        `title`="Assumption Status", 
+                        `type`="text"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="decisionCurveAnalysis",
+                title="Decision Curve Analysis",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis",
+                    "nriTimePoints"),
+                columns=list(
+                    list(
+                        `name`="Time_Point", 
+                        `title`="Time Point (months)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Threshold_Probability", 
+                        `title`="Threshold (%)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Net_Benefit_Original", 
+                        `title`="Net Benefit Original", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Net_Benefit_New", 
+                        `title`="Net Benefit New", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Difference", 
+                        `title`="Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Clinical_Impact", 
+                        `title`="Clinical Impact", 
+                        `type`="text"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="survivalCurvesExplanation",
@@ -2121,6 +2483,10 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param includeEffectSizes Calculate and display effect sizes for all
 #'   comparisons to assess practical significance beyond statistical
 #'   significance.
+#' @param advancedMigrationAnalysis Perform comprehensive stage migration
+#'   analysis including monotonicity  checks, Will Rogers phenomenon detection,
+#'   stage-specific validation,  and enhanced discrimination metrics. Provides
+#'   detailed assessment of  staging system quality and migration patterns.
 #' @param generateExecutiveSummary Generate executive summary with key
 #'   findings and recommendations for clinical and research stakeholders.
 #' @param cancerType Optional cancer type specification for customized
@@ -2197,6 +2563,7 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$integratedAUCAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$dcaResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dcaResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pseudoR2ResultsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -2205,7 +2572,7 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$decisionCurves} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$willRogersAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$willRogersAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$willRogersBasicAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$likelihoodTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$likelihoodTests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$homogeneityTestsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -2231,6 +2598,14 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$calibrationAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$calibrationPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$calibrationPlots} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$advancedMigrationExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$monotonicityCheck} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$willRogersAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stageSpecificCIndex} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$enhancedPseudoR2} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$enhancedReclassificationMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$proportionalHazardsTest} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$decisionCurveAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survivalCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$survivalCurves} \tab \tab \tab \tab \tab an image \cr
 #' }
@@ -2289,6 +2664,7 @@ stagemigration <- function(
     showStatisticalSummary = FALSE,
     showMethodologyNotes = FALSE,
     includeEffectSizes = FALSE,
+    advancedMigrationAnalysis = FALSE,
     generateExecutiveSummary = FALSE,
     cancerType = "general",
     useOptimismCorrection = FALSE,
@@ -2374,6 +2750,7 @@ stagemigration <- function(
         showStatisticalSummary = showStatisticalSummary,
         showMethodologyNotes = showMethodologyNotes,
         includeEffectSizes = includeEffectSizes,
+        advancedMigrationAnalysis = advancedMigrationAnalysis,
         generateExecutiveSummary = generateExecutiveSummary,
         cancerType = cancerType,
         useOptimismCorrection = useOptimismCorrection,

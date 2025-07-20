@@ -8,7 +8,6 @@ children:
     persistentItems: false
     stretchFactor: 1
     children:
-
       - type: TargetLayoutBox
         label: Original Staging System
         children:
@@ -51,8 +50,6 @@ children:
           - type: VariablesListBox
             name: categoricalCovariates
             isTarget: true
-
-
   - type: CollapseBox
     label: Main Analysis
     collapsed: false
@@ -87,37 +84,6 @@ children:
               - type: CheckBox
                 name: showExplanations
                 label: Show Explanations for Results
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   - type: CollapseBox
     label: Analysis Configuration
     collapsed: false
@@ -331,6 +297,9 @@ children:
               - type: CheckBox
                 name: showMigrationHeatmap
                 label: Migration Heatmap
+              # - type: CheckBox
+              #   name: showSankeyDiagram
+              #   label: Sankey Diagram
               - type: CheckBox
                 name: showROCComparison
                 label: ROC Curve Comparison
@@ -351,7 +320,7 @@ children:
               - type: CheckBox
                 name: showCalibrationPlots
                 label: Calibration Plots
-                enable: (performCalibration)
+                enable: (performCalibration || advancedMigrationAnalysis)
       - type: Label
         label: Survival Curve Options
         children:
@@ -397,6 +366,8 @@ children:
               - type: CheckBox
                 name: includeEffectSizes
                 label: Include Effect Sizes
+              - type: CheckBox
+                name: advancedMigrationAnalysis
       - type: Label
         label: Technical Details
         children:
@@ -409,5 +380,3 @@ children:
               - type: CheckBox
                 name: showMethodologyNotes
                 label: Methodology Notes
-
-

@@ -120,7 +120,7 @@ Results include comprehensive guidance for staging system adoption:
 stagemigration(
   data = cancer_data,
   oldStage = "old_stage",
-  newStage = "new_stage", 
+  newStage = "new_stage",
   survivalTime = "survival_months",
   event = "outcome",
   eventLevel = "DEAD",
@@ -131,7 +131,7 @@ stagemigration(
 stagemigration(
   data = lung_cancer_cohort,
   oldStage = "tnm7_stage",
-  newStage = "tnm8_stage", 
+  newStage = "tnm8_stage",
   survivalTime = "os_months",
   event = "death",
   eventLevel = "dead",

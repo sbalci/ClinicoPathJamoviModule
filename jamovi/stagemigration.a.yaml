@@ -332,6 +332,17 @@ options:
         to identify migration patterns at a glance - upstaging appears above the 
         diagonal, downstaging below. Essential for presentations and publications.
 
+    # - name: showSankeyDiagram
+    #   title: 'Stage Migration Flow Diagram'
+    #   type: Bool
+    #   default: false
+    #   description: >-
+    #     Display a Sankey flow diagram showing patient migration patterns between 
+    #     original and new staging systems. Flow thickness represents the number of 
+    #     patients moving between stages, making it easy to visualize dominant 
+    #     migration patterns. Excellent for presentations and understanding the 
+    #     overall reclassification impact.
+
     - name: showROCComparison
       title: 'ROC Curve Comparison'
       type: Bool
@@ -367,6 +378,25 @@ options:
       description: >-
         Detailed analysis of Will Rogers phenomenon with survival comparisons
         between migrated and non-migrated patients within stages.
+
+    - name: showWillRogersVisualization
+      title: 'Will Rogers Effect Visualization'
+      type: Bool
+      default: false
+      description: >-
+        Display visualization showing how stage migration affects survival
+        within each stage. Shows before/after survival curves demonstrating
+        the Will Rogers paradox where both stages appear to improve.
+
+    - name: showMigrationSurvivalComparison
+      title: 'Migration Survival Curve Comparison'
+      type: Bool
+      default: false
+      description: >-
+        Display Kaplan-Meier survival curves comparing the same stages before 
+        and after patient migration. Shows how survival curves change when 
+        patients are reclassified between staging systems, providing visual 
+        evidence of the Will Rogers phenomenon and staging system improvements.
 
     # Survival Plot Options
     - name: showSurvivalCurves
@@ -442,6 +472,16 @@ options:
       description: >-
         Calculate and display effect sizes for all comparisons to assess
         practical significance beyond statistical significance.
+
+    - name: advancedMigrationAnalysis
+      title: 'Advanced Migration Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform comprehensive stage migration analysis including monotonicity 
+        checks, Will Rogers phenomenon detection, stage-specific validation, 
+        and enhanced discrimination metrics. Provides detailed assessment of 
+        staging system quality and migration patterns.
 
     - name: generateExecutiveSummary
       title: 'Executive Summary'
