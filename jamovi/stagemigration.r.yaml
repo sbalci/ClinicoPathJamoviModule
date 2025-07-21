@@ -1140,18 +1140,18 @@ items:
     #   clearWith:
     #       - showSankeyDiagram
 
-    # # Sankey Diagram for Stage Migration
-    # - name: sankeyDiagram
-    #   title: Stage Migration Flow Diagram
-    #   type: Image
-    #   width: 900
-    #   height: 600
-    #   renderFun: .plotSankeyDiagram
-    #   visible: (showSankeyDiagram)
-    #   clearWith:
-    #       - oldStage
-    #       - newStage
-    #       - showSankeyDiagram
+    # Sankey Diagram for Stage Migration
+    - name: sankeyDiagram
+      title: Stage Migration Flow Diagram
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .plotSankeyDiagram
+      visible: (showSankeyDiagram)
+      clearWith:
+          - oldStage
+          - newStage
+          - showSankeyDiagram
 
 
 
@@ -1437,6 +1437,55 @@ items:
             title: "Test"
             type: text
 
+    # Detailed Stage-Specific Will Rogers Analysis
+    - name: willRogersStageDetail
+      title: Detailed Stage-Specific Will Rogers Breakdown
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: Migration_Type
+            title: "Migration Type"
+            type: text
+          - name: N_Migrated
+            title: "N Migrated"
+            type: integer
+          - name: Pct_Migrated
+            title: "% Migrated"
+            type: number
+            format: pc
+          - name: Original_Median
+            title: "Original Median Survival"
+            type: number
+            format: zto
+          - name: New_Median
+            title: "New Median Survival"
+            type: number
+            format: zto
+          - name: Absolute_Improvement
+            title: "Absolute Improvement"
+            type: number
+            format: zto
+          - name: Relative_Improvement
+            title: "Relative Improvement %"
+            type: number
+            format: pc
+          - name: Improvement_Type
+            title: "Improvement Type"
+            type: text
+          - name: Clinical_Impact
+            title: "Clinical Impact"
+            type: text
+
     # Stage-Specific C-Index
     - name: stageSpecificCIndex
       title: Stage-Specific C-Index Analysis
@@ -1698,6 +1747,91 @@ items:
             type: text
           - name: Recommendation
             title: "Recommendation"
+            type: text
+
+    # Abbreviation Glossary
+    - name: abbreviationGlossary
+      title: Comprehensive Abbreviation Glossary and Statistical Terms
+      type: Html
+      visible: (showAbbreviationGlossary)
+      clearWith:
+          - showAbbreviationGlossary
+
+    # Cross-Validation Results
+    - name: crossValidationResults
+      title: K-Fold Cross-Validation Results
+      type: Table
+      visible: (performCrossValidation)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCrossValidation
+          - cvFolds
+      columns:
+          - name: Fold
+            title: "Fold"
+            type: text
+          - name: N_Train
+            title: "N Train"
+            type: integer
+          - name: N_Test
+            title: "N Test"
+            type: integer
+          - name: Old_System_CIndex
+            title: "Old System C-Index"
+            type: number
+            format: zto
+          - name: New_System_CIndex
+            title: "New System C-Index"
+            type: number
+            format: zto
+          - name: CIndex_Difference
+            title: "C-Index Difference"
+            type: number
+            format: zto
+          - name: P_Value
+            title: "P-Value"
+            type: number
+            format: zto,pvalue
+          - name: Validation_Type
+            title: "Validation Result"
+            type: text
+
+    # Enhanced LR Chi-Square Comparison
+    - name: enhancedLRComparison
+      title: LR Chi-Square Comparison (Key Staging Validation Metric)
+      type: Table
+      visible: (showStatisticalComparison)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - showStatisticalComparison
+      columns:
+          - name: Model
+            title: "Staging System"
+            type: text
+          - name: LR_ChiSquare
+            title: "LR Chi-Square"
+            type: number
+            format: zto
+          - name: df
+            title: "df"
+            type: integer
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Goodness_of_Fit
+            title: "Goodness of Fit"
+            type: text
+          - name: Model_Quality
+            title: "Model Quality"
             type: text
 
 refs:
