@@ -84,6 +84,8 @@ children:
               - type: CheckBox
                 name: showExplanations
                 label: Show Explanations for Results
+              - type: CheckBox
+                name: showAbbreviationGlossary
   - type: CollapseBox
     label: Analysis Configuration
     collapsed: false
@@ -227,6 +229,10 @@ children:
               - type: CheckBox
                 name: showWillRogersAnalysis
                 label: Will Rogers Phenomenon Analysis
+              - type: CheckBox
+                name: showWillRogersVisualization
+              - type: CheckBox
+                name: showMigrationSurvivalComparison
   - type: CollapseBox
     label: Multifactorial Analysis
     collapsed: false
@@ -297,9 +303,9 @@ children:
               - type: CheckBox
                 name: showMigrationHeatmap
                 label: Migration Heatmap
-              # - type: CheckBox
-              #   name: showSankeyDiagram
-              #   label: Sankey Diagram
+              - type: CheckBox
+                name: showSankeyDiagram
+                label: Sankey Diagram
               - type: CheckBox
                 name: showROCComparison
                 label: ROC Curve Comparison

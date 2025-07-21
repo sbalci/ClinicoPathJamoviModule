@@ -332,16 +332,16 @@ options:
         to identify migration patterns at a glance - upstaging appears above the 
         diagonal, downstaging below. Essential for presentations and publications.
 
-    # - name: showSankeyDiagram
-    #   title: 'Stage Migration Flow Diagram'
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Display a Sankey flow diagram showing patient migration patterns between 
-    #     original and new staging systems. Flow thickness represents the number of 
-    #     patients moving between stages, making it easy to visualize dominant 
-    #     migration patterns. Excellent for presentations and understanding the 
-    #     overall reclassification impact.
+    - name: showSankeyDiagram
+      title: 'Stage Migration Flow Diagram'
+      type: Bool
+      default: false
+      description: >-
+        Display a Sankey flow diagram showing patient migration patterns between 
+        original and new staging systems. Flow thickness represents the number of 
+        patients moving between stages, making it easy to visualize dominant 
+        migration patterns. Excellent for presentations and understanding the 
+        overall reclassification impact.
 
     - name: showROCComparison
       title: 'ROC Curve Comparison'
@@ -647,6 +647,16 @@ options:
       default: true
       description: >-
         Include detailed explanations for results.
+
+    - name: showAbbreviationGlossary
+      title: 'Show Abbreviation Glossary'
+      type: Bool
+      default: false
+      description: >-
+        Display a comprehensive glossary of all abbreviations, statistical terms, 
+        and technical terminology used in the stage migration analysis. This 
+        provides a quick reference for interpreting dashboard values and 
+        understanding statistical outputs.
 
 
 ...

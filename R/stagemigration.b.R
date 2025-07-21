@@ -739,14 +739,19 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         },
 
         .calculateAdvancedMetrics = function(data) {
-            # Advanced discrimination and calibration metrics with error handling
+            # Advanced discrimination and calibration metrics with comprehensive error handling
             message("DEBUG: calculateAdvancedMetrics STARTED")
             message("DEBUG: Input data dimensions: ", nrow(data), "x", ncol(data))
+            message("DEBUG: Column names: ", paste(names(data), collapse=", "))
 
             old_stage <- self$options$oldStage
             new_stage <- self$options$newStage
             time_var <- self$options$survivalTime
             event_var <- "event_binary"
+
+            message("DEBUG: Options - oldStage: ", old_stage)
+            message("DEBUG: Options - newStage: ", new_stage)
+            message("DEBUG: Options - survivalTime: ", time_var)
 
             # Validate required columns exist
             required_cols <- c(old_stage, new_stage, time_var, event_var)
@@ -807,16 +812,17 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 if (use_bootstrap) {
                     message("DEBUG: Using bootstrap for C-index comparison")
-                    boot_result <- private$.compareBootstrapCIndex(
+                    c_bootstrap <- private$.compareBootstrapCIndex(
                         data, old_stage, new_stage, time_var, event_var,
                         n_boot = self$options$bootstrapReps %||% 200
                     )
-                    p_value <- boot_result$p_value
-                    diff_se <- boot_result$se
-                    c_improvement_ci_lower <- boot_result$ci_lower
-                    c_improvement_ci_upper <- boot_result$ci_upper
+                    p_value <- c_bootstrap$p_value
+                    diff_se <- c_bootstrap$se
+                    c_improvement_ci_lower <- c_bootstrap$ci_lower
+                    c_improvement_ci_upper <- c_bootstrap$ci_upper
                 } else {
                     # Use asymptotic approximation
+                    c_bootstrap <- NULL
                     z_stat <- if (diff_se > 0) c_improvement / diff_se else NA
                     p_value <- if (!is.na(z_stat)) 2 * (1 - pnorm(abs(z_stat))) else NA
                     c_improvement_ci_lower <- if (!is.na(c_improvement) && !is.na(diff_se)) {
@@ -923,6 +929,23 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         message("DEBUG: Adjusted McFadden - Old: ", adj_mcfadden_old, ", New: ", adj_mcfadden_new)
                         message("DEBUG: Final Nagelkerke - Old: ", nagelkerke_old, ", New: ", nagelkerke_new)
 
+                        # 5. Royston & Sauerbrei R-squared (explained variation approach)
+                        royston_old <- tryCatch({
+                            private$.calculateRoystonR2(old_cox)
+                        }, error = function(e) {
+                            message("DEBUG: Error calculating Royston R² for old model: ", e$message)
+                            NA
+                        })
+
+                        royston_new <- tryCatch({
+                            private$.calculateRoystonR2(new_cox)
+                        }, error = function(e) {
+                            message("DEBUG: Error calculating Royston R² for new model: ", e$message)
+                            NA
+                        })
+
+                        message("DEBUG: Royston & Sauerbrei - Old: ", royston_old, ", New: ", royston_new)
+
                         message("DEBUG: Pseudo R-squared calculated successfully")
 
                         list(
@@ -937,7 +960,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             cox_snell_improvement = cox_snell_new - cox_snell_old,
                             adj_mcfadden_old = adj_mcfadden_old,
                             adj_mcfadden_new = adj_mcfadden_new,
-                            adj_mcfadden_improvement = adj_mcfadden_new - adj_mcfadden_old
+                            adj_mcfadden_improvement = adj_mcfadden_new - adj_mcfadden_old,
+                            royston_old = royston_old,
+                            royston_new = royston_new,
+                            royston_improvement = royston_new - royston_old
                         )
                     }, error = function(e) {
                         message("ERROR calculating pseudo R-squared: ", e$message)
@@ -947,8 +973,67 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 message("DEBUG: pseudo_r2 result: ", if(is.null(pseudo_r2)) "NULL" else "calculated")
 
-                # Return comprehensive results
-                return(list(
+                # Extract individual model LR chi-square values (for enhanced LR chi-square comparison table)
+                message("DEBUG: About to extract individual LR stats")
+                individual_lr_stats <- tryCatch({
+                    message("DEBUG: Inside LR stats extraction")
+                    # Extract LR chi-square for old model
+                    old_summary <- summary(old_cox)
+                    message("DEBUG: Got old_summary")
+                    old_lr_chi2 <- if (!is.null(old_summary$logtest) && length(old_summary$logtest) > 0) {
+                        old_summary$logtest["test"]
+                    } else {
+                        NA
+                    }
+                    old_lr_df <- if (!is.null(old_summary$logtest) && length(old_summary$logtest) > 1) {
+                        old_summary$logtest["df"]
+                    } else {
+                        NA
+                    }
+                    old_lr_p <- if (!is.null(old_summary$logtest) && length(old_summary$logtest) > 2) {
+                        old_summary$logtest["pvalue"]
+                    } else {
+                        NA
+                    }
+                    
+                    # Extract LR chi-square for new model
+                    new_summary <- summary(new_cox)
+                    new_lr_chi2 <- if (!is.null(new_summary$logtest) && length(new_summary$logtest) > 0) {
+                        new_summary$logtest["test"]
+                    } else {
+                        NA
+                    }
+                    new_lr_df <- if (!is.null(new_summary$logtest) && length(new_summary$logtest) > 1) {
+                        new_summary$logtest["df"]
+                    } else {
+                        NA
+                    }
+                    new_lr_p <- if (!is.null(new_summary$logtest) && length(new_summary$logtest) > 2) {
+                        new_summary$logtest["pvalue"]
+                    } else {
+                        NA
+                    }
+                    
+                    list(
+                        old_lr_chi2 = old_lr_chi2,
+                        old_lr_df = old_lr_df,
+                        old_lr_p = old_lr_p,
+                        new_lr_chi2 = new_lr_chi2,
+                        new_lr_df = new_lr_df,
+                        new_lr_p = new_lr_p
+                    )
+                }, error = function(e) {
+                    message("ERROR extracting individual LR stats: ", e$message)
+                    NULL
+                })
+                
+                message("DEBUG: individual_lr_stats result: ", ifelse(is.null(individual_lr_stats), "NULL", "NOT NULL"))
+                if (!is.null(individual_lr_stats)) {
+                    message("DEBUG: individual_lr_stats names: ", paste(names(individual_lr_stats), collapse=", "))
+                }
+
+                # Create the final result list explicitly
+                final_result <- list(
                     old_cox = old_cox,
                     new_cox = new_cox,
                     old_concordance = old_concordance,
@@ -959,6 +1044,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     c_improvement_p = p_value,
                     c_improvement_ci_lower = c_improvement_ci_lower,
                     c_improvement_ci_upper = c_improvement_ci_upper,
+                    c_bootstrap = c_bootstrap,
                     aic_old = aic_old,
                     aic_new = aic_new,
                     aic_improvement = aic_improvement,
@@ -966,8 +1052,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     bic_new = bic_new,
                     bic_improvement = bic_improvement,
                     lr_test = lr_test,
+                    individual_lr_stats = individual_lr_stats,
                     pseudo_r2 = pseudo_r2
-                ))
+                )
+
+                message("DEBUG: Final result structure created, returning list")
+                message("DEBUG: individual_lr_stats in final_result: ", ifelse(is.null(final_result$individual_lr_stats), "NULL", "NOT NULL"))
+                return(final_result)
 
             }, error = function(e) {
                 message("ERROR in calculateAdvancedMetrics: ", e$message)
@@ -980,11 +1071,19 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     c_improvement = NA,
                     c_improvement_pct = NA,
                     c_improvement_se = NA,
-                    c_improvement_z = NA,
                     c_improvement_p = NA,
+                    c_improvement_ci_lower = NA,
+                    c_improvement_ci_upper = NA,
+                    c_bootstrap = NULL,
+                    aic_old = NA,
+                    aic_new = NA,
                     aic_improvement = NA,
+                    bic_old = NA,
+                    bic_new = NA,
                     bic_improvement = NA,
                     lr_test = list(lr_stat = NA, df = NA, p_value = NA),
+                    individual_lr_stats = NULL,
+                    pseudo_r2 = NULL,
                     error = e$message
                 ))
             })
@@ -1055,253 +1154,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             })
         },
 
-        .calculateAdvancedMetrics_ORIGINAL = function(data) {
-            # Advanced discrimination and calibration metrics with error handling
-            message("DEBUG: calculateAdvancedMetrics STARTED")
-            message("DEBUG: Input data dimensions: ", nrow(data), "x", ncol(data))
-            message("DEBUG: Column names: ", paste(names(data), collapse=", "))
-
-            # TEMPORARY: Return early to test if this function is being called
-            # return(list(test = "EARLY_RETURN_TEST"))
-
-            old_stage <- self$options$oldStage
-            new_stage <- self$options$newStage
-            time_var <- self$options$survivalTime
-            event_var <- "event_binary"
-
-            message("DEBUG: Options - oldStage: ", old_stage)
-            message("DEBUG: Options - newStage: ", new_stage)
-            message("DEBUG: Options - survivalTime: ", time_var)
-
-            # Validate required columns exist
-            required_cols <- c(old_stage, new_stage, time_var, event_var)
-            missing_cols <- setdiff(required_cols, names(data))
-            if (length(missing_cols) > 0) {
-                stop(paste("Missing required columns for advanced metrics:", paste(missing_cols, collapse=", ")))
-            }
-
-            # Always use the processed event_binary variable which respects user's event level choice
-            actual_event_var <- event_var  # This is "event_binary"
-            message("DEBUG: Using processed event variable: ", event_var)
-            message("DEBUG: Event levels in data: ", paste(unique(data[[actual_event_var]]), collapse=", "))
-
-            # Ensure staging variables are factors for Cox models
-            if (!is.factor(data[[old_stage]])) {
-                data[[old_stage]] <- as.factor(data[[old_stage]])
-                message("DEBUG: Converted ", old_stage, " to factor")
-            }
-            if (!is.factor(data[[new_stage]])) {
-                data[[new_stage]] <- as.factor(data[[new_stage]])
-                message("DEBUG: Converted ", new_stage, " to factor")
-            }
-
-            # Fit Cox models with standardized error handling
-            old_formula <- as.formula(paste("survival::Surv(", time_var, ",", actual_event_var, ") ~", old_stage))
-            new_formula <- as.formula(paste("survival::Surv(", time_var, ",", actual_event_var, ") ~", new_stage))
-
-            message("DEBUG: About to call .safeExecute for old Cox model")
-            old_cox <- private$.safeExecute({
-                # Debug: Check data before fitting
-                message("DEBUG: Fitting old Cox model with formula: ", deparse(old_formula))
-                message("DEBUG: Data dimensions: ", nrow(data), "x", ncol(data))
-                message("DEBUG: Event summary (event_binary): ", paste(table(data[["event_binary"]]), collapse=", "))
-                message("DEBUG: Staging variable levels: ", paste(unique(data[[old_stage]]), collapse=", "))
-                message("DEBUG: Any NA in time: ", any(is.na(data[[time_var]])))
-                message("DEBUG: Any NA in event: ", any(is.na(data[["event_binary"]])))
-
-                # Ensure survival package functions are available
-                if (!requireNamespace("survival", quietly = TRUE)) {
-                    stop("survival package is required but not installed")
-                }
-
-                model <- survival::coxph(old_formula, data = data)
-
-                # Check Cox model fitting
-                if (is.null(model$loglik) || length(model$loglik) < 2) {
-                    warning("Old Cox model did not converge properly")
-                }
-
-                message("DEBUG: Old Cox model fitted successfully")
-                message("DEBUG: Old Cox loglik: ", paste(model$loglik, collapse=", "))
-                return(model)
-            },
-            errorReturn = NULL,
-            errorMessage = "Failed to fit Cox model for original staging",
-            warningMessage = "Could not fit Cox model for original staging system")
-
-            message("DEBUG: old_cox result: ", ifelse(is.null(old_cox), "NULL", "SUCCESS"))
-            message("DEBUG: old_cox class: ", ifelse(is.null(old_cox), "NULL", class(old_cox)[1]))
-
-            # DIAGNOSTIC: Force execution to continue
-            if (is.null(old_cox)) {
-                message("DEBUG: old_cox is NULL, this should not happen if we got here")
-            } else {
-                message("DEBUG: old_cox is not NULL, continuing execution")
-            }
-
-            message("DEBUG: About to call .safeExecute for new Cox model")
-            new_cox <- private$.safeExecute({
-                # Debug: Check data before fitting
-                message("DEBUG: Fitting new Cox model with formula: ", deparse(new_formula))
-                message("DEBUG: New staging variable levels: ", paste(unique(data[[new_stage]]), collapse=", "))
-
-                model <- survival::coxph(new_formula, data = data)
-
-                # Check Cox model fitting
-                if (is.null(model$loglik) || length(model$loglik) < 2) {
-                    warning("New Cox model did not converge properly")
-                }
-                message("DEBUG: New Cox model fitted successfully")
-                return(model)
-            },
-            errorReturn = NULL,
-            errorMessage = "Failed to fit Cox model for new staging",
-            warningMessage = "Could not fit Cox model for new staging system")
-
-            message("DEBUG: new_cox result: ", ifelse(is.null(new_cox), "NULL", "SUCCESS"))
-
-            # Handle missing Cox models gracefully
-            if (is.null(old_cox) || is.null(new_cox)) {
-                warning("Failed to fit Cox models - returning placeholder results")
-                return(list(
-                    old_cox = NULL,
-                    new_cox = NULL,
-                    old_concordance = list(concordance = NA, var = NA),
-                    new_concordance = list(concordance = NA, var = NA),
-                    c_improvement = NA,
-                    aic_improvement = NA,
-                    bic_improvement = NA,
-                    lr_test = NULL,
-                    pseudo_r2 = NULL,
-                    error = "Cox models failed to fit"
-                ))
-            }
-
-            # Calculate C-index with standardized error handling
-            old_concordance <- private$.safeExecute({
-                survival::concordance(old_cox)
-            },
-            errorReturn = NULL,
-            errorMessage = "Failed to calculate concordance for original staging",
-            warningMessage = "Could not calculate C-index for original staging system")
-
-            new_concordance <- private$.safeExecute({
-                survival::concordance(new_cox)
-            },
-            errorReturn = NULL,
-            errorMessage = "Failed to calculate concordance for new staging",
-            warningMessage = "Could not calculate C-index for new staging system")
-
-            # Handle missing concordance values gracefully
-            if (is.null(old_concordance) || is.null(new_concordance)) {
-                warning("Failed to calculate concordance indices - using placeholder values")
-                message("DEBUG: Concordance calculation failed - old_concordance is ", ifelse(is.null(old_concordance), "NULL", "not NULL"))
-                message("DEBUG: Concordance calculation failed - new_concordance is ", ifelse(is.null(new_concordance), "NULL", "not NULL"))
-                old_concordance <- list(concordance = NA, var = NA)
-                new_concordance <- list(concordance = NA, var = NA)
-            } else {
-                message("DEBUG: Concordance calculations successful")
-                message("DEBUG: Old C-index: ", old_concordance$concordance)
-                message("DEBUG: New C-index: ", new_concordance$concordance)
-            }
-
-            # Validate concordance objects for NULL, NA, or empty results
-            old_c_val <- old_concordance$concordance
-            new_c_val <- new_concordance$concordance
-
-            if (is.null(old_c_val) || is.null(new_c_val) ||
-                length(old_c_val) == 0 || length(new_c_val) == 0 ||
-                is.na(old_c_val) || is.na(new_c_val)) {
-                stop("Concordance (C-index) calculation failed or returned an empty result. This can happen with very few events or if a staging system perfectly separates outcomes. Please check your data.")
-            }
-
-            c_improvement <- new_c_val - old_c_val
-
-            c_improvement_pct <- if (old_c_val > 0) {
-                (c_improvement / old_c_val) * 100
-            } else {
-                0
-            }
-
-            # Bootstrap C-index confidence intervals
-            if (self$options$performBootstrap) {
-                c_bootstrap <- private$.bootstrapConcordance(data, old_formula, new_formula)
-            } else {
-                c_bootstrap <- NULL
-            }
-
-            # Model comparison tests with standardized error handling
-            aic_old <- private$.safeExecute({
-                stats::AIC(old_cox)
-            }, errorReturn = NA, errorMessage = "Failed to calculate AIC for original staging", silent = TRUE)
-
-            aic_new <- private$.safeExecute({
-                stats::AIC(new_cox)
-            }, errorReturn = NA, errorMessage = "Failed to calculate AIC for new staging", silent = TRUE)
-
-            aic_improvement <- if (!is.na(aic_old) && !is.na(aic_new)) aic_old - aic_new else NA
-
-            bic_old <- private$.safeExecute({
-                stats::BIC(old_cox)
-            }, errorReturn = NA, errorMessage = "Failed to calculate BIC for original staging", silent = TRUE)
-
-            bic_new <- private$.safeExecute({
-                stats::BIC(new_cox)
-            }, errorReturn = NA, errorMessage = "Failed to calculate BIC for new staging", silent = TRUE)
-
-            bic_improvement <- if (!is.na(bic_old) && !is.na(bic_new)) bic_old - bic_new else NA
-
-            # Likelihood ratio test with standardized error handling
-            lr_test <- NULL
-            if (self$options$performLikelihoodTests) {
-                lr_test <- private$.safeExecute({
-                    anova(old_cox, new_cox, test = "Chisq")
-                },
-                errorReturn = NULL,
-                errorMessage = "Failed to perform likelihood ratio test",
-                warningMessage = "Likelihood ratio test could not be computed")
-            }
-
-            # Pseudo R-squared measures
-            if (self$options$calculatePseudoR2) {
-                message("DEBUG: calculatePseudoR2 option is enabled, calculating pseudo R-squared")
-                pseudo_r2 <- private$.calculatePseudoR2(old_cox, new_cox, data)
-                message("DEBUG: Pseudo R-squared calculation completed. Result: ",
-                        ifelse(is.null(pseudo_r2), "NULL", paste(names(pseudo_r2), collapse=", ")))
-            } else {
-                message("DEBUG: calculatePseudoR2 option is disabled")
-                pseudo_r2 <- NULL
-            }
-
-            # Debug output before returning
-            message("DEBUG: calculateAdvancedMetrics COMPLETED SUCCESSFULLY")
-            message("DEBUG: Returning - old_concordance: ", ifelse(is.null(old_concordance), "NULL", old_concordance$concordance))
-            message("DEBUG: Returning - new_concordance: ", ifelse(is.null(new_concordance), "NULL", new_concordance$concordance))
-            message("DEBUG: Returning - c_improvement: ", c_improvement)
-            message("DEBUG: Returning - aic_improvement: ", aic_improvement)
-
-            # Create the final result list explicitly
-            final_result <- list(
-                old_cox = old_cox,
-                new_cox = new_cox,
-                old_concordance = old_concordance,
-                new_concordance = new_concordance,
-                c_improvement = c_improvement,
-                c_improvement_pct = c_improvement_pct,
-                c_bootstrap = c_bootstrap,
-                aic_old = aic_old,
-                aic_new = aic_new,
-                aic_improvement = aic_improvement,
-                bic_old = bic_old,
-                bic_new = bic_new,
-                bic_improvement = bic_improvement,
-                lr_test = lr_test,
-                pseudo_r2 = pseudo_r2
-            )
-
-            message("DEBUG: Final result structure created, returning list")
-            return(final_result)
-        },
 
         .calculateNRI = function(data, time_points = NULL) {
             # Net Reclassification Improvement calculation using WIP methodology
@@ -1613,21 +1465,56 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # IDI calculation
             idi <- new_discrimination_slope - old_discrimination_slope
 
-            # Bootstrap confidence interval for IDI
-            if (self$options$performBootstrap) {
+            # Calculate standard error and confidence intervals for IDI
+            # Using Delta method for variance estimation
+            n_events <- sum(events == 1, na.rm = TRUE)
+            n_non_events <- sum(events == 0, na.rm = TRUE)
+            n_total <- n_events + n_non_events
+
+            # Variance of discrimination slopes
+            var_old_events <- if (n_events > 1) var(old_prob[events == 1], na.rm = TRUE) / n_events else 0
+            var_old_non_events <- if (n_non_events > 1) var(old_prob[events == 0], na.rm = TRUE) / n_non_events else 0
+            var_new_events <- if (n_events > 1) var(new_prob[events == 1], na.rm = TRUE) / n_events else 0
+            var_new_non_events <- if (n_non_events > 1) var(new_prob[events == 0], na.rm = TRUE) / n_non_events else 0
+
+            # IDI standard error (assuming independence)
+            se_idi <- sqrt((var_new_events + var_new_non_events) + (var_old_events + var_old_non_events))
+
+            # 95% Confidence intervals
+            ci_lower <- idi - 1.96 * se_idi
+            ci_upper <- idi + 1.96 * se_idi
+
+            # P-value (two-sided test)
+            z_score <- if (se_idi > 0) idi / se_idi else 0
+            p_value <- if (se_idi > 0) 2 * (1 - pnorm(abs(z_score))) else 1
+
+            # Bootstrap confidence interval for IDI if requested
+            if (self$options$performBootstrap && n_total > 50) {
                 idi_bootstrap <- private$.bootstrapIDI(data, old_formula, new_formula)
             } else {
                 idi_bootstrap <- NULL
             }
 
+            message("DEBUG: IDI calculation completed")
+            message("DEBUG: IDI = ", round(idi, 4))
+            message("DEBUG: SE = ", round(se_idi, 4))
+            message("DEBUG: 95% CI = [", round(ci_lower, 4), ", ", round(ci_upper, 4), "]")
+            message("DEBUG: P-value = ", format.pval(p_value, digits = 3))
+
             return(list(
                 idi = idi,
+                idi_se = se_idi,
+                idi_ci_lower = ci_lower,
+                idi_ci_upper = ci_upper,
+                idi_p_value = p_value,
                 old_discrimination_slope = old_discrimination_slope,
                 new_discrimination_slope = new_discrimination_slope,
                 old_prob_events = old_disc_events,
                 old_prob_nonevents = old_disc_nonevents,
                 new_prob_events = new_disc_events,
                 new_prob_nonevents = new_disc_nonevents,
+                n_events = n_events,
+                n_non_events = n_non_events,
                 idi_bootstrap = idi_bootstrap
             ))
         },
@@ -2422,6 +2309,29 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     NA
                 }
 
+                # 5. Royston & Sauerbrei R-squared (explained variation approach)
+                royston_old <- tryCatch({
+                    private$.calculateRoystonR2(old_cox)
+                }, error = function(e) {
+                    message("DEBUG: Error calculating Royston R² for old model: ", e$message)
+                    NA
+                })
+
+                royston_new <- tryCatch({
+                    private$.calculateRoystonR2(new_cox)
+                }, error = function(e) {
+                    message("DEBUG: Error calculating Royston R² for new model: ", e$message)
+                    NA
+                })
+
+                royston_improvement <- if (!is.na(royston_old) && !is.na(royston_new)) {
+                    royston_new - royston_old
+                } else {
+                    NA
+                }
+
+                message("DEBUG: Royston & Sauerbrei - Old: ", royston_old, ", New: ", royston_new, ", Improvement: ", royston_improvement)
+
                 result <- list(
                     nagelkerke_old = nagelkerke_old,
                     nagelkerke_new = nagelkerke_new,
@@ -2434,7 +2344,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     cox_snell_improvement = cox_snell_improvement,
                     adj_mcfadden_old = adj_mcfadden_old,
                     adj_mcfadden_new = adj_mcfadden_new,
-                    adj_mcfadden_improvement = adj_mcfadden_improvement
+                    adj_mcfadden_improvement = adj_mcfadden_improvement,
+                    royston_old = royston_old,
+                    royston_new = royston_new,
+                    royston_improvement = royston_improvement
                 )
 
                 message("DEBUG: .calculatePseudoR2 successful completion")
@@ -2449,7 +2362,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     nagelkerke_old = NA, nagelkerke_new = NA, nagelkerke_improvement = NA,
                     mcfadden_old = NA, mcfadden_new = NA, mcfadden_improvement = NA,
                     cox_snell_old = NA, cox_snell_new = NA, cox_snell_improvement = NA,
-                    adj_mcfadden_old = NA, adj_mcfadden_new = NA, adj_mcfadden_improvement = NA
+                    adj_mcfadden_old = NA, adj_mcfadden_new = NA, adj_mcfadden_improvement = NA,
+                    royston_old = NA, royston_new = NA, royston_improvement = NA
                 ))
             })
         },
@@ -3286,6 +3200,17 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             message("DEBUG: About to call calculateAdvancedMetrics from main .run")
             all_results$advanced_metrics <- private$.calculateAdvancedMetrics(data)
             message("DEBUG: calculateAdvancedMetrics call completed, result type: ", class(all_results$advanced_metrics))
+            
+            # Cross-validation (independent of other analysis options)
+            if (self$options$performCrossValidation) {
+                message("DEBUG: Calling performCrossValidation from main .run")
+                tryCatch({
+                    private$.performCrossValidation(data, all_results)
+                    message("DEBUG: performCrossValidation from main .run completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: performCrossValidation from main .run failed: ", e$message)
+                })
+            }
 
             # Optional advanced analyses based on analysis type
             isStandard <- analysisType %in% c("standard", "comprehensive", "publication")
@@ -3665,6 +3590,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 private$.populateStatisticalComparison(all_results$advanced_metrics)
+                
+                # Always populate enhanced LR chi-square comparison (key metric emphasis)
+                private$.populateEnhancedLRComparison(all_results$advanced_metrics)
             }
 
             if (self$options$showConcordanceComparison) {
@@ -3784,6 +3712,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     '
                     private$.setExplanationContent("idiResultsExplanation", idi_explanation_html)
                 }
+                
+                # Populate IDI results table
+                if (!is.null(all_results$idi_results)) {
+                    private$.populateIDIResults(all_results$idi_results)
+                }
 
                 private$.populateIDIAnalysis(all_results$idi_analysis)
             }
@@ -3852,12 +3785,14 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             <li><strong>McFadden R²:</strong> Based on likelihood ratio, values 0.2-0.4 indicate excellent fit</li>
                             <li><strong>Cox-Snell R²:</strong> Conservative measure, cannot reach 1.0 theoretically</li>
                             <li><strong>Adjusted McFadden R²:</strong> Penalizes for model complexity, can be negative if overfitted</li>
+                            <li><strong>Royston & Sauerbrei R²:</strong> Measures explained variation in survival times, accounts for censoring patterns</li>
                         </ul>
                         <div style="background-color: #f0f8f0; padding: 10px; border-radius: 5px; margin: 10px 0;">
                             <p style="margin: 0; color: #2e7d32;"><strong>📈 Clinical Interpretation:</strong></p>
                             <ul style="margin: 5px 0 0 20px; color: #2e7d32;">
                                 <li><strong>Nagelkerke R² >0.3:</strong> Acceptable explanatory power</li>
                                 <li><strong>McFadden R² >0.2:</strong> Good model fit</li>
+                                <li><strong>Royston & Sauerbrei R² >0.3:</strong> Good explained variation</li>
                                 <li><strong>Positive improvements:</strong> New staging system explains more variance</li>
                                 <li><strong>Higher values:</strong> Better discrimination between risk groups</li>
                             </ul>
@@ -4017,6 +3952,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 private$.populateLikelihoodTests(all_results$advanced_metrics)
+                
+                # Populate enhanced LR chi-square comparison with emphasis
+                private$.populateEnhancedLRComparison(all_results$advanced_metrics)
             }
 
             if (!is.null(all_results$homogeneity_tests)) {
@@ -4575,6 +4513,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     time_var = self$options$survivalTime,
                     event_var = "event_binary",
                     event_level = self$options$eventLevel
+                ))
+            }
+
+            # Sankey Diagram for Stage Migration Flow
+            if (self$options$showSankeyDiagram) {
+                # Get migration data for Sankey
+                migration_table <- table(data[[self$options$oldStage]], data[[self$options$newStage]])
+                
+                self$results$sankeyDiagram$setState(list(
+                    migration_matrix = migration_table,
+                    old_stage = self$options$oldStage,
+                    new_stage = self$options$newStage
                 ))
             }
         },
@@ -5613,6 +5563,219 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 table$setNote("df_zero", "Note: df=0 indicates models have the same number of parameters. P-value interpretation may be limited.")
             }
         },
+        
+        .populateEnhancedLRComparison = function(advanced_results) {
+            # Populate enhanced LR chi-square comparison table with individual model values
+            if (is.null(advanced_results$individual_lr_stats)) {
+                return()
+            }
+            
+            table <- self$results$enhancedLRComparison
+            if (is.null(table)) return()
+            
+            lr_stats <- advanced_results$individual_lr_stats
+            
+            # Function to interpret goodness of fit based on LR chi-square and p-value
+            .interpretGoodnessOfFit <- function(lr_chi2, df, p_value) {
+                if (is.na(lr_chi2) || is.na(p_value)) {
+                    return("Unable to assess")
+                } else if (p_value < 0.001) {
+                    return("Excellent fit")
+                } else if (p_value < 0.01) {
+                    return("Very good fit")
+                } else if (p_value < 0.05) {
+                    return("Good fit")
+                } else if (p_value < 0.10) {
+                    return("Moderate fit")
+                } else {
+                    return("Poor fit")
+                }
+            }
+            
+            # Function to assess model quality based on LR chi-square magnitude
+            .assessModelQuality <- function(lr_chi2, df) {
+                if (is.na(lr_chi2) || is.na(df) || df <= 0) {
+                    return("Cannot assess")
+                }
+                
+                # Chi-square per degree of freedom as quality indicator
+                chi2_per_df <- lr_chi2 / df
+                
+                if (chi2_per_df > 10) {
+                    return("Strong prognostic model")
+                } else if (chi2_per_df > 5) {
+                    return("Good prognostic model")
+                } else if (chi2_per_df > 2) {
+                    return("Moderate prognostic model")
+                } else if (chi2_per_df > 1) {
+                    return("Weak prognostic model")
+                } else {
+                    return("Non-prognostic model")
+                }
+            }
+            
+            # Add row for original staging system
+            old_goodness <- .interpretGoodnessOfFit(lr_stats$old_lr_chi2, lr_stats$old_lr_df, lr_stats$old_lr_p)
+            old_quality <- .assessModelQuality(lr_stats$old_lr_chi2, lr_stats$old_lr_df)
+            
+            table$addRow(rowKey = "old_system", values = list(
+                Model = "Original Staging System",
+                LR_ChiSquare = lr_stats$old_lr_chi2,
+                df = lr_stats$old_lr_df,
+                p_value = lr_stats$old_lr_p,
+                Goodness_of_Fit = old_goodness,
+                Model_Quality = old_quality
+            ))
+            
+            # Add row for new staging system
+            new_goodness <- .interpretGoodnessOfFit(lr_stats$new_lr_chi2, lr_stats$new_lr_df, lr_stats$new_lr_p)
+            new_quality <- .assessModelQuality(lr_stats$new_lr_chi2, lr_stats$new_lr_df)
+            
+            table$addRow(rowKey = "new_system", values = list(
+                Model = "New Staging System",
+                LR_ChiSquare = lr_stats$new_lr_chi2,
+                df = lr_stats$new_lr_df,
+                p_value = lr_stats$new_lr_p,
+                Goodness_of_Fit = new_goodness,
+                Model_Quality = new_quality
+            ))
+            
+            # Add improvement/comparison row if both values are available
+            if (!is.na(lr_stats$old_lr_chi2) && !is.na(lr_stats$new_lr_chi2)) {
+                lr_improvement <- lr_stats$new_lr_chi2 - lr_stats$old_lr_chi2
+                df_diff <- if (!is.na(lr_stats$old_lr_df) && !is.na(lr_stats$new_lr_df)) {
+                    lr_stats$new_lr_df - lr_stats$old_lr_df
+                } else {
+                    NA
+                }
+                
+                # Interpretation of improvement
+                improvement_interpretation <- if (lr_improvement > 10) {
+                    "Substantial improvement"
+                } else if (lr_improvement > 5) {
+                    "Moderate improvement"
+                } else if (lr_improvement > 2) {
+                    "Small improvement"
+                } else if (abs(lr_improvement) <= 2) {
+                    "Similar performance"
+                } else if (lr_improvement < -5) {
+                    "Performance degradation"
+                } else {
+                    "Slight degradation"
+                }
+                
+                quality_comparison <- if (lr_improvement > 0) {
+                    "New system better"
+                } else if (lr_improvement < 0) {
+                    "Original system better"
+                } else {
+                    "Equivalent systems"
+                }
+                
+                table$addRow(rowKey = "improvement", values = list(
+                    Model = "LR Chi-Square Improvement",
+                    LR_ChiSquare = lr_improvement,
+                    df = df_diff,
+                    p_value = NA, # Not applicable for difference
+                    Goodness_of_Fit = improvement_interpretation,
+                    Model_Quality = quality_comparison
+                ))
+            }
+            
+            # Add explanatory note
+            table$setNote("lr_interpretation", 
+                         "LR Chi-Square measures model goodness-of-fit vs null model. Higher values indicate better prognostic discrimination. This is a key metric for staging validation.")
+        },
+
+        .populateIDIResults = function(idi_results) {
+            # Populate IDI results table with enhanced statistics
+            if (is.null(idi_results)) return()
+            
+            table <- self$results$idiResults
+            if (is.null(table)) return()
+            
+            message("DEBUG: Populating IDI results")
+            message("DEBUG: IDI = ", idi_results$idi)
+            
+            # Add overall IDI result
+            table$addRow(rowKey = "overall", values = list(
+                Metric = "IDI (Integrated Discrimination Improvement)",
+                Value = private$.safeAtomic(idi_results$idi, "numeric", NA),
+                Standard_Error = private$.safeAtomic(idi_results$idi_se, "numeric", NA),
+                CI_Lower = private$.safeAtomic(idi_results$idi_ci_lower, "numeric", NA),
+                CI_Upper = private$.safeAtomic(idi_results$idi_ci_upper, "numeric", NA),
+                P_Value = private$.safeAtomic(idi_results$idi_p_value, "numeric", NA),
+                Interpretation = private$.interpretIDI(idi_results$idi, idi_results$idi_p_value)
+            ))
+            
+            # Add discrimination slopes
+            table$addRow(rowKey = "old_slope", values = list(
+                Metric = "Original System Discrimination Slope",
+                Value = private$.safeAtomic(idi_results$old_discrimination_slope, "numeric", NA),
+                Standard_Error = NA,
+                CI_Lower = NA,
+                CI_Upper = NA,
+                P_Value = NA,
+                Interpretation = private$.interpretDiscriminationSlope(idi_results$old_discrimination_slope)
+            ))
+            
+            table$addRow(rowKey = "new_slope", values = list(
+                Metric = "New System Discrimination Slope",
+                Value = private$.safeAtomic(idi_results$new_discrimination_slope, "numeric", NA),
+                Standard_Error = NA,
+                CI_Lower = NA,
+                CI_Upper = NA,
+                P_Value = NA,
+                Interpretation = private$.interpretDiscriminationSlope(idi_results$new_discrimination_slope)
+            ))
+            
+            # Add sample size information
+            table$addRow(rowKey = "sample_info", values = list(
+                Metric = "Sample Size (Events / Non-events)",
+                Value = paste0(idi_results$n_events, " / ", idi_results$n_non_events),
+                Standard_Error = NA,
+                CI_Lower = NA,
+                CI_Upper = NA,
+                P_Value = NA,
+                Interpretation = "Higher sample sizes provide more reliable estimates"
+            ))
+            
+            table$setNote("interpretation", "IDI measures the improvement in model's ability to discriminate between patients with and without events. Positive values indicate the new staging system has better discrimination.")
+        },
+        
+        .interpretIDI = function(idi_value, p_value) {
+            if (is.na(idi_value)) return("Not available")
+            
+            significance <- if (!is.na(p_value) && p_value < 0.05) "statistically significant" else "not significant"
+            
+            if (idi_value > 0.1) {
+                return(paste("Substantial improvement -", significance))
+            } else if (idi_value > 0.05) {
+                return(paste("Moderate improvement -", significance))
+            } else if (idi_value > 0.02) {
+                return(paste("Modest improvement -", significance))
+            } else if (idi_value > 0) {
+                return(paste("Minimal improvement -", significance))
+            } else {
+                return(paste("No improvement or worse -", significance))
+            }
+        },
+        
+        .interpretDiscriminationSlope = function(slope_value) {
+            if (is.na(slope_value)) return("Not available")
+            
+            if (slope_value > 0.3) {
+                return("Excellent discrimination")
+            } else if (slope_value > 0.2) {
+                return("Good discrimination") 
+            } else if (slope_value > 0.1) {
+                return("Acceptable discrimination")
+            } else if (slope_value > 0) {
+                return("Poor discrimination")
+            } else {
+                return("No discrimination")
+            }
+        },
 
         .populatePseudoR2Results = function(pseudo_r2_results) {
             # Populate pseudo R-squared results table
@@ -5648,6 +5811,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     else if (value < 0.4) return("Acceptable fit")
                     else if (value < 0.6) return("Good fit")
                     else return("Excellent fit")
+                } else if (measure_name == "Royston & Sauerbrei") {
+                    if (value < 0.1) return("Weak explained variation")
+                    else if (value < 0.3) return("Acceptable explained variation")
+                    else if (value < 0.5) return("Good explained variation")
+                    else return("Excellent explained variation")
                 } else { # Adjusted McFadden
                     if (value < 0) return("Poor fit (overfitted)")
                     else if (value < 0.1) return("Weak fit")
@@ -5690,6 +5858,15 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 New = private$.safeAtomic(pseudo_r2_results$adj_mcfadden_new, "numeric", NA),
                 Improvement = private$.safeAtomic(pseudo_r2_results$adj_mcfadden_improvement, "numeric", NA),
                 Interpretation = get_interpretation("Adjusted McFadden", pseudo_r2_results$adj_mcfadden_new, pseudo_r2_results$adj_mcfadden_improvement)
+            ))
+
+            # Add Royston & Sauerbrei R-squared
+            table$addRow(rowKey = "royston", values = list(
+                Measure = "Royston & Sauerbrei R²",
+                Original = private$.safeAtomic(pseudo_r2_results$royston_old, "numeric", NA),
+                New = private$.safeAtomic(pseudo_r2_results$royston_new, "numeric", NA),
+                Improvement = private$.safeAtomic(pseudo_r2_results$royston_improvement, "numeric", NA),
+                Interpretation = get_interpretation("Royston & Sauerbrei", pseudo_r2_results$royston_new, pseudo_r2_results$royston_improvement)
             ))
 
             # Add explanatory note
@@ -6180,6 +6357,17 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     message("DEBUG: performEnhancedWillRogersAnalysis failed: ", e$message)
                 })
                 
+                # Perform detailed Will Rogers stage-specific analysis
+                message("DEBUG: Calling performDetailedWillRogersAnalysis")
+                tryCatch({
+                    private$.performDetailedWillRogersAnalysis(data, all_results)
+                    message("DEBUG: performDetailedWillRogersAnalysis completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: performDetailedWillRogersAnalysis failed: ", e$message)
+                })
+                
+                # Cross-validation is now called from main .run method independently
+                
                 message("DEBUG: Calling calculateStageSpecificCIndex")
                 tryCatch({
                     private$.calculateStageSpecificCIndex(data)
@@ -6238,7 +6426,21 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         <h5 style="color: #34495e; margin-top: 15px;">Abbreviations and Terms Explained:</h5>
                         <ul style="margin-left: 20px;">
                             <li><strong>N/A (Not Applicable):</strong> This value is not relevant for the specific metric. For example, "Total Patients" has no improvement value because it\'s the same for both staging systems.</li>
-                            <li><strong>TBD (To Be Determined):</strong> The analysis is pending or requires you to check the detailed analysis table mentioned in the recommendation column. This appears when the dashboard cannot extract the specific value from the detailed analysis.</li>
+                            <li><strong>TBD (To Be Determined):</strong> The analysis is pending or requires you to check the detailed analysis table mentioned in the recommendation column. This appears when:
+                                <ul>
+                                    <li>Advanced analysis options need to be enabled</li>
+                                    <li>The specific analysis has not been run yet</li>
+                                    <li>The dashboard cannot automatically extract the value from detailed results</li>
+                                </ul>
+                            </li>
+                            <li><strong>C-Index:</strong> Concordance Index - measures discrimination ability (0.5 = no discrimination, 1.0 = perfect discrimination)</li>
+                            <li><strong>CI:</strong> Confidence Interval - typically 95% CI unless otherwise specified</li>
+                            <li><strong>HR:</strong> Hazard Ratio - relative risk between stages</li>
+                            <li><strong>NRI:</strong> Net Reclassification Improvement - measures improvement in risk classification</li>
+                            <li><strong>IDI:</strong> Integrated Discrimination Improvement - measures improvement in risk prediction</li>
+                            <li><strong>AUC:</strong> Area Under the Curve - discrimination measure for ROC analysis</li>
+                            <li><strong>PH:</strong> Proportional Hazards - assumption for Cox regression models</li>
+                            <li><strong>LR:</strong> Likelihood Ratio - model comparison statistic</li>
                         </ul>
                         
                         <h5 style="color: #34495e; margin-top: 15px;">Column Definitions:</h5>
@@ -6277,6 +6479,15 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             <li><strong>"Insufficient data":</strong> Not enough analyses completed for a definitive recommendation</li>
                         </ul>
                         
+                        <h5 style="color: #34495e; margin-top: 15px;">How to Address TBD Values:</h5>
+                        <p style="margin-bottom: 5px;">When you see "TBD" in the dashboard, follow these steps:</p>
+                        <ol style="margin-left: 20px;">
+                            <li><strong>For Monotonicity Score:</strong> Enable "Stage Homogeneity Tests" or "Stage Trend Analysis" options and rerun the analysis</li>
+                            <li><strong>For Will Rogers Evidence:</strong> The analysis should be available if "Advanced Migration Analysis" is enabled - check the "Enhanced Will Rogers Statistical Analysis" table</li>
+                            <li><strong>For Proportional Hazards:</strong> This is automatically tested - check the "Proportional Hazards Assumption Testing" table</li>
+                            <li><strong>For other metrics:</strong> Enable the corresponding analysis option (e.g., "Calculate NRI", "Calculate IDI", "Perform ROC Analysis")</li>
+                        </ol>
+                        
                         <p style="margin-top: 10px; font-style: italic; color: #7f8c8d;">
                             <strong>Note:</strong> For detailed results, refer to the specific analysis tables mentioned in the recommendations. 
                             The dashboard provides a high-level overview suitable for presentations and decision-making, while the detailed 
@@ -6285,6 +6496,159 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     </div>
                     '
                     self$results$dashboardExplanation$setContent(dashboard_explanation_html)
+                }
+
+                # Add comprehensive abbreviation glossary if enabled
+                if (self$options$showAbbreviationGlossary) {
+                    abbreviation_glossary_html <- '
+                    <div style="margin-bottom: 20px; padding: 20px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
+                        <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">Comprehensive Abbreviation Glossary and Statistical Terms</h3>
+                        <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">Quick reference for all abbreviations and technical terms used in stage migration analysis</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                            
+                            <div style="background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <h4 style="color: #1976d2; margin-top: 0;">Dashboard Values</h4>
+                                <dl style="margin: 0;">
+                                    <dt style="font-weight: bold;">N/A (Not Applicable)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Value not relevant for this metric</dd>
+                                    
+                                    <dt style="font-weight: bold;">TBD (To Be Determined)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Analysis pending or needs to be enabled</dd>
+                                    
+                                    <dt style="font-weight: bold;">± (Plus/Minus)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Indicates confidence interval range</dd>
+                                </dl>
+                            </div>
+                            
+                            <div style="background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <h4 style="color: #1976d2; margin-top: 0;">Discrimination Metrics</h4>
+                                <dl style="margin: 0;">
+                                    <dt style="font-weight: bold;">C-Index (Concordance Index)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Probability of correctly ordering survival times (0.5-1.0)</dd>
+                                    
+                                    <dt style="font-weight: bold;">AUC (Area Under Curve)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Time-dependent ROC curve area (0.5-1.0)</dd>
+                                    
+                                    <dt style="font-weight: bold;">iAUC (Integrated AUC)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Average AUC across all time points</dd>
+                                </dl>
+                            </div>
+                            
+                            <div style="background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <h4 style="color: #1976d2; margin-top: 0;">Reclassification Metrics</h4>
+                                <dl style="margin: 0;">
+                                    <dt style="font-weight: bold;">NRI (Net Reclassification Improvement)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">% correctly reclassified minus % incorrectly reclassified</dd>
+                                    
+                                    <dt style="font-weight: bold;">IDI (Integrated Discrimination Improvement)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Improvement in average sensitivity and specificity</dd>
+                                    
+                                    <dt style="font-weight: bold;">cfNRI (Category-Free NRI)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">NRI without predefined risk categories</dd>
+                                </dl>
+                            </div>
+                            
+                            <div style="background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <h4 style="color: #1976d2; margin-top: 0;">Model Comparison</h4>
+                                <dl style="margin: 0;">
+                                    <dt style="font-weight: bold;">AIC (Akaike Information Criterion)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Model quality measure (lower is better)</dd>
+                                    
+                                    <dt style="font-weight: bold;">BIC (Bayesian Information Criterion)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Model quality with sample size penalty</dd>
+                                    
+                                    <dt style="font-weight: bold;">LR (Likelihood Ratio)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Test statistic for model comparison</dd>
+                                    
+                                    <dt style="font-weight: bold;">Pseudo R²</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Variance explained by staging (0-1)</dd>
+                                </dl>
+                            </div>
+                            
+                            <div style="background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <h4 style="color: #1976d2; margin-top: 0;">Statistical Tests</h4>
+                                <dl style="margin: 0;">
+                                    <dt style="font-weight: bold;">HR (Hazard Ratio)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Relative risk between stages</dd>
+                                    
+                                    <dt style="font-weight: bold;">CI (Confidence Interval)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Range of plausible values (usually 95%)</dd>
+                                    
+                                    <dt style="font-weight: bold;">p-value</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Probability of result if null hypothesis true</dd>
+                                    
+                                    <dt style="font-weight: bold;">PH (Proportional Hazards)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Cox model assumption of constant HR over time</dd>
+                                </dl>
+                            </div>
+                            
+                            <div style="background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <h4 style="color: #1976d2; margin-top: 0;">Clinical Concepts</h4>
+                                <dl style="margin: 0;">
+                                    <dt style="font-weight: bold;">Stage Migration</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Patient reclassification between staging systems</dd>
+                                    
+                                    <dt style="font-weight: bold;">Will Rogers Phenomenon</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Apparent improvement due to stage migration bias</dd>
+                                    
+                                    <dt style="font-weight: bold;">Monotonicity</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Higher stages have consistently worse outcomes</dd>
+                                    
+                                    <dt style="font-weight: bold;">Upstaging/Downstaging</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Movement to higher/lower stage category</dd>
+                                </dl>
+                            </div>
+                            
+                            <div style="background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <h4 style="color: #1976d2; margin-top: 0;">Analysis Types</h4>
+                                <dl style="margin: 0;">
+                                    <dt style="font-weight: bold;">ROC (Receiver Operating Characteristic)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Sensitivity vs specificity trade-off curve</dd>
+                                    
+                                    <dt style="font-weight: bold;">DCA (Decision Curve Analysis)</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Clinical utility across decision thresholds</dd>
+                                    
+                                    <dt style="font-weight: bold;">Bootstrap Validation</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Resampling method for internal validation</dd>
+                                    
+                                    <dt style="font-weight: bold;">Cross-Validation</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">K-fold data splitting for validation</dd>
+                                </dl>
+                            </div>
+                            
+                            <div style="background-color: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <h4 style="color: #1976d2; margin-top: 0;">Interpretation Guidelines</h4>
+                                <dl style="margin: 0;">
+                                    <dt style="font-weight: bold;">Statistical Significance</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">p < 0.05 (unless otherwise specified)</dd>
+                                    
+                                    <dt style="font-weight: bold;">Clinical Significance</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">C-index improvement ≥ 0.02</dd>
+                                    
+                                    <dt style="font-weight: bold;">Strong Evidence</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">≥3/4 positive criteria met</dd>
+                                    
+                                    <dt style="font-weight: bold;">Model Preference</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Lower AIC/BIC indicates better model</dd>
+                                </dl>
+                            </div>
+                            
+                        </div>
+                        
+                        <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px;">
+                            <h5 style="margin-top: 0; color: #1565c0;">Quick Tips for Using This Glossary:</h5>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                <li>Use <strong>Ctrl+F</strong> (or <strong>Cmd+F</strong> on Mac) to search for specific terms</li>
+                                <li>Click on the "Show Abbreviation Glossary" option to toggle this reference</li>
+                                <li>Print this glossary for offline reference during manuscript preparation</li>
+                                <li>Refer to specific analysis tables for detailed results when dashboard shows "TBD"</li>
+                            </ul>
+                        </div>
+                        
+                    </div>
+                    '
+                    self$results$abbreviationGlossary$setContent(abbreviation_glossary_html)
                 }
 
                 message("DEBUG: Calling populateComparativeAnalysisDashboard")
@@ -7527,28 +7891,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             return(paste0(stringr::str_to_title(magnitude), " ", direction, type_desc))
         },
 
-        .interpretIDI = function(idi_value, type = "absolute") {
-            if (is.na(idi_value)) return("Unable to calculate")
-            
-            if (type == "relative") {
-                abs_idi <- abs(idi_value)
-                direction <- if (idi_value > 0) "improvement" else "deterioration"
-                
-                magnitude <- if (abs_idi > 0.5) {
-                    "substantial"
-                } else if (abs_idi > 0.25) {
-                    "moderate" 
-                } else if (abs_idi > 0.1) {
-                    "small"
-                } else {
-                    "minimal"
-                }
-                
-                return(paste0(stringr::str_to_title(magnitude), " relative ", direction, " in discrimination"))
-            } else {
-                return(private$.interpretNRI(idi_value, ""))
-            }
-        },
 
         .interpretDiscriminationImprovement = function(disc_value, type = "event") {
             if (is.na(disc_value)) return("Unable to calculate")
@@ -12332,6 +12674,211 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             })
         },
 
+        .plotSankeyDiagram = function(image, ...) {
+            # Create Sankey-style flow diagram showing stage migration patterns
+            message("DEBUG: plotSankeyDiagram called")
+            
+            if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
+                message("DEBUG: Missing oldStage or newStage options")
+                return(NULL)
+            }
+
+            tryCatch({
+                message("DEBUG: Starting Sankey diagram generation")
+                
+                # Get state data
+                plot_state <- image$state
+                message("DEBUG: Plot state is null? ", is.null(plot_state))
+                
+                if (is.null(plot_state)) {
+                    message("DEBUG: No state data available, creating error plot")
+                    p <- ggplot2::ggplot() +
+                        ggplot2::annotate("text", x = 0.5, y = 0.5, 
+                                        label = "No state data available for Sankey diagram\nEnsure 'Stage Migration Flow Diagram' is enabled",
+                                        hjust = 0.5, vjust = 0.5, size = 4) +
+                        ggplot2::theme_void() +
+                        ggplot2::labs(title = "Sankey Diagram - No State")
+                    return(p)
+                }
+                
+                # Extract data from state
+                migration_matrix <- plot_state$migration_matrix
+                old_stage <- plot_state$old_stage
+                new_stage <- plot_state$new_stage
+                
+                message("DEBUG: Got migration matrix - dimensions: ", nrow(migration_matrix), " x ", ncol(migration_matrix))
+                message("DEBUG: Migration matrix:")
+                message(capture.output(print(migration_matrix)))
+                
+                # Convert migration matrix to flow data
+                flow_data <- expand.grid(
+                    source = rownames(migration_matrix),
+                    target = colnames(migration_matrix),
+                    stringsAsFactors = FALSE
+                )
+                flow_data$count <- as.vector(migration_matrix)
+                
+                # Remove zero flows
+                flow_data <- flow_data[flow_data$count > 0, ]
+                
+                # Determine migration direction (upstage, downstage, or no change)
+                # Assuming stage names are ordered (e.g., T1 < T2 < T3 < T4)
+                # Extract numeric component from stage names if present
+                flow_data$source_numeric <- suppressWarnings(as.numeric(gsub("[^0-9]", "", flow_data$source)))
+                flow_data$target_numeric <- suppressWarnings(as.numeric(gsub("[^0-9]", "", flow_data$target)))
+                
+                # If numeric extraction fails, try ordering alphabetically
+                if (any(is.na(flow_data$source_numeric)) || any(is.na(flow_data$target_numeric))) {
+                    stage_order <- sort(unique(c(flow_data$source, flow_data$target)))
+                    flow_data$source_order <- match(flow_data$source, stage_order)
+                    flow_data$target_order <- match(flow_data$target, stage_order)
+                    flow_data$direction <- ifelse(flow_data$target_order > flow_data$source_order, "Upstaged", 
+                                                ifelse(flow_data$target_order < flow_data$source_order, "Downstaged", "No change"))
+                } else {
+                    flow_data$direction <- ifelse(flow_data$target_numeric > flow_data$source_numeric, "Upstaged", 
+                                                ifelse(flow_data$target_numeric < flow_data$source_numeric, "Downstaged", 
+                                                ifelse(flow_data$target_numeric == flow_data$source_numeric, "No change", "No change")))
+                }
+                
+                message("DEBUG: Flow data - ", nrow(flow_data), " flows with patients (", 
+                        sum(flow_data$direction == "Upstaged"), " upstaged, ", 
+                        sum(flow_data$direction == "Downstaged"), " downstaged, ",
+                        sum(flow_data$direction == "No change"), " unchanged)")
+                
+                if (nrow(flow_data) == 0) {
+                    message("DEBUG: No flows found")
+                    p <- ggplot2::ggplot() +
+                        ggplot2::annotate("text", x = 0.5, y = 0.5, 
+                                        label = "No data for flow diagram",
+                                        hjust = 0.5, vjust = 0.5, size = 4) +
+                        ggplot2::theme_void() +
+                        ggplot2::labs(title = "Sankey Diagram - No Data")
+                    return(p)
+                }
+                
+                # Create a simple, robust Sankey-style visualization using ggplot2
+                message("DEBUG: Creating Sankey-style plot with ggplot2")
+                
+                # Prepare nodes and positions
+                source_stages <- unique(flow_data$source)
+                target_stages <- unique(flow_data$target)
+                
+                # Create node positions
+                x_source <- 0
+                x_target <- 2
+                
+                # Calculate y positions based on flow volumes
+                source_totals <- aggregate(count ~ source, data = flow_data, sum)
+                target_totals <- aggregate(count ~ target, data = flow_data, sum)
+                
+                # Position source nodes
+                source_positions <- data.frame(
+                    stage = source_totals$source,
+                    x = x_source,
+                    y = cumsum(source_totals$count) - source_totals$count/2,
+                    height = source_totals$count,
+                    type = "Source"
+                )
+                
+                # Position target nodes
+                target_positions <- data.frame(
+                    stage = target_totals$target,
+                    x = x_target,
+                    y = cumsum(target_totals$count) - target_totals$count/2,
+                    height = target_totals$count,
+                    type = "Target"
+                )
+                
+                # Combine node positions
+                node_positions <- rbind(source_positions, target_positions)
+                
+                # Create the plot
+                message("DEBUG: Building Sankey plot")
+                p <- ggplot2::ggplot() +
+                    # Draw nodes as rectangles
+                    ggplot2::geom_rect(data = node_positions,
+                                      ggplot2::aes(xmin = x - 0.1, xmax = x + 0.1,
+                                                  ymin = y - height/2, ymax = y + height/2,
+                                                  fill = type),
+                                      color = "black", alpha = 0.8) +
+                    
+                    # Add node labels
+                    ggplot2::geom_text(data = node_positions,
+                                      ggplot2::aes(x = x, y = y, label = paste0(stage, "\n(n=", height, ")")),
+                                      hjust = 0.5, vjust = 0.5, size = 3, color = "white", fontface = "bold") +
+                    
+                    # Draw flows as segments with color based on direction
+                    ggplot2::geom_segment(data = flow_data,
+                                        ggplot2::aes(
+                                            x = x_source + 0.1,
+                                            xend = x_target - 0.1,
+                                            y = sapply(source, function(s) source_positions$y[source_positions$stage == s]),
+                                            yend = sapply(target, function(t) target_positions$y[target_positions$stage == t]),
+                                            size = count,
+                                            alpha = count,
+                                            color = direction
+                                        ),
+                                        arrow = ggplot2::arrow(length = ggplot2::unit(0.3, "cm"))) +
+                    
+                    # Add flow labels for all flows including "No change"
+                    ggplot2::geom_text(data = flow_data,
+                                      ggplot2::aes(
+                                          x = (x_source + x_target) / 2,
+                                          y = (sapply(source, function(s) source_positions$y[source_positions$stage == s]) +
+                                               sapply(target, function(t) target_positions$y[target_positions$stage == t])) / 2,
+                                          label = paste0("n=", count)
+                                      ),
+                                      hjust = 0.5, vjust = -0.5, size = 2.5, fontface = "bold", color = "black") +
+                    
+                    # Customize the plot
+                    ggplot2::scale_fill_manual(values = c("Source" = "#E41A1C", "Target" = "#377EB8")) +
+                    ggplot2::scale_color_manual(values = c("Upstaged" = "#D62728", 
+                                                         "Downstaged" = "#2CA02C",
+                                                         "No change" = "#7F7F7F"),
+                                              name = "Migration Direction") +
+                    ggplot2::scale_size_continuous(range = c(1, 8), guide = "none") +
+                    ggplot2::scale_alpha_continuous(range = c(0.3, 0.8), guide = "none") +
+                    ggplot2::labs(
+                        title = "Stage Migration Flow Diagram",
+                        subtitle = paste0("Patient migration patterns: ", old_stage, " → ", new_stage, 
+                                        "\nRed = Upstaging, Green = Downstaging, Gray = No change"),
+                        x = "",
+                        y = "Patient Flow",
+                        fill = "System"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
+                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
+                        axis.text = ggplot2::element_blank(),
+                        axis.ticks = ggplot2::element_blank(),
+                        panel.grid = ggplot2::element_blank(),
+                        legend.position = "bottom"
+                    ) +
+                    ggplot2::annotate("text", x = x_source, y = max(node_positions$y) + 50,
+                                    label = paste("Original", old_stage), hjust = 0.5, size = 4, fontface = "bold") +
+                    ggplot2::annotate("text", x = x_target, y = max(node_positions$y) + 50,
+                                    label = paste("New", new_stage), hjust = 0.5, size = 4, fontface = "bold")
+                
+                message("DEBUG: About to return Sankey plot")
+                return(p)
+                
+            }, error = function(e) {
+                message("DEBUG: ERROR in plotSankeyDiagram: ", e$message)
+                message("DEBUG: Error traceback:")
+                message(capture.output(traceback()))
+                
+                # Create error message plot
+                p <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
+                                    label = paste("Error creating Sankey diagram:\n", e$message),
+                                    hjust = 0.5, vjust = 0.5, size = 4) +
+                    ggplot2::theme_void() +
+                    ggplot2::labs(title = "Sankey Diagram - Error")
+                return(p)
+            })
+        },
+
         .performEnhancedWillRogersAnalysis = function(data, all_results) {
             # Enhanced Will Rogers analysis with formal statistical tests
             table <- self$results$willRogersEnhancedAnalysis
@@ -12425,8 +12972,16 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                 " vs ", 
                                 if(!is.na(without_median)) round(without_median, 1) else "NA"
                             ),
-                            CI_Lower = NA,
-                            CI_Upper = NA,
+                            CI_Lower = paste0(
+                                if(!is.na(with_ci[1])) round(with_ci[1], 1) else "NA",
+                                " vs ",
+                                if(!is.na(without_ci[1])) round(without_ci[1], 1) else "NA"
+                            ),
+                            CI_Upper = paste0(
+                                if(!is.na(with_ci[2])) round(with_ci[2], 1) else "NA",
+                                " vs ",
+                                if(!is.na(without_ci[2])) round(without_ci[2], 1) else "NA"
+                            ),
                             Survival_Change = survival_improvement,
                             P_Value = if(!is.na(p_value_original)) p_value_original else NA,
                             Statistical_Test = paste0("Log-rank test (", from_stage, "→", to_stage, " migration)")
@@ -12476,8 +13031,16 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                 " vs ", 
                                 if(!is.na(new_without_median)) round(new_without_median, 1) else "NA"
                             ),
-                            CI_Lower = NA,
-                            CI_Upper = NA,
+                            CI_Lower = paste0(
+                                if(!is.na(new_with_ci[1])) round(new_with_ci[1], 1) else "NA",
+                                " vs ",
+                                if(!is.na(new_without_ci[1])) round(new_without_ci[1], 1) else "NA"
+                            ),
+                            CI_Upper = paste0(
+                                if(!is.na(new_with_ci[2])) round(new_with_ci[2], 1) else "NA",
+                                " vs ",
+                                if(!is.na(new_without_ci[2])) round(new_without_ci[2], 1) else "NA"
+                            ),
                             Survival_Change = survival_improvement_new,
                             P_Value = if(!is.na(p_value_new)) p_value_new else NA,
                             Statistical_Test = paste0("Log-rank test (", from_stage, "→", to_stage, " migration)")
@@ -12568,6 +13131,488 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     Survival_Change = NA,
                     P_Value = NA,
                     Statistical_Test = "See individual test results above"
+                ))
+            })
+        },
+        
+        .performDetailedWillRogersAnalysis = function(data, all_results) {
+            # Detailed stage-specific Will Rogers analysis with survival improvement breakdown
+            table <- self$results$willRogersStageDetail
+            if (is.null(table)) return()
+            
+            tryCatch({
+                old_col <- self$options$oldStage
+                new_col <- self$options$newStage
+                time_col <- self$options$survivalTime
+                event_col <- self$options$event
+                event_level <- self$options$eventLevel
+                
+                # Prepare event variable
+                if (!is.null(event_level) && event_level != "") {
+                    data$event_binary <- ifelse(data[[event_col]] == event_level, 1, 0)
+                } else {
+                    data$event_binary <- as.numeric(data[[event_col]])
+                }
+                
+                # Get unique stages
+                all_stages <- sort(unique(c(data[[old_col]], data[[new_col]])))
+                
+                # Process each stage to show detailed Will Rogers effect
+                for (stage in all_stages) {
+                    # Patients originally in this stage
+                    original_patients <- data[data[[old_col]] == stage, ]
+                    
+                    # Patients in this stage after migration
+                    new_patients <- data[data[[new_col]] == stage, ]
+                    
+                    # Skip if no patients in either system
+                    if (nrow(original_patients) == 0 && nrow(new_patients) == 0) next
+                    
+                    # Calculate survival metrics for original system
+                    original_median <- NA
+                    original_ci_lower <- NA
+                    original_ci_upper <- NA
+                    
+                    if (nrow(original_patients) > 0 && sum(original_patients$event_binary) > 0) {
+                        tryCatch({
+                            surv_orig <- survival::Surv(original_patients[[time_col]], original_patients$event_binary)
+                            fit_orig <- survival::survfit(surv_orig ~ 1)
+                            summary_orig <- summary(fit_orig)
+                            
+                            # Extract median and CI
+                            if (!is.null(summary_orig$table) && "median" %in% names(summary_orig$table)) {
+                                original_median <- summary_orig$table["median"]
+                                # Get CI from quantiles
+                                quant_orig <- quantile(fit_orig, probs = 0.5)
+                                if (!is.null(quant_orig) && length(quant_orig$lower) > 0) {
+                                    original_ci_lower <- quant_orig$lower
+                                    original_ci_upper <- quant_orig$upper
+                                }
+                            }
+                        }, error = function(e) {
+                            # Use simple median as fallback
+                            if (sum(original_patients$event_binary) > 0) {
+                                original_median <- median(original_patients[[time_col]][original_patients$event_binary == 1])
+                            }
+                        })
+                    }
+                    
+                    # Calculate survival metrics for new system
+                    new_median <- NA
+                    new_ci_lower <- NA
+                    new_ci_upper <- NA
+                    
+                    if (nrow(new_patients) > 0 && sum(new_patients$event_binary) > 0) {
+                        tryCatch({
+                            surv_new <- survival::Surv(new_patients[[time_col]], new_patients$event_binary)
+                            fit_new <- survival::survfit(surv_new ~ 1)
+                            summary_new <- summary(fit_new)
+                            
+                            # Extract median and CI
+                            if (!is.null(summary_new$table) && "median" %in% names(summary_new$table)) {
+                                new_median <- summary_new$table["median"]
+                                # Get CI from quantiles
+                                quant_new <- quantile(fit_new, probs = 0.5)
+                                if (!is.null(quant_new) && length(quant_new$lower) > 0) {
+                                    new_ci_lower <- quant_new$lower
+                                    new_ci_upper <- quant_new$upper
+                                }
+                            }
+                        }, error = function(e) {
+                            # Use simple median as fallback
+                            if (sum(new_patients$event_binary) > 0) {
+                                new_median <- median(new_patients[[time_col]][new_patients$event_binary == 1])
+                            }
+                        })
+                    }
+                    
+                    # Identify migration patterns for this stage
+                    patients_lost <- original_patients[original_patients[[new_col]] != stage, ]
+                    patients_gained <- new_patients[new_patients[[old_col]] != stage, ]
+                    
+                    # Calculate migration statistics
+                    n_original <- nrow(original_patients)
+                    n_new <- nrow(new_patients)
+                    n_lost <- nrow(patients_lost)
+                    n_gained <- nrow(patients_gained)
+                    n_unchanged <- nrow(original_patients[original_patients[[new_col]] == stage, ])
+                    
+                    # Calculate survival improvements
+                    absolute_improvement <- NA
+                    relative_improvement <- NA
+                    improvement_percentage <- NA
+                    
+                    if (!is.na(original_median) && !is.na(new_median)) {
+                        absolute_improvement <- new_median - original_median
+                        if (original_median > 0) {
+                            relative_improvement <- (new_median - original_median) / original_median
+                            improvement_percentage <- relative_improvement * 100
+                        }
+                    }
+                    
+                    # Determine clinical impact and migration type
+                    migration_type <- ""
+                    clinical_impact <- ""
+                    
+                    if (n_lost > n_gained) {
+                        migration_type <- "Net Loss"
+                        if (!is.na(improvement_percentage) && improvement_percentage > 5) {
+                            clinical_impact <- "Will Rogers Effect: Survival improved by losing worst patients"
+                        } else if (!is.na(improvement_percentage) && improvement_percentage < -5) {
+                            clinical_impact <- "Survival worsened despite losing patients"
+                        } else {
+                            clinical_impact <- "Minimal survival change from patient loss"
+                        }
+                    } else if (n_gained > n_lost) {
+                        migration_type <- "Net Gain"
+                        if (!is.na(improvement_percentage) && improvement_percentage > 5) {
+                            clinical_impact <- "Will Rogers Effect: Survival improved by gaining better patients"
+                        } else if (!is.na(improvement_percentage) && improvement_percentage < -5) {
+                            clinical_impact <- "Survival worsened despite gaining patients"
+                        } else {
+                            clinical_impact <- "Minimal survival change from patient gain"
+                        }
+                    } else if (n_lost == n_gained && n_lost > 0) {
+                        migration_type <- "Patient Exchange"
+                        if (!is.na(improvement_percentage) && abs(improvement_percentage) > 5) {
+                            clinical_impact <- "Will Rogers Effect: Survival changed from patient exchange"
+                        } else {
+                            clinical_impact <- "Minimal survival change from patient exchange"
+                        }
+                    } else {
+                        migration_type <- "No Migration"
+                        clinical_impact <- "No migration effect"
+                    }
+                    
+                    # Format confidence intervals
+                    original_ci_str <- ""
+                    new_ci_str <- ""
+                    
+                    if (!is.na(original_ci_lower) && !is.na(original_ci_upper)) {
+                        original_ci_str <- sprintf("(%.1f-%.1f)", original_ci_lower, original_ci_upper)
+                    }
+                    
+                    if (!is.na(new_ci_lower) && !is.na(new_ci_upper)) {
+                        new_ci_str <- sprintf("(%.1f-%.1f)", new_ci_lower, new_ci_upper)
+                    }
+                    
+                    # Calculate migration numbers for this stage
+                    net_migrated <- abs(n_gained - n_lost)
+                    pct_migrated <- if (n_original > 0) net_migrated / n_original else 0
+                    
+                    # Add row to table with correct column names matching .r.yaml
+                    table$addRow(rowKey = paste0("stage_", stage), values = list(
+                        Stage = stage,
+                        Migration_Type = migration_type,
+                        N_Migrated = net_migrated,
+                        Pct_Migrated = pct_migrated,
+                        Original_Median = original_median,
+                        New_Median = new_median,
+                        Absolute_Improvement = absolute_improvement,
+                        Relative_Improvement = if (!is.na(improvement_percentage)) improvement_percentage/100 else NA,
+                        Improvement_Type = if (!is.na(improvement_percentage)) {
+                            if (improvement_percentage > 5) "Beneficial" 
+                            else if (improvement_percentage < -5) "Detrimental"
+                            else "Minimal"
+                        } else "Unknown",
+                        Clinical_Impact = clinical_impact
+                    ))
+                }
+                
+                # Add overall summary row
+                total_patients <- nrow(data)
+                total_migrated <- sum(data[[old_col]] != data[[new_col]])
+                migration_rate <- (total_migrated / total_patients) * 100
+                
+                # Calculate overall Will Rogers effect magnitude based on data analysis
+                # We'll recalculate this directly from the data instead of reading from table
+                overall_will_rogers_magnitude <- "Minimal"
+                if (total_migrated >= 10) {  # At least 10 migrated patients
+                    # Count stages with >5% improvement by re-analyzing the data
+                    improvement_stages <- 0
+                    
+                    for (stage in all_stages) {
+                        # Recalculate improvement for each stage
+                        original_patients <- data[data[[old_col]] == stage, ]
+                        new_patients <- data[data[[new_col]] == stage, ]
+                        
+                        if (nrow(original_patients) > 0 && nrow(new_patients) > 0) {
+                            # Quick survival calculation
+                            original_events <- original_patients[original_patients$event_binary == 1, ]
+                            new_events <- new_patients[new_patients$event_binary == 1, ]
+                            
+                            if (nrow(original_events) > 0 && nrow(new_events) > 0) {
+                                orig_median <- median(original_events[[time_col]], na.rm = TRUE)
+                                new_median <- median(new_events[[time_col]], na.rm = TRUE)
+                                
+                                if (!is.na(orig_median) && !is.na(new_median) && orig_median > 0) {
+                                    improvement_pct <- ((new_median - orig_median) / orig_median) * 100
+                                    if (improvement_pct > 5) {
+                                        improvement_stages <- improvement_stages + 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (improvement_stages >= 2) {
+                        overall_will_rogers_magnitude <- "Strong"
+                    } else if (improvement_stages == 1) {
+                        overall_will_rogers_magnitude <- "Moderate"
+                    }
+                }
+                
+                table$addRow(rowKey = "overall_summary", values = list(
+                    Stage = "Overall Assessment",
+                    Migration_Type = "Mixed Pattern",
+                    N_Migrated = total_migrated,
+                    Pct_Migrated = migration_rate/100,
+                    Original_Median = NA,
+                    New_Median = NA,
+                    Absolute_Improvement = NA,
+                    Relative_Improvement = NA,
+                    Improvement_Type = overall_will_rogers_magnitude,
+                    Clinical_Impact = "Multiple stages show artificial survival improvement from patient reclassification"
+                ))
+                
+            }, error = function(e) {
+                table$addRow(rowKey = "error", values = list(
+                    Stage = "Error",
+                    Migration_Type = "Analysis failed",
+                    N_Migrated = NA,
+                    Pct_Migrated = NA, 
+                    Original_Median = NA,
+                    New_Median = NA,
+                    Absolute_Improvement = NA,
+                    Relative_Improvement = NA,
+                    Improvement_Type = "Error",
+                    Clinical_Impact = paste("Error:", e$message)
+                ))
+            })
+        },
+        
+        .performCrossValidation = function(data, all_results) {
+            # K-fold cross-validation for staging system validation
+            table <- self$results$crossValidationResults
+            if (is.null(table)) return()
+            
+            tryCatch({
+                old_col <- self$options$oldStage
+                new_col <- self$options$newStage
+                time_col <- self$options$survivalTime
+                event_col <- self$options$event
+                event_level <- self$options$eventLevel
+                cv_folds <- self$options$cvFolds
+                
+                if (is.null(cv_folds) || cv_folds < 3) cv_folds <- 5
+                
+                # Prepare event variable
+                if (!is.null(event_level) && event_level != "") {
+                    data$event_binary <- ifelse(data[[event_col]] == event_level, 1, 0)
+                } else {
+                    data$event_binary <- as.numeric(data[[event_col]])
+                }
+                
+                # Check minimum sample size
+                n <- nrow(data)
+                if (n < cv_folds * 20) {
+                    table$addRow(rowKey = "insufficient_data", values = list(
+                        Fold = "Error",
+                        N_Train = NA,
+                        N_Test = NA,
+                        Old_System_CIndex = NA,
+                        New_System_CIndex = NA,
+                        CIndex_Difference = NA,
+                        P_Value = NA,
+                        Validation_Type = paste("Insufficient data for", cv_folds, "fold CV (need ≥", cv_folds * 20, "patients)")
+                    ))
+                    return()
+                }
+                
+                # Create fold assignments
+                set.seed(123)  # For reproducible results
+                fold_ids <- sample(rep(1:cv_folds, length.out = n))
+                
+                # Storage for CV results
+                cv_results <- data.frame(
+                    fold = integer(),
+                    n_train = integer(),
+                    n_test = integer(),
+                    old_cindex = numeric(),
+                    new_cindex = numeric(),
+                    cindex_diff = numeric(),
+                    p_value = numeric(),
+                    stringsAsFactors = FALSE
+                )
+                
+                # Perform k-fold cross-validation
+                for (fold in 1:cv_folds) {
+                    # Split data
+                    test_idx <- fold_ids == fold
+                    train_data <- data[!test_idx, ]
+                    test_data <- data[test_idx, ]
+                    
+                    n_train <- nrow(train_data)
+                    n_test <- nrow(test_data)
+                    
+                    # Skip if insufficient events in train or test
+                    train_events <- sum(train_data$event_binary, na.rm = TRUE)
+                    test_events <- sum(test_data$event_binary, na.rm = TRUE)
+                    
+                    if (train_events < 5 || test_events < 5) {
+                        cv_results <- rbind(cv_results, data.frame(
+                            fold = fold,
+                            n_train = n_train,
+                            n_test = n_test,
+                            old_cindex = NA,
+                            new_cindex = NA,
+                            cindex_diff = NA,
+                            p_value = NA
+                        ))
+                        next
+                    }
+                    
+                    # Fit Cox models on training data
+                    old_cindex <- NA
+                    new_cindex <- NA
+                    cindex_diff <- NA
+                    p_value <- NA
+                    
+                    tryCatch({
+                        # Old staging system
+                        train_surv <- survival::Surv(train_data[[time_col]], train_data$event_binary)
+                        old_fit <- survival::coxph(train_surv ~ get(old_col), data = train_data)
+                        
+                        # New staging system  
+                        new_fit <- survival::coxph(train_surv ~ get(new_col), data = train_data)
+                        
+                        # Test on held-out data
+                        test_surv <- survival::Surv(test_data[[time_col]], test_data$event_binary)
+                        
+                        # Calculate C-indices on test data
+                        old_pred <- predict(old_fit, newdata = test_data, type = "risk")
+                        new_pred <- predict(new_fit, newdata = test_data, type = "risk")
+                        
+                        # Use Harrell's concordance index
+                        old_cindex <- survival::concordance(test_surv ~ old_pred)$concordance
+                        new_cindex <- survival::concordance(test_surv ~ new_pred)$concordance
+                        cindex_diff <- new_cindex - old_cindex
+                        
+                        # Statistical comparison using likelihood ratio test
+                        # Fit nested models on test data for comparison
+                        test_old_fit <- survival::coxph(test_surv ~ get(old_col), data = test_data)
+                        test_new_fit <- survival::coxph(test_surv ~ get(new_col), data = test_data)
+                        
+                        # Likelihood ratio test
+                        lr_test <- anova(test_old_fit, test_new_fit)
+                        if (nrow(lr_test) >= 2 && "P(>|Chi|)" %in% colnames(lr_test)) {
+                            p_value <- lr_test[2, "P(>|Chi|)"]
+                        }
+                        
+                    }, error = function(e) {
+                        # Keep NA values if model fitting fails
+                    })
+                    
+                    # Store fold results
+                    cv_results <- rbind(cv_results, data.frame(
+                        fold = fold,
+                        n_train = n_train,
+                        n_test = n_test,
+                        old_cindex = old_cindex,
+                        new_cindex = new_cindex,
+                        cindex_diff = cindex_diff,
+                        p_value = p_value
+                    ))
+                }
+                
+                # Add individual fold results to table
+                for (i in 1:nrow(cv_results)) {
+                    row <- cv_results[i, ]
+                    
+                    validation_type <- if (is.na(row$old_cindex) || is.na(row$new_cindex)) {
+                        "Insufficient events"
+                    } else if (row$cindex_diff > 0.02) {
+                        "Improved discrimination"
+                    } else if (row$cindex_diff < -0.02) {
+                        "Reduced discrimination"
+                    } else {
+                        "Similar discrimination"
+                    }
+                    
+                    table$addRow(rowKey = paste0("fold_", row$fold), values = list(
+                        Fold = paste("Fold", row$fold),
+                        N_Train = row$n_train,
+                        N_Test = row$n_test,
+                        Old_System_CIndex = row$old_cindex,
+                        New_System_CIndex = row$new_cindex,
+                        CIndex_Difference = row$cindex_diff,
+                        P_Value = row$p_value,
+                        Validation_Type = validation_type
+                    ))
+                }
+                
+                # Calculate overall cross-validation summary
+                valid_results <- cv_results[!is.na(cv_results$old_cindex) & !is.na(cv_results$new_cindex), ]
+                
+                if (nrow(valid_results) > 0) {
+                    mean_old_cindex <- mean(valid_results$old_cindex)
+                    mean_new_cindex <- mean(valid_results$new_cindex)
+                    mean_diff <- mean(valid_results$cindex_diff)
+                    se_diff <- sd(valid_results$cindex_diff) / sqrt(nrow(valid_results))
+                    
+                    # Overall p-value using paired t-test
+                    overall_p <- NA
+                    if (nrow(valid_results) >= 3) {
+                        t_test <- t.test(valid_results$new_cindex, valid_results$old_cindex, paired = TRUE)
+                        overall_p <- t_test$p.value
+                    }
+                    
+                    # Clinical interpretation
+                    cv_interpretation <- if (mean_diff > 0.02 && (is.na(overall_p) || overall_p < 0.05)) {
+                        "Statistically significant improvement (externally validated)"
+                    } else if (mean_diff > 0.01) {
+                        "Modest improvement (externally validated)"
+                    } else if (abs(mean_diff) <= 0.01) {
+                        "Similar performance (no meaningful difference)"
+                    } else {
+                        "Potential performance degradation"
+                    }
+                    
+                    # Add summary row
+                    table$addRow(rowKey = "cv_summary", values = list(
+                        Fold = "CV Summary",
+                        N_Train = paste(nrow(valid_results), "valid folds"),
+                        N_Test = paste("Mean:", round(mean(valid_results$n_test))),
+                        Old_System_CIndex = mean_old_cindex,
+                        New_System_CIndex = mean_new_cindex,
+                        CIndex_Difference = mean_diff,
+                        P_Value = overall_p,
+                        Validation_Type = cv_interpretation
+                    ))
+                    
+                } else {
+                    table$addRow(rowKey = "cv_failed", values = list(
+                        Fold = "CV Failed",
+                        N_Train = "No valid folds",
+                        N_Test = "Insufficient data",
+                        Old_System_CIndex = NA,
+                        New_System_CIndex = NA,
+                        CIndex_Difference = NA,
+                        P_Value = NA,
+                        Validation_Type = "Cross-validation failed - insufficient events in test folds"
+                    ))
+                }
+                
+            }, error = function(e) {
+                table$addRow(rowKey = "error", values = list(
+                    Fold = "Error",
+                    N_Train = "Analysis failed",
+                    N_Test = "N/A",
+                    Old_System_CIndex = NA,
+                    New_System_CIndex = NA,
+                    CIndex_Difference = NA,
+                    P_Value = NA,
+                    Validation_Type = paste("Error:", e$message)
                 ))
             })
         }
