@@ -7,3 +7,5 @@
 - update stagemigration_documentation.md with the latest changes
 
 - update NEWS.md with the latest changes
+
+- update module-development-jamovi.Rmd to help developers
