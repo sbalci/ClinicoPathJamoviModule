@@ -12556,18 +12556,35 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Enhanced stepwise model selection with bootstrap stability
             stepwise_results <- NULL
             if (self$options$multifactorialComparisonType %in% c("stepwise", "comprehensive")) {
+                message("DEBUG: Bootstrap model selection triggered by multifactorialComparisonType: ", self$options$multifactorialComparisonType)
                 stepwise_results <- private$.performBootstrapModelSelection(covariate_data, all_covariates, old_stage, new_stage, survival_time)
             }
 
             # Advanced interaction detection if requested
             interaction_tests <- NULL
             if (self$options$performInteractionTests) {
+                message("DEBUG: About to call advanced interaction detection")
+                if (length(all_covariates) > 0) {
+                  message("DEBUG: all_covariates: ", paste(all_covariates, collapse = ", "))
+                } else {
+                  message("DEBUG: all_covariates: EMPTY")
+                }
+                message("DEBUG: old_stage: ", old_stage)
+                message("DEBUG: new_stage: ", new_stage)
+                message("DEBUG: survival_time: ", survival_time)
+                message("DEBUG: nrow(covariate_data): ", nrow(covariate_data))
+                
                 # Use advanced interaction detection method
                 interaction_analysis <- private$.performAdvancedInteractionDetection(covariate_data, all_covariates, old_stage, new_stage, survival_time)
                 interaction_tests <- interaction_analysis$interaction_results
                 interaction_summary <- interaction_analysis$summary_stats
                 
-                # Also perform legacy interaction tests for backwards compatibility
+                message("DEBUG: Interaction analysis completed, result type: ", class(interaction_tests))
+                
+                # Store the advanced interaction results
+                advanced_interaction_tests <- interaction_tests
+                
+                # Initialize legacy interaction tests as a separate list
                 legacy_interaction_tests <- list()
                 for (covar in all_covariates) {
                     # Test interaction with old staging
@@ -12584,14 +12601,14 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                         lrt_int_old <- anova(base_model_old, int_model_old, test = "LRT")
 
-                        interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
+                        legacy_interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
                             interaction = paste("Original Staging x", covar),
                             chi_square = lrt_int_old$Chisq[2],
                             df = lrt_int_old$Df[2],
                             p_value = lrt_int_old$`Pr(>|Chi|)`[2]
                         )
                     }, error = function(e) {
-                        interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
+                        legacy_interaction_tests[[paste("old_stage", covar, sep = "_x_")]] <- list(
                             interaction = paste("Original Staging x", covar),
                             chi_square = NA,
                             df = NA,
@@ -12605,7 +12622,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         int_formula_new <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~",
                                                           new_stage, "*", covar, "+",
                                                           paste(setdiff(all_covariates, covar), collapse = " + ")))
-                        int_model_new <- survival::coxph(int_formula_new, data = covariate_data)
+                        int_model_new <- survival::coxph(int_model_new, data = covariate_data)
 
                         # Compare with model without interaction
                         base_formula_new <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~",
@@ -12614,14 +12631,14 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                         lrt_int_new <- anova(base_model_new, int_model_new, test = "LRT")
 
-                        interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
+                        legacy_interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
                             interaction = paste("New Staging x", covar),
                             chi_square = lrt_int_new$Chisq[2],
                             df = lrt_int_new$Df[2],
                             p_value = lrt_int_new$`Pr(>|Chi|)`[2]
                         )
                     }, error = function(e) {
-                        interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
+                        legacy_interaction_tests[[paste("new_stage", covar, sep = "_x_")]] <- list(
                             interaction = paste("New Staging x", covar),
                             chi_square = NA,
                             df = NA,
@@ -12631,11 +12648,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     })
                 }
                 
-                # Store legacy interaction tests for backwards compatibility
-                legacy_interaction_tests <- legacy_interaction_tests
-                
                 # Use advanced interaction results as the primary interaction_tests
-                interaction_tests <- interaction_analysis$interaction_results
+                interaction_tests <- advanced_interaction_tests
             }
 
             # Stratified analysis if requested
@@ -12718,6 +12732,24 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 model_diagnostics <- private$.performComprehensiveModelDiagnostics(covariate_data, all_covariates, old_stage, new_stage, survival_time)
             }
 
+            # Calculate adjusted NRI if enabled
+            adjusted_nri_results <- NULL
+            if (self$options$calculateNRI && self$options$multifactorialComparisonType %in% c("comprehensive", "adjusted_cindex")) {
+                adjusted_nri_results <- private$.calculateAdjustedNRI(covariate_data, all_covariates, old_stage, new_stage, survival_time)
+            }
+
+            # Perform multivariable decision curve analysis if enabled
+            multivariable_dca_results <- NULL
+            if (self$options$performDCA && self$options$multifactorialComparisonType %in% c("comprehensive", "adjusted_cindex")) {
+                multivariable_dca_results <- private$.performMultivariableDCA(covariate_data, all_covariates, old_stage, new_stage, survival_time)
+            }
+
+            # Generate personalized risk predictions if comprehensive analysis
+            personalized_predictions <- NULL
+            if (self$options$multifactorialComparisonType == "comprehensive") {
+                personalized_predictions <- private$.generatePersonalizedPredictions(covariate_data, all_covariates, old_stage, new_stage, survival_time)
+            }
+
             return(list(
                 models = model_results,
                 comparisons = comparisons,
@@ -12727,9 +12759,945 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 interaction_summary = if(self$options$performInteractionTests) interaction_summary else NULL,
                 model_diagnostics = model_diagnostics,
                 stratified_results = stratified_results,
+                adjusted_nri = adjusted_nri_results,
+                multivariable_dca = multivariable_dca_results,
+                personalized_predictions = personalized_predictions,
                 sample_size = nrow(covariate_data),
                 covariates_used = all_covariates,
                 error = NULL
+            ))
+        },
+
+        .calculateAdjustedNRI = function(covariate_data, all_covariates, old_stage, new_stage, survival_time) {
+            # Calculate Net Reclassification Improvement adjusted for covariates
+            # This provides NRI measures in the context of multifactorial models
+            
+            tryCatch({
+                message("Calculating adjusted NRI with covariates...")
+                
+                # Parse time points from user input
+                time_points_str <- self$options$nriTimePoints
+                time_points <- as.numeric(unlist(strsplit(gsub("\\s", "", time_points_str), ",")))
+                time_points <- time_points[!is.na(time_points) & time_points > 0]
+                
+                if (length(time_points) == 0) {
+                    time_points <- c(12, 24, 60)  # Default time points
+                }
+                
+                # Prepare results storage
+                nri_results <- list()
+                
+                for (time_point in time_points) {
+                    
+                    # Build baseline covariate model (without any staging)
+                    if (length(all_covariates) > 0) {
+                        baseline_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                           paste(all_covariates, collapse = " + ")))
+                        baseline_model <- tryCatch({
+                            survival::coxph(baseline_formula, data = covariate_data)
+                        }, error = function(e) NULL)
+                    } else {
+                        baseline_model <- NULL
+                    }
+                    
+                    # Build old staging + covariates model
+                    old_covariates <- c(old_stage, all_covariates)
+                    old_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                  paste(old_covariates, collapse = " + ")))
+                    old_model <- tryCatch({
+                        survival::coxph(old_formula, data = covariate_data)
+                    }, error = function(e) NULL)
+                    
+                    # Build new staging + covariates model
+                    new_covariates <- c(new_stage, all_covariates)
+                    new_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                  paste(new_covariates, collapse = " + ")))
+                    new_model <- tryCatch({
+                        survival::coxph(new_formula, data = covariate_data)
+                    }, error = function(e) NULL)
+                    
+                    if (is.null(old_model) || is.null(new_model)) {
+                        nri_results[[paste0("time_", time_point)]] <- list(
+                            time_point = time_point,
+                            error = "Model fitting failed"
+                        )
+                        next
+                    }
+                    
+                    # Calculate survival probabilities for each model at time point
+                    old_survprob <- tryCatch({
+                        summary(survfit(old_model), times = time_point, extend = TRUE)$surv
+                    }, error = function(e) NULL)
+                    
+                    new_survprob <- tryCatch({
+                        summary(survfit(new_model), times = time_point, extend = TRUE)$surv
+                    }, error = function(e) NULL)
+                    
+                    baseline_survprob <- NULL
+                    if (!is.null(baseline_model)) {
+                        baseline_survprob <- tryCatch({
+                            summary(survfit(baseline_model), times = time_point, extend = TRUE)$surv
+                        }, error = function(e) NULL)
+                    }
+                    
+                    if (is.null(old_survprob) || is.null(new_survprob)) {
+                        nri_results[[paste0("time_", time_point)]] <- list(
+                            time_point = time_point,
+                            error = "Survival probability calculation failed"
+                        )
+                        next
+                    }
+                    
+                    # Convert to risk probabilities
+                    old_riskprob <- 1 - old_survprob
+                    new_riskprob <- 1 - new_survprob
+                    baseline_riskprob <- if (!is.null(baseline_survprob)) 1 - baseline_survprob else NULL
+                    
+                    # Define risk categories (can be customized)
+                    risk_cutoffs <- c(0.1, 0.3)  # Low (<10%), Medium (10-30%), High (>30%)
+                    
+                    # Categorize risks
+                    old_risk_cat <- cut(old_riskprob, breaks = c(0, risk_cutoffs, 1), 
+                                       labels = c("Low", "Medium", "High"), include.lowest = TRUE)
+                    new_risk_cat <- cut(new_riskprob, breaks = c(0, risk_cutoffs, 1), 
+                                       labels = c("Low", "Medium", "High"), include.lowest = TRUE)
+                    baseline_risk_cat <- NULL
+                    if (!is.null(baseline_riskprob)) {
+                        baseline_risk_cat <- cut(baseline_riskprob, breaks = c(0, risk_cutoffs, 1), 
+                                                labels = c("Low", "Medium", "High"), include.lowest = TRUE)
+                    }
+                    
+                    # Get actual outcomes at time point
+                    actual_events <- covariate_data$event_binary == 1 & covariate_data[[survival_time]] <= time_point
+                    actual_events[is.na(actual_events)] <- FALSE
+                    
+                    # Calculate NRI components
+                    
+                    # 1. Standard NRI (old vs new staging)
+                    standard_nri <- private$.calculateNRIComponents(old_risk_cat, new_risk_cat, actual_events)
+                    
+                    # 2. Adjusted NRI (baseline + old vs baseline + new staging)
+                    adjusted_nri <- NULL
+                    if (!is.null(baseline_risk_cat)) {
+                        # Compare risk categories when adding staging to baseline model
+                        adjusted_nri <- private$.calculateNRIComponents(old_risk_cat, new_risk_cat, actual_events)
+                        # Additional analysis comparing with baseline
+                        baseline_vs_old_nri <- private$.calculateNRIComponents(baseline_risk_cat, old_risk_cat, actual_events)
+                        baseline_vs_new_nri <- private$.calculateNRIComponents(baseline_risk_cat, new_risk_cat, actual_events)
+                        
+                        adjusted_nri$baseline_vs_old <- baseline_vs_old_nri
+                        adjusted_nri$baseline_vs_new <- baseline_vs_new_nri
+                    }
+                    
+                    # 3. Model discrimination metrics
+                    old_concordance <- tryCatch({
+                        survival::concordance(old_model)$concordance
+                    }, error = function(e) NA)
+                    
+                    new_concordance <- tryCatch({
+                        survival::concordance(new_model)$concordance
+                    }, error = function(e) NA)
+                    
+                    baseline_concordance <- if (!is.null(baseline_model)) {
+                        tryCatch({
+                            survival::concordance(baseline_model)$concordance
+                        }, error = function(e) NA)
+                    } else {
+                        NA
+                    }
+                    
+                    # 4. Likelihood ratio tests
+                    lr_old_vs_baseline <- NULL
+                    lr_new_vs_baseline <- NULL
+                    lr_new_vs_old <- NULL
+                    
+                    if (!is.null(baseline_model)) {
+                        lr_old_vs_baseline <- tryCatch({
+                            anova(baseline_model, old_model, test = "Chisq")
+                        }, error = function(e) NULL)
+                        
+                        lr_new_vs_baseline <- tryCatch({
+                            anova(baseline_model, new_model, test = "Chisq")
+                        }, error = function(e) NULL)
+                    }
+                    
+                    lr_new_vs_old <- tryCatch({
+                        anova(old_model, new_model, test = "Chisq")
+                    }, error = function(e) NULL)
+                    
+                    # Store results for this time point
+                    nri_results[[paste0("time_", time_point)]] <- list(
+                        time_point = time_point,
+                        standard_nri = standard_nri,
+                        adjusted_nri = adjusted_nri,
+                        concordance = list(
+                            baseline = baseline_concordance,
+                            old_staging = old_concordance,
+                            new_staging = new_concordance,
+                            improvement_old = if (!is.na(old_concordance) && !is.na(baseline_concordance)) {
+                                old_concordance - baseline_concordance
+                            } else NA,
+                            improvement_new = if (!is.na(new_concordance) && !is.na(baseline_concordance)) {
+                                new_concordance - baseline_concordance
+                            } else NA,
+                            difference_staging = if (!is.na(new_concordance) && !is.na(old_concordance)) {
+                                new_concordance - old_concordance
+                            } else NA
+                        ),
+                        likelihood_tests = list(
+                            old_vs_baseline = lr_old_vs_baseline,
+                            new_vs_baseline = lr_new_vs_baseline,
+                            new_vs_old = lr_new_vs_old
+                        ),
+                        risk_cutoffs = risk_cutoffs,
+                        n_patients = nrow(covariate_data),
+                        n_events = sum(actual_events, na.rm = TRUE)
+                    )
+                }
+                
+                return(nri_results)
+                
+            }, error = function(e) {
+                message("Error in adjusted NRI calculation: ", e$message)
+                return(list(error = e$message))
+            })
+        },
+
+        .performMultivariableDCA = function(covariate_data, all_covariates, old_stage, new_stage, survival_time) {
+            # Perform Decision Curve Analysis for multivariable models
+            # Compares clinical utility of different staging models adjusted for covariates
+            
+            tryCatch({
+                message("Performing multivariable decision curve analysis...")
+                
+                # Define time points for DCA analysis
+                time_points_str <- self$options$nriTimePoints
+                time_points <- as.numeric(unlist(strsplit(gsub("\\s", "", time_points_str), ",")))
+                time_points <- time_points[!is.na(time_points) & time_points > 0]
+                
+                if (length(time_points) == 0) {
+                    time_points <- c(12, 24, 60)  # Default time points
+                }
+                
+                # Prepare results storage
+                dca_results <- list()
+                
+                for (time_point in time_points) {
+                    
+                    # Build models for comparison
+                    model_list <- list()
+                    model_names <- c()
+                    
+                    # 1. Baseline model (covariates only) - if available
+                    if (length(all_covariates) > 0) {
+                        baseline_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                           paste(all_covariates, collapse = " + ")))
+                        baseline_model <- tryCatch({
+                            survival::coxph(baseline_formula, data = covariate_data)
+                        }, error = function(e) NULL)
+                        
+                        if (!is.null(baseline_model)) {
+                            model_list[["baseline"]] <- baseline_model
+                            model_names <- c(model_names, "Baseline (Covariates Only)")
+                        }
+                    }
+                    
+                    # 2. Old staging + covariates model
+                    old_covariates <- c(old_stage, all_covariates)
+                    old_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                  paste(old_covariates, collapse = " + ")))
+                    old_model <- tryCatch({
+                        survival::coxph(old_formula, data = covariate_data)
+                    }, error = function(e) NULL)
+                    
+                    if (!is.null(old_model)) {
+                        model_list[["old_staging"]] <- old_model
+                        model_names <- c(model_names, "Old Staging + Covariates")
+                    }
+                    
+                    # 3. New staging + covariates model
+                    new_covariates <- c(new_stage, all_covariates)
+                    new_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                  paste(new_covariates, collapse = " + ")))
+                    new_model <- tryCatch({
+                        survival::coxph(new_formula, data = covariate_data)
+                    }, error = function(e) NULL)
+                    
+                    if (!is.null(new_model)) {
+                        model_list[["new_staging"]] <- new_model
+                        model_names <- c(model_names, "New Staging + Covariates")
+                    }
+                    
+                    # 4. Full model (both staging systems + covariates) - for comparison
+                    if (!is.null(old_model) && !is.null(new_model)) {
+                        full_covariates <- c(old_stage, new_stage, all_covariates)
+                        full_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                                       paste(full_covariates, collapse = " + ")))
+                        full_model <- tryCatch({
+                            survival::coxph(full_formula, data = covariate_data)
+                        }, error = function(e) NULL)
+                        
+                        if (!is.null(full_model)) {
+                            model_list[["full_model"]] <- full_model
+                            model_names <- c(model_names, "Both Staging + Covariates")
+                        }
+                    }
+                    
+                    if (length(model_list) < 2) {
+                        dca_results[[paste0("time_", time_point)]] <- list(
+                            time_point = time_point,
+                            error = "Insufficient models for comparison"
+                        )
+                        next
+                    }
+                    
+                    # Calculate risk predictions for all models
+                    risk_predictions <- list()
+                    for (model_name in names(model_list)) {
+                        model <- model_list[[model_name]]
+                        
+                        # Calculate predicted survival probability at time point
+                        pred_surv <- tryCatch({
+                            # Get linear predictor
+                            lp <- predict(model, type = "lp")
+                            # Get baseline hazard at time point
+                            baseline_surv <- summary(survfit(model), times = time_point, extend = TRUE)
+                            if (length(baseline_surv$surv) > 0) {
+                                baseline_surv_prob <- baseline_surv$surv[1]
+                                # Calculate individual survival probabilities
+                                surv_probs <- baseline_surv_prob^exp(lp)
+                                risk_probs <- 1 - surv_probs
+                                risk_probs
+                            } else {
+                                NULL
+                            }
+                        }, error = function(e) NULL)
+                        
+                        if (!is.null(pred_surv)) {
+                            risk_predictions[[model_name]] <- pred_surv
+                        }
+                    }
+                    
+                    # Get actual outcomes at time point
+                    actual_events <- covariate_data$event_binary == 1 & covariate_data[[survival_time]] <= time_point
+                    actual_events[is.na(actual_events)] <- FALSE
+                    
+                    # Calculate DCA metrics for each model
+                    # Define threshold probabilities for decision making
+                    thresholds <- seq(0.01, 0.99, by = 0.01)
+                    
+                    net_benefits <- data.frame(threshold = thresholds)
+                    
+                    # Calculate "Treat All" and "Treat None" strategies
+                    event_rate <- mean(actual_events, na.rm = TRUE)
+                    
+                    treat_all_nb <- sapply(thresholds, function(pt) {
+                        event_rate - (1 - event_rate) * pt / (1 - pt)
+                    })
+                    
+                    treat_none_nb <- rep(0, length(thresholds))
+                    
+                    net_benefits$treat_all <- treat_all_nb
+                    net_benefits$treat_none <- treat_none_nb
+                    
+                    # Calculate net benefit for each model
+                    for (model_name in names(risk_predictions)) {
+                        pred_risks <- risk_predictions[[model_name]]
+                        
+                        model_nb <- sapply(thresholds, function(pt) {
+                            # Patients classified as high risk (treated)
+                            treated <- pred_risks >= pt
+                            
+                            if (sum(treated) == 0) {
+                                return(0)  # No one treated
+                            }
+                            
+                            # True positive rate among treated
+                            tp_rate <- mean(actual_events[treated], na.rm = TRUE)
+                            # False positive rate among treated
+                            fp_rate <- 1 - tp_rate
+                            # Proportion treated
+                            prop_treated <- mean(treated, na.rm = TRUE)
+                            
+                            # Net benefit calculation
+                            nb <- tp_rate * prop_treated - fp_rate * prop_treated * pt / (1 - pt)
+                            return(nb)
+                        })
+                        
+                        net_benefits[[model_name]] <- model_nb
+                    }
+                    
+                    # Calculate standardized net benefit (relative to treat all/none)
+                    standardized_nb <- net_benefits
+                    for (model_name in names(risk_predictions)) {
+                        standardized_nb[[model_name]] <- (net_benefits[[model_name]] - treat_none_nb) / 
+                                                        (treat_all_nb - treat_none_nb)
+                    }
+                    
+                    # Find optimal threshold ranges for each model
+                    optimal_ranges <- list()
+                    for (model_name in names(risk_predictions)) {
+                        nb_values <- net_benefits[[model_name]]
+                        
+                        # Find range where model is superior to treat all/none
+                        superior_to_all <- nb_values > treat_all_nb & treat_all_nb > treat_none_nb
+                        superior_to_none <- nb_values > treat_none_nb
+                        
+                        if (any(superior_to_all)) {
+                            optimal_ranges[[model_name]] <- list(
+                                optimal_min = min(thresholds[superior_to_all]),
+                                optimal_max = max(thresholds[superior_to_all]),
+                                max_net_benefit = max(nb_values),
+                                max_nb_threshold = thresholds[which.max(nb_values)]
+                            )
+                        } else if (any(superior_to_none)) {
+                            optimal_ranges[[model_name]] <- list(
+                                optimal_min = min(thresholds[superior_to_none]),
+                                optimal_max = max(thresholds[superior_to_none]),
+                                max_net_benefit = max(nb_values),
+                                max_nb_threshold = thresholds[which.max(nb_values)]
+                            )
+                        } else {
+                            optimal_ranges[[model_name]] <- list(
+                                optimal_min = NA,
+                                optimal_max = NA,
+                                max_net_benefit = max(nb_values),
+                                max_nb_threshold = thresholds[which.max(nb_values)]
+                            )
+                        }
+                    }
+                    
+                    # Calculate model comparisons
+                    model_comparisons <- list()
+                    model_pairs <- combn(names(risk_predictions), 2, simplify = FALSE)
+                    
+                    for (pair in model_pairs) {
+                        model1 <- pair[1]
+                        model2 <- pair[2]
+                        
+                        nb1 <- net_benefits[[model1]]
+                        nb2 <- net_benefits[[model2]]
+                        
+                        # Find threshold ranges where each model is superior
+                        model1_superior <- nb1 > nb2
+                        model2_superior <- nb2 > nb1
+                        
+                        model_comparisons[[paste0(model1, "_vs_", model2)]] <- list(
+                            model1_superior_range = if (any(model1_superior)) {
+                                c(min(thresholds[model1_superior]), max(thresholds[model1_superior]))
+                            } else {
+                                c(NA, NA)
+                            },
+                            model2_superior_range = if (any(model2_superior)) {
+                                c(min(thresholds[model2_superior]), max(thresholds[model2_superior]))
+                            } else {
+                                c(NA, NA)
+                            },
+                            max_difference = max(abs(nb1 - nb2), na.rm = TRUE),
+                            mean_difference = mean(nb1 - nb2, na.rm = TRUE)
+                        )
+                    }
+                    
+                    # Store results for this time point
+                    dca_results[[paste0("time_", time_point)]] <- list(
+                        time_point = time_point,
+                        models_compared = names(model_list),
+                        model_names = model_names,
+                        net_benefits = net_benefits,
+                        standardized_net_benefits = standardized_nb,
+                        optimal_ranges = optimal_ranges,
+                        model_comparisons = model_comparisons,
+                        event_rate = event_rate,
+                        n_patients = nrow(covariate_data),
+                        n_events = sum(actual_events, na.rm = TRUE),
+                        thresholds = thresholds
+                    )
+                }
+                
+                return(dca_results)
+                
+            }, error = function(e) {
+                message("Error in multivariable DCA: ", e$message)
+                return(list(error = e$message))
+            })
+        },
+
+        .generatePersonalizedPredictions = function(covariate_data, all_covariates, old_stage, new_stage, survival_time) {
+            # Generate personalized risk predictions and clinical recommendations
+            # This provides individualized risk assessments for clinical decision making
+            
+            tryCatch({
+                message("Generating personalized risk predictions...")
+                
+                # Define prediction time points
+                time_points_str <- self$options$nriTimePoints
+                time_points <- as.numeric(unlist(strsplit(gsub("\\s", "", time_points_str), ",")))
+                time_points <- time_points[!is.na(time_points) & time_points > 0]
+                
+                if (length(time_points) == 0) {
+                    time_points <- c(12, 24, 60)  # Default time points
+                }
+                
+                # Build prediction models
+                old_covariates <- c(old_stage, all_covariates)
+                old_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                              paste(old_covariates, collapse = " + ")))
+                old_model <- tryCatch({
+                    survival::coxph(old_formula, data = covariate_data)
+                }, error = function(e) NULL)
+                
+                new_covariates <- c(new_stage, all_covariates)
+                new_formula <- as.formula(paste("survival::Surv(", survival_time, ", event_binary) ~", 
+                                              paste(new_covariates, collapse = " + ")))
+                new_model <- tryCatch({
+                    survival::coxph(new_formula, data = covariate_data)
+                }, error = function(e) NULL)
+                
+                if (is.null(old_model) || is.null(new_model)) {
+                    return(list(error = "Model fitting failed for personalized predictions"))
+                }
+                
+                # Generate predictions for each patient
+                n_patients <- nrow(covariate_data)
+                patient_predictions <- data.frame(
+                    patient_id = 1:n_patients,
+                    stringsAsFactors = FALSE
+                )
+                
+                # Add baseline characteristics for context
+                patient_predictions[[old_stage]] <- covariate_data[[old_stage]]
+                patient_predictions[[new_stage]] <- covariate_data[[new_stage]]
+                
+                for (covariate in all_covariates) {
+                    if (covariate %in% names(covariate_data)) {
+                        patient_predictions[[covariate]] <- covariate_data[[covariate]]
+                    }
+                }
+                
+                # Calculate predictions for each time point
+                for (time_point in time_points) {
+                    
+                    # Old staging system predictions
+                    old_survfit <- tryCatch({
+                        survfit(old_model, newdata = covariate_data)
+                    }, error = function(e) NULL)
+                    
+                    old_survival_probs <- NULL
+                    if (!is.null(old_survfit)) {
+                        old_survival_probs <- tryCatch({
+                            summary(old_survfit, times = time_point, extend = TRUE)$surv
+                        }, error = function(e) rep(NA, n_patients))
+                    }
+                    
+                    if (is.null(old_survival_probs)) {
+                        old_survival_probs <- rep(NA, n_patients)
+                    }
+                    
+                    # New staging system predictions
+                    new_survfit <- tryCatch({
+                        survfit(new_model, newdata = covariate_data)
+                    }, error = function(e) NULL)
+                    
+                    new_survival_probs <- NULL
+                    if (!is.null(new_survfit)) {
+                        new_survival_probs <- tryCatch({
+                            summary(new_survfit, times = time_point, extend = TRUE)$surv
+                        }, error = function(e) rep(NA, n_patients))
+                    }
+                    
+                    if (is.null(new_survival_probs)) {
+                        new_survival_probs <- rep(NA, n_patients)
+                    }
+                    
+                    # Convert to risk probabilities
+                    old_risk_probs <- 1 - old_survival_probs
+                    new_risk_probs <- 1 - new_survival_probs
+                    
+                    # Risk difference (new - old)
+                    risk_difference <- new_risk_probs - old_risk_probs
+                    
+                    # Categorize risk levels
+                    old_risk_category <- cut(old_risk_probs, 
+                                           breaks = c(0, 0.1, 0.3, 0.5, 1),
+                                           labels = c("Low", "Moderate", "High", "Very High"),
+                                           include.lowest = TRUE)
+                    
+                    new_risk_category <- cut(new_risk_probs,
+                                           breaks = c(0, 0.1, 0.3, 0.5, 1),
+                                           labels = c("Low", "Moderate", "High", "Very High"),
+                                           include.lowest = TRUE)
+                    
+                    # Reclassification direction
+                    reclassification <- ifelse(is.na(old_risk_category) | is.na(new_risk_category), 
+                                             "Unknown",
+                                             ifelse(as.numeric(new_risk_category) > as.numeric(old_risk_category),
+                                                   "Upstaged",
+                                                   ifelse(as.numeric(new_risk_category) < as.numeric(old_risk_category),
+                                                         "Downstaged", "No Change")))
+                    
+                    # Clinical impact assessment
+                    clinical_impact <- ifelse(is.na(risk_difference), "Unknown",
+                                            ifelse(abs(risk_difference) < 0.05, "Minimal Impact",
+                                                  ifelse(risk_difference > 0.05, "Higher Risk (New System)",
+                                                        ifelse(risk_difference < -0.05, "Lower Risk (New System)",
+                                                              "Minimal Impact"))))
+                    
+                    # Confidence in prediction (based on model performance)
+                    old_concordance <- tryCatch({
+                        survival::concordance(old_model)$concordance
+                    }, error = function(e) NA)
+                    
+                    new_concordance <- tryCatch({
+                        survival::concordance(new_model)$concordance
+                    }, error = function(e) NA)
+                    
+                    # Generate confidence categories
+                    confidence_old <- ifelse(is.na(old_concordance), "Unknown",
+                                           ifelse(old_concordance > 0.8, "High Confidence",
+                                                 ifelse(old_concordance > 0.7, "Moderate Confidence", 
+                                                       "Low Confidence")))
+                    
+                    confidence_new <- ifelse(is.na(new_concordance), "Unknown",
+                                           ifelse(new_concordance > 0.8, "High Confidence",
+                                                 ifelse(new_concordance > 0.7, "Moderate Confidence", 
+                                                       "Low Confidence")))
+                    
+                    # Clinical recommendations
+                    recommendations <- ifelse(is.na(risk_difference), "Insufficient data for recommendation",
+                                            ifelse(new_risk_probs > 0.5 & old_risk_probs <= 0.3,
+                                                  "Consider intensive monitoring/treatment (new staging indicates high risk)",
+                                                  ifelse(new_risk_probs <= 0.3 & old_risk_probs > 0.5,
+                                                        "Consider reduced intensity approach (new staging indicates lower risk)",
+                                                        ifelse(new_risk_probs > 0.3 & old_risk_probs > 0.3,
+                                                              "High risk in both systems - continue current approach",
+                                                              "Low to moderate risk - standard monitoring appropriate"))))
+                    
+                    # Store results for this time point
+                    time_suffix <- paste0("_", time_point, "m")
+                    
+                    patient_predictions[[paste0("old_survival_prob", time_suffix)]] <- old_survival_probs
+                    patient_predictions[[paste0("new_survival_prob", time_suffix)]] <- new_survival_probs
+                    patient_predictions[[paste0("old_risk_prob", time_suffix)]] <- old_risk_probs
+                    patient_predictions[[paste0("new_risk_prob", time_suffix)]] <- new_risk_probs
+                    patient_predictions[[paste0("risk_difference", time_suffix)]] <- risk_difference
+                    patient_predictions[[paste0("old_risk_category", time_suffix)]] <- as.character(old_risk_category)
+                    patient_predictions[[paste0("new_risk_category", time_suffix)]] <- as.character(new_risk_category)
+                    patient_predictions[[paste0("reclassification", time_suffix)]] <- reclassification
+                    patient_predictions[[paste0("clinical_impact", time_suffix)]] <- clinical_impact
+                    patient_predictions[[paste0("confidence_old", time_suffix)]] <- confidence_old
+                    patient_predictions[[paste0("confidence_new", time_suffix)]] <- confidence_new
+                    patient_predictions[[paste0("recommendation", time_suffix)]] <- recommendations
+                }
+                
+                # Summary statistics across patients
+                summary_stats <- list()
+                for (time_point in time_points) {
+                    time_suffix <- paste0("_", time_point, "m")
+                    
+                    old_risks <- patient_predictions[[paste0("old_risk_prob", time_suffix)]]
+                    new_risks <- patient_predictions[[paste0("new_risk_prob", time_suffix)]]
+                    risk_diffs <- patient_predictions[[paste0("risk_difference", time_suffix)]]
+                    reclassifications <- patient_predictions[[paste0("reclassification", time_suffix)]]
+                    
+                    summary_stats[[paste0("time_", time_point)]] <- list(
+                        time_point = time_point,
+                        mean_old_risk = mean(old_risks, na.rm = TRUE),
+                        mean_new_risk = mean(new_risks, na.rm = TRUE),
+                        mean_risk_difference = mean(risk_diffs, na.rm = TRUE),
+                        median_old_risk = median(old_risks, na.rm = TRUE),
+                        median_new_risk = median(new_risks, na.rm = TRUE),
+                        median_risk_difference = median(risk_diffs, na.rm = TRUE),
+                        n_upstaged = sum(reclassifications == "Upstaged", na.rm = TRUE),
+                        n_downstaged = sum(reclassifications == "Downstaged", na.rm = TRUE),
+                        n_no_change = sum(reclassifications == "No Change", na.rm = TRUE),
+                        percent_upstaged = mean(reclassifications == "Upstaged", na.rm = TRUE) * 100,
+                        percent_downstaged = mean(reclassifications == "Downstaged", na.rm = TRUE) * 100,
+                        percent_no_change = mean(reclassifications == "No Change", na.rm = TRUE) * 100,
+                        significant_risk_change = sum(abs(risk_diffs) > 0.1, na.rm = TRUE),
+                        percent_significant_change = mean(abs(risk_diffs) > 0.1, na.rm = TRUE) * 100
+                    )
+                }
+                
+                # Generate risk profiles for different patient archetypes
+                risk_profiles <- private$.generateRiskProfiles(covariate_data, all_covariates, old_stage, new_stage, 
+                                                             old_model, new_model, time_points)
+                
+                return(list(
+                    patient_predictions = patient_predictions,
+                    summary_stats = summary_stats,
+                    risk_profiles = risk_profiles,
+                    time_points = time_points,
+                    models_used = list(old = "Old staging + covariates", new = "New staging + covariates"),
+                    model_performance = list(
+                        old_concordance = tryCatch(survival::concordance(old_model)$concordance, error = function(e) NA),
+                        new_concordance = tryCatch(survival::concordance(new_model)$concordance, error = function(e) NA)
+                    ),
+                    n_patients = n_patients,
+                    prediction_date = Sys.Date()
+                ))
+                
+            }, error = function(e) {
+                message("Error in personalized predictions: ", e$message)
+                return(list(error = e$message))
+            })
+        },
+
+        .generateRiskProfiles = function(covariate_data, all_covariates, old_stage, new_stage, old_model, new_model, time_points) {
+            # Generate risk profiles for different patient archetypes
+            # This helps clinicians understand how different patient types are affected by the new staging
+            
+            tryCatch({
+                # Create representative patient profiles
+                profiles <- list()
+                
+                # Profile 1: Young, low comorbidity
+                if ("Age" %in% all_covariates && length(all_covariates) > 1) {
+                    young_profile <- covariate_data[1, , drop = FALSE]  # Template
+                    young_profile$Age <- quantile(covariate_data$Age, 0.25, na.rm = TRUE)  # 25th percentile age
+                    
+                    # Set other variables to favorable values
+                    for (var in all_covariates) {
+                        if (var != "Age" && var %in% names(covariate_data)) {
+                            if (is.factor(covariate_data[[var]])) {
+                                young_profile[[var]] <- levels(covariate_data[[var]])[1]  # First level (usually baseline)
+                            } else if (is.numeric(covariate_data[[var]])) {
+                                young_profile[[var]] <- quantile(covariate_data[[var]], 0.25, na.rm = TRUE)
+                            }
+                        }
+                    }
+                    
+                    profiles[["young_low_risk"]] <- list(
+                        description = "Young patient, low comorbidity",
+                        profile_data = young_profile
+                    )
+                }
+                
+                # Profile 2: Older, high comorbidity
+                if ("Age" %in% all_covariates && length(all_covariates) > 1) {
+                    older_profile <- covariate_data[1, , drop = FALSE]  # Template
+                    older_profile$Age <- quantile(covariate_data$Age, 0.75, na.rm = TRUE)  # 75th percentile age
+                    
+                    # Set other variables to unfavorable values
+                    for (var in all_covariates) {
+                        if (var != "Age" && var %in% names(covariate_data)) {
+                            if (is.factor(covariate_data[[var]])) {
+                                # Try to find a "high risk" level
+                                levels_var <- levels(covariate_data[[var]])
+                                if (length(levels_var) > 1) {
+                                    older_profile[[var]] <- levels_var[length(levels_var)]  # Last level
+                                }
+                            } else if (is.numeric(covariate_data[[var]])) {
+                                older_profile[[var]] <- quantile(covariate_data[[var]], 0.75, na.rm = TRUE)
+                            }
+                        }
+                    }
+                    
+                    profiles[["older_high_risk"]] <- list(
+                        description = "Older patient, high comorbidity",
+                        profile_data = older_profile
+                    )
+                }
+                
+                # Profile 3: Average patient
+                average_profile <- covariate_data[1, , drop = FALSE]  # Template
+                for (var in all_covariates) {
+                    if (var %in% names(covariate_data)) {
+                        if (is.factor(covariate_data[[var]])) {
+                            # Most common level
+                            most_common <- names(sort(table(covariate_data[[var]]), decreasing = TRUE))[1]
+                            average_profile[[var]] <- most_common
+                        } else if (is.numeric(covariate_data[[var]])) {
+                            average_profile[[var]] <- median(covariate_data[[var]], na.rm = TRUE)
+                        }
+                    }
+                }
+                
+                profiles[["average"]] <- list(
+                    description = "Average patient profile",
+                    profile_data = average_profile
+                )
+                
+                # Calculate predictions for each profile and staging combination
+                profile_results <- list()
+                
+                for (profile_name in names(profiles)) {
+                    profile_data <- profiles[[profile_name]]$profile_data
+                    profile_desc <- profiles[[profile_name]]$description
+                    
+                    # Test different staging combinations
+                    old_stages <- unique(covariate_data[[old_stage]])
+                    new_stages <- unique(covariate_data[[new_stage]])
+                    
+                    stage_combinations <- expand.grid(
+                        old_stage = old_stages,
+                        new_stage = new_stages,
+                        stringsAsFactors = FALSE
+                    )
+                    
+                    combination_results <- list()
+                    
+                    for (i in 1:nrow(stage_combinations)) {
+                        old_s <- stage_combinations$old_stage[i]
+                        new_s <- stage_combinations$new_stage[i]
+                        
+                        # Create prediction data for this combination
+                        pred_data <- profile_data
+                        pred_data[[old_stage]] <- old_s
+                        pred_data[[new_stage]] <- new_s
+                        
+                        # Calculate predictions for each time point
+                        time_predictions <- list()
+                        
+                        for (time_point in time_points) {
+                            old_survfit <- tryCatch({
+                                survfit(old_model, newdata = pred_data)
+                            }, error = function(e) NULL)
+                            
+                            new_survfit <- tryCatch({
+                                survfit(new_model, newdata = pred_data)
+                            }, error = function(e) NULL)
+                            
+                            old_surv_prob <- if (!is.null(old_survfit)) {
+                                tryCatch({
+                                    summary(old_survfit, times = time_point, extend = TRUE)$surv[1]
+                                }, error = function(e) NA)
+                            } else {
+                                NA
+                            }
+                            
+                            new_surv_prob <- if (!is.null(new_survfit)) {
+                                tryCatch({
+                                    summary(new_survfit, times = time_point, extend = TRUE)$surv[1]
+                                }, error = function(e) NA)
+                            } else {
+                                NA
+                            }
+                            
+                            old_risk <- 1 - old_surv_prob
+                            new_risk <- 1 - new_surv_prob
+                            risk_diff <- new_risk - old_risk
+                            
+                            time_predictions[[paste0("time_", time_point)]] <- list(
+                                time_point = time_point,
+                                old_survival_prob = old_surv_prob,
+                                new_survival_prob = new_surv_prob,
+                                old_risk_prob = old_risk,
+                                new_risk_prob = new_risk,
+                                risk_difference = risk_diff,
+                                absolute_risk_change = abs(risk_diff)
+                            )
+                        }
+                        
+                        combination_results[[paste0("old_", old_s, "_new_", new_s)]] <- list(
+                            old_stage_value = old_s,
+                            new_stage_value = new_s,
+                            predictions = time_predictions
+                        )
+                    }
+                    
+                    profile_results[[profile_name]] <- list(
+                        description = profile_desc,
+                        stage_combinations = combination_results
+                    )
+                }
+                
+                return(profile_results)
+                
+            }, error = function(e) {
+                message("Error generating risk profiles: ", e$message)
+                return(list(error = e$message))
+            })
+        },
+
+        .calculateNRIComponents = function(old_categories, new_categories, actual_events) {
+            # Helper function to calculate NRI components
+            # Returns NRI for events and non-events
+            
+            # Create reclassification table
+            reclassification_table <- table(
+                Old = old_categories,
+                New = new_categories,
+                Events = actual_events,
+                useNA = "no"
+            )
+            
+            # Calculate NRI for events (those who actually had events)
+            event_table <- reclassification_table[, , "TRUE"]
+            if (length(event_table) == 0) {
+                nri_events <- 0
+                n_events <- 0
+            } else {
+                # Events moved up (improved classification) vs moved down
+                total_events <- sum(event_table)
+                if (total_events > 0) {
+                    moved_up <- sum(event_table[lower.tri(event_table)])    # Below diagonal
+                    moved_down <- sum(event_table[upper.tri(event_table)])  # Above diagonal
+                    nri_events <- (moved_up - moved_down) / total_events
+                } else {
+                    nri_events <- 0
+                }
+                n_events <- total_events
+            }
+            
+            # Calculate NRI for non-events (those who did not have events)
+            nonevent_table <- reclassification_table[, , "FALSE"]
+            if (length(nonevent_table) == 0) {
+                nri_nonevents <- 0
+                n_nonevents <- 0
+            } else {
+                # Non-events moved down (improved classification) vs moved up
+                total_nonevents <- sum(nonevent_table)
+                if (total_nonevents > 0) {
+                    moved_up <- sum(nonevent_table[lower.tri(nonevent_table)])    # Below diagonal (bad for non-events)
+                    moved_down <- sum(nonevent_table[upper.tri(nonevent_table)])  # Above diagonal (good for non-events)
+                    nri_nonevents <- (moved_down - moved_up) / total_nonevents
+                } else {
+                    nri_nonevents <- 0
+                }
+                n_nonevents <- total_nonevents
+            }
+            
+            # Overall NRI
+            overall_nri <- nri_events + nri_nonevents
+            
+            # Calculate standard errors (approximate)
+            se_events <- if (n_events > 0) sqrt(nri_events * (1 - nri_events) / n_events) else 0
+            se_nonevents <- if (n_nonevents > 0) sqrt(nri_nonevents * (1 - nri_nonevents) / n_nonevents) else 0
+            se_overall <- sqrt(se_events^2 + se_nonevents^2)
+            
+            # 95% Confidence intervals
+            ci_events <- nri_events + c(-1.96, 1.96) * se_events
+            ci_nonevents <- nri_nonevents + c(-1.96, 1.96) * se_nonevents
+            ci_overall <- overall_nri + c(-1.96, 1.96) * se_overall
+            
+            # Z-scores and p-values
+            z_events <- if (se_events > 0) nri_events / se_events else 0
+            z_nonevents <- if (se_nonevents > 0) nri_nonevents / se_nonevents else 0
+            z_overall <- if (se_overall > 0) overall_nri / se_overall else 0
+            
+            p_events <- if (abs(z_events) > 0) 2 * (1 - pnorm(abs(z_events))) else 1
+            p_nonevents <- if (abs(z_nonevents) > 0) 2 * (1 - pnorm(abs(z_nonevents))) else 1
+            p_overall <- if (abs(z_overall) > 0) 2 * (1 - pnorm(abs(z_overall))) else 1
+            
+            return(list(
+                nri_events = nri_events,
+                nri_nonevents = nri_nonevents,
+                nri_overall = overall_nri,
+                se_events = se_events,
+                se_nonevents = se_nonevents,
+                se_overall = se_overall,
+                ci_events = ci_events,
+                ci_nonevents = ci_nonevents,
+                ci_overall = ci_overall,
+                z_events = z_events,
+                z_nonevents = z_nonevents,
+                z_overall = z_overall,
+                p_events = p_events,
+                p_nonevents = p_nonevents,
+                p_overall = p_overall,
+                n_events = n_events,
+                n_nonevents = n_nonevents,
+                reclassification_table = reclassification_table
             ))
         },
 
@@ -12826,16 +13794,41 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Calculate selection frequencies
             selection_freq <- colMeans(bootstrap_selections, na.rm = TRUE)
             
-            # Calculate stability metrics
+            # Calculate stability metrics with AIC impact
             stability_metrics <- list()
             for (var in all_variables) {
                 var_selections <- bootstrap_selections[, var]
+                
+                # Calculate AIC impact when variable is included vs excluded
+                aic_with_var <- bootstrap_aics[var_selections == 1]
+                aic_without_var <- bootstrap_aics[var_selections == 0]
+                
+                mean_aic_impact <- if (length(aic_with_var) > 0 && length(aic_without_var) > 0) {
+                    mean(aic_without_var, na.rm = TRUE) - mean(aic_with_var, na.rm = TRUE)  # Positive = improvement
+                } else {
+                    0
+                }
+                
+                # Calculate confidence intervals for AIC impact
+                if (length(aic_with_var) > 5 && length(aic_without_var) > 5) {
+                    aic_diff_samples <- sample(aic_without_var, min(100, length(aic_without_var)), replace = TRUE) - 
+                                      sample(aic_with_var, min(100, length(aic_with_var)), replace = TRUE)
+                    ci_lower <- quantile(aic_diff_samples, 0.025, na.rm = TRUE)
+                    ci_upper <- quantile(aic_diff_samples, 0.975, na.rm = TRUE)
+                } else {
+                    ci_lower <- NA
+                    ci_upper <- NA
+                }
+                
                 stability_metrics[[var]] <- list(
                     selection_frequency = selection_freq[var],
                     selection_proportion = mean(var_selections == 1, na.rm = TRUE),
                     stability_se = sqrt(selection_freq[var] * (1 - selection_freq[var]) / n_bootstrap),
                     confidence_interval_lower = pmax(0, selection_freq[var] - 1.96 * sqrt(selection_freq[var] * (1 - selection_freq[var]) / n_bootstrap)),
-                    confidence_interval_upper = pmin(1, selection_freq[var] + 1.96 * sqrt(selection_freq[var] * (1 - selection_freq[var]) / n_bootstrap))
+                    confidence_interval_upper = pmin(1, selection_freq[var] + 1.96 * sqrt(selection_freq[var] * (1 - selection_freq[var]) / n_bootstrap)),
+                    mean_aic_impact = mean_aic_impact,
+                    ci_lower = ci_lower,
+                    ci_upper = ci_upper
                 )
             }
             
@@ -13267,6 +14260,15 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         freq <- selection_freq[var_name]
                         stability <- stability_metrics[[var_name]]
                         
+                        # Debug the stability object
+                        message("DEBUG: Processing stepwise var ", var_name)
+                        message("DEBUG: stability class: ", class(stability))
+                        message("DEBUG: stability names: ", paste(names(stability), collapse = ", "))
+                        if (!is.null(stability$mean_aic_impact)) {
+                            message("DEBUG: mean_aic_impact class: ", class(stability$mean_aic_impact))
+                            message("DEBUG: mean_aic_impact value: ", stability$mean_aic_impact)
+                        }
+                        
                         # Determine stability status
                         if (var_name %in% stepwise_info$high_stability_variables) {
                             action <- "High Stability"
@@ -13279,12 +14281,37 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         # Format selection frequency as percentage
                         freq_pct <- round(freq * 100, 1)
                         
+                        # Safely handle potentially non-numeric values
+                        aic_value <- if (!is.null(stability$mean_aic_impact) && is.numeric(stability$mean_aic_impact)) {
+                            round(stability$mean_aic_impact, 1)
+                        } else {
+                            NA
+                        }
+                        
+                        ci_lower <- if (!is.null(stability$ci_lower) && is.numeric(stability$ci_lower)) {
+                            round(stability$ci_lower, 2)
+                        } else {
+                            NA
+                        }
+                        
+                        ci_upper <- if (!is.null(stability$ci_upper) && is.numeric(stability$ci_upper)) {
+                            round(stability$ci_upper, 2)
+                        } else {
+                            NA
+                        }
+                        
+                        p_value_text <- if (!is.na(ci_lower) && !is.na(ci_upper)) {
+                            paste0("CI: [", ci_lower, ", ", ci_upper, "]")
+                        } else {
+                            "CI: NA"
+                        }
+                        
                         table$addRow(rowKey = paste("var", i, sep = "_"), values = list(
                             Variable = var_name,
                             Step = paste0(freq_pct, "%"),
                             Action = action,
-                            AIC = round(stability$mean_aic_impact, 1),
-                            p_value = paste0("CI: [", round(stability$ci_lower, 2), ", ", round(stability$ci_upper, 2), "]")
+                            AIC = aic_value,
+                            p_value = p_value_text
                         ))
                     }
                 } else if (!is.null(stepwise_info$step_history) && length(stepwise_info$step_history) > 0) {
@@ -13376,13 +14403,21 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 table <- self$results$interactionTests
                 
                 # Check if interaction_tests is a data frame (new format) or list (old format)
+                message("DEBUG: Interaction tests type: ", class(multifactorial_results$interaction_tests))
+                message("DEBUG: Is data frame: ", is.data.frame(multifactorial_results$interaction_tests))
                 if (is.data.frame(multifactorial_results$interaction_tests)) {
+                    message("DEBUG: Using NEW format - advanced interaction detection")
                     # New format: advanced interaction detection results
                     interaction_df <- multifactorial_results$interaction_tests
                     
                     for (i in 1:nrow(interaction_df)) {
                         row_data <- interaction_df[i, ]
                         row_key <- paste0("interaction_", i)
+                        
+                        message("DEBUG: Processing row ", i, " with Variable: ", row_data$Variable)
+                        message("DEBUG: Clinical_Significance: ", row_data$Clinical_Significance)
+                        message("DEBUG: Old_Stage_Interaction_P: ", row_data$Old_Stage_Interaction_P)
+                        message("DEBUG: New_Stage_Interaction_P: ", row_data$New_Stage_Interaction_P)
                         
                         # Create interaction description
                         interaction_desc <- paste0(row_data$Variable, " Interaction")
@@ -13394,13 +14429,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             "Unable to determine"
                         }
                         
-                        # Use the most significant p-value for display
-                        p_value <- min(row_data$Old_Stage_Interaction_P, 
-                                     row_data$New_Stage_Interaction_P, 
-                                     na.rm = TRUE)
+                        # Use the most significant p-value for display (handle all NA case)
+                        p_values <- c(row_data$Old_Stage_Interaction_P, row_data$New_Stage_Interaction_P)
+                        p_values_valid <- p_values[!is.na(p_values)]
+                        
+                        p_value <- if (length(p_values_valid) > 0) {
+                            min(p_values_valid)
+                        } else {
+                            NA
+                        }
                         
                         # Calculate chi-square approximation from p-value
-                        chi_square <- if (!is.na(p_value) && p_value > 0 && p_value < 1) {
+                        chi_square <- if (!is.na(p_value) && is.finite(p_value) && p_value > 0 && p_value < 1) {
                             qchisq(1 - p_value, df = 1)
                         } else {
                             NA
@@ -13408,13 +14448,14 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         
                         table$addRow(rowKey = row_key, values = list(
                             Interaction = interaction_desc,
-                            Chi_Square = round(chi_square, 3),
+                            Chi_Square = if (is.na(chi_square)) NA else round(chi_square, 3),
                             df = 1,
-                            p_value = round(p_value, 4),
+                            p_value = if (is.na(p_value)) NA else round(p_value, 4),
                             Interpretation = interpretation
                         ))
                     }
                 } else {
+                    message("DEBUG: Using OLD format - legacy interaction tests")
                     # Old format: legacy interaction tests
                     for (int_name in names(multifactorial_results$interaction_tests)) {
                         int_info <- multifactorial_results$interaction_tests[[int_name]]
@@ -16221,8 +17262,38 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
           tryCatch({
             event_col <- self$options$event
             
+            # Debug input parameters
+            message("DEBUG: Interaction detection started")
+            message("DEBUG: Number of covariates: ", length(all_covariates))
+            if (length(all_covariates) > 0) {
+              message("DEBUG: Covariates: ", paste(all_covariates, collapse = ", "))
+            } else {
+              message("DEBUG: Covariates: NONE")
+            }
+            message("DEBUG: Sample size: ", nrow(covariate_data))
+            
+            # Validate inputs
+            if (length(all_covariates) == 0) {
+              stop("No covariates provided for interaction detection")
+            }
+            
+            # Validate survival data
+            if (!survival_time %in% names(covariate_data)) {
+              stop(paste("Survival time variable", survival_time, "not found in data"))
+            }
+            if (!event_col %in% names(covariate_data)) {
+              stop(paste("Event variable", event_col, "not found in data"))
+            }
+            
+            survival_times <- covariate_data[[survival_time]]
+            events <- covariate_data[[event_col]]
+            
+            message("DEBUG: Survival times length: ", length(survival_times))
+            message("DEBUG: Events length: ", length(events))
+            message("DEBUG: Event level: ", self$options$eventLevel)
+            
             # Create survival object
-            surv_obj <- Surv(covariate_data[[survival_time]], covariate_data[[event_col]] == self$options$eventLevel)
+            surv_obj <- Surv(survival_times, events == self$options$eventLevel)
             
             # Interaction detection results
             interaction_results <- data.frame(
@@ -16243,11 +17314,30 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
               if (covar %in% names(covariate_data)) {
                 
                 # Test interaction with old staging system
-                old_interaction_formula <- as.formula(paste("surv_obj ~", old_stage, "*", covar))
-                old_main_formula <- as.formula(paste("surv_obj ~", old_stage, "+", covar))
+                message("DEBUG: Testing interaction for covariate: ", covar)
                 
-                old_interaction_fit <- tryCatch(coxph(old_interaction_formula, data = covariate_data), error = function(e) NULL)
-                old_main_fit <- tryCatch(coxph(old_main_formula, data = covariate_data), error = function(e) NULL)
+                # Build formulas with debugging
+                old_int_formula_str <- paste("surv_obj ~", old_stage, "*", covar)
+                old_main_formula_str <- paste("surv_obj ~", old_stage, "+", covar)
+                
+                message("DEBUG: Old interaction formula: ", old_int_formula_str)
+                
+                old_interaction_formula <- as.formula(old_int_formula_str)
+                old_main_formula <- as.formula(old_main_formula_str)
+                
+                old_interaction_fit <- tryCatch({
+                  coxph(old_interaction_formula, data = covariate_data)
+                }, error = function(e) {
+                  message("DEBUG: Old interaction model failed: ", e$message)
+                  NULL
+                })
+                
+                old_main_fit <- tryCatch({
+                  coxph(old_main_formula, data = covariate_data)
+                }, error = function(e) {
+                  message("DEBUG: Old main model failed: ", e$message)
+                  NULL
+                })
                 
                 # Test interaction with new staging system
                 new_interaction_formula <- as.formula(paste("surv_obj ~", new_stage, "*", covar))
@@ -16261,14 +17351,76 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                   
                   # Likelihood ratio tests for interactions
                   old_interaction_p <- tryCatch({
-                    lr_test <- anova(old_main_fit, old_interaction_fit, test = "Chisq")
-                    lr_test$`Pr(>Chi)`[2]
-                  }, error = function(e) NA)
+                    if (is.null(old_main_fit) || is.null(old_interaction_fit)) {
+                      message("DEBUG: Skipping old LR test - one or both models are NULL")
+                      NA
+                    } else {
+                      lr_test <- anova(old_main_fit, old_interaction_fit, test = "Chisq")
+                      
+                      # Debug anova output structure
+                      message("DEBUG: anova output class: ", class(lr_test))
+                      message("DEBUG: anova output names: ", paste(names(lr_test), collapse = ", "))
+                      
+                      # Try different ways to extract p-value
+                      p_val <- if ("Pr(>|Chi|)" %in% names(lr_test)) {
+                        lr_test[["Pr(>|Chi|)"]][2]
+                      } else if ("P(>|Chi|)" %in% names(lr_test)) {
+                        lr_test[["P(>|Chi|)"]][2]
+                      } else if ("Pr(>Chi)" %in% names(lr_test)) {
+                        lr_test[["Pr(>Chi)"]][2]
+                      } else if (is.data.frame(lr_test) && ncol(lr_test) >= 5) {
+                        # Try to get from the data frame structure
+                        lr_test[2, ncol(lr_test)]
+                      } else {
+                        message("DEBUG: Could not find p-value column in anova output")
+                        NA
+                      }
+                      
+                      message("DEBUG: Old interaction p-value: ", ifelse(is.null(p_val) || length(p_val) == 0, "NULL/empty", p_val))
+                      
+                      # Return NA if p_val is NULL or empty
+                      if (is.null(p_val) || length(p_val) == 0) NA else p_val
+                    }
+                  }, error = function(e) {
+                    message("DEBUG: Old LR test failed: ", e$message)
+                    NA
+                  })
                   
                   new_interaction_p <- tryCatch({
-                    lr_test <- anova(new_main_fit, new_interaction_fit, test = "Chisq")
-                    lr_test$`Pr(>Chi)`[2]
-                  }, error = function(e) NA)
+                    if (is.null(new_main_fit) || is.null(new_interaction_fit)) {
+                      message("DEBUG: Skipping new LR test - one or both models are NULL")
+                      NA
+                    } else {
+                      lr_test <- anova(new_main_fit, new_interaction_fit, test = "Chisq")
+                      
+                      # Debug anova output structure
+                      message("DEBUG: anova output class: ", class(lr_test))
+                      message("DEBUG: anova output names: ", paste(names(lr_test), collapse = ", "))
+                      
+                      # Try different ways to extract p-value
+                      p_val <- if ("Pr(>|Chi|)" %in% names(lr_test)) {
+                        lr_test[["Pr(>|Chi|)"]][2]
+                      } else if ("P(>|Chi|)" %in% names(lr_test)) {
+                        lr_test[["P(>|Chi|)"]][2]
+                      } else if ("Pr(>Chi)" %in% names(lr_test)) {
+                        lr_test[["Pr(>Chi)"]][2]
+                      } else if (is.data.frame(lr_test) && ncol(lr_test) >= 5) {
+                        # Try to get from the data frame structure
+                        lr_test[2, ncol(lr_test)]
+                      } else {
+                        message("DEBUG: Could not find p-value column in anova output")
+                        NA
+                      }
+                      
+                      message("DEBUG: New interaction p-value: ", ifelse(is.null(p_val) || length(p_val) == 0, "NULL/empty", p_val))
+                      
+                      # Return NA if p_val is NULL or empty
+                      if (is.null(p_val) || length(p_val) == 0) NA else p_val
+                    }
+                  }, error = function(e) {
+                    message("DEBUG: New LR test failed: ", e$message)
+                    NA
+                  })
                   
                   # Compare interaction strength between staging systems
                   comparison_p <- tryCatch({
@@ -16301,33 +17453,58 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     if (length(interaction_coef) > 0) exp(interaction_coef[1]) else NA
                   }, error = function(e) NA)
                   
-                  # Determine clinical significance
-                  clinical_sig <- "Not significant"
-                  if (!is.na(old_interaction_p) && !is.na(new_interaction_p)) {
-                    if (old_interaction_p < 0.05 || new_interaction_p < 0.05) {
-                      if (old_interaction_p < 0.05 && new_interaction_p >= 0.05) {
-                        clinical_sig <- "Old staging shows interaction"
-                      } else if (new_interaction_p < 0.05 && old_interaction_p >= 0.05) {
-                        clinical_sig <- "New staging shows interaction"
-                      } else if (old_interaction_p < 0.05 && new_interaction_p < 0.05) {
-                        clinical_sig <- "Both staging systems show interaction"
+                  # Determine clinical significance with robust error handling
+                  clinical_sig <- tryCatch({
+                    # Handle cases where p-values might be NA
+                    old_p_valid <- !is.na(old_interaction_p) && is.finite(old_interaction_p) && !is.null(old_interaction_p)
+                    new_p_valid <- !is.na(new_interaction_p) && is.finite(new_interaction_p) && !is.null(new_interaction_p)
+                    
+                    base_sig <- "Not significant"
+                    
+                    if (old_p_valid || new_p_valid) {
+                      old_significant <- if (old_p_valid) {
+                        old_interaction_p < 0.05
+                      } else {
+                        FALSE
+                      }
+                      
+                      new_significant <- if (new_p_valid) {
+                        new_interaction_p < 0.05
+                      } else {
+                        FALSE
+                      }
+                      
+                      if (old_significant || new_significant) {
+                        if (old_significant && (!new_p_valid || (new_p_valid && new_interaction_p >= 0.05))) {
+                          base_sig <- "Old staging shows interaction"
+                        } else if (new_significant && (!old_p_valid || (old_p_valid && old_interaction_p >= 0.05))) {
+                          base_sig <- "New staging shows interaction"
+                        } else if (old_significant && new_significant) {
+                          base_sig <- "Both staging systems show interaction"
+                        }
                       }
                     }
-                  }
+                    
+                    base_sig
+                  }, error = function(e) {
+                    paste("Error in significance determination:", e$message)
+                  })
                   
-                  # Add to results
-                  interaction_results <- rbind(interaction_results, data.frame(
+                  # Add to results with proper NA handling
+                  new_row <- data.frame(
                     Variable = covar,
-                    Old_Stage_Interaction_P = ifelse(is.na(old_interaction_p), NA, round(old_interaction_p, 4)),
-                    New_Stage_Interaction_P = ifelse(is.na(new_interaction_p), NA, round(new_interaction_p, 4)),
-                    Interaction_Comparison_P = ifelse(is.na(comparison_p), NA, round(comparison_p, 4)),
-                    Old_Stage_HR_Main = ifelse(is.na(old_main_hr), NA, round(old_main_hr, 3)),
-                    Old_Stage_HR_Interaction = ifelse(is.na(old_interaction_hr), NA, round(old_interaction_hr, 3)),
-                    New_Stage_HR_Main = ifelse(is.na(new_main_hr), NA, round(new_main_hr, 3)),
-                    New_Stage_HR_Interaction = ifelse(is.na(new_interaction_hr), NA, round(new_interaction_hr, 3)),
-                    Clinical_Significance = clinical_sig,
+                    Old_Stage_Interaction_P = if (is.na(old_interaction_p)) NA_real_ else round(old_interaction_p, 4),
+                    New_Stage_Interaction_P = if (is.na(new_interaction_p)) NA_real_ else round(new_interaction_p, 4),
+                    Interaction_Comparison_P = if (is.na(comparison_p)) NA_real_ else round(comparison_p, 4),
+                    Old_Stage_HR_Main = if (is.na(old_main_hr)) NA_real_ else round(old_main_hr, 3),
+                    Old_Stage_HR_Interaction = if (is.na(old_interaction_hr)) NA_real_ else round(old_interaction_hr, 3),
+                    New_Stage_HR_Main = if (is.na(new_main_hr)) NA_real_ else round(new_main_hr, 3),
+                    New_Stage_HR_Interaction = if (is.na(new_interaction_hr)) NA_real_ else round(new_interaction_hr, 3),
+                    Clinical_Significance = as.character(clinical_sig),
                     stringsAsFactors = FALSE
-                  ))
+                  )
+                  
+                  interaction_results <- rbind(interaction_results, new_row)
                 }
               }
             }
@@ -16343,6 +17520,14 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 na.rm = TRUE
               )
             )
+            
+            # Debug output
+            message("DEBUG: Advanced interaction detection completed")
+            message("DEBUG: Number of interaction results: ", nrow(interaction_results))
+            if (nrow(interaction_results) > 0) {
+              message("DEBUG: First result Variable: ", interaction_results$Variable[1])
+              message("DEBUG: First result Clinical_Significance: ", interaction_results$Clinical_Significance[1])
+            }
             
             return(list(
               interaction_results = interaction_results,
@@ -16378,8 +17563,23 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
           tryCatch({
             event_col <- self$options$event
             
+            # Validate survival data
+            if (!survival_time %in% names(covariate_data)) {
+              stop(paste("Survival time variable", survival_time, "not found in data"))
+            }
+            if (!event_col %in% names(covariate_data)) {
+              stop(paste("Event variable", event_col, "not found in data"))
+            }
+            
+            survival_times <- covariate_data[[survival_time]]
+            events <- covariate_data[[event_col]]
+            
+            message("DEBUG: Survival times length: ", length(survival_times))
+            message("DEBUG: Events length: ", length(events))
+            message("DEBUG: Event level: ", self$options$eventLevel)
+            
             # Create survival object
-            surv_obj <- Surv(covariate_data[[survival_time]], covariate_data[[event_col]] == self$options$eventLevel)
+            surv_obj <- Surv(survival_times, events == self$options$eventLevel)
             
             # Build comprehensive models for diagnostics
             old_formula <- as.formula(paste("surv_obj ~", old_stage, "+", paste(all_covariates, collapse = " + ")))

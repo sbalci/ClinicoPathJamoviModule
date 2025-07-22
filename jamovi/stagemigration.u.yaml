@@ -300,7 +300,7 @@ children:
               - type: CheckBox
                 name: showStepwiseResults
                 label: Show Stepwise Selection Results
-                enable: (enableMultifactorialAnalysis)
+                enable: (enableMultifactorialAnalysis && (multifactorialComparisonType:stepwise || multifactorialComparisonType:comprehensive))
   - type: CollapseBox
     label: Visualization Options
     collapsed: false
