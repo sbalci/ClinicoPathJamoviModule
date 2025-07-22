@@ -24,6 +24,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             bootstrapReps = 1000,
             performCrossValidation = FALSE,
             cvFolds = 5,
+            institutionVariable = NULL,
             clinicalSignificanceThreshold = 0.02,
             nriClinicalThreshold = 0.2,
             performHomogeneityTests = FALSE,
@@ -178,6 +179,15 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 min=3,
                 max=10,
                 default=5)
+            private$..institutionVariable <- jmvcore::OptionVariable$new(
+                "institutionVariable",
+                institutionVariable,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
             private$..clinicalSignificanceThreshold <- jmvcore::OptionNumber$new(
                 "clinicalSignificanceThreshold",
                 clinicalSignificanceThreshold,
@@ -420,6 +430,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..bootstrapReps)
             self$.addOption(private$..performCrossValidation)
             self$.addOption(private$..cvFolds)
+            self$.addOption(private$..institutionVariable)
             self$.addOption(private$..clinicalSignificanceThreshold)
             self$.addOption(private$..nriClinicalThreshold)
             self$.addOption(private$..performHomogeneityTests)
@@ -487,6 +498,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         bootstrapReps = function() private$..bootstrapReps$value,
         performCrossValidation = function() private$..performCrossValidation$value,
         cvFolds = function() private$..cvFolds$value,
+        institutionVariable = function() private$..institutionVariable$value,
         clinicalSignificanceThreshold = function() private$..clinicalSignificanceThreshold$value,
         nriClinicalThreshold = function() private$..nriClinicalThreshold$value,
         performHomogeneityTests = function() private$..performHomogeneityTests$value,
@@ -553,6 +565,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..bootstrapReps = NA,
         ..performCrossValidation = NA,
         ..cvFolds = NA,
+        ..institutionVariable = NA,
         ..clinicalSignificanceThreshold = NA,
         ..nriClinicalThreshold = NA,
         ..performHomogeneityTests = NA,
@@ -647,6 +660,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         decisionCurvesExplanation = function() private$.items[["decisionCurvesExplanation"]],
         decisionCurves = function() private$.items[["decisionCurves"]],
         bootstrapResults = function() private$.items[["bootstrapResults"]],
+        bootstrapValidationExplanation = function() private$.items[["bootstrapValidationExplanation"]],
         willRogersAnalysisExplanation = function() private$.items[["willRogersAnalysisExplanation"]],
         willRogersBasicAnalysis = function() private$.items[["willRogersBasicAnalysis"]],
         likelihoodTestsExplanation = function() private$.items[["likelihoodTestsExplanation"]],
@@ -692,7 +706,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         dashboardExplanation = function() private$.items[["dashboardExplanation"]],
         comparativeAnalysisDashboard = function() private$.items[["comparativeAnalysisDashboard"]],
         abbreviationGlossary = function() private$.items[["abbreviationGlossary"]],
+        crossValidationExplanation = function() private$.items[["crossValidationExplanation"]],
         crossValidationResults = function() private$.items[["crossValidationResults"]],
+        crossValidationPlot = function() private$.items[["crossValidationPlot"]],
         enhancedLRComparison = function() private$.items[["enhancedLRComparison"]]),
     private = list(),
     public=list(
@@ -1526,13 +1542,18 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="Metric", 
                         `type`="text"),
                     list(
-                        `name`="Original", 
-                        `title`="Original", 
+                        `name`="Apparent", 
+                        `title`="Apparent", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="Bootstrap_Mean", 
                         `title`="Bootstrap Mean", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Bootstrap_SE", 
+                        `title`="Bootstrap SE", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -1551,10 +1572,25 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="Corrected", 
-                        `title`="Corrected", 
+                        `name`="Optimism_Corrected", 
+                        `title`="Optimism Corrected", 
                         `type`="number", 
-                        `format`="zto"))))
+                        `format`="zto"),
+                    list(
+                        `name`="Success_Rate", 
+                        `title`="Success Rate", 
+                        `type`="text"),
+                    list(
+                        `name`="Clinical_Interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="bootstrapValidationExplanation",
+                title="Understanding Bootstrap Validation Results",
+                visible="(performBootstrap && showExplanations)",
+                clearWith=list(
+                    "performBootstrap")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="willRogersAnalysisExplanation",
@@ -2563,6 +2599,13 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 visible="(showAbbreviationGlossary)",
                 clearWith=list(
                     "showAbbreviationGlossary")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="crossValidationExplanation",
+                title="Understanding Cross-Validation Results",
+                visible="(performCrossValidation && showExplanations)",
+                clearWith=list(
+                    "performCrossValidation")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="crossValidationResults",
@@ -2590,13 +2633,41 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="N Test", 
                         `type`="integer"),
                     list(
+                        `name`="Train_Events", 
+                        `title`="Train Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="Test_Events", 
+                        `title`="Test Events", 
+                        `type`="integer"),
+                    list(
                         `name`="Old_System_CIndex", 
-                        `title`="Old System C-Index", 
+                        `title`="Old C-Index", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Old_CIndex_CI_Lower", 
+                        `title`="Old CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Old_CIndex_CI_Upper", 
+                        `title`="Old CI Upper", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="New_System_CIndex", 
-                        `title`="New System C-Index", 
+                        `title`="New C-Index", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="New_CIndex_CI_Lower", 
+                        `title`="New CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="New_CIndex_CI_Upper", 
+                        `title`="New CI Upper", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -2605,14 +2676,40 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="number", 
                         `format`="zto"),
                     list(
+                        `name`="Difference_SE", 
+                        `title`="Difference SE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
                         `name`="P_Value", 
                         `title`="P-Value", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
-                        `name`="Validation_Type", 
-                        `title`="Validation Result", 
+                        `name`="Validation_Quality", 
+                        `title`="Quality", 
+                        `type`="text"),
+                    list(
+                        `name`="Clinical_Interpretation", 
+                        `title`="Clinical Interpretation", 
                         `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="crossValidationPlot",
+                title="Cross-Validation Performance Visualization",
+                renderFun=".plotCrossValidation",
+                visible="(performCrossValidation)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "performCrossValidation",
+                    "cvFolds",
+                    "institutionVariable"),
+                width=600,
+                height=400))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="enhancedLRComparison",
@@ -2748,6 +2845,11 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   additional validation. Computationally intensive but provides robust
 #'   validation.
 #' @param cvFolds Number of folds for cross-validation when enabled.
+#' @param institutionVariable Optional variable indicating institution or
+#'   study center for  multi-institutional validation. When provided, performs
+#'   internal-external cross-validation using k-1 centers for development and
+#'   remaining center for validation. Essential for multi-center staging
+#'   validation studies.
 #' @param clinicalSignificanceThreshold Minimum improvement in C-index
 #'   considered clinically significant. Default 0.02 based on oncology
 #'   literature recommendations.
@@ -2933,6 +3035,7 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$decisionCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$decisionCurves} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$bootstrapValidationExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$willRogersAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$willRogersBasicAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$likelihoodTestsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -2978,7 +3081,9 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$dashboardExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$comparativeAnalysisDashboard} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$abbreviationGlossary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$crossValidationExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$crossValidationPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$enhancedLRComparison} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
@@ -3009,6 +3114,7 @@ stagemigration <- function(
     bootstrapReps = 1000,
     performCrossValidation = FALSE,
     cvFolds = 5,
+    institutionVariable,
     clinicalSignificanceThreshold = 0.02,
     nriClinicalThreshold = 0.2,
     performHomogeneityTests = FALSE,
@@ -3064,6 +3170,7 @@ stagemigration <- function(
     if ( ! missing(newStage)) newStage <- jmvcore::resolveQuo(jmvcore::enquo(newStage))
     if ( ! missing(survivalTime)) survivalTime <- jmvcore::resolveQuo(jmvcore::enquo(survivalTime))
     if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
+    if ( ! missing(institutionVariable)) institutionVariable <- jmvcore::resolveQuo(jmvcore::enquo(institutionVariable))
     if ( ! missing(continuousCovariates)) continuousCovariates <- jmvcore::resolveQuo(jmvcore::enquo(continuousCovariates))
     if ( ! missing(categoricalCovariates)) categoricalCovariates <- jmvcore::resolveQuo(jmvcore::enquo(categoricalCovariates))
     if (missing(data))
@@ -3073,6 +3180,7 @@ stagemigration <- function(
             `if`( ! missing(newStage), newStage, NULL),
             `if`( ! missing(survivalTime), survivalTime, NULL),
             `if`( ! missing(event), event, NULL),
+            `if`( ! missing(institutionVariable), institutionVariable, NULL),
             `if`( ! missing(continuousCovariates), continuousCovariates, NULL),
             `if`( ! missing(categoricalCovariates), categoricalCovariates, NULL))
 
@@ -3099,6 +3207,7 @@ stagemigration <- function(
         bootstrapReps = bootstrapReps,
         performCrossValidation = performCrossValidation,
         cvFolds = cvFolds,
+        institutionVariable = institutionVariable,
         clinicalSignificanceThreshold = clinicalSignificanceThreshold,
         nriClinicalThreshold = nriClinicalThreshold,
         performHomogeneityTests = performHomogeneityTests,

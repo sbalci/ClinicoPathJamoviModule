@@ -776,12 +776,16 @@ items:
           - name: Metric
             title: "Metric"
             type: text
-          - name: Original
-            title: "Original"
+          - name: Apparent
+            title: "Apparent"
             type: number
             format: zto
           - name: Bootstrap_Mean
             title: "Bootstrap Mean"
+            type: number
+            format: zto
+          - name: Bootstrap_SE
+            title: "Bootstrap SE"
             type: number
             format: zto
           - name: Bootstrap_CI_Lower
@@ -796,10 +800,24 @@ items:
             title: "Optimism"
             type: number
             format: zto
-          - name: Corrected
-            title: "Corrected"
+          - name: Optimism_Corrected
+            title: "Optimism Corrected"
             type: number
             format: zto
+          - name: Success_Rate
+            title: "Success Rate"
+            type: text
+          - name: Clinical_Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Bootstrap Validation Results Explanation
+    - name: bootstrapValidationExplanation
+      title: Understanding Bootstrap Validation Results
+      type: Html
+      visible: (performBootstrap && showExplanations)
+      clearWith:
+          - performBootstrap
 
     # Will Rogers Phenomenon Analysis Explanation
     - name: willRogersAnalysisExplanation
@@ -1757,6 +1775,14 @@ items:
       clearWith:
           - showAbbreviationGlossary
 
+    # Cross-Validation Explanation
+    - name: crossValidationExplanation
+      title: Understanding Cross-Validation Results
+      type: Html
+      visible: (performCrossValidation && showExplanations)
+      clearWith:
+          - performCrossValidation
+
     # Cross-Validation Results
     - name: crossValidationResults
       title: K-Fold Cross-Validation Results
@@ -1780,25 +1806,72 @@ items:
           - name: N_Test
             title: "N Test"
             type: integer
+          - name: Train_Events
+            title: "Train Events"
+            type: integer
+          - name: Test_Events
+            title: "Test Events"
+            type: integer
           - name: Old_System_CIndex
-            title: "Old System C-Index"
+            title: "Old C-Index"
+            type: number
+            format: zto
+          - name: Old_CIndex_CI_Lower
+            title: "Old CI Lower"
+            type: number
+            format: zto
+          - name: Old_CIndex_CI_Upper
+            title: "Old CI Upper"
             type: number
             format: zto
           - name: New_System_CIndex
-            title: "New System C-Index"
+            title: "New C-Index"
+            type: number
+            format: zto
+          - name: New_CIndex_CI_Lower
+            title: "New CI Lower"
+            type: number
+            format: zto
+          - name: New_CIndex_CI_Upper
+            title: "New CI Upper"
             type: number
             format: zto
           - name: CIndex_Difference
             title: "C-Index Difference"
             type: number
             format: zto
+          - name: Difference_SE
+            title: "Difference SE"
+            type: number
+            format: zto
           - name: P_Value
             title: "P-Value"
             type: number
             format: zto,pvalue
-          - name: Validation_Type
-            title: "Validation Result"
+          - name: Validation_Quality
+            title: "Quality"
             type: text
+          - name: Clinical_Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Cross-Validation Performance Plot
+    - name: crossValidationPlot
+      title: Cross-Validation Performance Visualization
+      type: Image
+      renderFun: .plotCrossValidation
+      visible: (performCrossValidation)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCrossValidation
+          - cvFolds
+          - institutionVariable
+      width: 600
+      height: 400
 
     # Enhanced LR Chi-Square Comparison
     - name: enhancedLRComparison

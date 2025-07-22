@@ -43,7 +43,7 @@ ClinicoPath.code-workspace
 pdfs
 temp
 _tododata
-^docs$
+# ^docs$
 inst/doc
 **/.quarto/
 /.claude
