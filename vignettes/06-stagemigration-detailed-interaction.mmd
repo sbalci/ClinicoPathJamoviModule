@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant UI as User Interface
+    participant Options as self$options
+    participant Init as .init()
+    participant Run as .run()
+    participant Results as self$results
+    participant Display as jamovi Display
+    
+    Note over UI,Display: ClinicoPath stagemigration Example
+    
+    UI->>Options: User selects oldStage = "tnm7_stage"
+    UI->>Options: User selects newStage = "tnm8_stage" 
+    UI->>Options: User sets analysisType = "comprehensive"
+    UI->>Options: User enables performBootstrap = true
+    
+    Note over Init: .init() method execution
+    Init->>Options: Check self$options$analysisType
+    Init->>Results: self$results$bootstrapResults$setVisible(true)
+    Init->>Results: self$results$crossValidationPlot$setSize(800, 600)
+    
+    Note over Run: .run() method execution
+    Run->>Options: oldStageVar <- self$options$oldStage
+    Run->>Options: newStageVar <- self$options$newStage
+    Run->>Options: if (self$options$performBootstrap)
+    
+    Run->>Run: Execute bootstrap validation (500 samples)
+    Run->>Run: Calculate optimism-corrected C-index
+    
+    Run->>Results: self$results$migrationOverview$setContent(migration_table)
+    Run->>Results: self$results$bootstrapResults$setContent(bootstrap_results)
+    Run->>Results: self$results$migrationPlot$setState(plot_data)
+    
+    Results->>Display: Render migration overview table
+    Results->>Display: Render bootstrap validation results
+    Results->>Display: Render migration heatmap plot
+    
+    Note over UI,Display: Real-time updates as user modifies options

@@ -1,0 +1,50 @@
+flowchart TD
+    subgraph "Input Processing"
+        A1[User Data Input] --> A2[Data Validation]
+        A2 --> A3[Variable Type Checking]
+        A3 --> A4[Missing Data Handling]
+    end
+    
+    subgraph "Analysis Configuration" 
+        B1[self$options$analysisType] --> B2{Analysis Scope}
+        B2 -->|basic| B3[Basic Migration]
+        B2 -->|standard| B4[Standard + C-index]
+        B2 -->|comprehensive| B5[Full Analysis Suite]
+        B2 -->|publication| B6[Publication Ready]
+    end
+    
+    subgraph "Core Analysis Engine"
+        C1[Migration Matrix] --> C2[Statistical Tests]
+        C2 --> C3[C-index Calculation]
+        C3 --> C4[Bootstrap Validation]
+        C4 --> C5[Cross-validation]
+        C5 --> C6[Decision Curves]
+        
+        C7[Multivariable Analysis] --> C8[Model Selection]
+        C8 --> C9[Interaction Tests] 
+        C9 --> C10[Personalized Risk]
+    end
+    
+    subgraph "Results Generation"
+        D1[Migration Tables] --> D2[Statistical Summaries]
+        D2 --> D3[Diagnostic Plots]
+        D3 --> D4[Clinical Interpretations]
+        D4 --> D5[self$results population]
+    end
+    
+    A4 --> B1
+    B3 --> C1
+    B4 --> C3
+    B5 --> C4
+    B6 --> C4
+    
+    C6 --> D1
+    C10 --> D1
+    
+    D5 --> E[jamovi Output]
+    
+    style A1 fill:#e1f5fe
+    style E fill:#e8f5e8
+    style B2 fill:#fff3e0
+    style C4 fill:#f3e5f5
+    style D5 fill:#ffebee

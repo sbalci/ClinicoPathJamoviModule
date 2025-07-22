@@ -1,0 +1,52 @@
+graph TB
+    subgraph ".r.yaml Results Definition"
+        R1["- name: migrationOverview<br/>  type: Table<br/>  columns:<br/>    - name: Metric<br/>    - name: Value<br/>    - name: Interpretation"]
+        R2["- name: bootstrapResults<br/>  type: Table<br/>  visible: (performBootstrap)<br/>  columns:<br/>    - name: Variable<br/>    - name: Original<br/>    - name: Optimism<br/>    - name: Corrected"]
+        R3["- name: migrationPlot<br/>  type: Image<br/>  width: 800<br/>  height: 600<br/>  renderFun: .migrationPlot<br/>  clearWith: [oldStage, newStage]"]
+        R4["- name: multivariableResults<br/>  type: Group<br/>  title: 'Multivariable Analysis'<br/>  visible: (enableMultifactorialAnalysis)"]
+    end
+    
+    subgraph ".b.R Results Population"
+        B1["self$results$migrationOverview$setContent(<br/>  migration_table)<br/><br/>migration_table <- data.frame(<br/>  Metric = c('Migration Rate', 'C-index'),<br/>  Value = c('25.3%', '0.742'),<br/>  Interpretation = c('Moderate', 'Good')<br/>)"]
+        B2["self$results$bootstrapResults$setContent(<br/>  bootstrap_table)<br/><br/>bootstrap_table <- data.frame(<br/>  Variable = c('Old Stage', 'New Stage'),<br/>  Original = c(0.720, 0.742),<br/>  Optimism = c(0.015, 0.012),<br/>  Corrected = c(0.705, 0.730)<br/>)"]
+        B3["self$results$migrationPlot$setState(<br/>  plot_data)<br/><br/>plot_data <- create_migration_heatmap(<br/>  migration_matrix)"]
+        B4["self$results$multivariableResults$<br/>  modelComparison$setContent(<br/>    model_comparison_table)"]
+    end
+    
+    subgraph "jamovi Display Output"
+        D1["📊 Migration Overview Table<br/>┌─────────────────┬──────┬──────────────┐<br/>│ Metric          │ Value│ Interpretation│<br/>├─────────────────┼──────┼──────────────┤<br/>│ Migration Rate  │25.3% │ Moderate     │<br/>│ C-index         │0.742 │ Good         │<br/>└─────────────────┴──────┴──────────────┘"]
+        D2["📈 Bootstrap Results Table<br/>┌───────────┬────────┬──────────┬───────────┐<br/>│ Variable  │Original│ Optimism │ Corrected │<br/>├───────────┼────────┼──────────┼───────────┤<br/>│ Old Stage │  0.720 │    0.015 │     0.705 │<br/>│ New Stage │  0.742 │    0.012 │     0.730 │<br/>└───────────┴────────┴──────────┴───────────┘"]
+        D3["🎨 Migration Heatmap<br/>[Rendered plot visualization]"]
+        D4["📊 Multivariable Analysis Group<br/>  └─ Model Comparison Table<br/>  └─ Interaction Tests<br/>  └─ Personalized Predictions"]
+    end
+    
+    subgraph "Conditional Display Logic"
+        C1["if (self$options$performBootstrap)<br/>  show bootstrapResults"]
+        C2["if (self$options$enableMultifactorialAnalysis)<br/>  show multivariableResults"]
+        C3["when oldStage or newStage changes<br/>  clear migrationPlot"]
+    end
+    
+    R1 --> B1 --> D1
+    R2 --> B2 --> D2
+    R3 --> B3 --> D3
+    R4 --> B4 --> D4
+    
+    C1 --> R2
+    C2 --> R4
+    C3 --> R3
+    
+    style R1 fill:#f3e5f5
+    style R2 fill:#f3e5f5
+    style R3 fill:#f3e5f5
+    style R4 fill:#f3e5f5
+    style B1 fill:#ffebee
+    style B2 fill:#ffebee
+    style B3 fill:#ffebee
+    style B4 fill:#ffebee
+    style D1 fill:#e8f5e8
+    style D2 fill:#e8f5e8
+    style D3 fill:#e8f5e8
+    style D4 fill:#e8f5e8
+    style C1 fill:#fff3e0
+    style C2 fill:#fff3e0
+    style C3 fill:#fff3e0

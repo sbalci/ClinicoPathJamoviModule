@@ -1,0 +1,41 @@
+flowchart TD
+    START["Defining New Analysis Option"] --> TYPE_DECISION{What type of input?}
+    
+    TYPE_DECISION -->|Variable Selection| VAR_TYPE{Single or Multiple?}
+    TYPE_DECISION -->|User Choice| CHOICE_TYPE{Exclusive or Multiple?}
+    TYPE_DECISION -->|Numeric Input| NUM_TYPE{Range or Value?}
+    TYPE_DECISION -->|Text Input| TEXT_TYPE{Validation needed?}
+    TYPE_DECISION -->|Boolean| BOOL_TYPE[type: Bool]
+    
+    VAR_TYPE -->|Single Variable| SINGLE_VAR["type: Variable<br/>Example: oldStage, newStage"]
+    VAR_TYPE -->|Multiple Variables| MULTI_VAR["type: Variables<br/>Example: covariates, factors"]
+    
+    CHOICE_TYPE -->|One Selection| LIST_TYPE["type: List<br/>Example: analysisType, cancerType"]
+    CHOICE_TYPE -->|Multiple Selections| TERMS_TYPE["type: Terms<br/>Example: interaction terms"]
+    
+    NUM_TYPE -->|Single Number| NUMBER_TYPE["type: Number<br/>Example: confidenceLevel, bootstrapReps"]
+    NUM_TYPE -->|Min/Max Range| RANGE_TYPE["type: Number + min/max<br/>Example: cvFolds (min:3, max:10)"]
+    
+    TEXT_TYPE -->|Simple Text| STRING_TYPE["type: String<br/>Example: nriTimePoints"]
+    TEXT_TYPE -->|Formula| FORMULA_TYPE["type: Formula<br/>Example: model formulas"]
+    
+    BOOL_TYPE --> BOOL_EXAMPLE["Example: performBootstrap,<br/>enableMultifactorialAnalysis,<br/>calculateNRI"]
+    
+    subgraph "ClinicoPath Examples"
+        CE1["oldStage: Variable<br/>newStage: Variable<br/>→ TNM staging variables"]
+        CE2["analysisType: List<br/>→ basic/standard/comprehensive"]
+        CE3["performBootstrap: Bool<br/>→ Enable bootstrap validation"]
+        CE4["bootstrapReps: Number<br/>→ Number of bootstrap samples"]
+    end
+    
+    SINGLE_VAR --> CE1
+    LIST_TYPE --> CE2
+    BOOL_EXAMPLE --> CE3
+    NUMBER_TYPE --> CE4
+    
+    style START fill:#e1f5fe
+    style TYPE_DECISION fill:#fff3e0
+    style CE1 fill:#e8f5e8
+    style CE2 fill:#e8f5e8
+    style CE3 fill:#e8f5e8
+    style CE4 fill:#e8f5e8

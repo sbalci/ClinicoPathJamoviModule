@@ -1,0 +1,29 @@
+graph TD
+    A[User Input via jamovi UI] --> B[.u.yaml UI Definition]
+    B --> C[self$options in .b.R]
+    C --> D[Data Validation & Processing]
+    D --> E[Statistical Analysis Execution]
+    E --> F[Results Generation]
+    F --> G[self$results in .b.R]
+    G --> H[.r.yaml Results Definition]
+    H --> I[jamovi Output Display]
+    
+    J[.a.yaml Analysis Definition] --> C
+    K[User Data] --> D
+    L[ClinicoPath Functions] --> E
+    
+    subgraph "Core Files"
+        B
+        C
+        G
+        H
+        J
+    end
+    
+    style A fill:#e1f5fe
+    style I fill:#e8f5e8
+    style J fill:#fff3e0
+    style B fill:#fff3e0
+    style H fill:#fff3e0
+    style C fill:#f3e5f5
+    style G fill:#f3e5f5

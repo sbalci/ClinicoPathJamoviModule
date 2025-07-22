@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant User as User Interface
+    participant UY as .u.yaml
+    participant AY as .a.yaml  
+    participant BR as .b.R Class
+    participant RY as .r.yaml
+    participant Output as jamovi Output
+    
+    Note over User,Output: ClinicoPath Analysis Execution Flow
+    
+    User->>UY: Selects variables & options
+    UY->>BR: UI bindings → self$options
+    AY->>BR: Default values → self$options
+    
+    Note over BR: .init() method execution
+    BR->>BR: Initialize self$results structure
+    BR->>RY: Check results definitions
+    
+    Note over BR: .run() method execution  
+    BR->>BR: Access self$options values
+    BR->>BR: Process self$data
+    BR->>BR: Execute ClinicoPath analysis
+    BR->>BR: Populate self$results tables/plots
+    
+    BR->>RY: Results data → defined structure
+    RY->>Output: Formatted output display
+    
+    Note over User,Output: Real-time updates as user changes options
