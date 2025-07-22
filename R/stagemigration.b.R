@@ -521,13 +521,44 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             required_vars <- c(self$options$oldStage, self$options$newStage,
                              self$options$survivalTime, self$options$event)
 
-            # For basic analysis, only include required variables
-            # Covariates will be handled separately in multifactorial analysis
+            # Include covariates if multifactorial analysis is enabled
             all_vars <- required_vars
+            if (self$options$enableMultifactorialAnalysis) {
+                continuous_vars <- self$options$continuousCovariates
+                categorical_vars <- self$options$categoricalCovariates
+                covariate_vars <- c(continuous_vars, categorical_vars)
+                
+                # Remove any NULL or empty values
+                covariate_vars <- covariate_vars[!is.null(covariate_vars) & covariate_vars != ""]
+                
+                if (length(covariate_vars) > 0) {
+                    all_vars <- c(all_vars, covariate_vars)
+                }
+            }
+            
+            # Also include institution variable if specified for cross-validation
+            if (!is.null(self$options$institutionVariable) && self$options$institutionVariable != "") {
+                all_vars <- c(all_vars, self$options$institutionVariable)
+            }
+            
+            # Remove duplicates
+            all_vars <- unique(all_vars)
 
-            missing_vars <- setdiff(required_vars, names(self$data))
+            missing_vars <- setdiff(all_vars, names(self$data))
             if (length(missing_vars) > 0) {
-                stop(paste("Missing variables:", paste(missing_vars, collapse = ", ")))
+                # Check if missing vars are only covariates (allow analysis to continue with warning)
+                missing_required <- intersect(missing_vars, required_vars)
+                missing_covariates <- intersect(missing_vars, setdiff(all_vars, required_vars))
+                
+                if (length(missing_required) > 0) {
+                    stop(paste("Missing required variables:", paste(missing_required, collapse = ", ")))
+                }
+                
+                if (length(missing_covariates) > 0) {
+                    warning(paste("Missing covariates (multifactorial analysis will be skipped):", paste(missing_covariates, collapse = ", ")))
+                    # Remove missing covariates from all_vars and continue
+                    all_vars <- setdiff(all_vars, missing_covariates)
+                }
             }
 
             # Extract and validate data (including covariates)
@@ -3371,15 +3402,29 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # Will Rogers analysis (handled by existing analysis functions)
 
-            # Multifactorial analysis (requires covariates)
+            # Multifactorial analysis (requires covariates available in data)
             if (self$options$enableMultifactorialAnalysis) {
-                # Check if covariates are specified
-                has_covariates <- (!is.null(self$options$continuousCovariates) &&
-                                  length(self$options$continuousCovariates) > 0) ||
-                                 (!is.null(self$options$categoricalCovariates) &&
-                                  length(self$options$categoricalCovariates) > 0)
-
-                if (has_covariates) {
+                continuous_vars <- self$options$continuousCovariates
+                categorical_vars <- self$options$categoricalCovariates
+                
+                # Check if covariates exist in the validated data
+                available_continuous <- if (length(continuous_vars) > 0) {
+                    intersect(continuous_vars, names(data))
+                } else {
+                    character(0)
+                }
+                
+                available_categorical <- if (length(categorical_vars) > 0) {
+                    intersect(categorical_vars, names(data))
+                } else {
+                    character(0)
+                }
+                
+                if (length(available_continuous) > 0 || length(available_categorical) > 0) {
+                    message("DEBUG: Multifactorial analysis enabled with available covariates")
+                    message("DEBUG: Available continuous:", paste(available_continuous, collapse = ", "))
+                    message("DEBUG: Available categorical:", paste(available_categorical, collapse = ", "))
+                    
                     multifactorial_result <- private$.performMultifactorialAnalysis(data)
                     if (!is.null(multifactorial_result) && !is.null(multifactorial_result$error)) {
                         message("Multifactorial analysis failed: ", multifactorial_result$error)
@@ -3387,7 +3432,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         all_results$multifactorial_analysis <- multifactorial_result
                     }
                 } else {
-                    message("Multifactorial analysis skipped: No covariates specified")
+                    message("Multifactorial analysis skipped: No covariates available in data")
+                    message("DEBUG: Requested continuous:", paste(continuous_vars, collapse = ", "))
+                    message("DEBUG: Requested categorical:", paste(categorical_vars, collapse = ", "))
+                    message("DEBUG: Available columns:", paste(names(data), collapse = ", "))
                 }
             } else if (self$options$performInteractionTests) {
                 # Create interaction tests even when multifactorial analysis is disabled
