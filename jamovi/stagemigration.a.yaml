@@ -205,6 +205,21 @@ options:
       description: >-
         Number of folds for cross-validation when enabled.
 
+    - name: institutionVariable
+      title: 'Institution Variable'
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description: >-
+        Optional variable indicating institution or study center for 
+        multi-institutional validation. When provided, performs internal-external
+        cross-validation using k-1 centers for development and remaining center
+        for validation. Essential for multi-center staging validation studies.
+
     # Clinical Significance Options
     - name: clinicalSignificanceThreshold
       title: 'Clinical Significance Threshold'

@@ -24,6 +24,7 @@ stagemigration(
   bootstrapReps = 1000,
   performCrossValidation = FALSE,
   cvFolds = 5,
+  institutionVariable,
   clinicalSignificanceThreshold = 0.02,
   nriClinicalThreshold = 0.2,
   performHomogeneityTests = FALSE,
@@ -138,6 +139,12 @@ additional validation. Computationally intensive but provides robust
 validation.}
 
 \item{cvFolds}{Number of folds for cross-validation when enabled.}
+
+\item{institutionVariable}{Optional variable indicating institution or
+study center for  multi-institutional validation. When provided, performs
+internal-external cross-validation using k-1 centers for development and
+remaining center for validation. Essential for multi-center staging
+validation studies.}
 
 \item{clinicalSignificanceThreshold}{Minimum improvement in C-index
 considered clinically significant. Default 0.02 based on oncology
@@ -372,6 +379,7 @@ A results object containing:
 \code{results$decisionCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$decisionCurves} \tab \tab \tab \tab \tab an image \cr
 \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$bootstrapValidationExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$willRogersAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$willRogersBasicAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$likelihoodTestsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -417,7 +425,9 @@ A results object containing:
 \code{results$dashboardExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$comparativeAnalysisDashboard} \tab \tab \tab \tab \tab a table \cr
 \code{results$abbreviationGlossary} \tab \tab \tab \tab \tab a html \cr
+\code{results$crossValidationExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$crossValidationPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$enhancedLRComparison} \tab \tab \tab \tab \tab a table \cr
 }
 

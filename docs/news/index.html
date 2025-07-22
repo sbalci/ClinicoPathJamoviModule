@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.63</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,355 @@
       <small>Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.66" id="clinicopath-00366">ClinicoPath 0.0.3.66<a class="anchor" aria-label="anchor" href="#clinicopath-00366"></a></h2>
+<div class="section level3">
+<h3 id="enhanced-calibration-assessment-with-flexible-spline-methods---complete-implementation-0-0-3-66">Enhanced Calibration Assessment with Flexible Spline Methods - Complete Implementation<a class="anchor" aria-label="anchor" href="#enhanced-calibration-assessment-with-flexible-spline-methods---complete-implementation-0-0-3-66"></a></h3>
+<div class="section level4">
+<h4 id="advanced-spline-based-calibration-analysis-0-0-3-66">Advanced Spline-Based Calibration Analysis<a class="anchor" aria-label="anchor" href="#advanced-spline-based-calibration-analysis-0-0-3-66"></a></h4>
+<ul><li>
+<strong>Flexible spline calibration curves</strong> using Restricted Cubic Splines (RCS) for non-linear calibration assessment</li>
+<li>
+<strong>Multi-method calibration framework</strong> combining traditional Hosmer-Lemeshow with advanced spline-based methods</li>
+<li>
+<strong>RCS calibration implementation</strong> providing flexible non-linear calibration curve fitting with proper confidence intervals</li>
+<li>
+<strong>Lowess-based calibration</strong> as robust alternative method for smooth calibration assessment</li>
+<li>
+<strong>rms package integration</strong> framework for enhanced calibration methodologies and validation</li>
+<li>
+<strong>Comprehensive calibration metrics</strong> including spline-based slopes, intercepts, and uncertainty quantification</li>
+</ul></div>
+<div class="section level4">
+<h4 id="enhanced-calibration-visualization-0-0-3-66">Enhanced Calibration Visualization<a class="anchor" aria-label="anchor" href="#enhanced-calibration-visualization-0-0-3-66"></a></h4>
+<ul><li>
+<strong>Dual-curve calibration plots</strong> showing both traditional Loess and advanced spline calibration methods</li>
+<li>
+<strong>GAM-based spline smoothing</strong> with confidence bands for visual calibration assessment</li>
+<li>
+<strong>Multi-layer visualization</strong> with distinct styling for different calibration approaches</li>
+<li>
+<strong>Enhanced plot aesthetics</strong> including color-coded curves, line type differentiation, and informative subtitles</li>
+<li>
+<strong>Automatic spline integration</strong> in calibration plots when spline data is available</li>
+<li>
+<strong>Publication-ready graphics</strong> with professional styling and comprehensive legends</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-calibration-table-integration-0-0-3-66">Comprehensive Calibration Table Integration<a class="anchor" aria-label="anchor" href="#comprehensive-calibration-table-integration-0-0-3-66"></a></h4>
+<ul><li>
+<strong>Extended calibration analysis table</strong> including spline calibration results alongside traditional metrics</li>
+<li>
+<strong>Separate spline calibration rows</strong> with dedicated interpretation and statistical measures</li>
+<li>
+<strong>Informative table annotations</strong> explaining spline methodology and applicability</li>
+<li>
+<strong>Statistical completeness</strong> with confidence intervals, slopes, and intercepts for all methods</li>
+<li>
+<strong>Method-specific interpretations</strong> providing clinical context for different calibration approaches</li>
+<li>
+<strong>Error handling integration</strong> with graceful fallbacks for missing or incomplete spline data</li>
+</ul></div>
+<div class="section level4">
+<h4 id="technical-infrastructure-enhancements-0-0-3-66">Technical Infrastructure Enhancements<a class="anchor" aria-label="anchor" href="#technical-infrastructure-enhancements-0-0-3-66"></a></h4>
+<ul><li>
+<strong>Package import additions</strong> including mgcv for GAM functionality and rms for spline methods</li>
+<li>
+<strong>Robust spline data generation</strong> with comprehensive error handling and validation</li>
+<li>
+<strong>Method integration framework</strong> allowing seamless addition of new calibration methods</li>
+<li>
+<strong>Performance optimization</strong> with efficient spline calculation and minimal computational overhead</li>
+<li>
+<strong>Backward compatibility</strong> maintaining all existing calibration functionality while adding new features</li>
+<li>
+<strong>Documentation completeness</strong> with method explanations and usage guidance</li>
+</ul></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.64" id="clinicopath-00364">ClinicoPath 0.0.3.64<a class="anchor" aria-label="anchor" href="#clinicopath-00364"></a></h2>
+<div class="section level3">
+<h3 id="visualization-and-dashboard-enhancements---complete-implementation-0-0-3-64">Visualization and Dashboard Enhancements - Complete Implementation<a class="anchor" aria-label="anchor" href="#visualization-and-dashboard-enhancements---complete-implementation-0-0-3-64"></a></h3>
+<div class="section level4">
+<h4 id="stage-migration-flow-visualization-0-0-3-64">Stage Migration Flow Visualization<a class="anchor" aria-label="anchor" href="#stage-migration-flow-visualization-0-0-3-64"></a></h4>
+<ul><li>
+<strong>Sankey diagram visualization</strong> showing patient flow between original and new staging systems</li>
+<li>
+<strong>Multiple visualization backends</strong> with networkD3 for interactive diagrams, ggalluvial for alluvial plots, and basic ggplot2 fallback</li>
+<li>
+<strong>Automatic flow quantification</strong> displaying patient counts for each migration pattern (unchanged, upstaged, downstaged)</li>
+<li>
+<strong>Visual flow analysis</strong> helping identify dominant migration patterns and assess reclassification magnitude</li>
+<li>
+<strong>Robust error handling</strong> with graceful fallbacks when specialized packages are unavailable</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comparative-analysis-dashboard-0-0-3-64">Comparative Analysis Dashboard<a class="anchor" aria-label="anchor" href="#comparative-analysis-dashboard-0-0-3-64"></a></h4>
+<ul><li>
+<strong>Comprehensive summary table</strong> aggregating results from all advanced migration analyses</li>
+<li>
+<strong>Evidence synthesis framework</strong> combining discrimination metrics, model fit criteria, and clinical assessments</li>
+<li>
+<strong>Automated recommendation engine</strong> generating overall evidence-based recommendations for staging system adoption</li>
+<li>
+<strong>Multi-dimensional assessment</strong> covering discrimination (C-index), model fit (AIC), validation (monotonicity), bias (Will Rogers), and assumptions (proportional hazards)</li>
+<li>
+<strong>Clinical relevance classification</strong> with clear interpretation of statistical significance and practical importance</li>
+<li>
+<strong>Research-ready summary</strong> providing publication-quality evidence synthesis for staging validation studies</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-dashboard-features-0-0-3-64">Advanced Dashboard Features<a class="anchor" aria-label="anchor" href="#advanced-dashboard-features-0-0-3-64"></a></h4>
+<ul><li>
+<strong>Evidence scoring system</strong> quantifying positive indicators across multiple analysis categories</li>
+<li>
+<strong>Proportional recommendation logic</strong> generating strong/moderate/limited evidence classifications</li>
+<li>
+<strong>Migration rate assessment</strong> with clinical relevance thresholds (high &gt;30%, moderate &gt;10%)</li>
+<li>
+<strong>Statistical significance integration</strong> combining multiple statistical tests and criteria</li>
+<li>
+<strong>Clinical decision support</strong> providing actionable recommendations for staging system adoption</li>
+<li>
+<strong>Error-resilient design</strong> with comprehensive fallback mechanisms for incomplete analyses</li>
+</ul></div>
+<div class="section level4">
+<h4 id="visualization-integration-0-0-3-64">Visualization Integration<a class="anchor" aria-label="anchor" href="#visualization-integration-0-0-3-64"></a></h4>
+<ul><li>
+<strong>Seamless workflow integration</strong> with advanced migration analysis framework</li>
+<li>
+<strong>Automatic activation</strong> when <code>advancedMigrationAnalysis</code> option is enabled</li>
+<li>
+<strong>Performance optimized</strong> with efficient data processing and minimal computational overhead</li>
+<li>
+<strong>Cross-platform compatibility</strong> supporting multiple visualization packages and graceful degradation</li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="time-dependent-auc-enhancement-with-integrated-measures---complete-implementation-0-0-3-64">Time-dependent AUC Enhancement with Integrated Measures - Complete Implementation<a class="anchor" aria-label="anchor" href="#time-dependent-auc-enhancement-with-integrated-measures---complete-implementation-0-0-3-64"></a></h3>
+<div class="section level4">
+<h4 id="enhanced-time-dependent-roc-analysis-0-0-3-64">Enhanced Time-dependent ROC Analysis<a class="anchor" aria-label="anchor" href="#enhanced-time-dependent-roc-analysis-0-0-3-64"></a></h4>
+<ul><li>
+<strong>Integrated AUC calculation</strong> using trapezoidal rule across multiple time points for comprehensive discrimination assessment</li>
+<li>
+<strong>Enhanced time-dependent ROC methodology</strong> with improved statistical methods and robust confidence intervals</li>
+<li>
+<strong>Brier score integration</strong> for combined calibration/discrimination assessment providing unified model performance metrics</li>
+<li>
+<strong>AUC comparison testing</strong> with DeLong statistical tests for differences between staging systems</li>
+<li>
+<strong>Temporal AUC trends analysis</strong> showing discrimination changes over time with linear regression modeling</li>
+<li>
+<strong>Bootstrap confidence intervals</strong> for integrated AUC differences with 500-iteration validation</li>
+<li>
+<strong>Multiple discrimination metrics</strong> including mean time-dependent AUC and integrated measures</li>
+<li>
+<strong>Clinical interpretation framework</strong> with magnitude classification (Substantial/Moderate/Small/Minimal) and clinical relevance thresholds</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-statistical-methods-0-0-3-64">Advanced Statistical Methods<a class="anchor" aria-label="anchor" href="#advanced-statistical-methods-0-0-3-64"></a></h4>
+<ul><li>
+<strong>Time-dependent AUC calculation</strong> using timeROC package with pROC fallback for robust analysis</li>
+<li>
+<strong>Trapezoidal integration</strong> for computing area under time-dependent AUC curves</li>
+<li>
+<strong>DeLong test implementation</strong> for statistical comparison of AUC values between staging systems</li>
+<li>
+<strong>Temporal trend detection</strong> using linear regression to identify discrimination changes over follow-up</li>
+<li>
+<strong>Combined discrimination/calibration</strong> assessment through Brier score analysis</li>
+<li>
+<strong>Bootstrap validation</strong> with automated confidence interval calculation for integrated measures</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-migration-analysis-0-0-3-64">Integration with Advanced Migration Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-migration-analysis-0-0-3-64"></a></h4>
+<ul><li>
+<strong>Seamless integration</strong> with existing advanced migration analysis framework</li>
+<li>
+<strong>Uses NRI time points</strong> for consistency across all time-dependent analyses</li>
+<li>
+<strong>Non-breaking implementation</strong> as part of <code>advancedMigrationAnalysis</code> option</li>
+<li>
+<strong>Comprehensive error handling</strong> with graceful degradation and informative error messages</li>
+<li>
+<strong>Performance optimization</strong> with bootstrap iteration limits for computational efficiency</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-research-applications-0-0-3-64">Clinical Research Applications<a class="anchor" aria-label="anchor" href="#clinical-research-applications-0-0-3-64"></a></h4>
+<ul><li>
+<strong>Publication-ready metrics</strong> with proper statistical rigor and confidence intervals</li>
+<li>
+<strong>Evidence-based thresholds</strong> using clinically meaningful AUC improvement criteria (≥0.02 for clinical relevance)</li>
+<li>
+<strong>Temporal discrimination assessment</strong> for understanding staging performance across different follow-up periods</li>
+<li>
+<strong>Combined performance evaluation</strong> through Brier scores integrating calibration and discrimination</li>
+<li>
+<strong>Comparative staging validation</strong> with statistical tests for superiority assessment</li>
+</ul></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.50" id="clinicopath-00350">ClinicoPath 0.0.3.50<a class="anchor" aria-label="anchor" href="#clinicopath-00350"></a></h2>
+<div class="section level3">
+<h3 id="advanced-migration-analysis-framework---complete-implementation-0-0-3-50">Advanced Migration Analysis Framework - Complete Implementation<a class="anchor" aria-label="anchor" href="#advanced-migration-analysis-framework---complete-implementation-0-0-3-50"></a></h3>
+<div class="section level4">
+<h4 id="advanced-migration-analysis-suite-0-0-3-50">Advanced Migration Analysis Suite<a class="anchor" aria-label="anchor" href="#advanced-migration-analysis-suite-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Complete implementation</strong> of all high-priority advanced migration analyses from staging literature</li>
+<li>
+<strong>Non-breaking integration</strong> with new <code>advancedMigrationAnalysis</code> option</li>
+<li>
+<strong>Comprehensive validation tools</strong> for staging system comparisons beyond basic C-index metrics</li>
+<li>
+<strong>Clinical research-grade outputs</strong> with detailed interpretations and recommendations</li>
+</ul></div>
+<div class="section level4">
+<h4 id="monotonicity-assessment-engine-0-0-3-50">Monotonicity Assessment Engine<a class="anchor" aria-label="anchor" href="#monotonicity-assessment-engine-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Automated detection</strong> of staging violations where higher stages have better survival than lower stages</li>
+<li>
+<strong>Quantitative monotonicity scoring</strong> (0-1 scale) measuring consistency across all stage comparisons</li>
+<li>
+<strong>Detailed violation reporting</strong> with specific stage pairs and survival differences</li>
+<li>
+<strong>Clinical interpretation</strong> guidance for both original and new staging systems</li>
+</ul></div>
+<div class="section level4">
+<h4 id="will-rogers-phenomenon-detection-0-0-3-50">Will Rogers Phenomenon Detection<a class="anchor" aria-label="anchor" href="#will-rogers-phenomenon-detection-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Comprehensive migration pattern analysis</strong> detecting artificial survival improvements</li>
+<li>
+<strong>Classic Will Rogers identification</strong> where patient reclassification improves both stage survivals without individual outcome changes</li>
+<li>
+<strong>Evidence strength classification</strong> (Strong/Possible/None) with statistical validation</li>
+<li>
+<strong>Migration rate assessment</strong> with bias risk evaluation and clinical impact guidance</li>
+<li>
+<strong>Per-pattern analysis</strong> for each migration type (e.g., Stage II → Stage III)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="stage-specific-validation-framework-0-0-3-50">Stage-Specific Validation Framework<a class="anchor" aria-label="anchor" href="#stage-specific-validation-framework-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Subgroup C-index analysis</strong> ensuring new staging maintains prognostic value within each original stage category</li>
+<li>
+<strong>Confidence interval estimation</strong> for discrimination metrics in each subgroup</li>
+<li>
+<strong>Insufficient sample size detection</strong> with appropriate handling for sparse data</li>
+<li>
+<strong>Clinical interpretation</strong> of discrimination quality (Good/Moderate/Poor/None) with significance testing</li>
+</ul></div>
+<div class="section level4">
+<h4 id="enhanced-pseudo-r-squared-suite-0-0-3-50">Enhanced Pseudo R-squared Suite<a class="anchor" aria-label="anchor" href="#enhanced-pseudo-r-squared-suite-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Multiple R² variants</strong>: Nagelkerke, Cox &amp; Snell, McFadden, and Royston &amp; Sauerbrei measures</li>
+<li>
+<strong>Comprehensive model comparison</strong> with absolute and relative improvement quantification</li>
+<li>
+<strong>Variance explanation analysis</strong> showing percentage of survival variation captured by each system</li>
+<li>
+<strong>Improvement magnitude classification</strong> (Substantial/Moderate/Small/Negligible) with clinical relevance thresholds</li>
+</ul></div>
+<div class="section level4">
+<h4 id="enhanced-reclassification-metrics-suite-0-0-3-50">Enhanced Reclassification Metrics Suite<a class="anchor" aria-label="anchor" href="#enhanced-reclassification-metrics-suite-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Category-free NRI</strong>: Rank-based Net Reclassification Improvement without predefined risk categories</li>
+<li>
+<strong>Clinical NRI</strong>: Risk threshold-based NRI using clinically meaningful cut-points (tertiles for high-risk identification)</li>
+<li>
+<strong>Relative IDI</strong>: Integrated Discrimination Improvement expressed as percentage of baseline discrimination</li>
+<li>
+<strong>Continuous NRI</strong>: Linear predictor-based continuous reclassification assessment</li>
+<li>
+<strong>Event/Non-event Discrimination Improvement</strong>: Separate discrimination metrics for events and non-events</li>
+<li>
+<strong>Kaplan-Meier based NRI</strong>: Survival curve-derived reclassification using stage-specific survival probabilities</li>
+<li>
+<strong>Bootstrap confidence intervals</strong>: Robust statistical inference with optional bootstrap validation for all metrics</li>
+<li>
+<strong>Comprehensive clinical interpretation</strong>: Magnitude classification (Substantial/Moderate/Small/Minimal) with direction assessment</li>
+</ul></div>
+<div class="section level4">
+<h4 id="proportional-hazards-assumption-testing-0-0-3-50">Proportional Hazards Assumption Testing<a class="anchor" aria-label="anchor" href="#proportional-hazards-assumption-testing-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Schoenfeld residuals testing</strong>: Automated validation of Cox model assumptions using survival::cox.zph()</li>
+<li>
+<strong>Global test statistics</strong>: Chi-square test results with degrees of freedom and p-values for both staging systems</li>
+<li>
+<strong>Assumption status classification</strong>: Clear indication of whether proportional hazards assumption is met or violated</li>
+<li>
+<strong>Clinical interpretation guidance</strong>: Specific recommendations for handling violations (stratified models, time-varying coefficients)</li>
+<li>
+<strong>Violation severity assessment</strong>: Graded interpretation (Strong/Moderate/Weak violation) with appropriate recommendations</li>
+<li>
+<strong>Automated integration</strong>: Runs automatically as part of advanced migration analysis without user configuration</li>
+</ul></div>
+<div class="section level4">
+<h4 id="enhanced-decision-curve-analysis-0-0-3-50">Enhanced Decision Curve Analysis<a class="anchor" aria-label="anchor" href="#enhanced-decision-curve-analysis-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Net benefit calculation</strong>: Implements clinical decision curve analysis across multiple threshold probabilities (5%-50%)</li>
+<li>
+<strong>Time-specific analysis</strong>: Uses same time points as NRI analysis for consistent temporal assessment</li>
+<li>
+<strong>Clinical utility comparison</strong>: Compares net benefit between staging systems at clinically relevant decision thresholds</li>
+<li>
+<strong>Impact classification</strong>: Graded assessment (Substantial/Moderate/Small Benefit/Harm) with clinical interpretations</li>
+<li>
+<strong>Survival probability integration</strong>: Uses Cox model baseline hazard for accurate time-specific mortality risk calculation</li>
+<li>
+<strong>Evidence-based thresholds</strong>: Covers clinically meaningful probability ranges for staging-based treatment decisions</li>
+</ul></div>
+<div class="section level4">
+<h4 id="enhanced-calibration-assessment-0-0-3-50">Enhanced Calibration Assessment<a class="anchor" aria-label="anchor" href="#enhanced-calibration-assessment-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Perfect calibration detection</strong>: Enhanced focus on calibration slope = 1.0 as ideal target (per document recommendations)</li>
+<li>
+<strong>Robust statistical methods</strong>: Quantile-based risk grouping and profile likelihood confidence intervals for calibration slopes</li>
+<li>
+<strong>Additional calibration metrics</strong>: Calibration-in-the-large, Expected/Observed ratios, and Brier scores for comprehensive assessment</li>
+<li>
+<strong>Enhanced Hosmer-Lemeshow testing</strong>: Improved handling of sparse data with continuity correction and minimum group size requirements</li>
+<li>
+<strong>Baseline hazard integration</strong>: More accurate survival probability calculation using Cox model baseline hazard functions</li>
+<li>
+<strong>Comprehensive interpretation</strong>: Multi-component interpretation covering H-L test, calibration slope quality, and systematic bias detection</li>
+</ul></div>
+<div class="section level4">
+<h4 id="technical-architecture-improvements-0-0-3-50">Technical Architecture Improvements<a class="anchor" aria-label="anchor" href="#technical-architecture-improvements-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Modular analysis framework</strong> with <code>.performAdvancedMigrationAnalysis()</code> main dispatcher</li>
+<li>
+<strong>Individual analysis functions</strong> for each advanced method with independent error handling</li>
+<li>
+<strong>Helper function library</strong> for pseudo R² calculations and survival metrics</li>
+<li>
+<strong>Robust statistical calculations</strong> with comprehensive fallback mechanisms for edge cases</li>
+</ul></div>
+<div class="section level4">
+<h4 id="user-experience-enhancements-0-0-3-50">User Experience Enhancements<a class="anchor" aria-label="anchor" href="#user-experience-enhancements-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Detailed explanatory documentation</strong> for each advanced analysis with clinical context</li>
+<li>
+<strong>Progress tracking</strong> with comprehensive error reporting and debugging information</li>
+<li>
+<strong>Clinical interpretation</strong> guidance for all metrics with actionable recommendations</li>
+<li>
+<strong>Research-ready outputs</strong> suitable for publication with proper statistical rigor</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-and-compatibility-0-0-3-50">Integration and Compatibility<a class="anchor" aria-label="anchor" href="#integration-and-compatibility-0-0-3-50"></a></h4>
+<ul><li>
+<strong>Seamless integration</strong> with existing stage migration workflow without breaking changes</li>
+<li>
+<strong>Backward compatibility</strong> with all existing functionality and options</li>
+<li>
+<strong>Configurable activation</strong> via single <code>advancedMigrationAnalysis</code> boolean option</li>
+<li>
+<strong>Error isolation</strong> ensuring advanced analyses failures don’t affect core functionality</li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.3.47" id="clinicopath-00347">ClinicoPath 0.0.3.47<a class="anchor" aria-label="anchor" href="#clinicopath-00347"></a></h2>
 <div class="section level3">

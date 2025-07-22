@@ -233,6 +233,17 @@ children:
                 name: showWillRogersVisualization
               - type: CheckBox
                 name: showMigrationSurvivalComparison
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Institution Variable
+        children:
+          - type: VariablesListBox
+            name: institutionVariable
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Multifactorial Analysis
     collapsed: false
