@@ -1,0 +1,87 @@
+graph TB
+    subgraph "stagemigration.a.yaml - Analysis Definition"
+        A1["- name: oldStage<br/>  type: Variable<br/>  default: null"]
+        A2["- name: newStage<br/>  type: Variable<br/>  default: null"]
+        A3["- name: analysisType<br/>  type: List<br/>  default: 'standard'"]
+        A4["- name: enableMultifactorialAnalysis<br/>  type: Bool<br/>  default: false"]
+        A5["- name: performBootstrap<br/>  type: Bool<br/>  default: false"]
+    end
+    
+    subgraph "stagemigration.b.R - R6 Class Methods"
+        B1[".init() - Initialize UI"]
+        B2[".run() - Main Logic"]
+        B3[".validateData() - Check Data"]
+        B4[".performBootstrapValidation()"]
+        B5[".performMultivariableAnalysis()"]
+    end
+    
+    subgraph "self$options Access"
+        C1["self$options$oldStage"]
+        C2["self$options$newStage"] 
+        C3["self$options$analysisType"]
+        C4["self$options$enableMultifactorialAnalysis"]
+        C5["self$options$performBootstrap"]
+    end
+    
+    subgraph "Analysis Execution"
+        D1["Validate Variables"]
+        D2["Create Migration Matrix"]
+        D3["Calculate C-index"]
+        D4["Bootstrap Validation"]
+        D5["Generate Plots"]
+    end
+    
+    subgraph "self$results Population"
+        E1["self$results$migrationOverview$setContent()"]
+        E2["self$results$statisticalComparison$setContent()"]
+        E3["self$results$bootstrapResults$setContent()"]
+        E4["self$results$migrationPlot$setState()"]
+    end
+    
+    subgraph "stagemigration.r.yaml - Results Definition"
+        F1["- name: migrationOverview<br/>  type: Table<br/>  columns: [...]"]
+        F2["- name: statisticalComparison<br/>  type: Table<br/>  columns: [...]"]
+        F3["- name: bootstrapResults<br/>  type: Table<br/>  columns: [...]"]
+        F4["- name: migrationPlot<br/>  type: Image<br/>  renderFun: .migrationPlot"]
+    end
+    
+    A1 --> C1
+    A2 --> C2
+    A3 --> C3
+    A4 --> C4
+    A5 --> C5
+    
+    C1 --> B1
+    C2 --> B1
+    C3 --> B2
+    C4 --> B2
+    C5 --> B2
+    
+    B2 --> D1
+    D1 --> D2
+    D2 --> D3
+    D3 --> D4
+    D4 --> D5
+    
+    D2 --> E1
+    D3 --> E2
+    D4 --> E3
+    D5 --> E4
+    
+    E1 --> F1
+    E2 --> F2
+    E3 --> F3
+    E4 --> F4
+    
+    style A1 fill:#fff3e0
+    style A2 fill:#fff3e0
+    style A3 fill:#fff3e0
+    style C1 fill:#ffebee
+    style C2 fill:#ffebee
+    style C3 fill:#ffebee
+    style E1 fill:#e8f5e8
+    style E2 fill:#e8f5e8
+    style E3 fill:#e8f5e8
+    style F1 fill:#f3e5f5
+    style F2 fill:#f3e5f5
+    style F3 fill:#f3e5f5

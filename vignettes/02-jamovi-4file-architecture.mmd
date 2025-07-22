@@ -1,0 +1,44 @@
+graph LR
+    subgraph "User Interface Layer"
+        UI[".u.yaml<br/>UI Definition"]
+    end
+    
+    subgraph "Configuration Layer"
+        AD[".a.yaml<br/>Analysis Definition"]
+    end
+    
+    subgraph "Processing Layer"
+        BR[".b.R<br/>Backend Logic"]
+        subgraph "R6 Class Methods"
+            INIT[".init()"]
+            RUN[".run()"]
+            PLOT[".plot()"]
+        end
+    end
+    
+    subgraph "Output Layer"
+        RD[".r.yaml<br/>Results Definition"]
+    end
+    
+    subgraph "Data Flow"
+        OPTIONS["self$options"]
+        RESULTS["self$results"]
+        DATA["self$data"]
+    end
+    
+    UI --> OPTIONS
+    AD --> OPTIONS
+    OPTIONS --> INIT
+    OPTIONS --> RUN
+    DATA --> RUN
+    RUN --> RESULTS
+    PLOT --> RESULTS
+    RESULTS --> RD
+    
+    style UI fill:#e3f2fd
+    style AD fill:#fff3e0
+    style BR fill:#f3e5f5
+    style RD fill:#e8f5e8
+    style OPTIONS fill:#ffebee
+    style RESULTS fill:#ffebee
+    style DATA fill:#f1f8e9

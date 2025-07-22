@@ -4319,28 +4319,90 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 self$results$methodologyNotes$setContent(methodology_html)
             }
 
+
             # Multifactorial Analysis Population
             if (self$options$enableMultifactorialAnalysis && !is.null(all_results$multifactorial_analysis)) {
                 # Add explanatory text for multifactorial analysis
                 if (self$options$showExplanations) {
                     multifactorial_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
-                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Multifactorial Stage Migration Analysis</h4>
-                        <p style="margin-bottom: 10px;">This analysis evaluates staging system performance after adjusting for other prognostic factors:</p>
-                        <ul style="margin-left: 20px;">
-                            <li><strong>Adjusted C-index:</strong> Discriminative ability after accounting for covariates</li>
-                            <li><strong>Nested Model Tests:</strong> Formal comparison of staging systems using likelihood ratio tests</li>
-                            <li><strong>Stepwise Selection:</strong> Automated variable selection showing importance of each staging system</li>
-                            <li><strong>Interaction Tests:</strong> Whether staging system performance varies by patient subgroups</li>
-                            <li><strong>Stratified Analysis:</strong> Separate evaluation within categorical covariate levels</li>
-                        </ul>
-                        <p style="margin-bottom: 5px;"><strong>Clinical significance:</strong></p>
-                        <ul style="margin-left: 20px;">
-                            <li>Adjusted analysis shows real-world staging system performance</li>
-                            <li>Accounts for confounding by other prognostic factors</li>
-                            <li>Identifies which staging system adds most value in multifactorial setting</li>
-                            <li>Reveals if staging system benefit varies across patient subgroups</li>
-                        </ul>
+                        <h4 style="margin-top: 0; color: #2c3e50;">Advanced Multifactorial Stage Migration Analysis</h4>
+                        <p style="margin-bottom: 15px;">This comprehensive analysis evaluates staging system performance using state-of-the-art multivariable methods, accounting for other prognostic factors and providing clinically actionable insights.</p>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                            <div>
+                                <h5 style="color: #1976d2; margin-bottom: 8px;">Core Analyses</h5>
+                                <ul style="margin: 0; padding-left: 16px; font-size: 14px;">
+                                    <li><strong>Adjusted C-index:</strong> Discriminative ability after covariate adjustment</li>
+                                    <li><strong>Nested Model Tests:</strong> Likelihood ratio tests comparing staging systems</li>
+                                    <li><strong>Bootstrap Model Selection:</strong> Stability assessment with 500 bootstrap samples</li>
+                                    <li><strong>Advanced Interaction Detection:</strong> Stage-covariate interaction testing</li>
+                                    <li><strong>Comprehensive Model Diagnostics:</strong> Validation and performance metrics</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 style="color: #1976d2; margin-bottom: 8px;">Advanced Methods</h5>
+                                <ul style="margin: 0; padding-left: 16px; font-size: 14px;">
+                                    <li><strong>Adjusted NRI:</strong> Net reclassification improvement with covariates</li>
+                                    <li><strong>Multivariable Decision Curves:</strong> Clinical utility across models</li>
+                                    <li><strong>Personalized Predictions:</strong> Individual patient risk assessments</li>
+                                    <li><strong>Risk Profiles:</strong> Representative patient archetypes</li>
+                                    <li><strong>Clinical Recommendations:</strong> Automated treatment intensity guidance</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div style="background-color: #fff; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                            <h5 style="color: #d32f2f; margin-bottom: 8px;">Clinical Significance Thresholds</h5>
+                            <ul style="margin: 0; padding-left: 16px; font-size: 14px;">
+                                <li>C-index improvement ≥ 0.02 (clinically meaningful discrimination gain)</li>
+                                <li>NRI ≥ 20% (substantial reclassification improvement)</li>
+                                <li>Bootstrap selection frequency > 80% (high stability variables)</li>
+                                <li>Risk difference > 10% (significant individual impact)</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background-color: #e8f5e8; padding: 12px; border-radius: 4px;">
+                            <h5 style="color: #2e7d32; margin-bottom: 8px;">Clinical Applications</h5>
+                            <ul style="margin: 0; padding-left: 16px; font-size: 14px;">
+                                <li><strong>Evidence-based adoption:</strong> Robust statistical evidence for staging system changes</li>
+                                <li><strong>Real-world performance:</strong> Accounts for confounding by other prognostic factors</li>
+                                <li><strong>Personalized medicine:</strong> Individual patient risk assessments and recommendations</li>
+                                <li><strong>Subgroup analysis:</strong> Identifies patient populations with greatest benefit</li>
+                                <li><strong>Decision support:</strong> Net benefit analysis for treatment threshold decisions</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background-color: #fff3e0; padding: 12px; border-radius: 4px; margin-top: 15px;">
+                            <h5 style="color: #e65100; margin-bottom: 8px;">Configuration Guidance & Resource Estimation</h5>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #d84315;">Comparison Types:</p>
+                                    <ul style="margin: 0; padding-left: 16px; font-size: 13px;">
+                                        <li><strong>Comprehensive:</strong> High-impact research (15-30 min)</li>
+                                        <li><strong>Adjusted C-index:</strong> Limited resources (2-5 min)</li>
+                                        <li><strong>Nested models:</strong> Formal testing (5-10 min)</li>
+                                        <li><strong>Stepwise:</strong> Variable selection (3-8 min)</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #d84315;">Sample Size Guidelines:</p>
+                                    <ul style="margin: 0; padding-left: 16px; font-size: 13px;">
+                                        <li><strong>&lt; 500 patients:</strong> All methods feasible</li>
+                                        <li><strong>500-2000:</strong> Monitor bootstrap operations</li>
+                                        <li><strong>&gt; 2000:</strong> Consider reducing iterations</li>
+                                        <li><strong>&gt; 10000:</strong> Use standard analysis</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p style="margin-top: 15px; margin-bottom: 0; font-style: italic; color: #666; font-size: 13px;">
+                            <strong>Note:</strong> This analysis represents the current state-of-the-art in staging system validation, 
+                            incorporating methods from recent oncology and biostatistics literature for comprehensive evaluation 
+                            of prognostic model improvements in multivariable settings. See stagemigration_analysis_guide.md for 
+                            detailed configuration selection guidance based on your research context.
+                        </p>
                     </div>
                     '
                     self$results$multifactorialAnalysisExplanation$setContent(multifactorial_explanation_html)
@@ -6789,6 +6851,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                     
                                     <dt style="font-weight: bold;">Upstaging/Downstaging</dt>
                                     <dd style="margin-left: 20px; margin-bottom: 10px;">Movement to higher/lower stage category</dd>
+                                    
+                                    <dt style="font-weight: bold;">Selection Frequency</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Proportion of bootstrap samples selecting a variable</dd>
+                                    
+                                    <dt style="font-weight: bold;">AIC Impact</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Average model improvement when variable included</dd>
+                                    
+                                    <dt style="font-weight: bold;">Risk Reclassification</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Change in individual risk category assignment</dd>
+                                    
+                                    <dt style="font-weight: bold;">Clinical Utility</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Net benefit for clinical decision making</dd>
                                 </dl>
                             </div>
                             
@@ -6806,6 +6880,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                     
                                     <dt style="font-weight: bold;">Cross-Validation</dt>
                                     <dd style="margin-left: 20px; margin-bottom: 10px;">K-fold data splitting for validation</dd>
+                                    
+                                    <dt style="font-weight: bold;">Bootstrap Model Selection</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Variable selection stability assessment using resampling</dd>
+                                    
+                                    <dt style="font-weight: bold;">Adjusted NRI</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Net reclassification improvement adjusted for covariates</dd>
+                                    
+                                    <dt style="font-weight: bold;">Multivariable DCA</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Decision curve analysis comparing multiple models</dd>
+                                    
+                                    <dt style="font-weight: bold;">Personalized Predictions</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Individual patient risk assessments and recommendations</dd>
                                 </dl>
                             </div>
                             
@@ -6823,6 +6909,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                     
                                     <dt style="font-weight: bold;">Model Preference</dt>
                                     <dd style="margin-left: 20px; margin-bottom: 10px;">Lower AIC/BIC indicates better model</dd>
+                                    
+                                    <dt style="font-weight: bold;">High Stability</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Selection frequency > 80% across bootstrap samples</dd>
+                                    
+                                    <dt style="font-weight: bold;">Substantial NRI</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Net reclassification improvement ≥ 20%</dd>
+                                    
+                                    <dt style="font-weight: bold;">Significant Risk Change</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Individual risk difference > 10%</dd>
+                                    
+                                    <dt style="font-weight: bold;">Clinical Utility</dt>
+                                    <dd style="margin-left: 20px; margin-bottom: 10px;">Positive net benefit over treat-all/treat-none</dd>
                                 </dl>
                             </div>
                             
@@ -6835,6 +6933,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                 <li>Click on the "Show Abbreviation Glossary" option to toggle this reference</li>
                                 <li>Print this glossary for offline reference during manuscript preparation</li>
                                 <li>Refer to specific analysis tables for detailed results when dashboard shows "TBD"</li>
+                                <li>See <strong>stagemigration_analysis_guide.md</strong> for detailed configuration selection guidance</li>
                             </ul>
                         </div>
                         

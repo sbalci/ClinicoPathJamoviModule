@@ -1,0 +1,56 @@
+graph LR
+    subgraph "stagemigration.a.yaml Configuration"
+        A1["name: oldStage<br/>type: Variable<br/>suggested: [ordinal]<br/>description: 'Original staging system'"]
+        A2["name: analysisType<br/>type: List<br/>options:<br/>  - basic<br/>  - standard<br/>  - comprehensive<br/>default: 'standard'"]
+        A3["name: performBootstrap<br/>type: Bool<br/>title: 'Bootstrap Validation'<br/>default: false"]
+        A4["name: nriTimePoints<br/>type: String<br/>title: 'NRI Time Points (months)'<br/>default: '12, 24, 60'"]
+    end
+    
+    subgraph "Compiled to self$options Access"
+        B1["self$options$oldStage<br/>→ Variable object"]
+        B2["self$options$analysisType<br/>→ String value"]
+        B3["self$options$performBootstrap<br/>→ Boolean value"]
+        B4["self$options$nriTimePoints<br/>→ String value"]
+    end
+    
+    subgraph ".b.R Implementation Usage"
+        C1["if (is.null(self$options$oldStage))<br/>  return()"]
+        C2["if (self$options$analysisType == 'comprehensive')<br/>  perform_full_analysis()"]
+        C3["if (self$options$performBootstrap)<br/>  bootstrap_validation()"]
+        C4["time_points <- parse_time_points(<br/>  self$options$nriTimePoints)"]
+    end
+    
+    subgraph "User Interface Elements"
+        D1["Variable selection dropdown<br/>for staging systems"]
+        D2["Radio buttons:<br/>○ Basic<br/>○ Standard<br/>● Comprehensive"]
+        D3["Checkbox:<br/>☐ Bootstrap Validation"]
+        D4["Text input:<br/>'12, 24, 60'"]
+    end
+    
+    D1 --> A1
+    D2 --> A2
+    D3 --> A3
+    D4 --> A4
+    
+    A1 --> B1
+    A2 --> B2
+    A3 --> B3
+    A4 --> B4
+    
+    B1 --> C1
+    B2 --> C2
+    B3 --> C3
+    B4 --> C4
+    
+    style A1 fill:#fff3e0
+    style A2 fill:#fff3e0
+    style A3 fill:#fff3e0
+    style A4 fill:#fff3e0
+    style B1 fill:#ffebee
+    style B2 fill:#ffebee
+    style B3 fill:#ffebee
+    style B4 fill:#ffebee
+    style D1 fill:#e3f2fd
+    style D2 fill:#e3f2fd
+    style D3 fill:#e3f2fd
+    style D4 fill:#e3f2fd

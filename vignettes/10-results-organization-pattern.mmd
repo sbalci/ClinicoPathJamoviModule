@@ -1,0 +1,52 @@
+flowchart LR
+    subgraph "Results Hierarchy"
+        TOP[Top-level Items]
+        GROUP[Result Groups]
+        TABLES[Tables]
+        PLOTS[Images/Plots] 
+        TEXT[Text/Preformatted]
+    end
+    
+    subgraph "stagemigration Example Structure"
+        SM1["migrationOverview (Table)"]
+        SM2["migrationMatrix (Table)"]
+        SM3["statisticalComparison (Table)"]
+        SM4["bootstrapResults (Table)"]
+        SM5["migrationPlot (Image)"]
+        SM6["multivariableResults (Group)"]
+        SM7["├─ modelComparison (Table)"]
+        SM8["├─ interactionTests (Table)"]
+        SM9["└─ personalizedPredictions (Table)"]
+    end
+    
+    subgraph "Population Patterns"
+        P1["Basic Results:<br/>Always visible"]
+        P2["Conditional Results:<br/>visible: (option)"]
+        P3["Grouped Results:<br/>Organized sections"]
+        P4["Dynamic Sizing:<br/>Based on data"]
+    end
+    
+    TOP --> SM1
+    TOP --> SM2
+    TOP --> SM3
+    TABLES --> SM4
+    PLOTS --> SM5
+    GROUP --> SM6
+    SM6 --> SM7
+    SM6 --> SM8
+    SM6 --> SM9
+    
+    SM1 --> P1
+    SM4 --> P2
+    SM6 --> P3
+    SM5 --> P4
+    
+    style SM1 fill:#e8f5e8
+    style SM2 fill:#e8f5e8
+    style SM3 fill:#e8f5e8
+    style SM4 fill:#fff3e0
+    style SM5 fill:#f3e5f5
+    style SM6 fill:#e3f2fd
+    style P2 fill:#ffebee
+    style P3 fill:#ffebee
+    style P4 fill:#ffebee

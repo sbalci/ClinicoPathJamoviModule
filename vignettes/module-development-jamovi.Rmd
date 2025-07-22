@@ -1,8 +1,8 @@
 ---
-title: "Comprehensive Guide to jamovi Module Development"
+title: "ClinicoPath Module Development Guide"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Comprehensive Guide to jamovi Module Development}
+  %\VignetteIndexEntry{ClinicoPath Module Development Guide}
   %\VignetteEngineknitr::rmarkdown
   %\VignetteEncodingUTF-8
 ---
@@ -19,60 +19,61 @@ knitr::opts_chunk$set(
 
 
 
-# ‘A beginners guide to jamovi modules’ or ‘jamovi modules for dummies’
+# ClinicoPath Module Development Guide
 
+This guide provides comprehensive instructions for developing and maintaining the ClinicoPath jamovi module for clinicopathological research analysis.
+
+> **Note**: This guide focuses specifically on ClinicoPath module development. Generic jamovi tutorial content and examples using non-ClinicoPath datasets have been commented out to maintain focus on the actual ClinicoPath development workflow. Developers can refer to commented sections for general jamovi concepts if needed.
+
+## Prerequisites & Quick Setup
+
+<!-- Generic jamovi setup - commented out for ClinicoPath-specific focus
 Official documentation is here: https://dev.jamovi.org/
 
-
-
-## TL;DR
-
-
-- Details are here: https://dev.jamovi.org/
-
-Briefly:
-
 - Use `R >= 4.0.5`
-
-- Install jamovi from this link: https://www.jamovi.org/download.html Get the latest one 2.3.2
-
+- Install jamovi from: https://www.jamovi.org/download.html 
 - Install jmvtools package with:
-
 ```r
 install.packages('node', repos='https://repo.jamovi.org')
-
 install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
 ```
+-->
 
-- locate jamovi bin folder via this: `jmvtools::check("C://Program Files//jamovi//bin")` I recommend changing folder name from default `jamovi 1.2` to `jamovi`
+### ClinicoPath Development Setup
 
-- `C:\Program Files\jamovi 2.3.0.0\bin\jamovi.exe`
+- Fork and clone this repository: https://github.com/sbalci/ClinicoPathJamoviModule
+- Navigate to the cloned directory in R
+- Run `jmvtools::install()` to build and install the module
+- This produces `ClinicoPath.jmo` and installs to jamovi
+- The module follows R package structure with additional `jamovi/` folder
 
-```r
-jmvtools::check(home = 'C:\\Program Files\\jamovi 2.3.0.0\\bin')
+### Key Development Areas
 
-options(jamovi_home = 'C:\\Program Files\\jamovi 2.3.0.0\\bin')
-```
+#### **Core Analysis Modules**
+- **Stage Migration Analysis**: `R/stagemigration.b.R` - Advanced TNM staging validation with bootstrap and cross-validation
+- **Survival Analysis**: `R/survival.b.R` - Comprehensive survival analysis with Kaplan-Meier and Cox regression
+- **Decision Analysis**: `R/decisiongraph.b.R` - Medical decision trees and Markov chain models
+- **Descriptive Analysis**: Cross tables, descriptive statistics, and data checking tools
+- **Statistical Plots**: JJStatsPlot integration for publication-ready visualizations
 
-- Fork and Clone this repo: https://github.com/sbalci/ClinicoPath
+#### **Configuration & Distribution**  
+- **Module Configuration**: `_updateModules_config.yaml` - Controls distribution to sub-modules
+- **Version Management**: Update `DESCRIPTION` and `NEWS.md` for version changes
+- **Documentation**: Function documentation follows roxygen2 standards
 
-- inside this repo folder in R `jmvtools::install()`
+#### **jamovi Integration**
+- **Analysis Definitions**: `.a.yaml` files define parameters and options
+- **UI Definitions**: `.u.yaml` files define user interface layout  
+- **Results Definitions**: `.r.yaml` files define output tables and plots
+- **Backend Implementation**: `.b.R` files contain the R6 class analysis logic
 
-- it will produce a file named ClinicoPath.jmo and install this module to jamovi
-
-- The repo is like an R package except `jamovi` folder. 
-
-- You need to edit `R/crosstable.b.R`
-
+<!-- 
+Generic tutorial content commented out:
 - Just edit the `tangram::` code
 https://dev.jamovi.org/tuts0104-implementing-an-analysis.html
 https://dev.jamovi.org/tuts0105-debugging-an-analysis.html
-
-- In DESCRIPTION file change `spgarbet/tangram@0.3.2` to the version you want to test. 
-
-- run `jmvtools::install()` again.
-
-Let me know how it goes :)
+- In DESCRIPTION file change `spgarbet/tangram@0.3.2` to the version you want to test
+-->
 
 ---
 
@@ -97,33 +98,106 @@ Rscript _updateModules_enhanced.R
 - ✅ **Configuration management** via YAML
 - ✅ **Security validation** and integrity checks
 
-### Modern Development Workflow
+### ClinicoPath Development Workflow
 
 ```r
-# Enhanced build process for production-ready modules
-development_cycle <- function() {
+# ClinicoPath-specific development cycle
+clinicopath_development <- function() {
     
-    # 1. Create/modify analysis
-    jmvtools::addAnalysis(name='myanalysis', title='My Analysis')
+    # 1. Modify existing analysis or create new one
+    # For existing: Edit R/stagemigration.b.R, R/survival.b.R, etc.
+    # For new: jmvtools::addAnalysis(name='newanalysis', title='New Analysis')
     
-    # 2. Edit implementation files
-    # R/myanalysis.b.R - Add your analysis logic
-    # jamovi/*.yaml - Configure UI and results
+    # 2. Update implementation files
+    # R/newanalysis.b.R - Main R6 class with .init(), .run() methods
+    # jamovi/newanalysis.a.yaml - Analysis options and parameters
+    # jamovi/newanalysis.u.yaml - User interface layout
+    # jamovi/newanalysis.r.yaml - Results tables and plots
     
-    # 3. Enhanced build process
-    jmvtools::prepare()
-    devtools::document() 
-    jmvtools::prepare()    # Critical: run twice for complex modules
-    devtools::document()
+    # 3. ClinicoPath enhanced build process
+    jmvtools::prepare()           # Generate .h.R files from .yaml
+    devtools::document()          # Update .Rd files
+    jmvtools::prepare()           # Critical: run twice for complex modules like stagemigration
+    devtools::document()          # Ensure all documentation is current
     
     # 4. Test and validate
-    devtools::test()       # Run unit tests
-    jmvtools::install()    # Install to jamovi
+    devtools::test()              # Run unit tests if available
+    jmvtools::install()           # Build .jmo and install to jamovi
     
-    # 5. Distribution (for multi-module projects)
-    system("Rscript _updateModules_enhanced.R")
+    # 5. Update module configurations and documentation
+    # Edit _updateModules_config.yaml if new files added
+    # Update DESCRIPTION version if needed
+    # Update NEWS.md for significant changes
+    
+    # 6. Distribute to sub-modules (ClinicoPath-specific)
+    system("Rscript _updateModules.R")  # Distribute to specialized repos
 }
 ```
+
+---
+
+## 🔄 ClinicoPath Data Flow Architecture
+
+> **📋 Note on Diagrams**: 
+> - **Mermaid Source Files**: All diagram source code is available in `vignettes/*.mmd` files
+> - **For Rendering**: Use [mermaid.live](https://mermaid.live), GitHub preview, or mermaid CLI
+> - **See**: `vignettes/MERMAID_DIAGRAMS_README.md` for detailed rendering instructions
+
+### Overall Module Data Flow
+
+The ClinicoPath module follows a sophisticated data flow pattern that integrates user input, analysis processing, and result presentation:
+
+![Overall Data Flow Architecture](images/01-overall-data-flow.png)
+
+*Source: `vignettes/01-overall-data-flow.mmd`*
+
+### jamovi 4-File Architecture Interaction
+
+The ClinicoPath module uses jamovi's 4-file architecture with specific data flow between components:
+
+![jamovi 4-File Architecture](images/02-jamovi-4file-architecture.png)
+
+*Source: `vignettes/02-jamovi-4file-architecture.mmd`*
+
+### Detailed Component Interaction Flow
+
+This diagram shows how `self$options` and `self$results` interact between the key files:
+
+![Component Interaction Sequence](images/03-component-interaction-sequence.png)
+
+*Source: `vignettes/03-component-interaction-sequence.mmd`*
+
+### ClinicoPath-Specific Data Processing Flow
+
+For complex analyses like `stagemigration`, the data flow includes multiple stages:
+
+#### Simplified Text Flow:
+
+```
+Input Processing:
+User Data → Data Validation → Variable Type Checking → Missing Data Handling
+
+Analysis Configuration:
+self$options$analysisType → {
+  - basic: Basic Migration Analysis
+  - standard: Standard + C-index Analysis  
+  - comprehensive: Full Analysis Suite
+  - publication: Publication Ready Output
+}
+
+Core Analysis Engine:
+Migration Matrix → Statistical Tests → C-index → Bootstrap → Cross-validation → Decision Curves
+              ↘ Multivariable Analysis → Model Selection → Interaction Tests → Personalized Risk
+
+Results Generation:
+Migration Tables → Statistical Summaries → Diagnostic Plots → Clinical Interpretations → self$results
+```
+
+#### Detailed Data Processing Flow:
+
+![ClinicoPath Data Processing Flow](images/04-stagemigration-data-processing.png)
+
+*Source: `vignettes/04-stagemigration-data-processing.mmd`*
 
 ---
 
@@ -379,7 +453,23 @@ advanced_analysis <- function(data, dependent, covariates, method = "standard") 
 
 ### Understanding the jamovi R6 Class Structure
 
-Every jamovi analysis is implemented as an R6 class in a `.b.R` file that inherits from an auto-generated base class. Here's the complete anatomy:
+Every jamovi analysis is implemented as an R6 class in a `.b.R` file that inherits from an auto-generated base class. 
+
+#### ClinicoPath Component Interaction Flow
+
+The following diagram shows how ClinicoPath analyses like `stagemigration` flow from configuration to results:
+
+![ClinicoPath Component Flow](images/05-stagemigration-component-flow.png)
+
+*Source: `vignettes/05-stagemigration-component-flow.mmd`*
+
+#### Detailed self$options ↔ self$results Interaction
+
+![Detailed Stagemigration Interaction](images/06-stagemigration-detailed-interaction.png)
+
+*Source: `vignettes/06-stagemigration-detailed-interaction.mmd`*
+
+Here's the complete anatomy:
 
 ```r
 # Standard jamovi analysis structure
@@ -1418,7 +1508,7 @@ No need to change. Auto-updated and overwritten.
 
 ##### Write Formula
 
-
+<!-- Generic ToothGrowth examples commented out - use ClinicoPath datasets instead
 https://cran.r-project.org/web/packages/jmv/vignettes/new-syntax.html
 
 ```r
@@ -1437,9 +1527,7 @@ jmv::ANOVA(..., emMeans = ~ supp + dose:supp)
 jmv::ANOVA(ToothGrowth, 'len', c('supp', 'dose'))
 ```
 
-
 > In this case, jmv will look for variables in ToothGrowth called 'dep' or 'factors'. This is tidy evaluation. To instruct jmv to use the contents of it's arguments, rather than the symbol name, prefix them with the !! signifier. For example:
-
 
 ```r
 dep <- 'len'
@@ -1447,6 +1535,7 @@ factors <- c('supp', 'dose')
 
 jmv::ANOVA(ToothGrowth, !!dep, !!factors)
 ```
+-->
 
 
 
@@ -2132,7 +2221,7 @@ add analysis, eval=FALSE, include=FALSE
 
 # jmvtools::install()
 #
-# jmvtools::create('SuperAwesome')
+# jmvtools::create('ClinicoPath')  # Use ClinicoPath instead of SuperAwesome
 #
 # jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test')
 #
@@ -2792,6 +2881,20 @@ mypairwisedescription)
 
 The `.a.yaml` files define the analysis options and parameters for jamovi modules. They serve as the configuration blueprint that controls what options users see and how they interact with your analysis.
 
+### ClinicoPath .a.yaml → self$options Flow
+
+This diagram shows how ClinicoPath .a.yaml definitions map to accessible `self$options` values:
+
+![ClinicoPath Options Flow](images/07-a-yaml-options-flow.png)
+
+*Source: `vignettes/07-a-yaml-options-flow.mmd`*
+
+### ClinicoPath Option Type Decision Tree
+
+![Option Type Decision Tree](images/08-option-type-decision-tree.png)
+
+*Source: `vignettes/08-option-type-decision-tree.mmd`*
+
 ### Complete .a.yaml Anatomy
 
 ```yaml
@@ -3194,6 +3297,20 @@ The `.a.yaml` files are the foundation of user interaction in jamovi modules. Th
 ## 📋 Deep Dive: .r.yaml Results Definition Architecture
 
 The `.r.yaml` files define the output structure and presentation for jamovi modules. They specify what results users will see, how they're organized, and how they're displayed. This is where you define tables, plots, and text outputs that will be generated by your analysis.
+
+### ClinicoPath self$results → .r.yaml Mapping
+
+This diagram shows how ClinicoPath analyses populate `self$results` based on `.r.yaml` definitions:
+
+![Results YAML Mapping](images/09-results-yaml-mapping.png)
+
+*Source: `vignettes/09-results-yaml-mapping.mmd`*
+
+### ClinicoPath Results Organization Pattern
+
+![Results Organization Pattern](images/10-results-organization-pattern.png)
+
+*Source: `vignettes/10-results-organization-pattern.mmd`*
 
 ### Complete .r.yaml Anatomy
 
@@ -4951,7 +5068,7 @@ system(command = gitCommand, intern = TRUE)
 
 # jmvtools::install()
 # 
-# jmvtools::create('SuperAwesome')
+# jmvtools::create('ClinicoPath')  # Use ClinicoPath instead of SuperAwesome
 # 
 # jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test')
 # 
