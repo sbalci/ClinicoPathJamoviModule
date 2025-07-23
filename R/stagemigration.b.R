@@ -44,11 +44,23 @@
 #'
 #' \strong{Advanced Visualizations:}
 #' \itemize{
-#'   \item Migration heatmaps
+#'   \item Migration heatmaps with flow statistics
 #'   \item Time-dependent ROC curves
 #'   \item Calibration plots
 #'   \item Decision curves
 #'   \item Forest plots with confidence intervals
+#' }
+#'
+#' \strong{PHASE 1 ENHANCEMENTS - Evidence-Based Assessment Framework:}
+#' \itemize{
+#'   \item \strong{Will Rogers Evidence Assessment:} Multi-criteria evaluation framework
+#'   \item \strong{Migration Pattern Analysis:} Advanced flow statistics and retention rates
+#'   \item \strong{Survival Pattern Validation:} Upstaged patient survival similarity analysis
+#'   \item \strong{Biological Consistency Checks:} Risk factor profile assessments
+#'   \item \strong{Landmark Analysis Integration:} Time-based cutoff discrimination analysis
+#'   \item \strong{Clinical Decision Support:} Evidence-based implementation recommendations
+#'   \item \strong{Traffic Light Assessment:} PASS/BORDERLINE/CONCERN/FAIL evidence grading
+#'   \item \strong{Enhanced Heatmap Analytics:} Major flow identification and net migration analysis
 #' }
 #'
 #' @section Clinical Applications:
@@ -122,6 +134,36 @@
 #'   calculateNRI = TRUE,
 #'   performBootstrap = TRUE,
 #'   bootstrapReps = 1000
+#' )
+#'
+#' # PHASE 1 ENHANCED: Evidence-based Will Rogers assessment
+#' stagemigration(
+#'   data = pancreatic_cohort,
+#'   oldStage = "T_AJCC8",
+#'   newStage = "T_modified", 
+#'   survivalTime = "overall_survival_months",
+#'   event = "death_status",
+#'   eventLevel = "Dead",
+#'   analysisType = "publication",
+#'   advancedMigrationAnalysis = TRUE,
+#'   showMigrationHeatmap = TRUE,
+#'   cancerType = "other",
+#'   showExplanations = TRUE
+#' )
+#'
+#' # Phase 1 Enhanced with landmark analysis for lung cancer
+#' stagemigration(
+#'   data = lung_staging_data,
+#'   oldStage = "stage_7th_edition",
+#'   newStage = "stage_8th_edition",
+#'   survivalTime = "survival_months",
+#'   event = "vital_status",
+#'   eventLevel = "deceased",
+#'   analysisType = "comprehensive", 
+#'   advancedMigrationAnalysis = TRUE,
+#'   cancerType = "lung",  # Uses lung-specific landmark times: 3,6,12,24 months
+#'   showWillRogersVisualization = TRUE,
+#'   showMigrationSurvivalComparison = TRUE
 #' )
 #' }
 #'
@@ -807,6 +849,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             message("DEBUG: Fitting Cox models")
 
             tryCatch({
+                # Checkpoint before fitting Cox models (computationally expensive)
+                private$.checkpoint()
+                
                 # Fit old Cox model
                 old_cox <- survival::coxph(old_formula, data = data)
                 message("DEBUG: Old Cox model fitted successfully")
@@ -844,6 +889,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 if (use_bootstrap) {
                     message("DEBUG: Using bootstrap for C-index comparison")
+                    # Checkpoint before bootstrap comparison (computationally expensive)
+                    private$.checkpoint()
                     c_bootstrap <- private$.compareBootstrapCIndex(
                         data, old_stage, new_stage, time_var, event_var,
                         n_boot = self$options$bootstrapReps %||% 200
@@ -1142,6 +1189,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 # Bootstrap
                 for (i in 1:n_boot) {
+                    # Checkpoint before each bootstrap iteration (allows user to cancel long-running bootstrap)
+                    if (i %% 50 == 1) {  # Check every 50 iterations to avoid too much overhead
+                        private$.checkpoint()
+                    }
+                    
                     # Sample with replacement
                     boot_idx <- sample(1:n, n, replace = TRUE)
                     boot_data <- data[boot_idx, ]
@@ -1218,6 +1270,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # Function to calculate NRI at specific time points (WIP approach)
             for (time_point in time_points) {
+                # Checkpoint before each time point calculation
+                private$.checkpoint()
 
                 message("DEBUG: NRI calculation for time ", time_point, " months")
 
@@ -1592,6 +1646,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Calculate time-dependent ROC for each time point
             if (requireNamespace("timeROC", quietly = TRUE)) {
                 for (t in time_points) {
+                    # Checkpoint before each time point ROC calculation
+                    private$.checkpoint()
+                    
                     # Skip time points that are beyond the data range
                     max_time <- max(data[[time_var]], na.rm = TRUE)
                     if (t > max_time) {
@@ -6581,6 +6638,122 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }, error = function(e) {
                     message("DEBUG: analyzeWillRogers failed: ", e$message)
                 })
+
+                # ========== PHASE 1 ADVANCED ENHANCEMENTS ==========
+                
+                # Advanced Will Rogers Evidence Assessment Framework
+                message("DEBUG: Calling performAdvancedWillRogersAssessment")
+                tryCatch({
+                    private$.performAdvancedWillRogersAssessment(data, all_results)
+                    message("DEBUG: performAdvancedWillRogersAssessment completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: performAdvancedWillRogersAssessment failed: ", e$message)
+                })
+                
+                # Enhanced Migration Heatmap Data Generation
+                message("DEBUG: Calling generateEnhancedMigrationHeatmapData")
+                tryCatch({
+                    enhanced_heatmap_data <- private$.generateEnhancedMigrationHeatmapData(
+                        data, self$options$oldStage, self$options$newStage
+                    )
+                    if (!is.null(enhanced_heatmap_data)) {
+                        all_results$enhanced_migration_heatmap <- enhanced_heatmap_data
+                    }
+                    message("DEBUG: generateEnhancedMigrationHeatmapData completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: generateEnhancedMigrationHeatmapData failed: ", e$message)
+                })
+                
+                # Landmark Analysis Integration
+                message("DEBUG: Calling performLandmarkAnalysis")
+                tryCatch({
+                    # Define landmark times based on cancer type or use defaults
+                    landmark_times <- switch(self$options$cancerType %||% "general",
+                        "lung" = c(3, 6, 12, 24),
+                        "breast" = c(6, 12, 24, 60),
+                        "colorectal" = c(6, 12, 24, 36),
+                        "prostate" = c(12, 24, 60, 120),
+                        c(3, 6, 12)  # general default
+                    )
+                    
+                    landmark_results <- private$.performLandmarkAnalysis(
+                        data, self$options$survivalTime, "event_binary", landmark_times
+                    )
+                    if (!is.null(landmark_results) && !is.null(landmark_results$error)) {
+                        all_results$landmark_analysis <- landmark_results
+                    }
+                    message("DEBUG: performLandmarkAnalysis completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: performLandmarkAnalysis failed: ", e$message)
+                })
+
+                # ========== PHASE 2 ADVANCED ANALYTICS INTEGRATION ==========
+                
+                # Advanced Time-Dependent Calibration Assessment
+                message("DEBUG: Calling performAdvancedCalibrationAssessment")
+                tryCatch({
+                    advanced_calibration <- private$.performAdvancedCalibrationAssessment(data, all_results)
+                    if (!is.null(advanced_calibration) && is.null(advanced_calibration$error)) {
+                        all_results$advanced_calibration <- advanced_calibration
+                    }
+                    message("DEBUG: performAdvancedCalibrationAssessment completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: performAdvancedCalibrationAssessment failed: ", e$message)
+                })
+                
+                # Comprehensive Stage Homogeneity Testing
+                message("DEBUG: Calling performComprehensiveHomogeneityTesting")
+                tryCatch({
+                    homogeneity_results <- private$.performComprehensiveHomogeneityTesting(
+                        data, self$options$oldStage, self$options$newStage, 
+                        self$options$survivalTime, "event_binary"
+                    )
+                    if (!is.null(homogeneity_results) && is.null(homogeneity_results$error)) {
+                        all_results$comprehensive_homogeneity <- homogeneity_results
+                    }
+                    message("DEBUG: performComprehensiveHomogeneityTesting completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: performComprehensiveHomogeneityTesting failed: ", e$message)
+                })
+                
+                # Time-Varying Coefficient Analysis
+                message("DEBUG: Calling performTimeVaryingCoefficientAnalysis")
+                tryCatch({
+                    time_varying_results <- private$.performTimeVaryingCoefficientAnalysis(
+                        data, self$options$oldStage, self$options$newStage,
+                        self$options$survivalTime, "event_binary"
+                    )
+                    if (!is.null(time_varying_results) && is.null(time_varying_results$error)) {
+                        all_results$time_varying_analysis <- time_varying_results
+                    }
+                    message("DEBUG: performTimeVaryingCoefficientAnalysis completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: performTimeVaryingCoefficientAnalysis failed: ", e$message)
+                })
+                
+                # Enhanced Model Diagnostics Suite
+                message("DEBUG: Calling performEnhancedModelDiagnostics")
+                tryCatch({
+                    if (!is.null(all_results$advanced_metrics) && 
+                        !is.null(all_results$advanced_metrics$old_cox) && 
+                        !is.null(all_results$advanced_metrics$new_cox)) {
+                        
+                        model_diagnostics <- private$.performPhase2ModelDiagnostics(
+                            data, 
+                            all_results$advanced_metrics$old_cox, 
+                            all_results$advanced_metrics$new_cox,
+                            self$options$oldStage, self$options$newStage
+                        )
+                        if (!is.null(model_diagnostics) && is.null(model_diagnostics$error)) {
+                            all_results$enhanced_diagnostics <- model_diagnostics
+                        }
+                    } else {
+                        message("DEBUG: Cox models not available for enhanced diagnostics")
+                    }
+                    message("DEBUG: performEnhancedModelDiagnostics completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: performEnhancedModelDiagnostics failed: ", e$message)
+                })
                 
                 # Perform enhanced Will Rogers analysis with statistical tests
                 message("DEBUG: Calling performEnhancedWillRogersAnalysis")
@@ -6942,6 +7115,53 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     self$results$abbreviationGlossary$setContent(abbreviation_glossary_html)
                 }
 
+                # ========== PHASE 1 TABLE POPULATION ==========
+                
+                # Populate Will Rogers Evidence Summary
+                message("DEBUG: Calling populateWillRogersEvidenceSummary")
+                tryCatch({
+                    private$.populateWillRogersEvidenceSummary(all_results)
+                    message("DEBUG: populateWillRogersEvidenceSummary completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: populateWillRogersEvidenceSummary failed: ", e$message)
+                })
+
+                # Populate Will Rogers Clinical Recommendation
+                message("DEBUG: Calling populateWillRogersClinicalRecommendation")
+                tryCatch({
+                    private$.populateWillRogersClinicalRecommendation(all_results)
+                    message("DEBUG: populateWillRogersClinicalRecommendation completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: populateWillRogersClinicalRecommendation failed: ", e$message)
+                })
+
+                # Populate Enhanced Migration Pattern Analysis
+                message("DEBUG: Calling populateEnhancedMigrationPatternAnalysis")
+                tryCatch({
+                    private$.populateEnhancedMigrationPatternAnalysis(all_results)
+                    message("DEBUG: populateEnhancedMigrationPatternAnalysis completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: populateEnhancedMigrationPatternAnalysis failed: ", e$message)
+                })
+
+                # Populate Landmark Analysis Results
+                message("DEBUG: Calling populateLandmarkAnalysisResults")
+                tryCatch({
+                    private$.populateLandmarkAnalysisResults(all_results)
+                    message("DEBUG: populateLandmarkAnalysisResults completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: populateLandmarkAnalysisResults failed: ", e$message)
+                })
+
+                # Populate Advanced Migration Heatmap Statistics
+                message("DEBUG: Calling populateAdvancedMigrationHeatmapStats")
+                tryCatch({
+                    private$.populateAdvancedMigrationHeatmapStats(all_results)
+                    message("DEBUG: populateAdvancedMigrationHeatmapStats completed successfully")
+                }, error = function(e) {
+                    message("DEBUG: populateAdvancedMigrationHeatmapStats failed: ", e$message)
+                })
+
                 message("DEBUG: Calling populateComparativeAnalysisDashboard")
                 tryCatch({
                     private$.populateComparativeAnalysisDashboard(all_results)
@@ -7000,6 +7220,35 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     }
                     
                     private$.performBootstrapValidation(data, all_results)
+                }
+
+                # ========== PHASE 3 CLINICAL INTEGRATION ==========
+                
+                message("DEBUG: Starting Phase 3 clinical integration features")
+                if (self$options$advancedMigrationAnalysis) {
+                    # Clinical Decision Support
+                    message("DEBUG: Calling performClinicalDecisionSupport")
+                    tryCatch({
+                        clinical_support <- private$.performClinicalDecisionSupport(data, all_results)
+                        if (!is.null(clinical_support) && is.null(clinical_support$error)) {
+                            all_results$clinical_decision_support <- clinical_support
+                        }
+                        message("DEBUG: performClinicalDecisionSupport completed successfully")
+                    }, error = function(e) {
+                        message("DEBUG: performClinicalDecisionSupport failed: ", e$message)
+                    })
+                    
+                    # Publication Report
+                    message("DEBUG: Calling generatePublicationReport")
+                    tryCatch({
+                        publication_report <- private$.generatePublicationReport(data, all_results)
+                        if (!is.null(publication_report) && is.null(publication_report$error)) {
+                            all_results$publication_report <- publication_report
+                        }
+                        message("DEBUG: generatePublicationReport completed successfully")
+                    }, error = function(e) {
+                        message("DEBUG: generatePublicationReport failed: ", e$message)
+                    })
                 }
 
             }, error = function(e) {
@@ -8660,6 +8909,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 # Calculate DCA for each time point
                 for (time_point in time_points) {
+                    # Checkpoint before each time point DCA calculation
+                    private$.checkpoint()
+                    
                     dca_results <- private$.performDCAAtTimePoint(data, old_cox, new_cox, time_point)
                     
                     if (!is.null(dca_results)) {
@@ -8875,6 +9127,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 valid_times <- logical(length(time_points))
 
                 for (i in seq_along(time_points)) {
+                    # Checkpoint before each time point AUC calculation
+                    private$.checkpoint()
                     t <- time_points[i]
                     
                     # Skip time points beyond data range
@@ -9552,6 +9806,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 # Perform bootstrap sampling
                 for (i in 1:bootstrap_reps) {
+                    # Checkpoint every 50 iterations to allow cancellation of long-running bootstrap
+                    if (i %% 50 == 1) {
+                        private$.checkpoint()
+                    }
+                    
                     # Bootstrap sample
                     n <- nrow(data)
                     boot_indices <- sample(1:n, n, replace = TRUE)
@@ -13825,6 +14084,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             # Bootstrap sampling and selection
             for (b in 1:n_bootstrap) {
+                # Checkpoint every 50 iterations to allow cancellation of long-running bootstrap
+                if (b %% 50 == 1) {
+                    private$.checkpoint()
+                }
+                
                 tryCatch({
                     # Bootstrap sample
                     n_obs <- nrow(covariate_data)
@@ -14917,6 +15181,264 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
 
 
+
+        # ==================================================================================
+        # PHASE 1 POPULATION METHODS: Evidence-Based Assessment Tables
+        # ==================================================================================
+
+        .populateWillRogersEvidenceSummary = function(all_results) {
+            # Populate Will Rogers Evidence Summary table
+            table <- self$results$willRogersEvidenceSummary
+            if (is.null(table) || is.null(all_results$will_rogers_evidence_summary)) return()
+
+            tryCatch({
+                evidence_summary <- all_results$will_rogers_evidence_summary
+                
+                # Add explanatory text
+                if (self$options$showExplanations) {
+                    explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #1e88e5;">
+                        <h4 style="margin-top: 0; color: #0d47a1;">Understanding Will Rogers Evidence Assessment Framework</h4>
+                        <p style="margin-bottom: 10px;">This comprehensive framework evaluates multiple lines of evidence to determine if stage migration represents legitimate prognostic improvement:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Migration Pattern:</strong> Analyzes migration rates, balance, and stability of staging criteria</li>
+                            <li><strong>Survival Pattern:</strong> Evaluates if upstaged patients show survival similar to target stage</li>
+                            <li><strong>Biological Risk Factors:</strong> Assesses if migrated patients show appropriate risk factor profiles</li>
+                            <li><strong>Prognostic Discrimination:</strong> Measures clinically meaningful C-index improvement</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Assessment Levels:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li><span style="color: green;">PASS</span> = Strong evidence supporting legitimate improvement</li>
+                            <li><span style="color: orange;">BORDERLINE</span> = Mixed evidence requiring careful interpretation</li>
+                            <li><span style="color: red;">CONCERN</span> = Potential Will Rogers phenomenon detected</li>
+                            <li><span style="color: red;">FAIL</span> = Clear evidence against staging improvement</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$willRogersEvidenceSummaryExplanation$setContent(explanation_html)
+                }
+
+                for (i in 1:nrow(evidence_summary)) {
+                    table$addRow(rowKey = paste0("criterion_", i), values = list(
+                        Criterion = evidence_summary$Criterion[i],
+                        Assessment = evidence_summary$Assessment[i],
+                        Evidence_Level = evidence_summary$Evidence_Level[i],
+                        Interpretation = evidence_summary$Interpretation[i]
+                    ))
+                }
+
+                message("DEBUG: Will Rogers Evidence Summary table populated with ", nrow(evidence_summary), " criteria")
+
+            }, error = function(e) {
+                message("DEBUG: populateWillRogersEvidenceSummary failed: ", e$message)
+            })
+        },
+
+        .populateWillRogersClinicalRecommendation = function(all_results) {
+            # Populate Will Rogers Clinical Recommendation table
+            table <- self$results$willRogersClinicalRecommendation
+            if (is.null(table) || is.null(all_results$will_rogers_recommendation)) return()
+
+            tryCatch({
+                recommendation <- all_results$will_rogers_recommendation
+
+                # Overall recommendation
+                table$addRow(rowKey = "overall", values = list(
+                    Category = "Overall Assessment",
+                    Finding = recommendation$final_recommendation,
+                    Confidence = recommendation$confidence,
+                    Guidance = recommendation$conclusion
+                ))
+
+                # Evidence counts
+                table$addRow(rowKey = "evidence_summary", values = list(
+                    Category = "Evidence Summary",
+                    Finding = paste0(
+                        "PASS: ", recommendation$evidence_counts$pass, ", ",
+                        "BORDERLINE: ", recommendation$evidence_counts$borderline, ", ",
+                        "CONCERN: ", recommendation$evidence_counts$concern, ", ",
+                        "TOTAL: ", recommendation$evidence_counts$total
+                    ),
+                    Confidence = recommendation$recommendation_level,
+                    Guidance = "Based on comprehensive multi-criteria evaluation"
+                ))
+
+                # Implementation guidance
+                if (length(recommendation$guidance) > 0) {
+                    for (i in seq_along(recommendation$guidance)) {
+                        table$addRow(rowKey = paste0("guidance_", i), values = list(
+                            Category = paste("Implementation", i),
+                            Finding = recommendation$guidance[i],
+                            Confidence = recommendation$confidence,
+                            Guidance = "Follow evidence-based implementation steps"
+                        ))
+                    }
+                }
+
+                message("DEBUG: Will Rogers Clinical Recommendation table populated")
+
+            }, error = function(e) {
+                message("DEBUG: populateWillRogersClinicalRecommendation failed: ", e$message)
+            })
+        },
+
+        .populateEnhancedMigrationPatternAnalysis = function(all_results) {
+            # Populate Enhanced Migration Pattern Analysis table
+            table <- self$results$enhancedMigrationPatternAnalysis
+            if (is.null(table) || is.null(all_results$enhanced_migration_heatmap)) return()
+
+            tryCatch({
+                heatmap_data <- all_results$enhanced_migration_heatmap
+
+                # Overall migration statistics
+                table$addRow(rowKey = "overall_migration", values = list(
+                    Pattern_Type = "Overall Migration",
+                    Count = sum(heatmap_data$migration_table) - sum(diag(heatmap_data$migration_table)),
+                    Percentage = heatmap_data$migration_rate / 100,
+                    Flow_Direction = "Multi-directional",
+                    Clinical_Impact = if (heatmap_data$migration_rate < 15) {
+                        "Low impact: Stable staging criteria"
+                    } else if (heatmap_data$migration_rate < 30) {
+                        "Moderate impact: Consider validation"
+                    } else {
+                        "High impact: Requires careful evaluation"
+                    }
+                ))
+
+                # Major migration patterns
+                if (length(heatmap_data$major_migrations) > 0) {
+                    for (pattern_name in names(heatmap_data$major_migrations)) {
+                        pattern <- heatmap_data$major_migrations[[pattern_name]]
+                        table$addRow(rowKey = pattern_name, values = list(
+                            Pattern_Type = "Major Migration",
+                            Count = pattern$count,
+                            Percentage = pattern$percentage / 100,
+                            Flow_Direction = paste(pattern$from, "→", pattern$to),
+                            Clinical_Impact = "Significant reclassification pattern"
+                        ))
+                    }
+                }
+
+                # Stage retention rates
+                for (i in seq_along(heatmap_data$stage_retention_rates)) {
+                    stage_name <- names(heatmap_data$stage_retention_rates)[i]
+                    retention_rate <- heatmap_data$stage_retention_rates[i]
+                    
+                    table$addRow(rowKey = paste0("retention_", stage_name), values = list(
+                        Pattern_Type = "Stage Retention",
+                        Count = round(retention_rate * sum(heatmap_data$migration_table[i, ]) / 100),
+                        Percentage = retention_rate / 100,
+                        Flow_Direction = paste("Remained in", stage_name),
+                        Clinical_Impact = if (retention_rate > 80) {
+                            "Stable stage definition"
+                        } else if (retention_rate > 60) {
+                            "Moderate stability"
+                        } else {
+                            "Low retention - review criteria"
+                        }
+                    ))
+                }
+
+                message("DEBUG: Enhanced Migration Pattern Analysis table populated")
+
+            }, error = function(e) {
+                message("DEBUG: populateEnhancedMigrationPatternAnalysis failed: ", e$message)
+            })
+        },
+
+        .populateLandmarkAnalysisResults = function(all_results) {
+            # Populate Landmark Analysis Results table
+            table <- self$results$landmarkAnalysisResults
+            if (is.null(table) || is.null(all_results$landmark_analysis)) return()
+
+            tryCatch({
+                landmark_results <- all_results$landmark_analysis
+
+                for (landmark_name in names(landmark_results)) {
+                    landmark_data <- landmark_results[[landmark_name]]
+                    
+                    if (!is.null(landmark_data$error)) {
+                        table$addRow(rowKey = landmark_name, values = list(
+                            Landmark_Time = as.numeric(gsub("month_", "", landmark_name)),
+                            N_Patients = NA,
+                            N_Events = NA,
+                            Old_C_Index = NA,
+                            New_C_Index = NA,
+                            C_Improvement = NA,
+                            Interpretation = landmark_data$error
+                        ))
+                    } else {
+                        table$addRow(rowKey = landmark_name, values = list(
+                            Landmark_Time = landmark_data$landmark_time,
+                            N_Patients = landmark_data$n_patients,
+                            N_Events = landmark_data$n_events,
+                            Old_C_Index = landmark_data$old_c_index,
+                            New_C_Index = landmark_data$new_c_index,
+                            C_Improvement = landmark_data$c_improvement,
+                            Interpretation = landmark_data$interpretation
+                        ))
+                    }
+                }
+
+                message("DEBUG: Landmark Analysis Results table populated with ", length(landmark_results), " landmarks")
+
+            }, error = function(e) {
+                message("DEBUG: populateLandmarkAnalysisResults failed: ", e$message)
+            })
+        },
+
+        .populateAdvancedMigrationHeatmapStats = function(all_results) {
+            # Populate Advanced Migration Heatmap Statistics table
+            table <- self$results$advancedMigrationHeatmapStats
+            if (is.null(table) || is.null(all_results$enhanced_migration_heatmap)) return()
+
+            tryCatch({
+                heatmap_data <- all_results$enhanced_migration_heatmap
+                migration_table <- heatmap_data$migration_table
+
+                # Calculate inflow and outflow for each stage
+                for (stage in rownames(migration_table)) {
+                    if (stage %in% colnames(migration_table)) {
+                        inflow <- sum(migration_table[, stage]) - migration_table[stage, stage]
+                        outflow <- sum(migration_table[stage, ]) - migration_table[stage, stage]
+                        net_change <- inflow - outflow
+                        retention_rate <- if (sum(migration_table[stage, ]) > 0) {
+                            migration_table[stage, stage] / sum(migration_table[stage, ]) * 100
+                        } else {
+                            0
+                        }
+
+                        # Identify major flows for this stage
+                        major_flows <- character(0)
+                        for (flow_name in names(heatmap_data$major_migrations)) {
+                            flow <- heatmap_data$major_migrations[[flow_name]]
+                            if (flow$from == stage || flow$to == stage) {
+                                major_flows <- c(major_flows, paste0(flow$from, "→", flow$to, " (", flow$percentage, "%)"))
+                            }
+                        }
+                        major_flows_text <- if (length(major_flows) > 0) {
+                            paste(major_flows, collapse = "; ")
+                        } else {
+                            "No major flows (>10%)"
+                        }
+
+                        table$addRow(rowKey = stage, values = list(
+                            Stage = stage,
+                            Retention_Rate = retention_rate / 100,
+                            Inflow = inflow,
+                            Outflow = outflow,
+                            Net_Migration = net_change,
+                            Major_Flows = major_flows_text
+                        ))
+                    }
+                }
+
+                message("DEBUG: Advanced Migration Heatmap Statistics table populated")
+
+            }, error = function(e) {
+                message("DEBUG: populateAdvancedMigrationHeatmapStats failed: ", e$message)
+            })
+        },
 
         .populateComparativeAnalysisDashboard = function(all_results) {
             # Populate the comparative analysis dashboard with summary of all analyses
@@ -16741,6 +17263,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Perform cross-validation (k-fold or multi-institutional)
                 for (fold in 1:cv_folds) {
+                    # Checkpoint before each fold to allow cancellation
+                    private$.checkpoint()
+                    
                     # Split data
                     test_idx <- fold_ids == fold
                     train_data <- data[!test_idx, ]
@@ -18063,6 +18588,1358 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
           }, error = function(e) {
             return(list(error = paste("Influence analysis failed:", e$message)))
           })
+        },
+
+        # ==================================================================================
+        # PHASE 1 ADVANCED ENHANCEMENTS: Evidence-Based Assessment Framework
+        # ==================================================================================
+
+        # Will Rogers Phenomenon Evidence Assessment Framework
+        .performAdvancedWillRogersAssessment = function(data, all_results) {
+            tryCatch({
+                message("DEBUG: Performing advanced Will Rogers evidence assessment")
+                
+                # Initialize evidence summary
+                evidence_summary <- data.frame(
+                    Criterion = character(0),
+                    Assessment = character(0),
+                    Evidence_Level = character(0),
+                    Interpretation = character(0),
+                    stringsAsFactors = FALSE
+                )
+
+                # Get basic parameters
+                old_stage <- self$options$oldStage
+                new_stage <- self$options$newStage
+                time_var <- self$options$survivalTime
+                event_var <- "event_binary"
+
+                # 1. Migration Pattern Analysis
+                migration_evidence <- private$.assessMigrationPatternEvidence(data, old_stage, new_stage)
+                evidence_summary <- rbind(evidence_summary, data.frame(
+                    Criterion = "Migration Pattern",
+                    Assessment = migration_evidence$assessment,
+                    Evidence_Level = migration_evidence$strength,
+                    Interpretation = migration_evidence$interpretation,
+                    stringsAsFactors = FALSE
+                ))
+
+                # 2. Survival Pattern Comparison
+                survival_evidence <- private$.assessSurvivalPatternEvidence(data, old_stage, new_stage, time_var, event_var)
+                evidence_summary <- rbind(evidence_summary, survival_evidence)
+
+                # 3. Lymph Node/Risk Factor Biology Evidence (if available)
+                ln_evidence <- private$.assessLymphNodeEvidence(data, old_stage, new_stage)
+                if (!is.null(ln_evidence)) {
+                    evidence_summary <- rbind(evidence_summary, ln_evidence)
+                }
+
+                # 4. Prognostic Discrimination Evidence
+                discrimination_evidence <- private$.assessDiscriminationEvidence(all_results)
+                evidence_summary <- rbind(evidence_summary, discrimination_evidence)
+
+                # Calculate overall recommendation
+                recommendation <- private$.generateWillRogersRecommendation(evidence_summary)
+
+                # Store results
+                all_results$will_rogers_evidence_summary <- evidence_summary
+                all_results$will_rogers_recommendation <- recommendation
+
+                message("DEBUG: Advanced Will Rogers assessment completed successfully")
+                return(TRUE)
+
+            }, error = function(e) {
+                message("DEBUG: Advanced Will Rogers assessment failed: ", e$message)
+                return(FALSE)
+            })
+        },
+
+        # Assess migration pattern evidence
+        .assessMigrationPatternEvidence = function(data, old_stage, new_stage) {
+            tryCatch({
+                # Create migration matrix
+                migration_table <- table(data[[old_stage]], data[[new_stage]])
+                total_patients <- sum(migration_table)
+                diagonal_patients <- sum(diag(migration_table))
+                migration_rate <- (total_patients - diagonal_patients) / total_patients
+
+                # Calculate upstaging vs downstaging balance
+                upstaging <- 0
+                downstaging <- 0
+                stage_levels <- levels(as.factor(data[[old_stage]]))
+                
+                for(i in 1:nrow(migration_table)) {
+                    for(j in 1:ncol(migration_table)) {
+                        if(i < j) upstaging <- upstaging + migration_table[i,j]
+                        if(i > j) downstaging <- downstaging + migration_table[i,j]
+                    }
+                }
+
+                # Assessment logic
+                if (migration_rate < 0.10) {
+                    assessment <- "PASS"
+                    strength <- "Strong"
+                    interpretation <- "Low migration rate suggests stable staging criteria"
+                } else if (migration_rate < 0.25) {
+                    if (abs(upstaging - downstaging) / (upstaging + downstaging + 1) < 0.3) {
+                        assessment <- "PASS"
+                        strength <- "Moderate"
+                        interpretation <- "Balanced migration pattern with moderate rate"
+                    } else {
+                        assessment <- "BORDERLINE"
+                        strength <- "Moderate"
+                        interpretation <- "Unbalanced migration pattern needs investigation"
+                    }
+                } else {
+                    assessment <- "CONCERN"
+                    strength <- "Weak"
+                    interpretation <- "High migration rate may indicate unstable criteria"
+                }
+
+                return(list(
+                    assessment = assessment,
+                    strength = strength,
+                    interpretation = interpretation,
+                    migration_rate = migration_rate,
+                    upstaging = upstaging,
+                    downstaging = downstaging
+                ))
+
+            }, error = function(e) {
+                return(list(
+                    assessment = "ERROR",
+                    strength = "None",
+                    interpretation = paste("Migration analysis failed:", e$message)
+                ))
+            })
+        },
+
+        # Assess survival pattern evidence
+        .assessSurvivalPatternEvidence = function(data, old_stage, new_stage, time_var, event_var) {
+            tryCatch({
+                # Fit survival models for comparison
+                old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
+                new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
+                
+                old_cox <- survival::coxph(old_formula, data = data)
+                new_cox <- survival::coxph(new_formula, data = data)
+                
+                # Calculate survival curve comparisons for upstaged patients
+                upstaged_evidence <- private$.analyzeUpstagedPatientSurvival(data, old_stage, new_stage, time_var, event_var)
+                
+                # Assessment based on survival similarity to target stage
+                if (!is.null(upstaged_evidence) && upstaged_evidence$similarity_to_target > 0.8) {
+                    assessment <- "PASS"
+                    strength <- "Strong"
+                    interpretation <- "Upstaged patients show survival similar to target stage"
+                } else if (!is.null(upstaged_evidence) && upstaged_evidence$similarity_to_target > 0.6) {
+                    assessment <- "BORDERLINE"
+                    strength <- "Moderate"
+                    interpretation <- "Upstaged patients show intermediate survival patterns"
+                } else {
+                    assessment <- "CONCERN"
+                    strength <- "Weak"
+                    interpretation <- "Upstaged patients may retain original stage survival"
+                }
+
+                return(data.frame(
+                    Criterion = "Survival Pattern",
+                    Assessment = assessment,
+                    Evidence_Level = strength,
+                    Interpretation = interpretation,
+                    stringsAsFactors = FALSE
+                ))
+
+            }, error = function(e) {
+                return(data.frame(
+                    Criterion = "Survival Pattern",
+                    Assessment = "ERROR",
+                    Evidence_Level = "None",
+                    Interpretation = paste("Survival analysis failed:", e$message),
+                    stringsAsFactors = FALSE
+                ))
+            })
+        },
+
+        # Analyze upstaged patient survival patterns
+        .analyzeUpstagedPatientSurvival = function(data, old_stage, new_stage, time_var, event_var) {
+            tryCatch({
+                # Identify upstaged patients (moved to higher stage)
+                stage_levels_old <- levels(as.factor(data[[old_stage]]))
+                stage_levels_new <- levels(as.factor(data[[new_stage]]))
+                
+                # For simplicity, assume stages can be ordered numerically
+                upstaged_patients <- data[as.numeric(as.factor(data[[new_stage]])) > 
+                                         as.numeric(as.factor(data[[old_stage]])), ]
+                
+                if (nrow(upstaged_patients) < 10) {
+                    return(list(similarity_to_target = 0.5, note = "Too few upstaged patients"))
+                }
+
+                # Calculate median survival for upstaged patients
+                upstaged_surv <- survival::survfit(
+                    survival::Surv(upstaged_patients[[time_var]], upstaged_patients[[event_var]]) ~ 1
+                )
+                upstaged_median <- summary(upstaged_surv)$table["median"]
+
+                # Compare to target stage median survival
+                target_stages <- unique(upstaged_patients[[new_stage]])
+                target_similarities <- numeric(0)
+                
+                for (target_stage in target_stages) {
+                    target_patients <- data[data[[new_stage]] == target_stage & 
+                                           data[[old_stage]] == data[[new_stage]], ]
+                    if (nrow(target_patients) > 5) {
+                        target_surv <- survival::survfit(
+                            survival::Surv(target_patients[[time_var]], target_patients[[event_var]]) ~ 1
+                        )
+                        target_median <- summary(target_surv)$table["median"]
+                        
+                        if (!is.na(upstaged_median) && !is.na(target_median) && target_median > 0) {
+                            similarity <- 1 - abs(upstaged_median - target_median) / target_median
+                            target_similarities <- c(target_similarities, similarity)
+                        }
+                    }
+                }
+
+                avg_similarity <- if(length(target_similarities) > 0) mean(target_similarities) else 0.5
+                
+                return(list(
+                    similarity_to_target = max(0, min(1, avg_similarity)),
+                    upstaged_median = upstaged_median,
+                    n_upstaged = nrow(upstaged_patients)
+                ))
+
+            }, error = function(e) {
+                return(list(similarity_to_target = 0.5, error = e$message))
+            })
+        },
+
+        # Assess lymph node/risk factor evidence
+        .assessLymphNodeEvidence = function(data, old_stage, new_stage) {
+            tryCatch({
+                # Look for lymph node or related risk factor variables
+                possible_ln_vars <- c("LymphNodeStatus", "lymph_nodes", "nodes", "N_stage", 
+                                     "node_positive", "ln_positive", "nodal_status")
+                ln_var <- NULL
+                
+                for (var_name in possible_ln_vars) {
+                    if (var_name %in% names(data)) {
+                        ln_var <- var_name
+                        break
+                    }
+                }
+
+                if (is.null(ln_var)) {
+                    return(NULL)  # No lymph node data available
+                }
+
+                # Analyze lymph node positivity rates by migration pattern
+                migration_table <- table(data[[old_stage]], data[[new_stage]])
+                upstaged_patients <- data[as.numeric(as.factor(data[[new_stage]])) > 
+                                         as.numeric(as.factor(data[[old_stage]])), ]
+                
+                if (nrow(upstaged_patients) == 0) {
+                    return(NULL)
+                }
+
+                # Calculate LN+ rates
+                upstaged_ln_pos_rate <- mean(upstaged_patients[[ln_var]] == "Positive" | 
+                                           upstaged_patients[[ln_var]] == 1, na.rm = TRUE)
+                
+                overall_ln_pos_rate <- mean(data[[ln_var]] == "Positive" | 
+                                          data[[ln_var]] == 1, na.rm = TRUE)
+
+                # Assessment based on biological consistency
+                if (upstaged_ln_pos_rate > overall_ln_pos_rate + 0.15) {
+                    assessment <- "PASS"
+                    strength <- "Strong"
+                    interpretation <- "Upstaged patients show higher-risk biology (elevated LN+ rate)"
+                } else if (upstaged_ln_pos_rate > overall_ln_pos_rate) {
+                    assessment <- "BORDERLINE"
+                    strength <- "Moderate"
+                    interpretation <- "Upstaged patients show modestly higher-risk biology"
+                } else {
+                    assessment <- "CONCERN"
+                    strength <- "Weak"
+                    interpretation <- "Upstaged patients do not show higher-risk biology"
+                }
+
+                return(data.frame(
+                    Criterion = "Biological Risk Factors",
+                    Assessment = assessment,
+                    Evidence_Level = strength,
+                    Interpretation = interpretation,
+                    stringsAsFactors = FALSE
+                ))
+
+            }, error = function(e) {
+                return(NULL)  # Skip if analysis fails
+            })
+        },
+
+        # Assess prognostic discrimination evidence
+        .assessDiscriminationEvidence = function(all_results) {
+            tryCatch({
+                # Extract C-index improvement from results
+                c_improvement <- NULL
+                
+                if (!is.null(all_results$concordance_old) && !is.null(all_results$concordance_new)) {
+                    c_improvement <- all_results$concordance_new - all_results$concordance_old
+                } else if (!is.null(all_results$statistical_comparison)) {
+                    # Try to extract from statistical comparison table
+                    stats <- all_results$statistical_comparison
+                    c_idx <- which(grepl("C.*index.*improvement|Concordance.*improvement", stats$metric, ignore.case = TRUE))
+                    if (length(c_idx) > 0) {
+                        c_improvement <- as.numeric(gsub("[^0-9.-]", "", stats$value[c_idx[1]]))
+                    }
+                }
+
+                # Assessment based on C-index improvement
+                if (!is.null(c_improvement) && !is.na(c_improvement)) {
+                    if (c_improvement >= 0.02) {
+                        assessment <- "PASS"
+                        strength <- "Strong"
+                        interpretation <- "Clinically meaningful discrimination improvement (≥0.02)"
+                    } else if (c_improvement > 0.01) {
+                        assessment <- "BORDERLINE"
+                        strength <- "Moderate"
+                        interpretation <- "Modest discrimination improvement (0.01-0.02)"
+                    } else if (c_improvement > 0) {
+                        assessment <- "BORDERLINE"
+                        strength <- "Weak"
+                        interpretation <- "Minimal discrimination improvement (<0.01)"
+                    } else {
+                        assessment <- "FAIL"
+                        strength <- "None"
+                        interpretation <- "No discrimination improvement detected"
+                    }
+                } else {
+                    assessment <- "UNKNOWN"
+                    strength <- "None"
+                    interpretation <- "Discrimination analysis not available"
+                }
+
+                return(data.frame(
+                    Criterion = "Prognostic Discrimination",
+                    Assessment = assessment,
+                    Evidence_Level = strength,
+                    Interpretation = interpretation,
+                    stringsAsFactors = FALSE
+                ))
+
+            }, error = function(e) {
+                return(data.frame(
+                    Criterion = "Prognostic Discrimination",
+                    Assessment = "ERROR",
+                    Evidence_Level = "None",
+                    Interpretation = paste("Discrimination analysis failed:", e$message),
+                    stringsAsFactors = FALSE
+                ))
+            })
+        },
+
+        # Generate overall Will Rogers recommendation
+        .generateWillRogersRecommendation = function(evidence_summary) {
+            tryCatch({
+                # Count evidence levels
+                pass_count <- sum(evidence_summary$Assessment == "PASS")
+                borderline_count <- sum(evidence_summary$Assessment == "BORDERLINE")
+                concern_count <- sum(evidence_summary$Assessment == "CONCERN")
+                fail_count <- sum(evidence_summary$Assessment == "FAIL")
+                total_criteria <- nrow(evidence_summary)
+
+                # Generate recommendation
+                if (pass_count >= 2 && concern_count == 0 && fail_count == 0) {
+                    final_recommendation <- "LEGITIMATE STAGING IMPROVEMENT"
+                    recommendation_level <- "Strong"
+                    confidence <- "High"
+                    conclusion <- "The staging system change represents genuine improvement"
+                    guidance <- c(
+                        "✅ Implement staging change with confidence",
+                        "📊 Document methodology for future reference",
+                        "🔍 Monitor outcomes in clinical practice",
+                        "📝 Prepare manuscript for peer review publication"
+                    )
+                } else if (pass_count + borderline_count >= 2 && fail_count == 0) {
+                    final_recommendation <- "CONDITIONAL STAGING IMPROVEMENT"
+                    recommendation_level <- "Moderate"
+                    confidence <- "Moderate"
+                    conclusion <- "Mixed evidence for staging legitimacy"
+                    guidance <- c(
+                        "⚠️ Conditional implementation with additional safeguards",
+                        "🔬 Perform external validation in independent cohort",
+                        "📊 Conduct additional multivariate analysis",
+                        "👥 Seek expert review before widespread adoption"
+                    )
+                } else {
+                    final_recommendation <- "POTENTIAL WILL ROGERS PHENOMENON"
+                    recommendation_level <- "Weak"
+                    confidence <- "Low"
+                    conclusion <- "Insufficient evidence for legitimate improvement"
+                    guidance <- c(
+                        "❌ Do not implement staging change at this time",
+                        "🔬 Require additional research addressing identified concerns",
+                        "📊 Perform power analysis for adequate sample size",
+                        "🏥 Consider multi-institutional validation study"
+                    )
+                }
+
+                return(list(
+                    final_recommendation = final_recommendation,
+                    recommendation_level = recommendation_level,
+                    confidence = confidence,
+                    conclusion = conclusion,
+                    guidance = guidance,
+                    evidence_counts = list(
+                        pass = pass_count,
+                        borderline = borderline_count,
+                        concern = concern_count,
+                        fail = fail_count,
+                        total = total_criteria
+                    )
+                ))
+
+            }, error = function(e) {
+                return(list(
+                    final_recommendation = "ANALYSIS ERROR",
+                    recommendation_level = "None",
+                    confidence = "None",
+                    conclusion = paste("Recommendation generation failed:", e$message),
+                    guidance = c("🔧 Check data quality and analysis parameters"),
+                    evidence_counts = list(pass = 0, borderline = 0, concern = 0, fail = 0, total = 0)
+                ))
+            })
+        },
+
+        # ==================================================================================
+        # PHASE 1 CONTINUED: Enhanced Migration Heatmap with Advanced Features
+        # ==================================================================================
+
+        # Generate enhanced migration heatmap data with advanced statistics
+        .generateEnhancedMigrationHeatmapData = function(data, old_stage, new_stage) {
+            tryCatch({
+                # Create migration matrix
+                migration_table <- table(data[[old_stage]], data[[new_stage]])
+                migration_prop <- prop.table(migration_table, margin = 1) * 100
+                
+                # Calculate advanced migration statistics
+                diagonal_retention <- diag(migration_prop)
+                total_migrants <- sum(migration_table) - sum(diag(migration_table))
+                migration_rate <- round(total_migrants / sum(migration_table) * 100, 1)
+                
+                # Identify major migration patterns (>10%)
+                major_migrations <- list()
+                for (i in 1:nrow(migration_prop)) {
+                    for (j in 1:ncol(migration_prop)) {
+                        if (i != j && migration_prop[i, j] > 10) {
+                            from_stage <- rownames(migration_prop)[i]
+                            to_stage <- colnames(migration_prop)[j]
+                            percentage <- round(migration_prop[i, j], 1)
+                            major_migrations[[paste0(from_stage, "_to_", to_stage)]] <- list(
+                                from = from_stage,
+                                to = to_stage,
+                                percentage = percentage,
+                                count = migration_table[i, j]
+                            )
+                        }
+                    }
+                }
+                
+                # Calculate net migration by stage
+                net_migration <- colSums(migration_table) - rowSums(migration_table)
+                
+                # Calculate migration flow intensity
+                flow_intensity <- migration_prop
+                flow_intensity[flow_intensity < 1] <- 0  # Only show flows >1%
+                
+                return(list(
+                    migration_table = migration_table,
+                    migration_prop = migration_prop,
+                    diagonal_retention = diagonal_retention,
+                    migration_rate = migration_rate,
+                    major_migrations = major_migrations,
+                    net_migration = net_migration,
+                    flow_intensity = flow_intensity,
+                    stage_retention_rates = round(diagonal_retention, 1)
+                ))
+
+            }, error = function(e) {
+                message("DEBUG: Enhanced heatmap data generation failed: ", e$message)
+                return(NULL)
+            })
+        },
+
+        # ==================================================================================
+        # PHASE 1 CONTINUED: Landmark Analysis Integration
+        # ==================================================================================
+
+        # Perform landmark analysis with time-based cutoffs
+        .performLandmarkAnalysis = function(data, time_var, event_var, landmark_times = c(3, 6, 12)) {
+            tryCatch({
+                message("DEBUG: Performing landmark analysis with cutoffs: ", paste(landmark_times, collapse = ", "))
+                
+                landmark_results <- list()
+                old_stage <- self$options$oldStage
+                new_stage <- self$options$newStage
+                
+                for (landmark_time in landmark_times) {
+                    # Checkpoint before each landmark time analysis (computationally expensive)
+                    private$.checkpoint()
+                    
+                    # Filter patients surviving beyond landmark time
+                    landmark_data <- data[data[[time_var]] >= landmark_time, ]
+                    
+                    if (nrow(landmark_data) < 30) {
+                        landmark_results[[paste0("month_", landmark_time)]] <- list(
+                            error = "Insufficient patients surviving beyond landmark"
+                        )
+                        next
+                    }
+                    
+                    # Adjust survival times (subtract landmark time)
+                    landmark_data[[paste0(time_var, "_adj")]] <- landmark_data[[time_var]] - landmark_time
+                    
+                    # Fit Cox models for landmark cohort
+                    old_formula <- as.formula(paste("survival::Surv(", paste0(time_var, "_adj"), ",", event_var, ") ~", old_stage))
+                    new_formula <- as.formula(paste("survival::Surv(", paste0(time_var, "_adj"), ",", event_var, ") ~", new_stage))
+                    
+                    old_cox_landmark <- survival::coxph(old_formula, data = landmark_data)
+                    new_cox_landmark <- survival::coxph(new_formula, data = landmark_data)
+                    
+                    # Calculate landmark-specific C-indices
+                    old_c_landmark <- survival::concordance(old_cox_landmark)$concordance
+                    new_c_landmark <- survival::concordance(new_cox_landmark)$concordance
+                    
+                    # Store landmark results
+                    landmark_results[[paste0("month_", landmark_time)]] <- list(
+                        landmark_time = landmark_time,
+                        n_patients = nrow(landmark_data),
+                        n_events = sum(landmark_data[[event_var]]),
+                        old_c_index = old_c_landmark,
+                        new_c_index = new_c_landmark,
+                        c_improvement = new_c_landmark - old_c_landmark,
+                        interpretation = if (new_c_landmark > old_c_landmark + 0.02) {
+                            "Meaningful improvement in post-landmark discrimination"
+                        } else if (new_c_landmark > old_c_landmark) {
+                            "Modest improvement in post-landmark discrimination"
+                        } else {
+                            "No improvement in post-landmark discrimination"
+                        }
+                    )
+                }
+                
+                return(landmark_results)
+
+            }, error = function(e) {
+                message("DEBUG: Landmark analysis failed: ", e$message)
+                return(list(error = paste("Landmark analysis failed:", e$message)))
+            })
+        },
+
+        # ==================================================================================
+        # PHASE 2 ADVANCED ANALYTICS: Advanced Calibration & Model Diagnostics
+        # ==================================================================================
+
+        # Advanced Time-Dependent Calibration Assessment
+        .performAdvancedCalibrationAssessment = function(data, all_results) {
+            tryCatch({
+                message("DEBUG: Performing advanced calibration assessment")
+                
+                old_stage <- self$options$oldStage
+                new_stage <- self$options$newStage
+                time_var <- self$options$survivalTime
+                event_var <- "event_binary"
+                
+                # Get Cox models from results
+                if (is.null(all_results$advanced_metrics) || 
+                    is.null(all_results$advanced_metrics$old_cox) || 
+                    is.null(all_results$advanced_metrics$new_cox)) {
+                    message("DEBUG: Cox models not available for calibration assessment")
+                    return(NULL)
+                }
+                
+                old_cox <- all_results$advanced_metrics$old_cox
+                new_cox <- all_results$advanced_metrics$new_cox
+                
+                # Time-dependent calibration analysis
+                calibration_times <- c(12, 24, 36, 60)  # Standard time points
+                calibration_results <- list()
+                
+                for (cal_time in calibration_times) {
+                    # Checkpoint before each calibration time point
+                    private$.checkpoint()
+                    
+                    # Filter patients with follow-up >= cal_time or event before cal_time
+                    cal_data <- data[data[[time_var]] >= cal_time | data[[event_var]] == 1, ]
+                    
+                    if (nrow(cal_data) < 30) {
+                        calibration_results[[paste0("month_", cal_time)]] <- list(
+                            error = "Insufficient follow-up for calibration assessment"
+                        )
+                        next
+                    }
+                    
+                    # Calculate observed vs predicted survival at cal_time
+                    old_cal <- private$.assessTimePointCalibration(cal_data, old_cox, cal_time, time_var, event_var)
+                    new_cal <- private$.assessTimePointCalibration(cal_data, new_cox, cal_time, time_var, event_var)
+                    
+                    calibration_results[[paste0("month_", cal_time)]] <- list(
+                        calibration_time = cal_time,
+                        n_patients = nrow(cal_data),
+                        old_calibration = old_cal,
+                        new_calibration = new_cal,
+                        improvement = if (!is.null(old_cal) && !is.null(new_cal)) {
+                            new_cal$calibration_slope - old_cal$calibration_slope
+                        } else NA
+                    )
+                }
+                
+                return(calibration_results)
+
+            }, error = function(e) {
+                message("DEBUG: Advanced calibration assessment failed: ", e$message)
+                return(list(error = paste("Advanced calibration assessment failed:", e$message)))
+            })
+        },
+
+        # Assess calibration at specific time point
+        .assessTimePointCalibration = function(data, cox_model, time_point, time_var, event_var) {
+            tryCatch({
+                # Calculate predicted survival probabilities at time_point
+                predicted_surv <- exp(-predict(cox_model, type = "expected") * time_point)
+                
+                # Create risk groups based on predicted survival
+                risk_groups <- cut(predicted_surv, 
+                                 breaks = quantile(predicted_surv, probs = seq(0, 1, 0.1), na.rm = TRUE),
+                                 include.lowest = TRUE,
+                                 labels = paste0("Decile_", 1:10))
+                
+                # Calculate observed survival in each risk group
+                calibration_data <- data.frame(
+                    predicted = predicted_surv,
+                    risk_group = risk_groups,
+                    time = data[[time_var]],
+                    event = data[[event_var]]
+                )
+                
+                # Observed vs expected analysis
+                observed_rates <- numeric(10)
+                expected_rates <- numeric(10)
+                
+                for (i in 1:10) {
+                    group_data <- calibration_data[calibration_data$risk_group == paste0("Decile_", i) & 
+                                                  !is.na(calibration_data$risk_group), ]
+                    if (nrow(group_data) > 0) {
+                        # Observed survival rate at time_point
+                        surv_fit <- survival::survfit(survival::Surv(group_data$time, group_data$event) ~ 1)
+                        observed_rates[i] <- summary(surv_fit, times = time_point)$surv
+                        
+                        # Expected (predicted) survival rate
+                        expected_rates[i] <- mean(group_data$predicted, na.rm = TRUE)
+                    }
+                }
+                
+                # Calculate calibration slope (ideally should be 1.0)
+                valid_indices <- !is.na(observed_rates) & !is.na(expected_rates)
+                if (sum(valid_indices) >= 3) {
+                    cal_model <- lm(observed_rates[valid_indices] ~ expected_rates[valid_indices])
+                    calibration_slope <- coef(cal_model)[2]
+                    calibration_intercept <- coef(cal_model)[1]
+                    r_squared <- summary(cal_model)$r.squared
+                } else {
+                    calibration_slope <- NA
+                    calibration_intercept <- NA
+                    r_squared <- NA
+                }
+                
+                return(list(
+                    calibration_slope = calibration_slope,
+                    calibration_intercept = calibration_intercept,
+                    r_squared = r_squared,
+                    observed_rates = observed_rates,
+                    expected_rates = expected_rates,
+                    interpretation = if (!is.na(calibration_slope)) {
+                        if (abs(calibration_slope - 1.0) < 0.1) {
+                            "Excellent calibration"
+                        } else if (abs(calibration_slope - 1.0) < 0.2) {
+                            "Good calibration"
+                        } else {
+                            "Poor calibration - systematic bias detected"
+                        }
+                    } else {
+                        "Calibration assessment failed"
+                    }
+                ))
+
+            }, error = function(e) {
+                return(list(error = paste("Time-point calibration failed:", e$message)))
+            })
+        },
+
+        # ==================================================================================
+        # PHASE 2 CONTINUED: Enhanced Statistical Testing Suite
+        # ==================================================================================
+
+        # Comprehensive Stage Homogeneity Testing
+        .performComprehensiveHomogeneityTesting = function(data, old_stage, new_stage, time_var, event_var) {
+            tryCatch({
+                message("DEBUG: Performing comprehensive homogeneity testing")
+                
+                homogeneity_results <- list()
+                
+                # Test homogeneity within stages for both systems
+                for (system_name in c("Original", "New")) {
+                    stage_var <- if (system_name == "Original") old_stage else new_stage
+                    stage_levels <- levels(as.factor(data[[stage_var]]))
+                    
+                    stage_homogeneity <- list()
+                    
+                    for (stage in stage_levels) {
+                        stage_data <- data[data[[stage_var]] == stage, ]
+                        
+                        if (nrow(stage_data) < 10) {
+                            stage_homogeneity[[stage]] <- list(
+                                error = "Insufficient sample size for homogeneity testing"
+                            )
+                            next
+                        }
+                        
+                        # Test for homogeneity using multiple approaches
+                        # 1. Log-rank test for subgroup differences (if we have additional variables)
+                        # 2. Cox proportional hazards assumption test
+                        # 3. Residual analysis
+                        
+                        # Fit Cox model for this stage
+                        stage_surv <- survival::Surv(stage_data[[time_var]], stage_data[[event_var]])
+                        stage_cox <- survival::coxph(stage_surv ~ 1)  # Null model for baseline
+                        
+                        # Test proportional hazards assumption
+                        ph_test <- tryCatch({
+                            if (nrow(stage_data) > 15) {
+                                survival::cox.zph(stage_cox)
+                            } else {
+                                NULL
+                            }
+                        }, error = function(e) NULL)
+                        
+                        # Calculate within-stage variability
+                        stage_median <- summary(survival::survfit(stage_surv ~ 1))$table["median"]
+                        stage_variance <- var(stage_data[[time_var]], na.rm = TRUE)
+                        
+                        stage_homogeneity[[stage]] <- list(
+                            n_patients = nrow(stage_data),
+                            median_survival = stage_median,
+                            variance = stage_variance,
+                            ph_test = ph_test,
+                            homogeneity_score = if (!is.na(stage_median) && stage_variance > 0) {
+                                # Higher score = more homogeneous
+                                1 / (1 + sqrt(stage_variance) / max(stage_median, 1))
+                            } else NA
+                        )
+                    }
+                    
+                    homogeneity_results[[system_name]] <- stage_homogeneity
+                }
+                
+                # Compare homogeneity between systems
+                comparison_results <- private$.compareStageHomogeneity(
+                    homogeneity_results[["Original"]], 
+                    homogeneity_results[["New"]]
+                )
+                
+                homogeneity_results$comparison <- comparison_results
+                
+                return(homogeneity_results)
+
+            }, error = function(e) {
+                message("DEBUG: Comprehensive homogeneity testing failed: ", e$message)
+                return(list(error = paste("Homogeneity testing failed:", e$message)))
+            })
+        },
+
+        # Compare stage homogeneity between systems
+        .compareStageHomogeneity = function(old_homogeneity, new_homogeneity) {
+            tryCatch({
+                # Calculate average homogeneity scores
+                old_scores <- sapply(old_homogeneity, function(x) x$homogeneity_score)
+                new_scores <- sapply(new_homogeneity, function(x) x$homogeneity_score)
+                
+                old_avg <- mean(old_scores, na.rm = TRUE)
+                new_avg <- mean(new_scores, na.rm = TRUE)
+                
+                improvement <- new_avg - old_avg
+                
+                return(list(
+                    old_average_homogeneity = old_avg,
+                    new_average_homogeneity = new_avg,
+                    homogeneity_improvement = improvement,
+                    interpretation = if (!is.na(improvement)) {
+                        if (improvement > 0.05) {
+                            "New staging system shows improved within-stage homogeneity"
+                        } else if (improvement > -0.05) {
+                            "Similar within-stage homogeneity between systems"
+                        } else {
+                            "New staging system shows reduced within-stage homogeneity"
+                        }
+                    } else {
+                        "Homogeneity comparison not available"
+                    }
+                ))
+
+            }, error = function(e) {
+                return(list(error = paste("Homogeneity comparison failed:", e$message)))
+            })
+        },
+
+        # ==================================================================================
+        # PHASE 2 CONTINUED: Advanced Survival Analysis Features
+        # ==================================================================================
+
+        # Time-Varying Coefficient Analysis
+        .performTimeVaryingCoefficientAnalysis = function(data, old_stage, new_stage, time_var, event_var) {
+            tryCatch({
+                message("DEBUG: Performing time-varying coefficient analysis")
+                
+                # Test for time-varying effects using interaction with time
+                time_varying_results <- list()
+                
+                # Create time interaction terms
+                data$log_time <- log(pmax(data[[time_var]], 0.1))  # Avoid log(0)
+                data$sqrt_time <- sqrt(data[[time_var]])
+                
+                # Test old staging system
+                old_base_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
+                old_time_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", 
+                                                   old_stage, "+ ", old_stage, ":log_time"))
+                
+                old_base_cox <- survival::coxph(old_base_formula, data = data)
+                old_time_cox <- survival::coxph(old_time_formula, data = data)
+                
+                # Test new staging system  
+                new_base_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
+                new_time_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", 
+                                                   new_stage, "+ ", new_stage, ":log_time"))
+                
+                new_base_cox <- survival::coxph(new_base_formula, data = data)
+                new_time_cox <- survival::coxph(new_time_formula, data = data)
+                
+                # Likelihood ratio tests
+                old_lrt <- anova(old_base_cox, old_time_cox)
+                new_lrt <- anova(new_base_cox, new_time_cox)
+                
+                time_varying_results <- list(
+                    old_system = list(
+                        base_model = old_base_cox,
+                        time_varying_model = old_time_cox,
+                        lrt = old_lrt,
+                        time_varying_significant = old_lrt$`Pr(>Chi)`[2] < 0.05
+                    ),
+                    new_system = list(
+                        base_model = new_base_cox,
+                        time_varying_model = new_time_cox,
+                        lrt = new_lrt,
+                        time_varying_significant = new_lrt$`Pr(>Chi)`[2] < 0.05
+                    ),
+                    interpretation = list(
+                        old_system = if (old_lrt$`Pr(>Chi)`[2] < 0.05) {
+                            "Significant time-varying effects detected - hazard ratios change over time"
+                        } else {
+                            "No significant time-varying effects - proportional hazards assumption satisfied"
+                        },
+                        new_system = if (new_lrt$`Pr(>Chi)`[2] < 0.05) {
+                            "Significant time-varying effects detected - hazard ratios change over time"
+                        } else {
+                            "No significant time-varying effects - proportional hazards assumption satisfied"
+                        }
+                    )
+                )
+                
+                return(time_varying_results)
+
+            }, error = function(e) {
+                message("DEBUG: Time-varying coefficient analysis failed: ", e$message)
+                return(list(error = paste("Time-varying analysis failed:", e$message)))
+            })
+        },
+
+        # ==================================================================================
+        # PHASE 2 CONTINUED: Comprehensive Model Performance Metrics
+        # ==================================================================================
+
+        # Phase 2 Model Diagnostics Suite
+        .performPhase2ModelDiagnostics = function(data, old_cox, new_cox, old_stage, new_stage) {
+            tryCatch({
+                message("DEBUG: Performing enhanced model diagnostics")
+                
+                diagnostics_results <- list()
+                
+                # 1. Residual Analysis
+                old_residuals <- private$.calculateModelResiduals(old_cox, data)
+                new_residuals <- private$.calculateModelResiduals(new_cox, data)
+                
+                # 2. Influence Analysis (already exists, enhance it)
+                old_influence <- private$.performInfluenceAnalysis(old_cox, new_cox, data)
+                
+                # 3. Model Assumptions Testing
+                assumptions_old <- private$.testPhase2ModelAssumptions(old_cox, data)
+                assumptions_new <- private$.testPhase2ModelAssumptions(new_cox, data)
+                
+                # 4. Goodness of Fit Measures
+                gof_old <- private$.calculateGoodnessOfFit(old_cox, data)
+                gof_new <- private$.calculateGoodnessOfFit(new_cox, data)
+                
+                diagnostics_results <- list(
+                    residuals = list(
+                        old_system = old_residuals,
+                        new_system = new_residuals
+                    ),
+                    influence = old_influence,
+                    assumptions = list(
+                        old_system = assumptions_old,
+                        new_system = assumptions_new
+                    ),
+                    goodness_of_fit = list(
+                        old_system = gof_old,
+                        new_system = gof_new
+                    ),
+                    overall_assessment = private$.assessOverallModelQuality(
+                        list(old_residuals, old_influence, assumptions_old, gof_old),
+                        list(new_residuals, old_influence, assumptions_new, gof_new)
+                    )
+                )
+                
+                return(diagnostics_results)
+
+            }, error = function(e) {
+                message("DEBUG: Enhanced model diagnostics failed: ", e$message)
+                return(list(error = paste("Model diagnostics failed:", e$message)))
+            })
+        },
+
+        # Calculate model residuals  
+        .calculateModelResiduals = function(cox_model, data) {
+            tryCatch({
+                # Multiple types of residuals for comprehensive assessment
+                residuals_list <- list()
+                
+                # Martingale residuals
+                residuals_list$martingale <- residuals(cox_model, type = "martingale")
+                
+                # Deviance residuals
+                residuals_list$deviance <- residuals(cox_model, type = "deviance")
+                
+                # Score residuals (if available)
+                residuals_list$score <- tryCatch(
+                    residuals(cox_model, type = "score"),
+                    error = function(e) NULL
+                )
+                
+                # Schoenfeld residuals for proportional hazards testing
+                residuals_list$schoenfeld <- tryCatch(
+                    residuals(cox_model, type = "schoenfeld"),
+                    error = function(e) NULL
+                )
+                
+                # Calculate residual statistics
+                residuals_list$statistics <- list(
+                    martingale_mean = mean(residuals_list$martingale, na.rm = TRUE),
+                    martingale_var = var(residuals_list$martingale, na.rm = TRUE),
+                    deviance_mean = mean(residuals_list$deviance, na.rm = TRUE),
+                    deviance_var = var(residuals_list$deviance, na.rm = TRUE),
+                    n_outliers = sum(abs(residuals_list$deviance) > 2, na.rm = TRUE)
+                )
+                
+                return(residuals_list)
+
+            }, error = function(e) {
+                return(list(error = paste("Residual calculation failed:", e$message)))
+            })
+        },
+
+        # Test Phase 2 model assumptions
+        .testPhase2ModelAssumptions = function(cox_model, data) {
+            tryCatch({
+                assumptions_results <- list()
+                
+                # Proportional hazards test
+                ph_test <- tryCatch({
+                    survival::cox.zph(cox_model)
+                }, error = function(e) NULL)
+                
+                assumptions_results$proportional_hazards <- list(
+                    test = ph_test,
+                    p_value = if (!is.null(ph_test)) ph_test$table[nrow(ph_test$table), "p"] else NA,
+                    assumption_satisfied = if (!is.null(ph_test)) ph_test$table[nrow(ph_test$table), "p"] > 0.05 else NA
+                )
+                
+                # Linearity test (for continuous predictors)
+                # Note: This would need extension for continuous staging variables
+                
+                # Global test of model assumptions
+                assumptions_results$global_test <- list(
+                    proportional_hazards_satisfied = assumptions_results$proportional_hazards$assumption_satisfied,
+                    overall_assessment = if (!is.na(assumptions_results$proportional_hazards$assumption_satisfied)) {
+                        if (assumptions_results$proportional_hazards$assumption_satisfied) {
+                            "Model assumptions satisfied"
+                        } else {
+                            "Proportional hazards assumption violated"
+                        }
+                    } else {
+                        "Assumption testing not available"
+                    }
+                )
+                
+                return(assumptions_results)
+
+            }, error = function(e) {
+                return(list(error = paste("Assumption testing failed:", e$message)))
+            })
+        },
+
+        # Calculate goodness of fit measures
+        .calculateGoodnessOfFit = function(cox_model, data) {
+            tryCatch({
+                gof_results <- list()
+                
+                # Model deviance
+                gof_results$deviance = cox_model$loglik[2] * -2
+                
+                # Degrees of freedom
+                gof_results$df <- length(coef(cox_model))
+                
+                # AIC and BIC (already calculated elsewhere, but include for completeness)
+                gof_results$aic <- AIC(cox_model)
+                gof_results$bic <- BIC(cox_model)
+                
+                # Concordance probability (already calculated)
+                concordance_result <- survival::concordance(cox_model)
+                gof_results$concordance <- concordance_result$concordance
+                gof_results$concordance_se <- sqrt(concordance_result$var)
+                
+                # Global chi-square test
+                gof_results$global_chi_square <- 2 * (cox_model$loglik[2] - cox_model$loglik[1])
+                gof_results$global_p_value <- pchisq(gof_results$global_chi_square, df = gof_results$df, lower.tail = FALSE)
+                
+                return(gof_results)
+
+            }, error = function(e) {
+                return(list(error = paste("Goodness of fit calculation failed:", e$message)))
+            })
+        },
+
+        # Assess overall model quality
+        .assessOverallModelQuality = function(old_diagnostics, new_diagnostics) {
+            tryCatch({
+                # Simple quality assessment based on available metrics
+                quality_scores <- list()
+                
+                # Score old system (0-1 scale, higher is better)
+                old_score <- 0.5  # neutral starting point
+                if (!is.null(old_diagnostics[[3]]) && !is.null(old_diagnostics[[3]]$proportional_hazards$assumption_satisfied)) {
+                    if (old_diagnostics[[3]]$proportional_hazards$assumption_satisfied) old_score <- old_score + 0.2
+                }
+                if (!is.null(old_diagnostics[[1]]) && !is.null(old_diagnostics[[1]]$statistics$n_outliers)) {
+                    if (old_diagnostics[[1]]$statistics$n_outliers < nrow(data) * 0.05) old_score <- old_score + 0.2
+                }
+                
+                # Score new system
+                new_score <- 0.5  # neutral starting point  
+                if (!is.null(new_diagnostics[[3]]) && !is.null(new_diagnostics[[3]]$proportional_hazards$assumption_satisfied)) {
+                    if (new_diagnostics[[3]]$proportional_hazards$assumption_satisfied) new_score <- new_score + 0.2
+                }
+                if (!is.null(new_diagnostics[[1]]) && !is.null(new_diagnostics[[1]]$statistics$n_outliers)) {
+                    if (new_diagnostics[[1]]$statistics$n_outliers < nrow(data) * 0.05) new_score <- new_score + 0.2
+                }
+                
+                return(list(
+                    old_quality_score = old_score,
+                    new_quality_score = new_score,
+                    improvement = new_score - old_score,
+                    recommendation = if (new_score > old_score + 0.1) {
+                        "New staging system shows improved model quality"
+                    } else if (new_score > old_score - 0.1) {
+                        "Similar model quality between systems"
+                    } else {
+                        "Old staging system shows better model quality"
+                    }
+                ))
+
+            }, error = function(e) {
+                return(list(error = paste("Quality assessment failed:", e$message)))
+            })
+        },
+
+        # ==================================================================================
+        # PHASE 3: CLINICAL INTEGRATION FEATURES
+        # ==================================================================================
+        
+        # Clinical Decision Support System
+        .performClinicalDecisionSupport = function(data, all_results) {
+            tryCatch({
+                message("DEBUG: Performing clinical decision support analysis")
+                
+                decision_support <- list()
+                
+                # 1. Patient Risk Stratification
+                decision_support$risk_stratification <- private$.performPatientRiskStratification(
+                    data, all_results
+                )
+                
+                # 2. Clinical Alert System
+                decision_support$clinical_alerts <- private$.generateClinicalAlerts(
+                    data, all_results
+                )
+                
+                # 3. Implementation Guidance
+                decision_support$implementation_guidance <- private$.generateImplementationGuidance(
+                    all_results
+                )
+                
+                return(decision_support)
+                
+            }, error = function(e) {
+                return(list(error = paste("Clinical decision support failed:", e$message)))
+            })
+        },
+        
+        # Patient Risk Stratification
+        .performPatientRiskStratification = function(data, all_results) {
+            tryCatch({
+                old_stage <- self$options$oldStage
+                new_stage <- self$options$newStage
+                
+                if (is.null(all_results$advanced_metrics)) {
+                    return(list(error = "Advanced metrics required for risk stratification"))
+                }
+                
+                old_cox <- all_results$advanced_metrics$old_cox
+                new_cox <- all_results$advanced_metrics$new_cox
+                
+                # Calculate risk scores for both systems
+                old_risk <- predict(old_cox, type = "risk")
+                new_risk <- predict(new_cox, type = "risk")
+                
+                # Define risk categories using quantiles
+                old_risk_categories <- cut(old_risk, 
+                                         breaks = quantile(old_risk, c(0, 0.33, 0.67, 1), na.rm = TRUE),
+                                         labels = c("Low", "Moderate", "High"),
+                                         include.lowest = TRUE)
+                                         
+                new_risk_categories <- cut(new_risk, 
+                                         breaks = quantile(new_risk, c(0, 0.33, 0.67, 1), na.rm = TRUE),
+                                         labels = c("Low", "Moderate", "High"),
+                                         include.lowest = TRUE)
+                
+                # Cross-tabulate risk categories
+                risk_crosstab <- table(old_risk_categories, new_risk_categories, useNA = "ifany")
+                
+                # Calculate reclassification statistics
+                reclassification_stats <- list(
+                    total_patients = length(old_risk),
+                    upclassified = sum(new_risk_categories > old_risk_categories, na.rm = TRUE),
+                    downclassified = sum(new_risk_categories < old_risk_categories, na.rm = TRUE),
+                    unchanged = sum(new_risk_categories == old_risk_categories, na.rm = TRUE)
+                )
+                
+                reclassification_stats$reclassification_rate <- 
+                    (reclassification_stats$upclassified + reclassification_stats$downclassified) / 
+                    reclassification_stats$total_patients
+                
+                return(list(
+                    risk_categories = list(old = old_risk_categories, new = new_risk_categories),
+                    risk_crosstab = risk_crosstab,
+                    statistics = reclassification_stats,
+                    clinical_implications = "Risk stratification analysis completed"
+                ))
+                
+            }, error = function(e) {
+                return(list(error = paste("Risk stratification failed:", e$message)))
+            })
+        },
+        
+        # Generate Clinical Alerts
+        .generateClinicalAlerts = function(data, all_results) {
+            tryCatch({
+                alerts <- list()
+                
+                # Will Rogers phenomenon alert
+                if (!is.null(all_results$will_rogers_assessment)) {
+                    alerts$will_rogers <- list(
+                        level = "info",
+                        title = "Will Rogers Phenomenon Assessment",
+                        message = "Stage migration patterns have been analyzed for potential bias",
+                        recommendation = "Review evidence summary for clinical significance"
+                    )
+                }
+                
+                # Sample size adequacy alert
+                n_total <- nrow(data)
+                event_binary <- private$.createEventBinary(data, self$options$event, self$options$eventLevel)
+                n_events <- sum(event_binary, na.rm = TRUE)
+                
+                if (n_events < 100) {
+                    alerts$sample_size <- list(
+                        level = "warning",
+                        title = "Limited Sample Size",
+                        message = paste("Only", n_events, "events observed. Results may be unstable."),
+                        recommendation = "Consider expanding sample size or external validation"
+                    )
+                }
+                
+                # Statistical significance vs clinical significance alert
+                if (!is.null(all_results$advanced_metrics)) {
+                    c_diff <- all_results$advanced_metrics$new_cindex - all_results$advanced_metrics$old_cindex
+                    if (c_diff > 0 && c_diff < 0.02) {
+                        alerts$clinical_significance <- list(
+                            level = "info",
+                            title = "Marginal Clinical Improvement",
+                            message = paste("C-index improvement of", round(c_diff, 3), "is below typical clinical threshold"),
+                            recommendation = "Consider additional validation metrics before adoption"
+                        )
+                    }
+                }
+                
+                return(alerts)
+                
+            }, error = function(e) {
+                return(list(error = paste("Clinical alerts generation failed:", e$message)))
+            })
+        },
+        
+        # Generate Implementation Guidance
+        .generateImplementationGuidance = function(all_results) {
+            tryCatch({
+                guidance <- list()
+                
+                # Overall recommendation
+                if (!is.null(all_results$advanced_metrics)) {
+                    c_improvement <- all_results$advanced_metrics$new_cindex - all_results$advanced_metrics$old_cindex
+                    
+                    if (c_improvement > 0.05) {
+                        guidance$overall_recommendation <- "Strong evidence supports adopting the new staging system"
+                        guidance$implementation_priority <- "High"
+                    } else if (c_improvement > 0.02) {
+                        guidance$overall_recommendation <- "Moderate evidence supports considering the new staging system"
+                        guidance$implementation_priority <- "Medium"
+                    } else if (c_improvement > 0) {
+                        guidance$overall_recommendation <- "Weak evidence for improvement; additional validation recommended"
+                        guidance$implementation_priority <- "Low"
+                    } else {
+                        guidance$overall_recommendation <- "No evidence of improvement; retain current staging system"
+                        guidance$implementation_priority <- "None"
+                    }
+                }
+                
+                # Implementation steps
+                guidance$implementation_steps <- c(
+                    "1. Review all statistical evidence and clinical alerts",
+                    "2. Validate findings in external cohort if available",
+                    "3. Train clinical staff on new staging criteria",
+                    "4. Implement gradual transition with parallel staging",
+                    "5. Monitor performance metrics during transition"
+                )
+                
+                # Quality assurance
+                guidance$quality_assurance <- c(
+                    "Regular audit of staging accuracy",
+                    "Monitor for consistent application across pathologists",
+                    "Track patient outcome improvements",
+                    "Document implementation challenges and solutions"
+                )
+                
+                return(guidance)
+                
+            }, error = function(e) {
+                return(list(error = paste("Implementation guidance generation failed:", e$message)))
+            })
+        },
+        
+        # Publication Report Generator
+        .generatePublicationReport = function(data, all_results) {
+            tryCatch({
+                message("DEBUG: Generating publication-ready report")
+                
+                report <- list()
+                
+                # Executive Summary
+                report$executive_summary <- private$.generateExecutiveSummaryForPublication(all_results)
+                
+                # Methods Summary
+                report$methods_summary <- paste(
+                    "Stage migration analysis was performed using advanced statistical methods including",
+                    "concordance index comparison, Net Reclassification Improvement (NRI),",
+                    "and bootstrap validation. Will Rogers phenomenon was assessed using",
+                    "evidence-based criteria."
+                )
+                
+                # Key Findings
+                report$key_findings <- private$.extractKeyFindings(all_results)
+                
+                return(report)
+                
+            }, error = function(e) {
+                return(list(error = paste("Publication report generation failed:", e$message)))
+            })
+        },
+        
+        # Extract Key Findings for Publication
+        .extractKeyFindings = function(all_results) {
+            findings <- character(0)
+            
+            if (!is.null(all_results$basic_results)) {
+                migration_rate <- all_results$basic_results$overall_migration_rate * 100
+                findings <- c(findings, 
+                    paste("Overall migration rate:", round(migration_rate, 1), "%")
+                )
+            }
+            
+            if (!is.null(all_results$advanced_metrics)) {
+                c_old <- round(all_results$advanced_metrics$old_cindex, 3)
+                c_new <- round(all_results$advanced_metrics$new_cindex, 3)
+                c_diff <- round(c_new - c_old, 3)
+                
+                findings <- c(findings,
+                    paste("C-index improvement:", c_old, "to", c_new, "(difference:", c_diff, ")")
+                )
+            }
+            
+            return(findings)
+        },
+        
+        # Generate Executive Summary for Publication
+        .generateExecutiveSummaryForPublication = function(all_results) {
+            tryCatch({
+                summary_parts <- character(0)
+                
+                if (!is.null(all_results$basic_results)) {
+                    n_patients <- all_results$basic_results$total_patients
+                    migration_rate <- round(all_results$basic_results$overall_migration_rate * 100, 1)
+                    
+                    summary_parts <- c(summary_parts,
+                        paste("We analyzed", n_patients, "patients with", migration_rate, "% experiencing stage migration.")
+                    )
+                }
+                
+                if (!is.null(all_results$advanced_metrics)) {
+                    c_improvement <- round(all_results$advanced_metrics$new_cindex - all_results$advanced_metrics$old_cindex, 3)
+                    
+                    if (c_improvement > 0.02) {
+                        summary_parts <- c(summary_parts,
+                            paste("The new staging system demonstrated clinically significant improvement (ΔC-index =", c_improvement, ").")
+                        )
+                    } else {
+                        summary_parts <- c(summary_parts,
+                            paste("The new staging system showed marginal improvement (ΔC-index =", c_improvement, ").")
+                        )
+                    }
+                }
+                
+                return(paste(summary_parts, collapse = " "))
+                
+            }, error = function(e) {
+                return("Executive summary generation failed")
+            })
         }
     )
 )

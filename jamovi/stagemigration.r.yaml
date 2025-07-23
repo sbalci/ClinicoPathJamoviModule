@@ -1767,6 +1767,168 @@ items:
             title: "Recommendation"
             type: text
 
+    # ==================================================================================
+    # PHASE 1 ADVANCED ENHANCEMENTS: Evidence-Based Assessment Results
+    # ==================================================================================
+
+    # Will Rogers Evidence Summary Explanation
+    - name: willRogersEvidenceSummaryExplanation
+      title: Understanding Will Rogers Evidence Assessment Framework
+      type: Html
+      visible: (advancedMigrationAnalysis && showExplanations)
+      clearWith:
+          - advancedMigrationAnalysis
+
+    # Will Rogers Evidence Summary
+    - name: willRogersEvidenceSummary
+      title: Will Rogers Phenomenon Evidence Summary
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Criterion
+            title: "Assessment Criterion"
+            type: text
+          - name: Assessment
+            title: "Result"
+            type: text
+          - name: Evidence_Level
+            title: "Evidence Strength"
+            type: text
+          - name: Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Will Rogers Clinical Recommendation
+    - name: willRogersClinicalRecommendation
+      title: Will Rogers Analysis Clinical Recommendation
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Category
+            title: "Category"
+            type: text
+          - name: Finding
+            title: "Finding"
+            type: text
+          - name: Confidence
+            title: "Confidence Level"
+            type: text
+          - name: Guidance
+            title: "Implementation Guidance"
+            type: text
+
+    # Enhanced Migration Pattern Analysis
+    - name: enhancedMigrationPatternAnalysis
+      title: Enhanced Migration Pattern Analysis
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - advancedMigrationAnalysis
+      columns:
+          - name: Pattern_Type
+            title: "Pattern Type"
+            type: text
+          - name: Count
+            title: "Count"
+            type: integer
+          - name: Percentage
+            title: "Percentage"
+            type: number
+            format: pc
+          - name: Flow_Direction
+            title: "Flow Direction"
+            type: text
+          - name: Clinical_Impact
+            title: "Clinical Impact"
+            type: text
+
+    # Landmark Analysis Results
+    - name: landmarkAnalysisResults
+      title: Landmark Analysis Results
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+          - cancerType
+      columns:
+          - name: Landmark_Time
+            title: "Landmark Time (months)"
+            type: number
+            format: zto
+          - name: N_Patients
+            title: "N Patients"
+            type: integer
+          - name: N_Events
+            title: "N Events"
+            type: integer
+          - name: Old_C_Index
+            title: "Original C-Index"
+            type: number
+            format: zto
+          - name: New_C_Index
+            title: "New C-Index"
+            type: number
+            format: zto
+          - name: C_Improvement
+            title: "C-Index Improvement"
+            type: number
+            format: zto
+          - name: Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Advanced Migration Heatmap Statistics
+    - name: advancedMigrationHeatmapStats
+      title: Advanced Migration Heatmap Statistics
+      type: Table
+      visible: (advancedMigrationAnalysis && showMigrationHeatmap)
+      clearWith:
+          - oldStage
+          - newStage
+          - advancedMigrationAnalysis
+          - showMigrationHeatmap
+      columns:
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: Retention_Rate
+            title: "Retention Rate (%)"
+            type: number
+            format: pc
+          - name: Inflow
+            title: "Patients Gained"
+            type: integer
+          - name: Outflow
+            title: "Patients Lost"
+            type: integer
+          - name: Net_Migration
+            title: "Net Change"
+            type: integer
+          - name: Major_Flows
+            title: "Major Migration Flows"
+            type: text
+
     # Abbreviation Glossary
     - name: abbreviationGlossary
       title: Comprehensive Abbreviation Glossary and Statistical Terms
