@@ -36,18 +36,18 @@ script_dir <- tryCatch({
 setwd(script_dir)
 
 # Source utility functions with enhanced validation
-utility_file <- "_module_utils.R"
+utility_file <- "_updateModules_utils.R"
 if (!file.exists(utility_file)) {
-  warning("⚠️ _module_utils.R not found in current directory: ", getwd())
-  cat("Looking for _module_utils.R in script directory...\n")
+  warning("⚠️ _updateModules_utils.R not found in current directory: ", getwd())
+  cat("Looking for _updateModules_utils.R in script directory...\n")
 
   # Try to find in script directory
   script_utility <- file.path(script_dir, utility_file)
   if (file.exists(script_utility)) {
-    cat("✅ Found _module_utils.R in script directory\n")
+    cat("✅ Found _updateModules_utils.R in script directory\n")
     utility_file <- script_utility
   } else {
-    stop("❌ _module_utils.R not found. Please ensure all required files are present.")
+    stop("❌ _updateModules_utils.R not found. Please ensure all required files are present.")
   }
 }
 
@@ -56,7 +56,7 @@ tryCatch({
   source(utility_file)
   cat("✅ Successfully loaded module utilities\n")
 }, error = function(e) {
-  stop("❌ Failed to load _module_utils.R: ", e$message)
+  stop("❌ Failed to load _updateModules_utils.R: ", e$message)
 })
 
 # Load and validate configuration

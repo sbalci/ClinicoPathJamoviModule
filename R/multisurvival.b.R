@@ -262,6 +262,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         if (!tint) {
           ### Precalculated Time ----
+          
+          # Check if time variable is selected
+          if (is.null(mytime_labelled) || length(mytime_labelled) == 0) {
+            # Return empty data frame with proper structure
+            return(data.frame(row_names = character(0), mytime = numeric(0)))
+          }
 
           mydata[["mytime"]] <-
             jmvcore::toNumeric(mydata[[mytime_labelled]])
@@ -375,6 +381,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         outcomeLevel <- self$options$outcomeLevel
         multievent <- self$options$multievent
+
+        # Check if outcome variable is selected
+        if (is.null(myoutcome_labelled) || length(myoutcome_labelled) == 0) {
+          # Return empty data frame with proper structure
+          return(data.frame(row_names = character(0), myoutcome = numeric(0)))
+        }
 
         outcome1 <- mydata[[myoutcome_labelled]]
 
@@ -875,24 +887,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         
         if (self$options$use_tree) {
           private$.checkpoint()
-          tree <- private$.survivalTree(cleaneddata)
-          
-          # Prepare data for tree plots
-          if (!is.null(tree)) {
-            image_tree <- self$results$tree_plot
-            image_tree$setState(list(
-              "results" = cleaneddata,
-              "tree" = tree
-            ))
-            
-            if (self$options$show_terminal_nodes) {
-              image_node_survival <- self$results$node_survival_plots
-              image_node_survival$setState(list(
-                "results" = cleaneddata,
-                "tree" = tree
-              ))
-            }
-          }
+          # Tree analysis is handled directly in plot functions
+          # to avoid storing large tree objects in state
         }
 
         # Prepare Data For Plots ----
@@ -3760,255 +3756,257 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       ,
     ## Fit Cox Model with Selection ----
 .fitModelWithSelection = function(formula, data) {
-  # Get the selection method and criteria from options
-  modelSelection <- self$options$modelSelection
-  selectionCriteria <- self$options$selectionCriteria
-  pEntry <- self$options$pEntry
-  pRemoval <- self$options$pRemoval
+  tryCatch({
+    # Get the selection method and criteria from options
+    modelSelection <- self$options$modelSelection
+    selectionCriteria <- self$options$selectionCriteria
+    pEntry <- self$options$pEntry
+    pRemoval <- self$options$pRemoval
 
-  # Validation checks
-  if (self$options$pEntry >= self$options$pRemoval) {
-    stop("Entry significance must be less than removal significance")
-  }
-
-  if (self$options$modelSelection != "enter" &&
-      length(c(self$options$explanatory, self$options$contexpl)) < 2) {
-    stop("Variable selection requires at least 2 predictor variables")
-  }
-
-
-  private$.checkpoint()
-
-
-  # If no selection requested, return full model
-  if (modelSelection == "enter") {
-    # Just fit and return the full model with all variables
-    full_model <- survival::coxph(formula, data = data)
-    return(full_model)
-  }
-
-  # For Cox models we need to preserve the exact Surv() object on the left side
-  surv_part <- formula[[2]]  # Gets the Surv() expression itself
-  pred_part <- attr(terms(formula), "term.labels")  # All predictor variables
-
-  # Create full and null models
-  full_model <- survival::coxph(formula, data = data)
-  null_formula <- as.formula(paste(deparse(surv_part), "~ 1"))
-  null_model <- survival::coxph(null_formula, data = data)
-
-  # For backward selection
-
-  if (modelSelection == "backward") {
-    # Start with all variables
-    current_vars <- pred_part
-    current_model <- full_model
-
-    # Set status to indicate backward selection is starting
-    self$results$text_model_selection$setStatus('running')
-    self$results$text2_model_selection$setStatus('running')
-
-    # Initial checkpoint to push status to UI
-    private$.checkpoint()
-
-    # Track variables removed for reporting
-    removed_vars <- character(0)
-
-    # Remove variables one-by-one if they don't contribute significantly
-    changed <- TRUE
-    iteration <- 0
-    while(changed && length(current_vars) > 0) {
-      iteration <- iteration + 1
-      changed <- FALSE
-
-      # Add checkpoint at beginning of each iteration
-      private$.checkpoint(flush=FALSE)
-
-      # Only try to examine p-values if we have variables
-      if (length(current_vars) > 0) {
-        # Get model summary
-        model_summary <- summary(current_model)
-
-        # Check if we have coefficients
-        if (!is.null(model_summary$coefficients)) {
-          # Store p-values for each variable
-          coef_summary <- model_summary$coefficients
-          var_p_values <- coef_summary[, "Pr(>|z|)"]
-
-          # Find least significant variable
-          max_p <- max(var_p_values)
-          if (max_p > pRemoval) {
-            # Which variable has highest p-value
-            drop_var_idx <- which.max(var_p_values)
-            drop_var <- names(var_p_values)[drop_var_idx]
-
-            # Remove this variable
-            current_vars <- setdiff(current_vars, drop_var)
-            removed_vars <- c(removed_vars, drop_var)
-
-            # Update status with progress information
-            status_msg <- paste0("Removing variable: ", drop_var,
-                                 " (p=", format.pval(max_p, digits=3), ")")
-            self$results$text2_model_selection$setContent(status_msg)
-
-            # Critical checkpoint before expensive operation - always flush here
-            private$.checkpoint()
-
-            if (length(current_vars) > 0) {
-              # Create new formula without this variable
-              new_formula <- as.formula(paste(deparse(surv_part), "~",
-                                              paste(current_vars, collapse = " + ")))
-
-              # This is the most computationally expensive step
-              current_model <- survival::coxph(new_formula, data = data)
-            } else {
-              # If no variables left, use null model
-              current_model <- null_model
-            }
-
-            changed <- TRUE
-          }
-        }
-      }
-
-      # Add checkpoint after expensive operation to show progress
-      # Only flush every 2nd iteration to balance responsiveness with performance
-      if (iteration %% 2 == 0) {
-        private$.checkpoint()
-      }
+    # Validation checks
+    if (self$options$pEntry >= self$options$pRemoval) {
+      stop("Entry significance must be less than removal significance")
     }
 
-    # Final model is ready - set status to complete
-    self$results$text_model_selection$setStatus('complete')
-    self$results$text2_model_selection$setStatus('complete')
+    if (self$options$modelSelection != "enter" &&
+        length(c(self$options$explanatory, self$options$contexpl)) < 2) {
+      stop("Variable selection requires at least 2 predictor variables")
+    }
 
-    # Final checkpoint to push complete results
     private$.checkpoint()
 
-    # Store selection steps for reporting
-    attr(current_model, "selection_steps") <- list(
-      removed = removed_vars,
-      remaining = current_vars
-    )
+    # If no selection requested, return full model
+    if (modelSelection == "enter") {
+      # Just fit and return the full model with all variables
+      full_model <- survival::coxph(formula, data = data)
+      return(full_model)
+    }
 
-    return(current_model)
+    # For Cox models we need to preserve the exact Surv() object on the left side
+    surv_part <- formula[[2]]  # Gets the Surv() expression itself
+    pred_part <- attr(terms(formula), "term.labels")  # All predictor variables
 
-      }
+    # Create full and null models
+    full_model <- survival::coxph(formula, data = data)
+    null_formula <- as.formula(paste(deparse(surv_part), "~ 1"))
+    null_model <- survival::coxph(null_formula, data = data)
 
-  # For forward selection or stepwise (both)
-  else if (modelSelection == "forward" || modelSelection == "both") {
-    # Start with no variables
-    selected_vars <- character(0)
-    current_model <- null_model
+    # For backward selection
+    if (modelSelection == "backward") {
+      # Start with all variables
+      current_vars <- pred_part
+      current_model <- full_model
 
-    # Add variables one by one
-    while (length(selected_vars) < length(pred_part)) {
+      # Set status to indicate backward selection is starting
+      self$results$text_model_selection$setStatus('running')
+      self$results$text2_model_selection$setStatus('running')
 
+      # Initial checkpoint to push status to UI
       private$.checkpoint()
 
+      # Track variables removed for reporting
+      removed_vars <- character(0)
 
-      best_var <- NULL
-      best_p <- pEntry
-      best_improvement <- 0
+      # Remove variables one-by-one if they don't contribute significantly
+      changed <- TRUE
+      iteration <- 0
+      while(changed && length(current_vars) > 0) {
+        iteration <- iteration + 1
+        changed <- FALSE
 
-      # Try adding each variable not already selected
-      for (var in setdiff(pred_part, selected_vars)) {
-        # Create formula with this variable added
-        if (length(selected_vars) == 0) {
-          test_formula <- as.formula(paste(deparse(surv_part), "~", var))
-        } else {
-          test_formula <- as.formula(paste(deparse(surv_part), "~",
-                                           paste(c(selected_vars, var), collapse = " + ")))
-        }
+        # Add checkpoint at beginning of each iteration
+        private$.checkpoint(flush=FALSE)
 
-        # Fit model and check improvement
-        test_model <- survival::coxph(test_formula, data = data)
-
-        # Compare models
-        if (selectionCriteria == "aic") {
-          # Use AIC for comparison
-          current_aic <- AIC(current_model)
-          test_aic <- AIC(test_model)
-          improvement <- current_aic - test_aic
-
-          if (improvement > best_improvement) {
-            best_improvement <- improvement
-            best_var <- var
-          }
-        } else {
-          # Use likelihood ratio test
-          lr_test <- anova(current_model, test_model)
-          if (nrow(lr_test) >= 2) {
-            p_value <- lr_test$P[2]  # Second row has the p-value for comparison
-
-            if (!is.na(p_value) && p_value < best_p) {
-              best_p <- p_value
-              best_var <- var
-              best_improvement <- 1  # Just a flag
-            }
-          }
-        }
-      }
-
-      # If we found a variable to add
-      if (!is.null(best_var) && (
-        (selectionCriteria == "aic" && best_improvement > 0) ||
-        (selectionCriteria == "lrt" && best_p < pEntry)
-      )) {
-        # Add best variable
-        selected_vars <- c(selected_vars, best_var)
-
-        # Update current model
-        if (length(selected_vars) > 0) {
-          current_formula <- as.formula(paste(deparse(surv_part), "~",
-                                              paste(selected_vars, collapse = " + ")))
-          current_model <- survival::coxph(current_formula, data = data)
-        }
-
-        # For stepwise, check if we should remove any variables
-        if (modelSelection == "both" && length(selected_vars) > 1) {
-
-          private$.checkpoint()
-
+        # Only try to examine p-values if we have variables
+        if (length(current_vars) > 0) {
           # Get model summary
           model_summary <- summary(current_model)
 
-          # Only check for removal if we have coefficients
+          # Check if we have coefficients
           if (!is.null(model_summary$coefficients)) {
-            # Check p-values of current variables
+            # Store p-values for each variable
             coef_summary <- model_summary$coefficients
             var_p_values <- coef_summary[, "Pr(>|z|)"]
 
-            # Find variables that are no longer significant
-            remove_vars <- character(0)
-            for (i in seq_along(var_p_values)) {
-              if (var_p_values[i] > pRemoval) {
-                remove_vars <- c(remove_vars, names(var_p_values)[i])
-              }
-            }
+            # Find least significant variable
+            max_p <- max(var_p_values)
+            if (max_p > pRemoval) {
+              # Which variable has highest p-value
+              drop_var_idx <- which.max(var_p_values)
+              drop_var <- names(var_p_values)[drop_var_idx]
 
-            if (length(remove_vars) > 0) {
-              # Remove these variables
-              selected_vars <- setdiff(selected_vars, remove_vars)
+              # Remove this variable
+              current_vars <- setdiff(current_vars, drop_var)
+              removed_vars <- c(removed_vars, drop_var)
 
-              # Update model
-              if (length(selected_vars) > 0) {
-                current_formula <- as.formula(paste(deparse(surv_part), "~",
-                                                    paste(selected_vars, collapse = " + ")))
-                current_model <- survival::coxph(current_formula, data = data)
+              # Update status with progress information
+              status_msg <- paste0("Removing variable: ", drop_var,
+                                   " (p=", format.pval(max_p, digits=3), ")")
+              self$results$text2_model_selection$setContent(status_msg)
+
+              # Critical checkpoint before expensive operation - always flush here
+              private$.checkpoint()
+
+              if (length(current_vars) > 0) {
+                # Create new formula without this variable
+                new_formula <- as.formula(paste(deparse(surv_part), "~",
+                                                paste(current_vars, collapse = " + ")))
+
+                # This is the most computationally expensive step
+                current_model <- survival::coxph(new_formula, data = data)
               } else {
+                # If no variables left, use null model
                 current_model <- null_model
               }
+
+              changed <- TRUE
             }
           }
         }
+
+        # Add checkpoint after expensive operation to show progress
+        # Only flush every 2nd iteration to balance responsiveness with performance
+        if (iteration %% 2 == 0) {
+          private$.checkpoint()
+        }
+      }
+
+      # Final model is ready - set status to complete
+      self$results$text_model_selection$setStatus('complete')
+      self$results$text2_model_selection$setStatus('complete')
+
+      # Final checkpoint to push complete results
+      private$.checkpoint()
+
+      # Store selection steps for reporting
+      attr(current_model, "selection_steps") <- list(
+        removed = removed_vars,
+        remaining = current_vars
+      )
+
+      return(current_model)
+    }
+
+    # For forward selection
+    else if (modelSelection == "forward") {
+      # Start with no variables
+      selected_vars <- character(0)
+      current_model <- null_model
+      added_vars <- character(0)
+
+      # Set status to indicate forward selection is starting
+      self$results$text_model_selection$setStatus('running')
+      self$results$text2_model_selection$setStatus('running')
+
+      private$.checkpoint()
+
+      # Add variables one by one
+      while (length(selected_vars) < length(pred_part)) {
+        private$.checkpoint(flush=FALSE)
+
+        best_var <- NULL
+        best_p <- Inf
+        best_model <- NULL
+
+        # Try adding each remaining variable
+        remaining_vars <- setdiff(pred_part, selected_vars)
+        
+        for (var in remaining_vars) {
+          test_vars <- c(selected_vars, var)
+          test_formula <- as.formula(paste(deparse(surv_part), "~",
+                                           paste(test_vars, collapse = " + ")))
+          
+          tryCatch({
+            test_model <- survival::coxph(test_formula, data = data)
+            test_summary <- summary(test_model)
+            
+            if (!is.null(test_summary$coefficients)) {
+              # Get p-value for the new variable
+              var_p <- test_summary$coefficients[var, "Pr(>|z|)"]
+              
+              if (var_p < best_p) {
+                best_p <- var_p
+                best_var <- var
+                best_model <- test_model
+              }
+            }
+          }, error = function(e) {
+            # Skip this variable if model fails
+            NULL
+          })
+        }
+
+        # Add the best variable if it meets criteria
+        if (!is.null(best_var) && best_p < pEntry) {
+          selected_vars <- c(selected_vars, best_var)
+          added_vars <- c(added_vars, best_var)
+          current_model <- best_model
+
+          # Update status
+          status_msg <- paste0("Adding variable: ", best_var,
+                               " (p=", format.pval(best_p, digits=3), ")")
+          self$results$text2_model_selection$setContent(status_msg)
+          
+          private$.checkpoint()
+        } else {
+          # No more variables meet criteria
+          break
+        }
+      }
+
+      # Final model is ready
+      self$results$text_model_selection$setStatus('complete')
+      self$results$text2_model_selection$setStatus('complete')
+      private$.checkpoint()
+
+      # Store selection steps for reporting
+      attr(current_model, "selection_steps") <- list(
+        added = added_vars,
+        final = selected_vars
+      )
+
+      return(current_model)
+    }
+
+    # For stepwise (both directions)
+    else if (modelSelection == "both") {
+      # Use MASS::stepAIC for bidirectional selection
+      if (requireNamespace("MASS", quietly = TRUE)) {
+        # Set status
+        self$results$text_model_selection$setStatus('running')
+        self$results$text2_model_selection$setStatus('running')
+        
+        private$.checkpoint()
+
+        # Use stepwise selection with AIC
+        step_model <- MASS::stepAIC(full_model, 
+                                    scope = list(lower = null_model, upper = full_model),
+                                    direction = "both",
+                                    trace = 0)  # Silent operation
+
+        # Final model is ready
+        self$results$text_model_selection$setStatus('complete')
+        self$results$text2_model_selection$setStatus('complete')
+        private$.checkpoint()
+
+        return(step_model)
       } else {
-        # No more variables to add
-        break
+        # Fallback to backward selection if MASS not available
+        return(private$.fitModelWithSelection(formula, data))
       }
     }
 
-    return(current_model)
-  }
+    # Default: return full model
+    return(full_model)
+
+  }, error = function(e) {
+    # Set error status
+    self$results$text_model_selection$setStatus('error')
+    self$results$text2_model_selection$setContent(paste("Model selection error:", e$message))
+    
+    # Return full model as fallback
+    return(survival::coxph(formula, data = data))
+  })
 }
 
 ,
@@ -4050,21 +4048,21 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
   model_summary <- summary(model)
 
 
-  self$results$mydataview_modelselection$setContent(
-    list(
-      mydata = head(mydata),
-      mytime = cleaneddata$name1time,
-      myexplanatory = myexplanatory,
-      mycontexpl = mycontexpl,
-      myformula = myformula,
-      model = model,
-      use_modelSelection = self$options$use_modelSelection,
-      modelSelection = self$options$modelSelection,
-      selectionCriteria = self$options$selectionCriteria,
-      pEntry = self$options$pEntry,
-      pRemoval = self$options$pRemoval
-    )
-    )
+  # self$results$mydataview_modelselection$setContent(
+  #   list(
+  #     mydata = head(mydata),
+  #     mytime = cleaneddata$name1time,
+  #     myexplanatory = myexplanatory,
+  #     mycontexpl = mycontexpl,
+  #     myformula = myformula,
+  #     model = model,
+  #     use_modelSelection = self$options$use_modelSelection,
+  #     modelSelection = self$options$modelSelection,
+  #     selectionCriteria = self$options$selectionCriteria,
+  #     pEntry = self$options$pEntry,
+  #     pRemoval = self$options$pRemoval
+  #   )
+  #   )
 
 
 
@@ -4262,182 +4260,345 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       # Survival Decision Tree Function ----
       ,
       .survivalTree = function(results) {
-        # Skip if tree analysis not requested
-        if (!self$options$use_tree) {
-          return(NULL)
-        }
+        tryCatch({
+          # Skip if tree analysis not requested
+          if (!self$options$use_tree) {
+            return(NULL)
+          }
 
-        # Get cleaned data
-        cleanData <- results$cleanData
-        mytime <- results$name1time
-        myoutcome <- results$name2outcome
-        
-        # Get explanatory variables
-        expl_vars <- NULL
-        if (!is.null(self$options$explanatory)) {
-          expl_vars <- c(expl_vars, as.vector(results$myexplanatory_labelled))
-        }
-        if (!is.null(self$options$contexpl)) {
-          expl_vars <- c(expl_vars, as.vector(results$mycontexpl_labelled))
-        }
-        
-        # Check for explanatory variables
-        if (length(expl_vars) == 0) {
-          self$results$tree_summary$setContent(
-            "<p>Error: At least one explanatory variable is required for decision tree analysis.</p>"
-          )
-          return(NULL)
-        }
+          # Check required packages
+          if (!requireNamespace("rpart", quietly = TRUE)) {
+            self$results$tree_summary$setContent(
+              "<p>Error: The 'rpart' package is required for decision tree analysis but not available.</p>"
+            )
+            return(NULL)
+          }
 
-        private$.checkpoint()
-        
-        # Create formula for rpart
-        formula <- paste("survival::Surv(", mytime, ",", myoutcome, ") ~ ", 
-                         paste(expl_vars, collapse = " + "))
-        formula <- as.formula(formula)
-        
-        # Fit survival tree using rpart
-        tree <- rpart::rpart(
-          formula = formula,
-          data = cleanData,
-          method = "exp",  # exponential survival model
-          control = rpart::rpart.control(
-            minsplit = 2 * self$options$min_node, 
-            minbucket = self$options$min_node,
-            cp = self$options$complexity,
-            maxdepth = self$options$max_depth
-          )
-        )
-        
-        # Create summary text
-        if (is.null(tree)) {
-          tree_text <- "The survival tree could not be built with the current parameters."
-        } else {
-          # Get variable importance
-          var_imp <- tree$variable.importance
-          if (!is.null(var_imp)) {
-            var_imp_df <- data.frame(
-              Variable = names(var_imp),
-              Importance = var_imp
+          # Get cleaned data
+          cleanData <- results$cleanData
+          # Use the standardized column names that actually exist in cleanData
+          mytime <- "mytime"
+          myoutcome <- "myoutcome"
+          
+
+
+
+
+
+
+
+
+
+
+
+
+          # Validate data
+          if (is.null(cleanData) || nrow(cleanData) == 0) {
+            self$results$tree_summary$setContent(
+              "<p>Error: No data available for decision tree analysis.</p>"
             )
-            var_imp_df <- var_imp_df[order(-var_imp_df$Importance), ]
-            
-            var_imp_html <- paste(
-              "<tr>",
-              "<td>", var_imp_df$Variable, "</td>",
-              "<td>", round(var_imp_df$Importance, 2), "</td>",
-              "</tr>", 
-              collapse = ""
-            )
-            
-            var_imp_table <- paste0(
-              "<table class='jmv-results-table'>",
-              "<thead><tr><th>Variable</th><th>Importance</th></tr></thead>",
-              "<tbody>", var_imp_html, "</tbody>",
-              "</table>"
-            )
-          } else {
-            var_imp_table <- "<p>No variable importance measures available.</p>"
+            return(NULL)
           }
           
-          # Get tree statistics
-          n_terminal <- sum(tree$frame$var == "<leaf>")
+          # Check if standardized columns exist
+          if (!"mytime" %in% names(cleanData) || !"myoutcome" %in% names(cleanData)) {
+            self$results$tree_summary$setContent(
+              paste0("<p>Error: Required columns not found in cleaned data. Available columns: ", 
+                     paste(names(cleanData), collapse = ", "), "</p>")
+            )
+            return(NULL)
+          }
           
-          tree_text <- paste0(
-            "<h3>Survival Decision Tree Results</h3>",
-            "<p>The decision tree identified ", n_terminal, " terminal nodes based on the input variables.</p>",
-            "<p>Complexity parameter: ", self$options$complexity, "</p>",
-            "<p>Minimum node size: ", self$options$min_node, "</p>",
-            "<p>Maximum depth: ", self$options$max_depth, "</p>",
-            "<h4>Variable Importance</h4>",
-            var_imp_table,
-            "<p><i>Note: The decision tree plot visualizes how the variables split the data into groups with different survival outcomes.</i></p>"
+          # Get explanatory variables
+          expl_vars <- NULL
+          if (!is.null(self$options$explanatory)) {
+            expl_vars <- c(expl_vars, as.vector(results$myexplanatory_labelled))
+          }
+          if (!is.null(self$options$contexpl)) {
+            expl_vars <- c(expl_vars, as.vector(results$mycontexpl_labelled))
+          }
+          
+          # Check for explanatory variables
+          if (length(expl_vars) == 0) {
+            self$results$tree_summary$setContent(
+              "<p>Error: At least one explanatory variable is required for decision tree analysis.</p>"
+            )
+            return(NULL)
+          }
+
+          # Validate that explanatory variables exist in data
+          missing_vars <- setdiff(expl_vars, names(cleanData))
+          if (length(missing_vars) > 0) {
+            self$results$tree_summary$setContent(
+              paste0("<p>Error: Variables not found in data: ", paste(missing_vars, collapse = ", "), "</p>")
+            )
+            return(NULL)
+          }
+
+          private$.checkpoint()
+          
+          # Create formula for rpart using the actual column names from results
+          formula_string <- paste("survival::Surv(", mytime, ", ", myoutcome, ") ~ ", 
+                                   paste(expl_vars, collapse = " + "))
+          formula <- as.formula(formula_string)
+          
+          # Validate minimum parameters
+          min_node <- max(1, self$options$min_node)
+          complexity <- max(0.001, self$options$complexity)
+          max_depth <- max(1, min(30, self$options$max_depth))
+
+          # Fit survival tree using rpart with error handling
+          tree <- tryCatch({
+            rpart::rpart(
+              formula = formula,
+              data = cleanData,
+              method = "exp",  # exponential survival model
+              control = rpart::rpart.control(
+                minsplit = 2 * min_node, 
+                minbucket = min_node,
+                cp = complexity,
+                maxdepth = max_depth
+              )
+            )
+          }, error = function(e) {
+            NULL
+          })
+          
+          # Create summary text
+          if (is.null(tree) || nrow(tree$frame) == 0) {
+            tree_text <- paste0(
+              "<h3>Survival Decision Tree Results</h3>",
+              "<p><strong>The survival tree could not be built with the current parameters.</strong></p>",
+              "<p>This may be due to:</p>",
+              "<ul>",
+              "<li>Insufficient data for the specified minimum node size</li>",
+              "<li>Complexity parameter too high</li>",
+              "<li>Variables not providing meaningful splits</li>",
+              "</ul>",
+              "<p>Try adjusting the parameters:</p>",
+              "<ul>",
+              "<li>Reduce minimum node size</li>",
+              "<li>Lower complexity parameter</li>",
+              "<li>Include more variables</li>",
+              "</ul>"
+            )
+          } else {
+            # Get variable importance
+            var_imp <- tree$variable.importance
+            if (!is.null(var_imp) && length(var_imp) > 0) {
+              var_imp_df <- data.frame(
+                Variable = names(var_imp),
+                Importance = var_imp,
+                stringsAsFactors = FALSE
+              )
+              var_imp_df <- var_imp_df[order(-var_imp_df$Importance), ]
+              
+              var_imp_html <- paste(
+                "<tr>",
+                "<td>", var_imp_df$Variable, "</td>",
+                "<td>", round(var_imp_df$Importance, 2), "</td>",
+                "</tr>", 
+                collapse = ""
+              )
+              
+              var_imp_table <- paste0(
+                "<table class='jmv-results-table'>",
+                "<thead><tr><th>Variable</th><th>Importance</th></tr></thead>",
+                "<tbody>", var_imp_html, "</tbody>",
+                "</table>"
+              )
+            } else {
+              var_imp_table <- "<p>No variable importance measures available.</p>"
+            }
+            
+            # Get tree statistics
+            n_terminal <- sum(tree$frame$var == "<leaf>")
+            n_splits <- nrow(tree$frame) - 1
+            
+            tree_text <- paste0(
+              "<h3>Survival Decision Tree Results</h3>",
+              "<p>The decision tree was successfully built with the following characteristics:</p>",
+              "<ul>",
+              "<li><strong>Terminal nodes:</strong> ", n_terminal, "</li>",
+              "<li><strong>Internal splits:</strong> ", n_splits, "</li>",
+              "<li><strong>Variables used:</strong> ", length(unique(tree$frame$var[tree$frame$var != "<leaf>"])), "</li>",
+              "</ul>",
+              "<p><strong>Parameters used:</strong></p>",
+              "<ul>",
+              "<li>Complexity parameter: ", complexity, "</li>",
+              "<li>Minimum node size: ", min_node, "</li>",
+              "<li>Maximum depth: ", max_depth, "</li>",
+              "</ul>",
+              "<h4>Variable Importance</h4>",
+              var_imp_table,
+              "<p><i>Note: The decision tree plot visualizes how the variables split the data into groups with different survival outcomes.</i></p>"
+            )
+          }
+          
+          self$results$tree_summary$setContent(tree_text)
+          
+          # Store tree for plotting
+          return(tree)
+          
+        }, error = function(e) {
+          error_msg <- paste0(
+            "<h3>Survival Decision Tree Error</h3>",
+            "<p>An error occurred while building the decision tree:</p>",
+            "<p><strong>", e$message, "</strong></p>",
+            "<p>Please check your data and parameters, then try again.</p>"
           )
-        }
-        
-        self$results$tree_summary$setContent(tree_text)
-        
-        # Store tree for plotting
-        return(tree)
+          self$results$tree_summary$setContent(error_msg)
+          return(NULL)
+        })
       }
 
       # Plot Tree ----
       ,
       .plotTree = function(image, ggtheme, theme, ...) {
-        # Skip if tree analysis not requested
-        if (!self$options$use_tree) {
+        tryCatch({
+          # Skip if tree analysis not requested
+          if (!self$options$use_tree) {
+            return(FALSE)
+          }
+          
+          # Check required packages
+          if (!requireNamespace("rpart.plot", quietly = TRUE)) {
+            return(FALSE)
+          }
+          
+          # Get results and tree
+          results <- private$.cleandata()
+          tree <- private$.survivalTree(results)
+          
+          if (is.null(tree) || nrow(tree$frame) == 0) {
+            return(FALSE)
+          }
+          
+            self$results$mydataview_survivaldecisiontree$setContent(
+    list(
+      results = results,
+      tree = tree
+    )
+  )
+
+
+          # Add checkpoint before plotting
+          private$.checkpoint()
+          
+          # Plot tree with error handling
+          rpart.plot::rpart.plot(
+            tree,
+            main = "Survival Decision Tree",
+            extra = 101,  # show fitted risk and percentage of observations
+            box.palette = "auto",  # color by fitted risk
+            shadow.col = "gray",  # add shadows to the boxes
+            nn = TRUE,  # show node numbers
+            fallen.leaves = TRUE,  # align leaf nodes
+            roundint = FALSE,  # don't round integers
+            cex = 0.8,  # text size
+            clip.right.labs = FALSE  # don't clip labels
+          )
+          
+          return(TRUE)
+          
+        }, error = function(e) {
+          # Report tree plotting error for debugging
+          self$results$tree_summary$setContent(
+            paste0("<p>Tree plotting error: ", e$message, "</p>")
+          )
           return(FALSE)
-        }
-        
-        # Get results and tree
-        results <- private$.cleandata()
-        tree <- private$.survivalTree(results)
-        
-        if (is.null(tree)) {
-          return(FALSE)
-        }
-        
-        # Plot tree
-        rpart.plot::rpart.plot(
-          tree,
-          main = "Survival Decision Tree",
-          extra = 101,  # show fitted risk and percentage of observations
-          box.palette = "auto",  # color by fitted risk
-          shadow.col = "gray",  # add shadows to the boxes
-          nn = TRUE,  # show node numbers
-          fallen.leaves = TRUE,  # align leaf nodes
-          roundint = FALSE  # don't round integers
-        )
-        
-        return(TRUE)
+        })
       }
 
       # Plot Node Survival ----
       ,
       .plotNodeSurvival = function(image, ggtheme, theme, ...) {
-        # Skip if not requested
-        if (!self$options$use_tree || !self$options$show_terminal_nodes) {
+        tryCatch({
+          # Skip if not requested
+          if (!self$options$use_tree || !self$options$show_terminal_nodes) {
+            return(FALSE)
+          }
+          
+          # Check required packages
+          if (!requireNamespace("survminer", quietly = TRUE)) {
+            return(FALSE)
+          }
+          
+          # Get results and tree
+          results <- private$.cleandata()
+          message("Node survival: results obtained, cleanData columns: ", paste(names(results$cleanData), collapse = ", "))
+          tree <- private$.survivalTree(results)
+          message("Node survival: tree obtained")
+          
+          if (is.null(tree) || nrow(tree$frame) == 0) {
+            return(FALSE)
+          }
+          
+          # Get cleaned data
+          cleanData <- results$cleanData
+          # Use the standardized column names that actually exist in cleanData
+          mytime <- "mytime"
+          myoutcome <- "myoutcome"
+          
+          # Validate data
+          if (is.null(cleanData) || nrow(cleanData) == 0) {
+            return(FALSE)
+          }
+          
+          # Add checkpoint before plotting
+          private$.checkpoint()
+          
+          # Get terminal node assignments for each observation
+          message("Node survival: getting node assignments")
+          node_assignments <- tree$where
+          cleanData$node <- paste("Node", node_assignments)
+          message("Node survival: node assignments created, unique nodes: ", length(unique(cleanData$node)))
+          
+          # Check if we have at least 2 nodes
+          unique_nodes <- unique(cleanData$node)
+          if (length(unique_nodes) < 2) {
+            message("Node survival: insufficient nodes (", length(unique_nodes), ")")
+            return(FALSE)
+          }
+          
+          # Plot survival curves for each terminal node
+          # Check that required columns exist
+          if (!"mytime" %in% names(cleanData)) {
+            message("Error: mytime column not found in cleanData")
+            return(FALSE)
+          }
+          if (!"myoutcome" %in% names(cleanData)) {
+            message("Error: myoutcome column not found in cleanData")
+            return(FALSE)
+          }
+          
+          # Create formula properly
+          message("Node survival: creating formula with proper syntax")
+          formula <- as.formula("Surv(mytime, myoutcome) ~ node")
+          message("Node survival: formula created: ", deparse(formula))
+          
+          message("Node survival: calling survfit")
+          fit <- survival::survfit(formula, data = cleanData)
+          message("Node survival: survfit completed")
+          
+          message("Node survival: trying minimal ggsurvplot call")
+          
+          # Try the most minimal ggsurvplot call possible
+          plot <- survminer::ggsurvplot(
+            fit,
+            data = cleanData
+          )
+          
+          message("Node survival: minimal ggsurvplot completed, printing")
+          print(plot)
+          message("Node survival: plot printed successfully")
+          return(TRUE)
+          
+        }, error = function(e) {
+          # Report node survival plotting error for debugging
+          message("Node survival plotting error: ", e$message)
           return(FALSE)
-        }
-        
-        # Get results and tree
-        results <- private$.cleandata()
-        tree <- private$.survivalTree(results)
-        
-        if (is.null(tree)) {
-          return(FALSE)
-        }
-        
-        # Get cleaned data
-        cleanData <- results$cleanData
-        mytime <- results$name1time
-        myoutcome <- results$name2outcome
-        
-        # Get terminal node assignments for each observation
-        node_assignments <- tree$where
-        cleanData$node <- paste("Node", node_assignments)
-        
-        # Plot survival curves for each terminal node
-        formula <- paste("survival::Surv(", mytime, ",", myoutcome, ") ~ node")
-        formula <- as.formula(formula)
-        
-        fit <- survival::survfit(formula, data = cleanData)
-        
-        plot <- survminer::ggsurvplot(
-          fit,
-          data = cleanData,
-          risk.table = TRUE,
-          pval = TRUE,
-          conf.int = TRUE,
-          xlab = paste0("Time (", self$options$timetypeoutput, ")"),
-          ylab = "Survival probability",
-          title = "Survival by Terminal Node",
-          legend.title = "Terminal Node",
-          risk.table.height = 0.25
-        )
-        
-        print(plot)
-        return(TRUE)
+        })
       }
 
       # Convert Wide Format to Long Format for Time-Dependent Covariates ----

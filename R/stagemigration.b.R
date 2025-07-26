@@ -947,6 +947,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     list(lr_stat = NA, df = NA, p_value = NA)
                 })
 
+                # Linear Trend Chi-square test for ordinal staging trends
+                linear_trend_test <- private$.calculateLinearTrendTest(data, old_stage, new_stage, time_var, event_var)
+
                 # Calculate pseudo R-squared measures if requested
                 pseudo_r2 <- NULL
                 if (self$options$calculatePseudoR2) {
@@ -1131,6 +1134,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     bic_new = bic_new,
                     bic_improvement = bic_improvement,
                     lr_test = lr_test,
+                    linear_trend_test = linear_trend_test,
                     individual_lr_stats = individual_lr_stats,
                     pseudo_r2 = pseudo_r2
                 )
@@ -1161,6 +1165,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     bic_new = NA,
                     bic_improvement = NA,
                     lr_test = list(lr_stat = NA, df = NA, p_value = NA),
+                    linear_trend_test = list(old_trend = list(stat = NA, p_value = NA), new_trend = list(stat = NA, p_value = NA)),
                     individual_lr_stats = NULL,
                     pseudo_r2 = NULL,
                     error = e$message
@@ -1603,6 +1608,123 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 n_non_events = n_non_events,
                 idi_bootstrap = idi_bootstrap
             ))
+        },
+
+        .calculateLinearTrendTest = function(data, old_stage, new_stage, time_var, event_var) {
+            # Linear Trend Chi-square test for ordinal staging trends
+            # Tests if there's a linear trend in survival across ordered stages
+            
+            tryCatch({
+                # Prepare survival object
+                surv_obj <- survival::Surv(data[[time_var]], data[[event_var]])
+                
+                # Function to calculate linear trend test for a staging system
+                .calculateTrendForStage <- function(stage_col) {
+                    # Get unique stages and sort them
+                    stages <- sort(unique(data[[stage_col]]))
+                    n_stages <- length(stages)
+                    
+                    if (n_stages < 3) {
+                        return(list(stat = NA, p_value = NA, df = NA, 
+                                   interpretation = "At least 3 stages required for trend test"))
+                    }
+                    
+                    # Create ordered numeric scores for stages (1, 2, 3, ...)
+                    stage_scores <- match(data[[stage_col]], stages)
+                    
+                    # Fit Cox model with stage as continuous variable (for trend)
+                    trend_formula <- as.formula(paste("surv_obj ~ stage_scores"))
+                    trend_data <- data.frame(surv_obj = surv_obj, stage_scores = stage_scores)
+                    
+                    # Remove rows with missing stage scores
+                    trend_data <- trend_data[!is.na(trend_data$stage_scores), ]
+                    
+                    if (nrow(trend_data) < 10) {
+                        return(list(stat = NA, p_value = NA, df = 1,
+                                   interpretation = "Insufficient data for trend test"))
+                    }
+                    
+                    # Fit trend model
+                    trend_cox <- survival::coxph(trend_formula, data = trend_data)
+                    
+                    # Extract Wald chi-square statistic for linear trend
+                    trend_summary <- summary(trend_cox)
+                    wald_stat <- trend_summary$waldtest["test"]
+                    wald_p <- trend_summary$waldtest["pvalue"]
+                    
+                    # Interpretation
+                    interpretation <- if (is.na(wald_p)) {
+                        "Unable to calculate trend test"
+                    } else if (wald_p < 0.001) {
+                        "Highly significant linear trend (p < 0.001)"
+                    } else if (wald_p < 0.01) {
+                        "Significant linear trend (p < 0.01)"
+                    } else if (wald_p < 0.05) {
+                        "Statistically significant linear trend (p < 0.05)"
+                    } else if (wald_p < 0.10) {
+                        "Marginal evidence of linear trend (p < 0.10)"
+                    } else {
+                        "No significant linear trend detected"
+                    }
+                    
+                    # Add direction information
+                    if (!is.na(wald_p) && wald_p < 0.05) {
+                        coef_value <- coef(trend_cox)[1]
+                        direction <- if (coef_value > 0) {
+                            " (increasing hazard with higher stages)"
+                        } else {
+                            " (decreasing hazard with higher stages)"
+                        }
+                        interpretation <- paste0(interpretation, direction)
+                    }
+                    
+                    return(list(
+                        stat = as.numeric(wald_stat),
+                        p_value = as.numeric(wald_p),
+                        df = 1,
+                        n_stages = n_stages,
+                        coefficient = if (exists("coef_value")) coef_value else coef(trend_cox)[1],
+                        interpretation = interpretation
+                    ))
+                }
+                
+                # Calculate trend tests for both staging systems
+                old_trend <- .calculateTrendForStage(old_stage)
+                new_trend <- .calculateTrendForStage(new_stage)
+                
+                # Overall comparison
+                comparison <- if (!is.na(old_trend$p_value) && !is.na(new_trend$p_value)) {
+                    old_sig <- old_trend$p_value < 0.05
+                    new_sig <- new_trend$p_value < 0.05
+                    
+                    if (old_sig && new_sig) {
+                        "Both staging systems show significant linear trends"
+                    } else if (!old_sig && new_sig) {
+                        "New staging system shows better linear trend"
+                    } else if (old_sig && !new_sig) {
+                        "Original staging system shows better linear trend"
+                    } else {
+                        "Neither staging system shows significant linear trend"
+                    }
+                } else {
+                    "Unable to compare linear trends"
+                }
+                
+                return(list(
+                    old_trend = old_trend,
+                    new_trend = new_trend,
+                    comparison = comparison
+                ))
+                
+            }, error = function(e) {
+                return(list(
+                    old_trend = list(stat = NA, p_value = NA, df = NA, 
+                                    interpretation = paste("Error:", e$message)),
+                    new_trend = list(stat = NA, p_value = NA, df = NA,
+                                    interpretation = paste("Error:", e$message)),
+                    comparison = "Linear trend test failed"
+                ))
+            })
         },
 
         .performTimeROCAnalysis = function(data, force = FALSE) {
@@ -4160,6 +4282,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Populate enhanced LR chi-square comparison with emphasis
                 private$.populateEnhancedLRComparison(all_results$advanced_metrics)
+                
+                # Populate Linear Trend Chi-square test results
+                if (!is.null(all_results$advanced_metrics$linear_trend_test)) {
+                    private$.populateLinearTrendTest(all_results$advanced_metrics$linear_trend_test)
+                }
             }
 
             if (!is.null(all_results$homogeneity_tests)) {
@@ -5976,6 +6103,90 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Add explanatory note
             table$setNote("lr_interpretation", 
                          "LR Chi-Square measures model goodness-of-fit vs null model. Higher values indicate better prognostic discrimination. This is a key metric for staging validation.")
+        },
+
+        .populateLinearTrendTest = function(linear_trend_results) {
+            # Populate Linear Trend Chi-square test results
+            if (is.null(linear_trend_results)) return()
+            
+            # Check if we have a linearTrendTest table in the results structure
+            if (!"linearTrendTest" %in% names(self$results)) {
+                message("DEBUG: linearTrendTest table not found in results structure")
+                return()
+            }
+            
+            table <- self$results$linearTrendTest
+            if (is.null(table)) {
+                message("DEBUG: linearTrendTest table is NULL")
+                return()
+            }
+            
+            # Add explanatory text if available
+            if (self$options$showExplanations && "linearTrendTestExplanation" %in% names(self$results)) {
+                trend_explanation_html <- '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #2196f3;">
+                    <h4 style="margin-top: 0; color: #2c3e50;">Understanding Linear Trend Chi-square Tests</h4>
+                    <p style="margin-bottom: 10px;">Linear trend tests assess whether there is a systematic increase in hazard across ordered stages:</p>
+                    <ul style="margin-left: 20px;">
+                        <li><strong>Wald Chi-Square:</strong> Tests linear trend in log-hazard across stages (higher = stronger trend)</li>
+                        <li><strong>P-value:</strong> Statistical significance of the linear trend (p < 0.05 = significant trend)</li>
+                        <li><strong>Coefficient:</strong> Direction and magnitude of trend (positive = increasing hazard with higher stages)</li>
+                    </ul>
+                    <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Significant trends indicate proper stage ordering with prognostic value</li>
+                        <li>Non-significant trends may suggest stage grouping issues or insufficient sample size</li>
+                        <li>Compare trends between staging systems to assess improvement in ordinal ranking</li>
+                    </ul>
+                </div>
+                '
+                self$results$linearTrendTestExplanation$setContent(trend_explanation_html)
+            }
+            
+            # Add results for original staging system
+            old_trend <- linear_trend_results$old_trend
+            if (!is.null(old_trend)) {
+                table$addRow(rowKey = "old_system", values = list(
+                    Staging_System = "Original Staging",
+                    Wald_Chi_Square = private$.safeAtomic(old_trend$stat, "numeric", NA),
+                    df = private$.safeAtomic(old_trend$df, "integer", 1),
+                    P_Value = private$.safeAtomic(old_trend$p_value, "numeric", NA),
+                    Coefficient = private$.safeAtomic(old_trend$coefficient, "numeric", NA),
+                    N_Stages = private$.safeAtomic(old_trend$n_stages, "integer", NA),
+                    Interpretation = as.character(old_trend$interpretation %||% "Unable to interpret")
+                ))
+            }
+            
+            # Add results for new staging system
+            new_trend <- linear_trend_results$new_trend
+            if (!is.null(new_trend)) {
+                table$addRow(rowKey = "new_system", values = list(
+                    Staging_System = "New Staging",
+                    Wald_Chi_Square = private$.safeAtomic(new_trend$stat, "numeric", NA),
+                    df = private$.safeAtomic(new_trend$df, "integer", 1),
+                    P_Value = private$.safeAtomic(new_trend$p_value, "numeric", NA),
+                    Coefficient = private$.safeAtomic(new_trend$coefficient, "numeric", NA),
+                    N_Stages = private$.safeAtomic(new_trend$n_stages, "integer", NA),
+                    Interpretation = as.character(new_trend$interpretation %||% "Unable to interpret")
+                ))
+            }
+            
+            # Add overall comparison
+            if (!is.null(linear_trend_results$comparison)) {
+                table$addRow(rowKey = "comparison", values = list(
+                    Staging_System = "Overall Comparison",
+                    Wald_Chi_Square = NA,
+                    df = NA,
+                    P_Value = NA,
+                    Coefficient = NA,
+                    N_Stages = NA,
+                    Interpretation = as.character(linear_trend_results$comparison)
+                ))
+            }
+            
+            # Add explanatory note
+            table$setNote("trend_interpretation", 
+                         "Linear trend tests assess ordinal progression in survival risk across stages. Significant trends indicate proper stage ordering.")
         },
 
         .populateIDIResults = function(idi_results) {
@@ -10959,7 +11170,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     panel.grid.minor = element_blank(),
                     panel.grid.major = element_line(color = "gray90", linewidth = 0.5),
                     legend.position.inside = c(0.85, 0.15),
-                    legend.background = element_rect(fill = "white", color = NA, alpha = 0.8)
+                    legend.background = element_rect(fill = "white", color = NA)
                 ) +
                 # Add annotation for perfect calibration
                 annotate("text", x = 0.5, y = 0.48, label = "Perfect calibration", 
@@ -11017,7 +11228,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     panel.grid.minor = element_blank(),
                     panel.grid.major = element_line(color = "gray90", linewidth = 0.5),
                     legend.position.inside = c(0.85, 0.15),
-                    legend.background = element_rect(fill = "white", color = NA, alpha = 0.8)
+                    legend.background = element_rect(fill = "white", color = NA)
                 ) +
                 # Add annotation for perfect calibration
                 annotate("text", x = 0.5, y = 0.48, label = "Perfect calibration", 
@@ -11386,6 +11597,20 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     stringsAsFactors = FALSE
                 ))
             }
+
+            # Order stages properly (T1, T2, T3, etc. or I, II, III, IV, etc.)
+            stage_order <- c("T1", "T2", "T3", "T4", "I", "II", "III", "IV", "1", "2", "3", "4", "A", "B", "C", "D")
+            
+            # Get unique strata and order them properly
+            unique_strata <- unique(risk_data$strata)
+            ordered_strata <- intersect(stage_order, unique_strata)
+            remaining_strata <- setdiff(unique_strata, ordered_strata)
+            final_order <- c(ordered_strata, sort(remaining_strata))
+            
+            # Apply proper factor ordering
+            risk_data$strata <- factor(risk_data$strata, levels = final_order)
+            risk_data$strata_full <- factor(risk_data$strata_full, 
+                                           levels = unique(risk_data$strata_full[order(risk_data$strata)]))
 
             return(risk_data)
         },

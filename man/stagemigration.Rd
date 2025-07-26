@@ -424,6 +424,12 @@ A results object containing:
 \code{results$survivalCurves} \tab \tab \tab \tab \tab an image \cr
 \code{results$dashboardExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$comparativeAnalysisDashboard} \tab \tab \tab \tab \tab a table \cr
+\code{results$willRogersEvidenceSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$willRogersEvidenceSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$willRogersClinicalRecommendation} \tab \tab \tab \tab \tab a table \cr
+\code{results$enhancedMigrationPatternAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$landmarkAnalysisResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$advancedMigrationHeatmapStats} \tab \tab \tab \tab \tab a table \cr
 \code{results$abbreviationGlossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$crossValidationExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr

@@ -1,0 +1,19 @@
+---
+name:  jjradarplot
+title: Radar Plot
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: ''
+      type: Html
+      visible: true
+
+    - name: plot
+      title: Radar Plot
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .plot
+      visible: true
+...

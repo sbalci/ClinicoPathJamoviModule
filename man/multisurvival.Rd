@@ -334,10 +334,10 @@ A results object containing:
 \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
+\code{results$mydataview_survivaldecisiontree} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$tree_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$node_survival_plots} \tab \tab \tab \tab \tab an image \cr
-\code{results$mydataview_modelselection} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text_model_selection} \tab \tab \tab \tab \tab a html \cr
 \code{results$selection_method} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2_model_selection} \tab \tab \tab \tab \tab a html \cr

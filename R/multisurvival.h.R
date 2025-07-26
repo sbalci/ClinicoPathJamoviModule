@@ -685,10 +685,10 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plot_adj = function() private$.items[["plot_adj"]],
         plot_nomogram = function() private$.items[["plot_nomogram"]],
         nomogram_display = function() private$.items[["nomogram_display"]],
+        mydataview_survivaldecisiontree = function() private$.items[["mydataview_survivaldecisiontree"]],
         tree_summary = function() private$.items[["tree_summary"]],
         tree_plot = function() private$.items[["tree_plot"]],
         node_survival_plots = function() private$.items[["node_survival_plots"]],
-        mydataview_modelselection = function() private$.items[["mydataview_modelselection"]],
         text_model_selection = function() private$.items[["text_model_selection"]],
         selection_method = function() private$.items[["selection_method"]],
         text2_model_selection = function() private$.items[["text2_model_selection"]]),
@@ -1147,6 +1147,10 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="nomogram_display",
                 title="Nomogram Scoring Guide",
                 visible="(showNomogram)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="mydataview_survivaldecisiontree",
+                title="mydataview_survivaldecisiontree"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tree_summary",
@@ -1201,10 +1205,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "elapsedtime",
                     "explanatory",
                     "contexpl")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview_modelselection",
-                title="mydataview_modelselection"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text_model_selection",
@@ -1579,10 +1579,10 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$mydataview_survivaldecisiontree} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tree_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$node_survival_plots} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$mydataview_modelselection} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text_model_selection} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$selection_method} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2_model_selection} \tab \tab \tab \tab \tab a html \cr
