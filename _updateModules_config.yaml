@@ -3,7 +3,7 @@
 
 # Global settings
 global:
-  new_version: "0.0.3.70"
+  new_version: "0.0.3.71"
   new_date: "2025-07-26"
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 

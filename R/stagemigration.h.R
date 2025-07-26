@@ -71,7 +71,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             showNestedModelTests = FALSE,
             showStepwiseResults = FALSE,
             showExplanations = TRUE,
-            showAbbreviationGlossary = FALSE, ...) {
+            showAbbreviationGlossary = FALSE,
+            calculateSME = FALSE,
+            calculateRMST = FALSE,
+            performCompetingRisks = FALSE,
+            competingEventVar = NULL, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -411,6 +415,27 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "showAbbreviationGlossary",
                 showAbbreviationGlossary,
                 default=FALSE)
+            private$..calculateSME <- jmvcore::OptionBool$new(
+                "calculateSME",
+                calculateSME,
+                default=FALSE)
+            private$..calculateRMST <- jmvcore::OptionBool$new(
+                "calculateRMST",
+                calculateRMST,
+                default=FALSE)
+            private$..performCompetingRisks <- jmvcore::OptionBool$new(
+                "performCompetingRisks",
+                performCompetingRisks,
+                default=FALSE)
+            private$..competingEventVar <- jmvcore::OptionVariable$new(
+                "competingEventVar",
+                competingEventVar,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
 
             self$.addOption(private$..oldStage)
             self$.addOption(private$..newStage)
@@ -478,6 +503,10 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..showStepwiseResults)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showAbbreviationGlossary)
+            self$.addOption(private$..calculateSME)
+            self$.addOption(private$..calculateRMST)
+            self$.addOption(private$..performCompetingRisks)
+            self$.addOption(private$..competingEventVar)
         }),
     active = list(
         oldStage = function() private$..oldStage$value,
@@ -545,7 +574,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         showNestedModelTests = function() private$..showNestedModelTests$value,
         showStepwiseResults = function() private$..showStepwiseResults$value,
         showExplanations = function() private$..showExplanations$value,
-        showAbbreviationGlossary = function() private$..showAbbreviationGlossary$value),
+        showAbbreviationGlossary = function() private$..showAbbreviationGlossary$value,
+        calculateSME = function() private$..calculateSME$value,
+        calculateRMST = function() private$..calculateRMST$value,
+        performCompetingRisks = function() private$..performCompetingRisks$value,
+        competingEventVar = function() private$..competingEventVar$value),
     private = list(
         ..oldStage = NA,
         ..newStage = NA,
@@ -612,7 +645,11 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..showNestedModelTests = NA,
         ..showStepwiseResults = NA,
         ..showExplanations = NA,
-        ..showAbbreviationGlossary = NA)
+        ..showAbbreviationGlossary = NA,
+        ..calculateSME = NA,
+        ..calculateRMST = NA,
+        ..performCompetingRisks = NA,
+        ..competingEventVar = NA)
 )
 
 stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -665,6 +702,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         willRogersBasicAnalysis = function() private$.items[["willRogersBasicAnalysis"]],
         likelihoodTestsExplanation = function() private$.items[["likelihoodTestsExplanation"]],
         likelihoodTests = function() private$.items[["likelihoodTests"]],
+        linearTrendTestExplanation = function() private$.items[["linearTrendTestExplanation"]],
+        linearTrendTest = function() private$.items[["linearTrendTest"]],
         homogeneityTestsExplanation = function() private$.items[["homogeneityTestsExplanation"]],
         homogeneityTests = function() private$.items[["homogeneityTests"]],
         trendTestsExplanation = function() private$.items[["trendTestsExplanation"]],
@@ -715,7 +754,16 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         crossValidationExplanation = function() private$.items[["crossValidationExplanation"]],
         crossValidationResults = function() private$.items[["crossValidationResults"]],
         crossValidationPlot = function() private$.items[["crossValidationPlot"]],
-        enhancedLRComparison = function() private$.items[["enhancedLRComparison"]]),
+        enhancedLRComparison = function() private$.items[["enhancedLRComparison"]],
+        stageMigrationEffectExplanation = function() private$.items[["stageMigrationEffectExplanation"]],
+        stageMigrationEffect = function() private$.items[["stageMigrationEffect"]],
+        stageMigrationEffectAssessment = function() private$.items[["stageMigrationEffectAssessment"]],
+        rmstAnalysisExplanation = function() private$.items[["rmstAnalysisExplanation"]],
+        rmstByStage = function() private$.items[["rmstByStage"]],
+        rmstComparison = function() private$.items[["rmstComparison"]],
+        competingRisksExplanation = function() private$.items[["competingRisksExplanation"]],
+        competingRisksEventDistribution = function() private$.items[["competingRisksEventDistribution"]],
+        competingRisksComparison = function() private$.items[["competingRisksComparison"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1682,6 +1730,57 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="linearTrendTestExplanation",
+                title="Understanding Linear Trend Chi-square Tests",
+                visible="(performLikelihoodTests && showExplanations)",
+                clearWith=list(
+                    "performLikelihoodTests")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="linearTrendTest",
+                title="Linear Trend Chi-square Tests",
+                visible="(performLikelihoodTests)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "performLikelihoodTests"),
+                columns=list(
+                    list(
+                        `name`="Staging_System", 
+                        `title`="Staging System", 
+                        `type`="text"),
+                    list(
+                        `name`="Wald_Chi_Square", 
+                        `title`="Wald Chi-Square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="P_Value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Coefficient", 
+                        `title`="Coefficient", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="N_Stages", 
+                        `title`="# Stages", 
+                        `type`="integer"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="homogeneityTestsExplanation",
@@ -2932,6 +3031,224 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="Model_Quality", 
                         `title`="Model Quality", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="stageMigrationEffectExplanation",
+                title="Understanding Stage Migration Effect Formula (SME)",
+                visible="(calculateSME && showExplanations)",
+                clearWith=list(
+                    "calculateSME")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stageMigrationEffect",
+                title="Stage Migration Effect Formula (SME) Results",
+                visible="(calculateSME)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "calculateSME"),
+                columns=list(
+                    list(
+                        `name`="Timepoint", 
+                        `title`="Timepoint", 
+                        `type`="text"),
+                    list(
+                        `name`="SME_Value", 
+                        `title`="SME Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Valid_Comparisons", 
+                        `title`="Valid Comparisons", 
+                        `type`="integer"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stageMigrationEffectAssessment",
+                title="Overall Stage Migration Effect Assessment",
+                visible="(calculateSME)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "calculateSME"),
+                columns=list(
+                    list(
+                        `name`="Metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="Value", 
+                        `title`="Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="rmstAnalysisExplanation",
+                title="Understanding Restricted Mean Survival Time (RMST) Analysis",
+                visible="(calculateRMST && showExplanations)",
+                clearWith=list(
+                    "calculateRMST")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="rmstByStage",
+                title="RMST Analysis by Stage",
+                visible="(calculateRMST)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "calculateRMST"),
+                columns=list(
+                    list(
+                        `name`="Staging_System", 
+                        `title`="Staging System", 
+                        `type`="text"),
+                    list(
+                        `name`="Stage", 
+                        `title`="Stage", 
+                        `type`="text"),
+                    list(
+                        `name`="N", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="Events", 
+                        `title`="Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="RMST_Months", 
+                        `title`="RMST (months)", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Median_Survival", 
+                        `title`="Median Survival", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="rmstComparison",
+                title="RMST Discrimination Comparison",
+                visible="(calculateRMST)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "calculateRMST"),
+                columns=list(
+                    list(
+                        `name`="System", 
+                        `title`="System", 
+                        `type`="text"),
+                    list(
+                        `name`="RMST_Range", 
+                        `title`="RMST Range", 
+                        `type`="text"),
+                    list(
+                        `name`="Discrimination", 
+                        `title`="Discrimination", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="competingRisksExplanation",
+                title="Understanding Competing Risks Analysis",
+                visible="(performCompetingRisks && showExplanations)",
+                clearWith=list(
+                    "performCompetingRisks")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="competingRisksEventDistribution",
+                title="Competing Risks Event Distribution by Stage",
+                visible="(performCompetingRisks)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "performCompetingRisks",
+                    "competingEventVar"),
+                columns=list(
+                    list(
+                        `name`="Staging_System", 
+                        `title`="Staging System", 
+                        `type`="text"),
+                    list(
+                        `name`="Stage", 
+                        `title`="Stage", 
+                        `type`="text"),
+                    list(
+                        `name`="N_Total", 
+                        `title`="N Total", 
+                        `type`="integer"),
+                    list(
+                        `name`="N_Primary", 
+                        `title`="N Primary", 
+                        `type`="integer"),
+                    list(
+                        `name`="N_Competing", 
+                        `title`="N Competing", 
+                        `type`="integer"),
+                    list(
+                        `name`="N_Censored", 
+                        `title`="N Censored", 
+                        `type`="integer"),
+                    list(
+                        `name`="Primary_Rate", 
+                        `title`="Primary Rate", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="Competing_Rate", 
+                        `title`="Competing Rate", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="competingRisksComparison",
+                title="Competing Risks Analysis Comparison",
+                visible="(performCompetingRisks)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "performCompetingRisks",
+                    "competingEventVar"),
+                columns=list(
+                    list(
+                        `name`="System", 
+                        `title`="System", 
+                        `type`="text"),
+                    list(
+                        `name`="Metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="Primary_Events", 
+                        `title`="Primary Events", 
+                        `type`="text"),
+                    list(
+                        `name`="Competing_Events", 
+                        `title`="Competing Events", 
+                        `type`="text"),
+                    list(
+                        `name`="Assessment", 
+                        `title`="Assessment", 
                         `type`="text"))))}))
 
 stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -3176,6 +3493,29 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   abbreviations, statistical terms,  and technical terminology used in the
 #'   stage migration analysis. This  provides a quick reference for interpreting
 #'   dashboard values and  understanding statistical outputs.
+#' @param calculateSME Calculate Stage Migration Effect Formula (SME) to
+#'   quantify the cumulative  difference in survival between corresponding
+#'   stages of old and new staging  systems. SME = Σ(S_new_i - S_old_i) where S
+#'   represents stage-specific  survival rates. Positive values indicate Will
+#'   Rogers phenomenon (apparent  improvement in new system), while negative
+#'   values suggest understaging.
+#' @param calculateRMST Calculate Restricted Mean Survival Time (RMST) metrics
+#'   for robust  discrimination assessment. RMST provides clinically
+#'   interpretable  survival measures that are independent of proportional
+#'   hazards assumptions.  Particularly valuable when median survival is not
+#'   reached or when comparing  absolute survival benefits between staging
+#'   systems.
+#' @param performCompetingRisks Perform competing risks analysis for scenarios
+#'   with multiple event types  (e.g., cancer-specific death vs. other causes).
+#'   Implements Fine-Gray  subdistribution hazard models and Cumulative
+#'   Incidence Function (CIF)  analysis. Essential when competing events prevent
+#'   observation of primary  outcome and standard survival analysis may be
+#'   biased.
+#' @param competingEventVar Optional variable indicating competing events
+#'   (events other than primary  outcome). If not specified, the analysis will
+#'   attempt to detect competing  risks from multi-level event variables. For
+#'   cancer studies, this typically  represents non-cancer deaths when primary
+#'   outcome is cancer-specific death.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcomeMessage} \tab \tab \tab \tab \tab a html \cr
@@ -3224,6 +3564,8 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$willRogersBasicAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$likelihoodTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$likelihoodTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$linearTrendTestExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$linearTrendTest} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$homogeneityTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$homogeneityTests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$trendTestsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -3275,6 +3617,15 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$crossValidationPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$enhancedLRComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stageMigrationEffectExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$stageMigrationEffect} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stageMigrationEffectAssessment} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rmstAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$rmstByStage} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rmstComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$competingRisksExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$competingRisksEventDistribution} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$competingRisksComparison} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -3351,7 +3702,11 @@ stagemigration <- function(
     showNestedModelTests = FALSE,
     showStepwiseResults = FALSE,
     showExplanations = TRUE,
-    showAbbreviationGlossary = FALSE) {
+    showAbbreviationGlossary = FALSE,
+    calculateSME = FALSE,
+    calculateRMST = FALSE,
+    performCompetingRisks = FALSE,
+    competingEventVar) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("stagemigration requires jmvcore to be installed (restart may be required)")
@@ -3363,6 +3718,7 @@ stagemigration <- function(
     if ( ! missing(institutionVariable)) institutionVariable <- jmvcore::resolveQuo(jmvcore::enquo(institutionVariable))
     if ( ! missing(continuousCovariates)) continuousCovariates <- jmvcore::resolveQuo(jmvcore::enquo(continuousCovariates))
     if ( ! missing(categoricalCovariates)) categoricalCovariates <- jmvcore::resolveQuo(jmvcore::enquo(categoricalCovariates))
+    if ( ! missing(competingEventVar)) competingEventVar <- jmvcore::resolveQuo(jmvcore::enquo(competingEventVar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -3372,7 +3728,8 @@ stagemigration <- function(
             `if`( ! missing(event), event, NULL),
             `if`( ! missing(institutionVariable), institutionVariable, NULL),
             `if`( ! missing(continuousCovariates), continuousCovariates, NULL),
-            `if`( ! missing(categoricalCovariates), categoricalCovariates, NULL))
+            `if`( ! missing(categoricalCovariates), categoricalCovariates, NULL),
+            `if`( ! missing(competingEventVar), competingEventVar, NULL))
 
     for (v in oldStage) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in newStage) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -3444,7 +3801,11 @@ stagemigration <- function(
         showNestedModelTests = showNestedModelTests,
         showStepwiseResults = showStepwiseResults,
         showExplanations = showExplanations,
-        showAbbreviationGlossary = showAbbreviationGlossary)
+        showAbbreviationGlossary = showAbbreviationGlossary,
+        calculateSME = calculateSME,
+        calculateRMST = calculateRMST,
+        performCompetingRisks = performCompetingRisks,
+        competingEventVar = competingEventVar)
 
     analysis <- stagemigrationClass$new(
         options = options,
