@@ -673,5 +673,166 @@ options:
         provides a quick reference for interpreting dashboard values and 
         understanding statistical outputs.
 
+    # Stage Migration Effect Options
+    - name: calculateSME
+      title: 'Calculate Stage Migration Effect'
+      type: Bool
+      default: false
+      description: >-
+        Calculate Stage Migration Effect Formula (SME) to quantify the cumulative 
+        difference in survival between corresponding stages of old and new staging 
+        systems. SME = Σ(S_new_i - S_old_i) where S represents stage-specific 
+        survival rates. Positive values indicate Will Rogers phenomenon (apparent 
+        improvement in new system), while negative values suggest understaging.
+
+    # RMST Analysis Options
+    - name: calculateRMST
+      title: 'Calculate RMST Metrics'
+      type: Bool
+      default: false
+      description: >-
+        Calculate Restricted Mean Survival Time (RMST) metrics for robust 
+        discrimination assessment. RMST provides clinically interpretable 
+        survival measures that are independent of proportional hazards assumptions. 
+        Particularly valuable when median survival is not reached or when comparing 
+        absolute survival benefits between staging systems.
+
+    # Competing Risks Analysis Options
+    - name: performCompetingRisks
+      title: 'Perform Competing Risks Analysis'
+      type: Bool
+      default: false
+      description: >-
+        Perform competing risks analysis for scenarios with multiple event types 
+        (e.g., cancer-specific death vs. other causes). Implements Fine-Gray 
+        subdistribution hazard models and Cumulative Incidence Function (CIF) 
+        analysis. Essential when competing events prevent observation of primary 
+        outcome and standard survival analysis may be biased.
+
+    - name: competingEventVar
+      title: 'Competing Event Variable'
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description: >-
+        Optional variable indicating competing events (events other than primary 
+        outcome). If not specified, the analysis will attempt to detect competing 
+        risks from multi-level event variables. For cancer studies, this typically 
+        represents non-cancer deaths when primary outcome is cancer-specific death.
+
+    # Optimal Cut-point Determination Options
+    - name: performOptimalCutpoint
+      title: 'Optimal Cut-point Determination'
+      type: Bool
+      default: false
+      description: >-
+        Determine optimal cut-points for continuous variables that create the most 
+        statistically significant separation in survival outcomes. Uses maximal 
+        selected rank statistics with appropriate multiple testing corrections. 
+        Essential for developing new staging criteria from continuous biomarkers 
+        or measurements.
+
+    - name: continuousStageVariable
+      title: 'Continuous Variable for Cut-point Analysis'
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: >-
+        Continuous variable (e.g., tumor size, biomarker level, age) for optimal 
+        cut-point determination. The analysis will find the cut-point that maximizes 
+        the separation in survival outcomes while controlling for multiple testing.
+
+    - name: cutpointMethod
+      title: 'Cut-point Method'
+      type: List
+      options:
+        - title: "Maximal Selected Rank Statistics"
+          name: maxstat
+        - title: "Minimum p-value Approach"
+          name: minpvalue
+        - title: "Optimal Separation (survminer)"
+          name: surv_cutpoint
+        - title: "Multiple Methods Comparison"
+          name: comprehensive
+      default: maxstat
+      description: >-
+        Method for optimal cut-point determination. Maximal selected rank statistics 
+        provides the most rigorous approach with proper multiple testing correction.
+
+    - name: cutpointRange
+      title: 'Cut-point Search Range'
+      type: String
+      default: "0.1, 0.9"
+      description: >-
+        Proportion range for cut-point search (e.g., "0.1, 0.9" excludes outer 
+        10% to maintain statistical power). Prevents extreme cut-points that 
+        create unbalanced groups.
+
+    - name: multipleTestingCorrection
+      title: 'Multiple Testing Correction'
+      type: List
+      options:
+        - title: "Bonferroni"
+          name: bonferroni
+        - title: "Benjamini-Hochberg (FDR)"
+          name: BH
+        - title: "Holm"
+          name: holm
+        - title: "None"
+          name: none
+      default: bonferroni
+      description: >-
+        Multiple testing correction method for cut-point determination. 
+        Bonferroni is most conservative; use when testing many cut-points.
+
+    - name: validateCutpoint
+      title: 'Cross-validate Cut-point'
+      type: Bool
+      default: false
+      description: >-
+        Perform cross-validation to assess stability of optimal cut-point. 
+        Helps identify robust cut-points that are not dependent on specific 
+        data characteristics.
+
+    - name: cutpointBootstrap
+      title: 'Bootstrap Cut-point Validation'
+      type: Bool
+      default: false
+      description: >-
+        Use bootstrap validation to assess cut-point stability and derive 
+        confidence intervals. Provides robust assessment of cut-point reliability.
+
+    - name: cutpointBootstrapReps
+      title: 'Cut-point Bootstrap Repetitions'
+      type: Number
+      min: 100
+      max: 1000
+      default: 500
+      description: >-
+        Number of bootstrap repetitions for cut-point validation.
+
+    - name: generateStagingSystem
+      title: 'Generate New Staging System'
+      type: Bool
+      default: false
+      description: >-
+        Automatically generate a new staging system based on optimal cut-points. 
+        Creates categorical staging variable from continuous measurements using 
+        determined cut-points with appropriate stage labeling.
+
+    - name: stagingSystemLevels
+      title: 'Number of Staging Levels'
+      type: Number
+      min: 2
+      max: 6
+      default: 3
+      description: >-
+        Number of staging levels to create from optimal cut-points (e.g., 3 for 
+        Low/Intermediate/High or 4 for Stages I-IV).
+
 
 ...

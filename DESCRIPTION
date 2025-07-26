@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.3.70
+Version: 0.0.3.71
 Date: 2025-07-26
 Authors@R: 
     person(given = "Serdar",

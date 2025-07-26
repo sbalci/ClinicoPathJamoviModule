@@ -86,6 +86,12 @@ children:
                 label: Show Explanations for Results
               - type: CheckBox
                 name: showAbbreviationGlossary
+              - type: CheckBox
+                name: calculateSME
+              - type: CheckBox
+                name: calculateRMST
+              - type: CheckBox
+                name: performCompetingRisks
   - type: CollapseBox
     label: Analysis Configuration
     collapsed: false
@@ -106,6 +112,17 @@ children:
                 name: confidenceLevel
                 label: Confidence Level
                 format: number
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Competing Event Variable
+        children:
+          - type: VariablesListBox
+            name: competingEventVar
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Advanced Statistical Methods
     collapsed: false
@@ -300,7 +317,10 @@ children:
               - type: CheckBox
                 name: showStepwiseResults
                 label: Show Stepwise Selection Results
-                enable: (enableMultifactorialAnalysis && (multifactorialComparisonType:stepwise || multifactorialComparisonType:comprehensive))
+                enable: >-
+                  (enableMultifactorialAnalysis &&
+                  (multifactorialComparisonType:stepwise ||
+                  multifactorialComparisonType:comprehensive))
   - type: CollapseBox
     label: Visualization Options
     collapsed: false

@@ -2,17 +2,7 @@
 
 ## Summary
 
-The stagemigration module has completed **Phase 1** (Foundational Features) and **Phase 2** (Advanced Validation & Clinical Utility). 
-
-**Core functionality is complete** including:
-- Migration matrix analysis and heatmap visualization
-- Comprehensive C-index comparison with bootstrap validation
-- Full NRI/IDI suite with multiple approaches
-- Decision Curve Analysis (DCA)
-- Will Rogers phenomenon detection
-- Calibration analysis with spline methods
-- Bootstrap and cross-validation frameworks
-- Clinical interpretation and recommendations
+The stagemigration module has completed **Phase 1** (Foundational Features), **Phase 2** (Advanced Validation & Clinical Utility), **Phase 3** (Clinical Integration Features), and **Phase 4-5** (Advanced Features - Enhanced Statistical Analysis Suite).
 
 This document lists the **remaining advanced features** from Phases 3-6 that could further enhance the module for research and specialized use cases.
 
@@ -35,11 +25,7 @@ This document lists the **remaining advanced features** from Phases 3-6 that cou
 ## **Phase 4: Enhanced Features from ChatGPT Stage Migration Analysis**
 
 ### **1. Advanced Will Rogers Phenomenon Analysis**
-- **Simulation-Based Validation:** Add R simulation capabilities to demonstrate Will Rogers effects with synthetic data and validate findings
 - **Temporal Comparison Framework:** Compare stage-specific survival across different time periods to detect artifacts vs. real improvements
-
-### **2. Advanced Statistical Comparisons** 
-- **Linear Trend Chi-square:** Test for ordinal trends across staging systems
 
 ### **3. Real-World Clinical Examples Integration**
 - **Cancer-Specific Templates:**
@@ -66,10 +52,8 @@ This document lists the **remaining advanced features** from Phases 3-6 that cou
 
 ### **1. Advanced Cox Modeling Enhancements**
 - **Frailty Models for Clustering:** Mixed-effects Cox models (coxme) for multi-institutional data with center-specific random effects
-- **Martingale Residual Analysis:** Detect nonlinearity and outliers in Cox model assumptions
 
 ### **2. Enhanced Stage Migration Quantification**
-- **Stage Migration Effect Formula:** Implement mathematical quantification: SME = (S₁' - S₁) + (S₂' - S₂)
 - **Migration Correction Methods:** Apply probability-weighted expectations to adjust for migration effects
 
 ### **3. Regulatory and Clinical Guidelines Integration**
@@ -92,7 +76,6 @@ This document lists the **remaining advanced features** from Phases 3-6 that cou
 
 ### **6. Enhanced Discrimination Metrics**
 - **Concordance Probability Estimates:** Alternative concordance measures for heavily censored data
-- **Restricted Mean Survival Time:** RMST-based discrimination for specific time horizons
 - **Win Ratio Analysis:** Composite endpoint analysis for staging comparison
 
 ### **7. Clinical Decision Analysis Integration**

@@ -898,6 +898,52 @@ items:
             type: number
             format: zto,pvalue
 
+    # Linear Trend Test Explanation
+    - name: linearTrendTestExplanation
+      title: Understanding Linear Trend Chi-square Tests
+      type: Html
+      visible: (performLikelihoodTests && showExplanations)
+      clearWith:
+          - performLikelihoodTests
+
+    # Linear Trend Chi-square Tests
+    - name: linearTrendTest
+      title: Linear Trend Chi-square Tests
+      type: Table
+      visible: (performLikelihoodTests)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performLikelihoodTests
+      columns:
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Wald_Chi_Square
+            title: "Wald Chi-Square"
+            type: number
+            format: zto
+          - name: df
+            title: "df"
+            type: integer
+          - name: P_Value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Coefficient
+            title: "Coefficient"
+            type: number
+            format: zto
+          - name: N_Stages
+            title: "# Stages"
+            type: integer
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
     # Stage Homogeneity Tests Explanation
     - name: homogeneityTestsExplanation
       title: Understanding Stage Homogeneity Tests
@@ -2069,6 +2115,321 @@ items:
             title: "Model Quality"
             type: text
 
+    # Stage Migration Effect Formula (SME) Tables
+    - name: stageMigrationEffectExplanation
+      title: Understanding Stage Migration Effect Formula (SME)
+      type: Html
+      visible: (calculateSME && showExplanations)
+      clearWith:
+          - calculateSME
+
+    # SME Results Table
+    - name: stageMigrationEffect
+      title: Stage Migration Effect Formula (SME) Results
+      type: Table
+      visible: (calculateSME)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - calculateSME
+      columns:
+          - name: Timepoint
+            title: "Timepoint"
+            type: text
+          - name: SME_Value
+            title: "SME Value"
+            type: number
+            format: zto,pvalue
+          - name: Valid_Comparisons
+            title: "Valid Comparisons"
+            type: integer
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # SME Overall Assessment Table
+    - name: stageMigrationEffectAssessment
+      title: Overall Stage Migration Effect Assessment
+      type: Table
+      visible: (calculateSME)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - calculateSME
+      columns:
+          - name: Metric
+            title: "Metric"
+            type: text
+          - name: Value
+            title: "Value"
+            type: text
+
+    # RMST Analysis Tables
+    - name: rmstAnalysisExplanation
+      title: Understanding Restricted Mean Survival Time (RMST) Analysis
+      type: Html
+      visible: (calculateRMST && showExplanations)
+      clearWith:
+          - calculateRMST
+
+    # RMST by Stage Table
+    - name: rmstByStage
+      title: RMST Analysis by Stage
+      type: Table
+      visible: (calculateRMST)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - calculateRMST
+      columns:
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: N
+            title: "N"
+            type: integer
+          - name: Events
+            title: "Events"
+            type: integer
+          - name: RMST_Months
+            title: "RMST (months)"
+            type: number
+            format: zto,pvalue
+          - name: Median_Survival
+            title: "Median Survival"
+            type: number
+            format: zto,pvalue
+
+    # RMST Comparison Table
+    - name: rmstComparison
+      title: RMST Discrimination Comparison
+      type: Table
+      visible: (calculateRMST)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - calculateRMST
+      columns:
+          - name: System
+            title: "System"
+            type: text
+          - name: RMST_Range
+            title: "RMST Range"
+            type: text
+          - name: Discrimination
+            title: "Discrimination"
+            type: text
+
+    # Competing Risks Analysis Tables
+    - name: competingRisksExplanation
+      title: Understanding Competing Risks Analysis
+      type: Html
+      visible: (performCompetingRisks && showExplanations)
+      clearWith:
+          - performCompetingRisks
+
+    # Competing Risks Event Distribution Table
+    - name: competingRisksEventDistribution
+      title: Competing Risks Event Distribution by Stage
+      type: Table
+      visible: (performCompetingRisks)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCompetingRisks
+          - competingEventVar
+      columns:
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: N_Total
+            title: "N Total"
+            type: integer
+          - name: N_Primary
+            title: "N Primary"
+            type: integer
+          - name: N_Competing
+            title: "N Competing"
+            type: integer
+          - name: N_Censored
+            title: "N Censored"
+            type: integer
+          - name: Primary_Rate
+            title: "Primary Rate"
+            type: number
+            format: zto,pvalue
+          - name: Competing_Rate
+            title: "Competing Rate"
+            type: number
+            format: zto,pvalue
+
+    # Competing Risks Comparison Table
+    - name: competingRisksComparison
+      title: Competing Risks Analysis Comparison
+      type: Table
+      visible: (performCompetingRisks)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCompetingRisks
+          - competingEventVar
+      columns:
+          - name: System
+            title: "System"
+            type: text
+          - name: Metric
+            title: "Metric"
+            type: text
+          - name: Primary_Events
+            title: "Primary Events"
+            type: text
+          - name: Competing_Events
+            title: "Competing Events"
+            type: text
+          - name: Assessment
+            title: "Assessment"
+            type: text
+
+    # Optimal Cut-point Analysis Table
+    - name: optimalCutpointAnalysis
+      title: Optimal Cut-point Determination Results
+      type: Table
+      visible: (performOptimalCutpoint)
+      clearWith:
+          - continuousStageVariable
+          - survivalTime
+          - event
+          - eventLevel
+          - performOptimalCutpoint
+          - cutpointMethod
+          - cutpointRange
+          - multipleTestingCorrection
+      columns:
+          - name: Method
+            title: "Method"
+            type: text
+          - name: Optimal_Cutpoint
+            title: "Optimal Cut-point"
+            type: number
+            format: dp:3
+          - name: P_Value
+            title: "P-value"
+            type: number
+            format: zto,pvalue
+          - name: Adjusted_P_Value
+            title: "Adjusted P-value"
+            type: number
+            format: zto,pvalue
+          - name: Log_Rank_Statistic
+            title: "Log-rank χ²"
+            type: number
+            format: dp:3
+          - name: Hazard_Ratio
+            title: "Hazard Ratio"
+            type: number
+            format: dp:3
+          - name: HR_CI
+            title: "95% CI"
+            type: text
+          - name: Group_Sizes
+            title: "Group Sizes"
+            type: text
+          - name: Clinical_Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Cut-point Validation Results Table
+    - name: cutpointValidation
+      title: Cut-point Validation Results
+      type: Table
+      visible: (performOptimalCutpoint && (validateCutpoint || cutpointBootstrap))
+      clearWith:
+          - continuousStageVariable
+          - performOptimalCutpoint
+          - validateCutpoint
+          - cutpointBootstrap
+          - cutpointBootstrapReps
+      columns:
+          - name: Validation_Method
+            title: "Validation Method"
+            type: text
+          - name: Statistic
+            title: "Statistic"
+            type: text
+          - name: Value
+            title: "Value"
+            type: text
+          - name: Confidence_Interval
+            title: "95% CI"
+            type: text
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Generated Staging System Table
+    - name: generatedStagingSystem
+      title: Generated Staging System Statistics
+      type: Table
+      visible: (performOptimalCutpoint && generateStagingSystem)
+      clearWith:
+          - continuousStageVariable
+          - performOptimalCutpoint
+          - generateStagingSystem
+          - stagingSystemLevels
+      columns:
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: N
+            title: "N"
+            type: integer
+          - name: Events
+            title: "Events"
+            type: integer
+          - name: Event_Rate
+            title: "Event Rate (%)"
+            type: number
+            format: dp:1
+          - name: Median_Survival
+            title: "Median Survival"
+            type: number
+            format: dp:1
+          - name: Hazard_Ratio
+            title: "Hazard Ratio"
+            type: number
+            format: dp:3
+          - name: HR_CI
+            title: "95% CI"
+            type: text
+          - name: P_Value
+            title: "P-value"
+            type: number
+            format: zto,pvalue
+
 refs:
     - harrell2015
     - pencina2008
@@ -2079,5 +2440,4 @@ refs:
     - ggplot2
     - timeROC
     - dcurves
-
 ...
