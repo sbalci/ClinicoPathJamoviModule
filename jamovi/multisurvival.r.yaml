@@ -580,6 +580,13 @@ items:
       visible: (showNomogram)
 
 # Survival Decision Tree ----
+
+
+    - name:  mydataview_survivaldecisiontree
+      title: mydataview_survivaldecisiontree
+      type:  Preformatted
+
+
     - name: tree_summary
       title: 'Survival Decision Tree Summary'
       type: Html
@@ -636,9 +643,9 @@ items:
 
 
 
-    - name:  mydataview_modelselection
-      title: mydataview_modelselection
-      type:  Preformatted
+    # - name:  mydataview_modelselection
+    #   title: mydataview_modelselection
+    #   type:  Preformatted
 
 
     - name:  text_model_selection

@@ -705,6 +705,12 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         survivalCurves = function() private$.items[["survivalCurves"]],
         dashboardExplanation = function() private$.items[["dashboardExplanation"]],
         comparativeAnalysisDashboard = function() private$.items[["comparativeAnalysisDashboard"]],
+        willRogersEvidenceSummaryExplanation = function() private$.items[["willRogersEvidenceSummaryExplanation"]],
+        willRogersEvidenceSummary = function() private$.items[["willRogersEvidenceSummary"]],
+        willRogersClinicalRecommendation = function() private$.items[["willRogersClinicalRecommendation"]],
+        enhancedMigrationPatternAnalysis = function() private$.items[["enhancedMigrationPatternAnalysis"]],
+        landmarkAnalysisResults = function() private$.items[["landmarkAnalysisResults"]],
+        advancedMigrationHeatmapStats = function() private$.items[["advancedMigrationHeatmapStats"]],
         abbreviationGlossary = function() private$.items[["abbreviationGlossary"]],
         crossValidationExplanation = function() private$.items[["crossValidationExplanation"]],
         crossValidationResults = function() private$.items[["crossValidationResults"]],
@@ -2594,6 +2600,184 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="willRogersEvidenceSummaryExplanation",
+                title="Understanding Will Rogers Evidence Assessment Framework",
+                visible="(advancedMigrationAnalysis && showExplanations)",
+                clearWith=list(
+                    "advancedMigrationAnalysis")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="willRogersEvidenceSummary",
+                title="Will Rogers Phenomenon Evidence Summary",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis"),
+                columns=list(
+                    list(
+                        `name`="Criterion", 
+                        `title`="Assessment Criterion", 
+                        `type`="text"),
+                    list(
+                        `name`="Assessment", 
+                        `title`="Result", 
+                        `type`="text"),
+                    list(
+                        `name`="Evidence_Level", 
+                        `title`="Evidence Strength", 
+                        `type`="text"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="willRogersClinicalRecommendation",
+                title="Will Rogers Analysis Clinical Recommendation",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis"),
+                columns=list(
+                    list(
+                        `name`="Category", 
+                        `title`="Category", 
+                        `type`="text"),
+                    list(
+                        `name`="Finding", 
+                        `title`="Finding", 
+                        `type`="text"),
+                    list(
+                        `name`="Confidence", 
+                        `title`="Confidence Level", 
+                        `type`="text"),
+                    list(
+                        `name`="Guidance", 
+                        `title`="Implementation Guidance", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="enhancedMigrationPatternAnalysis",
+                title="Enhanced Migration Pattern Analysis",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "advancedMigrationAnalysis"),
+                columns=list(
+                    list(
+                        `name`="Pattern_Type", 
+                        `title`="Pattern Type", 
+                        `type`="text"),
+                    list(
+                        `name`="Count", 
+                        `title`="Count", 
+                        `type`="integer"),
+                    list(
+                        `name`="Percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="Flow_Direction", 
+                        `title`="Flow Direction", 
+                        `type`="text"),
+                    list(
+                        `name`="Clinical_Impact", 
+                        `title`="Clinical Impact", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="landmarkAnalysisResults",
+                title="Landmark Analysis Results",
+                visible="(advancedMigrationAnalysis)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "advancedMigrationAnalysis",
+                    "cancerType"),
+                columns=list(
+                    list(
+                        `name`="Landmark_Time", 
+                        `title`="Landmark Time (months)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="N_Patients", 
+                        `title`="N Patients", 
+                        `type`="integer"),
+                    list(
+                        `name`="N_Events", 
+                        `title`="N Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="Old_C_Index", 
+                        `title`="Original C-Index", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="New_C_Index", 
+                        `title`="New C-Index", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="C_Improvement", 
+                        `title`="C-Index Improvement", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="Interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="advancedMigrationHeatmapStats",
+                title="Advanced Migration Heatmap Statistics",
+                visible="(advancedMigrationAnalysis && showMigrationHeatmap)",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "advancedMigrationAnalysis",
+                    "showMigrationHeatmap"),
+                columns=list(
+                    list(
+                        `name`="Stage", 
+                        `title`="Stage", 
+                        `type`="text"),
+                    list(
+                        `name`="Retention_Rate", 
+                        `title`="Retention Rate (%)", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="Inflow", 
+                        `title`="Patients Gained", 
+                        `type`="integer"),
+                    list(
+                        `name`="Outflow", 
+                        `title`="Patients Lost", 
+                        `type`="integer"),
+                    list(
+                        `name`="Net_Migration", 
+                        `title`="Net Change", 
+                        `type`="integer"),
+                    list(
+                        `name`="Major_Flows", 
+                        `title`="Major Migration Flows", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="abbreviationGlossary",
                 title="Comprehensive Abbreviation Glossary and Statistical Terms",
                 visible="(showAbbreviationGlossary)",
@@ -3080,6 +3264,12 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$survivalCurves} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$dashboardExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$comparativeAnalysisDashboard} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$willRogersEvidenceSummaryExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$willRogersEvidenceSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$willRogersClinicalRecommendation} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$enhancedMigrationPatternAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$landmarkAnalysisResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$advancedMigrationHeatmapStats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$abbreviationGlossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$crossValidationExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr

@@ -1,0 +1,163 @@
+---
+name:  jjradarplot
+title: Radar Plot
+menuGroup: JJStatsPlotD
+menuSubgroup: 'Multivariate'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        'Create radar plots (spider plots) for multivariate data visualization.
+        This function allows comparison of multiple variables across different categories.'
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: Variables for Radar Axes
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            A list of numeric variables to be used as radar axes (minimum 3 required).
+
+    - name: categoryVar
+      title: Category Variable
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      description:
+          R: >
+            A categorical variable that defines different radar polygons.
+
+    - name: splitBy
+      title: 'Split By (Optional)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+          R: >
+            Optional variable to create separate radar plots in facets.
+            
+    # Analysis Options
+    - name: scaleData
+      title: Scale Data (0-1)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to scale all variables to 0-1 range for better comparison.
+
+    - name: aggregationMethod
+      title: Aggregation Method
+      type: List
+      options:
+        - name: mean
+          title: Mean
+        - name: median
+          title: Median
+      default: mean
+      description:
+          R: >
+            How to aggregate data for each category.
+
+    # Appearance Options
+    - name: alpha
+      title: Fill Transparency
+      type: Number
+      min: 0
+      max: 1
+      default: 0.25
+      description:
+          R: >
+            Transparency level for polygon fill (0 = transparent, 1 = opaque).
+
+    - name: lineSize
+      title: Line Width
+      type: Number
+      min: 0.1
+      max: 3
+      default: 1
+      description:
+          R: >
+            Width of polygon outline.
+
+    - name: pointSize
+      title: Point Size
+      type: Number
+      min: 0.5
+      max: 5
+      default: 2
+      description:
+          R: >
+            Size of points at vertices.
+
+    - name: title
+      title: Plot Title
+      type: String
+      default: "Radar Plot"
+      description:
+          R: >
+            Title for the plot.
+
+    - name: legendPosition
+      title: Legend Position
+      type: List
+      options:
+        - name: right
+          title: Right
+        - name: left
+          title: Left
+        - name: top
+          title: Top
+        - name: bottom
+          title: Bottom
+        - name: none
+          title: None
+      default: right
+      description:
+          R: >
+            Position of the legend.
+
+    - name: axisLabelSize
+      title: Axis Label Size
+      type: Number
+      min: 6
+      max: 20
+      default: 10
+      description:
+          R: >
+            Size of axis labels.
+
+    - name: facetLabelSize
+      title: Facet Label Size
+      type: Number
+      min: 6
+      max: 20
+      default: 11
+      description:
+          R: >
+            Size of facet labels (when using Split By).
+
+    # Data Exclusion
+    - name: excl
+      title: Exclude cases analysis by analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            TRUE or FALSE (default), exclude cases analysis by analysis
+
+...

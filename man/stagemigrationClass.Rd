@@ -51,11 +51,23 @@ This comprehensive staging validation analysis includes:
 
 \strong{Advanced Visualizations:}
 \itemize{
-\item Migration heatmaps
+\item Migration heatmaps with flow statistics
 \item Time-dependent ROC curves
 \item Calibration plots
 \item Decision curves
 \item Forest plots with confidence intervals
+}
+
+\strong{PHASE 1 ENHANCEMENTS - Evidence-Based Assessment Framework:}
+\itemize{
+\item \strong{Will Rogers Evidence Assessment:} Multi-criteria evaluation framework
+\item \strong{Migration Pattern Analysis:} Advanced flow statistics and retention rates
+\item \strong{Survival Pattern Validation:} Upstaged patient survival similarity analysis
+\item \strong{Biological Consistency Checks:} Risk factor profile assessments
+\item \strong{Landmark Analysis Integration:} Time-based cutoff discrimination analysis
+\item \strong{Clinical Decision Support:} Evidence-based implementation recommendations
+\item \strong{Traffic Light Assessment:} PASS/BORDERLINE/CONCERN/FAIL evidence grading
+\item \strong{Enhanced Heatmap Analytics:} Major flow identification and net migration analysis
 }
 }
 \section{Clinical Applications}{
@@ -139,6 +151,36 @@ stagemigration(
   calculateNRI = TRUE,
   performBootstrap = TRUE,
   bootstrapReps = 1000
+)
+
+# PHASE 1 ENHANCED: Evidence-based Will Rogers assessment
+stagemigration(
+  data = pancreatic_cohort,
+  oldStage = "T_AJCC8",
+  newStage = "T_modified", 
+  survivalTime = "overall_survival_months",
+  event = "death_status",
+  eventLevel = "Dead",
+  analysisType = "publication",
+  advancedMigrationAnalysis = TRUE,
+  showMigrationHeatmap = TRUE,
+  cancerType = "other",
+  showExplanations = TRUE
+)
+
+# Phase 1 Enhanced with landmark analysis for lung cancer
+stagemigration(
+  data = lung_staging_data,
+  oldStage = "stage_7th_edition",
+  newStage = "stage_8th_edition",
+  survivalTime = "survival_months",
+  event = "vital_status",
+  eventLevel = "deceased",
+  analysisType = "comprehensive", 
+  advancedMigrationAnalysis = TRUE,
+  cancerType = "lung",  # Uses lung-specific landmark times: 3,6,12,24 months
+  showWillRogersVisualization = TRUE,
+  showMigrationSurvivalComparison = TRUE
 )
 }
 
