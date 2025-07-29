@@ -22,11 +22,11 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
-    label: Analysis
+    label: Statistical Analysis
     collapsed: true
     children:
       - type: Label
-        label: Analysis
+        label: Correlation Method
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -34,4 +34,81 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
+      - type: Label
+        label: Statistical Options
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: siglevel
+                format: number
+              - type: TextBox
+                name: conflevel
+                format: number
+              - type: ComboBox
+                name: padjustmethod
+              - type: TextBox
+                name: k
+                format: number
+
+  - type: CollapseBox
+    label: Matrix Display
+    collapsed: true
+    children:
+      - type: Label
+        label: Matrix Configuration
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: matrixtype
+              - type: ComboBox
+                name: matrixmethod
+
+  - type: CollapseBox
+    label: Plot Appearance
+    collapsed: true
+    children:
+      - type: Label
+        label: Color Scheme
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: lowcolor
+                format: string
+                width: large
+              - type: TextBox
+                name: midcolor
+                format: string
+                width: large
+              - type: TextBox
+                name: highcolor
+                format: string
+                width: large
+      - type: Label
+        label: Plot Labels
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: title
+                format: string
+                width: large
+              - type: TextBox
+                name: subtitle
+                format: string
+                width: large
+              - type: TextBox
+                name: caption
+                format: string
+                width: large
 

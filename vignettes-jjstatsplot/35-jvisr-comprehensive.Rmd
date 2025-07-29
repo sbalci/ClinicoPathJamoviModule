@@ -6,6 +6,25 @@ author: "ClinicoPath"
 output: html_document
 ---
 
+
+
+
+
+```{r setup, include=FALSE}
+# Set options for better output
+options(digits = 3)
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 300,
+  out.width = "100%",
+  echo = TRUE,
+  eval = FALSE
+)
+```
+
+
+
 # Introduction
 
 The `jvisr` function provides professional clinical research visualizations using the visR package with sensible defaults based on graphical principles. It's designed specifically for clinical and medical research applications, supporting multiple analysis types including survival analysis, cumulative incidence, patient flow charts, and clinical summaries.
@@ -30,22 +49,13 @@ visR is an R package that provides a grammar of graphics implementation focused 
 
 ## Installation and Setup
 
-```{r setup}
+```{r setup 2}
 # Load required libraries
 library(ClinicoPath)
 library(dplyr)
 library(survival)
 
-# Set options for better output
-options(digits = 3)
-knitr::opts_chunk$set(
-  fig.width = 12,
-  fig.height = 8,
-    dpi = 300,
-  echo = TRUE,
-  eval = FALSE,
-  out.width = "100%"
-)
+
 
 # Check if packages are available
 if (!requireNamespace("survival", quietly = TRUE)) {

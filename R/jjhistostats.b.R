@@ -90,14 +90,47 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     binwidth <- self$options$binwidth
                 }
                 
+                # Process text parameters
+                xlab <- if (self$options$xlab != '') self$options$xlab else NULL
+                title <- if (self$options$title != '') self$options$title else NULL
+                subtitle <- if (self$options$subtitle != '') self$options$subtitle else NULL
+                caption <- if (self$options$caption != '') self$options$caption else NULL
+                
+                # Process bin.args
+                bin.args <- list(
+                    fill = self$options$binfill,
+                    color = self$options$bincolor,
+                    alpha = self$options$binalpha
+                )
+                
+                # Process centrality.line.args
+                centrality.line.args <- list(
+                    color = self$options$centralitylinecolor,
+                    linewidth = self$options$centralitylinewidth,
+                    linetype = self$options$centralitylinetype
+                )
+                
+                # Process centrality.type
+                centrality.type <- if (self$options$centralitytype != 'default') self$options$centralitytype else NULL
+                
                 # Cache the processed options
                 options_list <- list(
                     typestatistics = typestatistics,
                     dep = dep,
                     binwidth = binwidth,
-                    normalcurve = self$options$normalcurve,
                     resultssubtitle = self$options$resultssubtitle,
-                    centralityline = self$options$centralityline
+                    centralityline = self$options$centralityline,
+                    test.value = self$options$test.value,
+                    conf.level = self$options$conf.level,
+                    bf.message = self$options$bf.message,
+                    digits = self$options$digits,
+                    xlab = xlab,
+                    title = title,
+                    subtitle = subtitle,
+                    caption = caption,
+                    bin.args = bin.args,
+                    centrality.line.args = centrality.line.args,
+                    centrality.type = centrality.type
                 )
                 private$.processedOptions <- options_list
                 return(options_list)
@@ -176,18 +209,46 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 ## dep == 1 ----
 
                 if (length(self$options$dep) == 1) {
-                    plot <-
-                        ggstatsplot::gghistostats(
+                    if (!is.null(options_data$centrality.type)) {
+                        plot <- ggstatsplot::gghistostats(
                             data = mydata,
-                            x = !!rlang::sym(dep)
-
-                            , type = typestatistics
-                            , normal.curve = options_data$normalcurve
-                            , results.subtitle = options_data$resultssubtitle
-                            , centrality.plotting = options_data$centralityline
-                            , binwidth = binwidth
-
+                            x = !!rlang::sym(dep),
+                            type = typestatistics,
+                            results.subtitle = options_data$resultssubtitle,
+                            centrality.plotting = options_data$centralityline,
+                            binwidth = binwidth,
+                            test.value = options_data$test.value,
+                            conf.level = options_data$conf.level,
+                            bf.message = options_data$bf.message,
+                            digits = options_data$digits,
+                            xlab = options_data$xlab,
+                            title = options_data$title,
+                            subtitle = options_data$subtitle,
+                            caption = options_data$caption,
+                            bin.args = options_data$bin.args,
+                            centrality.line.args = options_data$centrality.line.args,
+                            centrality.type = options_data$centrality.type
                         )
+                    } else {
+                        plot <- ggstatsplot::gghistostats(
+                            data = mydata,
+                            x = !!rlang::sym(dep),
+                            type = typestatistics,
+                            results.subtitle = options_data$resultssubtitle,
+                            centrality.plotting = options_data$centralityline,
+                            binwidth = binwidth,
+                            test.value = options_data$test.value,
+                            conf.level = options_data$conf.level,
+                            bf.message = options_data$bf.message,
+                            digits = options_data$digits,
+                            xlab = options_data$xlab,
+                            title = options_data$title,
+                            subtitle = options_data$subtitle,
+                            caption = options_data$caption,
+                            bin.args = options_data$bin.args,
+                            centrality.line.args = options_data$centrality.line.args
+                        )
+                    }
 
 # extracted_stats <- ggstatsplot::extract_stats(plot)
 # extracted_subtitle <- ggstatsplot::extract_subtitle(plot)
@@ -222,18 +283,48 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                 x = dep2_symbols,
                                 messages = FALSE),
                             .f = function(x, messages) {
-                                    ggstatsplot::gghistostats(
-                                        data = mydata,
-                                        x = !!x,
-                                        messages = messages
-
-                                        , type = typestatistics
-                                        , normal.curve = options_data$normalcurve
-                                        , results.subtitle = options_data$resultssubtitle
-                                        , centrality.plotting = options_data$centralityline
-                                        , binwidth = binwidth
-
-                                    )
+                                    if (!is.null(options_data$centrality.type)) {
+                                        ggstatsplot::gghistostats(
+                                            data = mydata,
+                                            x = !!x,
+                                            messages = messages,
+                                            type = typestatistics,
+                                            results.subtitle = options_data$resultssubtitle,
+                                            centrality.plotting = options_data$centralityline,
+                                            binwidth = binwidth,
+                                            test.value = options_data$test.value,
+                                            conf.level = options_data$conf.level,
+                                            bf.message = options_data$bf.message,
+                                            digits = options_data$digits,
+                                            xlab = options_data$xlab,
+                                            title = options_data$title,
+                                            subtitle = options_data$subtitle,
+                                            caption = options_data$caption,
+                                            bin.args = options_data$bin.args,
+                                            centrality.line.args = options_data$centrality.line.args,
+                                            centrality.type = options_data$centrality.type
+                                        )
+                                    } else {
+                                        ggstatsplot::gghistostats(
+                                            data = mydata,
+                                            x = !!x,
+                                            messages = messages,
+                                            type = typestatistics,
+                                            results.subtitle = options_data$resultssubtitle,
+                                            centrality.plotting = options_data$centralityline,
+                                            binwidth = binwidth,
+                                            test.value = options_data$test.value,
+                                            conf.level = options_data$conf.level,
+                                            bf.message = options_data$bf.message,
+                                            digits = options_data$digits,
+                                            xlab = options_data$xlab,
+                                            title = options_data$title,
+                                            subtitle = options_data$subtitle,
+                                            caption = options_data$caption,
+                                            bin.args = options_data$bin.args,
+                                            centrality.line.args = options_data$centrality.line.args
+                                        )
+                                    }
                             }
                         )
 
@@ -292,21 +383,44 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 ## dep = 1 ----
 
                 if (length(self$options$dep) == 1) {
-                    plot2 <- ggstatsplot::grouped_gghistostats(
-                        data = mydata,
-                        x = !!rlang::sym(dep),
-                        grouping.var = !!rlang::sym(grvar)
-
-
-                        , type = typestatistics
-                        , normal.curve = options_data$normalcurve
-                        , results.subtitle = options_data$resultssubtitle
-                        , centrality.plotting = options_data$centralityline
-                        , binwidth = binwidth
-
-
-
-                    )
+                    if (!is.null(options_data$centrality.type)) {
+                        plot2 <- ggstatsplot::grouped_gghistostats(
+                            data = mydata,
+                            x = !!rlang::sym(dep),
+                            grouping.var = !!rlang::sym(grvar),
+                            type = typestatistics,
+                            results.subtitle = options_data$resultssubtitle,
+                            centrality.plotting = options_data$centralityline,
+                            binwidth = binwidth,
+                            test.value = options_data$test.value,
+                            conf.level = options_data$conf.level,
+                            bf.message = options_data$bf.message,
+                            digits = options_data$digits,
+                            xlab = options_data$xlab,
+                            caption = options_data$caption,
+                            bin.args = options_data$bin.args,
+                            centrality.line.args = options_data$centrality.line.args,
+                            centrality.type = options_data$centrality.type
+                        )
+                    } else {
+                        plot2 <- ggstatsplot::grouped_gghistostats(
+                            data = mydata,
+                            x = !!rlang::sym(dep),
+                            grouping.var = !!rlang::sym(grvar),
+                            type = typestatistics,
+                            results.subtitle = options_data$resultssubtitle,
+                            centrality.plotting = options_data$centralityline,
+                            binwidth = binwidth,
+                            test.value = options_data$test.value,
+                            conf.level = options_data$conf.level,
+                            bf.message = options_data$bf.message,
+                            digits = options_data$digits,
+                            xlab = options_data$xlab,
+                            caption = options_data$caption,
+                            bin.args = options_data$bin.args,
+                            centrality.line.args = options_data$centrality.line.args
+                        )
+                    }
 
                 }
 
@@ -322,20 +436,46 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                 x = dep2_symbols,
                                 messages = FALSE),
                             .f = function(x, messages) {
-                                ggstatsplot::grouped_gghistostats(
-                                    data = mydata,
-                                    x = !!x,
-                                    messages = messages,
-                                    grouping.var = !!rlang::sym(grvar)
-
-
-                                    , type = typestatistics
-                                    , normal.curve = options_data$normalcurve
-                                    , results.subtitle = options_data$resultssubtitle
-                                    , centrality.plotting = options_data$centralityline
-                                    , binwidth = binwidth
-
-)
+                                if (!is.null(options_data$centrality.type)) {
+                                    ggstatsplot::grouped_gghistostats(
+                                        data = mydata,
+                                        x = !!x,
+                                        messages = messages,
+                                        grouping.var = !!rlang::sym(grvar),
+                                        type = typestatistics,
+                                        results.subtitle = options_data$resultssubtitle,
+                                        centrality.plotting = options_data$centralityline,
+                                        binwidth = binwidth,
+                                        test.value = options_data$test.value,
+                                        conf.level = options_data$conf.level,
+                                        bf.message = options_data$bf.message,
+                                        digits = options_data$digits,
+                                        xlab = options_data$xlab,
+                                        caption = options_data$caption,
+                                        bin.args = options_data$bin.args,
+                                        centrality.line.args = options_data$centrality.line.args,
+                                        centrality.type = options_data$centrality.type
+                                    )
+                                } else {
+                                    ggstatsplot::grouped_gghistostats(
+                                        data = mydata,
+                                        x = !!x,
+                                        messages = messages,
+                                        grouping.var = !!rlang::sym(grvar),
+                                        type = typestatistics,
+                                        results.subtitle = options_data$resultssubtitle,
+                                        centrality.plotting = options_data$centralityline,
+                                        binwidth = binwidth,
+                                        test.value = options_data$test.value,
+                                        conf.level = options_data$conf.level,
+                                        bf.message = options_data$bf.message,
+                                        digits = options_data$digits,
+                                        xlab = options_data$xlab,
+                                        caption = options_data$caption,
+                                        bin.args = options_data$bin.args,
+                                        centrality.line.args = options_data$centrality.line.args
+                                    )
+                                }
                             }
 )
 

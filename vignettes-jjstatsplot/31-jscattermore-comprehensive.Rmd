@@ -6,6 +6,22 @@ author: "ClinicoPath"
 output: html_document
 ---
 
+
+
+```{r setup, include=FALSE}
+# Set options for better output
+options(digits = 3)
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 300,
+  out.width = "100%",
+  echo = TRUE,
+  eval = FALSE
+)
+```
+
+
 # Introduction
 
 The `jscattermore` function provides high-performance scatter plot visualization using the `scattermore` package, designed specifically for plotting millions of data points efficiently. This function is ideal for large datasets where traditional plotting methods become slow or memory-intensive.
@@ -22,22 +38,12 @@ The `jscattermore` function provides high-performance scatter plot visualization
 
 ## Installation and Setup
 
-```{r setup}
+```{r setup 2}
 # Load required libraries
 library(ClinicoPath)
 library(dplyr)
 library(ggplot2)
 
-# Set options for better output
-options(digits = 3)
-knitr::opts_chunk$set(
-  fig.width = 10,
-  fig.height = 6,
-  dpi = 300,
-  out.width = "100%",
-  echo = TRUE,
-  eval = FALSE
-)
 
 # Check if scattermore is available
 if (!requireNamespace("scattermore", quietly = TRUE)) {

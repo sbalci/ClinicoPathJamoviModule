@@ -647,9 +647,19 @@ if (!WIP) {
     if (copy_vignettes && (config$vignette_folders$copy_settings$use_folder_based %||% TRUE)) {
       cat("  📄 Copying", module_name, "vignette files (folder-based)...\n")
       vignette_dir <- file.path(module_dir, "vignettes")
-      if (!dir.exists(vignette_dir)) {
-        dir.create(vignette_dir, recursive = TRUE)
+      
+      # Clean existing vignettes folder for fresh copy
+      if (dir.exists(vignette_dir)) {
+        cat("    🧹 Cleaning existing vignettes folder...\n")
+        tryCatch({
+          fs::dir_delete(vignette_dir)
+        }, error = function(e) {
+          warning("⚠️ Error cleaning vignettes folder for ", module_name, ": ", e$message)
+        })
       }
+      
+      # Create fresh vignettes directory
+      dir.create(vignette_dir, recursive = TRUE)
 
       # Get folders that should be copied to this module
       target_folders <- c()
@@ -696,9 +706,19 @@ if (!WIP) {
       # Fallback to manual file copying
       cat("  📄 Copying", module_name, "vignette files (manual)...\n")
       vignette_dir <- file.path(module_dir, "vignettes")
-      if (!dir.exists(vignette_dir)) {
-        dir.create(vignette_dir, recursive = TRUE)
+      
+      # Clean existing vignettes folder for fresh copy
+      if (dir.exists(vignette_dir)) {
+        cat("    🧹 Cleaning existing vignettes folder...\n")
+        tryCatch({
+          fs::dir_delete(vignette_dir)
+        }, error = function(e) {
+          warning("⚠️ Error cleaning vignettes folder for ", module_name, ": ", e$message)
+        })
       }
+      
+      # Create fresh vignettes directory
+      dir.create(vignette_dir, recursive = TRUE)
 
       tryCatch({
         for (vignette_file in module_cfg$vignette_files) {

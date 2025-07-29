@@ -82,7 +82,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Process type of statistics
-            typestatistics <- jmvcore::constructFormula(terms = self$options$typestatistics)
+            typestatistics <- self$options$typestatistics
 
             # Process variables
             dep <- self$options$dep
@@ -107,8 +107,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 xtitle = xtitle,
                 ytitle = ytitle,
                 effsizetype = self$options$effsizetype,
-                centralityplotting = self$options$centralityplotting,
-                centralitytype = self$options$centralitytype
+                testvalue = self$options$testvalue,
+                bfmessage = self$options$bfmessage,
+                conflevel = self$options$conflevel,
+                k = self$options$k,
+                testvalueline = self$options$testvalueline,
+                centralityparameter = self$options$centralityparameter,
+                centralityk = self$options$centralityk,
+                resultssubtitle = self$options$resultssubtitle
             )
             private$.processedOptions <- options_list
             return(options_list)
@@ -170,16 +176,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Use cached data and options for performance ----
             mydata <- private$.prepareData()
             options_data <- private$.prepareOptions()
-            
-            typestatistics <- options_data$typestatistics
-            dep <- options_data$dep
-            group <- options_data$group
-            mytitle <- options_data$mytitle
-            xtitle <- options_data$xtitle
-            ytitle <- options_data$ytitle
-            effsizetype <- options_data$effsizetype
-            centralityplotting <- options_data$centralityplotting
-            centralitytype <- options_data$centralitytype
 
 
             # ggdotplotstats ----
@@ -190,18 +186,21 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot <-
                 ggstatsplot::ggdotplotstats(
                     data = mydata,
-                    x = !!rlang::sym(dep),
-                    y = !!rlang::sym(group)
-                    , title = mytitle
-                    , xlab = xtitle
-                    , ylab = ytitle
-                    , type = typestatistics
-                    , effsize.type = effsizetype
-                    , centrality.plotting = centralityplotting
-                    , centrality.type = centralitytype
-                    , results.subtitle = self$options$resultssubtitle
-
-
+                    x = !!rlang::sym(options_data$dep),
+                    y = !!rlang::sym(options_data$group),
+                    title = options_data$mytitle,
+                    xlab = options_data$xtitle,
+                    ylab = options_data$ytitle,
+                    type = options_data$typestatistics,
+                    test.value = options_data$testvalue,
+                    effsize.type = options_data$effsizetype,
+                    conf.level = options_data$conflevel,
+                    k = options_data$k,
+                    bf.message = options_data$bfmessage,
+                    test.value.line = options_data$testvalueline,
+                    centrality.parameter = options_data$centralityparameter,
+                    centrality.k = options_data$centralityk,
+                    results.subtitle = options_data$resultssubtitle
                 )
 
 
@@ -236,13 +235,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Use cached data and options for performance ----
             mydata <- private$.prepareData()
             options_data <- private$.prepareOptions()
-            
-            typestatistics <- options_data$typestatistics
-            dep <- options_data$dep
-            group <- options_data$group
-            effsizetype <- options_data$effsizetype
-            centralityplotting <- options_data$centralityplotting
-            centralitytype <- options_data$centralitytype
 
 
             # grouped_ggdotplotstats ----
@@ -261,19 +253,20 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 plot2 <- ggstatsplot::grouped_ggdotplotstats(
                     data = mydata,
-                    x = !!rlang::sym(dep),
-                    y = !!rlang::sym(group),
-                    grouping.var = !!rlang::sym(grvar)
-
-                    , type = typestatistics
-                    , effsize.type = effsizetype
-                    , centrality.plotting = centralityplotting
-                    , centrality.type = centralitytype
-                    , ggtheme = selected_theme
-                    , results.subtitle = self$options$resultssubtitle
-
-
-
+                    x = !!rlang::sym(options_data$dep),
+                    y = !!rlang::sym(options_data$group),
+                    grouping.var = !!rlang::sym(grvar),
+                    type = options_data$typestatistics,
+                    test.value = options_data$testvalue,
+                    effsize.type = options_data$effsizetype,
+                    conf.level = options_data$conflevel,
+                    k = options_data$k,
+                    bf.message = options_data$bfmessage,
+                    test.value.line = options_data$testvalueline,
+                    centrality.parameter = options_data$centralityparameter,
+                    centrality.k = options_data$centralityk,
+                    results.subtitle = options_data$resultssubtitle,
+                    ggtheme = selected_theme
                 )
             }
 

@@ -37,14 +37,15 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
-    label: Analysis
+    label: Statistical Analysis
     collapsed: true
     children:
       - type: Label
-        label: Analysis
+        label: Test Method
         fitToGrid: true
         children:
           - type: LayoutBox
+            margin: large
             children:
               - type: ComboBox
                 name: typestatistics
@@ -55,6 +56,7 @@ children:
         fitToGrid: true
         children:
           - type: LayoutBox
+            margin: large
             children:
               - type: CheckBox
                 name: pairwisecomparisons
@@ -65,23 +67,26 @@ children:
                   - type: ComboBox
                     name: padjustmethod
                     enable: (pairwisecomparisons)
+
   - type: CollapseBox
-    label: Plot
+    label: Plot Display
     collapsed: true
     children:
       - type: Label
-        label: Theme
+        label: Plot Configuration
         fitToGrid: true
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
-                name: resultssubtitle
+                name: violin
               - type: CheckBox
-                name: originaltheme
+                name: boxplot
+              - type: CheckBox
+                name: point
       - type: Label
-        label: Plot Features
+        label: Statistical Features
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -98,19 +103,22 @@ children:
                   - type: ComboBox
                     name: centralitytype
                     enable: (centralityplotting)
+
+  - type: CollapseBox
+    label: Plot Appearance
+    collapsed: true
+    children:
       - type: Label
-        label: Plot Type
+        label: Display Options
         fitToGrid: true
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
-                name: violin
+                name: resultssubtitle
               - type: CheckBox
-                name: boxplot
-              - type: CheckBox
-                name: point
+                name: originaltheme
       - type: Label
         label: Plot Labels
         fitToGrid: true

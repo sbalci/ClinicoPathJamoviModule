@@ -30,11 +30,11 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
-    label: Analysis
+    label: Statistical Analysis
     collapsed: true
     children:
       - type: Label
-        label: Analysis
+        label: Test Options
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -42,22 +42,19 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
+              - type: TextBox
+                name: conflevel
+                format: number
+              - type: CheckBox
+                name: bfmessage
+              - type: TextBox
+                name: k
+                format: number
 
   - type: CollapseBox
-    label: Plot
+    label: Plot Appearance
     collapsed: true
     children:
-      - type: Label
-        label: Plot
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: resultssubtitle
-              - type: CheckBox
-                name: originaltheme
       - type: Label
         label: Plot Labels
         fitToGrid: true
@@ -77,3 +74,82 @@ children:
                 name: ytitle
                 format: string
                 width: large
+      - type: Label
+        label: Display Options
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: resultssubtitle
+              - type: CheckBox
+                name: originaltheme
+
+  - type: CollapseBox
+    label: Point Aesthetics
+    collapsed: true
+    children:
+      - type: Label
+        label: Point Styling
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: pointsize
+                format: number
+              - type: TextBox
+                name: pointalpha
+                format: number
+
+  - type: CollapseBox
+    label: Regression Line
+    collapsed: true
+    children:
+      - type: Label
+        label: Line Styling
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: smoothlinesize
+                format: number
+              - type: TextBox
+                name: smoothlinecolor
+                format: string
+                width: large
+
+  - type: CollapseBox
+    label: Marginal Histograms
+    collapsed: true
+    children:
+      - type: Label
+        label: Marginal Settings
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: marginal
+      - type: Label
+        label: Marginal Colors
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: xsidefill
+                format: string
+                width: large
+                enable: (marginal)
+              - type: TextBox
+                name: ysidefill
+                format: string
+                width: large
+                enable: (marginal)

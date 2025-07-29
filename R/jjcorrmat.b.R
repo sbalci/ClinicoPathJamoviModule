@@ -73,17 +73,39 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Process type of statistics
-            typestatistics <- jmvcore::constructFormula(terms = self$options$typestatistics)
+            typestatistics <- self$options$typestatistics
 
-            # Process variables
-            myvars <- jmvcore::constructFormula(terms = self$options$dep)
-            myvars <- jmvcore::decomposeFormula(formula = myvars)
-            myvars <- unlist(myvars)
+            # Process variables - dep is already a list of variables
+            myvars <- self$options$dep
+            
+            # Process text parameters
+            title <- if (self$options$title != '') self$options$title else NULL
+            subtitle <- if (self$options$subtitle != '') self$options$subtitle else NULL
+            caption <- if (self$options$caption != '') self$options$caption else NULL
+            
+            # Process colors
+            colors <- c(self$options$lowcolor, self$options$midcolor, self$options$highcolor)
+            
+            # Process ggcorrplot.args
+            ggcorrplot.args <- list(
+                method = self$options$matrixmethod,
+                outline.color = "black"
+            )
 
             # Cache the processed options
             options_list <- list(
                 typestatistics = typestatistics,
-                myvars = myvars
+                myvars = myvars,
+                matrixtype = self$options$matrixtype,
+                ggcorrplot.args = ggcorrplot.args,
+                siglevel = self$options$siglevel,
+                conflevel = self$options$conflevel,
+                padjustmethod = self$options$padjustmethod,
+                k = self$options$k,
+                colors = colors,
+                title = title,
+                subtitle = subtitle,
+                caption = caption
             )
             private$.processedOptions <- options_list
             return(options_list)
@@ -162,27 +184,26 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 cor.vars = myvars,
                 cor.vars.names = NULL,
                 output = "plot",
-                matrix.type = "full",
-                matrix.method = "square",
+                matrix.type = options_data$matrixtype,
 
-                type = typestatistics,
+                type = options_data$typestatistics,
 
                 beta = 0.1,
-                k = 2L,
-                sig.level = 0.05,
-                conf.level = 0.95,
+                k = options_data$k,
+                sig.level = options_data$siglevel,
+                conf.level = options_data$conflevel,
                 bf.prior = 0.707,
-                p.adjust.method = "none",
+                p.adjust.method = options_data$padjustmethod,
                 pch = "cross",
-                ggcorrplot.args = list(outline.color = "black"),
+                ggcorrplot.args = options_data$ggcorrplot.args,
                 package = "RColorBrewer",
                 palette = "Dark2",
-                colors = c("#E69F00", "white", "#009E73"),
+                colors = options_data$colors,
 
                 ggplot.component = NULL,
-                title = NULL,
-                subtitle = NULL,
-                caption = NULL,
+                title = options_data$title,
+                subtitle = options_data$subtitle,
+                caption = options_data$caption,
                 messages = TRUE
 
             )
@@ -244,15 +265,22 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     title.prefix = NULL,
                     output = "plot",
                     plotgrid.args = list(),
-                    title.text = NULL,
+                    title.text = options_data$title,
                     title.args = list(size = 16, fontface = "bold"),
-                    caption.text = NULL,
+                    caption.text = options_data$caption,
                     caption.args = list(size = 10),
-                    sub.text = NULL,
+                    sub.text = options_data$subtitle,
                     sub.args = list(size = 12)
                     , ggtheme = ggtheme
                     , ggstatsplot.layer = TRUE
-                    , type = typestatistics
+                    , type = options_data$typestatistics
+                    , matrix.type = options_data$matrixtype
+                    , ggcorrplot.args = options_data$ggcorrplot.args
+                    , k = options_data$k
+                    , sig.level = options_data$siglevel
+                    , conf.level = options_data$conflevel
+                    , p.adjust.method = options_data$padjustmethod
+                    , colors = options_data$colors
 
 
 

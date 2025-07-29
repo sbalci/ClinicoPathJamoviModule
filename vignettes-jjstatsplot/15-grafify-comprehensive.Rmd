@@ -29,7 +29,10 @@ knitr::opts_chunk$set(
   eval = FALSE,
   out.width = "100%"
 )
+```
 
+
+```{r setup 2, include=FALSE}
 # Load required libraries
 suppressMessages({
   library(ClinicoPath)

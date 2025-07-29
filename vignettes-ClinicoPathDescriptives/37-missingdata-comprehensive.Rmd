@@ -9,7 +9,8 @@ editor: visual
 
 ## Overview
 
-The `missingdata` function in ClinicoPath provides comprehensive missing data analysis and multiple imputation capabilities using the powerful `mice` and `ggmice` packages. This function is specifically designed for clinical research applications where missing data is common and proper handling is critical for valid statistical inference.
+The `missingdata` function in ClinicoPath provides comprehensive missing data analysis and multiple imputation capabilities using the powerful `mice` and `ggmice` packages.
+This function is specifically designed for clinical research applications where missing data is common and proper handling is critical for valid statistical inference.
 
 ### Key Features
 
@@ -47,19 +48,22 @@ library(ggplot2)
 Understanding the mechanism behind missing data is crucial for choosing appropriate analysis methods:
 
 #### 1. Missing Completely at Random (MCAR)
-- **Definition**: Missingness is independent of both observed and unobserved data
-- **Example**: Equipment malfunction leading to random measurement failures
-- **Implications**: Complete case analysis is unbiased but inefficient
+
+-   **Definition**: Missingness is independent of both observed and unobserved data
+-   **Example**: Equipment malfunction leading to random measurement failures
+-   **Implications**: Complete case analysis is unbiased but inefficient
 
 #### 2. Missing at Random (MAR)
-- **Definition**: Missingness depends only on observed data
-- **Example**: Older patients more likely to miss laboratory appointments
-- **Implications**: Multiple imputation can provide unbiased estimates
+
+-   **Definition**: Missingness depends only on observed data
+-   **Example**: Older patients more likely to miss laboratory appointments
+-   **Implications**: Multiple imputation can provide unbiased estimates
 
 #### 3. Missing Not at Random (MNAR)
-- **Definition**: Missingness depends on the unobserved value itself
-- **Example**: Patients with severe symptoms avoid reporting pain scores
-- **Implications**: Requires specialized methods or sensitivity analysis
+
+-   **Definition**: Missingness depends on the unobserved value itself
+-   **Example**: Patients with severe symptoms avoid reporting pain scores
+-   **Implications**: Requires specialized methods or sensitivity analysis
 
 ## Basic Usage
 
@@ -190,10 +194,7 @@ clinical_assessment <- missingdata(
 )
 ```
 
-**Interpretation for Clinical Trials:**
-- Pattern plots reveal systematic missing data in later visits
-- High dropout rates may indicate treatment tolerability issues
-- Missing data patterns can inform protocol amendments
+**Interpretation for Clinical Trials:** - Pattern plots reveal systematic missing data in later visits - High dropout rates may indicate treatment tolerability issues - Missing data patterns can inform protocol amendments
 
 ### Application 2: Biomarker Analysis
 
@@ -210,10 +211,7 @@ biomarker_imputation <- missingdata(
 )
 ```
 
-**Biomarker Considerations:**
-- Technical missing data (insufficient sample volume)
-- Values below detection limit
-- Batch effects and equipment failures
+**Biomarker Considerations:** - Technical missing data (insufficient sample volume) - Values below detection limit - Batch effects and equipment failures
 
 ### Application 3: Patient-Reported Outcomes
 
@@ -250,38 +248,19 @@ multicenter_analysis <- missingdata(
 
 ### Pattern Plots
 
-**Missing Data Pattern Plot:**
-- Each row represents a different missing data pattern
-- Blue indicates observed data, red indicates missing data
-- Pattern frequency shown on the right
-- Helps identify systematic missing data
+**Missing Data Pattern Plot:** - Each row represents a different missing data pattern - Blue indicates observed data, red indicates missing data - Pattern frequency shown on the right - Helps identify systematic missing data
 
-**Correlation Plot:**
-- Shows correlations between variables
-- Helps understand relationships for imputation
-- Identifies potential auxiliary variables
+**Correlation Plot:** - Shows correlations between variables - Helps understand relationships for imputation - Identifies potential auxiliary variables
 
-**Influx/Outflux Plot:**
-- Influx: How well other variables predict this variable
-- Outflux: How well this variable predicts others
-- Guides imputation model specification
+**Influx/Outflux Plot:** - Influx: How well other variables predict this variable - Outflux: How well this variable predicts others - Guides imputation model specification
 
 ### Imputation Diagnostics
 
-**Trace Plots:**
-- Show convergence of imputation algorithm
-- Chains should mix well and be stationary
-- Non-convergent chains indicate model problems
+**Trace Plots:** - Show convergence of imputation algorithm - Chains should mix well and be stationary - Non-convergent chains indicate model problems
 
-**Density Plots:**
-- Compare distributions of observed vs imputed values
-- Imputed values should be plausible
-- Large differences may indicate model misspecification
+**Density Plots:** - Compare distributions of observed vs imputed values - Imputed values should be plausible - Large differences may indicate model misspecification
 
-**Strip Plots:**
-- Show distribution of imputed values by iteration
-- Help identify convergence issues
-- Useful for detecting outliers in imputed data
+**Strip Plots:** - Show distribution of imputed values by iteration - Help identify convergence issues - Useful for detecting outliers in imputed data
 
 ## Best Practices
 
@@ -354,11 +333,7 @@ for (method in methods) {
 
 **Problem:** Trace plots show non-stationary chains
 
-**Solutions:**
-- Increase `max_iterations`
-- Simplify imputation models
-- Remove highly correlated variables
-- Check for perfect prediction
+**Solutions:** - Increase `max_iterations` - Simplify imputation models - Remove highly correlated variables - Check for perfect prediction
 
 ```{r convergence_fix, eval=FALSE}
 # Increase iterations for convergence
@@ -375,10 +350,7 @@ result <- missingdata(
 
 **Problem:** Imputed values are outside reasonable ranges
 
-**Solutions:**
-- Use appropriate imputation method
-- Transform variables before imputation
-- Set constraints in imputation model
+**Solutions:** - Use appropriate imputation method - Transform variables before imputation - Set constraints in imputation model
 
 ```{r plausible_values, eval=FALSE}
 # Use PMM for bounded variables
@@ -393,12 +365,9 @@ result <- missingdata(
 
 ### Issue 3: High Missing Data Rates
 
-**Problem:** Variables with >50% missing data
+**Problem:** Variables with \>50% missing data
 
-**Solutions:**
-- Consider excluding from analysis
-- Use auxiliary variables
-- Investigate missing data mechanism
+**Solutions:** - Consider excluding from analysis - Use auxiliary variables - Investigate missing data mechanism
 
 ```{r high_missing, eval=FALSE}
 # Identify high missing variables
@@ -416,20 +385,18 @@ print(missing_rates)
 
 When reporting missing data analysis results:
 
-1. **Describe Missing Data Patterns:**
-   - Percentage of missing data per variable
-   - Pattern frequency and distribution
-   - Potential mechanisms (MCAR, MAR, MNAR)
-
-2. **Imputation Methodology:**
-   - Number of imputations performed
-   - Imputation method used
-   - Convergence diagnostics results
-
-3. **Sensitivity Analysis:**
-   - Comparison of different imputation methods
-   - Complete case analysis comparison
-   - Robustness of findings
+1.  **Describe Missing Data Patterns:**
+    -   Percentage of missing data per variable
+    -   Pattern frequency and distribution
+    -   Potential mechanisms (MCAR, MAR, MNAR)
+2.  **Imputation Methodology:**
+    -   Number of imputations performed
+    -   Imputation method used
+    -   Convergence diagnostics results
+3.  **Sensitivity Analysis:**
+    -   Comparison of different imputation methods
+    -   Complete case analysis comparison
+    -   Robustness of findings
 
 ### Example Report Template
 
@@ -447,8 +414,7 @@ report_result <- missingdata(
 )
 ```
 
-**Sample Report Text:**
-"Missing data analysis revealed that 23% of participants had incomplete primary outcome data, with higher missingness in later study visits (dropout pattern). Multiple imputation using predictive mean matching was performed with 10 imputations and 20 iterations. Convergence diagnostics indicated satisfactory chain mixing. Sensitivity analysis comparing complete case analysis with multiple imputation showed consistent results, suggesting MAR mechanism."
+**Sample Report Text:** "Missing data analysis revealed that 23% of participants had incomplete primary outcome data, with higher missingness in later study visits (dropout pattern). Multiple imputation using predictive mean matching was performed with 10 imputations and 20 iterations. Convergence diagnostics indicated satisfactory chain mixing. Sensitivity analysis comparing complete case analysis with multiple imputation showed consistent results, suggesting MAR mechanism."
 
 ## Advanced Topics
 
@@ -493,12 +459,12 @@ longitudinal_result <- missingdata(
 
 ### Validation Checklist
 
-- [ ] **Data Quality**: Check for impossible values and outliers
-- [ ] **Missing Data Patterns**: Investigate systematic patterns
-- [ ] **Imputation Convergence**: Verify chain convergence
-- [ ] **Distributional Checks**: Compare observed vs imputed distributions
-- [ ] **Sensitivity Analysis**: Test robustness to method choices
-- [ ] **Clinical Plausibility**: Ensure imputed values make clinical sense
+-   [ ] **Data Quality**: Check for impossible values and outliers
+-   [ ] **Missing Data Patterns**: Investigate systematic patterns
+-   [ ] **Imputation Convergence**: Verify chain convergence
+-   [ ] **Distributional Checks**: Compare observed vs imputed distributions
+-   [ ] **Sensitivity Analysis**: Test robustness to method choices
+-   [ ] **Clinical Plausibility**: Ensure imputed values make clinical sense
 
 ### Common Validation Steps
 
@@ -528,29 +494,30 @@ imputation_check <- missingdata(
 
 ## Conclusion
 
-The `missingdata` function provides a comprehensive toolkit for handling missing data in clinical research. By combining pattern analysis, multiple imputation, and extensive diagnostics, it enables researchers to:
+The `missingdata` function provides a comprehensive toolkit for handling missing data in clinical research.
+By combining pattern analysis, multiple imputation, and extensive diagnostics, it enables researchers to:
 
-- Make informed decisions about missing data handling
-- Perform rigorous multiple imputation
-- Validate imputation quality
-- Report results transparently
+-   Make informed decisions about missing data handling
+-   Perform rigorous multiple imputation
+-   Validate imputation quality
+-   Report results transparently
 
 ### Key Takeaways
 
-1. **Always start with pattern analysis** to understand missing data structure
-2. **Use appropriate imputation methods** based on variable types and patterns
-3. **Check convergence diagnostics** to ensure imputation quality
-4. **Perform sensitivity analyses** to test robustness
-5. **Report methods and results transparently** for reproducibility
+1.  **Always start with pattern analysis** to understand missing data structure
+2.  **Use appropriate imputation methods** based on variable types and patterns
+3.  **Check convergence diagnostics** to ensure imputation quality
+4.  **Perform sensitivity analyses** to test robustness
+5.  **Report methods and results transparently** for reproducibility
 
 ### Further Reading
 
-- van Buuren, S. (2018). *Flexible Imputation of Missing Data*. CRC Press.
-- Schafer, J. L. (1997). *Analysis of Incomplete Multivariate Data*. Chapman & Hall.
-- Little, R. J., & Rubin, D. B. (2019). *Statistical Analysis with Missing Data*. Wiley.
+-   van Buuren, S. (2018). *Flexible Imputation of Missing Data*. CRC Press.
+-   Schafer, J. L. (1997). *Analysis of Incomplete Multivariate Data*. Chapman & Hall.
+-   Little, R. J., & Rubin, D. B. (2019). *Statistical Analysis with Missing Data*. Wiley.
 
 For more information and updates, visit the [ClinicoPath documentation](https://github.com/sbalci/ClinicoPathJamoviModule).
 
----
+------------------------------------------------------------------------
 
 *This vignette was generated using ClinicoPath version `r packageVersion("ClinicoPath")` on `r Sys.Date()`.*

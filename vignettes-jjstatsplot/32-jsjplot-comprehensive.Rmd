@@ -6,6 +6,20 @@ author: "ClinicoPath"
 output: html_document
 ---
 
+
+```{r setup, include=FALSE}
+# Set options for better output
+options(digits = 3)
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 300,
+  out.width = "100%",
+  echo = TRUE,
+  eval = FALSE
+)
+```
+
 # Introduction
 
 The `jsjplot` function provides comprehensive social science statistical visualization using the powerful `sjPlot` package. This function is designed specifically for researchers in psychology, sociology, political science, economics, and related fields who need publication-ready statistical visualizations and model summaries.
@@ -21,22 +35,12 @@ The `jsjplot` function provides comprehensive social science statistical visuali
 
 ## Installation and Setup
 
-```{r setup}
+```{r setup 2}
 # Load required libraries
 library(ClinicoPath)
 library(dplyr)
 library(ggplot2)
 
-# Set options for better output
-options(digits = 3)
-knitr::opts_chunk$set(
-  fig.width = 12,
-  fig.height = 8,
-  dpi = 300,
-  out.width = "100%",
-  echo = TRUE,
-  eval = FALSE
-)
 
 # Check if sjPlot is available
 if (!requireNamespace("sjPlot", quietly = TRUE)) {

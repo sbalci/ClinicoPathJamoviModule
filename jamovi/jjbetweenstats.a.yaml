@@ -1,7 +1,7 @@
 ---
 name:  jjbetweenstats
 title: Box-Violin Plots to Compare Between Groups
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Independent Samples'
 version: '0.0.3'
@@ -171,6 +171,90 @@ options:
       title: Statistical Results
       type: Bool
       default: true
+
+    - name: plottype
+      title: Plot Type
+      type: List
+      options:
+        - title: Box + Violin
+          name: boxviolin
+        - title: Box Only
+          name: box
+        - title: Violin Only
+          name: violin
+      default: boxviolin
+      description:
+          R: >
+            Type of plot to display - combination of box and violin plots, 
+            box plots only, or violin plots only.
+
+    - name: bfmessage
+      title: Bayes Factor Message
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
+
+    - name: k
+      title: Decimal Places
+      type: Integer
+      default: 2
+      min: 0
+      max: 5
+      description:
+          R: >
+            Number of decimal places for displaying statistics in the subtitle.
+
+    - name: conflevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0
+      max: 1
+      description:
+          R: >
+            Confidence level for confidence intervals.
+
+    - name: varequal
+      title: Equal Variances
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to assume equal variances across groups for parametric tests.
+
+    - name: meanplotting
+      title: Show Mean
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to highlight and display mean values.
+
+    - name: meanci
+      title: Mean Confidence Interval
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to display 95% confidence interval for the mean.
+
+    - name: notch
+      title: Notched Box Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to use notched box plots for comparing medians.
+
+    - name: samplesizeLabel
+      title: Sample Size Labels
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display sample size information for each group.
 
 ...
 
