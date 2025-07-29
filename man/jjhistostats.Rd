@@ -13,7 +13,21 @@ jjhistostats(
   changebinwidth = FALSE,
   binwidth = 1.1,
   resultssubtitle = TRUE,
-  normalcurve = FALSE
+  test.value = 0,
+  conf.level = 0.95,
+  bf.message = TRUE,
+  digits = 2,
+  xlab = "",
+  title = "",
+  subtitle = "",
+  caption = "",
+  centralitytype = "default",
+  binfill = "skyblue",
+  bincolor = "black",
+  binalpha = 0.7,
+  centralitylinecolor = "blue",
+  centralitylinewidth = 1,
+  centralitylinetype = "dashed"
 )
 }
 \arguments{
@@ -45,8 +59,44 @@ create fewer bins.}
 subtitle in the plot, including normality test results and descriptive
 statistics.}
 
-\item{normalcurve}{Whether to overlay a normal distribution curve on the
-histogram for comparison with the theoretical normal distribution.}
+\item{test.value}{Value to compare the sample against in one-sample test.
+Default is 0.}
+
+\item{conf.level}{Confidence level for confidence intervals (between 0 and
+1).}
+
+\item{bf.message}{Whether to display Bayes Factor in the subtitle when
+using Bayesian analysis.}
+
+\item{digits}{Number of decimal places for displaying statistics in the
+subtitle.}
+
+\item{xlab}{Custom label for the x-axis. If empty, variable name will be
+used.}
+
+\item{title}{Title for the plot.}
+
+\item{subtitle}{Subtitle for the plot (overrides statistical results if
+provided).}
+
+\item{caption}{Caption text to display at the bottom of the plot.}
+
+\item{centralitytype}{Type of central tendency measure to display.
+'Default' uses the appropriate measure based on the statistical test type
+selected.}
+
+\item{binfill}{Fill color for histogram bins.}
+
+\item{bincolor}{Border color for histogram bins.}
+
+\item{binalpha}{Transparency level for histogram bins (0 = fully
+transparent, 1 = opaque).}
+
+\item{centralitylinecolor}{Color of the vertical centrality line.}
+
+\item{centralitylinewidth}{Width of the vertical centrality line.}
+
+\item{centralitylinetype}{Line type for the vertical centrality line.}
 }
 \value{
 A results object containing:
@@ -69,8 +119,7 @@ data(jjhistostats_test_data)
 jjhistostats(
   data = jjhistostats_test_data,
   dep = "age_years",
-  typestatistics = "parametric",
-  normalcurve = TRUE
+  typestatistics = "parametric"
 )
 
 # Multiple histograms

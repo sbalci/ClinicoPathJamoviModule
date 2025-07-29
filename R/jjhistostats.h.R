@@ -13,7 +13,21 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             changebinwidth = FALSE,
             binwidth = 1.1,
             resultssubtitle = TRUE,
-            normalcurve = FALSE, ...) {
+            test.value = 0,
+            conf.level = 0.95,
+            bf.message = TRUE,
+            digits = 2,
+            xlab = "",
+            title = "",
+            subtitle = "",
+            caption = "",
+            centralitytype = "default",
+            binfill = "skyblue",
+            bincolor = "black",
+            binalpha = 0.7,
+            centralitylinecolor = "blue",
+            centralitylinewidth = 1,
+            centralitylinetype = "dashed", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -61,10 +75,87 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "resultssubtitle",
                 resultssubtitle,
                 default=TRUE)
-            private$..normalcurve <- jmvcore::OptionBool$new(
-                "normalcurve",
-                normalcurve,
-                default=FALSE)
+            private$..test.value <- jmvcore::OptionNumber$new(
+                "test.value",
+                test.value,
+                default=0)
+            private$..conf.level <- jmvcore::OptionNumber$new(
+                "conf.level",
+                conf.level,
+                default=0.95,
+                min=0,
+                max=1)
+            private$..bf.message <- jmvcore::OptionBool$new(
+                "bf.message",
+                bf.message,
+                default=TRUE)
+            private$..digits <- jmvcore::OptionInteger$new(
+                "digits",
+                digits,
+                default=2,
+                min=0,
+                max=5)
+            private$..xlab <- jmvcore::OptionString$new(
+                "xlab",
+                xlab,
+                default="")
+            private$..title <- jmvcore::OptionString$new(
+                "title",
+                title,
+                default="")
+            private$..subtitle <- jmvcore::OptionString$new(
+                "subtitle",
+                subtitle,
+                default="")
+            private$..caption <- jmvcore::OptionString$new(
+                "caption",
+                caption,
+                default="")
+            private$..centralitytype <- jmvcore::OptionList$new(
+                "centralitytype",
+                centralitytype,
+                options=list(
+                    "default",
+                    "parametric",
+                    "nonparametric",
+                    "robust",
+                    "bayes"),
+                default="default")
+            private$..binfill <- jmvcore::OptionString$new(
+                "binfill",
+                binfill,
+                default="skyblue")
+            private$..bincolor <- jmvcore::OptionString$new(
+                "bincolor",
+                bincolor,
+                default="black")
+            private$..binalpha <- jmvcore::OptionNumber$new(
+                "binalpha",
+                binalpha,
+                default=0.7,
+                min=0,
+                max=1)
+            private$..centralitylinecolor <- jmvcore::OptionString$new(
+                "centralitylinecolor",
+                centralitylinecolor,
+                default="blue")
+            private$..centralitylinewidth <- jmvcore::OptionNumber$new(
+                "centralitylinewidth",
+                centralitylinewidth,
+                default=1,
+                min=0.1,
+                max=5)
+            private$..centralitylinetype <- jmvcore::OptionList$new(
+                "centralitylinetype",
+                centralitylinetype,
+                options=list(
+                    "solid",
+                    "dashed",
+                    "dotted",
+                    "dotdash",
+                    "longdash",
+                    "twodash"),
+                default="dashed")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
@@ -73,7 +164,21 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..changebinwidth)
             self$.addOption(private$..binwidth)
             self$.addOption(private$..resultssubtitle)
-            self$.addOption(private$..normalcurve)
+            self$.addOption(private$..test.value)
+            self$.addOption(private$..conf.level)
+            self$.addOption(private$..bf.message)
+            self$.addOption(private$..digits)
+            self$.addOption(private$..xlab)
+            self$.addOption(private$..title)
+            self$.addOption(private$..subtitle)
+            self$.addOption(private$..caption)
+            self$.addOption(private$..centralitytype)
+            self$.addOption(private$..binfill)
+            self$.addOption(private$..bincolor)
+            self$.addOption(private$..binalpha)
+            self$.addOption(private$..centralitylinecolor)
+            self$.addOption(private$..centralitylinewidth)
+            self$.addOption(private$..centralitylinetype)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -83,7 +188,21 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         changebinwidth = function() private$..changebinwidth$value,
         binwidth = function() private$..binwidth$value,
         resultssubtitle = function() private$..resultssubtitle$value,
-        normalcurve = function() private$..normalcurve$value),
+        test.value = function() private$..test.value$value,
+        conf.level = function() private$..conf.level$value,
+        bf.message = function() private$..bf.message$value,
+        digits = function() private$..digits$value,
+        xlab = function() private$..xlab$value,
+        title = function() private$..title$value,
+        subtitle = function() private$..subtitle$value,
+        caption = function() private$..caption$value,
+        centralitytype = function() private$..centralitytype$value,
+        binfill = function() private$..binfill$value,
+        bincolor = function() private$..bincolor$value,
+        binalpha = function() private$..binalpha$value,
+        centralitylinecolor = function() private$..centralitylinecolor$value,
+        centralitylinewidth = function() private$..centralitylinewidth$value,
+        centralitylinetype = function() private$..centralitylinetype$value),
     private = list(
         ..dep = NA,
         ..grvar = NA,
@@ -92,7 +211,21 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..changebinwidth = NA,
         ..binwidth = NA,
         ..resultssubtitle = NA,
-        ..normalcurve = NA)
+        ..test.value = NA,
+        ..conf.level = NA,
+        ..bf.message = NA,
+        ..digits = NA,
+        ..xlab = NA,
+        ..title = NA,
+        ..subtitle = NA,
+        ..caption = NA,
+        ..centralitytype = NA,
+        ..binfill = NA,
+        ..bincolor = NA,
+        ..binalpha = NA,
+        ..centralitylinecolor = NA,
+        ..centralitylinewidth = NA,
+        ..centralitylinetype = NA)
 )
 
 jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -169,8 +302,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' jjhistostats(
 #'   data = jjhistostats_test_data,
 #'   dep = "age_years",
-#'   typestatistics = "parametric",
-#'   normalcurve = TRUE
+#'   typestatistics = "parametric"
 #' )
 #'
 #' # Multiple histograms
@@ -211,8 +343,30 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param resultssubtitle Whether to display statistical test results as
 #'   subtitle in the plot, including normality test results and descriptive
 #'   statistics.
-#' @param normalcurve Whether to overlay a normal distribution curve on the
-#'   histogram for comparison with the theoretical normal distribution.
+#' @param test.value Value to compare the sample against in one-sample test.
+#'   Default is 0.
+#' @param conf.level Confidence level for confidence intervals (between 0 and
+#'   1).
+#' @param bf.message Whether to display Bayes Factor in the subtitle when
+#'   using Bayesian analysis.
+#' @param digits Number of decimal places for displaying statistics in the
+#'   subtitle.
+#' @param xlab Custom label for the x-axis. If empty, variable name will be
+#'   used.
+#' @param title Title for the plot.
+#' @param subtitle Subtitle for the plot (overrides statistical results if
+#'   provided).
+#' @param caption Caption text to display at the bottom of the plot.
+#' @param centralitytype Type of central tendency measure to display.
+#'   'Default' uses the appropriate measure based on the statistical test type
+#'   selected.
+#' @param binfill Fill color for histogram bins.
+#' @param bincolor Border color for histogram bins.
+#' @param binalpha Transparency level for histogram bins (0 = fully
+#'   transparent, 1 = opaque).
+#' @param centralitylinecolor Color of the vertical centrality line.
+#' @param centralitylinewidth Width of the vertical centrality line.
+#' @param centralitylinetype Line type for the vertical centrality line.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -230,7 +384,21 @@ jjhistostats <- function(
     changebinwidth = FALSE,
     binwidth = 1.1,
     resultssubtitle = TRUE,
-    normalcurve = FALSE) {
+    test.value = 0,
+    conf.level = 0.95,
+    bf.message = TRUE,
+    digits = 2,
+    xlab = "",
+    title = "",
+    subtitle = "",
+    caption = "",
+    centralitytype = "default",
+    binfill = "skyblue",
+    bincolor = "black",
+    binalpha = 0.7,
+    centralitylinecolor = "blue",
+    centralitylinewidth = 1,
+    centralitylinetype = "dashed") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjhistostats requires jmvcore to be installed (restart may be required)")
@@ -253,7 +421,21 @@ jjhistostats <- function(
         changebinwidth = changebinwidth,
         binwidth = binwidth,
         resultssubtitle = resultssubtitle,
-        normalcurve = normalcurve)
+        test.value = test.value,
+        conf.level = conf.level,
+        bf.message = bf.message,
+        digits = digits,
+        xlab = xlab,
+        title = title,
+        subtitle = subtitle,
+        caption = caption,
+        centralitytype = centralitytype,
+        binfill = binfill,
+        bincolor = bincolor,
+        binalpha = binalpha,
+        centralitylinecolor = centralitylinecolor,
+        centralitylinewidth = centralitylinewidth,
+        centralitylinetype = centralitylinetype)
 
     analysis <- jjhistostatsClass$new(
         options = options,

@@ -62,7 +62,6 @@ children:
               - type: TextBox
                 name: k
                 format: number
-
   - type: CollapseBox
     label: Plot Display
     collapsed: true
@@ -82,7 +81,11 @@ children:
                 name: centralityk
                 format: number
                 enable: (centralityparameter:mean || centralityparameter:median)
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: centralityplotting
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -117,4 +120,8 @@ children:
                 name: ytitle
                 format: string
                 width: large
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: centralitytype

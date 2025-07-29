@@ -518,6 +518,3 @@ By combining pattern analysis, multiple imputation, and extensive diagnostics, i
 
 For more information and updates, visit the [ClinicoPath documentation](https://github.com/sbalci/ClinicoPathJamoviModule).
 
-------------------------------------------------------------------------
-
-*This vignette was generated using ClinicoPath version `r packageVersion("ClinicoPath")` on `r Sys.Date()`.*

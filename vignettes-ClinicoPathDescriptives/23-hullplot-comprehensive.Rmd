@@ -24,8 +24,13 @@ knitr::opts_chunk$set(
   message = FALSE,
   fig.width = 8,
   fig.height = 6,
-  out.width = "100%"
+  out.width = "100%",
+  eval = FALSE
 )
+```
+
+
+```{r setup 2, include=FALSE}
 
 library(ClinicoPath)
 library(dplyr)

@@ -23,7 +23,16 @@ jjbetweenstats(
   xtitle = "",
   ytitle = "",
   originaltheme = FALSE,
-  resultssubtitle = TRUE
+  resultssubtitle = TRUE,
+  plottype = "boxviolin",
+  bfmessage = TRUE,
+  k = 2,
+  conflevel = 0.95,
+  varequal = FALSE,
+  meanplotting = TRUE,
+  meanci = FALSE,
+  notch = FALSE,
+  samplesizeLabel = TRUE
 )
 }
 \arguments{
@@ -64,6 +73,29 @@ jjbetweenstats(
 \item{originaltheme}{.}
 
 \item{resultssubtitle}{.}
+
+\item{plottype}{Type of plot to display - combination of box and violin
+plots,  box plots only, or violin plots only.}
+
+\item{bfmessage}{Whether to display Bayes Factor in the subtitle when using
+Bayesian analysis.}
+
+\item{k}{Number of decimal places for displaying statistics in the
+subtitle.}
+
+\item{conflevel}{Confidence level for confidence intervals.}
+
+\item{varequal}{Whether to assume equal variances across groups for
+parametric tests.}
+
+\item{meanplotting}{Whether to highlight and display mean values.}
+
+\item{meanci}{Whether to display 95\\% confidence interval for the mean.}
+
+\item{notch}{Whether to use notched box plots for comparing medians.}
+
+\item{samplesizeLabel}{Whether to display sample size information for each
+group.}
 }
 \value{
 A results object containing:

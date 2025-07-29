@@ -14,7 +14,17 @@ jjscatterstats(
   xtitle = "",
   ytitle = "",
   originaltheme = FALSE,
-  resultssubtitle = TRUE
+  resultssubtitle = TRUE,
+  conflevel = 0.95,
+  bfmessage = TRUE,
+  k = 2,
+  marginal = TRUE,
+  xsidefill = "#009E73",
+  ysidefill = "#D55E00",
+  pointsize = 3,
+  pointalpha = 0.4,
+  smoothlinesize = 1.5,
+  smoothlinecolor = "blue"
 )
 }
 \arguments{
@@ -37,6 +47,30 @@ jjscatterstats(
 \item{originaltheme}{.}
 
 \item{resultssubtitle}{.}
+
+\item{conflevel}{Confidence level for confidence intervals (between 0 and
+1).}
+
+\item{bfmessage}{Whether to display Bayes Factor in the subtitle when using
+Bayesian analysis.}
+
+\item{k}{Number of decimal places for displaying statistics in the
+subtitle.}
+
+\item{marginal}{Whether to display marginal histogram plots on the axes
+using ggside.}
+
+\item{xsidefill}{Fill color for x-axis marginal histogram.}
+
+\item{ysidefill}{Fill color for y-axis marginal histogram.}
+
+\item{pointsize}{Size of the scatter plot points.}
+
+\item{pointalpha}{Transparency level for scatter plot points.}
+
+\item{smoothlinesize}{Width of the regression/smooth line.}
+
+\item{smoothlinecolor}{Color of the regression/smooth line.}
 }
 \value{
 A results object containing:
@@ -47,10 +81,48 @@ A results object containing:
 }
 }
 \description{
-Scatter Plot
+Wrapper Function for ggstatsplot::ggscatterstats and
+ggstatsplot::grouped_ggscatterstats to generate scatter plots
+with correlation analysis and optional marginal distributions.
 }
 \examples{
 \donttest{
-# example will be added
+# Load test data
+data("mtcars")
+
+# Basic scatter plot with correlation
+jjscatterstats(
+  data = mtcars,
+  dep = "mpg",       # x-axis
+  group = "hp",      # y-axis
+  typestatistics = "parametric",
+  conflevel = 0.95,
+  k = 2
+)
+
+# Scatter plot with marginal histograms
+jjscatterstats(
+  data = mtcars,
+  dep = "mpg",
+  group = "hp",
+  marginal = TRUE,
+  xsidefill = "#009E73",
+  ysidefill = "#D55E00",
+  pointsize = 4,
+  pointalpha = 0.6,
+  smoothlinesize = 2,
+  smoothlinecolor = "red"
+)
+
+# Grouped scatter plot by number of cylinders
+jjscatterstats(
+  data = mtcars,
+  dep = "mpg",
+  group = "hp",
+  grvar = "cyl",
+  typestatistics = "nonparametric",
+  bfmessage = FALSE,
+  resultssubtitle = TRUE
+)
 }
 }

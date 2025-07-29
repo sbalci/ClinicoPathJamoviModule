@@ -17,7 +17,14 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             xtitle = "",
             ytitle = "",
             originaltheme = FALSE,
-            resultssubtitle = TRUE, ...) {
+            resultssubtitle = TRUE,
+            testvalue = 0,
+            bfmessage = TRUE,
+            conflevel = 0.95,
+            k = 2,
+            testvalueline = FALSE,
+            centralityparameter = "mean",
+            centralityk = 2, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -99,6 +106,44 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "resultssubtitle",
                 resultssubtitle,
                 default=TRUE)
+            private$..testvalue <- jmvcore::OptionNumber$new(
+                "testvalue",
+                testvalue,
+                default=0)
+            private$..bfmessage <- jmvcore::OptionBool$new(
+                "bfmessage",
+                bfmessage,
+                default=TRUE)
+            private$..conflevel <- jmvcore::OptionNumber$new(
+                "conflevel",
+                conflevel,
+                default=0.95,
+                min=0,
+                max=1)
+            private$..k <- jmvcore::OptionInteger$new(
+                "k",
+                k,
+                default=2,
+                min=0,
+                max=5)
+            private$..testvalueline <- jmvcore::OptionBool$new(
+                "testvalueline",
+                testvalueline,
+                default=FALSE)
+            private$..centralityparameter <- jmvcore::OptionList$new(
+                "centralityparameter",
+                centralityparameter,
+                options=list(
+                    "mean",
+                    "median",
+                    "none"),
+                default="mean")
+            private$..centralityk <- jmvcore::OptionInteger$new(
+                "centralityk",
+                centralityk,
+                default=2,
+                min=0,
+                max=5)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -112,6 +157,13 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..resultssubtitle)
+            self$.addOption(private$..testvalue)
+            self$.addOption(private$..bfmessage)
+            self$.addOption(private$..conflevel)
+            self$.addOption(private$..k)
+            self$.addOption(private$..testvalueline)
+            self$.addOption(private$..centralityparameter)
+            self$.addOption(private$..centralityk)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -125,7 +177,14 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
         originaltheme = function() private$..originaltheme$value,
-        resultssubtitle = function() private$..resultssubtitle$value),
+        resultssubtitle = function() private$..resultssubtitle$value,
+        testvalue = function() private$..testvalue$value,
+        bfmessage = function() private$..bfmessage$value,
+        conflevel = function() private$..conflevel$value,
+        k = function() private$..k$value,
+        testvalueline = function() private$..testvalueline$value,
+        centralityparameter = function() private$..centralityparameter$value,
+        centralityk = function() private$..centralityk$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -138,7 +197,14 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..xtitle = NA,
         ..ytitle = NA,
         ..originaltheme = NA,
-        ..resultssubtitle = NA)
+        ..resultssubtitle = NA,
+        ..testvalue = NA,
+        ..bfmessage = NA,
+        ..conflevel = NA,
+        ..k = NA,
+        ..testvalueline = NA,
+        ..centralityparameter = NA,
+        ..centralityk = NA)
 )
 
 jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -173,7 +239,7 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`${group} - {dep} by {grvar}`",
+                title="`${dep} - {group} by {grvar}`",
                 width=800,
                 height=300,
                 renderFun=".plot2",
@@ -182,7 +248,7 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`${group} - {dep}`",
+                title="`${dep} - {group}`",
                 width=400,
                 height=300,
                 renderFun=".plot",
@@ -256,6 +322,17 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param ytitle .
 #' @param originaltheme .
 #' @param resultssubtitle .
+#' @param testvalue A number specifying the value of the null hypothesis for
+#'   one-sample tests.
+#' @param bfmessage Whether to display Bayes Factor in the subtitle when using
+#'   Bayesian analysis.
+#' @param conflevel Confidence level for confidence intervals.
+#' @param k Number of decimal places for displaying statistics in the
+#'   subtitle.
+#' @param testvalueline Whether to display a vertical line at the test value.
+#' @param centralityparameter Which measure of central tendency to display as
+#'   a vertical line.
+#' @param centralityk Number of decimal places for centrality parameter label.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -277,7 +354,14 @@ jjdotplotstats <- function(
     xtitle = "",
     ytitle = "",
     originaltheme = FALSE,
-    resultssubtitle = TRUE) {
+    resultssubtitle = TRUE,
+    testvalue = 0,
+    bfmessage = TRUE,
+    conflevel = 0.95,
+    k = 2,
+    testvalueline = FALSE,
+    centralityparameter = "mean",
+    centralityk = 2) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjdotplotstats requires jmvcore to be installed (restart may be required)")
@@ -307,7 +391,14 @@ jjdotplotstats <- function(
         xtitle = xtitle,
         ytitle = ytitle,
         originaltheme = originaltheme,
-        resultssubtitle = resultssubtitle)
+        resultssubtitle = resultssubtitle,
+        testvalue = testvalue,
+        bfmessage = bfmessage,
+        conflevel = conflevel,
+        k = k,
+        testvalueline = testvalueline,
+        centralityparameter = centralityparameter,
+        centralityk = centralityk)
 
     analysis <- jjdotplotstatsClass$new(
         options = options,

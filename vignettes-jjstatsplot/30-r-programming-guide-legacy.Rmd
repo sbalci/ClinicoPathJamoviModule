@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = TRUE, fig.width = 7, fig.height = 5)
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval = FALSE, fig.width = 7, fig.height = 5)
 ```
 
 # Using jjstatsplot Functions in R
