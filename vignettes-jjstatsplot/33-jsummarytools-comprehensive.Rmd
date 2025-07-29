@@ -6,6 +6,22 @@ author: "ClinicoPath"
 output: html_document
 ---
 
+
+
+
+```{r setup, include=FALSE}
+# Set options for better output
+options(digits = 3)
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 300,
+  out.width = "100%",
+  echo = TRUE,
+  eval = FALSE
+)
+```
+
 # Introduction
 
 The `jsummarytools` function provides comprehensive descriptive statistics using the powerful `summarytools` package. This function is designed specifically for clinical researchers, epidemiologists, and data analysts who need professional-quality descriptive statistics with publication-ready output.
@@ -21,22 +37,12 @@ The `jsummarytools` function provides comprehensive descriptive statistics using
 
 ## Installation and Setup
 
-```{r setup}
+```{r setup 2}
 # Load required libraries
 library(ClinicoPath)
 library(dplyr)
 library(knitr)
 
-# Set options for better output
-options(digits = 3)
-knitr::opts_chunk$set(
-  fig.width = 12,
-  fig.height = 8,
-    dpi = 300,
-  echo = TRUE,
-  eval = FALSE,
-  out.width = "100%"
-)
 
 # Check if summarytools is available
 if (!requireNamespace("summarytools", quietly = TRUE)) {

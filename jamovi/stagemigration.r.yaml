@@ -2430,6 +2430,2428 @@ items:
             type: number
             format: zto,pvalue
 
+    # SHAP Analysis Results Table
+    - name: shapGlobalImportance
+      title: SHAP Global Feature Importance
+      type: Table
+      visible: (performSHAPAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performSHAPAnalysis
+          - shapCovariates
+          - shapAnalysisType
+      columns:
+          - name: Feature
+            title: "Feature"
+            type: text
+          - name: Mean_SHAP_Value
+            title: "Mean |SHAP|"
+            type: number
+            format: dp:4
+          - name: Importance_Rank
+            title: "Rank"
+            type: integer
+          - name: Feature_Type
+            title: "Type"
+            type: text
+          - name: Clinical_Impact
+            title: "Clinical Impact"
+            type: text
+          - name: Direction
+            title: "Primary Effect"
+            type: text
+          - name: Interaction_Score
+            title: "Interaction Score"
+            type: number
+            format: dp:3
+          - name: Stability
+            title: "Stability"
+            type: text
+
+    # SHAP Individual Explanations Table
+    - name: shapIndividualExplanations
+      title: SHAP Individual Patient Explanations
+      type: Table
+      visible: (performSHAPAnalysis && (shapAnalysisType:individual || shapAnalysisType:comprehensive))
+      clearWith:
+          - oldStage
+          - newStage
+          - performSHAPAnalysis
+          - shapPatientProfiles
+          - shapSampleSize
+      columns:
+          - name: Patient_ID
+            title: "Patient"
+            type: text
+          - name: Profile_Type
+            title: "Profile"
+            type: text
+          - name: Predicted_Risk
+            title: "Predicted Risk"
+            type: number
+            format: dp:3
+          - name: Risk_Category
+            title: "Risk Category"
+            type: text
+          - name: Top_Feature_1
+            title: "Top Feature 1"
+            type: text
+          - name: SHAP_Value_1
+            title: "SHAP Value 1"
+            type: number
+            format: dp:4
+          - name: Top_Feature_2
+            title: "Top Feature 2"
+            type: text
+          - name: SHAP_Value_2
+            title: "SHAP Value 2"
+            type: number
+            format: dp:4
+          - name: Top_Feature_3
+            title: "Top Feature 3"
+            type: text
+          - name: SHAP_Value_3
+            title: "SHAP Value 3"
+            type: number
+            format: dp:4
+          - name: Clinical_Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # SHAP Feature Interactions Table
+    - name: shapInteractions
+      title: SHAP Feature Interactions
+      type: Table
+      visible: (performSHAPAnalysis && shapInteractionAnalysis)
+      clearWith:
+          - performSHAPAnalysis
+          - shapInteractionAnalysis
+          - shapCovariates
+      columns:
+          - name: Feature_1
+            title: "Feature 1"
+            type: text
+          - name: Feature_2
+            title: "Feature 2"
+            type: text
+          - name: Interaction_Strength
+            title: "Interaction Strength"
+            type: number
+            format: dp:4
+          - name: Interaction_Rank
+            title: "Rank"
+            type: integer
+          - name: Clinical_Relevance
+            title: "Clinical Relevance"
+            type: text
+          - name: Effect_Direction
+            title: "Effect Direction"
+            type: text
+          - name: Population_Frequency
+            title: "Frequency (%)"
+            type: number
+            format: dp:1
+
+    # SHAP Summary Statistics Table
+    - name: shapSummaryStats
+      title: SHAP Analysis Summary
+      type: Table
+      visible: (performSHAPAnalysis)
+      clearWith:
+          - performSHAPAnalysis
+          - shapAnalysisType
+          - shapSampleSize
+      columns:
+          - name: Metric
+            title: "Metric"
+            type: text
+          - name: Value
+            title: "Value"
+            type: text
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
+    # Competing Risks Analysis Results Tables
+    
+    # Fine-Gray Regression Results
+    - name: fineGrayResults
+      title: Fine-Gray Subdistribution Hazard Models
+      type: Table
+      visible: (performCompetingRisksAdvanced && (competingRisksMethod:finegray || competingRisksMethod:comprehensive))
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCompetingRisksAdvanced
+          - competingRisksCovariates
+      columns:
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: SHR
+            title: "Subdistribution HR"
+            type: number
+            format: dp:3
+          - name: SHR_Lower
+            title: "SHR Lower CI"
+            type: number
+            format: dp:3
+          - name: SHR_Upper
+            title: "SHR Upper CI"
+            type: number
+            format: dp:3
+          - name: P_Value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Cumulative_Incidence_12m
+            title: "CIF 12m (%)"
+            type: number
+            format: dp:1
+          - name: Cumulative_Incidence_24m
+            title: "CIF 24m (%)"
+            type: number
+            format: dp:1
+          - name: Cumulative_Incidence_60m
+            title: "CIF 60m (%)"
+            type: number
+            format: dp:1
+          - name: Clinical_Significance
+            title: "Clinical Significance"
+            type: text
+
+    # Cause-Specific Hazard Models Results
+    - name: causeSpecificResults
+      title: Cause-Specific Hazard Models
+      type: Table
+      visible: (performCompetingRisksAdvanced && (competingRisksMethod:causespecific || competingRisksMethod:comprehensive))
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCompetingRisksAdvanced
+      columns:
+          - name: Event_Type
+            title: "Event Type"
+            type: text
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: HR
+            title: "Hazard Ratio"
+            type: number
+            format: dp:3
+          - name: HR_Lower
+            title: "HR Lower CI"
+            type: number
+            format: dp:3
+          - name: HR_Upper
+            title: "HR Upper CI"
+            type: number
+            format: dp:3
+          - name: P_Value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Model_Fit
+            title: "Model Quality"
+            type: text
+
+    # Cumulative Incidence Function Summary
+    - name: cifSummary
+      title: Cumulative Incidence Function Summary
+      type: Table
+      visible: (performCompetingRisksAdvanced)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCompetingRisksAdvanced
+          - cifTimePoints
+      columns:
+          - name: Time_Point
+            title: "Time (months)"
+            type: integer
+          - name: Event_Type
+            title: "Event Type"
+            type: text
+          - name: Original_System_CIF
+            title: "Original CIF (%)"
+            type: number
+            format: dp:1
+          - name: Original_System_CI_Lower
+            title: "Original Lower CI"
+            type: number
+            format: dp:1
+          - name: Original_System_CI_Upper
+            title: "Original Upper CI"
+            type: number
+            format: dp:1
+          - name: New_System_CIF
+            title: "New CIF (%)"
+            type: number
+            format: dp:1
+          - name: New_System_CI_Lower
+            title: "New Lower CI"
+            type: number
+            format: dp:1
+          - name: New_System_CI_Upper
+            title: "New Upper CI"
+            type: number
+            format: dp:1
+          - name: Difference
+            title: "Difference (%)"
+            type: number
+            format: dp:1
+          - name: Gray_Test_P
+            title: "Gray Test p-value"
+            type: number
+            format: zto,pvalue
+
+    # Competing Risks C-Index Comparison
+    - name: competingRisksCIndex
+      title: Competing Risks Discrimination (C-Index)
+      type: Table
+      visible: (performCompetingRisksAdvanced && calculateCRCIndex)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCompetingRisksAdvanced
+      columns:
+          - name: Event_Type
+            title: "Event Type"
+            type: text
+          - name: Original_CIndex
+            title: "Original C-Index"
+            type: number
+            format: dp:4
+          - name: Original_CI_Lower
+            title: "Original Lower CI"
+            type: number
+            format: dp:4
+          - name: Original_CI_Upper
+            title: "Original Upper CI"
+            type: number
+            format: dp:4
+          - name: New_CIndex
+            title: "New C-Index"
+            type: number
+            format: dp:4
+          - name: New_CI_Lower
+            title: "New Lower CI"
+            type: number
+            format: dp:4
+          - name: New_CI_Upper
+            title: "New Upper CI"
+            type: number
+            format: dp:4
+          - name: Improvement
+            title: "Improvement"
+            type: number
+            format: dp:4
+          - name: P_Value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Clinical_Significance
+            title: "Clinical Significance"
+            type: text
+
+    # Competing Risks Comprehensive Summary
+    - name: competingRisksSummary
+      title: Competing Risks Analysis Summary
+      type: Table
+      visible: (performCompetingRisksAdvanced && generateCRSummary)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - performCompetingRisksAdvanced
+      columns:
+          - name: Analysis_Component
+            title: "Analysis Component"
+            type: text
+          - name: Original_System
+            title: "Original System"
+            type: text
+          - name: New_System
+            title: "New System"
+            type: text
+          - name: Comparison_Result
+            title: "Comparison"
+            type: text
+          - name: Statistical_Significance
+            title: "Statistical Significance"
+            type: text
+          - name: Clinical_Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Multi-State Models Results Tables
+
+    # Transition Intensity Matrix
+    - name: transitionIntensities
+      title: Multi-State Transition Intensities
+      type: Table
+      visible: (performMultiStateAnalysis && generateTransitionMatrix)
+      clearWith:
+          - oldStage
+          - newStage
+          - stateVariable
+          - transitionTimeVariable
+          - performMultiStateAnalysis
+          - multiStateModel
+      columns:
+          - name: From_State
+            title: "From State"
+            type: text
+          - name: To_State
+            title: "To State"
+            type: text
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Hazard_Rate
+            title: "Hazard Rate"
+            type: number
+            format: dp:4
+          - name: HR_Lower
+            title: "HR Lower CI"
+            type: number
+            format: dp:4
+          - name: HR_Upper
+            title: "HR Upper CI"
+            type: number
+            format: dp:4
+          - name: P_Value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Transition_Type
+            title: "Transition Type"
+            type: text
+          - name: Clinical_Significance
+            title: "Clinical Significance"
+            type: text
+
+    # State Transition Probabilities
+    - name: transitionProbabilities
+      title: State Transition Probabilities
+      type: Table
+      visible: (performMultiStateAnalysis && calculateTransitionProbabilities)
+      clearWith:
+          - oldStage
+          - newStage
+          - stateVariable
+          - performMultiStateAnalysis
+          - multiStateTimePoints
+      columns:
+          - name: Time_Point
+            title: "Time (months)"
+            type: integer
+          - name: From_State
+            title: "From State"
+            type: text
+          - name: To_State
+            title: "To State"
+            type: text
+          - name: Original_Probability
+            title: "Original Prob (%)"
+            type: number
+            format: dp:1
+          - name: Original_CI_Lower
+            title: "Original Lower CI"
+            type: number
+            format: dp:1
+          - name: Original_CI_Upper
+            title: "Original Upper CI"
+            type: number
+            format: dp:1
+          - name: New_Probability
+            title: "New Prob (%)"
+            type: number
+            format: dp:1
+          - name: New_CI_Lower
+            title: "New Lower CI"
+            type: number
+            format: dp:1
+          - name: New_CI_Upper
+            title: "New Upper CI"
+            type: number
+            format: dp:1
+          - name: Probability_Difference
+            title: "Difference (%)"
+            type: number
+            format: dp:1
+          - name: Statistical_Test
+            title: "Test p-value"
+            type: number
+            format: zto,pvalue
+
+    # State Occupancy Probabilities
+    - name: stateOccupancy
+      title: State Occupancy Probabilities
+      type: Table
+      visible: (performMultiStateAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - stateVariable
+          - performMultiStateAnalysis
+          - multiStateTimePoints
+      columns:
+          - name: Time_Point
+            title: "Time (months)"
+            type: integer
+          - name: State
+            title: "State"
+            type: text
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Occupancy_Probability
+            title: "Occupancy Prob (%)"
+            type: number
+            format: dp:1
+          - name: CI_Lower
+            title: "Lower CI"
+            type: number
+            format: dp:1
+          - name: CI_Upper
+            title: "Upper CI"
+            type: number
+            format: dp:1
+          - name: Prediction_Quality
+            title: "Prediction Quality"
+            type: text
+          - name: Clinical_Relevance
+            title: "Clinical Relevance"
+            type: text
+
+    # Multi-State Model Comparison
+    - name: multiStateComparison
+      title: Multi-State Model Comparison
+      type: Table
+      visible: (performMultiStateAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - stateVariable
+          - performMultiStateAnalysis
+          - multiStateModel
+      columns:
+          - name: Model_Component
+            title: "Model Component"
+            type: text
+          - name: Original_System
+            title: "Original System"
+            type: text
+          - name: New_System
+            title: "New System"
+            type: text
+          - name: Improvement_Metric
+            title: "Improvement"
+            type: text
+          - name: Statistical_Significance
+            title: "Significance"
+            type: text
+          - name: Clinical_Impact
+            title: "Clinical Impact"
+            type: text
+
+    # Multi-State Comprehensive Summary
+    - name: multiStateSummary
+      title: Multi-State Analysis Summary
+      type: Table
+      visible: (performMultiStateAnalysis && generateMSMSummary)
+      clearWith:
+          - oldStage
+          - newStage
+          - stateVariable
+          - performMultiStateAnalysis
+      columns:
+          - name: Analysis_Component
+            title: "Analysis Component"
+            type: text
+          - name: Finding
+            title: "Key Finding"
+            type: text
+          - name: Original_vs_New
+            title: "System Comparison"
+            type: text
+          - name: Statistical_Evidence
+            title: "Statistical Evidence"
+            type: text
+          - name: Clinical_Recommendation
+            title: "Clinical Recommendation"
+            type: text
+
+    # Random Survival Forests Results Tables
+
+    # Forest Variable Importance
+    - name: forestVariableImportance
+      title: Random Forest Variable Importance
+      type: Table
+      visible: (performRandomForestAnalysis && calculateVariableImportance)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - performRandomForestAnalysis
+          - forestCovariates
+          - forestImportanceType
+      columns:
+          - name: Variable
+            title: "Variable"
+            type: text
+          - name: Importance_Score
+            title: "Importance Score"
+            type: number
+            format: dp:4
+          - name: Importance_Rank
+            title: "Rank"
+            type: integer
+          - name: Permutation_Pvalue
+            title: "Permutation p-value"
+            type: number
+            format: zto,pvalue
+          - name: Importance_Type
+            title: "Importance Type"
+            type: text
+          - name: Variable_Type
+            title: "Variable Type"
+            type: text
+          - name: Clinical_Relevance
+            title: "Clinical Relevance"
+            type: text
+          - name: Staging_Contribution
+            title: "Staging Contribution"
+            type: text
+
+    # Forest Model Performance
+    - name: forestModelPerformance
+      title: Random Forest Model Performance
+      type: Table
+      visible: (performRandomForestAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - performRandomForestAnalysis
+          - forestModelType
+          - forestNTrees
+      columns:
+          - name: Model_Type
+            title: "Model Type"
+            type: text
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: C_Index
+            title: "C-Index"
+            type: number
+            format: dp:4
+          - name: C_Index_CI_Lower
+            title: "C-Index Lower CI"
+            type: number
+            format: dp:4
+          - name: C_Index_CI_Upper
+            title: "C-Index Upper CI"
+            type: number
+            format: dp:4
+          - name: OOB_Error
+            title: "OOB Error Rate"
+            type: number
+            format: dp:4
+          - name: Brier_Score
+            title: "Integrated Brier Score"
+            type: number
+            format: dp:4
+          - name: Model_Complexity
+            title: "Model Complexity"
+            type: text
+          - name: Performance_Grade
+            title: "Performance Grade"
+            type: text
+
+    # Forest Survival Predictions
+    - name: forestSurvivalPredictions
+      title: Forest Survival Predictions
+      type: Table
+      visible: (performRandomForestAnalysis && generateSurvivalPredictions)
+      clearWith:
+          - oldStage
+          - newStage
+          - performRandomForestAnalysis
+          - forestPredictionTimePoints
+      columns:
+          - name: Time_Point
+            title: "Time (months)"
+            type: integer
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Stage
+            title: "Stage"
+            type: text
+          - name: Survival_Probability
+            title: "Survival Prob (%)"
+            type: number
+            format: dp:1
+          - name: Prediction_CI_Lower
+            title: "Prediction Lower CI"
+            type: number
+            format: dp:1
+          - name: Prediction_CI_Upper
+            title: "Prediction Upper CI"
+            type: number
+            format: dp:1
+          - name: Risk_Category
+            title: "Risk Category"
+            type: text
+          - name: Prediction_Quality
+            title: "Prediction Quality"
+            type: text
+          - name: Clinical_Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Forest vs Cox Comparison
+    - name: forestCoxComparison
+      title: Random Forest vs Cox Model Comparison
+      type: Table
+      visible: (performRandomForestAnalysis && forestDiscriminationMetrics)
+      clearWith:
+          - oldStage
+          - newStage
+          - performRandomForestAnalysis
+          - forestStagingComparison
+      columns:
+          - name: Metric
+            title: "Performance Metric"
+            type: text
+          - name: Cox_Original
+            title: "Cox Original"
+            type: number
+            format: dp:4
+          - name: Cox_New
+            title: "Cox New"
+            type: number
+            format: dp:4
+          - name: Forest_Original
+            title: "Forest Original"
+            type: number
+            format: dp:4
+          - name: Forest_New
+            title: "Forest New"
+            type: number
+            format: dp:4
+          - name: Best_Method
+            title: "Best Method"
+            type: text
+          - name: Improvement
+            title: "Improvement"
+            type: number
+            format: dp:4
+          - name: Statistical_Significance
+            title: "Significance"
+            type: text
+          - name: Clinical_Impact
+            title: "Clinical Impact"
+            type: text
+
+    # Forest Staging Comparison
+    - name: forestStagingComparison
+      title: Forest-Based Staging System Comparison
+      type: Table
+      visible: (performRandomForestAnalysis && forestStagingComparison)
+      clearWith:
+          - oldStage
+          - newStage
+          - performRandomForestAnalysis
+      columns:
+          - name: Analysis_Component
+            title: "Analysis Component"
+            type: text
+          - name: Original_System
+            title: "Original System"
+            type: text
+          - name: New_System
+            title: "New System"
+            type: text
+          - name: Forest_Assessment
+            title: "Forest Assessment"
+            type: text
+          - name: Improvement_Magnitude
+            title: "Improvement"
+            type: text
+          - name: Statistical_Evidence
+            title: "Statistical Evidence"
+            type: text
+          - name: Clinical_Recommendation
+            title: "Clinical Recommendation"
+            type: text
+
+    # Forest Analysis Summary
+    - name: forestAnalysisSummary
+      title: Random Forest Analysis Summary
+      type: Table
+      visible: (performRandomForestAnalysis && generateForestSummary)
+      clearWith:
+          - oldStage
+          - newStage
+          - performRandomForestAnalysis
+      columns:
+          - name: Summary_Component
+            title: "Analysis Component"
+            type: text
+          - name: Key_Finding
+            title: "Key Finding"
+            type: text
+          - name: Statistical_Result
+            title: "Statistical Result"
+            type: text
+          - name: Clinical_Implication
+            title: "Clinical Implication"
+            type: text
+          - name: Recommendation
+            title: "Recommendation"
+            type: text
+
+    # ============================================================================
+    # Cure Models Results Tables
+    # ============================================================================
+
+    # Cure Fraction Estimates
+    - name: cureFractionEstimates
+      title: Cure Fraction Estimates by Staging System
+      type: Table
+      visible: (performCureModelAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - performCureModelAnalysis
+      columns:
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Stage_Group
+            title: "Stage Group"
+            type: text
+          - name: Sample_Size
+            title: "N"
+            type: integer
+          - name: Cure_Fraction
+            title: "Cure Fraction"
+            type: number
+            format: dp:4
+          - name: CF_Lower_CI
+            title: "95% CI Lower"
+            type: number
+            format: dp:4
+          - name: CF_Upper_CI
+            title: "95% CI Upper"
+            type: number
+            format: dp:4
+          - name: Median_Survival_Susceptible
+            title: "Median Survival (Susceptible)"
+            type: number
+            format: dp:2
+          - name: Model_Type
+            title: "Model Type"
+            type: text
+          - name: Convergence_Status
+            title: "Convergence"
+            type: text
+
+    # Cure Model Parameters
+    - name: cureModelParameters
+      title: Cure Model Parameters and Fit Statistics
+      type: Table
+      visible: (performCureModelAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - performCureModelAnalysis
+      columns:
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Model_Type
+            title: "Model Type"
+            type: text
+          - name: Distribution
+            title: "Distribution"
+            type: text
+          - name: Log_Likelihood
+            title: "Log-Likelihood"
+            type: number
+            format: dp:2
+          - name: AIC
+            title: "AIC"
+            type: number
+            format: dp:2
+          - name: BIC
+            title: "BIC"
+            type: number
+            format: dp:2
+          - name: Overall_Cure_Fraction
+            title: "Overall Cure Fraction"
+            type: number
+            format: dp:4
+          - name: Shape_Parameter
+            title: "Shape Parameter"
+            type: number
+            format: dp:4
+          - name: Scale_Parameter
+            title: "Scale Parameter"
+            type: number
+            format: dp:4
+          - name: Goodness_of_Fit_p
+            title: "GoF p-value"
+            type: number
+            format: zto,pvalue
+
+    # Cure Model Comparison
+    - name: cureModelComparison
+      title: Cure Model Staging System Comparison
+      type: Table
+      visible: (performCureModelAnalysis && cureModelComparison)
+      clearWith:
+          - oldStage
+          - newStage
+          - performCureModelAnalysis
+      columns:
+          - name: Comparison_Metric
+            title: "Comparison Metric"
+            type: text
+          - name: Original_System
+            title: "Original System"
+            type: text
+          - name: New_System
+            title: "New System"
+            type: text
+          - name: Difference
+            title: "Difference"
+            type: number
+            format: dp:4
+          - name: LR_Test_Statistic
+            title: "LR Test Statistic"
+            type: number
+            format: dp:4
+          - name: p_value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Statistical_Significance
+            title: "Statistical Significance"
+            type: text
+          - name: Clinical_Interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Stage-Specific Cure Analysis
+    - name: stageSpecificCureAnalysis
+      title: Stage-Specific Cure Patterns Analysis
+      type: Table
+      visible: (performCureModelAnalysis && cureStageSpecificAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - performCureModelAnalysis
+      columns:
+          - name: Analysis_Component
+            title: "Analysis Component"
+            type: text
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Stage_Specific_Finding
+            title: "Stage-Specific Finding"
+            type: text
+          - name: Cure_Fraction_Range
+            title: "Cure Fraction Range"
+            type: text
+          - name: Discrimination_Quality
+            title: "Discrimination Quality"
+            type: text
+          - name: Clinical_Utility
+            title: "Clinical Utility"
+            type: text
+          - name: Recommendation
+            title: "Recommendation"
+            type: text
+
+    # Cure Model Bootstrap Results
+    - name: cureModelBootstrap
+      title: Cure Model Bootstrap Validation
+      type: Table
+      visible: (performCureModelAnalysis && cureBootstrapCI)
+      clearWith:
+          - oldStage
+          - newStage
+          - performCureModelAnalysis
+      columns:
+          - name: Parameter
+            title: "Parameter"
+            type: text
+          - name: Staging_System
+            title: "Staging System"
+            type: text
+          - name: Original_Estimate
+            title: "Original Estimate"
+            type: number
+            format: dp:4
+          - name: Bootstrap_Mean
+            title: "Bootstrap Mean"
+            type: number
+            format: dp:4
+          - name: Bootstrap_SD
+            title: "Bootstrap SD"
+            type: number
+            format: dp:4
+          - name: Bootstrap_Lower_CI
+            title: "Bootstrap 95% CI Lower"
+            type: number
+            format: dp:4
+          - name: Bootstrap_Upper_CI
+            title: "Bootstrap 95% CI Upper"
+            type: number
+            format: dp:4
+          - name: Bias
+            title: "Bias"
+            type: number
+            format: dp:4
+          - name: Coverage_Probability
+            title: "Coverage"
+            type: number
+            format: dp:4
+
+    # Cure Analysis Summary
+    - name: cureAnalysisSummary
+      title: Cure Model Analysis Summary
+      type: Table
+      visible: (performCureModelAnalysis && generateCureSummary)
+      clearWith:
+          - oldStage
+          - newStage
+          - performCureModelAnalysis
+      columns:
+          - name: Analysis_Component
+            title: "Analysis Component"
+            type: text
+          - name: Key_Finding
+            title: "Key Finding"
+            type: text
+          - name: Statistical_Evidence
+            title: "Statistical Evidence"
+            type: text
+          - name: Clinical_Interpretation
+            title: "Clinical Interpretation"
+            type: text
+          - name: Recommendation
+            title: "Recommendation"
+            type: text
+
+    - name: intervalCensoringOverview
+      title: "Interval Censoring Analysis Overview"
+      type: Table
+      description: 'Summary of interval-censored data characteristics and model selection'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performIntervalCensoringAnalysis
+        - intervalCensoringLeftTime
+        - intervalCensoringRightTime
+        - intervalCensoringModel
+        - intervalCensoringDistribution
+      columns:
+        - name: Characteristic
+          title: "Characteristic"
+          type: text
+        - name: Value
+          title: "Value"
+          type: text
+        - name: Description
+          title: "Description"
+          type: text
+
+    - name: intervalCensoringNonparametric
+      title: "Non-parametric Survival Estimates (NPMLE)"
+      type: Table
+      description: 'Non-parametric maximum likelihood survival estimates for interval-censored data'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performIntervalCensoringAnalysis
+        - intervalCensoringModel
+        - intervalCensoringBootstrap
+        - intervalCensoringPredictionTime
+      columns:
+        - name: Stage
+          title: "Stage"
+          type: text
+        - name: Time_Point
+          title: "Time (months)"
+          type: number
+        - name: Survival_Probability
+          title: "Survival Probability"
+          type: number
+        - name: Lower_CI
+          title: "95% CI Lower"
+          type: number
+        - name: Upper_CI
+          title: "95% CI Upper"
+          type: number
+        - name: n_at_risk
+          title: "At Risk"
+          type: integer
+
+    - name: intervalCensoringParametric
+      title: "Parametric Interval-Censored Regression"
+      type: Table
+      description: 'Parametric survival regression results for interval-censored data'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performIntervalCensoringAnalysis
+        - intervalCensoringModel
+        - intervalCensoringDistribution
+        - intervalCensoringAdjustVariables
+      columns:
+        - name: Parameter
+          title: "Parameter"
+          type: text
+        - name: Coefficient
+          title: "Coefficient"
+          type: number
+        - name: SE
+          title: "Standard Error"
+          type: number
+        - name: Z_value
+          title: "Z-value"
+          type: number
+        - name: P_value
+          title: "P-value"
+          type: number
+        - name: Lower_CI
+          title: "95% CI Lower"
+          type: number
+        - name: Upper_CI
+          title: "95% CI Upper"
+          type: number
+
+    - name: intervalCensoringComparison
+      title: "Staging System Comparison (Interval-Censored)"
+      type: Table
+      description: 'Model comparison between staging systems accounting for interval censoring'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performIntervalCensoringAnalysis
+        - intervalCensoringCompareStages
+        - intervalCensoringModel
+      columns:
+        - name: Model
+          title: "Staging System"
+          type: text
+        - name: Log_Likelihood
+          title: "Log-Likelihood"
+          type: number
+        - name: AIC
+          title: "AIC"
+          type: number
+        - name: BIC
+          title: "BIC"
+          type: number
+        - name: LR_Test_Statistic
+          title: "LR Test"
+          type: number
+        - name: LR_P_value
+          title: "LR P-value"
+          type: number
+        - name: Preferred_Model
+          title: "Preferred"
+          type: text
+
+    - name: intervalCensoringDiagnosticsTable
+      title: "Interval Censoring Model Diagnostics"
+      type: Table
+      description: 'Diagnostic measures for interval-censored survival models'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performIntervalCensoringAnalysis
+        - intervalCensoringDiagnostics
+        - intervalCensoringModel
+      columns:
+        - name: Diagnostic
+          title: "Diagnostic Test"
+          type: text
+        - name: Statistic
+          title: "Test Statistic"
+          type: number
+        - name: P_value
+          title: "P-value"
+          type: number
+        - name: Interpretation
+          title: "Interpretation"
+          type: text
+        - name: Recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: intervalCensoringSummary
+      title: "Interval Censoring Analysis Summary"
+      type: Table
+      description: 'Clinical interpretation and recommendations for interval-censored survival analysis'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performIntervalCensoringAnalysis
+      columns:
+        - name: Finding
+          title: "Key Finding"
+          type: text
+        - name: Statistical_Evidence
+          title: "Statistical Evidence"
+          type: text
+        - name: Clinical_Interpretation
+          title: "Clinical Interpretation"
+          type: text
+        - name: Recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: informativeCensoringOverview
+      title: "Informative Censoring Analysis Overview"
+      type: Table
+      description: 'Summary of informative censoring detection analysis and data characteristics'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performInformativeCensoringAnalysis
+        - informativeCensoringTestMethod
+        - informativeCensoringAdjustmentMethod
+      columns:
+        - name: Characteristic
+          title: "Characteristic"
+          type: text
+        - name: Value
+          title: "Value"
+          type: text
+        - name: Description
+          title: "Description"
+          type: text
+
+    - name: informativeCensoringTests
+      title: "Informative Censoring Detection Tests"
+      type: Table
+      description: 'Statistical tests for detecting informative censoring patterns'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performInformativeCensoringAnalysis
+        - informativeCensoringTestMethod
+        - informativeCensoringAlpha
+      columns:
+        - name: Test_Method
+          title: "Test Method"
+          type: text
+        - name: Test_Statistic
+          title: "Test Statistic"
+          type: number
+        - name: P_value
+          title: "P-value"
+          type: number
+        - name: Critical_Value
+          title: "Critical Value"
+          type: number
+        - name: Conclusion
+          title: "Conclusion"
+          type: text
+        - name: Evidence_Strength
+          title: "Evidence Strength"
+          type: text
+
+    - name: informativeCensoringByStage
+      title: "Censoring Patterns by Stage"
+      type: Table
+      description: 'Comparison of censoring patterns across staging groups'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performInformativeCensoringAnalysis
+        - informativeCensoringCompareStages
+      columns:
+        - name: Stage
+          title: "Stage"
+          type: text
+        - name: Total_N
+          title: "Total N"
+          type: integer
+        - name: Events
+          title: "Events"
+          type: integer
+        - name: Censored
+          title: "Censored"
+          type: integer
+        - name: Censoring_Rate
+          title: "Censoring Rate (%)"
+          type: number
+        - name: Median_Censoring_Time
+          title: "Median Censoring Time"
+          type: number
+        - name: Test_Statistic
+          title: "Test Statistic"
+          type: number
+        - name: P_value
+          title: "P-value"
+          type: number
+
+    - name: informativeCensoringAdjustment
+      title: "Adjusted Survival Estimates"
+      type: Table
+      description: 'Survival estimates adjusted for informative censoring effects'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performInformativeCensoringAnalysis
+        - informativeCensoringAdjustmentMethod
+        - informativeCensoringBootstrap
+      columns:
+        - name: Stage
+          title: "Stage"
+          type: text
+        - name: Time_Point
+          title: "Time (months)"
+          type: number
+        - name: Unadjusted_Survival
+          title: "Unadjusted Survival"
+          type: number
+        - name: Adjusted_Survival
+          title: "Adjusted Survival"
+          type: number
+        - name: Bias_Estimate
+          title: "Bias Estimate"
+          type: number
+        - name: Lower_CI
+          title: "95% CI Lower"
+          type: number
+        - name: Upper_CI
+          title: "95% CI Upper"
+          type: number
+
+    - name: informativeCensoringSensitivity
+      title: "Sensitivity Analysis Results"
+      type: Table
+      description: 'Sensitivity analysis exploring range of potential bias from informative censoring'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performInformativeCensoringAnalysis
+        - informativeCensoringSensitivityRange
+        - informativeCensoringAdjustmentMethod
+      columns:
+        - name: Sensitivity_Parameter
+          title: "Sensitivity Parameter"
+          type: number
+        - name: Stage
+          title: "Stage"
+          type: text
+        - name: Time_Point
+          title: "Time (months)"
+          type: number
+        - name: Adjusted_Survival
+          title: "Adjusted Survival"
+          type: number
+        - name: Bias_Direction
+          title: "Bias Direction"
+          type: text
+        - name: Clinical_Impact
+          title: "Clinical Impact"
+          type: text
+
+    - name: informativeCensoringDiagnostics
+      title: "Informative Censoring Diagnostics"
+      type: Table
+      description: 'Diagnostic measures for informative censoring assessment'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performInformativeCensoringAnalysis
+        - informativeCensoringTestMethod
+      columns:
+        - name: Diagnostic
+          title: "Diagnostic Measure"
+          type: text
+        - name: Value
+          title: "Value"
+          type: number
+        - name: Interpretation
+          title: "Interpretation"
+          type: text
+        - name: Recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: informativeCensoringSummary
+      title: "Informative Censoring Analysis Summary"
+      type: Table
+      description: 'Summary of informative censoring findings and recommendations'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performInformativeCensoringAnalysis
+      columns:
+        - name: Finding
+          title: "Key Finding"
+          type: text
+        - name: Statistical_Evidence
+          title: "Statistical Evidence"
+          type: text
+        - name: Clinical_Interpretation
+          title: "Clinical Interpretation"
+          type: text
+        - name: Recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: concordanceProbabilityOverview
+      title: "Concordance Probability Analysis Overview"
+      type: Table
+      description: 'Summary of concordance probability analysis for staging system discrimination assessment'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performConcordanceProbabilityAnalysis
+        - concordanceProbabilityMethods
+        - concordanceProbabilityWeighting
+      columns:
+        - name: Characteristic
+          title: "Characteristic"
+          type: text
+        - name: Value
+          title: "Value"
+          type: text
+        - name: Description
+          title: "Description"
+          type: text
+
+    - name: concordanceProbabilityEstimates
+      title: "Concordance Probability Estimates"
+      type: Table
+      description: 'Concordance probability estimates using multiple methods for robust discrimination assessment'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performConcordanceProbabilityAnalysis
+        - concordanceProbabilityMethods
+        - concordanceProbabilityBootstrap
+      columns:
+        - name: Method
+          title: "Method"
+          type: text
+        - name: Staging_System
+          title: "Staging System"
+          type: text
+        - name: Concordance
+          title: "Concordance"
+          type: number
+        - name: Standard_Error
+          title: "Standard Error"
+          type: number
+        - name: Lower_CI
+          title: "95% CI Lower"
+          type: number
+        - name: Upper_CI
+          title: "95% CI Upper"
+          type: number
+        - name: Sample_Size
+          title: "Sample Size"
+          type: integer
+        - name: Events
+          title: "Events"
+          type: integer
+
+    - name: concordanceProbabilityTimeDependentComplex
+      title: "Time-Dependent Concordance Analysis"
+      type: Table
+      description: 'Time-dependent concordance probability estimates at clinically relevant time points'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performConcordanceProbabilityAnalysis
+        - concordanceProbabilityTimePoints
+        - concordanceProbabilityMethods
+      columns:
+        - name: Staging_System
+          title: "Staging System"
+          type: text
+        - name: Time_Point
+          title: "Time Point (months)"
+          type: number
+        - name: Method
+          title: "Method"
+          type: text
+        - name: Concordance
+          title: "Concordance"
+          type: number
+        - name: Lower_CI
+          title: "95% CI Lower"
+          type: number
+        - name: Upper_CI
+          title: "95% CI Upper"
+          type: number
+        - name: At_Risk
+          title: "At Risk"
+          type: integer
+        - name: Events_Period
+          title: "Events in Period"
+          type: integer
+
+    - name: concordanceProbabilityComparison
+      title: "Staging System Concordance Comparison"
+      type: Table
+      description: 'Statistical comparison of concordance probabilities between staging systems'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performConcordanceProbabilityAnalysis
+        - concordanceProbabilityCompareStages
+        - concordanceProbabilityAlpha
+      columns:
+        - name: Method
+          title: "Method"
+          type: text
+        - name: System_1
+          title: "System 1"
+          type: text
+        - name: Concordance_1
+          title: "Concordance 1"
+          type: number
+        - name: System_2
+          title: "System 2"
+          type: text
+        - name: Concordance_2
+          title: "Concordance 2"
+          type: number
+        - name: Difference
+          title: "Difference"
+          type: number
+        - name: Test_Statistic
+          title: "Test Statistic"
+          type: number
+        - name: P_value
+          title: "P-value"
+          type: number
+        - name: Interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: concordanceProbabilityRobustness
+      title: "Robustness Analysis Results"
+      type: Table
+      description: 'Robustness analysis for concordance probability estimates under different assumptions'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performConcordanceProbabilityAnalysis
+        - concordanceProbabilityRobustnessAnalysis
+      columns:
+        - name: Analysis_Type
+          title: "Analysis Type"
+          type: text
+        - name: Staging_System
+          title: "Staging System"
+          type: text
+        - name: Scenario
+          title: "Scenario"
+          type: text
+        - name: Concordance
+          title: "Concordance"
+          type: number
+        - name: Change_from_Base
+          title: "Change from Base"
+          type: number
+        - name: Robustness_Assessment
+          title: "Robustness"
+          type: text
+
+    - name: concordanceProbabilityDiagnosticsTable
+      title: "Concordance Analysis Diagnostics"
+      type: Table
+      description: 'Diagnostic measures for concordance probability analysis validation'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performConcordanceProbabilityAnalysis
+        - concordanceProbabilityDiagnostics
+      columns:
+        - name: Diagnostic
+          title: "Diagnostic Measure"
+          type: text
+        - name: Value
+          title: "Value"
+          type: number
+        - name: Interpretation
+          title: "Interpretation"
+          type: text
+        - name: Recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: concordanceProbabilitySummary
+      title: "Concordance Probability Analysis Summary"
+      type: Table
+      description: 'Summary of concordance probability findings and clinical interpretation'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performConcordanceProbabilityAnalysis
+      columns:
+        - name: Finding
+          title: "Key Finding"
+          type: text
+        - name: Statistical_Evidence
+          title: "Statistical Evidence"
+          type: text
+        - name: Clinical_Interpretation
+          title: "Clinical Interpretation"
+          type: text
+        - name: Recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: winRatioOverview
+      title: "Win Ratio Analysis Overview"
+      type: Table
+      description: 'Summary of win ratio analysis configuration and data characteristics'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performWinRatioAnalysis
+        - winRatioEndpoints
+        - winRatioMatchingStrategy
+      columns:
+        - name: Characteristic
+          title: "Characteristic"
+          type: text
+        - name: Value
+          title: "Value"
+          type: text
+        - name: Description
+          title: "Description"
+          type: text
+
+    - name: winRatioPrimaryResults
+      title: "Win Ratio Primary Results"
+      type: Table
+      description: 'Primary win ratio analysis results comparing staging systems'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performWinRatioAnalysis
+        - winRatioDeathVariable
+        - winRatioSecondaryEndpoint
+      columns:
+        - name: Comparison
+          title: "Comparison"
+          type: text
+        - name: Win_Ratio
+          title: "Win Ratio"
+          type: number
+        - name: Wins
+          title: "Wins"
+          type: integer
+        - name: Losses
+          title: "Losses"
+          type: integer
+        - name: Ties
+          title: "Ties"
+          type: integer
+        - name: Lower_CI
+          title: "95% CI Lower"
+          type: number
+        - name: Upper_CI
+          title: "95% CI Upper"
+          type: number
+        - name: P_value
+          title: "P-value"
+          type: number
+        - name: Interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: winRatioEndpointContributions
+      title: "Endpoint-Specific Contributions"
+      type: Table
+      description: 'Contribution of each endpoint to the overall win ratio'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performWinRatioAnalysis
+        - winRatioEndpoints
+      columns:
+        - name: Endpoint
+          title: "Endpoint"
+          type: text
+        - name: Staging_System
+          title: "Staging System"
+          type: text
+        - name: Wins
+          title: "Wins"
+          type: integer
+        - name: Losses
+          title: "Losses"
+          type: integer
+        - name: Ties
+          title: "Ties"
+          type: integer
+        - name: Win_Proportion
+          title: "Win Proportion"
+          type: number
+        - name: Contribution_Percent
+          title: "Contribution (%)"
+          type: number
+        - name: Cumulative_Percent
+          title: "Cumulative (%)"
+          type: number
+
+    - name: winRatioStageSpecific
+      title: "Stage-Specific Win Ratios"
+      type: Table
+      description: 'Win ratio analysis stratified by staging categories'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performWinRatioAnalysis
+        - winRatioMatchingStrategy
+      columns:
+        - name: Stage
+          title: "Stage"
+          type: text
+        - name: N_Pairs
+          title: "Number of Pairs"
+          type: integer
+        - name: Win_Ratio
+          title: "Win Ratio"
+          type: number
+        - name: Lower_CI
+          title: "95% CI Lower"
+          type: number
+        - name: Upper_CI
+          title: "95% CI Upper"
+          type: number
+        - name: P_value
+          title: "P-value"
+          type: number
+        - name: Weight
+          title: "Weight"
+          type: number
+
+    - name: winRatioSensitivityResults
+      title: "Win Ratio Sensitivity Analysis"
+      type: Table
+      description: 'Sensitivity analysis results for win ratio estimates'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performWinRatioAnalysis
+        - winRatioSensitivityAnalysis
+      columns:
+        - name: Analysis_Type
+          title: "Analysis Type"
+          type: text
+        - name: Scenario
+          title: "Scenario"
+          type: text
+        - name: Win_Ratio
+          title: "Win Ratio"
+          type: number
+        - name: Change_from_Primary
+          title: "Change from Primary"
+          type: number
+        - name: Lower_CI
+          title: "95% CI Lower"
+          type: number
+        - name: Upper_CI
+          title: "95% CI Upper"
+          type: number
+        - name: Robustness
+          title: "Robustness"
+          type: text
+
+    - name: winRatioGeneralizedPairwiseResults
+      title: "Generalized Pairwise Comparison Results"
+      type: Table
+      description: 'Extended metrics from generalized pairwise comparison framework'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performWinRatioAnalysis
+        - winRatioGeneralizedPairwise
+      columns:
+        - name: Metric
+          title: "Metric"
+          type: text
+        - name: Value
+          title: "Value"
+          type: number
+        - name: Lower_CI
+          title: "95% CI Lower"
+          type: number
+        - name: Upper_CI
+          title: "95% CI Upper"
+          type: number
+        - name: P_value
+          title: "P-value"
+          type: number
+        - name: Interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: winRatioSummary
+      title: "Win Ratio Analysis Summary"
+      type: Table
+      description: 'Summary of win ratio findings and clinical interpretation'
+      clearWith:
+        - vars
+        - explanatory
+        - outcome
+        - performWinRatioAnalysis
+      columns:
+        - name: Finding
+          title: "Key Finding"
+          type: text
+        - name: Statistical_Evidence
+          title: "Statistical Evidence"
+          type: text
+        - name: Clinical_Interpretation
+          title: "Clinical Interpretation"
+          type: text
+        - name: Recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: frailtyModelsOverview
+      title: Frailty Models Analysis Overview
+      type: Table
+      description: 'Overview of frailty models analysis for clustered survival data'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+        - frailtyClusterVariable
+      columns:
+        - name: Analysis
+          title: "Analysis Component"
+          type: text
+        - name: Status
+          title: "Analysis Status"
+          type: text
+        - name: ClusterCount
+          title: "Number of Clusters"
+          type: integer
+        - name: AverageClusterSize
+          title: "Average Cluster Size"
+          type: number
+          format: dp:1
+        - name: TotalObservations
+          title: "Total Observations"
+          type: integer
+        - name: FrailtyVariance
+          title: "Frailty Variance"
+          type: number
+          format: dp:4
+        - name: ICC
+          title: "Intracluster Correlation"
+          type: number
+          format: dp:3
+        - name: Interpretation
+          title: "Clinical Interpretation"
+          type: text
+
+    - name: frailtyModelsComparison
+      title: Frailty Models - Staging System Comparison
+      type: Table
+      description: 'Comparison of staging systems using frailty models with clustering adjustments'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+        - frailtyClusterVariable
+      columns:
+        - name: StagingSystem
+          title: "Staging System"
+          type: text
+        - name: Model
+          title: "Model Type"
+          type: text
+        - name: LogLikelihood
+          title: "Log-Likelihood"
+          type: number
+          format: dp:2
+        - name: AIC
+          title: "AIC"
+          type: number
+          format: dp:1
+        - name: BIC
+          title: "BIC"
+          type: number
+          format: dp:1
+        - name: FrailtyVariance
+          title: "Frailty Variance"
+          type: number
+          format: dp:4
+        - name: HeterogeneityTest
+          title: "Heterogeneity Test P-value"
+          type: text
+        - name: ConcordanceIndex
+          title: "C-index (Cluster-Adjusted)"
+          type: number
+          format: dp:3
+        - name: Improvement
+          title: "Improvement"
+          type: text
+
+    - name: frailtyModelsVarianceComponents
+      title: Frailty Models - Variance Components Analysis
+      type: Table
+      description: 'Detailed variance components analysis for frailty models'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+        - frailtyClusterVariable
+      columns:
+        - name: Component
+          title: "Variance Component"
+          type: text
+        - name: OldStaging
+          title: "Original Staging"
+          type: number
+          format: dp:4
+        - name: NewStaging
+          title: "New Staging"
+          type: number
+          format: dp:4
+        - name: Difference
+          title: "Difference"
+          type: number
+          format: dp:4
+        - name: PercentChange
+          title: "% Change"
+          type: number
+          format: dp:1
+        - name: Significance
+          title: "Statistical Significance"
+          type: text
+        - name: ClinicalRelevance
+          title: "Clinical Relevance"
+          type: text
+
+    - name: frailtyModelsClusterSpecific
+      title: Frailty Models - Cluster-Specific Analysis
+      type: Table
+      description: 'Cluster-specific survival analysis comparing staging systems within institutions'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+        - frailtyClusterVariable
+      columns:
+        - name: Cluster
+          title: "Cluster/Institution"
+          type: text
+        - name: ClusterSize
+          title: "Sample Size"
+          type: integer
+        - name: EventRate
+          title: "Event Rate (%)"
+          type: number
+          format: dp:1
+        - name: OldStaging_Cindex
+          title: "Original C-index"
+          type: number
+          format: dp:3
+        - name: NewStaging_Cindex
+          title: "New C-index"
+          type: number
+          format: dp:3
+        - name: CindexImprovement
+          title: "C-index Improvement"
+          type: number
+          format: dp:3
+        - name: PValue
+          title: "P-value"
+          type: text
+        - name: ClusterEffect
+          title: "Cluster Effect Size"
+          type: number
+          format: dp:3
+        - name: Consistency
+          title: "Consistency Rating"
+          type: text
+
+    - name: frailtyModelsBootstrap
+      title: Frailty Models - Bootstrap Validation Results
+      type: Table
+      description: 'Bootstrap validation results for frailty model parameters and variance components'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+        - frailtyClusterVariable
+      columns:
+        - name: Parameter
+          title: "Parameter"
+          type: text
+        - name: OriginalEstimate
+          title: "Original Estimate"
+          type: number
+          format: dp:4
+        - name: BootstrapMean
+          title: "Bootstrap Mean"
+          type: number
+          format: dp:4
+        - name: BootstrapSE
+          title: "Bootstrap SE"
+          type: number
+          format: dp:4
+        - name: LowerCI
+          title: "95% CI Lower"
+          type: number
+          format: dp:4
+        - name: UpperCI
+          title: "95% CI Upper"
+          type: number
+          format: dp:4
+        - name: BiasEstimate
+          title: "Bias Estimate"
+          type: number
+          format: dp:4
+        - name: CoverageRate
+          title: "Coverage Rate (%)"
+          type: number
+          format: dp:1
+        - name: Stability
+          title: "Parameter Stability"
+          type: text
+
+    - name: frailtyModelsDiagnostics
+      title: Frailty Models - Model Diagnostics
+      type: Table
+      description: 'Comprehensive model diagnostics for frailty models including residual analysis and goodness-of-fit'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+        - frailtyClusterVariable
+      columns:
+        - name: Diagnostic
+          title: "Diagnostic Test"
+          type: text
+        - name: OldStaging
+          title: "Original Staging"
+          type: text
+        - name: NewStaging
+          title: "New Staging"
+          type: text
+        - name: TestStatistic
+          title: "Test Statistic"
+          type: number
+          format: dp:3
+        - name: PValue
+          title: "P-value"
+          type: text
+        - name: Interpretation
+          title: "Interpretation"
+          type: text
+        - name: Recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: frailtyModelsSummary
+      title: Frailty Models - Comprehensive Summary
+      type: Table
+      description: 'Executive summary of frailty models analysis with evidence-based recommendations'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+        - frailtyClusterVariable
+      columns:
+        - name: Finding
+          title: "Key Finding"
+          type: text
+        - name: OriginalStaging
+          title: "Original Staging"
+          type: text
+        - name: NewStaging
+          title: "New Staging"
+          type: text
+        - name: StatisticalEvidence
+          title: "Statistical Evidence"
+          type: text
+        - name: ClinicalSignificance
+          title: "Clinical Significance"
+          type: text
+        - name: ClusteringImpact
+          title: "Clustering Impact"
+          type: text
+        - name: Recommendation
+          title: "Recommendation"
+          type: text
+
+    - name: clinicalUtilityOverview
+      title: Clinical Utility Index Analysis Overview
+      type: Table
+      description: 'Overview of clinical utility index analysis combining discrimination with clinical decision-making value'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+      columns:
+        - name: Analysis
+          title: "Analysis Component"
+          type: text
+        - name: Status
+          title: "Analysis Status"
+          type: text
+        - name: TimePoint
+          title: "Time Point (months)"
+          type: integer
+        - name: Prevalence
+          title: "Disease Prevalence"
+          type: number
+          format: dp:3
+        - name: ThresholdRange
+          title: "Risk Threshold Range"
+          type: text
+        - name: TreatmentEffect
+          title: "Treatment Effect (HR)"
+          type: number
+          format: dp:2
+        - name: CostPerIntervention
+          title: "Cost Per Intervention ($)"
+          type: integer
+        - name: Interpretation
+          title: "Clinical Interpretation"
+          type: text
+
+    - name: clinicalUtilityComparison
+      title: Clinical Utility Index - Staging System Comparison
+      type: Table
+      description: 'Comparison of clinical utility between staging systems across different risk thresholds'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+      columns:
+        - name: StagingSystem
+          title: "Staging System"
+          type: text
+        - name: RiskThreshold
+          title: "Risk Threshold (%)"
+          type: number
+          format: dp:1
+        - name: Sensitivity
+          title: "Sensitivity"
+          type: number
+          format: dp:3
+        - name: Specificity
+          title: "Specificity"
+          type: number
+          format: dp:3
+        - name: PPV
+          title: "Positive Predictive Value"
+          type: number
+          format: dp:3
+        - name: NPV
+          title: "Negative Predictive Value"
+          type: number
+          format: dp:3
+        - name: NetBenefit
+          title: "Net Benefit"
+          type: number
+          format: dp:4
+        - name: ClinicalUtilityIndex
+          title: "Clinical Utility Index"
+          type: number
+          format: dp:3
+        - name: Interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: clinicalUtilityNNT
+      title: Clinical Utility Index - Number Needed to Treat Analysis
+      type: Table
+      description: 'Number Needed to Treat (NNT) and Number Needed to Harm (NNH) analysis for staging-guided interventions'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+      columns:
+        - name: StagingSystem
+          title: "Staging System"
+          type: text
+        - name: RiskThreshold
+          title: "Risk Threshold (%)"
+          type: number
+          format: dp:1
+        - name: NNT
+          title: "Number Needed to Treat"
+          type: number
+          format: dp:1
+        - name: NNH
+          title: "Number Needed to Harm"
+          type: number
+          format: dp:1
+        - name: NNT_LowerCI
+          title: "NNT 95% CI Lower"
+          type: number
+          format: dp:1
+        - name: NNT_UpperCI
+          title: "NNT 95% CI Upper"
+          type: number
+          format: dp:1
+        - name: TreatmentBenefit
+          title: "Treatment Benefit (%)"
+          type: number
+          format: dp:2
+        - name: CostPerQALY
+          title: "Cost Per QALY ($)"
+          type: integer
+        - name: CostEffectiveness
+          title: "Cost-Effectiveness"
+          type: text
+        - name: ClinicalRecommendation
+          title: "Clinical Recommendation"
+          type: text
+
+    - name: clinicalUtilityNetBenefit
+      title: Clinical Utility Index - Net Benefit Analysis
+      type: Table
+      description: 'Net benefit analysis across risk thresholds with comparative utility assessment'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+      columns:
+        - name: RiskThreshold
+          title: "Risk Threshold (%)"
+          type: number
+          format: dp:1
+        - name: OldStaging_NetBenefit
+          title: "Original Net Benefit"
+          type: number
+          format: dp:4
+        - name: NewStaging_NetBenefit
+          title: "New Net Benefit"
+          type: number
+          format: dp:4
+        - name: NetBenefitDifference
+          title: "Net Benefit Difference"
+          type: number
+          format: dp:4
+        - name: PercentImprovement
+          title: "% Improvement"
+          type: number
+          format: dp:1
+        - name: TreatAll_NetBenefit
+          title: "Treat All Net Benefit"
+          type: number
+          format: dp:4
+        - name: TreatNone_NetBenefit
+          title: "Treat None Net Benefit"
+          type: number
+          format: dp:4
+        - name: OptimalStrategy
+          title: "Optimal Strategy"
+          type: text
+        - name: ClinicalSignificance
+          title: "Clinical Significance"
+          type: text
+
+    - name: clinicalUtilityTimeVarying
+      title: Clinical Utility Index - Time-Varying Analysis
+      type: Table
+      description: 'Time-varying clinical utility analysis showing how staging system value changes over time'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+      columns:
+        - name: TimePoint
+          title: "Time Point (months)"
+          type: integer
+        - name: StagingSystem
+          title: "Staging System"
+          type: text
+        - name: Prevalence
+          title: "Event Rate at Time"
+          type: number
+          format: dp:3
+        - name: OptimalThreshold
+          title: "Optimal Threshold (%)"
+          type: number
+          format: dp:1
+        - name: MaxNetBenefit
+          title: "Maximum Net Benefit"
+          type: number
+          format: dp:4
+        - name: ClinicalUtilityIndex
+          title: "Clinical Utility Index"
+          type: number
+          format: dp:3
+        - name: NNT_Optimal
+          title: "NNT at Optimal Threshold"
+          type: number
+          format: dp:1
+        - name: UtilityTrend
+          title: "Utility Trend"
+          type: text
+        - name: DecisionTiming
+          title: "Decision Timing Recommendation"
+          type: text
+
+    - name: clinicalUtilityBootstrap
+      title: Clinical Utility Index - Bootstrap Validation Results
+      type: Table
+      description: 'Bootstrap validation results for clinical utility metrics with confidence intervals'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+      columns:
+        - name: Metric
+          title: "Clinical Utility Metric"
+          type: text
+        - name: StagingSystem
+          title: "Staging System"
+          type: text
+        - name: OriginalEstimate
+          title: "Original Estimate"
+          type: number
+          format: dp:4
+        - name: BootstrapMean
+          title: "Bootstrap Mean"
+          type: number
+          format: dp:4
+        - name: BootstrapSE
+          title: "Bootstrap SE"
+          type: number
+          format: dp:4
+        - name: LowerCI
+          title: "95% CI Lower"
+          type: number
+          format: dp:4
+        - name: UpperCI
+          title: "95% CI Upper"
+          type: number
+          format: dp:4
+        - name: BiasEstimate
+          title: "Bias Estimate"
+          type: number
+          format: dp:4
+        - name: Stability
+          title: "Metric Stability"
+          type: text
+
+    - name: clinicalUtilitySummary
+      title: Clinical Utility Index - Comprehensive Summary
+      type: Table
+      description: 'Executive summary of clinical utility analysis with evidence-based recommendations'
+      clearWith:
+        - timeVar
+        - eventVar
+        - oldStage
+        - newStage
+      columns:
+        - name: Finding
+          title: "Key Finding"
+          type: text
+        - name: OriginalStaging
+          title: "Original Staging"
+          type: text
+        - name: NewStaging
+          title: "New Staging"
+          type: text
+        - name: ClinicalEvidence
+          title: "Clinical Evidence"
+          type: text
+        - name: UtilityImprovement
+          title: "Utility Improvement"
+          type: text
+        - name: CostEffectiveness
+          title: "Cost-Effectiveness"
+          type: text
+        - name: ClinicalRecommendation
+          title: "Clinical Recommendation"
+          type: text
+
 refs:
     - harrell2015
     - pencina2008

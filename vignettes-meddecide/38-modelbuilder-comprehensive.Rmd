@@ -9,7 +9,8 @@ editor: visual
 
 ## Overview
 
-The `modelbuilder` function in ClinicoPath provides comprehensive clinical prediction model development with advanced validation and seamless integration with Decision Curve Analysis. This function is specifically designed for medical research applications where robust prediction models are essential for clinical decision-making.
+The `modelbuilder` function in ClinicoPath provides comprehensive clinical prediction model development with advanced validation and seamless integration with Decision Curve Analysis.
+This function is specifically designed for medical research applications where robust prediction models are essential for clinical decision-making.
 
 ### Key Features
 
@@ -48,39 +49,43 @@ library(mice)
 The modelbuilder function supports four types of prediction models:
 
 #### 1. Basic Clinical Models
-- **Purpose**: Foundation models using core demographic and primary risk factors
-- **Variables**: Age, sex, primary risk factors (diabetes, hypertension)
-- **Use Case**: Initial risk assessment, screening tools
-- **Advantages**: Simple, widely applicable, easy to implement
+
+-   **Purpose**: Foundation models using core demographic and primary risk factors
+-   **Variables**: Age, sex, primary risk factors (diabetes, hypertension)
+-   **Use Case**: Initial risk assessment, screening tools
+-   **Advantages**: Simple, widely applicable, easy to implement
 
 #### 2. Enhanced Clinical Models
-- **Purpose**: Extended models with additional clinical variables
-- **Variables**: Basic predictors plus smoking, cholesterol, BMI, blood pressure
-- **Use Case**: Comprehensive risk assessment, clinical guidelines
-- **Advantages**: Better discrimination, clinical relevance
+
+-   **Purpose**: Extended models with additional clinical variables
+-   **Variables**: Basic predictors plus smoking, cholesterol, BMI, blood pressure
+-   **Use Case**: Comprehensive risk assessment, clinical guidelines
+-   **Advantages**: Better discrimination, clinical relevance
 
 #### 3. Biomarker Models
-- **Purpose**: Advanced models incorporating laboratory values
-- **Variables**: Clinical predictors plus biomarkers (troponin, creatinine)
-- **Use Case**: Precision medicine, specialized care
-- **Advantages**: Highest accuracy, novel biomarker validation
+
+-   **Purpose**: Advanced models incorporating laboratory values
+-   **Variables**: Clinical predictors plus biomarkers (troponin, creatinine)
+-   **Use Case**: Precision medicine, specialized care
+-   **Advantages**: Highest accuracy, novel biomarker validation
 
 #### 4. Custom Models
-- **Purpose**: User-defined variable combinations
-- **Variables**: Any combination of available predictors
-- **Use Case**: Research applications, hypothesis testing
-- **Advantages**: Flexible, tailored to specific needs
+
+-   **Purpose**: User-defined variable combinations
+-   **Variables**: Any combination of available predictors
+-   **Use Case**: Research applications, hypothesis testing
+-   **Advantages**: Flexible, tailored to specific needs
 
 ### Model Development Process
 
 The modelbuilder follows established clinical prediction modeling guidelines:
 
-1. **Data Preparation**: Validation, missing data handling, variable transformation
-2. **Model Fitting**: Logistic regression with convergence monitoring
-3. **Variable Selection**: Stepwise selection with AIC/BIC criteria
-4. **Performance Assessment**: Discrimination, calibration, clinical utility
-5. **Validation**: Cross-validation, bootstrap validation, external validation
-6. **Clinical Implementation**: Risk score generation, DCA integration
+1.  **Data Preparation**: Validation, missing data handling, variable transformation
+2.  **Model Fitting**: Logistic regression with convergence monitoring
+3.  **Variable Selection**: Stepwise selection with AIC/BIC criteria
+4.  **Performance Assessment**: Discrimination, calibration, clinical utility
+5.  **Validation**: Cross-validation, bootstrap validation, external validation
+6.  **Clinical Implementation**: Risk score generation, DCA integration
 
 ## Basic Usage
 
@@ -308,11 +313,7 @@ cv_risk_model <- modelbuilder(
 )
 ```
 
-**Clinical Interpretation:**
-- Basic model provides foundation risk assessment
-- Enhanced model adds lifestyle and laboratory factors
-- Biomarker model incorporates cardiac-specific markers
-- Model comparison guides clinical implementation
+**Clinical Interpretation:** - Basic model provides foundation risk assessment - Enhanced model adds lifestyle and laboratory factors - Biomarker model incorporates cardiac-specific markers - Model comparison guides clinical implementation
 
 ### Application 2: Biomarker Validation Study
 
@@ -416,27 +417,16 @@ multicenter_model <- modelbuilder(
 
 ### Model Performance Metrics
 
-**Discrimination Metrics:**
-- **AUC (Area Under the Curve)**: Measures model's ability to distinguish between outcomes
-  - AUC > 0.8: Excellent discrimination
-  - AUC 0.7-0.8: Good discrimination
-  - AUC 0.6-0.7: Fair discrimination
-  - AUC < 0.6: Poor discrimination
+**Discrimination Metrics:** - **AUC (Area Under the Curve)**: Measures model's ability to distinguish between outcomes - AUC \> 0.8: Excellent discrimination - AUC 0.7-0.8: Good discrimination - AUC 0.6-0.7: Fair discrimination - AUC \< 0.6: Poor discrimination
 
-**Calibration Metrics:**
-- **Calibration Slope**: Measures agreement between predicted and observed probabilities
-  - Slope = 1.0: Perfect calibration
-  - Slope < 1.0: Overfitting (predictions too extreme)
-  - Slope > 1.0: Underfitting (predictions too conservative)
+**Calibration Metrics:** - **Calibration Slope**: Measures agreement between predicted and observed probabilities - Slope = 1.0: Perfect calibration - Slope \< 1.0: Overfitting (predictions too extreme) - Slope \> 1.0: Underfitting (predictions too conservative)
 
-- **Calibration Intercept**: Measures systematic over- or under-prediction
-  - Intercept = 0: No systematic bias
-  - Intercept > 0: Systematic under-prediction
-  - Intercept < 0: Systematic over-prediction
+-   **Calibration Intercept**: Measures systematic over- or under-prediction
+    -   Intercept = 0: No systematic bias
+    -   Intercept \> 0: Systematic under-prediction
+    -   Intercept \< 0: Systematic over-prediction
 
-**Overall Performance:**
-- **Brier Score**: Measures overall prediction accuracy (lower is better)
-- **Hosmer-Lemeshow Test**: Tests goodness of fit (p > 0.05 indicates good fit)
+**Overall Performance:** - **Brier Score**: Measures overall prediction accuracy (lower is better) - **Hosmer-Lemeshow Test**: Tests goodness of fit (p \> 0.05 indicates good fit)
 
 ### Model Comparison
 
@@ -467,26 +457,13 @@ comparison_result <- modelbuilder(
 )
 ```
 
-**Interpretation Guidelines:**
-- Higher AUC indicates better discrimination
-- Calibration slope closer to 1.0 indicates better calibration
-- Lower Brier score indicates better overall performance
-- Positive NRI indicates net improvement in reclassification
-- Positive IDI indicates improvement in discrimination
+**Interpretation Guidelines:** - Higher AUC indicates better discrimination - Calibration slope closer to 1.0 indicates better calibration - Lower Brier score indicates better overall performance - Positive NRI indicates net improvement in reclassification - Positive IDI indicates improvement in discrimination
 
 ### Cross-Validation Results
 
-**Cross-Validation Metrics:**
-- **CV AUC**: Average AUC across folds
-- **CV AUC (SD)**: Standard deviation of AUC across folds
-- **Optimism**: Difference between training and CV performance
-- **Optimism-Corrected AUC**: Training AUC minus optimism
+**Cross-Validation Metrics:** - **CV AUC**: Average AUC across folds - **CV AUC (SD)**: Standard deviation of AUC across folds - **Optimism**: Difference between training and CV performance - **Optimism-Corrected AUC**: Training AUC minus optimism
 
-**Interpretation:**
-- CV AUC provides unbiased estimate of future performance
-- Small SD indicates stable performance across folds
-- Large optimism indicates overfitting
-- Optimism-corrected estimates are more realistic
+**Interpretation:** - CV AUC provides unbiased estimate of future performance - Small SD indicates stable performance across folds - Large optimism indicates overfitting - Optimism-corrected estimates are more realistic
 
 ## Best Practices
 
@@ -610,20 +587,11 @@ risk_score_model <- modelbuilder(
 
 ### Risk Score Implementation
 
-**Framingham-Style Points:**
-- Age-based scaling
-- Integer point assignments
-- Clinically interpretable ranges
+**Framingham-Style Points:** - Age-based scaling - Integer point assignments - Clinically interpretable ranges
 
-**Simple Integer Weights:**
-- Coefficient-based scaling
-- Easy calculation
-- Suitable for electronic systems
+**Simple Integer Weights:** - Coefficient-based scaling - Easy calculation - Suitable for electronic systems
 
-**Risk Decile Scoring:**
-- Percentile-based categories
-- Population-specific ranges
-- Suitable for quality metrics
+**Risk Decile Scoring:** - Percentile-based categories - Population-specific ranges - Suitable for quality metrics
 
 ### Clinical Risk Score Example
 
@@ -693,6 +661,7 @@ dca_models <- modelbuilder(
 **Problem:** Model fitting fails or produces warnings
 
 **Solutions:**
+
 ```{r convergence_fix, eval=FALSE}
 # Increase maximum iterations
 result <- modelbuilder(
@@ -714,6 +683,7 @@ print(separation_check)
 **Problem:** One predictor perfectly predicts outcome
 
 **Solutions:**
+
 ```{r separation_fix, eval=FALSE}
 # The enhanced modelbuilder automatically detects and warns about separation
 # Remove or combine categories of problematic variables
@@ -725,6 +695,7 @@ print(separation_check)
 **Problem:** Too few events for stable modeling
 
 **Solutions:**
+
 ```{r low_events_fix, eval=FALSE}
 # Check events per variable
 n_events <- sum(clinical_data$outcome == "Yes")
@@ -745,6 +716,7 @@ if (epv < 10) {
 **Problem:** Substantial missing data in key variables
 
 **Solutions:**
+
 ```{r missing_fix, eval=FALSE}
 # Use multiple imputation
 result <- modelbuilder(
@@ -774,28 +746,25 @@ result <- modelbuilder(
 
 When reporting prediction model results:
 
-1. **Model Development:**
-   - Sample size and event rate
-   - Variable selection method
-   - Missing data handling
-   - Model fitting procedure
-
-2. **Performance Metrics:**
-   - Discrimination (AUC with 95% CI)
-   - Calibration (slope and intercept)
-   - Overall performance (Brier score)
-   - Classification metrics at optimal threshold
-
-3. **Validation Results:**
-   - Cross-validation performance
-   - Bootstrap validation (if performed)
-   - Optimism-corrected estimates
-   - External validation (if available)
-
-4. **Clinical Utility:**
-   - Decision curve analysis results
-   - Net benefit across thresholds
-   - Clinical impact assessment
+1.  **Model Development:**
+    -   Sample size and event rate
+    -   Variable selection method
+    -   Missing data handling
+    -   Model fitting procedure
+2.  **Performance Metrics:**
+    -   Discrimination (AUC with 95% CI)
+    -   Calibration (slope and intercept)
+    -   Overall performance (Brier score)
+    -   Classification metrics at optimal threshold
+3.  **Validation Results:**
+    -   Cross-validation performance
+    -   Bootstrap validation (if performed)
+    -   Optimism-corrected estimates
+    -   External validation (if available)
+4.  **Clinical Utility:**
+    -   Decision curve analysis results
+    -   Net benefit across thresholds
+    -   Clinical impact assessment
 
 ### Example Report Template
 
@@ -825,8 +794,7 @@ report_model <- modelbuilder(
 )
 ```
 
-**Sample Report Text:**
-"We developed a clinical prediction model for cardiovascular events using logistic regression. The model included age, sex, diabetes, and hypertension as predictors. The dataset was split into training (70%, n=420) and validation (30%, n=180) sets. The model demonstrated good discrimination (AUC 0.74, 95% CI 0.69-0.79) and adequate calibration (slope 0.96, intercept 0.03). Five-fold cross-validation yielded an optimism-corrected AUC of 0.72. Decision curve analysis showed clinical utility across the 10-30% threshold range."
+**Sample Report Text:** "We developed a clinical prediction model for cardiovascular events using logistic regression. The model included age, sex, diabetes, and hypertension as predictors. The dataset was split into training (70%, n=420) and validation (30%, n=180) sets. The model demonstrated good discrimination (AUC 0.74, 95% CI 0.69-0.79) and adequate calibration (slope 0.96, intercept 0.03). Five-fold cross-validation yielded an optimism-corrected AUC of 0.72. Decision curve analysis showed clinical utility across the 10-30% threshold range."
 
 ## Advanced Topics
 
@@ -909,14 +877,14 @@ secondary_outcome <- modelbuilder(
 
 ### Model Validation Checklist
 
-- [ ] **Sample Size**: Adequate events per variable (EPV ≥ 10)
-- [ ] **Data Quality**: Missing data patterns assessed and handled
-- [ ] **Variable Selection**: Clinically relevant predictors included
-- [ ] **Model Fitting**: Convergence achieved, no separation issues
-- [ ] **Performance**: Discrimination and calibration adequate
-- [ ] **Validation**: Cross-validation or bootstrap performed
-- [ ] **Clinical Utility**: Decision curve analysis completed
-- [ ] **Reporting**: Transparent methodology and results
+-   [ ] **Sample Size**: Adequate events per variable (EPV ≥ 10)
+-   [ ] **Data Quality**: Missing data patterns assessed and handled
+-   [ ] **Variable Selection**: Clinically relevant predictors included
+-   [ ] **Model Fitting**: Convergence achieved, no separation issues
+-   [ ] **Performance**: Discrimination and calibration adequate
+-   [ ] **Validation**: Cross-validation or bootstrap performed
+-   [ ] **Clinical Utility**: Decision curve analysis completed
+-   [ ] **Reporting**: Transparent methodology and results
 
 ### Validation Steps
 
@@ -969,30 +937,31 @@ utility_check <- modelbuilder(
 
 ## Conclusion
 
-The `modelbuilder` function provides a comprehensive toolkit for clinical prediction model development. By combining robust statistical methods, advanced validation techniques, and seamless integration with decision analysis, it enables researchers to:
+The `modelbuilder` function provides a comprehensive toolkit for clinical prediction model development.
+By combining robust statistical methods, advanced validation techniques, and seamless integration with decision analysis, it enables researchers to:
 
-- Develop high-quality prediction models
-- Validate model performance rigorously
-- Assess clinical utility effectively
-- Implement models in clinical practice
+-   Develop high-quality prediction models
+-   Validate model performance rigorously
+-   Assess clinical utility effectively
+-   Implement models in clinical practice
 
 ### Key Takeaways
 
-1. **Start with clinical knowledge** when selecting predictors
-2. **Use appropriate validation methods** for your dataset size
-3. **Handle missing data carefully** with appropriate methods
-4. **Assess both discrimination and calibration** performance
-5. **Evaluate clinical utility** with decision curve analysis
-6. **Report methods and results transparently** for reproducibility
+1.  **Start with clinical knowledge** when selecting predictors
+2.  **Use appropriate validation methods** for your dataset size
+3.  **Handle missing data carefully** with appropriate methods
+4.  **Assess both discrimination and calibration** performance
+5.  **Evaluate clinical utility** with decision curve analysis
+6.  **Report methods and results transparently** for reproducibility
 
 ### Further Reading
 
-- Steyerberg, E.W. (2019). *Clinical Prediction Models*. Springer.
-- Harrell, F.E. (2015). *Regression Modeling Strategies*. Springer.
-- Collins, G.S., et al. (2015). Transparent reporting of a multivariable prediction model for individual prognosis or diagnosis (TRIPOD). *BMJ*, 350, g7594.
+-   Steyerberg, E.W. (2019). *Clinical Prediction Models*. Springer.
+-   Harrell, F.E. (2015). *Regression Modeling Strategies*. Springer.
+-   Collins, G.S., et al. (2015). Transparent reporting of a multivariable prediction model for individual prognosis or diagnosis (TRIPOD). *BMJ*, 350, g7594.
 
 For more information and updates, visit the [ClinicoPath documentation](https://github.com/sbalci/ClinicoPathJamoviModule).
 
----
+------------------------------------------------------------------------
 
 *This vignette was generated using ClinicoPath version `r packageVersion("ClinicoPath")` on `r Sys.Date()`.*

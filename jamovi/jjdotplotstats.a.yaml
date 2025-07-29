@@ -1,7 +1,7 @@
 ---
 name:  jjdotplotstats
 title: Dot Chart
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
 # menuSubtitle: Dot Chart
 version: '0.0.3'
@@ -161,6 +161,75 @@ options:
       title: Statistical Results
       type: Bool
       default: true
+
+    - name: testvalue
+      title: Test Value
+      type: Number
+      default: 0
+      description:
+          R: >
+            A number specifying the value of the null hypothesis for one-sample tests.
+
+    - name: bfmessage
+      title: Bayes Factor Message
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
+
+    - name: conflevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0
+      max: 1
+      description:
+          R: >
+            Confidence level for confidence intervals.
+
+    - name: k
+      title: Decimal Places
+      type: Integer
+      default: 2
+      min: 0
+      max: 5
+      description:
+          R: >
+            Number of decimal places for displaying statistics in the subtitle.
+
+    - name: testvalueline
+      title: Show Test Value Line
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to display a vertical line at the test value.
+
+    - name: centralityparameter
+      title: Centrality Parameter
+      type: List
+      options:
+        - title: Mean
+          name: mean
+        - title: Median
+          name: median
+        - title: None
+          name: none
+      default: mean
+      description:
+          R: >
+            Which measure of central tendency to display as a vertical line.
+
+    - name: centralityk
+      title: Centrality Decimal Places
+      type: Integer
+      default: 2
+      min: 0
+      max: 5
+      description:
+          R: >
+            Number of decimal places for centrality parameter label.
 
 ...
 

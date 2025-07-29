@@ -95,7 +95,7 @@ advancedbarplot(
 
 ### R Code Example for Basic Approach
 
-```{r basic-code, eval=TRUE}
+```{r basic-code, eval=FALSE}
 # Reproducible R code for basic approach
 library(ggplot2)
 library(dplyr)
@@ -149,7 +149,7 @@ advancedbarplot(
 
 ### R Code Example for Polished Approach
 
-```{r polished-code, eval=TRUE}
+```{r polished-code, eval=FALSE}
 # Polished presentation approach
 summary_data_grouped <- histopathology %>%
   group_by(Grade_Level, Sex) %>%
@@ -213,7 +213,7 @@ advancedbarplot(
 
 ### R Code Example for Statistical Approach
 
-```{r statistical-code, eval=TRUE}
+```{r statistical-code, eval=FALSE}
 # Statistical approach with error bars
 summary_stats <- histopathology %>%
   group_by(Group) %>%
@@ -274,7 +274,7 @@ advancedbarplot(
 
 ### R Code Example for Interactive Approach
 
-```{r interactive-code, eval=TRUE}
+```{r interactive-code, eval=FALSE}
 library(plotly)
 
 # Prepare data for interactive plot
@@ -331,7 +331,7 @@ advancedbarplot(
 
 ### R Code Example for Publication Approach
 
-```{r publication-code, eval=TRUE}
+```{r publication-code, eval=FALSE}
 # Publication-ready approach
 sex_summary <- histopathology %>%
   group_by(Sex) %>%
@@ -403,7 +403,7 @@ advancedbarplot(
 
 ### R Code Example for BBC Style
 
-```{r bbc-code, eval=TRUE}
+```{r bbc-code, eval=FALSE}
 # BBC News style approach
 grade_age_summary <- histopathology %>%
   group_by(Grade_Level) %>%
@@ -480,7 +480,7 @@ advancedbarplot(
 
 ### R Code Example for Prism Style
 
-```{r prism-code, eval=TRUE}
+```{r prism-code, eval=FALSE}
 # GraphPad Prism style approach
 prism_summary <- histopathology %>%
   group_by(Group, Grade_Level) %>%

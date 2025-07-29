@@ -75,12 +75,37 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(private$.prepared_options)) {
                 
                 # Process type statistics
-                typestatistics <- jmvcore::constructFormula(terms = self$options$typestatistics)
+                typestatistics <- self$options$typestatistics
                 
                 # Process titles
                 mytitle <- if (self$options$mytitle == '') NULL else self$options$mytitle
                 xtitle <- if (self$options$xtitle == '') NULL else self$options$xtitle
                 ytitle <- if (self$options$ytitle == '') NULL else self$options$ytitle
+                
+                # Process point.args
+                point.args <- list(
+                    size = self$options$pointsize,
+                    alpha = self$options$pointalpha
+                )
+                
+                # Process smooth.line.args
+                smooth.line.args <- list(
+                    linewidth = self$options$smoothlinesize,
+                    color = self$options$smoothlinecolor
+                )
+                
+                # Process marginal histogram args
+                xsidehistogram.args <- list(
+                    fill = self$options$xsidefill,
+                    color = "black",
+                    na.rm = TRUE
+                )
+                
+                ysidehistogram.args <- list(
+                    fill = self$options$ysidefill,
+                    color = "black", 
+                    na.rm = TRUE
+                )
                 
                 private$.prepared_options <- list(
                     typestatistics = typestatistics,
@@ -91,7 +116,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     group = self$options$group,
                     grvar = self$options$grvar,
                     resultssubtitle = self$options$resultssubtitle,
-                    originaltheme = self$options$originaltheme
+                    originaltheme = self$options$originaltheme,
+                    conflevel = self$options$conflevel,
+                    bfmessage = self$options$bfmessage,
+                    k = self$options$k,
+                    marginal = self$options$marginal,
+                    xsidehistogram.args = xsidehistogram.args,
+                    ysidehistogram.args = ysidehistogram.args,
+                    point.args = point.args,
+                    smooth.line.args = smooth.line.args
                 )
             }
             
@@ -167,12 +200,22 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     y = !!rlang::sym(opts$group)
 
                     , type = opts$typestatistics
+                    , conf.level = opts$conflevel
+                    , bf.message = opts$bfmessage
+                    , k = opts$k
 
                     , title = opts$mytitle
                     , xlab = opts$xtitle
                     , ylab = opts$ytitle
 
                     , results.subtitle = opts$resultssubtitle
+                    
+                    , marginal = opts$marginal
+                    , xsidehistogram.args = opts$xsidehistogram.args
+                    , ysidehistogram.args = opts$ysidehistogram.args
+                    
+                    , point.args = opts$point.args
+                    , smooth.line.args = opts$smooth.line.args
 
                 )
 
@@ -220,8 +263,22 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 grouping.var = !!rlang::sym(opts$grvar),
 
                 , type = opts$typestatistics
-                # , title = opts$mytitle
+                , conf.level = opts$conflevel
+                , bf.message = opts$bfmessage
+                , k = opts$k
+                
+                # Note: title is omitted for grouped plots as they auto-generate titles
+                , xlab = opts$xtitle
+                , ylab = opts$ytitle
+
                 , results.subtitle = opts$resultssubtitle
+                
+                , marginal = opts$marginal
+                , xsidehistogram.args = opts$xsidehistogram.args
+                , ysidehistogram.args = opts$ysidehistogram.args
+                
+                , point.args = opts$point.args
+                , smooth.line.args = opts$smooth.line.args
 
             )
 

@@ -6,6 +6,13 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval=FALSE)
+```
+
+
 # Introduction
 
 The `classification` function in ClinicoPath provides comprehensive machine learning capabilities for clinical and pathological research. This tool enables researchers to build predictive models for medical diagnosis, prognosis, and treatment response using various state-of-the-art algorithms.
@@ -57,7 +64,7 @@ Classification algorithms help clinicians make data-driven decisions by identify
 
 ## Package Setup
 
-```{r setup}
+```{r setup 2}
 library(ClinicoPath)
 library(dplyr)
 library(knitr)

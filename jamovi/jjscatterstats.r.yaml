@@ -21,7 +21,7 @@ items:
 
 
     - name: plot2
-      title: '`${group} vs {dep} by {grvar}`'
+      title: '`${dep} vs {group} by {grvar}`'
       type: Image
       width:  1600
       height: 600
@@ -30,7 +30,7 @@ items:
       visible: (grvar)
 
     - name: plot
-      title: '`${group} vs {dep}`'
+      title: '`${dep} vs {group}`'
       type: Image
       width:  800
       height: 600

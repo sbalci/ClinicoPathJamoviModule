@@ -1,7 +1,7 @@
 ---
 name:  jjscatterstats
 title: Scatter Plot
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
 version: '0.0.3'
@@ -10,13 +10,50 @@ jas: '1.2'
 
 
 description:
-    # main: |
-    #     'Wrapper Function for ggstatsplot::ggscatterstats and
-    #     ggstatsplot::grouped_ggscatterstats to generate Scatter Plot.'
+    main: |
+        Wrapper Function for ggstatsplot::ggscatterstats and
+        ggstatsplot::grouped_ggscatterstats to generate scatter plots
+        with correlation analysis and optional marginal distributions.
     R:
         dontrun: true
         usage: |
-            # example will be added
+            # Load test data
+            data("mtcars")
+            
+            # Basic scatter plot with correlation
+            jjscatterstats(
+              data = mtcars,
+              dep = "mpg",       # x-axis
+              group = "hp",      # y-axis
+              typestatistics = "parametric",
+              conflevel = 0.95,
+              k = 2
+            )
+            
+            # Scatter plot with marginal histograms
+            jjscatterstats(
+              data = mtcars,
+              dep = "mpg",
+              group = "hp",
+              marginal = TRUE,
+              xsidefill = "#009E73",
+              ysidefill = "#D55E00",
+              pointsize = 4,
+              pointalpha = 0.6,
+              smoothlinesize = 2,
+              smoothlinecolor = "red"
+            )
+            
+            # Grouped scatter plot by number of cylinders
+            jjscatterstats(
+              data = mtcars,
+              dep = "mpg",
+              group = "hp",
+              grvar = "cyl",
+              typestatistics = "nonparametric",
+              bfmessage = FALSE,
+              resultssubtitle = TRUE
+            )
 
 options:
     - name: data
@@ -86,6 +123,97 @@ options:
       title: Statistical Results
       type: Bool
       default: true
+
+    - name: conflevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0
+      max: 1
+      description:
+          R: >
+            Confidence level for confidence intervals (between 0 and 1).
+
+    - name: bfmessage
+      title: Bayes Factor Message
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
+
+    - name: k
+      title: Decimal Places
+      type: Integer
+      default: 2
+      min: 0
+      max: 5
+      description:
+          R: >
+            Number of decimal places for displaying statistics in the subtitle.
+
+    - name: marginal
+      title: Show Marginal Histograms
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display marginal histogram plots on the axes using ggside.
+
+    - name: xsidefill
+      title: X-axis Marginal Fill Color
+      type: String
+      default: '#009E73'
+      description:
+          R: >
+            Fill color for x-axis marginal histogram.
+
+    - name: ysidefill
+      title: Y-axis Marginal Fill Color
+      type: String
+      default: '#D55E00'
+      description:
+          R: >
+            Fill color for y-axis marginal histogram.
+
+    - name: pointsize
+      title: Point Size
+      type: Number
+      default: 3
+      min: 0.1
+      max: 10
+      description:
+          R: >
+            Size of the scatter plot points.
+
+    - name: pointalpha
+      title: Point Transparency
+      type: Number
+      default: 0.4
+      min: 0
+      max: 1
+      description:
+          R: >
+            Transparency level for scatter plot points.
+
+    - name: smoothlinesize
+      title: Smooth Line Size
+      type: Number
+      default: 1.5
+      min: 0.1
+      max: 5
+      description:
+          R: >
+            Width of the regression/smooth line.
+
+    - name: smoothlinecolor
+      title: Smooth Line Color
+      type: String
+      default: 'blue'
+      description:
+          R: >
+            Color of the regression/smooth line.
+
 ...
 
 

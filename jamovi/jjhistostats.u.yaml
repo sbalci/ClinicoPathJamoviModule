@@ -22,11 +22,11 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
-    label: Analysis
+    label: Analysis Options
     collapsed: true
     children:
       - type: Label
-        label: Analysis
+        label: Statistical Analysis
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -34,12 +34,47 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
+              - type: TextBox
+                name: test.value
+                format: number
+              - type: TextBox
+                name: conf.level
+                format: number
+              - type: CheckBox
+                name: bf.message
+              - type: TextBox
+                name: digits
+                format: number
+
   - type: CollapseBox
-    label: Plot
+    label: Plot Appearance
     collapsed: true
     children:
       - type: Label
-        label: Plot
+        label: Plot Labels
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: title
+                format: string
+                width: large
+              - type: TextBox
+                name: subtitle
+                format: string
+                width: large  
+              - type: TextBox
+                name: caption
+                format: string
+                width: large
+              - type: TextBox
+                name: xlab
+                format: string
+                width: large
+      - type: Label
+        label: Results Display
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -47,10 +82,15 @@ children:
             children:
               - type: CheckBox
                 name: resultssubtitle
-              - type: CheckBox
-                name: normalcurve
-              - type: CheckBox
-                name: centralityline
+
+  - type: CollapseBox
+    label: Histogram Settings
+    collapsed: true
+    children:
+      - type: Label
+        label: Bin Configuration
+        fitToGrid: true
+        children:
           - type: LayoutBox
             margin: large
             children:
@@ -61,3 +101,71 @@ children:
                     name: binwidth
                     format: number
                     enable: (changebinwidth)
+      - type: Label
+        label: Histogram Aesthetics
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: binfill
+                format: string
+                width: large
+              - type: TextBox
+                name: bincolor
+                format: string
+                width: large
+              - type: TextBox
+                name: binalpha
+                format: number
+
+  - type: CollapseBox
+    label: Centrality Line
+    collapsed: true
+    children:
+      - type: Label
+        label: Centrality Settings
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: centralityline
+              - type: ComboBox
+                name: centralitytype
+                enable: (centralityline)
+      - type: Label
+        label: Line Appearance
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: centralitylinecolor
+                format: string
+                enable: (centralityline)
+              - type: TextBox
+                name: centralitylinewidth
+                format: number
+                enable: (centralityline)
+              - type: ComboBox
+                name: centralitylinetype
+                enable: (centralityline)
+                options:
+                  - title: Solid
+                    name: solid
+                  - title: Dashed
+                    name: dashed
+                  - title: Dotted
+                    name: dotted
+                  - title: Dotted
+                    name: dotted
+                  - title: Dot-dash
+                    name: dotdash
+                  - title: Long dash
+                    name: longdash
+                  - title: Two dash
+                    name: twodash

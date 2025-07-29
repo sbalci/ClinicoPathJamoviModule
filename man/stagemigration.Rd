@@ -71,7 +71,11 @@ stagemigration(
   showNestedModelTests = FALSE,
   showStepwiseResults = FALSE,
   showExplanations = TRUE,
-  showAbbreviationGlossary = FALSE
+  showAbbreviationGlossary = FALSE,
+  calculateSME = FALSE,
+  calculateRMST = FALSE,
+  performCompetingRisks = FALSE,
+  competingEventVar
 )
 }
 \arguments{
@@ -334,6 +338,33 @@ final model.}
 abbreviations, statistical terms,  and technical terminology used in the
 stage migration analysis. This  provides a quick reference for interpreting
 dashboard values and  understanding statistical outputs.}
+
+\item{calculateSME}{Calculate Stage Migration Effect Formula (SME) to
+quantify the cumulative  difference in survival between corresponding
+stages of old and new staging  systems. SME = Σ(S_new_i - S_old_i) where S
+represents stage-specific  survival rates. Positive values indicate Will
+Rogers phenomenon (apparent  improvement in new system), while negative
+values suggest understaging.}
+
+\item{calculateRMST}{Calculate Restricted Mean Survival Time (RMST) metrics
+for robust  discrimination assessment. RMST provides clinically
+interpretable  survival measures that are independent of proportional
+hazards assumptions.  Particularly valuable when median survival is not
+reached or when comparing  absolute survival benefits between staging
+systems.}
+
+\item{performCompetingRisks}{Perform competing risks analysis for scenarios
+with multiple event types  (e.g., cancer-specific death vs. other causes).
+Implements Fine-Gray  subdistribution hazard models and Cumulative
+Incidence Function (CIF)  analysis. Essential when competing events prevent
+observation of primary  outcome and standard survival analysis may be
+biased.}
+
+\item{competingEventVar}{Optional variable indicating competing events
+(events other than primary  outcome). If not specified, the analysis will
+attempt to detect competing  risks from multi-level event variables. For
+cancer studies, this typically  represents non-cancer deaths when primary
+outcome is cancer-specific death.}
 }
 \value{
 A results object containing:
@@ -384,6 +415,8 @@ A results object containing:
 \code{results$willRogersBasicAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$likelihoodTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$likelihoodTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$linearTrendTestExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$linearTrendTest} \tab \tab \tab \tab \tab a table \cr
 \code{results$homogeneityTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$homogeneityTests} \tab \tab \tab \tab \tab a table \cr
 \code{results$trendTestsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -435,6 +468,15 @@ A results object containing:
 \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$crossValidationPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$enhancedLRComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$stageMigrationEffectExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$stageMigrationEffect} \tab \tab \tab \tab \tab a table \cr
+\code{results$stageMigrationEffectAssessment} \tab \tab \tab \tab \tab a table \cr
+\code{results$rmstAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$rmstByStage} \tab \tab \tab \tab \tab a table \cr
+\code{results$rmstComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$competingRisksExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$competingRisksEventDistribution} \tab \tab \tab \tab \tab a table \cr
+\code{results$competingRisksComparison} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

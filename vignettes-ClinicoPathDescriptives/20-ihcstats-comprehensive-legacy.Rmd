@@ -172,7 +172,7 @@ basic_result <- ihcstats(
 print("IHC clustering analysis complete. See jamovi interface for interactive analysis.")
 ```
 
-```{r, eval=TRUE}
+```{r, eval=FALSE}
 # Show the synthetic sarcoma data structure for reference
 cat("Olsen Study Sarcoma Markers Dataset Structure:\n")
 cat("- Sample Size: 73 cases (23 Synovial Sarcoma, 23 MPNST, 27 Ewing Sarcoma)\n")
@@ -212,7 +212,7 @@ The `ihcstats` function provides four major clinical methodologies:
 - **Key Markers**: CD3, CD8, CD20, PD-L1
 - **Clinical Impact**: Immunotherapy response prediction
 
-```{r, eval=TRUE}
+```{r, eval=FALSE}
 cat("=== INTERACTIVE USAGE IN JAMOVI ===\n")
 cat("1. Load your IHC dataset with marker columns\n")
 cat("2. Navigate to: Exploration → ClinicoPath → IHC Statistics\n") 

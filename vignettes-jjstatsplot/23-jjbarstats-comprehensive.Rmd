@@ -13,9 +13,13 @@ knitr::opts_chunk$set(
   message = FALSE,
   fig.width = 10,
   fig.height = 8,
-  dpi = 300
+  dpi = 300,
+  eval = FALSE
 )
+```
 
+
+```{r setup 2, include=FALSE}
 # Load required packages
 library(ClinicoPath)
 library(ggplot2)

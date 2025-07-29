@@ -3,15 +3,15 @@
 
 # Global settings
 global:
-  new_version: "0.0.3.71"
-  new_date: "2025-07-26"
+  new_version: "0.0.3.82"  # New version number for the modules
+  new_date: "2025-07-28"
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 # Operation modes
 modes:
   quick: false
   check: false
-  extended: true
+  extended: false
   webpage: false
   commit_modules: false
   WIP: false
@@ -19,9 +19,9 @@ modes:
   # File copying control modes
   copy_vignettes: false       # Enable/disable vignette file copying
   copy_data_files: false      # Enable/disable data file copying
-  copy_test_files: false    # Enable/disable test file copying
-  copy_r_files: true         # Enable/disable R utility file copying
-  use_legacy_copying: false  # Use legacy hardcoded file lists instead of config-based copying
+  copy_test_files: false      # Enable/disable test file copying
+  copy_r_files: false         # Enable/disable R utility file copying
+  use_legacy_copying: false   # Use legacy hardcoded file lists instead of config-based copying
 
 # Required packages for validation
 required_packages:
@@ -42,17 +42,17 @@ vignette_folders:
     vignettes-jjstatsplot: ["jjstatsplot"]
     vignettes-meddecide: ["meddecide"]
     vignettes-jsurvival: ["jsurvival"]
-    vignettes: ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]  # General vignettes to all modules
+    # vignettes: ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]  # General vignettes to all modules
 
   # Special files that don't follow domain pattern (from vignettes/ folder)
   special_files:
     "use-jjstatsplot-in-R.Rmd": ["jjstatsplot"]
-    "module-development-jamovi.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-    "users-of-clinicopath.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-    "pkgnet-report.Rmd": ["ClinicoPathDescriptives"]
-    "_workflows.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-    "_wf_master.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-    "_wf_child.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+   # "module-development-jamovi.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+   # "users-of-clinicopath.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+   # "pkgnet-report.Rmd": ["ClinicoPathDescriptives"]
+   # "_workflows.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+   # "_wf_master.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
+   # "_wf_child.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
 
   # Files to exclude from copying (internal or temporary files)
   exclude_patterns:
@@ -76,7 +76,7 @@ vignette_folders:
 # Module definitions
 modules:
   jjstatsplot:
-    enabled: false
+    enabled: true
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
     menuGroup_pattern: "menuGroup: JJStatsPlot$"
     menuGroup_pattern_wip: "menuGroup: JJStatsPlot"
@@ -164,7 +164,7 @@ modules:
       - "tests/testthat"
 
   jsurvival:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     menuGroup_pattern: "menuGroup: Survival$"
     menuGroup_pattern_wip: "menuGroup: Survival"

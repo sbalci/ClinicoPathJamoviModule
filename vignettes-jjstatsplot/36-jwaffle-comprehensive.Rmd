@@ -6,6 +6,22 @@ author: "ClinicoPath"
 output: html_document
 ---
 
+
+
+```{r setup, include=FALSE}
+# Set options for better output
+options(digits = 3)
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 300,
+  out.width = "100%",
+  echo = TRUE,
+  eval = FALSE
+)
+```
+
+
 # Introduction
 
 The `jwaffle` function provides professional waffle chart visualizations for proportional data display. Waffle charts (also known as square pie charts) use a grid of squares to represent data proportions, making them particularly effective for displaying percentages, survey responses, and categorical distributions.
@@ -30,22 +46,12 @@ Waffle charts are a powerful alternative to traditional pie charts that offer se
 
 ## Installation and Setup
 
-```{r setup}
+```{r setup 2}
 # Load required libraries
 library(ClinicoPath)
 library(dplyr)
 library(ggplot2)
 
-# Set options for better output
-options(digits = 3)
-knitr::opts_chunk$set(
-  fig.width = 12,
-  fig.height = 8,
-    dpi = 300,
-  echo = TRUE,
-  eval = FALSE,
-  out.width = "100%"
-)
 
 # Check if required packages are available
 if (!requireNamespace("waffle", quietly = TRUE)) {

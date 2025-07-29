@@ -100,7 +100,7 @@ advancedraincloud(
 
 ### R Code Example for Basic Plot
 
-```{r basic-code, eval=TRUE}
+```{r basic-code, eval=FALSE}
 # Reproducible R code using ggrain
 library(ggrain)
 library(ggplot2)
@@ -144,7 +144,7 @@ advancedraincloud(
 
 ### R Code Example for Longitudinal Connections
 
-```{r longitudinal-code, eval=TRUE}
+```{r longitudinal-code, eval=FALSE}
 # Create simulated longitudinal data
 longitudinal_data <- histopathology %>%
   filter(!is.na(OverallTime)) %>%
@@ -214,7 +214,7 @@ advancedraincloud(
 
 ### R Code Examples for Different Positions
 
-```{r positioning-code, eval=TRUE}
+```{r positioning-code, eval=FALSE}
 # Create comparison plots
 library(gridExtra)
 
@@ -270,7 +270,7 @@ advancedraincloud(
 
 ### R Code Example for Likert Data
 
-```{r likert-code, eval=TRUE}
+```{r likert-code, eval=FALSE}
 # Create Likert scale data
 likert_data <- histopathology %>%
   mutate(
@@ -317,7 +317,7 @@ advancedraincloud(
 
 ### R Code Example for Covariate Mapping
 
-```{r covariate-code, eval=TRUE}
+```{r covariate-code, eval=FALSE}
 # Advanced raincloud with covariate mapping
 histopathology_cov <- histopathology %>%
   filter(!is.na(Group) & !is.na(OverallTime) & !is.na(Age))
@@ -359,7 +359,7 @@ advancedraincloud(data = histopathology, y_var = "Age", x_var = "Grade_Level",
 
 ### R Code Examples for Color Palettes
 
-```{r palette-code, eval=TRUE}
+```{r palette-code, eval=FALSE}
 # Create palette comparison
 grade_data <- histopathology %>% filter(!is.na(Grade_Level))
 
@@ -416,7 +416,7 @@ The module automatically selects appropriate tests:
 - **2 Groups**: Wilcoxon rank-sum test (robust, non-parametric)
 - **>2 Groups**: Kruskal-Wallis test (robust, non-parametric)
 
-```{r statistics-demo, eval=TRUE}
+```{r statistics-demo, eval=FALSE}
 # Demonstrate statistical testing
 group_data <- histopathology %>% filter(Group %in% c("Control", "Treatment"))
 
@@ -465,7 +465,7 @@ advancedraincloud(
 
 ### R Code Example for Customization
 
-```{r customization-code, eval=TRUE}
+```{r customization-code, eval=FALSE}
 # Load required libraries
 library(ggrain)
 library(ggplot2)
@@ -503,7 +503,7 @@ print(custom_plot)
 
 ### 1. Before/After Treatment Analysis
 
-```{r clinical-before-after, eval=TRUE}
+```{r clinical-before-after, eval=FALSE}
 # Simulate before/after treatment data
 treatment_data <- data.frame(
   Patient_ID = rep(1:30, 2),
@@ -536,7 +536,7 @@ print(before_after_plot)
 
 ### 2. Multi-Group Clinical Trial
 
-```{r clinical-trial, eval=TRUE}
+```{r clinical-trial, eval=FALSE}
 # Simulate clinical trial data
 trial_data <- histopathology %>%
   mutate(

@@ -5,6 +5,20 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig.height = 8,
+    dpi = 300,
+  echo = TRUE,
+  eval = FALSE,
+  out.width = "100%"
+)
+```
+
 # Introduction to Complex UpSet Plots
 
 Complex UpSet plots are a powerful visualization technique for analyzing intersections among multiple sets. They are particularly useful when you have more than 3 sets, where traditional Venn diagrams become cluttered and difficult to interpret. The `jcomplexupset` function in ClinicoPath provides an enhanced interface to create sophisticated UpSet plots for clinical and pathological research.
@@ -30,7 +44,7 @@ UpSet plots are ideal for:
 
 ## Loading Required Packages
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r setup 2, message=FALSE, warning=FALSE}
 library(ClinicoPath)
 library(dplyr)
 library(ggplot2)

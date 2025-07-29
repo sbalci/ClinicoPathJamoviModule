@@ -6,6 +6,10 @@ author: "ClinicoPath"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE, eval=FALSE)
+```
+
 # Introduction to BBC-Style Data Visualization
 
 The BBC Visual and Data Journalism team has established world-class standards for data visualization in news and media. Their approach emphasizes clarity, accessibility, and professional presentation that serves diverse audiences across digital and broadcast platforms.
@@ -43,7 +47,7 @@ The BBC Visual and Data Journalism team has established world-class standards fo
 
 ## Load Required Libraries
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r setup 2, message=FALSE, warning=FALSE}
 library(ClinicoPath)
 library(dplyr)
 library(ggplot2)

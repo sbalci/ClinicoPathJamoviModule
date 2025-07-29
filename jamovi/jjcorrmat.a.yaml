@@ -1,7 +1,7 @@
 ---
 name:  jjcorrmat
 title: Correlation Matrix
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
 version: '0.0.3'
@@ -10,13 +10,46 @@ jas: '1.2'
 
 
 description:
-    # main: |
-    #     'Wrapper Function for ggstatsplot::ggcorrmat and
-    #     ggstatsplot::grouped_ggcorrmat to generate Correlation Matrix.'
+    main: |
+        Wrapper Function for ggstatsplot::ggcorrmat and
+        ggstatsplot::grouped_ggcorrmat to generate correlation matrix
+        visualizations with significance testing.
     R:
         dontrun: true
         usage: |
-            # Load test data\n            data(jjcorrmat_test_data)\n            \n            # Basic correlation matrix\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\", \"tumor_size_mm\"),\n              typestatistics = \"parametric\"\n            )\n            \n            # Grouped correlation matrix by tumor grade\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\"),\n              grvar = \"tumor_grade\",\n              typestatistics = \"nonparametric\"\n            )
+            # Load test data
+            data("mtcars")
+            
+            # Basic correlation matrix with defaults
+            jjcorrmat(
+              data = mtcars,
+              dep = c("mpg", "hp", "wt", "qsec"),
+              typestatistics = "parametric"
+            )
+            
+            # Customized correlation matrix
+            jjcorrmat(
+              data = mtcars,
+              dep = c("mpg", "hp", "wt", "qsec", "disp"),
+              typestatistics = "nonparametric",
+              matrixtype = "lower",
+              matrixmethod = "circle",
+              padjustmethod = "bonferroni",
+              k = 3,
+              lowcolor = "blue",
+              midcolor = "white", 
+              highcolor = "red",
+              title = "Motor Trend Car Correlations"
+            )
+            
+            # Grouped correlation matrix by number of cylinders
+            jjcorrmat(
+              data = mtcars,
+              dep = c("mpg", "hp", "wt", "qsec"),
+              grvar = "cyl",
+              typestatistics = "robust",
+              siglevel = 0.01
+            )
 
 options:
     - name: data
@@ -66,6 +99,135 @@ options:
             Type of correlation analysis to perform. 'parametric' uses Pearson
             correlation, 'nonparametric' uses Spearman's rho, 'robust' uses
             percentage bend correlation, 'bayes' computes Bayes factors.
+
+    - name: matrixtype
+      title: Matrix Type
+      type: List
+      options:
+        - title: Upper Triangle
+          name: upper
+        - title: Lower Triangle
+          name: lower
+        - title: Full Matrix
+          name: full
+      default: upper
+      description:
+          R: >
+            Display upper triangular, lower triangular or full matrix.
+
+    - name: matrixmethod
+      title: Matrix Method
+      type: List
+      options:
+        - title: Square
+          name: square
+        - title: Circle
+          name: circle
+      default: square
+      description:
+          R: >
+            The visualization method of correlation matrix to be used.
+
+    - name: siglevel
+      title: Significance Level
+      type: Number
+      default: 0.05
+      min: 0
+      max: 1
+      description:
+          R: >
+            Significance level for marking correlations as insignificant.
+
+    - name: conflevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0
+      max: 1
+      description:
+          R: >
+            Confidence level for confidence intervals.
+
+    - name: padjustmethod
+      title: P-value Adjustment Method
+      type: List
+      options:
+        - title: Holm
+          name: holm
+        - title: None
+          name: none
+        - title: Hochberg
+          name: hochberg
+        - title: Hommel
+          name: hommel
+        - title: Bonferroni
+          name: bonferroni
+        - title: BH (FDR)
+          name: BH
+        - title: BY
+          name: BY
+      default: holm
+      description:
+          R: >
+            Adjustment method for multiple comparisons.
+
+    - name: k
+      title: Decimal Places
+      type: Integer
+      default: 2
+      min: 0
+      max: 5
+      description:
+          R: >
+            Number of decimal places for displaying correlation coefficients.
+
+    - name: lowcolor
+      title: Low Correlation Color
+      type: String
+      default: '#E69F00'
+      description:
+          R: >
+            Color for low (negative) correlation values.
+
+    - name: midcolor
+      title: Mid Correlation Color
+      type: String
+      default: 'white'
+      description:
+          R: >
+            Color for mid (zero) correlation values.
+
+    - name: highcolor
+      title: High Correlation Color
+      type: String
+      default: '#009E73'
+      description:
+          R: >
+            Color for high (positive) correlation values.
+
+    - name: title
+      title: Plot Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Title for the correlation matrix plot.
+
+    - name: subtitle
+      title: Plot Subtitle
+      type: String
+      default: ''
+      description:
+          R: >
+            Subtitle for the correlation matrix plot.
+
+    - name: caption
+      title: Plot Caption
+      type: String
+      default: ''
+      description:
+          R: >
+            Caption for the correlation matrix plot.
 
 
 ...

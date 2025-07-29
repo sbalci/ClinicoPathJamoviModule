@@ -1,7 +1,7 @@
 ---
 name:  jjhistostats
 title: Histogram
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous
 # menuSubtitle: Histogram
 version: '0.0.3'
@@ -22,8 +22,7 @@ description:
             jjhistostats(
               data = jjhistostats_test_data,
               dep = "age_years",
-              typestatistics = "parametric",
-              normalcurve = TRUE
+              typestatistics = "parametric"
             )
             
             # Multiple histograms
@@ -140,15 +139,162 @@ options:
             Whether to display statistical test results as subtitle in the plot,
             including normality test results and descriptive statistics.
 
-    - name: normalcurve
-      title: Normal Curve
-      type: Bool
-      default: false
+    - name: test.value
+      title: Test Value
+      type: Number
+      default: 0
       description:
           R: >
-            Whether to overlay a normal distribution curve on the histogram
-            for comparison with the theoretical normal distribution.
+            Value to compare the sample against in one-sample test. Default is 0.
 
+    - name: conf.level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0
+      max: 1
+      description:
+          R: >
+            Confidence level for confidence intervals (between 0 and 1).
+
+    - name: bf.message
+      title: Bayes Factor Message
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
+
+    - name: digits
+      title: Decimal Places
+      type: Integer
+      default: 2
+      min: 0
+      max: 5
+      description:
+          R: >
+            Number of decimal places for displaying statistics in the subtitle.
+
+    - name: xlab
+      title: X-axis Label
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom label for the x-axis. If empty, variable name will be used.
+
+    - name: title
+      title: Plot Title
+      type: String
+      default: ''
+      description:
+          R: >
+            Title for the plot.
+
+    - name: subtitle
+      title: Plot Subtitle
+      type: String
+      default: ''
+      description:
+          R: >
+            Subtitle for the plot (overrides statistical results if provided).
+
+    - name: caption
+      title: Plot Caption
+      type: String
+      default: ''
+      description:
+          R: >
+            Caption text to display at the bottom of the plot.
+
+    - name: centralitytype
+      title: Centrality Type
+      type: List
+      options:
+        - title: Default (follows test type)
+          name: default
+        - title: Parametric (Mean)
+          name: parametric
+        - title: Nonparametric (Median)
+          name: nonparametric
+        - title: Robust (Trimmed Mean)
+          name: robust
+        - title: Bayes (MAP Estimator)
+          name: bayes
+      default: default
+      description:
+          R: >
+            Type of central tendency measure to display. 'Default' uses the
+            appropriate measure based on the statistical test type selected.
+
+# Histogram Aesthetics ----
+
+    - name: binfill
+      title: Bin Fill Color
+      type: String
+      default: 'skyblue'
+      description:
+          R: >
+            Fill color for histogram bins.
+
+    - name: bincolor
+      title: Bin Border Color
+      type: String
+      default: 'black'
+      description:
+          R: >
+            Border color for histogram bins.
+
+    - name: binalpha
+      title: Bin Transparency
+      type: Number
+      default: 0.7
+      min: 0
+      max: 1
+      description:
+          R: >
+            Transparency level for histogram bins (0 = fully transparent, 1 = opaque).
+
+# Centrality Line Aesthetics ----
+
+    - name: centralitylinecolor
+      title: Centrality Line Color
+      type: String
+      default: 'blue'
+      description:
+          R: >
+            Color of the vertical centrality line.
+
+    - name: centralitylinewidth
+      title: Centrality Line Width
+      type: Number
+      default: 1
+      min: 0.1
+      max: 5
+      description:
+          R: >
+            Width of the vertical centrality line.
+
+    - name: centralitylinetype
+      title: Centrality Line Type
+      type: List
+      options:
+        - title: Solid
+          name: solid
+        - title: Dashed
+          name: dashed
+        - title: Dotted
+          name: dotted
+        - title: Dot-dash
+          name: dotdash
+        - title: Long dash
+          name: longdash
+        - title: Two dash
+          name: twodash
+      default: dashed
+      description:
+          R: >
+            Line type for the vertical centrality line.
 
 
 ...

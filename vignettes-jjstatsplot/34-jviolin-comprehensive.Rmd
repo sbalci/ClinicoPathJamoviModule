@@ -6,6 +6,22 @@ author: "ClinicoPath"
 output: html_document
 ---
 
+
+
+```{r setup, include=FALSE}
+# Set options for better output
+options(digits = 3)
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 300,
+  out.width = "100%",
+  echo = TRUE,
+  eval = FALSE
+)
+```
+
+
 # Introduction
 
 The `jviolin` function provides professional violin plots for visualizing the distribution of continuous data across groups. Violin plots combine the best features of box plots and density plots, showing both summary statistics and the shape of the data distribution.
@@ -29,22 +45,13 @@ Violin plots are mirror-symmetric density plots that display:
 
 ## Installation and Setup
 
-```{r setup}
+```{r setup 2}
 # Load required libraries
 library(ClinicoPath)
 library(dplyr)
 library(ggplot2)
 
-# Set options for better output
-options(digits = 3)
-knitr::opts_chunk$set(
-  fig.width = 12,
-  fig.height = 8,
-    dpi = 300,
-  echo = TRUE,
-  eval = FALSE,
-  out.width = "100%"
-)
+
 
 # Check if packages are available
 if (!requireNamespace("ggplot2", quietly = TRUE)) {
