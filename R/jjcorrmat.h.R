@@ -8,7 +8,19 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             dep = NULL,
             grvar = NULL,
-            typestatistics = "parametric", ...) {
+            typestatistics = "parametric",
+            matrixtype = "upper",
+            matrixmethod = "square",
+            siglevel = 0.05,
+            conflevel = 0.95,
+            padjustmethod = "holm",
+            k = 2,
+            lowcolor = "#E69F00",
+            midcolor = "white",
+            highcolor = "#009E73",
+            title = "",
+            subtitle = "",
+            caption = "", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -40,19 +52,124 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..matrixtype <- jmvcore::OptionList$new(
+                "matrixtype",
+                matrixtype,
+                options=list(
+                    "upper",
+                    "lower",
+                    "full"),
+                default="upper")
+            private$..matrixmethod <- jmvcore::OptionList$new(
+                "matrixmethod",
+                matrixmethod,
+                options=list(
+                    "square",
+                    "circle"),
+                default="square")
+            private$..siglevel <- jmvcore::OptionNumber$new(
+                "siglevel",
+                siglevel,
+                default=0.05,
+                min=0,
+                max=1)
+            private$..conflevel <- jmvcore::OptionNumber$new(
+                "conflevel",
+                conflevel,
+                default=0.95,
+                min=0,
+                max=1)
+            private$..padjustmethod <- jmvcore::OptionList$new(
+                "padjustmethod",
+                padjustmethod,
+                options=list(
+                    "holm",
+                    "none",
+                    "hochberg",
+                    "hommel",
+                    "bonferroni",
+                    "BH",
+                    "BY"),
+                default="holm")
+            private$..k <- jmvcore::OptionInteger$new(
+                "k",
+                k,
+                default=2,
+                min=0,
+                max=5)
+            private$..lowcolor <- jmvcore::OptionString$new(
+                "lowcolor",
+                lowcolor,
+                default="#E69F00")
+            private$..midcolor <- jmvcore::OptionString$new(
+                "midcolor",
+                midcolor,
+                default="white")
+            private$..highcolor <- jmvcore::OptionString$new(
+                "highcolor",
+                highcolor,
+                default="#009E73")
+            private$..title <- jmvcore::OptionString$new(
+                "title",
+                title,
+                default="")
+            private$..subtitle <- jmvcore::OptionString$new(
+                "subtitle",
+                subtitle,
+                default="")
+            private$..caption <- jmvcore::OptionString$new(
+                "caption",
+                caption,
+                default="")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..matrixtype)
+            self$.addOption(private$..matrixmethod)
+            self$.addOption(private$..siglevel)
+            self$.addOption(private$..conflevel)
+            self$.addOption(private$..padjustmethod)
+            self$.addOption(private$..k)
+            self$.addOption(private$..lowcolor)
+            self$.addOption(private$..midcolor)
+            self$.addOption(private$..highcolor)
+            self$.addOption(private$..title)
+            self$.addOption(private$..subtitle)
+            self$.addOption(private$..caption)
         }),
     active = list(
         dep = function() private$..dep$value,
         grvar = function() private$..grvar$value,
-        typestatistics = function() private$..typestatistics$value),
+        typestatistics = function() private$..typestatistics$value,
+        matrixtype = function() private$..matrixtype$value,
+        matrixmethod = function() private$..matrixmethod$value,
+        siglevel = function() private$..siglevel$value,
+        conflevel = function() private$..conflevel$value,
+        padjustmethod = function() private$..padjustmethod$value,
+        k = function() private$..k$value,
+        lowcolor = function() private$..lowcolor$value,
+        midcolor = function() private$..midcolor$value,
+        highcolor = function() private$..highcolor$value,
+        title = function() private$..title$value,
+        subtitle = function() private$..subtitle$value,
+        caption = function() private$..caption$value),
     private = list(
         ..dep = NA,
         ..grvar = NA,
-        ..typestatistics = NA)
+        ..typestatistics = NA,
+        ..matrixtype = NA,
+        ..matrixmethod = NA,
+        ..siglevel = NA,
+        ..conflevel = NA,
+        ..padjustmethod = NA,
+        ..k = NA,
+        ..lowcolor = NA,
+        ..midcolor = NA,
+        ..highcolor = NA,
+        ..title = NA,
+        ..subtitle = NA,
+        ..caption = NA)
 )
 
 jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -124,11 +241,46 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Correlation Matrix
 #'
+#' Wrapper Function for ggstatsplot::ggcorrmat and
+#' ggstatsplot::grouped_ggcorrmat to generate correlation matrix
+#' visualizations with significance testing.
 #' 
 #'
 #' @examples
 #' \donttest{
-#' # Load test data\n            data(jjcorrmat_test_data)\n            \n            # Basic correlation matrix\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\", \"tumor_size_mm\"),\n              typestatistics = \"parametric\"\n            )\n            \n            # Grouped correlation matrix by tumor grade\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\"),\n              grvar = \"tumor_grade\",\n              typestatistics = \"nonparametric\"\n            )
+#' # Load test data
+#' data("mtcars")
+#'
+#' # Basic correlation matrix with defaults
+#' jjcorrmat(
+#'   data = mtcars,
+#'   dep = c("mpg", "hp", "wt", "qsec"),
+#'   typestatistics = "parametric"
+#' )
+#'
+#' # Customized correlation matrix
+#' jjcorrmat(
+#'   data = mtcars,
+#'   dep = c("mpg", "hp", "wt", "qsec", "disp"),
+#'   typestatistics = "nonparametric",
+#'   matrixtype = "lower",
+#'   matrixmethod = "circle",
+#'   padjustmethod = "bonferroni",
+#'   k = 3,
+#'   lowcolor = "blue",
+#'   midcolor = "white",
+#'   highcolor = "red",
+#'   title = "Motor Trend Car Correlations"
+#' )
+#'
+#' # Grouped correlation matrix by number of cylinders
+#' jjcorrmat(
+#'   data = mtcars,
+#'   dep = c("mpg", "hp", "wt", "qsec"),
+#'   grvar = "cyl",
+#'   typestatistics = "robust",
+#'   siglevel = 0.01
+#' )
 #'}
 #' @param data The data as a data frame.
 #' @param dep List of continuous variables for which the correlation matrix
@@ -138,6 +290,21 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param typestatistics Type of correlation analysis to perform. 'parametric'
 #'   uses Pearson correlation, 'nonparametric' uses Spearman's rho, 'robust'
 #'   uses percentage bend correlation, 'bayes' computes Bayes factors.
+#' @param matrixtype Display upper triangular, lower triangular or full
+#'   matrix.
+#' @param matrixmethod The visualization method of correlation matrix to be
+#'   used.
+#' @param siglevel Significance level for marking correlations as
+#'   insignificant.
+#' @param conflevel Confidence level for confidence intervals.
+#' @param padjustmethod Adjustment method for multiple comparisons.
+#' @param k Number of decimal places for displaying correlation coefficients.
+#' @param lowcolor Color for low (negative) correlation values.
+#' @param midcolor Color for mid (zero) correlation values.
+#' @param highcolor Color for high (positive) correlation values.
+#' @param title Title for the correlation matrix plot.
+#' @param subtitle Subtitle for the correlation matrix plot.
+#' @param caption Caption for the correlation matrix plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -150,7 +317,19 @@ jjcorrmat <- function(
     data,
     dep,
     grvar,
-    typestatistics = "parametric") {
+    typestatistics = "parametric",
+    matrixtype = "upper",
+    matrixmethod = "square",
+    siglevel = 0.05,
+    conflevel = 0.95,
+    padjustmethod = "holm",
+    k = 2,
+    lowcolor = "#E69F00",
+    midcolor = "white",
+    highcolor = "#009E73",
+    title = "",
+    subtitle = "",
+    caption = "") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjcorrmat requires jmvcore to be installed (restart may be required)")
@@ -168,7 +347,19 @@ jjcorrmat <- function(
     options <- jjcorrmatOptions$new(
         dep = dep,
         grvar = grvar,
-        typestatistics = typestatistics)
+        typestatistics = typestatistics,
+        matrixtype = matrixtype,
+        matrixmethod = matrixmethod,
+        siglevel = siglevel,
+        conflevel = conflevel,
+        padjustmethod = padjustmethod,
+        k = k,
+        lowcolor = lowcolor,
+        midcolor = midcolor,
+        highcolor = highcolor,
+        title = title,
+        subtitle = subtitle,
+        caption = caption)
 
     analysis <- jjcorrmatClass$new(
         options = options,

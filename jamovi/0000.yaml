@@ -1278,7 +1278,7 @@ analyses:
   - title: Histogram
     name: jjhistostats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuSubgroup: Continuous
     menuTitle: Histogram
     description: |
@@ -1289,23 +1289,31 @@ analyses:
   - title: Scatter Plot
     name: jjscatterstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuSubgroup: Continuous vs Continuous
     menuTitle: Scatter Plot
     ribbon: analyses
     category: analyses
+    description: |
+      Wrapper Function for ggstatsplot::ggscatterstats and
+      ggstatsplot::grouped_ggscatterstats to generate scatter plots
+      with correlation analysis and optional marginal distributions.
   - title: Correlation Matrix
     name: jjcorrmat
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuSubgroup: Continuous vs Continuous
     menuTitle: Correlation Matrix
     ribbon: analyses
     category: analyses
+    description: |
+      Wrapper Function for ggstatsplot::ggcorrmat and
+      ggstatsplot::grouped_ggcorrmat to generate correlation matrix
+      visualizations with significance testing.
   - title: Dot Chart
     name: jjdotplotstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart
     ribbon: analyses
@@ -1313,7 +1321,7 @@ analyses:
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Between Groups
     menuSubtitle: Independent Samples

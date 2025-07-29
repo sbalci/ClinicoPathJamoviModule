@@ -17,7 +17,14 @@ jjdotplotstats(
   xtitle = "",
   ytitle = "",
   originaltheme = FALSE,
-  resultssubtitle = TRUE
+  resultssubtitle = TRUE,
+  testvalue = 0,
+  bfmessage = TRUE,
+  conflevel = 0.95,
+  k = 2,
+  testvalueline = FALSE,
+  centralityparameter = "mean",
+  centralityk = 2
 )
 }
 \arguments{
@@ -53,6 +60,24 @@ tests, 'bayes' for Bayesian analysis.}
 \item{originaltheme}{.}
 
 \item{resultssubtitle}{.}
+
+\item{testvalue}{A number specifying the value of the null hypothesis for
+one-sample tests.}
+
+\item{bfmessage}{Whether to display Bayes Factor in the subtitle when using
+Bayesian analysis.}
+
+\item{conflevel}{Confidence level for confidence intervals.}
+
+\item{k}{Number of decimal places for displaying statistics in the
+subtitle.}
+
+\item{testvalueline}{Whether to display a vertical line at the test value.}
+
+\item{centralityparameter}{Which measure of central tendency to display as
+a vertical line.}
+
+\item{centralityk}{Number of decimal places for centrality parameter label.}
 }
 \value{
 A results object containing:

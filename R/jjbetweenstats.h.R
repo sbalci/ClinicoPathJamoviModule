@@ -23,7 +23,16 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             xtitle = "",
             ytitle = "",
             originaltheme = FALSE,
-            resultssubtitle = TRUE, ...) {
+            resultssubtitle = TRUE,
+            plottype = "boxviolin",
+            bfmessage = TRUE,
+            k = 2,
+            conflevel = 0.95,
+            varequal = FALSE,
+            meanplotting = TRUE,
+            meanci = FALSE,
+            notch = FALSE,
+            samplesizeLabel = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -143,6 +152,50 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "resultssubtitle",
                 resultssubtitle,
                 default=TRUE)
+            private$..plottype <- jmvcore::OptionList$new(
+                "plottype",
+                plottype,
+                options=list(
+                    "boxviolin",
+                    "box",
+                    "violin"),
+                default="boxviolin")
+            private$..bfmessage <- jmvcore::OptionBool$new(
+                "bfmessage",
+                bfmessage,
+                default=TRUE)
+            private$..k <- jmvcore::OptionInteger$new(
+                "k",
+                k,
+                default=2,
+                min=0,
+                max=5)
+            private$..conflevel <- jmvcore::OptionNumber$new(
+                "conflevel",
+                conflevel,
+                default=0.95,
+                min=0,
+                max=1)
+            private$..varequal <- jmvcore::OptionBool$new(
+                "varequal",
+                varequal,
+                default=FALSE)
+            private$..meanplotting <- jmvcore::OptionBool$new(
+                "meanplotting",
+                meanplotting,
+                default=TRUE)
+            private$..meanci <- jmvcore::OptionBool$new(
+                "meanci",
+                meanci,
+                default=FALSE)
+            private$..notch <- jmvcore::OptionBool$new(
+                "notch",
+                notch,
+                default=FALSE)
+            private$..samplesizeLabel <- jmvcore::OptionBool$new(
+                "samplesizeLabel",
+                samplesizeLabel,
+                default=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -162,6 +215,15 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..resultssubtitle)
+            self$.addOption(private$..plottype)
+            self$.addOption(private$..bfmessage)
+            self$.addOption(private$..k)
+            self$.addOption(private$..conflevel)
+            self$.addOption(private$..varequal)
+            self$.addOption(private$..meanplotting)
+            self$.addOption(private$..meanci)
+            self$.addOption(private$..notch)
+            self$.addOption(private$..samplesizeLabel)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -181,7 +243,16 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
         originaltheme = function() private$..originaltheme$value,
-        resultssubtitle = function() private$..resultssubtitle$value),
+        resultssubtitle = function() private$..resultssubtitle$value,
+        plottype = function() private$..plottype$value,
+        bfmessage = function() private$..bfmessage$value,
+        k = function() private$..k$value,
+        conflevel = function() private$..conflevel$value,
+        varequal = function() private$..varequal$value,
+        meanplotting = function() private$..meanplotting$value,
+        meanci = function() private$..meanci$value,
+        notch = function() private$..notch$value,
+        samplesizeLabel = function() private$..samplesizeLabel$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -200,7 +271,16 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..xtitle = NA,
         ..ytitle = NA,
         ..originaltheme = NA,
-        ..resultssubtitle = NA)
+        ..resultssubtitle = NA,
+        ..plottype = NA,
+        ..bfmessage = NA,
+        ..k = NA,
+        ..conflevel = NA,
+        ..varequal = NA,
+        ..meanplotting = NA,
+        ..meanci = NA,
+        ..notch = NA,
+        ..samplesizeLabel = NA)
 )
 
 jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -294,6 +374,20 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param ytitle .
 #' @param originaltheme .
 #' @param resultssubtitle .
+#' @param plottype Type of plot to display - combination of box and violin
+#'   plots,  box plots only, or violin plots only.
+#' @param bfmessage Whether to display Bayes Factor in the subtitle when using
+#'   Bayesian analysis.
+#' @param k Number of decimal places for displaying statistics in the
+#'   subtitle.
+#' @param conflevel Confidence level for confidence intervals.
+#' @param varequal Whether to assume equal variances across groups for
+#'   parametric tests.
+#' @param meanplotting Whether to highlight and display mean values.
+#' @param meanci Whether to display 95\% confidence interval for the mean.
+#' @param notch Whether to use notched box plots for comparing medians.
+#' @param samplesizeLabel Whether to display sample size information for each
+#'   group.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -321,7 +415,16 @@ jjbetweenstats <- function(
     xtitle = "",
     ytitle = "",
     originaltheme = FALSE,
-    resultssubtitle = TRUE) {
+    resultssubtitle = TRUE,
+    plottype = "boxviolin",
+    bfmessage = TRUE,
+    k = 2,
+    conflevel = 0.95,
+    varequal = FALSE,
+    meanplotting = TRUE,
+    meanci = FALSE,
+    notch = FALSE,
+    samplesizeLabel = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjbetweenstats requires jmvcore to be installed (restart may be required)")
@@ -357,7 +460,16 @@ jjbetweenstats <- function(
         xtitle = xtitle,
         ytitle = ytitle,
         originaltheme = originaltheme,
-        resultssubtitle = resultssubtitle)
+        resultssubtitle = resultssubtitle,
+        plottype = plottype,
+        bfmessage = bfmessage,
+        k = k,
+        conflevel = conflevel,
+        varequal = varequal,
+        meanplotting = meanplotting,
+        meanci = meanci,
+        notch = notch,
+        samplesizeLabel = samplesizeLabel)
 
     analysis <- jjbetweenstatsClass$new(
         options = options,

@@ -557,6 +557,39 @@ commit_repo <- function(repo_dir, commit_message) {
 
 
 
+# Function to replace ClinicoPath references with module-specific names ----
+replace_clinicopath_with_module <- function(base_dir, module_name) {
+  if (!dir.exists(base_dir)) {
+    message("Directory does not exist: ", base_dir)
+    return()
+  }
+  # Get all R, Rmd, qmd, and md files in the directory recursively
+  files <- list.files(
+    path = base_dir,
+    pattern = "\\.(R|Rmd|rmd|qmd|md)$",
+    full.names = TRUE,
+    recursive = TRUE
+  )
+  
+  if (length(files) > 0) {
+    cat("      📝 Updating", length(files), "file(s) with package references...\n")
+    # Perform replacements
+    xfun::gsub_files(
+      files = files,
+      pattern = "library\\(ClinicoPath\\)",
+      replacement = paste0("library(", module_name, ")")
+    )
+    xfun::gsub_files(
+      files = files,
+      pattern = "ClinicoPath::",
+      replacement = paste0(module_name, "::")
+    )
+    cat("      ✅ Package references updated successfully\n")
+  } else {
+    cat("      ℹ️ No files found to update\n")
+  }
+}
+
 # Enhanced configuration-based asset copying ----
 if (!WIP) {
   cat("\n📁 Copying assets with configuration-based logic...\n")
@@ -702,6 +735,11 @@ if (!WIP) {
           warning("⚠️ Vignette folder not found: ", folder_path)
         }
       }
+      
+      # Replace ClinicoPath references with module-specific names in copied vignettes
+      cat("    🔄 Updating package references in vignettes...\n")
+      replace_clinicopath_with_module(vignette_dir, module_name)
+      
     } else if (copy_vignettes && length(module_cfg$vignette_files) > 0) {
       # Fallback to manual file copying
       cat("  📄 Copying", module_name, "vignette files (manual)...\n")
@@ -732,6 +770,11 @@ if (!WIP) {
       }, error = function(e) {
         warning("⚠️ Error copying vignette files for ", module_name, ": ", e$message)
       })
+      
+      # Replace ClinicoPath references with module-specific names in copied vignettes
+      cat("    🔄 Updating package references in vignettes...\n")
+      replace_clinicopath_with_module(vignette_dir, module_name)
+      
     } else if (!copy_vignettes) {
       cat("  ⏭️ Skipping", module_name, "vignette files (copy_vignettes: false)\n")
     }
@@ -1077,31 +1120,6 @@ if (ClinicoPathDescriptives_module && length(ClinicoPathDescriptives_modules) > 
 
 
 
-## Function to replace ClinicoPath with given module name in R and Rmd files ----
-replace_clinicopath_with_module <- function(base_dir, module_name) {
-  if (!dir.exists(base_dir)) {
-    message("Directory does not exist: ", base_dir)
-    return()
-  }
-  # Get all R and Rmd files in the directory recursively
-  files <- list.files(
-    path = base_dir,
-    pattern = "\\.(R|Rmd|rmd)$",
-    full.names = TRUE,
-    recursive = TRUE
-  )
-  # Perform replacements
-  xfun::gsub_files(
-    files = files,
-    pattern = "library\\(ClinicoPath\\)",
-    replacement = paste0("library(", module_name, ")")
-  )
-  xfun::gsub_files(
-    files = files,
-    pattern = "ClinicoPath::",
-    replacement = paste0(module_name, "::")
-  )
-}
 
 if (!WIP & webpage) {
   ## --- Replace ClinicoPath references in module code ----

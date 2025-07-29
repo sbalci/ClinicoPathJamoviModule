@@ -6,6 +6,20 @@ author: "ClinicoPath"
 output: html_document
 ---
 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>", 
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 12,
+  fig.height = 8,
+  dpi = 300,
+  eval = FALSE
+)
+```
+
 # Introduction to Benford's Law
 
 Benford's Law, also known as the Newcomb-Benford Law or the First-Digit Law, is a fascinating mathematical phenomenon that describes the frequency distribution of leading digits in many naturally occurring datasets. This law has become an invaluable tool for fraud detection, data validation, and quality assurance across diverse fields.
@@ -62,7 +76,7 @@ Benford's Law works best with datasets that:
 
 ## Load Required Libraries and Data
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r setup 2, message=FALSE, warning=FALSE}
 library(ClinicoPath)
 library(dplyr)
 library(ggplot2)

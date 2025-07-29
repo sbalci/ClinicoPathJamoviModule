@@ -14,7 +14,17 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             xtitle = "",
             ytitle = "",
             originaltheme = FALSE,
-            resultssubtitle = TRUE, ...) {
+            resultssubtitle = TRUE,
+            conflevel = 0.95,
+            bfmessage = TRUE,
+            k = 2,
+            marginal = TRUE,
+            xsidefill = "#009E73",
+            ysidefill = "#D55E00",
+            pointsize = 3,
+            pointalpha = 0.4,
+            smoothlinesize = 1.5,
+            smoothlinecolor = "blue", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -73,6 +83,56 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "resultssubtitle",
                 resultssubtitle,
                 default=TRUE)
+            private$..conflevel <- jmvcore::OptionNumber$new(
+                "conflevel",
+                conflevel,
+                default=0.95,
+                min=0,
+                max=1)
+            private$..bfmessage <- jmvcore::OptionBool$new(
+                "bfmessage",
+                bfmessage,
+                default=TRUE)
+            private$..k <- jmvcore::OptionInteger$new(
+                "k",
+                k,
+                default=2,
+                min=0,
+                max=5)
+            private$..marginal <- jmvcore::OptionBool$new(
+                "marginal",
+                marginal,
+                default=TRUE)
+            private$..xsidefill <- jmvcore::OptionString$new(
+                "xsidefill",
+                xsidefill,
+                default="#009E73")
+            private$..ysidefill <- jmvcore::OptionString$new(
+                "ysidefill",
+                ysidefill,
+                default="#D55E00")
+            private$..pointsize <- jmvcore::OptionNumber$new(
+                "pointsize",
+                pointsize,
+                default=3,
+                min=0.1,
+                max=10)
+            private$..pointalpha <- jmvcore::OptionNumber$new(
+                "pointalpha",
+                pointalpha,
+                default=0.4,
+                min=0,
+                max=1)
+            private$..smoothlinesize <- jmvcore::OptionNumber$new(
+                "smoothlinesize",
+                smoothlinesize,
+                default=1.5,
+                min=0.1,
+                max=5)
+            private$..smoothlinecolor <- jmvcore::OptionString$new(
+                "smoothlinecolor",
+                smoothlinecolor,
+                default="blue")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -83,6 +143,16 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..resultssubtitle)
+            self$.addOption(private$..conflevel)
+            self$.addOption(private$..bfmessage)
+            self$.addOption(private$..k)
+            self$.addOption(private$..marginal)
+            self$.addOption(private$..xsidefill)
+            self$.addOption(private$..ysidefill)
+            self$.addOption(private$..pointsize)
+            self$.addOption(private$..pointalpha)
+            self$.addOption(private$..smoothlinesize)
+            self$.addOption(private$..smoothlinecolor)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -93,7 +163,17 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
         originaltheme = function() private$..originaltheme$value,
-        resultssubtitle = function() private$..resultssubtitle$value),
+        resultssubtitle = function() private$..resultssubtitle$value,
+        conflevel = function() private$..conflevel$value,
+        bfmessage = function() private$..bfmessage$value,
+        k = function() private$..k$value,
+        marginal = function() private$..marginal$value,
+        xsidefill = function() private$..xsidefill$value,
+        ysidefill = function() private$..ysidefill$value,
+        pointsize = function() private$..pointsize$value,
+        pointalpha = function() private$..pointalpha$value,
+        smoothlinesize = function() private$..smoothlinesize$value,
+        smoothlinecolor = function() private$..smoothlinecolor$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -103,7 +183,17 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..xtitle = NA,
         ..ytitle = NA,
         ..originaltheme = NA,
-        ..resultssubtitle = NA)
+        ..resultssubtitle = NA,
+        ..conflevel = NA,
+        ..bfmessage = NA,
+        ..k = NA,
+        ..marginal = NA,
+        ..xsidefill = NA,
+        ..ysidefill = NA,
+        ..pointsize = NA,
+        ..pointalpha = NA,
+        ..smoothlinesize = NA,
+        ..smoothlinecolor = NA)
 )
 
 jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -138,7 +228,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`${group} vs {dep} by {grvar}`",
+                title="`${dep} vs {group} by {grvar}`",
                 width=1600,
                 height=600,
                 renderFun=".plot2",
@@ -147,7 +237,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`${group} vs {dep}`",
+                title="`${dep} vs {group}`",
                 width=800,
                 height=600,
                 renderFun=".plot",
@@ -176,11 +266,50 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Scatter Plot
 #'
+#' Wrapper Function for ggstatsplot::ggscatterstats and
+#' ggstatsplot::grouped_ggscatterstats to generate scatter plots
+#' with correlation analysis and optional marginal distributions.
 #' 
 #'
 #' @examples
 #' \donttest{
-#' # example will be added
+#' # Load test data
+#' data("mtcars")
+#'
+#' # Basic scatter plot with correlation
+#' jjscatterstats(
+#'   data = mtcars,
+#'   dep = "mpg",       # x-axis
+#'   group = "hp",      # y-axis
+#'   typestatistics = "parametric",
+#'   conflevel = 0.95,
+#'   k = 2
+#' )
+#'
+#' # Scatter plot with marginal histograms
+#' jjscatterstats(
+#'   data = mtcars,
+#'   dep = "mpg",
+#'   group = "hp",
+#'   marginal = TRUE,
+#'   xsidefill = "#009E73",
+#'   ysidefill = "#D55E00",
+#'   pointsize = 4,
+#'   pointalpha = 0.6,
+#'   smoothlinesize = 2,
+#'   smoothlinecolor = "red"
+#' )
+#'
+#' # Grouped scatter plot by number of cylinders
+#' jjscatterstats(
+#'   data = mtcars,
+#'   dep = "mpg",
+#'   group = "hp",
+#'   grvar = "cyl",
+#'   typestatistics = "nonparametric",
+#'   bfmessage = FALSE,
+#'   resultssubtitle = TRUE
+#' )
 #'}
 #' @param data The data as a data frame.
 #' @param dep .
@@ -192,6 +321,20 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param ytitle .
 #' @param originaltheme .
 #' @param resultssubtitle .
+#' @param conflevel Confidence level for confidence intervals (between 0 and
+#'   1).
+#' @param bfmessage Whether to display Bayes Factor in the subtitle when using
+#'   Bayesian analysis.
+#' @param k Number of decimal places for displaying statistics in the
+#'   subtitle.
+#' @param marginal Whether to display marginal histogram plots on the axes
+#'   using ggside.
+#' @param xsidefill Fill color for x-axis marginal histogram.
+#' @param ysidefill Fill color for y-axis marginal histogram.
+#' @param pointsize Size of the scatter plot points.
+#' @param pointalpha Transparency level for scatter plot points.
+#' @param smoothlinesize Width of the regression/smooth line.
+#' @param smoothlinecolor Color of the regression/smooth line.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -210,7 +353,17 @@ jjscatterstats <- function(
     xtitle = "",
     ytitle = "",
     originaltheme = FALSE,
-    resultssubtitle = TRUE) {
+    resultssubtitle = TRUE,
+    conflevel = 0.95,
+    bfmessage = TRUE,
+    k = 2,
+    marginal = TRUE,
+    xsidefill = "#009E73",
+    ysidefill = "#D55E00",
+    pointsize = 3,
+    pointalpha = 0.4,
+    smoothlinesize = 1.5,
+    smoothlinecolor = "blue") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjscatterstats requires jmvcore to be installed (restart may be required)")
@@ -236,7 +389,17 @@ jjscatterstats <- function(
         xtitle = xtitle,
         ytitle = ytitle,
         originaltheme = originaltheme,
-        resultssubtitle = resultssubtitle)
+        resultssubtitle = resultssubtitle,
+        conflevel = conflevel,
+        bfmessage = bfmessage,
+        k = k,
+        marginal = marginal,
+        xsidefill = xsidefill,
+        ysidefill = ysidefill,
+        pointsize = pointsize,
+        pointalpha = pointalpha,
+        smoothlinesize = smoothlinesize,
+        smoothlinecolor = smoothlinecolor)
 
     analysis <- jjscatterstatsClass$new(
         options = options,

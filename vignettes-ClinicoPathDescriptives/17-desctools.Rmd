@@ -29,6 +29,22 @@ keywords:
 output: html_document
 ---
 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>", 
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 12,
+  fig.height = 8,
+  dpi = 300,
+  eval = FALSE
+)
+```
+
+
 ## Introduction
 
 The `desctools` function in ClinicoPath provides access to advanced statistical tests from the DescTools R package, specifically designed for clinical and epidemiological research. This comprehensive tool offers three major categories of statistical analysis:
@@ -54,7 +70,7 @@ The desctools function works with various data types:
 - **Goodness of Fit**: Requires fitted probabilities and observed outcomes, or continuous variables for normality testing
 - **Categorical Tests**: Requires categorical variables, ordered exposures, and binary outcomes
 
-```{r setup}
+```{r setup 2}
 #| message: false
 #| warning: false
 

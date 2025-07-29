@@ -4,7 +4,24 @@
 \alias{jjcorrmat}
 \title{Correlation Matrix}
 \usage{
-jjcorrmat(data, dep, grvar, typestatistics = "parametric")
+jjcorrmat(
+  data,
+  dep,
+  grvar,
+  typestatistics = "parametric",
+  matrixtype = "upper",
+  matrixmethod = "square",
+  siglevel = 0.05,
+  conflevel = 0.95,
+  padjustmethod = "holm",
+  k = 2,
+  lowcolor = "#E69F00",
+  midcolor = "white",
+  highcolor = "#009E73",
+  title = "",
+  subtitle = "",
+  caption = ""
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -18,6 +35,33 @@ matrices for each level of the grouping variable.}
 \item{typestatistics}{Type of correlation analysis to perform. 'parametric'
 uses Pearson correlation, 'nonparametric' uses Spearman's rho, 'robust'
 uses percentage bend correlation, 'bayes' computes Bayes factors.}
+
+\item{matrixtype}{Display upper triangular, lower triangular or full
+matrix.}
+
+\item{matrixmethod}{The visualization method of correlation matrix to be
+used.}
+
+\item{siglevel}{Significance level for marking correlations as
+insignificant.}
+
+\item{conflevel}{Confidence level for confidence intervals.}
+
+\item{padjustmethod}{Adjustment method for multiple comparisons.}
+
+\item{k}{Number of decimal places for displaying correlation coefficients.}
+
+\item{lowcolor}{Color for low (negative) correlation values.}
+
+\item{midcolor}{Color for mid (zero) correlation values.}
+
+\item{highcolor}{Color for high (positive) correlation values.}
+
+\item{title}{Title for the correlation matrix plot.}
+
+\item{subtitle}{Subtitle for the correlation matrix plot.}
+
+\item{caption}{Caption for the correlation matrix plot.}
 }
 \value{
 A results object containing:
@@ -28,10 +72,44 @@ A results object containing:
 }
 }
 \description{
-Correlation Matrix
+Wrapper Function for ggstatsplot::ggcorrmat and
+ggstatsplot::grouped_ggcorrmat to generate correlation matrix
+visualizations with significance testing.
 }
 \examples{
 \donttest{
-# Load test data\n            data(jjcorrmat_test_data)\n            \n            # Basic correlation matrix\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\", \"tumor_size_mm\"),\n              typestatistics = \"parametric\"\n            )\n            \n            # Grouped correlation matrix by tumor grade\n            jjcorrmat(\n              data = jjcorrmat_test_data,\n              dep = c(\"ki67_percent\", \"p53_score\", \"her2_intensity\"),\n              grvar = \"tumor_grade\",\n              typestatistics = \"nonparametric\"\n            )
+# Load test data
+data("mtcars")
+
+# Basic correlation matrix with defaults
+jjcorrmat(
+  data = mtcars,
+  dep = c("mpg", "hp", "wt", "qsec"),
+  typestatistics = "parametric"
+)
+
+# Customized correlation matrix
+jjcorrmat(
+  data = mtcars,
+  dep = c("mpg", "hp", "wt", "qsec", "disp"),
+  typestatistics = "nonparametric",
+  matrixtype = "lower",
+  matrixmethod = "circle",
+  padjustmethod = "bonferroni",
+  k = 3,
+  lowcolor = "blue",
+  midcolor = "white",
+  highcolor = "red",
+  title = "Motor Trend Car Correlations"
+)
+
+# Grouped correlation matrix by number of cylinders
+jjcorrmat(
+  data = mtcars,
+  dep = c("mpg", "hp", "wt", "qsec"),
+  grvar = "cyl",
+  typestatistics = "robust",
+  siglevel = 0.01
+)
 }
 }
