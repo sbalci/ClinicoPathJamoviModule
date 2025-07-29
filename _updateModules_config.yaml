@@ -17,10 +17,10 @@ modes:
   WIP: false
 
   # File copying control modes
-  copy_vignettes: true       # Enable/disable vignette file copying
-  copy_data_files: true      # Enable/disable data file copying
-  copy_test_files: true      # Enable/disable test file copying
-  copy_r_files: true         # Enable/disable R utility file copying
+  copy_vignettes: false       # Enable/disable vignette file copying
+  copy_data_files: false      # Enable/disable data file copying
+  copy_test_files: false      # Enable/disable test file copying
+  copy_r_files: false         # Enable/disable R utility file copying
   use_legacy_copying: false   # Use legacy hardcoded file lists instead of config-based copying
 
 # Required packages for validation
@@ -120,7 +120,7 @@ modules:
       - "jamovi"
 
   meddecide:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
     menuGroup_pattern: "menuGroup: meddecide$"
     menuGroup_pattern_wip: "menuGroup: meddecide"
@@ -164,7 +164,7 @@ modules:
       - "tests/testthat"
 
   jsurvival:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     menuGroup_pattern: "menuGroup: Survival$"
     menuGroup_pattern_wip: "menuGroup: Survival"
@@ -202,7 +202,7 @@ modules:
       - "jamovi"
 
   ClinicoPathDescriptives:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     menuGroup_pattern: "menuGroup: Exploration$"
     menuGroup_pattern_wip: "menuGroup: Exploration"
