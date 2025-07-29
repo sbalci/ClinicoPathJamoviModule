@@ -15,15 +15,22 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
+ggswim_available <- FALSE
+
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 8,
   fig.height = 6,
   warning = FALSE,
-  message = FALSE
+  message = FALSE,
+  eval = FALSE
 )
+```
 
+
+```{r setup 2, include = FALSE}
 # Load required packages
 library(ClinicoPath)
 library(ggplot2)
