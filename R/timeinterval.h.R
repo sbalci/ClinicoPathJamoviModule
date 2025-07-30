@@ -156,7 +156,6 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="todo",
                 title="Getting Started",
-                visible="(dx_date === null || fu_date === null)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeInfo",
@@ -165,12 +164,10 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="qualityAssessment",
                 title="Data Quality Assessment",
-                visible="(dx_date !== null && fu_date !== null)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
                 title="Statistical Summary & Person-Time Analysis",
-                visible="(dx_date !== null && fu_date !== null)"))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculated_time",

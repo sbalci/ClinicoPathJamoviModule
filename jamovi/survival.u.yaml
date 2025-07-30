@@ -39,7 +39,7 @@ children:
     stretchFactor: 1
     children:
       - type: Label
-        label: Time Interval
+        label: Time Interval Calculation
         fitToGrid: true
         stretchFactor: 1
         children:
@@ -50,6 +50,7 @@ children:
               - type: CheckBox
                 name: tint
                 fitToGrid: true
+                label: Calculate time from dates
               - type: Label
                 label: Date Variables
                 fitToGrid: true
@@ -60,6 +61,7 @@ children:
                     stretchFactor: 1
                     children:
                       - type: TargetLayoutBox
+                        label: Diagnosis Date
                         children:
                           - type: VariablesListBox
                             name: dxdate
@@ -68,6 +70,7 @@ children:
                             fitToGrid: true
                             stretchFactor: 1
                       - type: TargetLayoutBox
+                        label: Follow-up Date
                         children:
                           - type: VariablesListBox
                             name: fudate
@@ -76,22 +79,24 @@ children:
                             fitToGrid: true
                             stretchFactor: 1
               - type: Label
-                label: Time Type
+                label: Time Type Settings
                 fitToGrid: true
                 stretchFactor: 1
                 children:
                   - type: LayoutBox
                     margin: large
-                    fitToGrid: true
+                    stretchFactor: 1
                     children:
                       - type: ComboBox
                         name: timetypedata
                         enable: (tint)
+                        label: Input Time Type
                       - type: ComboBox
                         name: timetypeoutput
+                        label: Output Time Type
                         enable: (tint)
       - type: Label
-        label: Landmark Time
+        label: Landmark Analysis
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -99,188 +104,247 @@ children:
             children:
               - type: CheckBox
                 name: uselandmark
+                label: Use Landmark Time
                 children:
                   - type: TextBox
                     name: landmark
                     format: number
+                    label: Landmark Time
                     enable: (uselandmark)
-      - type: Label
-        label: Calculated Time to Data
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: Output
-                name: calculatedtime
-                enable: (tint)
+
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
     children:
       - type: Label
-        label: Multiple Event Levels
-        fitToGrid: true
-        children:
-          - type: CheckBox
-            name: multievent
-            enable: (outcome)
-          - type: LayoutBox
-            fitToGrid: true
-            children:
-              - type: LevelSelector
-                name: dod
-                enable: (outcome && multievent)
-              - type: LevelSelector
-                name: dooc
-                enable: (outcome && multievent)
-              - type: LevelSelector
-                name: awd
-                enable: (outcome && multievent)
-              - type: LevelSelector
-                name: awod
-                enable: (outcome && multievent)
-      - type: Label
-        label: Analysis Type
-        children:
-          - type: ComboBox
-            name: analysistype
-            enable: (outcome && multievent)
-      - type: Label
-        label: Calculated Outcome to Data
+        label: Multiple Event Configuration
         fitToGrid: true
         children:
           - type: LayoutBox
             margin: large
             children:
-              - type: Output
-                name: outcomeredefined
+              - type: CheckBox
+                name: multievent
+                enable: (outcome)
+                label: Enable Multiple Event Analysis
+              - type: Label
+                label: Event Level Assignment
+                children:
+                  - type: LayoutBox
+                    margin: large
+                    children:
+                      - type: LevelSelector
+                        name: dod
+                        label: Dead of Disease
+                        enable: (outcome && multievent)
+                      - type: LevelSelector
+                        name: dooc
+                        label: Dead of Other Causes
+                        enable: (outcome && multievent)
+                      - type: LevelSelector
+                        name: awd
+                        label: Alive with Disease
+                        enable: (outcome && multievent)
+                      - type: LevelSelector
+                        name: awod
+                        label: Alive without Disease
+                        enable: (outcome && multievent)
+              - type: ComboBox
+                name: analysistype
                 enable: (outcome && multievent)
+                label: Analysis Type
   - type: CollapseBox
-    label: Pairwise Comparisons
+    label: Statistical Analysis
     collapsed: true
     children:
       - type: Label
-        label: Pairwise comparisons
+        label: Cox Regression Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: stratified_cox
+                label: Stratified Cox Model
+              - type: CheckBox
+                name: residual_diagnostics
+                label: Residual Diagnostics
+              - type: CheckBox
+                name: loglog
+                label: Log-Log Plot
+              - type: VariableSupplier
+                persistentItems: false
+                stretchFactor: 1
+                children:
+                  - type: TargetLayoutBox
+                    label: Stratification Variable
+                    children:
+                      - type: VariablesListBox
+                        name: strata_variable
+                        maxItemCount: 1
+                        isTarget: true
+      - type: Label
+        label: Pairwise Comparisons
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: pw
+                label: Perform Pairwise Comparisons
               - type: ComboBox
                 name: padjustmethod
                 enable: (pw)
+                label: P-value Adjustment Method
+      - type: Label
+        label: Restricted Mean Survival Time
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: rmst_analysis
+                label: RMST Analysis
+              - type: TextBox
+                name: rmst_tau
+                format: number
+                label: Tau (Restriction Time)
+
   - type: CollapseBox
     label: Plots
     collapsed: true
     children:
       - type: Label
-        label: Plots
-        fitToGrid: true
+        label: Plot Types
         children:
           - type: LayoutBox
-            fitToGrid: true
+            margin: large
             children:
               - type: CheckBox
-                name: ph_cox
-              - type: CheckBox
                 name: sc
+                label: Survival Curves
               - type: CheckBox
                 name: kmunicate
+                label: KMunicate Plot
               - type: CheckBox
                 name: ce
+                label: Cumulative Events
               - type: CheckBox
                 name: ch
+                label: Cumulative Hazard
+              - type: CheckBox
+                name: ph_cox
+                label: Proportional Hazards Plot
       - type: Label
         label: Plot Arguments
         children:
           - type: LayoutBox
             fitToGrid: true
             children:
+              - type: CheckBox
+                name: ci95
+                label: 95% Confidence Intervals
+              - type: CheckBox
+                name: risktable
+                label: Risk Table
+              - type: CheckBox
+                name: censored
+                label: Show Censored
+              - type: CheckBox
+                name: pplot
+                label: Show P-values
               - type: TextBox
                 name: endplot
                 format: number
+                label: Plot End Time
               - type: TextBox
                 name: byplot
                 format: number
+                label: Time Interval
               - type: TextBox
                 name: ybegin_plot
                 format: number
+                label: Y-axis Start
               - type: TextBox
                 name: yend_plot
                 format: number
-              - type: CheckBox
-                name: ci95
-              - type: CheckBox
-                name: risktable
-              - type: CheckBox
-                name: censored
-              - type: CheckBox
-                name: pplot
+                label: Y-axis End
               - type: ComboBox
                 name: medianline
+                label: Median Survival Line
+
   - type: CollapseBox
     label: Survival Tables
     collapsed: true
     children:
       - type: Label
-        label: Survival table
+        label: Table Configuration
         children:
-          - type: TextBox
-            name: cutp
-            format: string
-            width: large
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: cutp
+                format: string
+                width: large
+                label: Time Points for Table
+
   - type: CollapseBox
     label: Person-Time Analysis
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Incidence Rate Analysis
         children:
-          - type: CheckBox
-            name: person_time
-          - type: TextBox
-            name: time_intervals
-            format: string
-            enable: (person_time)
-            width: large
-          - type: TextBox
-            name: rate_multiplier
-            format: number
-  - type: LayoutBox
-    margin: large
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: person_time
+                label: Calculate Person-Time Rates
+              - type: TextBox
+                name: time_intervals
+                format: string
+                enable: (person_time)
+                width: large
+                label: Time Intervals
+              - type: TextBox
+                name: rate_multiplier
+                format: number
+                label: Rate Multiplier
+
+  - type: CollapseBox
+    label: Data Export Options
+    collapsed: true
     children:
-      - type: CheckBox
-        name: rmst_analysis
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: rmst_tau
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: stratified_cox
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Stratification Variable
+      - type: Label
+        label: Export Settings
         children:
-          - type: VariablesListBox
-            name: strata_variable
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Output
+                name: export_survival_data
+                label: Export Estimated Survival
+              - type: Output
+                name: calculatedtime
+                label: Add Calculated Time to Data
+                enable: (tint)
+              - type: Output
+                name: outcomeredefined
+                label: Add Redefined Outcome to Data
+                enable: (multievent)
+
+  - type: CollapseBox
+    label: Analysis Explanations
+    collapsed: true
     children:
-      - type: CheckBox
-        name: residual_diagnostics
-      - type: CheckBox
-        name: export_survival_data
-      - type: CheckBox
-        name: loglog
+      - type: Label
+        label: Help & Interpretation
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showExplanations
+                label: Show Analysis Explanations

@@ -37,6 +37,15 @@ items:
 
 
 
+    # Median Survival Explanation
+    - name: medianSurvivalExplanation
+      title: Understanding Median Survival Analysis
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
+
     - name:  medianSummary
       # title: Median Survival Summary and Table
       title: '`Median Survival Summary and Table - ${explanatory}`'
@@ -103,6 +112,15 @@ items:
           - tint
           - multievent
 
+
+    # Cox Regression Explanation
+    - name: coxRegressionExplanation
+      title: Understanding Cox Regression Analysis
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
 
     - name:  coxSummary
       # title: Cox Regression Summary and Table
@@ -209,6 +227,15 @@ items:
           - multievent
 
 
+    # Survival Tables Explanation
+    - name: survivalTablesExplanation
+      title: Understanding Survival Probability Tables
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
+
     - name:  survTableSummary
       # title: '1, 3, 5-yr Survival Summary and Table'
       title: '`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`'
@@ -271,6 +298,16 @@ items:
           - tint
           - multievent
 
+
+    # Person-Time Analysis Explanation
+    - name: personTimeExplanation
+      title: Understanding Person-Time Analysis
+      type: Html
+      visible: (person_time && showExplanations)
+      clearWith:
+          - person_time
+          - explanatory
+          - outcome
 
     - name: personTimeTable
       title: 'Person-Time Analysis'
@@ -336,6 +373,16 @@ items:
         - tint
         - multievent
 
+    # RMST Analysis Explanation
+    - name: rmstExplanation
+      title: Understanding Restricted Mean Survival Time (RMST)
+      type: Html
+      visible: (rmst_analysis && showExplanations)
+      clearWith:
+          - rmst_analysis
+          - explanatory
+          - outcome
+
     - name: rmstTable
       title: 'Restricted Mean Survival Time'
       type: Table
@@ -386,6 +433,16 @@ items:
         - outcome
         - outcomeLevel
         - elapsedtime
+
+    # Residual Diagnostics Explanation
+    - name: residualDiagnosticsExplanation
+      title: Understanding Cox Model Residual Diagnostics
+      type: Html
+      visible: (residual_diagnostics && showExplanations)
+      clearWith:
+          - residual_diagnostics
+          - explanatory
+          - outcome
 
     - name: residualsTable
       title: 'Cox Model Residuals'
@@ -491,6 +548,20 @@ items:
 
 
 
+    # Survival Plots Explanation
+    - name: survivalPlotsExplanation
+      title: Understanding Survival Curves and Plots
+      type: Html
+      visible: ((sc || ce || ch || kmunicate || loglog) && showExplanations)
+      clearWith:
+          - sc
+          - ce
+          - ch
+          - kmunicate
+          - loglog
+          - explanatory
+          - outcome
+
     - name: plot
       title: '`Survival Plot - ${explanatory}`'
       type: Image
@@ -517,6 +588,7 @@ items:
           - tint
           - multievent
           - pplot
+          - medianline
 
 
 
@@ -641,9 +713,10 @@ items:
 
 
 
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
+    - name:  mydataview_multipleCutoffs
+      title: mydataview_multipleCutoffs
+      type:  Preformatted
+      visible: (multiple_cutoffs)
 
 
 

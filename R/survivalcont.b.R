@@ -661,6 +661,25 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
 
+                ## Run Multiple Cut-offs Analysis FIRST ----
+                multicut_results <- NULL
+                message(paste("multiple_cutoffs option:", self$options$multiple_cutoffs))
+                if (self$options$multiple_cutoffs) {
+                    message("Starting multiple cutoffs analysis...")
+                    # Use the original clean data, before any single cutoff processing
+                    multicut_results <- private$.multipleCutoffs(results)
+                    if (!is.null(multicut_results)) {
+                        private$.multipleCutoffTables(multicut_results)
+                        
+                        # Add multiple cutoff groups to data
+                        if (self$options$calculatedmulticut &&
+                            self$results$calculatedmulticut$isNotFilled()) {
+                            self$results$calculatedmulticut$setRowNums(rownames(results$cleanData))
+                            self$results$calculatedmulticut$setValues(multicut_results$risk_groups)
+                        }
+                    }
+                }
+
                 # self$results$mydataview$setContent(
                 #     list(
                 #         res.cut = res.cut,
@@ -678,19 +697,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 ## Run life table cutoff ----
 
                 private$.lifetablecutoff(cutoffdata)
-
-                ## Run Multiple Cut-offs Analysis ----
-                multicut_results <- NULL
-                if (self$options$multiple_cutoffs) {
-                    multicut_results <- private$.multipleCutoffs(results)
-                    private$.multipleCutoffTables(multicut_results)
-                    
-                    # Add multiple cutoff groups to data
-                    if (self$options$calculatedmulticut &&
-                        self$results$calculatedmulticut$isNotFilled()) {
-                        self$results$calculatedmulticut$setValues(multicut_results$risk_groups)
-                    }
-                }
 
 
 
@@ -1697,45 +1703,96 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Multiple Cut-offs Analysis ----
             ,
             .multipleCutoffs = function(results) {
-                mytime <- results$name1time
-                myoutcome <- results$name2outcome
-                mycontexpl <- results$name3contexpl
-                mydata <- results$cleanData
-                
-                # Convert to numeric
-                mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
-                
-                # Extract continuous variable values
-                cont_var <- mydata[[mycontexpl]]
-                cont_var <- cont_var[!is.na(cont_var)]
-                
-                # Determine number of cutoffs
-                num_cuts <- switch(self$options$num_cutoffs,
-                                   "two" = 2,
-                                   "three" = 3,
-                                   "four" = 4)
-                
-                # Calculate cutoffs based on method
-                cutoff_values <- switch(self$options$cutoff_method,
-                    "quantile" = private$.quantileCutoffs(cont_var, num_cuts),
-                    "recursive" = private$.recursiveCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts),
-                    "tree" = private$.treeCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts),
-                    "minpval" = private$.minPvalueCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts)
-                )
-                
-                # Create risk groups
-                risk_groups <- private$.createRiskGroups(mydata[[mycontexpl]], cutoff_values)
-                
-                # Calculate survival statistics for each group
-                group_stats <- private$.calculateGroupStats(mydata, mytime, myoutcome, risk_groups)
-                
-                return(list(
-                    cutoff_values = cutoff_values,
-                    risk_groups = risk_groups,
-                    group_stats = group_stats,
-                    method = self$options$cutoff_method,
-                    num_cuts = num_cuts
-                ))
+                tryCatch({
+                    mytime <- results$name1time
+                    myoutcome <- results$name2outcome
+                    mycontexpl <- results$name3contexpl
+                    mydata <- results$cleanData
+                    
+                    # Convert to numeric
+                    mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+                    
+                    # Extract continuous variable values
+                    if (!mycontexpl %in% names(mydata)) {
+                        warning(paste("Variable", mycontexpl, "not found in data. Available columns:", paste(names(mydata), collapse = ", ")))
+                        return(NULL)
+                    }
+                    
+                    cont_var <- mydata[[mycontexpl]]
+                    if (is.null(cont_var)) {
+                        warning(paste("Variable", mycontexpl, "is NULL"))
+                        return(NULL)
+                    }
+                    
+                    cont_var <- cont_var[!is.na(cont_var)]
+                    
+                    # Check if we have enough data
+                    if (length(cont_var) < 10) {
+                        warning("Insufficient data for multiple cutoffs analysis")
+                        return(NULL)
+                    }
+                    
+
+
+                self$results$mydataview_multipleCutoffs$setContent(
+                                    list(
+                                        mytime = mytime,
+                                        myoutcome = myoutcome,
+                                        mycontexpl = mycontexpl,
+                                        mydata = mydata,
+                                        cont_var = cont_var
+                                        )
+                                )
+
+
+
+                    # Debug information
+                    message(paste("Data columns:", paste(names(mydata), collapse = ", ")))
+                    message(paste("Trying to access variable:", mycontexpl))
+                    message(paste("Variable exists:", mycontexpl %in% names(mydata)))
+                    if (mycontexpl %in% names(mydata)) {
+                        message(paste("Multiple cutoffs analysis: n =", length(cont_var), 
+                                    "method =", self$options$cutoff_method,
+                                    "num_cuts =", self$options$num_cutoffs))
+                    }
+                    
+                    # Determine number of cutoffs
+                    num_cuts <- switch(self$options$num_cutoffs,
+                                       "two" = 2,
+                                       "three" = 3,
+                                       "four" = 4)
+                    
+                    # Calculate cutoffs based on method
+                    cutoff_values <- switch(self$options$cutoff_method,
+                        "quantile" = private$.quantileCutoffs(cont_var, num_cuts),
+                        "recursive" = private$.recursiveCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts),
+                        "tree" = private$.treeCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts),
+                        "minpval" = private$.minPvalueCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts)
+                    )
+                    
+                    # Check if cutoffs were successfully calculated
+                    if (is.null(cutoff_values) || length(cutoff_values) == 0) {
+                        warning("Failed to calculate cutoff values")
+                        return(NULL)
+                    }
+                    
+                    # Create risk groups
+                    risk_groups <- private$.createRiskGroups(mydata[[mycontexpl]], cutoff_values)
+                    
+                    # Calculate survival statistics for each group
+                    group_stats <- private$.calculateGroupStats(mydata, mytime, myoutcome, risk_groups)
+                    
+                    return(list(
+                        cutoff_values = cutoff_values,
+                        risk_groups = risk_groups,
+                        group_stats = group_stats,
+                        method = self$options$cutoff_method,
+                        num_cuts = num_cuts
+                    ))
+                }, error = function(e) {
+                    warning(paste("Error in multiple cutoffs analysis:", e$message))
+                    return(NULL)
+                })
             }
 
             # Quantile-based cutoffs ----
@@ -1896,18 +1953,28 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (length(cutoffs) == 2) {
                     groups <- ifelse(cont_var <= cutoffs[1], "Low Risk",
                                    ifelse(cont_var <= cutoffs[2], "Medium Risk", "High Risk"))
+                    level_order <- c("Low Risk", "Medium Risk", "High Risk")
                 } else if (length(cutoffs) == 3) {
                     groups <- ifelse(cont_var <= cutoffs[1], "Low Risk",
                                    ifelse(cont_var <= cutoffs[2], "Medium-Low Risk",
                                          ifelse(cont_var <= cutoffs[3], "Medium-High Risk", "High Risk")))
+                    level_order <- c("Low Risk", "Medium-Low Risk", "Medium-High Risk", "High Risk")
                 } else if (length(cutoffs) == 4) {
                     groups <- ifelse(cont_var <= cutoffs[1], "Very Low Risk",
                                    ifelse(cont_var <= cutoffs[2], "Low Risk",
                                          ifelse(cont_var <= cutoffs[3], "Medium Risk",
                                                ifelse(cont_var <= cutoffs[4], "High Risk", "Very High Risk"))))
+                    level_order <- c("Very Low Risk", "Low Risk", "Medium Risk", "High Risk", "Very High Risk")
+                } else {
+                    # Fallback for other numbers of cutoffs
+                    groups <- cut(cont_var, breaks = c(-Inf, cutoffs, Inf), 
+                                labels = paste("Group", 1:(length(cutoffs) + 1)))
+                    level_order <- paste("Group", 1:(length(cutoffs) + 1))
                 }
                 
-                return(factor(groups, levels = unique(groups[order(cont_var)])))
+                # Filter level_order to only include levels that actually exist in the data
+                existing_levels <- intersect(level_order, unique(groups))
+                return(factor(groups, levels = existing_levels))
             }
 
             # Calculate survival statistics by group ----
@@ -1925,13 +1992,33 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         
                         km_fit <- survival::survfit(formula, data = group_data)
                         
+                        # Extract median survival statistics safely
+                        surv_summary <- summary(km_fit)
+                        median_val <- if (!is.null(surv_summary$table)) {
+                            surv_summary$table["median"]
+                        } else {
+                            NA
+                        }
+                        
+                        lower_val <- if (!is.null(surv_summary$table)) {
+                            surv_summary$table["0.95LCL"]
+                        } else {
+                            NA
+                        }
+                        
+                        upper_val <- if (!is.null(surv_summary$table)) {
+                            surv_summary$table["0.95UCL"]
+                        } else {
+                            NA
+                        }
+                        
                         stats_list[[group]] <- list(
                             group = group,
                             n = nrow(group_data),
                             events = sum(group_data[[myoutcome]], na.rm = TRUE),
-                            median_surv = summary(km_fit)$table["median"],
-                            median_lower = summary(km_fit)$table["0.95LCL"],
-                            median_upper = summary(km_fit)$table["0.95UCL"]
+                            median_surv = as.numeric(median_val),
+                            median_lower = as.numeric(lower_val),
+                            median_upper = as.numeric(upper_val)
                         )
                     }
                 }
@@ -1942,13 +2029,27 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Populate multiple cutoffs tables ----
             ,
             .multipleCutoffTables = function(multicut_results) {
+                message("multipleCutoffTables called")
+                
+                # Check if results are valid
+                if (is.null(multicut_results) || 
+                    is.null(multicut_results$cutoff_values) ||
+                    is.null(multicut_results$group_stats)) {
+                    message("multicut_results is null or invalid")
+                    return()
+                }
+                
+                message(paste("Populating tables with", length(multicut_results$cutoff_values), "cutoffs"))
+                
                 # Populate cut-off points table
                 cutoff_table <- self$results$multipleCutTable
+                cutoff_table$deleteRows()  # Clear existing rows
+                
                 for (i in seq_along(multicut_results$cutoff_values)) {
                     cutoff_table$addRow(rowKey = i, values = list(
                         cutpoint_number = i,
-                        cutpoint_value = multicut_results$cutoff_values[i],
-                        group_created = paste("Cut", i),
+                        cutpoint_value = round(multicut_results$cutoff_values[i], 2),
+                        group_created = paste("Group", i + 1),
                         logrank_statistic = NA,  # Will be calculated separately
                         p_value = NA
                     ))
@@ -1956,16 +2057,20 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 
                 # Populate median survival table
                 median_table <- self$results$multipleMedianTable
+                median_table$deleteRows()  # Clear existing rows
+                
                 for (group_name in names(multicut_results$group_stats)) {
                     stats <- multicut_results$group_stats[[group_name]]
-                    median_table$addRow(rowKey = group_name, values = list(
-                        risk_group = stats$group,
-                        n_patients = stats$n,
-                        events = stats$events,
-                        median_survival = stats$median_surv,
-                        median_lower = stats$median_lower,
-                        median_upper = stats$median_upper
-                    ))
+                    if (!is.null(stats)) {
+                        median_table$addRow(rowKey = group_name, values = list(
+                            risk_group = stats$group,
+                            n_patients = stats$n,
+                            events = stats$events,
+                            median_survival = if(is.na(stats$median_surv)) "NR" else round(stats$median_surv, 1),
+                            median_lower = if(is.na(stats$median_lower)) NA else round(stats$median_lower, 1),
+                            median_upper = if(is.na(stats$median_upper)) NA else round(stats$median_upper, 1)
+                        ))
+                    }
                 }
                 
                 # TODO: Add survival estimates table population
