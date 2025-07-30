@@ -1,10 +1,10 @@
 ---
 name: timeinterval
 title: Comprehensive Time Interval Calculator
-menuGroup: SurvivalD
+menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: Advanced time interval analysis with quality assessment
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 
 description:

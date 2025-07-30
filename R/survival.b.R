@@ -791,6 +791,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     self$results$outcomeredefined$setRowNums(results$cleanData$row_names)
                     self$results$outcomeredefined$setValues(results$cleanData$CalculatedOutcome)
                 }
+                
+                # Populate explanations if enabled
+                private$.populateExplanations()
             }
 
             # RMST Analysis Function ----
@@ -1210,7 +1213,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .exportSurvivalData = function(results) {
                 # Export Kaplan-Meier estimates for external analysis
-                if (!self$options$export_survival_data) {
+                if (!self$options$export_survival_data || !self$results$survivalExport$isNotFilled()) {
                     return()
                 }
                 
@@ -1252,10 +1255,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     export_df$strata <- gsub(paste0(myfactor, "="), "", export_df$strata)
                     
                     # Add to results as exportable data
-                    if (self$results$survivalExport$isNotFilled()) {
-                        self$results$survivalExport$setRowNums(1:nrow(export_df))
-                        self$results$survivalExport$setValues(export_df)
-                    }
+                    self$results$survivalExport$setRowNums(rownames(export_df))
+                    self$results$survivalExport$setValues(export_df)
                     
                     # Create summary for user
                     export_summary <- paste0(
@@ -2051,6 +2052,129 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 print(plot8)
                 TRUE
 
+            }
+            
+            # Set Explanation Content Helper ----
+            ,
+            .setExplanationContent = function(outputName, htmlContent) {
+                if (self$options$showExplanations && !is.null(self$results[[outputName]])) {
+                    self$results[[outputName]]$setContent(htmlContent)
+                }
+            }
+            
+            # Populate Explanations ----
+            ,
+            .populateExplanations = function() {
+                if (!self$options$showExplanations) return()
+                
+                # Median Survival Explanation
+                private$.setExplanationContent("medianSurvivalExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
+                    <h4>Understanding Median Survival Analysis</h4>
+                    <p><strong>Median Survival Time:</strong> The time point at which 50% of patients have experienced the event (death, relapse, etc.).</p>
+                    <ul>
+                        <li><strong>Interpretation:</strong> If median survival is 24 months, half the patients survive longer than 24 months</li>
+                        <li><strong>Confidence Intervals:</strong> Provide uncertainty range around the median estimate</li>
+                        <li><strong>Not Reached (NR):</strong> Indicates that less than 50% of patients experienced the event during follow-up</li>
+                        <li><strong>Records vs Events:</strong> Records = total patients, Events = patients who experienced the outcome</li>
+                    </ul>
+                    <p><em>Clinical significance:</em> Median survival is robust to outliers and provides an easily interpretable summary of survival experience.</p>
+                </div>
+                ')
+                
+                # Cox Regression Explanation
+                private$.setExplanationContent("coxRegressionExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+                    <h4>Understanding Cox Regression Analysis</h4>
+                    <p><strong>Hazard Ratio (HR):</strong> Measures the relative risk of experiencing the event between groups.</p>
+                    <ul>
+                        <li><strong>HR = 1:</strong> No difference in hazard between groups</li>
+                        <li><strong>HR > 1:</strong> Higher hazard (worse prognosis) in the comparison group</li>
+                        <li><strong>HR < 1:</strong> Lower hazard (better prognosis) in the comparison group</li>
+                        <li><strong>95% CI:</strong> If confidence interval includes 1, the difference is not statistically significant</li>
+                        <li><strong>P-value:</strong> Tests whether HR significantly differs from 1</li>
+                    </ul>
+                    <p><em>Example:</em> HR = 2.0 means the hazard is twice as high in the comparison group (twice the risk of event).</p>
+                </div>
+                ')
+                
+                # Survival Tables Explanation
+                private$.setExplanationContent("survivalTablesExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
+                    <h4>Understanding Survival Probability Tables</h4>
+                    <p><strong>Survival Probabilities:</strong> Estimated proportion of patients surviving at specific time points.</p>
+                    <ul>
+                        <li><strong>Time:</strong> Specific time points (e.g., 12, 36, 60 months)</li>
+                        <li><strong>Number at Risk:</strong> Patients still under observation at that time point</li>
+                        <li><strong>Number of Events:</strong> Patients who experienced the outcome by that time</li>
+                        <li><strong>Survival %:</strong> Percentage of patients surviving past that time point</li>
+                        <li><strong>95% CI:</strong> Confidence interval for the survival estimate</li>
+                    </ul>
+                    <p><em>Clinical use:</em> These tables provide specific survival rates commonly reported in medical literature (1-year, 3-year, 5-year survival).</p>
+                </div>
+                ')
+                
+                # Person-Time Analysis Explanation
+                private$.setExplanationContent("personTimeExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
+                    <h4>Understanding Person-Time Analysis</h4>
+                    <p><strong>Person-Time:</strong> Accounts for varying follow-up durations by calculating total observation time.</p>
+                    <ul>
+                        <li><strong>Person-Years:</strong> Sum of follow-up time for all patients in the group</li>
+                        <li><strong>Incidence Rate:</strong> Events per unit of person-time (e.g., deaths per 100 person-years)</li>
+                        <li><strong>Rate Ratio:</strong> Compares incidence rates between groups</li>
+                        <li><strong>Confidence Intervals:</strong> Provide precision estimates for incidence rates</li>
+                    </ul>
+                    <p><em>Advantage:</em> More precise than simple event proportions when follow-up times vary significantly between patients.</p>
+                </div>
+                ')
+                
+                # RMST Explanation
+                private$.setExplanationContent("rmstExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #e2e3e5; border-left: 4px solid #6c757d;">
+                    <h4>Understanding Restricted Mean Survival Time (RMST)</h4>
+                    <p><strong>RMST:</strong> Average survival time up to a specified time horizon (τ).</p>
+                    <ul>
+                        <li><strong>Interpretation:</strong> Mean survival time within the observation period</li>
+                        <li><strong>Time Horizon (τ):</strong> Maximum follow-up time considered</li>
+                        <li><strong>Robust Measure:</strong> Less affected by tail behavior than median survival</li>
+                        <li><strong>Difference in RMST:</strong> Directly interpretable as difference in mean survival time</li>
+                    </ul>
+                    <p><em>When to use:</em> Particularly useful when median survival cannot be estimated (too few events) or when comparing survival over a specific time period.</p>
+                </div>
+                ')
+                
+                # Residual Diagnostics Explanation
+                private$.setExplanationContent("residualDiagnosticsExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #ffeaa7; border-left: 4px solid #fdcb6e;">
+                    <h4>Understanding Cox Model Residual Diagnostics</h4>
+                    <p><strong>Model Residuals:</strong> Help assess model fit and identify potential problems.</p>
+                    <ul>
+                        <li><strong>Martingale Residuals:</strong> Detect outliers and functional form issues (should scatter around 0)</li>
+                        <li><strong>Deviance Residuals:</strong> Standardized residuals for outlier detection (approximately normal if model fits)</li>
+                        <li><strong>Score Residuals:</strong> Assess influence of observations on regression coefficients</li>
+                        <li><strong>Schoenfeld Residuals:</strong> Test proportional hazards assumption (should be independent of time)</li>
+                    </ul>
+                    <p><em>Clinical interpretation:</em> Large residuals may indicate patients with unusual survival patterns or data quality issues.</p>
+                </div>
+                ')
+                
+                # Survival Plots Explanation
+                private$.setExplanationContent("survivalPlotsExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #d1ecf1; border-left: 4px solid #bee5eb;">
+                    <h4>Understanding Survival Curves and Plots</h4>
+                    <p><strong>Survival Curves:</strong> Visual representation of survival probability over time.</p>
+                    <ul>
+                        <li><strong>Survival Curves:</strong> Kaplan-Meier estimates showing probability of survival</li>
+                        <li><strong>Cumulative Events:</strong> Shows cumulative probability of experiencing the event</li>
+                        <li><strong>Cumulative Hazard:</strong> Displays cumulative hazard function over time</li>
+                        <li><strong>Log-Log Plot:</strong> Tests proportional hazards assumption (parallel lines expected)</li>
+                        <li><strong>Risk Tables:</strong> Show number of patients at risk at different time points</li>
+                        <li><strong>Confidence Bands:</strong> Indicate uncertainty around survival estimates</li>
+                    </ul>
+                    <p><em>Interpretation:</em> Curves that separate early suggest different survival experiences between groups.</p>
+                </div>
+                ')
             }
 
         )

@@ -7,7 +7,6 @@ items:
     - name: todo
       title: 'Getting Started'
       type: Html
-      visible: (dx_date === null || fu_date === null)
       
     - name: personTimeInfo
       title: Understanding Person-Time Analysis
@@ -16,12 +15,10 @@ items:
     - name: qualityAssessment
       title: Data Quality Assessment
       type: Html
-      visible: (dx_date !== null && fu_date !== null)
       
     - name: summary
       title: Statistical Summary & Person-Time Analysis
       type: Html
-      visible: (dx_date !== null && fu_date !== null)
       
     - name: calculated_time
       title: Calculated Time Intervals

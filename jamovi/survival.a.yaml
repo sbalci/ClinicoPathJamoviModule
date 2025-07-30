@@ -1,7 +1,7 @@
 ---
 name:  survival
 title: Survival Analysis
-menuGroup: SurvivalD
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
 version: '0.0.3'
@@ -402,9 +402,8 @@ options:
         Martingale, deviance, score, and Schoenfeld residuals.
 
     - name: export_survival_data
-      title: "Export Survival Estimates"
-      type: Bool
-      default: false
+      title: "Export Estimated Survival"
+      type: Output
       description: >-
         Export detailed survival estimates for external analysis, including survival
         probabilities, confidence intervals, and risk tables at multiple time points.
@@ -416,6 +415,14 @@ options:
       description: >-
         Display log-log survival plot for visual assessment of proportional hazards
         assumption. Parallel lines suggest proportional hazards.
+
+    - name: showExplanations
+      title: "Show Analysis Explanations"
+      type: Bool
+      default: false
+      description: >-
+        Display detailed explanations for each analysis component to help
+        interpret the statistical methods and results.
 
 
 
