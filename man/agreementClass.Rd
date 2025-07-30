@@ -2,10 +2,10 @@
 % Please edit documentation in R/agreement.b.R
 \name{agreementClass}
 \alias{agreementClass}
-\title{Comprehensive Interrater Reliability Analysis}
+\title{Interrater Reliability Analysis}
 \description{
-Comprehensive interrater reliability analysis designed for pathology applications.
-Includes Cohen's kappa, Fleiss' kappa, ICC, Krippendorff's alpha, and pathology-specific metrics.
+Interrater reliability analysis including Cohen's kappa, Fleiss' kappa,
+Krippendorff's alpha, and agreement visualization.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::agreementBase} -> \code{agreementClass}

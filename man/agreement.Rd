@@ -13,28 +13,7 @@ agreement(
   wght = "unweighted",
   exct = FALSE,
   kripp = FALSE,
-  krippMethod = "nominal",
-  bootstrap = FALSE,
-  icc = FALSE,
-  iccType = "ICC2",
-  pathologyContext = FALSE,
-  diagnosisVar = NULL,
-  confidenceLevel = 0.95,
-  minAgreement = 0.6,
-  showInterpretation = TRUE,
-  outlierAnalysis = FALSE,
-  pairwiseAnalysis = FALSE,
-  categoryAnalysis = FALSE,
-  diagnosticStyleAnalysis = FALSE,
-  styleClusterMethod = "ward",
-  styleDistanceMetric = "agreement",
-  numberOfStyleGroups = 3,
-  identifyDiscordantCases = FALSE,
-  raterCharacteristics = FALSE,
-  experienceVar = NULL,
-  trainingVar = NULL,
-  institutionVar = NULL,
-  specialtyVar = NULL
+  krippMethod = "nominal"
 )
 }
 \arguments{
@@ -66,72 +45,6 @@ reliability for any number of observers and data types.}
 
 \item{krippMethod}{Measurement level for Krippendorff's alpha calculation.
 Choose based on your data type.}
-
-\item{bootstrap}{Calculate bootstrap confidence intervals for
-Krippendorff's alpha (1000 bootstrap samples).}
-
-\item{icc}{Calculate ICC for continuous or ordinal data. Appropriate for
-quantitative measurements.}
-
-\item{iccType}{Type of ICC to calculate. Choose based on your study design
-and measurement model.}
-
-\item{pathologyContext}{Enable pathology-specific analysis including
-diagnostic accuracy metrics and clinical interpretation.}
-
-\item{diagnosisVar}{Gold standard or consensus diagnosis for calculating
-diagnostic accuracy of individual raters.}
-
-\item{confidenceLevel}{Confidence level for confidence intervals (default
-95\\%).}
-
-\item{minAgreement}{Minimum kappa value considered acceptable agreement
-(default 0.6).}
-
-\item{showInterpretation}{Display interpretation guidelines for kappa
-values and ICC coefficients.}
-
-\item{outlierAnalysis}{Identify cases with consistently poor agreement
-across raters.}
-
-\item{pairwiseAnalysis}{Detailed analysis of agreement between each pair of
-raters.}
-
-\item{categoryAnalysis}{Analysis of agreement for each diagnostic category
-separately.}
-
-\item{diagnosticStyleAnalysis}{Identify diagnostic "schools" or "styles"
-among pathologists using hierarchical clustering  based on diagnostic
-patterns. This reveals whether pathologists cluster by experience,
-training, geographic region, or diagnostic philosophy.}
-
-\item{styleClusterMethod}{Hierarchical clustering method for identifying
-diagnostic styles. Ward's linkage  was used in the original Usubutun et al.
-2012 study.}
-
-\item{styleDistanceMetric}{Distance metric for style clustering. Percentage
-agreement was used in original study.}
-
-\item{numberOfStyleGroups}{Number of diagnostic style groups to identify.
-Original study found 3 distinct styles.}
-
-\item{identifyDiscordantCases}{Identify specific cases that distinguish
-different diagnostic style groups.}
-
-\item{raterCharacteristics}{Include analysis of rater characteristics
-(experience, training, institution)  in relation to diagnostic styles.}
-
-\item{experienceVar}{Variable indicating years of experience or experience
-level of each rater.}
-
-\item{trainingVar}{Variable indicating training institution or background
-of each rater.}
-
-\item{institutionVar}{Variable indicating current practice institution of
-each rater.}
-
-\item{specialtyVar}{Variable indicating specialty (e.g., generalist vs
-specialist) of each rater.}
 }
 \value{
 A results object containing:
@@ -139,22 +52,8 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$overviewTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$kappaTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$categoryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$outlierTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$diagnosticAccuracyTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$interpretationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$pairwisePlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$categoryPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$confusionMatrixPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$diagnosticStyleTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$styleSummaryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$discordantCasesTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$diagnosticStyleDendrogram} \tab \tab \tab \tab \tab an image \cr
-\code{results$diagnosticStyleHeatmap} \tab \tab \tab \tab \tab an image \cr
 \code{results$frequencyTables} \tab \tab \tab \tab \tab a html \cr
 }
 
