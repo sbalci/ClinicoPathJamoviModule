@@ -646,6 +646,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             }
+
+        # Educational Explanations ----
+        if (self$options$showExplanations) {
+            private$.addExplanations()
+        }
         }
 
 
@@ -1239,7 +1244,79 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 #
 #
 
-
+        # Educational Explanations ----
+        ,
+        .addExplanations = function() {
+            # Helper function to set explanation content
+            private$.setExplanationContent <- function(result_name, content) {
+                tryCatch({
+                    self$results[[result_name]]$setContent(content)
+                }, error = function(e) {
+                    # Silently ignore if result doesn't exist
+                })
+            }
+            
+            # Odds Ratio Analysis Explanation
+            private$.setExplanationContent("oddsRatioExplanation", '
+            <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Odds Ratio Analysis</h4>
+                <p><strong>Odds Ratio (OR):</strong> Measures the strength of association between risk factors and binary outcomes.</p>
+                <ul>
+                    <li><strong>Interpretation:</strong> OR > 1 indicates increased odds, OR < 1 indicates decreased odds</li>
+                    <li><strong>Magnitude:</strong> Distance from 1.0 indicates strength of association</li>
+                    <li><strong>Confidence Intervals:</strong> Provide precision estimates and statistical significance</li>
+                    <li><strong>Case-Control Studies:</strong> Primary measure for retrospective study designs</li>
+                </ul>
+                <p><em>Clinical interpretation:</em> An OR of 2.0 means the odds of the outcome are twice as high in the exposed group.</p>
+            </div>
+            ')
+            
+            # Risk Measures Explanation
+            private$.setExplanationContent("riskMeasuresExplanation", '
+            <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Risk Measures</h4>
+                <p><strong>Risk Measures:</strong> Different ways to quantify the relationship between risk factors and outcomes.</p>
+                <ul>
+                    <li><strong>Risk Ratio (RR):</strong> Ratio of risks between exposed and unexposed groups</li>
+                    <li><strong>Risk Difference (RD):</strong> Absolute difference in risk between groups</li>
+                    <li><strong>Number Needed to Treat (NNT):</strong> Inverse of risk difference (1/RD)</li>
+                    <li><strong>Attributable Risk:</strong> Proportion of disease attributable to the exposure</li>
+                </ul>
+                <p><em>Clinical utility:</em> Each measure provides different insights for clinical decision-making and public health planning.</p>
+            </div>
+            ')
+            
+            # Diagnostic Test Performance Explanation
+            private$.setExplanationContent("diagnosticTestExplanation", '
+            <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Diagnostic Test Performance</h4>
+                <p><strong>Diagnostic Metrics:</strong> Evaluate how well a test distinguishes between disease and non-disease states.</p>
+                <ul>
+                    <li><strong>Sensitivity:</strong> Proportion of true positives correctly identified (true positive rate)</li>
+                    <li><strong>Specificity:</strong> Proportion of true negatives correctly identified (true negative rate)</li>
+                    <li><strong>Positive Predictive Value (PPV):</strong> Probability of disease given a positive test</li>
+                    <li><strong>Negative Predictive Value (NPV):</strong> Probability of no disease given a negative test</li>
+                    <li><strong>Likelihood Ratios:</strong> How much a test result changes the probability of disease</li>
+                </ul>
+                <p><em>Clinical application:</em> These metrics help determine the clinical utility of diagnostic tests and biomarkers.</p>
+            </div>
+            ')
+            
+            # Nomogram Analysis Explanation
+            private$.setExplanationContent("nomogramAnalysisExplanation", '
+            <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
+                <h4 style="margin-top: 0; color: #721c24;">Understanding Nomogram Analysis</h4>
+                <p><strong>Diagnostic Nomogram:</strong> Visual tool for converting likelihood ratios to post-test probabilities.</p>
+                <ul>
+                    <li><strong>Pre-test Probability:</strong> Prior probability of disease before testing</li>
+                    <li><strong>Likelihood Ratio:</strong> How much the test result changes the odds</li>
+                    <li><strong>Post-test Probability:</strong> Updated probability after incorporating test results</li>
+                    <li><strong>Clinical Decision Making:</strong> Helps determine if further testing or treatment is warranted</li>
+                </ul>
+                <p><em>Usage:</em> Draw a line from pre-test probability through likelihood ratio to find post-test probability.</p>
+            </div>
+            ')
+        }
 
 
 

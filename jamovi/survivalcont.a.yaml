@@ -468,6 +468,14 @@ options:
         Enable log-log plot for assessing proportional hazards assumption. Parallel lines 
         in the log-log plot suggest that proportional hazards assumption holds.
 
+    - name: showExplanations
+      title: "Show Educational Explanations"
+      type: Bool
+      default: false
+      description: >-
+        Display educational explanations for each analysis type to help interpret 
+        survival analysis results, cut-off point analysis, Cox regression, and multiple 
+        cutoffs analysis.
 
 
 

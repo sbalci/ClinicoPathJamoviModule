@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.3.84
-Date: 2025-07-30
+Version: 0.0.3.90
+Date: 2025-07-31
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -204,7 +204,8 @@ Imports:
     ggiraph,
     mutationtypes,
     rank,
-    patchwork
+    patchwork,
+    cardx
 VignetteBuilder: 
     knitr, 
     tiff, 

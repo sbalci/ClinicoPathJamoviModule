@@ -1,0 +1,21 @@
+PatientID,StartTime,EndTime,Response,Surgery,TreatmentStart,ResponseAssessment,Progression,EventType,EventTime
+PT001,0,24,CR,1,2,6,NA,Treatment Start,2
+PT002,0,18,PR,2,3,6,12,Treatment Start,3
+PT003,0,22,SD,1,2,6,16,Treatment Start,2
+PT004,0,15,PD,3,4,8,10,Treatment Start,4
+PT005,0,28,CR,2,3,6,NA,Treatment Start,3
+PT006,0,12,SD,1,2,6,NA,Treatment Start,2
+PT007,0,20,PR,2,3,6,14,Treatment Start,3
+PT008,0,16,SD,1,2,8,NA,Treatment Start,2
+PT009,0,26,CR,3,4,6,NA,Treatment Start,4
+PT010,0,14,PD,2,3,6,11,Treatment Start,3
+PT011,0,19,PR,1,2,8,15,Treatment Start,2
+PT012,0,23,SD,2,3,6,NA,Treatment Start,3
+PT013,0,17,PR,1,2,6,NA,Treatment Start,2
+PT014,0,21,CR,3,4,8,NA,Treatment Start,4
+PT015,0,13,PD,2,3,6,9,Treatment Start,3
+PT016,0,25,PR,1,2,6,18,Treatment Start,2
+PT017,0,11,SD,2,3,8,NA,Treatment Start,3
+PT018,0,27,CR,1,2,6,NA,Treatment Start,2
+PT019,0,18,PR,3,4,8,14,Treatment Start,4
+PT020,0,22,SD,2,3,6,NA,Treatment Start,3

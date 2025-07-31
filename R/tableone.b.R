@@ -104,21 +104,53 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 # --- Using janitor package for frequency tables with improved spacing & styling ---
                 table_list <- lapply(selected_vars, function(var) {
                     freq_table <- tryCatch({
-                        table <- janitor::tabyl(data, !!rlang::sym(var))
+                        # Check if variable exists and has data
+                        if (!var %in% names(data)) {
+                            stop("Variable '", var, "' not found in data")
+                        }
+                        
+                        # Remove missing values for this variable to avoid issues
+                        var_data <- data[!is.na(data[[var]]), ]
+                        
+                        if (nrow(var_data) == 0) {
+                            stop("Variable '", var, "' has no non-missing values")
+                        }
+                        
+                        # Create tabyl table
+                        table <- janitor::tabyl(var_data, !!rlang::sym(var))
+                        
+                        # Add totals
                         table <- janitor::adorn_totals(table, "row")
-                        table <- janitor::adorn_pct_formatting(table)
+                        
+                        # Add percentage formatting - but handle the case where it might fail
+                        table <- tryCatch({
+                            janitor::adorn_pct_formatting(table)
+                        }, error = function(e) {
+                            # If pct formatting fails, just return the table with totals
+                            table
+                        })
 
-                        # Rename columns for consistency and clarity
-                        # (If you don't have dplyr, you can use base R: colnames(table)[2:4] <- c("N", "Percent", "Valid Percent"))
-                        table <- dplyr::rename(
-                            table,
-                            "N"            = n,
-                            "Percent"      = percent,
-                            "Valid Percent" = valid_percent
-                        )
+                        # Get the actual column names to handle different janitor output formats
+                        col_names <- names(table)
+                        
+                        # Rename columns for consistency - use more flexible approach
+                        if (length(col_names) >= 2) {
+                            # First column is typically the variable values, second is counts
+                            names(table)[2] <- "N"
+                        }
+                        if (length(col_names) >= 3) {
+                            names(table)[3] <- "Percent"
+                        }
+                        if (length(col_names) >= 4) {
+                            names(table)[4] <- "Valid Percent"
+                        }
+                        
                         table
                     }, error = function(e) {
-                        stop("Error processing variable '", var, "' with janitor: ", e$message)
+                        # Provide more detailed error information
+                        stop("Error processing variable '", var, "' with janitor: ", e$message, 
+                             " (Variable type: ", class(data[[var]])[1], 
+                             ", Non-missing values: ", sum(!is.na(data[[var]])), ")")
                     })
 
                     # Add a header for clarity for each variable's table, plus a top margin.

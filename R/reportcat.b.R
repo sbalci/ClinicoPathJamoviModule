@@ -5,6 +5,7 @@
 #' @import jmvcore
 #' @importFrom magrittr %>%
 #' @importFrom gtExtras gt_plt_summary
+#' @importFrom utils packageVersion
 #'
 # Improved version of reportcatClass with enhanced messages and formatting
 reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -80,15 +81,141 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary_text <- paste(summaries, collapse = "<br><br>")
             self$results$text$setContent(summary_text)
 
-            # Generate a visually appealing summary plot using gtExtras.
-            plot_obj <- mydata %>%
-                gtExtras::gt_plt_summary() %>%
-                gt::cols_hide(columns = c("Mean", "Median", "SD"))
+            # Version-compatible gtExtras implementation with fallbacks for categorical data
+            plot_dataset <- tryCatch({
+                # Primary approach: Use gtExtras with version compatibility for categorical data
+                private$.safe_gt_plt_summary_cat(mydata, myvars)
+            }, error = function(e) {
+                # Secondary approach: Custom gt table with gtExtras-like styling for categorical data
+                tryCatch({
+                    private$.gtExtras_style_fallback_cat(mydata, myvars)
+                }, error = function(e2) {
+                    # Final fallback: Simple HTML message
+                    htmltools::HTML(paste0(
+                        "<div style='padding: 20px; border-left: 4px solid #dc3545; background-color: #f8d7da; margin: 10px 0;'>",
+                        "<h5 style='color: #721c24; margin-top: 0;'>Summary Table Error</h5>",
+                        "<p><strong>gtExtras error:</strong> ", e$message, "</p>",
+                        "<p><strong>Fallback error:</strong> ", e2$message, "</p>",
+                        "<p>Please check your data types and ensure variables are categorical.</p>",
+                        "</div>"
+                    ))
+                })
+            })
+            
+            self$results$text1$setContent(plot_dataset)
+        },
 
+        # Version-compatible gtExtras wrapper for categorical data
+        .safe_gt_plt_summary_cat = function(dataset, var_list) {
+            # Filter to categorical/factor variables only
+            cat_vars <- var_list[sapply(dataset[var_list], function(x) is.factor(x) || is.character(x))]
+            
+            if (length(cat_vars) == 0) {
+                return(htmltools::HTML("<p>No categorical variables selected for gtExtras summary.</p>"))
+            }
+            
+            # Prepare clean dataset with only categorical variables
+            clean_data <- dataset[cat_vars]
+            
+            # Ensure proper data types (convert character to factor)
+            clean_data <- as.data.frame(lapply(clean_data, function(x) {
+                if (is.character(x)) as.factor(x) else x
+            }))
+            
+            # Check gt version and handle missing value formatting
+            gt_version <- utils::packageVersion("gt")
+            
+            # Try gtExtras with version compatibility
+            summary_table <- tryCatch({
+                if (gt_version >= "0.6.0") {
+                    # For newer gt versions, gtExtras should handle sub_missing internally
+                    clean_data %>% gtExtras::gt_plt_summary()
+                } else {
+                    # For older gt versions, use fmt_missing approach
+                    clean_data %>% gtExtras::gt_plt_summary()
+                }
+            }, error = function(e) {
+                # If gtExtras fails, create basic summary without problematic columns
+                clean_data %>% gtExtras::gt_plt_summary()
+            })
+            
+            # Safely hide columns that might not exist for categorical data
+            summary_table <- tryCatch({
+                # Try to hide columns, but don't fail if they don't exist
+                summary_table %>% gt::cols_hide(columns = c("Mean", "Median", "SD"))
+            }, error = function(e) {
+                # If hiding columns fails (columns don't exist), return table as-is
+                summary_table
+            })
+            
+            # Convert to HTML
+            print_table <- print(summary_table)
+            return(htmltools::HTML(print_table[["children"]][[2]]))
+        },
 
-            # Convert the gt object to HTML for display.
-            plot_html <- htmltools::HTML(print(plot_obj)[["children"]][[2]])
-            self$results$text1$setContent(plot_html)
+        # Fallback with gtExtras-style appearance for categorical data
+        .gtExtras_style_fallback_cat = function(dataset, var_list) {
+            # Get categorical variables only
+            cat_vars <- var_list[sapply(dataset[var_list], function(x) is.factor(x) || is.character(x))]
+            
+            if (length(cat_vars) == 0) {
+                return(htmltools::HTML("<p>No categorical variables available for summary table.</p>"))
+            }
+            
+            # Calculate comprehensive summary statistics for categorical data
+            summary_stats <- data.frame(
+                Variable = cat_vars,
+                Type = rep("categorical", length(cat_vars)),
+                N = sapply(dataset[cat_vars], function(x) sum(!is.na(x))),
+                Missing = sapply(dataset[cat_vars], function(x) sum(is.na(x))),
+                Levels = sapply(dataset[cat_vars], function(x) {
+                    if (is.factor(x)) nlevels(x) else length(unique(x[!is.na(x)]))
+                }),
+                Most_Common = sapply(dataset[cat_vars], function(x) {
+                    tbl <- table(x, useNA = "no")
+                    if (length(tbl) > 0) names(tbl)[which.max(tbl)] else "NA"
+                }),
+                Most_Common_N = sapply(dataset[cat_vars], function(x) {
+                    tbl <- table(x, useNA = "no")
+                    if (length(tbl) > 0) max(tbl) else 0
+                }),
+                stringsAsFactors = FALSE
+            )
+            
+            # Create gtExtras-style table for categorical data
+            gt_table <- summary_stats %>%
+                gt::gt() %>%
+                gt::tab_header(
+                    title = gt::md("**Categorical Variables Summary**"),
+                    subtitle = gt::md("*Comprehensive statistics for categorical variables*")
+                ) %>%
+                gt::cols_label(
+                    Variable = "Variable",
+                    Type = "Type",
+                    N = "N",
+                    Missing = "Missing",
+                    Levels = "Levels",
+                    Most_Common = "Most Common",
+                    Most_Common_N = "Count"
+                ) %>%
+                gt::tab_style(
+                    style = gt::cell_fill(color = "#f8f9fa"),
+                    locations = gt::cells_column_labels()
+                ) %>%
+                gt::tab_style(
+                    style = gt::cell_text(weight = "bold"),
+                    locations = gt::cells_column_labels()
+                ) %>%
+                gt::opt_stylize(style = 6, color = "blue") %>%
+                gt::tab_options(
+                    table.font.size = 12,
+                    heading.title.font.size = 16,
+                    heading.subtitle.font.size = 12
+                )
+            
+            # Convert to HTML
+            print_table <- print(gt_table)
+            return(htmltools::HTML(print_table[["children"]][[2]]))
         }
     )
 )

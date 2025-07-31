@@ -67,6 +67,16 @@ options:
             Display an interactive nomogram for converting pre-test to post-test 
             probabilities using likelihood ratios calculated from the data.
 
+    - name: showExplanations
+      title: "Show Educational Explanations"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display educational explanations for each analysis type to help interpret 
+            odds ratios, risk ratios, diagnostic test performance, ROC analysis, 
+            and likelihood ratios.
+
 
 
 ...

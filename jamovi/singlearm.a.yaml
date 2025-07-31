@@ -405,5 +405,13 @@ options:
 
 
 
+    - name: showExplanations
+      title: "Show Educational Explanations"
+      type: Bool
+      default: false
+      description: >-
+        Display educational explanations alongside analysis results to help interpret
+        survival statistics, median survival, and person-time analysis.
+
 ...
 

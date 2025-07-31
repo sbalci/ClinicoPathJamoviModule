@@ -82,6 +82,8 @@ items:
         - name: median_duration
           title: "Median Duration"
           type: text
+      visible: (!is.null(timeVar) && inputType == "raw")
+
 
     - name: clinicalMetrics
       title: Clinical Response Metrics

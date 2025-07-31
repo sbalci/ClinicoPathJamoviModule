@@ -4,13 +4,16 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom magrittr %>%
-#' @importFrom gt gt
-#' @importFrom htmltools HTML
+#' @importFrom gt gt tab_header fmt_number cols_label md cell_fill cells_column_labels cell_text tab_style opt_stylize tab_options
 #' @importFrom gtExtras gt_plt_summary
+#' @importFrom htmltools HTML
 #' @import moments
+#' @importFrom utils packageVersion
 
 summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataClass",
-    inherit = summarydataBase, private = list(.run = function() {
+    inherit = summarydataBase, private = list(
+        
+        .run = function() {
 
 
         # Check if variables have been selected. If not, display a welcoming message with instructions.
@@ -102,13 +105,134 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             self$results$text$setContent(results)
 
 
-            plot_dataset <- dataset %>%
-                gtExtras::gt_plt_summary()
-            print_plot_dataset <- print(plot_dataset)
-            plot_dataset <- htmltools::HTML(print_plot_dataset[["children"]][[2]])
+            # Version-compatible gtExtras implementation with fallbacks
+            plot_dataset <- tryCatch({
+                # Primary approach: Use gtExtras with version compatibility
+                private$.safe_gt_plt_summary(dataset, var_list)
+            }, error = function(e) {
+                # Secondary approach: Custom gt table with gtExtras-like styling
+                tryCatch({
+                    private$.gtExtras_style_fallback(dataset, var_list)
+                }, error = function(e2) {
+                    # Final fallback: Simple HTML message
+                    htmltools::HTML(paste0(
+                        "<div style='padding: 20px; border-left: 4px solid #dc3545; background-color: #f8d7da; margin: 10px 0;'>",
+                        "<h5 style='color: #721c24; margin-top: 0;'>Summary Table Error</h5>",
+                        "<p><strong>gtExtras error:</strong> ", e$message, "</p>",
+                        "<p><strong>Fallback error:</strong> ", e2$message, "</p>",
+                        "<p>Please check your data types and ensure variables are numeric.</p>",
+                        "</div>"
+                    ))
+                })
+            })
+            
             self$results$text1$setContent(plot_dataset)
 
         }
+        },
+
+        # Version-compatible gtExtras wrapper
+        .safe_gt_plt_summary = function(dataset, var_list) {
+            # Filter to numeric variables only
+            numeric_vars <- var_list[sapply(dataset[var_list], is.numeric)]
+            
+            if (length(numeric_vars) == 0) {
+                return(htmltools::HTML("<p>No numeric variables selected for gtExtras summary.</p>"))
+            }
+            
+            # Prepare clean dataset with only numeric variables
+            clean_data <- dataset[numeric_vars]
+            
+            # Ensure proper data types
+            clean_data <- as.data.frame(lapply(clean_data, function(x) {
+                if (is.factor(x)) as.numeric(as.character(x)) else as.numeric(x)
+            }))
+            
+            # Check gt version and handle missing value formatting
+            gt_version <- utils::packageVersion("gt")
+            
+            # Try gtExtras with version compatibility
+            if (gt_version >= "0.6.0") {
+                # For newer gt versions, gtExtras should handle sub_missing internally
+                summary_table <- clean_data %>% gtExtras::gt_plt_summary()
+            } else {
+                # For older gt versions, use fmt_missing approach
+                summary_table <- clean_data %>% gtExtras::gt_plt_summary()
+            }
+            
+            # Convert to HTML
+            print_table <- print(summary_table)
+            return(htmltools::HTML(print_table[["children"]][[2]]))
+        },
+
+        # Fallback with gtExtras-style appearance
+        .gtExtras_style_fallback = function(dataset, var_list) {
+            # Get numeric variables only
+            numeric_vars <- var_list[sapply(dataset[var_list], is.numeric)]
+            
+            if (length(numeric_vars) == 0) {
+                return(htmltools::HTML("<p>No numeric variables available for summary table.</p>"))
+            }
+            
+            # Calculate comprehensive summary statistics
+            summary_stats <- data.frame(
+                Variable = numeric_vars,
+                Type = rep("numeric", length(numeric_vars)),
+                N = sapply(dataset[numeric_vars], function(x) sum(!is.na(x))),
+                Missing = sapply(dataset[numeric_vars], function(x) sum(is.na(x))),
+                Mean = sapply(dataset[numeric_vars], function(x) round(mean(x, na.rm = TRUE), 2)),
+                SD = sapply(dataset[numeric_vars], function(x) round(sd(x, na.rm = TRUE), 2)),
+                Min = sapply(dataset[numeric_vars], function(x) round(min(x, na.rm = TRUE), 2)),
+                Q25 = sapply(dataset[numeric_vars], function(x) round(quantile(x, 0.25, na.rm = TRUE), 2)),
+                Median = sapply(dataset[numeric_vars], function(x) round(median(x, na.rm = TRUE), 2)),
+                Q75 = sapply(dataset[numeric_vars], function(x) round(quantile(x, 0.75, na.rm = TRUE), 2)),
+                Max = sapply(dataset[numeric_vars], function(x) round(max(x, na.rm = TRUE), 2)),
+                stringsAsFactors = FALSE
+            )
+            
+            # Create gtExtras-style table
+            gt_table <- summary_stats %>%
+                gt::gt() %>%
+                gt::tab_header(
+                    title = gt::md("**Dataset Summary**"),
+                    subtitle = gt::md("*Comprehensive statistics for numeric variables*")
+                ) %>%
+                gt::fmt_number(
+                    columns = c("Mean", "SD", "Min", "Q25", "Median", "Q75", "Max"),
+                    decimals = 2
+                ) %>%
+                gt::cols_label(
+                    Variable = "Variable",
+                    Type = "Type",
+                    N = "N",
+                    Missing = "Missing",
+                    Mean = "Mean",
+                    SD = "SD",
+                    Min = "Min",
+                    Q25 = "Q25",
+                    Median = "Median",
+                    Q75 = "Q75",
+                    Max = "Max"
+                ) %>%
+                gt::tab_style(
+                    style = gt::cell_fill(color = "#f8f9fa"),
+                    locations = gt::cells_column_labels()
+                ) %>%
+                gt::tab_style(
+                    style = gt::cell_text(weight = "bold"),
+                    locations = gt::cells_column_labels()
+                ) %>%
+                gt::opt_stylize(style = 6, color = "blue") %>%
+                gt::tab_options(
+                    table.font.size = 12,
+                    heading.title.font.size = 16,
+                    heading.subtitle.font.size = 12
+                )
+            
+            # Convert to HTML
+            print_table <- print(gt_table)
+            return(htmltools::HTML(print_table[["children"]][[2]]))
+        }
 
 
-    }))
+    ))

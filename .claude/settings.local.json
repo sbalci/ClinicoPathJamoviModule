@@ -49,7 +49,9 @@
       "Bash(# Check the .safeExecute call specifically around lines 780-810\nsed -n ''780,810p'' /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/stagemigration.b.R)",
       "Bash(gemini:*)",
       "WebFetch(domain:indrajeetpatil.github.io)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "WebFetch(domain:www.bmj.com)",
+      "WebFetch(domain:www.danieldsjoberg.com)"
     ],
     "deny": []
   }

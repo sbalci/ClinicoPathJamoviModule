@@ -1,0 +1,146 @@
+---
+name: continuousrelationship
+title: "Continuous Variable Relationship Analysis"
+jus: '3.0'
+
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: "Outcome Variable"
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+      
+      - type: TargetLayoutBox
+        label: "Continuous Predictor"
+        children:
+          - type: VariablesListBox
+            name: predictor
+            maxItemCount: 1
+            isTarget: true
+      
+      - type: TargetLayoutBox
+        label: "Adjustment Variables (Optional)"
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CollapseBox
+        label: "Analysis Method"
+        collapsed: false
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            children:
+              - type: ComboBox
+                name: modelType
+                label: "Modeling Approach"
+              
+              - type: LayoutBox
+                enable: (modelType:spline)
+                children:
+                  - type: RadioButton
+                    name: nKnots_3
+                    optionName: nKnots
+                    optionPart: 3
+                    label: "3 knots (simple)"
+                  
+                  - type: RadioButton
+                    name: nKnots_4
+                    optionName: nKnots
+                    optionPart: 4
+                    label: "4 knots (moderate)"
+                  
+                  - type: RadioButton
+                    name: nKnots_5
+                    optionName: nKnots
+                    optionPart: 5
+                    label: "5 knots (complex)"
+              
+              - type: ComboBox
+                name: knotPositions
+                label: "Knot Placement"
+                enable: (modelType:spline)
+              
+              - type: TextBox
+                name: referenceValue
+                label: "Reference Value (optional)"
+                format: number
+
+      - type: CollapseBox
+        label: "Visualization Options"
+        collapsed: false
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            children:
+              - type: ComboBox
+                name: plotType
+                label: "Primary Plot Type"
+              
+              - type: CheckBox
+                name: showCI
+                label: "Show Confidence Intervals"
+              
+              - type: CheckBox
+                name: showRug
+                label: "Show Data Distribution (rug plot)"
+              
+              - type: CheckBox
+                name: compareWithLinear
+                label: "Compare with Linear Model"
+
+      - type: CollapseBox
+        label: "Educational Features"
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            children:
+              - type: CheckBox
+                name: showGuidance
+                label: "Show BMJ Best Practices Guidance"
+              
+              - type: CheckBox
+                name: showCategorizedPitfall
+                label: "Demonstrate Categorization Pitfall (Educational)"
+                children:
+                  - type: Label
+                    label: "⚠️ This will show why categorization is problematic"
+                    style: warning
+
+      - type: CollapseBox
+        label: "Statistical Tests & Output"
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            children:
+              - type: CheckBox
+                name: testLinearity
+                label: "Test for Non-linearity"
+              
+              - type: CheckBox
+                name: showModelFit
+                label: "Show Model Fit Statistics"
+              
+              - type: CheckBox
+                name: showModel
+                label: "Display Model Formula"
+              
+              - type: CheckBox
+                name: exportPredictions
+                label: "Add Predictions to Dataset"
+...

@@ -661,6 +661,17 @@ items:
           - tint
           - multievent
 
+
+
+    # - name:  mydataview_multipleCutoffs1
+    #   title: mydataview_multipleCutoffs1
+    #   type:  Preformatted
+
+    # - name:  mydataview_multipleCutoffs2
+    #   title: mydataview_multipleCutoffs2
+    #   type:  Preformatted
+
+
     - name: multipleCutTable
       title: 'Multiple Cut-off Points'
       type: Table
@@ -675,13 +686,6 @@ items:
         - name: group_created
           title: 'Groups Created'
           type: text
-        - name: logrank_statistic
-          title: 'Log-rank χ²'
-          type: number
-        - name: p_value
-          title: 'P-value'
-          type: number
-          format: zto,pvalue
       visible: (multiple_cutoffs)
       clearWith:
           - multiple_cutoffs
@@ -882,6 +886,64 @@ items:
           - tint
           - multievent
 
+    # Cox Regression Explanation
+    - name: coxRegressionExplanation
+      title: 'Understanding Cox Regression for Continuous Variables'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - contexpl
+          - outcome
+
+    # Cut-off Point Analysis Explanation  
+    - name: cutoffAnalysisExplanation
+      title: 'Understanding Cut-off Point Analysis'
+      type: Html
+      visible: (findcut && showExplanations)
+      clearWith:
+          - findcut
+          - contexpl
+          - outcome
+
+    # Multiple Cutoffs Explanation
+    - name: multipleCutoffsExplanation
+      title: 'Understanding Multiple Cut-offs Analysis'
+      type: Html
+      visible: (multiple_cutoffs && showExplanations)
+      clearWith:
+          - multiple_cutoffs
+          - contexpl
+          - outcome
+
+    # Person-Time Analysis Explanation
+    - name: personTimeExplanation
+      title: 'Understanding Person-Time Analysis'
+      type: Html
+      visible: (person_time && showExplanations)
+      clearWith:
+          - person_time
+          - contexpl
+          - outcome
+
+    # RMST Analysis Explanation
+    - name: rmstExplanation
+      title: 'Understanding RMST Analysis'
+      type: Html
+      visible: (rmst_analysis && showExplanations)
+      clearWith:
+          - rmst_analysis
+          - contexpl
+          - outcome
+
+    # Residual Diagnostics Explanation
+    - name: residualDiagnosticsExplanation
+      title: 'Understanding Cox Model Residuals'
+      type: Html
+      visible: (residual_diagnostics && showExplanations)
+      clearWith:
+          - residual_diagnostics
+          - contexpl
+          - outcome
 
 
 

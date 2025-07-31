@@ -224,9 +224,26 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 pngknit = FALSE
             )
 
-            # Convert to SVG
+            # export as svg ----
             results1 <- DiagrammeRsvg::export_svg(gv = results)
-            self$results$text1$setContent(print(results1))
+
+            # Use maxwidth parameter or default values
+            maxwidth <- self$options$maxwidth
+            if (is.null(maxwidth)) {
+                maxwidth <- ifelse(horizontal == TRUE, 400, 1000)
+            }
+            
+            results1 <- base::sub('width=\"[[:digit:]pt\"]+',
+                                  paste0('width=', maxwidth, 'pt '),
+                                  results1)
+
+            results1 <- paste0('<html><head><style>
+                               #myDIV {width: 610px; height: 850px; overflow: auto;}
+                               </style></head><body><div id="myDIV">',
+                               results1,
+                               '</div></script></body></html>')
+
+            self$results$text1$setContent(results1)
 
             # Handle pattern table
             if (self$options$ptable) {

@@ -465,6 +465,8 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         calculatedtime = function() private$.items[["calculatedtime"]],
         outcomeredefined = function() private$.items[["outcomeredefined"]],
         calculatedcutoff = function() private$.items[["calculatedcutoff"]],
+        mydataview_multipleCutoffs1 = function() private$.items[["mydataview_multipleCutoffs1"]],
+        mydataview_multipleCutoffs2 = function() private$.items[["mydataview_multipleCutoffs2"]],
         multipleCutTable = function() private$.items[["multipleCutTable"]],
         multipleMedianTable = function() private$.items[["multipleMedianTable"]],
         multipleSurvTable = function() private$.items[["multipleSurvTable"]],
@@ -1151,6 +1153,14 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="mydataview_multipleCutoffs1",
+                title="mydataview_multipleCutoffs1"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="mydataview_multipleCutoffs2",
+                title="mydataview_multipleCutoffs2"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="multipleCutTable",
@@ -1168,16 +1178,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     list(
                         `name`="group_created", 
                         `title`="Groups Created", 
-                        `type`="text"),
-                    list(
-                        `name`="logrank_statistic", 
-                        `title`="Log-rank \u03C7\u00B2", 
-                        `type`="number"),
-                    list(
-                        `name`="p_value", 
-                        `title`="P-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
+                        `type`="text")),
                 visible="(multiple_cutoffs)",
                 clearWith=list(
                     "multiple_cutoffs",
@@ -1555,6 +1556,8 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$calculatedcutoff} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$mydataview_multipleCutoffs1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$mydataview_multipleCutoffs2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$multipleCutTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multipleMedianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multipleSurvTable} \tab \tab \tab \tab \tab a table \cr

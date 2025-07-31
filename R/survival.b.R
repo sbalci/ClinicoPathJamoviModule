@@ -961,6 +961,30 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 self$results$medianSummary$setContent(medianSummary)
 
+                # Add explanatory output for median survival
+                if (self$options$showExplanations) {
+                    median_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Median Survival by Groups</h4>
+                        <p style="margin-bottom: 10px;">This analysis compares median survival times between different groups in your data:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Median Survival:</strong> Time when 50% of patients in each group experienced the event</li>
+                            <li><strong>Group Comparison:</strong> Allows identification of prognostic factors</li>
+                            <li><strong>95% CI:</strong> Confidence intervals for each group\'s median survival</li>
+                            <li><strong>Log-rank Test:</strong> Statistical test comparing survival curves between groups</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Groups with longer median survival have better prognosis</li>
+                            <li>Non-overlapping confidence intervals suggest significant differences</li>
+                            <li>Use for patient stratification and treatment decisions</li>
+                            <li>Consider clinical significance alongside statistical significance</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$medianSurvivalExplanation$setContent(median_explanation_html)
+                }
+
 
             }
 
@@ -1113,6 +1137,32 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 )
 
                 self$results$coxSummary$setContent(coxSummary)
+
+                # Add explanatory output for Cox regression
+                if (self$options$showExplanations) {
+                    cox_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cox Proportional Hazards Regression</h4>
+                        <p style="margin-bottom: 10px;">Cox regression models the relationship between explanatory variables and the hazard (risk) of experiencing the event:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Hazard Ratio (HR):</strong> Risk multiplier compared to reference group</li>
+                            <li><strong>HR > 1:</strong> Increased risk of event occurrence</li>
+                            <li><strong>HR < 1:</strong> Decreased risk of event occurrence</li>
+                            <li><strong>P-value:</strong> Statistical significance of the association</li>
+                            <li><strong>95% CI:</strong> Range of plausible values for the true HR</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>HR = 2.0 means double the risk compared to reference</li>
+                            <li>HR = 0.5 means half the risk compared to reference</li>
+                            <li>Use for identifying prognostic factors and risk stratification</li>
+                            <li>Assumes proportional hazards over time</li>
+                            <li>Consider both statistical and clinical significance</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$coxRegressionExplanation$setContent(cox_explanation_html)
+                }
 
 
 
@@ -1621,6 +1671,31 @@ survivalClass <- if (requireNamespace('jmvcore'))
 ")
 
                 self$results$personTimeSummary$setContent(summary_html)
+
+                # Add explanatory output for person-time analysis
+                if (self$options$showExplanations) {
+                    person_time_explanation_html <- '
+                    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Person-Time Analysis</h4>
+                        <p style="margin-bottom: 10px;">Person-time analysis calculates incidence rates by accounting for the total time each patient was at risk:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Person-Time:</strong> Sum of individual follow-up periods for all patients in each group</li>
+                            <li><strong>Incidence Rate:</strong> Events per unit time (e.g., per 100 person-years)</li>
+                            <li><strong>Rate Ratio:</strong> Comparison of incidence rates between groups</li>
+                            <li><strong>95% CI:</strong> Confidence interval calculated using exact Poisson method</li>
+                        </ul>
+                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Person-time analysis handles varying follow-up durations effectively</li>
+                            <li>Higher rates indicate more frequent event occurrence in that group</li>
+                            <li>Rate ratios >1 suggest increased risk compared to reference group</li>
+                            <li>Use for comparing event rates between different patient populations</li>
+                            <li>Particularly useful when follow-up times vary significantly between groups</li>
+                        </ul>
+                    </div>
+                    '
+                    self$results$personTimeExplanation$setContent(person_time_explanation_html)
+                }
             }
 
 

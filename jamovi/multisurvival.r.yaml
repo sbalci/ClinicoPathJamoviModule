@@ -585,6 +585,7 @@ items:
     - name:  mydataview_survivaldecisiontree
       title: mydataview_survivaldecisiontree
       type:  Preformatted
+      visible: (FALSE)
 
 
     - name: tree_summary
@@ -1055,6 +1056,66 @@ items:
     #       - selectionCriteria
     #       - pEntry
     #       - pRemoval
+
+    # Multivariable Cox Regression Explanation
+    - name: multivariableCoxExplanation
+      title: 'Understanding Multivariable Cox Regression'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - contexpl
+          - outcome
+
+    # Adjusted Survival Curves Explanation
+    - name: adjustedSurvivalExplanation
+      title: 'Understanding Adjusted Survival Curves'
+      type: Html
+      visible: (ac && showExplanations)
+      clearWith:
+          - ac
+          - adjexplanatory
+          - outcome
+
+    # Risk Score Analysis Explanation
+    - name: riskScoreExplanation
+      title: 'Understanding Risk Score Analysis'
+      type: Html
+      visible: (calculateRiskScore && showExplanations)
+      clearWith:
+          - calculateRiskScore
+          - numRiskGroups
+          - outcome
+
+    # Nomogram Explanation
+    - name: nomogramExplanation
+      title: 'Understanding Nomograms'
+      type: Html
+      visible: (showNomogram && showExplanations)
+      clearWith:
+          - showNomogram
+          - explanatory
+          - outcome
+
+    # Person-Time Analysis Explanation
+    - name: personTimeExplanation
+      title: 'Understanding Person-Time Analysis'
+      type: Html
+      visible: (person_time && showExplanations)
+      clearWith:
+          - person_time
+          - time_intervals
+          - outcome
+
+    # Stratified Analysis Explanation
+    - name: stratifiedAnalysisExplanation
+      title: 'Understanding Stratified Cox Regression'
+      type: Html
+      visible: (use_stratify && showExplanations)
+      clearWith:
+          - use_stratify
+          - stratvar
+          - outcome
 
 refs:
     - multivariable

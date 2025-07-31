@@ -1,0 +1,204 @@
+---
+name: continuousrelationship
+title: "Continuous Variable Relationship Analysis"
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives Data Quality
+menuSubtitle: "Evidence-Based Continuous Analysis"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: >
+        Analyzes relationships between continuous variables in clinical research using 
+        evidence-based approaches from BMJ best practices. Avoids common pitfalls like 
+        arbitrary categorization and linear assumptions.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Analyzing BMI vs mortality risk
+            continuousrelationship(
+                data = clinical_data,
+                outcome = "mortality",
+                predictor = "bmi",
+                modelType = "spline",
+                nKnots = 4,
+                showGuidance = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The dataset containing clinical variables
+
+    - name: outcome
+      title: "Outcome Variable"
+      type: Variable
+      suggested: [continuous, nominal]
+      description:
+          R: The outcome/dependent variable (can be continuous or binary)
+
+    - name: predictor
+      title: "Predictor Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: The continuous predictor variable to analyze
+
+    - name: covariates
+      title: "Adjustment Variables"
+      type: Variables
+      suggested: [continuous, nominal]
+      required: false
+      description:
+          R: Variables to adjust for in the analysis
+
+    # Analysis Method Selection
+    - name: modelType
+      title: "Modeling Approach"
+      type: List
+      options:
+        - title: "Restricted Cubic Splines (Recommended)"
+          name: spline
+        - title: "Fractional Polynomials"
+          name: fp
+        - title: "Linear (for comparison)"
+          name: linear
+        - title: "Categorized (NOT recommended - educational only)"
+          name: categorized
+      default: spline
+      description:
+          R: >
+            Statistical approach for modeling the relationship. 
+            Splines are recommended for most clinical applications.
+
+    - name: nKnots
+      title: "Number of Knots (for splines)"
+      type: List
+      options:
+        - title: "3 knots (simple non-linearity)"
+          name: '3'
+        - title: "4 knots (moderate flexibility)"
+          name: '4'
+        - title: "5 knots (complex relationships)"
+          name: '5'
+      default: '4'
+      description:
+          R: Number of knots for spline models. More knots = more flexibility
+
+    - name: knotPositions
+      title: "Knot Placement"
+      type: List
+      options:
+        - title: "Quantile-based (recommended)"
+          name: quantile
+        - title: "Equally spaced"
+          name: equal
+        - title: "Clinical cutpoints"
+          name: clinical
+      default: quantile
+      description:
+          R: How to position knots across the predictor range
+
+    # Visualization Options
+    - name: plotType
+      title: "Primary Plot Type"
+      type: List
+      options:
+        - title: "Dose-Response Curve"
+          name: doseresponse
+        - title: "Partial Effect Plot"
+          name: partial
+        - title: "Comparison Plot (all methods)"
+          name: comparison
+      default: doseresponse
+      description:
+          R: Type of visualization to create
+
+    - name: referenceValue
+      title: "Reference Value"
+      type: Number
+      required: false
+      description:
+          R: >
+            Reference value for the predictor (e.g., BMI=25). 
+            If not specified, uses median value.
+
+    - name: showCI
+      title: "Show Confidence Intervals"
+      type: Bool
+      default: true
+      description:
+          R: Display 95% confidence intervals on plots
+
+    - name: showRug
+      title: "Show Data Distribution"
+      type: Bool
+      default: true
+      description:
+          R: Show rug plot of actual data points
+
+    # Educational Features
+    - name: showGuidance
+      title: "Show Analysis Guidance"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display educational guidance based on BMJ best practices
+            to help interpret results and avoid common mistakes
+
+    - name: compareWithLinear
+      title: "Compare with Linear Model"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show comparison with simple linear model to demonstrate
+            the importance of flexible modeling
+
+    - name: showCategorizedPitfall
+      title: "Show Categorization Pitfall"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Educational: Show what happens when continuous variables
+            are inappropriately categorized (with warning)
+
+    # Statistical Testing
+    - name: testLinearity
+      title: "Test for Non-linearity"
+      type: Bool
+      default: true
+      description:
+          R: Perform statistical test for non-linear relationship
+
+    - name: showModelFit
+      title: "Show Model Fit Statistics"
+      type: Bool
+      default: true
+      description:
+          R: Display AIC, BIC, and other fit statistics
+
+    # Model Display Options
+    - name: showModel
+      title: "Show Model Formula"
+      type: Bool
+      default: false
+      description:
+          R: Display the model formula as HTML in the results
+
+    # Output Options
+    - name: exportPredictions
+      title: "Add Predictions to Data"
+      type: Output
+      varTitle: "Predicted Values"
+      varDescription: "Model predictions based on the continuous relationship analysis"
+      measureType: continuous
+      clearWith:
+        - predictor
+        - outcome
+        - modelType
+...

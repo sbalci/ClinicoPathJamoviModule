@@ -293,8 +293,37 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add calculated times to results if requested
             if (self$options$add_times && !is.null(calculated_times)) {
-                self$results$calculated_time$setRowNums(rownames(self$data))
-                self$results$calculated_time$setValues(calculated_times)
+                # Extract time values if calculated_times is a list
+                if (is.list(calculated_times) && "time" %in% names(calculated_times)) {
+                    time_values_for_output <- calculated_times$time
+                } else {
+                    time_values_for_output <- calculated_times
+                }
+                
+                # Debug: Check if we have valid values to set
+                if (!is.null(time_values_for_output) && length(time_values_for_output) > 0) {
+                    self$results$calculated_time$setRowNums(rownames(self$data))
+                    self$results$calculated_time$setValues(time_values_for_output)
+                    
+                    # Add debug message
+                    self$results$todo$setContent(
+                        paste("<p><strong>✅ Success:</strong> Added", length(time_values_for_output), "calculated time values to data output.</p>")
+                    )
+                } else {
+                    self$results$todo$setContent(
+                        "<p><strong>⚠️ Warning:</strong> No valid time values available to add to data output.</p>"
+                    )
+                }
+            } else {
+                if (!self$options$add_times) {
+                    self$results$todo$setContent(
+                        "<p><strong>ℹ️ Note:</strong> add_times option is disabled. Enable it to add calculated times to data.</p>"
+                    )
+                } else {
+                    self$results$todo$setContent(
+                        "<p><strong>⚠️ Warning:</strong> calculated_times is null, cannot add to data output.</p>"
+                    )
+                }
             }
 
             # Generate person-time information
@@ -323,18 +352,25 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             self$results$personTimeInfo$setContent(person_time_info)
 
+            # Extract time values from the result list
+            if (!is.null(calculated_times) && is.list(calculated_times) && "time" %in% names(calculated_times)) {
+                time_values <- calculated_times$time
+            } else {
+                time_values <- calculated_times  # fallback if it's already a vector
+            }
+            
             # Generate summary statistics
-            if (!is.null(calculated_times)) {
+            if (!is.null(time_values) && length(time_values) > 0) {
                 summary_stats <- list(
-                    n = length(calculated_times),
-                    mean = mean(calculated_times, na.rm = TRUE),
-                    median = median(calculated_times, na.rm = TRUE),
-                    sd = sd(calculated_times, na.rm = TRUE),
-                    min = min(calculated_times, na.rm = TRUE),
-                    max = max(calculated_times, na.rm = TRUE),
-                    missing = sum(is.na(calculated_times)),
-                    negative = sum(calculated_times < 0, na.rm = TRUE),
-                    total_person_time = sum(calculated_times, na.rm = TRUE)
+                    n = length(time_values),
+                    mean = mean(time_values, na.rm = TRUE),
+                    median = median(time_values, na.rm = TRUE),
+                    sd = sd(time_values, na.rm = TRUE),
+                    min = min(time_values, na.rm = TRUE),
+                    max = max(time_values, na.rm = TRUE),
+                    missing = sum(is.na(time_values)),
+                    negative = sum(time_values < 0, na.rm = TRUE),
+                    total_person_time = sum(time_values, na.rm = TRUE)
                 )
 
                 # if (any(time_data$time < 0, na.rm = TRUE)) {
