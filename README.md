@@ -79,7 +79,7 @@ DOI 10.17605/OSF.IO/9SZUD
 
 ## Installation in [jamovi](https://www.jamovi.org)
 
-You can install this module after installing jamovi version \>= 1.2.19
+You can install this module after installing jamovi version \>= 2.7.2
 from here: <https://www.jamovi.org/download.html>
 
 Then you can install the submodules directly inside the jamovi, using
@@ -109,9 +109,9 @@ Submodules are:
 #### a: For development version
 
 - [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
-- [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download).
+  <!-- - [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download). -->
 
-#### b: For smaller modules
+#### b: For modules
 
 ##### ClinicoPathDescriptives
 
@@ -125,41 +125,25 @@ Modules and jamovi library)
 
 <https://github.com/sbalci/ClinicoPathDescriptives/releases/>
 
-<https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo>
+<!-- https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo -->
 
-<https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo>
+<!-- https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo -->
 
 ``` r
 remotes::install_github("sbalci/ClinicoPathDescriptives")
 ```
 
-    - name: ClinicoPathDescriptives
-      url: https://github.com/sbalci/ClinicoPathDescriptives.git
-      commit: c425bb0021a097b76666006c19b3b87fa137264e
-      platforms:
-        - win64
-        - macos
+<!--    - name: ClinicoPathDescriptives -->
 
-##### ClinicoPathLinuxDescriptives
+<!--      url: https://github.com/sbalci/ClinicoPathDescriptives.git -->
 
-ClinicoPath Descriptives functions for Linux
+<!--      commit: c425bb0021a097b76666006c19b3b87fa137264e -->
 
-<https://github.com/sbalci/ClinicoPathLinuxDescriptives/>
+<!--      platforms: -->
 
-<https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/>
+<!--        - win64 -->
 
-<https://library.jamovi.org/linux/R4.0.5/ClinicoPathLinuxDescriptives-0.0.2.0084.jmo>
-
-``` r
-remotes::install_github("sbalci/ClinicoPathLinuxDescriptives")
-```
-
-    - name: ClinicoPathDescriptives
-      url: https://github.com/sbalci/ClinicoPathLinuxDescriptives.git
-      commit: 0bac188199fda2e8397f09a1416e162c18f6c85d
-      platforms:
-        - linux
-        
+<!--        - macos -->
 
 ##### JJStatsPlot
 
@@ -169,11 +153,11 @@ jjstatsplot menu
 JJStastPlot module can be downloaded inside jamovi (click Modules and
 jamovi library)
 
-<https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.02.jmo>
+<!-- https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.02.jmo  -->
 
 <!-- https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo   -->
 
-<https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.02.jmo>
+<!-- https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.02.jmo  -->
 
 <https://github.com/sbalci/jjstatsplot>
 
@@ -183,12 +167,17 @@ jamovi library)
 remotes::install_github("sbalci/jjstatsplot")
 ```
 
-    - name: jjstatsplot
-      url: https://github.com/sbalci/jjstatsplot.git
-      commit: b26c2c37f02b25ff3c3d32391a5cc7f413373a9d
-      platforms:
-        - win64
-        - macos
+<!--    - name: jjstatsplot  -->
+
+<!--      url: https://github.com/sbalci/jjstatsplot.git  -->
+
+<!--      commit: b26c2c37f02b25ff3c3d32391a5cc7f413373a9d  -->
+
+<!--      platforms:  -->
+
+<!--        - win64  -->
+
+<!--        - macos  -->
 
 ##### jsurvival
 
@@ -196,9 +185,9 @@ remotes::install_github("sbalci/jjstatsplot")
 
 <https://github.com/sbalci/jsurvival/releases/>
 
-<https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.02.jmo>
+<!-- https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.02.jmo  -->
 
-<https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.02.jmo>
+<!-- https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.02.jmo  -->
 
 <!-- https://library.jamovi.org/linux/R4.0.5/jsurvival-0.0.2.02.jmo -->
 
@@ -206,12 +195,17 @@ remotes::install_github("sbalci/jjstatsplot")
 remotes::install_github("sbalci/jsurvival")
 ```
 
-    - name: jsurvival
-      url: https://github.com/sbalci/jsurvival.git
-      commit: 080034635c3f0173e5a22ddd2614d0af90504763
-      platforms:
-        - win64
-        - macos
+<!--    - name: jsurvival  -->
+
+<!--      url: https://github.com/sbalci/jsurvival.git  -->
+
+<!--      commit: 080034635c3f0173e5a22ddd2614d0af90504763  -->
+
+<!--      platforms:  -->
+
+<!--        - win64  -->
+
+<!--        - macos  -->
 
 <!-- - linux -->
 
@@ -221,32 +215,27 @@ remotes::install_github("sbalci/jsurvival")
 
 <https://github.com/sbalci/meddecide/releases/>
 
-<https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.2.04.jmo>
+<!-- https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.2.04.jmo  -->
 
 <!-- https://library.jamovi.org/linux/R4.0.5/meddecide-0.0.1.0005.jmo   -->
 
-<https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.2.04.jmo>
+<!-- https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.2.04.jmo  -->
 
 ``` r
 remotes::install_github("sbalci/meddecide")
 ```
 
-    - name: meddecide
-      url: https://github.com/sbalci/meddecide.git
-      commit: 2bda14af05d8dafe33d9d137705f9fb8ac527279
-      platforms:
-        - win64
-        - macos
+<!--    - name: meddecide  -->
 
-##### jbbplot
+<!--      url: https://github.com/sbalci/meddecide.git  -->
 
-<https://github.com/sbalci/jbbplot/>
+<!--      commit: 2bda14af05d8dafe33d9d137705f9fb8ac527279  -->
 
-<https://github.com/sbalci/jbbplot/releases/>
+<!--      platforms:  -->
 
-``` r
-remotes::install_github("sbalci/jbbplot")
-```
+<!--        - win64  -->
+
+<!--        - macos  -->
 
 <!-- #### c: For stable version    -->
 
@@ -286,85 +275,85 @@ remotes::install_github("sbalci/jbbplot")
 
 #### ClinicoPath Descriptives
 
-##### [Age Pyramid](https://sbalci.github.io/ClinicoPathDescriptives/articles/agepyramid_documentation.html)
+##### [Age Pyramid](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/agepyramid_documentation.html)
 
 <img src="man/figures/jamovi-ClinicoPath-age-pyramid.png" align="center" width = 75% />
 
-##### [Age Pyramid 2](https://sbalci.github.io/ClinicoPathDescriptives/articles/agepyramid2_documentation.html)
+##### [Age Pyramid 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/agepyramid2_documentation.html)
 
 (Similar to Age Pyramid with more styling options)
 
-##### [Alluvial Diagrams](https://sbalci.github.io/ClinicoPathDescriptives/articles/alluvial_documentation.html)
+##### [Alluvial Diagrams](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/alluvial_documentation.html)
 
 <img src="man/figures/jamovi-ClinicoPath-easyalluvial.gif" align="center" width = 75% />
 
-##### [Alluvial Diagrams 2](https://sbalci.github.io/ClinicoPathDescriptives/articles/alluvial2_documentation.html)
+##### [Alluvial Diagrams 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/alluvial2_documentation.html)
 
 (Similar to Alluvial Diagrams with more styling options)
 
-##### [Missing Data Analysis and Imputation](https://sbalci.github.io/ClinicoPathDescriptives/articles/missingdata_documentation.html)
+##### [Missing Data Analysis and Imputation](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/missingdata_documentation.html)
 
 (Comprehensive missing data analysis and multiple imputation)
 
-##### [Outlier Detection](https://sbalci.github.io/ClinicoPathDescriptives/articles/outlierdetection_documentation.html)
+##### [Outlier Detection](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/outlierdetection_documentation.html)
 
 (Advanced outlier detection with multiple statistical methods)
 
-##### [Summary of Categorical Variables](https://sbalci.github.io/ClinicoPathDescriptives/articles/reportcat_documentation.html)
+##### [Summary of Categorical Variables](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/reportcat_documentation.html)
 
 <img src="man/figures/jamovi-and-R-report.gif" align="center" width = 75% />
 
-##### [Summary of Categorical Variables 2](https://sbalci.github.io/ClinicoPathDescriptives/articles/reportcat2_documentation.html)
+##### [Summary of Categorical Variables 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/reportcat2_documentation.html)
 
 (Enhanced categorical summary)
 
-##### [Raincloud Plot](https://sbalci.github.io/ClinicoPathDescriptives/articles/raincloud_documentation.html)
+##### [Raincloud Plot](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/raincloud_documentation.html)
 
 (Comprehensive distribution analysis)
 
-##### [Summary of Continuous Variables](https://sbalci.github.io/ClinicoPathDescriptives/articles/summarydata_documentation.html)
+##### [Summary of Continuous Variables](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/summarydata_documentation.html)
 
 <img src="man/figures/jamovi-write-summary-continuous-variables.gif" align="center" width = 75% />
 
-##### [Summary of Continuous Variables 2](https://sbalci.github.io/ClinicoPathDescriptives/articles/summarydata2_documentation.html)
+##### [Summary of Continuous Variables 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/summarydata2_documentation.html)
 
 (Enhanced summary statistics for continuous and date variables)
 
-##### [Swimmer Plot](https://sbalci.github.io/ClinicoPathDescriptives/articles/swimmerplot_documentation.html)
+##### [Swimmer Plot](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/swimmerplot_documentation.html)
 
 (Comprehensive swimmer plots for visualizing patient timelines)
 
-##### [Table One](https://sbalci.github.io/ClinicoPathDescriptives/articles/tableone_documentation.html)
+##### [Table One](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tableone_documentation.html)
 
 <img src="man/figures/jamovi-and-R-tableone.gif" align="center" width = 75% />
 <img src="man/figures/jamovi-ClinicoPath-tableone.gif" align="center" width = 75% />
 
-##### [Table One 2](https://sbalci.github.io/ClinicoPathDescriptives/articles/tableone2_documentation.html)
+##### [Table One 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tableone2_documentation.html)
 
 (Enhanced Table One with pivottabler)
 
-##### [Tidy Density](https://sbalci.github.io/ClinicoPathDescriptives/articles/tidydensity_documentation.html)
+##### [Tidy Density](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tidydensity_documentation.html)
 
 (Statistical distribution generator and analyzer)
 
-##### [Tools Summary](https://sbalci.github.io/ClinicoPathDescriptives/articles/toolssummary_documentation.html)
+##### [Tools Summary](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/toolssummary_documentation.html)
 
 (Tools for data summary with summarytools integration)
 
-##### [Toxicity Profile](https://sbalci.github.io/ClinicoPathDescriptives/articles/toxicityprofile_documentation.html)
+##### [Toxicity Profile](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/toxicityprofile_documentation.html)
 
 (Treatment toxicity profile analysis)
 
-##### [Venn Diagram](https://sbalci.github.io/ClinicoPathDescriptives/articles/venn_documentation.html)
+##### [Venn Diagram](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/venn_documentation.html)
 
 (Venn and Upset diagrams)
 
-##### [Variable Tree](https://sbalci.github.io/ClinicoPathDescriptives/articles/vartree_documentation.html)
+##### [Variable Tree](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/vartree_documentation.html)
 
 <img src="man/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width = 75% />  
 <img src="man/figures/jamovi-ClinicoPath-VariableTree2.gif" align="center" width = 75% />
 
-##### [Waterfall Plot](https://sbalci.github.io/ClinicoPathDescriptives/articles/waterfall_documentation.html)
+##### [Waterfall Plot](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/waterfall_documentation.html)
 
 (Treatment response analysis)
 
@@ -388,67 +377,67 @@ remotes::install_github("sbalci/jbbplot")
 
 #### Graphs and Plots
 
-##### [Advanced Barplot](https://sbalci.github.io/jjstatsplot/articles/advancedbarplot_documentation.html)
+##### [Advanced Barplot](https://www.serdarbalci.com/jjstatsplot/articles/advancedbarplot_documentation.html)
 
 (Advanced bar charts - 5 ways)
 
-##### [Advanced Raincloud Plot](https://sbalci.github.io/jjstatsplot/articles/advancedraincloud_documentation.html)
+##### [Advanced Raincloud Plot](https://www.serdarbalci.com/jjstatsplot/articles/advancedraincloud_documentation.html)
 
 (Advanced raincloud plot with longitudinal support)
 
-##### [Predictive Power Score Analysis](https://sbalci.github.io/jjstatsplot/articles/jpps_documentation.html)
+##### [Predictive Power Score Analysis](https://www.serdarbalci.com/jjstatsplot/articles/jpps_documentation.html)
 
 (Predictive Power Score Analysis)
 
-##### [High-Performance Scatter Plots](https://sbalci.github.io/jjstatsplot/articles/jscattermore_documentation.html)
+##### [High-Performance Scatter Plots](https://www.serdarbalci.com/jjstatsplot/articles/jscattermore_documentation.html)
 
 (Fast scatter plots for large datasets)
 
-##### [Social Science Statistical Visualization](https://sbalci.github.io/jjstatsplot/articles/jsjplot_documentation.html)
+##### [Social Science Statistical Visualization](https://www.serdarbalci.com/jjstatsplot/articles/jsjplot_documentation.html)
 
 (sjPlot Integration for Social Science Research)
 
-##### [Professional Violin Plot](https://sbalci.github.io/jjstatsplot/articles/jviolin_documentation.html)
+##### [Professional Violin Plot](https://www.serdarbalci.com/jjstatsplot/articles/jviolin_documentation.html)
 
 (Advanced Violin Plots for Data Distribution)
 
-##### [Waffle Charts](https://sbalci.github.io/jjstatsplot/articles/jwaffle_documentation.html)
+##### [Waffle Charts](https://www.serdarbalci.com/jjstatsplot/articles/jwaffle_documentation.html)
 
 (Create Waffle Charts to visualize distributions)
 
-##### [Line Chart](https://sbalci.github.io/jjstatsplot/articles/linechart_documentation.html)
+##### [Line Chart](https://www.serdarbalci.com/jjstatsplot/articles/linechart_documentation.html)
 
 (Line Chart for Time Series and Trend Analysis)
 
-##### [Lasso-Cox Regression](https://sbalci.github.io/jjstatsplot/articles/lassocox_documentation.html)
+##### [Lasso-Cox Regression](https://www.serdarbalci.com/jjstatsplot/articles/lassocox_documentation.html)
 
 (Lasso-Cox Regression for Variable Selection in Survival Analysis)
 
-##### [Parallel Coordinates Plot](https://sbalci.github.io/jjstatsplot/articles/parallelplot_documentation.html)
+##### [Parallel Coordinates Plot](https://www.serdarbalci.com/jjstatsplot/articles/parallelplot_documentation.html)
 
 (Multivariate Exploration)
 
-##### [Automatic Plot Selection](https://sbalci.github.io/jjstatsplot/articles/statsplot2_documentation.html)
+##### [Automatic Plot Selection](https://www.serdarbalci.com/jjstatsplot/articles/statsplot2_documentation.html)
 
 (Automatic Plot Selection Based on Variable Types)
 
-##### [Statistical Distribution Generator](https://sbalci.github.io/jjstatsplot/articles/tidyplots_documentation.html)
+##### [Statistical Distribution Generator](https://www.serdarbalci.com/jjstatsplot/articles/tidydensity_documentation.html)
 
 (TidyDensity - Distribution Analysis & Simulation)
 
-##### [Within-Group Comparison](https://sbalci.github.io/jjstatsplot/articles/jjwithinstats_documentation.html)
+##### [Within-Group Comparison](https://www.serdarbalci.com/jjstatsplot/articles/jjwithinstats_documentation.html)
 
 (Violin Plots to Compare Within Groups)
 
-##### [Treemap](https://sbalci.github.io/jjstatsplot/articles/jjtreemap_documentation.html)
+##### [Treemap](https://www.serdarbalci.com/jjstatsplot/articles/jjtreemap_documentation.html)
 
 (Creates treemap visualizations for categorical data)
 
-##### [StreamGraphs](https://sbalci.github.io/jjstatsplot/articles/jjstreamgraph_documentation.html)
+##### [StreamGraphs](https://www.serdarbalci.com/jjstatsplot/articles/jjstreamgraph_documentation.html)
 
 (Create interactive StreamGraphs using R streamgraph package.)
 
-##### [Scatter Plot](https://sbalci.github.io/jjstatsplot/articles/jjscatterstats_documentation.html)
+##### [Scatter Plot](https://www.serdarbalci.com/jjstatsplot/articles/jjscatterstats_documentation.html)
 
 (Scatter Plot for Continuous Variables)
 
@@ -464,56 +453,56 @@ remotes::install_github("sbalci/jbbplot")
 
 #### jsurvival
 
-##### [Alluvial Survival Plot](https://sbalci.github.io/jsurvival/articles/alluvialsurvival_documentation.html)
+##### [Alluvial Survival Plot](https://www.serdarbalci.com/jsurvival/articles/alluvialsurvival_documentation.html)
 
 (Treatment Pathway Alluvial Plot)
 
-##### [Multivariable Survival Analysis](https://sbalci.github.io/jsurvival/articles/multisurvival_documentation.html)
+##### [Multivariable Survival Analysis](https://www.serdarbalci.com/jsurvival/articles/multisurvival_documentation.html)
 
 <img src="man/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width = 75% />
 <img src="man/figures/jamovi-and-multivariate-survival.gif" align="center" width = 75% />
 <img src="man/figures/jamovi-clinicopath-multivariate-survival.gif" align="center" width = 75% />
 
-##### [Odds Ratio Table and Plot](https://sbalci.github.io/jsurvival/articles/oddsratio_documentation.html)
+##### [Odds Ratio Table and Plot](https://www.serdarbalci.com/jsurvival/articles/oddsratio_documentation.html)
 
 <img src="man/figures/jamovi-ClinicoPath-oddsratio.gif" align="center" width = 75% />
 
-##### [Kaplan-Meier Survival Analysis for Single Group](https://sbalci.github.io/jsurvival/articles/onesurvival_documentation.html)
+##### [Kaplan-Meier Survival Analysis for Single Group](https://www.serdarbalci.com/jsurvival/articles/onesurvival_documentation.html)
 
 (Kaplan-Meier Survival Analysis for Single Group)
 
-##### [Single Arm Survival](https://sbalci.github.io/jsurvival/articles/singlearm_documentation.html)
+##### [Single Arm Survival](https://www.serdarbalci.com/jsurvival/articles/singlearm_documentation.html)
 
 (Survival for whole group, no explanatory factor)
 
-##### [Comprehensive Survival Analysis](https://sbalci.github.io/jsurvival/articles/survival_documentation.html)
+##### [Comprehensive Survival Analysis](https://www.serdarbalci.com/jsurvival/articles/survival_documentation.html)
 
 <img src="man/figures/jamovi-and-survival-analysis-finalfit.png" align="center" width = 75% />
 <img src="man/figures/jamovi-and-survival-analysis-finalfit-2.png" align="center" width = 75% />
 <img src="man/figures/jamovi-and-survival-analysis-finalfit-3.png" align="center" width = 75% />
 <img src="man/figures/jamovi-KMunicate-survival.png" align="center" width = 75% />
 
-##### [Survival Analysis for Continuous Explanatory Variable](https://sbalci.github.io/jsurvival/articles/survivalcont_documentation.html)
+##### [Survival Analysis for Continuous Explanatory Variable](https://www.serdarbalci.com/jsurvival/articles/survivalcont_documentation.html)
 
 (Cut-off & Univariate Survival Analysis)
 
-##### [Survival Analysis Power & Sample Size](https://sbalci.github.io/jsurvival/articles/survivalpower_documentation.html)
+##### [Survival Analysis Power & Sample Size](https://www.serdarbalci.com/jsurvival/articles/survivalpower_documentation.html)
 
 (Power Analysis for Survival Studies)
 
-##### [Time-Dependent ROC Analysis](https://sbalci.github.io/jsurvival/articles/timeroc_documentation.html)
+##### [Time-Dependent ROC Analysis](https://www.serdarbalci.com/jsurvival/articles/timeroc_documentation.html)
 
 (Predictive Performance Over Time)
 
-##### [Comprehensive Time Interval Calculator](https://sbalci.github.io/jsurvival/articles/timeinterval_documentation.html)
+##### [Comprehensive Time Interval Calculator](https://www.serdarbalci.com/jsurvival/articles/timeinterval_documentation.html)
 
 (Advanced time interval analysis with quality assessment)
 
-##### [Jvisr](https://sbalci.github.io/jsurvival/articles/jvisr_documentation.html)
+##### [Jvisr](https://www.serdarbalci.com/jsurvival/articles/jvisr_documentation.html)
 
 (Fit-for-Purpose Clinical Visualizations)
 
-##### [Competing Survival](https://sbalci.github.io/jsurvival/articles/15-competing-survival.html)
+##### [Competing Survival](https://www.serdarbalci.com/jsurvival/articles/15-competing-survival.html)
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
@@ -539,15 +528,15 @@ remotes::install_github("sbalci/jbbplot")
 
 <img src="man/figures/jamovi-and-R-caret-from-data.png" align="center" width = 75% />
 
-##### [Decision Calculator](https://sbalci.github.io/meddecide/articles/35-screening-calculator-comprehensive.html)
+##### [Decision Calculator](https://www.serdarbalci.com/meddecide/articles/35-screening-calculator-comprehensive.html)
 
 <img src="man/figures/jamovi-and-R-caret-user-input.png" align="center" width = 75% />
 
 <img src="man/figures/jamovi-ClinicoPath-FaganNomogram.gif" align="center" width = 75% />
 
-##### [Decision Tree](https://sbalci.github.io/meddecide/articles/05-decision-tree-analysis.html)
+##### [Decision Tree](https://www.serdarbalci.com/meddecide/articles/05-decision-tree-analysis.html)
 
-##### [Decision Tree explore](https://sbalci.github.io/meddecide/articles/05-decision-tree-analysis.html)
+##### [Decision Tree explore](https://www.serdarbalci.com/meddecide/articles/05-decision-tree-analysis.html)
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
@@ -565,7 +554,7 @@ remotes::install_github("sbalci/jbbplot")
 
 <img src="man/figures/jamovi-clinicopath-rpart-decision-tree.png" align="center" width = 75% />
 
-##### [ROC Analysis](https://sbalci.github.io/meddecide/articles/03-roc-analysis.html)
+##### [ROC Analysis](https://www.serdarbalci.com/meddecide/articles/03-roc-analysis.html)
 
 🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
 
@@ -573,7 +562,7 @@ remotes::install_github("sbalci/jbbplot")
 
 ### Correlation
 
-#### [Correlation](https://sbalci.github.io/ClinicoPathDescriptives/articles/01-correlation-analysis.html)
+#### [Correlation](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/01-correlation-analysis.html)
 
 ------------------------------------------------------------------------
 
@@ -688,7 +677,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2025--07--19-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2025--07--31-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -768,7 +757,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2025--07--19-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2025--07--31-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

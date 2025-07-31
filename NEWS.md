@@ -1,3 +1,16 @@
+# ClinicoPath 0.0.3.90
+
+## Documentation Updates
+
+### Submodule Documentation Links
+- **Updated Documentation Structure**: All submodule documentation links in README now point to their respective module documentation sites
+- **Consistent URL Pattern**: Documentation links now follow the pattern `https://www.serdarbalci.com/{module-name}/articles/`
+- **ClinicoPathDescriptives**: Updated 20 documentation links
+- **jjstatsplot**: Updated 16 documentation links  
+- **jsurvival**: Updated 12 documentation links
+- **meddecide**: Updated 5 documentation links
+- **Improved User Experience**: Direct access to module-specific documentation with consistent navigation
+
 # ClinicoPath 0.0.3.82
 
 ## PHASE 5 ADVANCED FEATURES - Clinical Utility Index

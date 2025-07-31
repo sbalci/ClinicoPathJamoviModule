@@ -193,6 +193,21 @@ This replaces the previous manual approach where vignette files had to be indivi
 
 ## Development Memories
 
+### Documentation Structure
+
+#### Submodule Documentation Links
+All submodule documentation is hosted on their respective websites following a consistent pattern:
+- Base URL: `https://www.serdarbalci.com/{module-name}/`
+- Articles/Vignettes: `https://www.serdarbalci.com/{module-name}/articles/{document-name}.html`
+
+The four main submodules and their documentation sites:
+1. **ClinicoPathDescriptives**: https://www.serdarbalci.com/ClinicoPathDescriptives/
+2. **jjstatsplot**: https://www.serdarbalci.com/jjstatsplot/
+3. **jsurvival**: https://www.serdarbalci.com/jsurvival/
+4. **meddecide**: https://www.serdarbalci.com/meddecide/
+
+When updating documentation links in README.Rmd, ensure they point to these submodule-specific sites rather than the main ClinicoPathJamoviModule documentation.
+
 ### File Update Instructions
 
 - Update NEWS.md when there is version change
