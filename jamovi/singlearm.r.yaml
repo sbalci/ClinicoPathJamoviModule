@@ -35,6 +35,19 @@ items:
           - tint
           - multievent
 
+    - name: medianSurvivalExplanation
+      title: 'Understanding Median Survival Analysis'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
     # - name:  medianSummary2
     #   title: medianSummary2
     #   type:  Preformatted
@@ -86,6 +99,19 @@ items:
     - name:  survTableSummary
       title: '1, 3, 5-yr Survival Summary and Table'
       type:  Preformatted
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - overalltime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+    - name: survivalProbabilityExplanation
+      title: 'Understanding Survival Probabilities'
+      type: Html
+      visible: (showExplanations)
       clearWith:
           - outcome
           - outcomeLevel
@@ -200,6 +226,18 @@ items:
         - tint
         - multievent
 
+    - name: personTimeExplanation
+      title: 'Understanding Person-Time Analysis'
+      type: Html
+      visible: (person_time && showExplanations)
+      clearWith:
+        - person_time
+        - rate_multiplier
+        - time_intervals
+        - outcome
+        - outcomeLevel
+        - overalltime
+
 
 
     - name: plot
@@ -225,6 +263,7 @@ items:
           - dxdate
           - tint
           - multievent
+          - medianline
 
 
 

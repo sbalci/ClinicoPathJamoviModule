@@ -1,7 +1,7 @@
 ---
 name: timeinterval
 title: Comprehensive Time Interval Calculator
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: Data Preparation
 menuSubtitle: Advanced time interval analysis with quality assessment
 version: '0.0.3'
@@ -142,7 +142,7 @@ options:
     - name: remove_negative
       title: Remove Negative Intervals
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Automatically exclude negative time intervals (end date before start date).
@@ -151,7 +151,7 @@ options:
     - name: remove_extreme
       title: Flag Extreme Values
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Identify and flag potentially extreme time intervals for quality review.
@@ -161,7 +161,7 @@ options:
     - name: add_times
       title: Add Calculated Times to Dataset
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Appends calculated time intervals as a new variable for downstream analysis.
@@ -170,7 +170,7 @@ options:
     - name: include_quality_metrics
       title: Include Data Quality Assessment
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Provides comprehensive data quality assessment including missing values,

@@ -547,6 +547,20 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Run Analysis ----
             ,
             .run = function() {
+                
+                # # Debug: Check if .run is being called at all
+                # tryCatch({
+                #     self$results$mydataview_multipleCutoffs1$setContent(
+                #         list(
+                #             step = "Start of .run method",
+                #             run_method_called = "YES, .run method is being executed",
+                #             multiple_cutoffs_available = exists("multiple_cutoffs", where = self$options)
+                #         )
+                #     )
+                # }, error = function(e) {
+                #     # If mydataview_multipleCutoffs1 doesn't exist, try the console
+                #     message("Debug: .run method called but mydataview_multipleCutoffs1 not available")
+                # })
 
                 # Errors, Warnings ----
 
@@ -605,6 +619,16 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Get Clean Data ----
                 results <- private$.cleandata()
+                
+                # Debug: Check if we have results after cleandata
+                # self$results$mydataview_multipleCutoffs1$setContent(
+                #     list(
+                #         step = "After .cleandata()",
+                #         results_created = !is.null(results),
+                #         cleanData_exists = if(!is.null(results)) !is.null(results$cleanData) else FALSE,
+                #         has_variables = if(!is.null(results)) all(c("name1time", "name2outcome", "name3contexpl") %in% names(results)) else FALSE
+                #     )
+                # )
 
                 # Run Analysis ----
 
@@ -631,6 +655,56 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 ## Run Residual diagnostics before cutoff (if enabled) ----
                 if (self$options$residual_diagnostics) {
                     private$.calculateResiduals(results)
+                }
+
+                ## Run Multiple Cut-offs Analysis (INDEPENDENT) ----
+                multicut_results <- NULL
+                message(paste("multiple_cutoffs option:", self$options$multiple_cutoffs))
+                
+                # Debug: Always show debug info regardless of option
+                # self$results$mydataview_multipleCutoffs1$setContent(
+                #     list(
+                #         step = "Before multiple_cutoffs check",
+                #         multiple_cutoffs_option = self$options$multiple_cutoffs,
+                #         results_available = !is.null(results),
+                #         cleanData_available = if(!is.null(results)) !is.null(results$cleanData) else FALSE,
+                #         name1time = if(!is.null(results)) results$name1time else "NULL",
+                #         name2outcome = if(!is.null(results)) results$name2outcome else "NULL",
+                #         name3contexpl = if(!is.null(results)) results$name3contexpl else "NULL"
+                #     )
+                # )
+                
+                # Debug: Check the condition
+                # self$results$mydataview_multipleCutoffs1$setContent(
+                #     list(
+                #         step = "At multiple_cutoffs condition",
+                #         multiple_cutoffs_option = self$options$multiple_cutoffs,
+                #         option_type = class(self$options$multiple_cutoffs),
+                #         condition_result = as.logical(self$options$multiple_cutoffs)
+                #     )
+                # )
+                
+                # Force enable for debugging
+                if (TRUE) { # self$options$multiple_cutoffs) {
+                    message("Starting multiple cutoffs analysis...")
+                    # Use the original clean data, before any single cutoff processing
+                    multicut_results <- private$.multipleCutoffs(results)
+                    if (!is.null(multicut_results)) {
+                        private$.multipleCutoffTables(multicut_results)
+                        
+                        # Store data for plots
+                        self$results$plotMultipleCutoffs$setState(list(
+                            multicut_results = multicut_results,
+                            results = results
+                        ))
+                        
+                        # Add multiple cutoff groups to data
+                        if (self$options$calculatedmulticut &&
+                            self$results$calculatedmulticut$isNotFilled()) {
+                            self$results$calculatedmulticut$setRowNums(rownames(results$cleanData))
+                            self$results$calculatedmulticut$setValues(multicut_results$risk_groups)
+                        }
+                    }
                 }
 
                 ## Run Cut-off calculation and further analysis ----
@@ -661,24 +735,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
 
-                ## Run Multiple Cut-offs Analysis FIRST ----
-                multicut_results <- NULL
-                message(paste("multiple_cutoffs option:", self$options$multiple_cutoffs))
-                if (self$options$multiple_cutoffs) {
-                    message("Starting multiple cutoffs analysis...")
-                    # Use the original clean data, before any single cutoff processing
-                    multicut_results <- private$.multipleCutoffs(results)
-                    if (!is.null(multicut_results)) {
-                        private$.multipleCutoffTables(multicut_results)
-                        
-                        # Add multiple cutoff groups to data
-                        if (self$options$calculatedmulticut &&
-                            self$results$calculatedmulticut$isNotFilled()) {
-                            self$results$calculatedmulticut$setRowNums(rownames(results$cleanData))
-                            self$results$calculatedmulticut$setValues(multicut_results$risk_groups)
-                        }
-                    }
-                }
 
                 # self$results$mydataview$setContent(
                 #     list(
@@ -772,6 +828,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         self$results$calculatedcutoff$isNotFilled()) {
                         self$results$calculatedcutoff$setValues(cutoffgr)
                 }
+
+            # Educational Explanations ----
+            if (self$options$showExplanations) {
+                private$.addExplanations()
+            }
 
             }
 
@@ -1734,15 +1795,16 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     
 
 
-                self$results$mydataview_multipleCutoffs$setContent(
-                                    list(
-                                        mytime = mytime,
-                                        myoutcome = myoutcome,
-                                        mycontexpl = mycontexpl,
-                                        mydata = mydata,
-                                        cont_var = cont_var
-                                        )
-                                )
+                # self$results$mydataview_multipleCutoffs2$setContent(
+                #                     list(
+                #                         name_of_debug = c('inside multipleCutoffs'),
+                #                         mytime = mytime,
+                #                         myoutcome = myoutcome,
+                #                         mycontexpl = mycontexpl,
+                #                         mydata = mydata,
+                #                         cont_var = cont_var
+                #                         )
+                #                 )
 
 
 
@@ -1779,6 +1841,16 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     # Create risk groups
                     risk_groups <- private$.createRiskGroups(mydata[[mycontexpl]], cutoff_values)
                     
+                    # Debug: Update mydataview_multipleCutoffs2 with progress
+                    # self$results$mydataview_multipleCutoffs2$setContent(
+                    #     list(
+                    #         name_of_debug = 'Risk groups created successfully',
+                    #         cutoff_values = cutoff_values,
+                    #         risk_groups_length = length(risk_groups),
+                    #         unique_groups = length(unique(risk_groups))
+                    #     )
+                    # )
+                    
                     # Calculate survival statistics for each group
                     group_stats <- private$.calculateGroupStats(mydata, mytime, myoutcome, risk_groups)
                     
@@ -1787,7 +1859,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         risk_groups = risk_groups,
                         group_stats = group_stats,
                         method = self$options$cutoff_method,
-                        num_cuts = num_cuts
+                        num_cuts = num_cuts,
+                        original_data = mydata,
+                        mytime = mytime,
+                        myoutcome = myoutcome
                     ))
                 }, error = function(e) {
                     warning(paste("Error in multiple cutoffs analysis:", e$message))
@@ -2018,7 +2093,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             events = sum(group_data[[myoutcome]], na.rm = TRUE),
                             median_surv = as.numeric(median_val),
                             median_lower = as.numeric(lower_val),
-                            median_upper = as.numeric(upper_val)
+                            median_upper = as.numeric(upper_val),
+                            surv_fit = km_fit  # Store the survival fit object for time-specific survival calculations
                         )
                     }
                 }
@@ -2041,7 +2117,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 
                 message(paste("Populating tables with", length(multicut_results$cutoff_values), "cutoffs"))
                 
-                # Populate cut-off points table
+                # Populate cut-off points table (without statistical columns)
                 cutoff_table <- self$results$multipleCutTable
                 cutoff_table$deleteRows()  # Clear existing rows
                 
@@ -2049,10 +2125,49 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     cutoff_table$addRow(rowKey = i, values = list(
                         cutpoint_number = i,
                         cutpoint_value = round(multicut_results$cutoff_values[i], 2),
-                        group_created = paste("Group", i + 1),
-                        logrank_statistic = NA,  # Will be calculated separately
-                        p_value = NA
+                        group_created = paste("Group", i + 1)
                     ))
+                }
+                
+                # Calculate and display overall log-rank test as separate text
+                if (!is.null(multicut_results$risk_groups) && length(unique(multicut_results$risk_groups)) > 1) {
+                    # Get the original data
+                    mydata <- multicut_results$original_data
+                    mytime <- multicut_results$mytime  
+                    myoutcome <- multicut_results$myoutcome
+                    
+                    # Perform log-rank test comparing all groups
+                    formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ multicut_results$risk_groups")
+                    tryCatch({
+                        logrank_test <- survival::survdiff(as.formula(formula_str), data = mydata)
+                        overall_chisq <- logrank_test$chisq
+                        overall_pval <- 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1)
+                        
+                        # Set the log-rank test results as text
+                        logrank_text <- paste0("Overall Log-rank Test: χ² = ", round(overall_chisq, 3), 
+                                             " (df = ", length(logrank_test$n) - 1, "), p = ", 
+                                             ifelse(overall_pval < 0.001, "< 0.001", round(overall_pval, 3)))
+                        
+                        # Add interpretation 
+                        interpretation <- if (overall_pval < 0.05) {
+                            "The multiple cutoffs significantly differentiate survival between risk groups."
+                        } else {
+                            "The multiple cutoffs do not significantly differentiate survival between risk groups."
+                        }
+                        
+                        full_text <- paste(logrank_text, interpretation, sep = "\n\n")
+                        
+                        # Store in a text result (we'll need to check what text output is available)
+                        # For now, let's use a preformatted result
+                        if (!is.null(self$results$multipleCutTable)) {
+                            # We can add a note to the table or create a separate text output
+                            # Let's add it as a note for now
+                            self$results$multipleCutTable$setNote("logrank", full_text)
+                        }
+                        
+                    }, error = function(e) {
+                        message(paste("Error calculating log-rank test:", e$message))
+                    })
                 }
                 
                 # Populate median survival table
@@ -2073,8 +2188,60 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
                 
-                # TODO: Add survival estimates table population
-                # This would require calculating survival at specific time points
+                # Populate survival estimates table
+                survtable <- self$results$multipleSurvTable
+                survtable$deleteRows()  # Clear existing rows
+                
+                # Calculate survival at 1, 3, 5 years (12, 36, 60 months)
+                time_points <- c(12, 36, 60)
+                
+                for (group_name in names(multicut_results$group_stats)) {
+                    stats <- multicut_results$group_stats[[group_name]]
+                    if (!is.null(stats) && !is.null(stats$surv_fit)) {
+                        for (time_point in time_points) {
+                            tryCatch({
+                                # Extract survival probability at specific time point
+                                surv_summary <- summary(stats$surv_fit, times = time_point)
+                                
+                                if (length(surv_summary$surv) > 0) {
+                                    # Debug the raw values
+                                    message(paste("Debug survival for", group_name, "at time", time_point, 
+                                                ": raw surv =", surv_summary$surv[1], 
+                                                ", n.risk =", surv_summary$n.risk[1]))
+                                    
+                                    # Don't multiply by 100 - the YAML format: pc does this automatically
+                                    surv_prob <- surv_summary$surv[1]  # Keep as proportion (0-1)
+                                    lower_ci <- surv_summary$lower[1]
+                                    upper_ci <- surv_summary$upper[1]
+                                    n_at_risk <- surv_summary$n.risk[1]
+                                    
+                                    survtable$addRow(rowKey = paste(group_name, time_point, sep = "_"), 
+                                                   values = list(
+                                        risk_group = stats$group,
+                                        time_point = time_point,
+                                        n_risk = n_at_risk,  # Match YAML column name
+                                        survival_prob = round(surv_prob, 3),  # Keep as proportion
+                                        surv_lower = round(lower_ci, 3),  # Match YAML column name
+                                        surv_upper = round(upper_ci, 3)   # Match YAML column name
+                                    ))
+                                } else {
+                                    # No survival data available at this time point
+                                    survtable$addRow(rowKey = paste(group_name, time_point, sep = "_"), 
+                                                   values = list(
+                                        risk_group = stats$group,
+                                        time_point = time_point,
+                                        n_risk = 0,  # Match YAML column name
+                                        survival_prob = NA,
+                                        surv_lower = NA,  # Match YAML column name
+                                        surv_upper = NA   # Match YAML column name
+                                    ))
+                                }
+                            }, error = function(e) {
+                                message(paste("Error calculating survival at time", time_point, "for group", group_name, ":", e$message))
+                            })
+                        }
+                    }
+                }
             }
 
             # Multiple cutoffs visualization ----
@@ -2609,6 +2776,109 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 })
                 
                 TRUE
+            }
+
+            # Educational Explanations ----
+            ,
+            .addExplanations = function() {
+                # Helper function to set explanation content
+                private$.setExplanationContent <- function(result_name, content) {
+                    tryCatch({
+                        self$results[[result_name]]$setContent(content)
+                    }, error = function(e) {
+                        # Silently ignore if result doesn't exist
+                    })
+                }
+                
+                # Cox Regression Explanation
+                private$.setExplanationContent("coxRegressionExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
+                    <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cox Regression for Continuous Variables</h4>
+                    <p><strong>Cox Regression:</strong> Models the relationship between continuous predictors and survival time.</p>
+                    <ul>
+                        <li><strong>Hazard Ratio (HR):</strong> Risk increase/decrease per unit change in continuous variable</li>
+                        <li><strong>Linear Assumption:</strong> Assumes linear relationship between variable and log-hazard</li>
+                        <li><strong>Interpretation:</strong> HR > 1 indicates increased risk, HR < 1 indicates decreased risk</li>
+                        <li><strong>Confidence Intervals:</strong> Provide precision estimates for hazard ratios</li>
+                    </ul>
+                    <p><em>Clinical interpretation:</em> For each unit increase in the continuous variable, the hazard changes by a factor of HR.</p>
+                </div>
+                ')
+                
+                # Cut-off Point Analysis Explanation
+                private$.setExplanationContent("cutoffAnalysisExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
+                    <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cut-off Point Analysis</h4>
+                    <p><strong>Optimal Cut-off:</strong> Transforms continuous variable into binary groups for survival comparison.</p>
+                    <ul>
+                        <li><strong>Maximally Selected Rank Statistics:</strong> Finds cut-off with maximum group separation</li>
+                        <li><strong>Statistical Significance:</strong> Tests whether groups have significantly different survival</li>
+                        <li><strong>Binary Classification:</strong> Creates high-risk and low-risk groups</li>
+                        <li><strong>Clinical Utility:</strong> Enables simple risk stratification decisions</li>
+                    </ul>
+                    <p><em>Caution:</em> Cut-off selection can be data-dependent and may not generalize to other populations.</p>
+                </div>
+                ')
+                
+                # Multiple Cutoffs Explanation
+                private$.setExplanationContent("multipleCutoffsExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+                    <h4 style="margin-top: 0; color: #2c3e50;">Understanding Multiple Cut-offs Analysis</h4>
+                    <p><strong>Risk Stratification:</strong> Creates multiple risk groups (low, intermediate, high) from continuous variable.</p>
+                    <ul>
+                        <li><strong>Multiple Cut-offs:</strong> Identifies 2-4 optimal cut-points for risk stratification</li>
+                        <li><strong>Risk Groups:</strong> Creates ordered categories with distinct survival profiles</li>
+                        <li><strong>Method Options:</strong> Quantile-based, tree-based, or minimum p-value approaches</li>
+                        <li><strong>Group Validation:</strong> Ensures adequate sample size in each risk group</li>
+                    </ul>
+                    <p><em>Advantage:</em> Captures non-linear relationships better than single cut-off approaches.</p>
+                </div>
+                ')
+                
+                # Person-Time Analysis Explanation
+                private$.setExplanationContent("personTimeExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
+                    <h4 style="margin-top: 0; color: #2c3e50;">Understanding Person-Time Analysis</h4>
+                    <p><strong>Person-Time:</strong> Accounts for both number of participants and their observation duration.</p>
+                    <ul>
+                        <li><strong>Incidence Rate:</strong> Events per person-time unit (e.g., per 100 person-years)</li>
+                        <li><strong>Time Intervals:</strong> Analyzes rates across different follow-up periods</li>
+                        <li><strong>Rate Comparison:</strong> Compares incidence rates between risk groups</li>
+                        <li><strong>Confidence Intervals:</strong> Provide precision estimates for rates</li>
+                    </ul>
+                    <p><em>Clinical use:</em> Essential for comparing event rates when follow-up times vary between groups.</p>
+                </div>
+                ')
+                
+                # RMST Analysis Explanation
+                private$.setExplanationContent("rmstExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #e2e3e5; border-left: 4px solid #6c757d;">
+                    <h4 style="margin-top: 0; color: #2c3e50;">Understanding Restricted Mean Survival Time (RMST)</h4>
+                    <p><strong>RMST:</strong> Average survival time up to a specified time horizon (τ).</p>
+                    <ul>
+                        <li><strong>Time-Limited Analysis:</strong> Mean survival within a defined observation period</li>
+                        <li><strong>Group Comparison:</strong> Difference in RMST between risk groups</li>
+                        <li><strong>Robust Measure:</strong> Less sensitive to tail behavior than median survival</li>
+                        <li><strong>Clinical Interpretation:</strong> Direct measure of expected survival time</li>
+                    </ul>
+                    <p><em>When to use:</em> Particularly valuable when median survival cannot be estimated or for time-limited analyses.</p>
+                </div>
+                ')
+                
+                # Residual Diagnostics Explanation
+                private$.setExplanationContent("residualDiagnosticsExplanation", '
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #ffeaa7; border-left: 4px solid #fdcb6e;">
+                    <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cox Model Residual Diagnostics</h4>
+                    <p><strong>Model Residuals:</strong> Assess Cox model fit and identify potential issues.</p>
+                    <ul>
+                        <li><strong>Martingale Residuals:</strong> Detect functional form problems (should scatter around 0)</li>
+                        <li><strong>Deviance Residuals:</strong> Standardized residuals for outlier detection</li>
+                        <li><strong>Score Residuals:</strong> Assess influence of observations on coefficients</li>
+                        <li><strong>Schoenfeld Residuals:</strong> Test proportional hazards assumption</li>
+                    </ul>
+                    <p><em>Clinical interpretation:</em> Large residuals may indicate patients with unusual survival patterns requiring further investigation.</p>
+                </div>
+                ')
             }
         )
     )

@@ -286,4 +286,12 @@ options:
           R: >
             Generate and display automatic interpretation of tree results.
 
+    - name: maxwidth
+      title: Maximum Width
+      type: Integer
+      default: 600
+      description:
+          R: >
+            Maximum width for tree display in pixels.
+
 ...

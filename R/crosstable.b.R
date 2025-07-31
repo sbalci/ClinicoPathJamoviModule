@@ -28,7 +28,11 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#'
+#' @importFrom gtsummary tbl_summary modify_header add_n add_overall bold_labels add_p add_q bold_levels bold_p all_continuous all_categorical all_stat_cols style_pvalue as_kable_extra
+#' @importFrom gt md
+#' @importFrom purrr partial
+#' @import magrittr
+
 
 crosstableClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
@@ -55,6 +59,35 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 myvars <- names(all_labels)[match(myvars, all_labels)]
                 mygroup <- names(all_labels)[all_labels == self$options$group]
                 return(list("mydata" = mydata, "myvars" = myvars, "mygroup" = mygroup))
+            },
+
+
+            # .showTestInformation ----
+            .showTestInformation = function() {
+                test_info <- paste0(
+                    "<div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
+                    "<h4 style='margin-top: 0; color: #1976D2;'>Q-values and Multiple Testing Correction</h4>",
+                    
+                    "<p><strong>What are Q-values?</strong><br>",
+                    "Q-values represent the False Discovery Rate (FDR) - the expected proportion of false positives among rejected hypotheses when testing multiple variables simultaneously.</p>",
+                    
+                    "<p><strong>Why use Q-values in this table?</strong><br>",
+                    "When comparing multiple variables across groups (as in this cross-table), the chance of finding at least one false positive increases. Q-values control this family-wise error rate.</p>",
+                    
+                    "<p><strong>Interpretation Guidelines:</strong></p>",
+                    "<ul>",
+                    "<li><strong>Q < 0.05:</strong> Strong evidence against null hypothesis (5% FDR)</li>",
+                    "<li><strong>Q < 0.10:</strong> Moderate evidence (10% FDR) - often acceptable in exploratory research</li>",
+                    "<li><strong>Q < 0.20:</strong> Suggestive evidence - warrants further investigation</li>",
+                    "</ul>",
+                    
+                    "<p><strong>Method:</strong> Benjamini-Hochberg FDR correction applied to p-values from gtsummary's automatic test selection (chi-square/Fisher for categorical, t-test/ANOVA for continuous).</p>",
+                    
+                    "<p><em>💡 Focus on q-values when interpreting results from tables with multiple comparisons to reduce false discoveries.</em></p>",
+                    "</div>"
+                )
+                
+                self$results$testInformation$setContent(test_info)
             },
 
             # .run ----
@@ -123,6 +156,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 } else if (sty == "finalfit") {
                     myvars_term <- jmvcore::composeTerm(components = myvars)
                     myvars_term <- jmvcore::decomposeTerm(term = myvars_term)
+                    private$.checkpoint()
+                    # Create the finalfit summary table.
                     tablefinalfit <- mydata %>%
                         finalfit::summary_factorlist(
                             .data = .,
@@ -168,9 +203,95 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     )
                     self$results$tablestyle2$setContent(tablefinalfit)
                 } else if (sty == "gtsummary") {
-                    tablegtsummary <- gtsummary::tbl_summary(data = mydata, by = mygroup)
-                    tablegtsummary <- gtsummary::as_kable_extra(tablegtsummary)
-                    self$results$tablestyle3$setContent(tablegtsummary)
+                    # tablegtsummary <- gtsummary::tbl_summary(data = mydata, by = mygroup)
+                    # tablegtsummary <- gtsummary::as_kable_extra(tablegtsummary)
+                    # self$results$tablestyle3$setContent(tablegtsummary)
+
+
+
+                    # http://www.danieldsjoberg.com/gtsummary/articles/gallery.html
+
+
+                # Select only the analysis variables and grouping variable
+                analysis_vars <- c(myvars, mygroup)
+                mydata_subset <- mydata[, analysis_vars, drop = FALSE]
+                
+                 tablegtsummary <-
+  mydata_subset %>%
+  tbl_summary(
+    by = mygroup,
+    statistic = list(
+      all_continuous()  ~ "{mean} ({sd})",
+      all_categorical() ~ "{n}/{N} ({p}%)"
+    ),
+    digits       = all_continuous() ~ 2,
+    missing_text = "(Missing)"
+  ) %>%
+  add_n() %>%
+  add_overall() %>%
+  add_p(
+    # compute p‐values for all variables using gtsummary defaults
+    pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)
+  ) %>%
+  add_q(
+    # compute q‐values (Benjamini–Hochberg by default)
+    method = "fdr", 
+    pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)
+  ) %>%
+  modify_header(
+    # re‐apply your group‐level header
+    all_stat_cols() ~ "**{level}**\nN = {n} ({style_percent(p)})",
+    # explicitly give p.value and q.value nice titles
+    p.value      ~ "**p-value**",
+    q.value      ~ "**q-value**"
+  ) %>%
+  bold_labels()
+
+                tablegtsummary <-
+                    gtsummary::as_kable_extra(tablegtsummary)
+
+                self$results$tablestyle3$setContent(tablegtsummary)
+                
+                # Add q-value explanation
+                qvalue_explanation <- paste0(
+                    "<div style='background-color: #f0f8ff; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #4682b4;'>",
+                    "<h4 style='margin-top: 0;'>Understanding Q-values (False Discovery Rate)</h4>",
+                    "<p><strong>What is a q-value?</strong><br>",
+                    "The q-value is the False Discovery Rate (FDR) adjusted p-value. It estimates the proportion of false positives ",
+                    "among all significant results when conducting multiple comparisons.</p>",
+                    
+                    "<p><strong>How to interpret:</strong></p>",
+                    "<ul>",
+                    "<li>A q-value of 0.05 means that 5% of significant results are expected to be false positives</li>",
+                    "<li>Q-values are typically larger than p-values</li>",
+                    "<li>Use q < 0.05 (or q < 0.10) as significance threshold for multiple testing</li>",
+                    "</ul>",
+                    
+                    "<p><strong>When to use q-values:</strong></p>",
+                    "<ul>",
+                    "<li>✅ When testing multiple variables simultaneously (like in this table)</li>",
+                    "<li>✅ In exploratory analyses with many comparisons</li>",
+                    "<li>✅ In genomic/proteomic studies with thousands of tests</li>",
+                    "</ul>",
+                    
+                    "<p><strong>Important limitations:</strong></p>",
+                    "<ul>",
+                    "<li>⚠️ Q-values assume all tests are independent (may not be true for correlated variables)</li>",
+                    "<li>⚠️ FDR control doesn't guarantee control of Type I error for individual tests</li>",
+                    "<li>⚠️ With few tests (<10), q-values may be overly conservative</li>",
+                    "<li>⚠️ Should not replace careful hypothesis planning and clinical judgment</li>",
+                    "</ul>",
+                    
+                    "<p><small><em>Method: Benjamini-Hochberg FDR correction as implemented in gtsummary::add_q()</em></small></p>",
+                    "</div>"
+                )
+                
+                self$results$qvalueExplanation$setContent(qvalue_explanation)
+                
+                # Show q-value focused test information automatically
+                private$.showTestInformation()
+                
+
                 } else if (sty %in% c("nejm", "lancet", "hmisc")) {
                     sty_term <- jmvcore::composeTerm(components = self$options$sty)
                     tabletangram <- tangram::html5(

@@ -46,7 +46,13 @@ children:
         children:
           - type: ComboBox
             name: pcat
-            enable: (sty:finalfit)
+            enable: (sty:finalfit || sty:gtsummary)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showTestInfo
+            enable: (sty:gtsummary)
   # - type: CollapseBox
   #   label: Post-hoc Analysis
   #   collapsed: true

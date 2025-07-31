@@ -155,7 +155,7 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Getting Started",
+                title="Getting Started"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeInfo",
@@ -163,11 +163,11 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityAssessment",
-                title="Data Quality Assessment",
+                title="Data Quality Assessment"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
-                title="Statistical Summary & Person-Time Analysis",
+                title="Statistical Summary & Person-Time Analysis"))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculated_time",
@@ -191,7 +191,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "timeinterval",
-                version = c(1,0,0),
+                version = c(0,0,3),
                 options = options,
                 results = timeintervalResults$new(options=options),
                 data = data,

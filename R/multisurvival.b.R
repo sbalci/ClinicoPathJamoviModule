@@ -4599,6 +4599,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           message("Node survival plotting error: ", e$message)
           return(FALSE)
         })
+
+        # Educational Explanations ----
+        if (self$options$showExplanations) {
+          private$.addExplanations()
+        }
       }
 
       # Convert Wide Format to Long Format for Time-Dependent Covariates ----
@@ -4694,7 +4699,108 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         return(long_data)
       }
 
-
+      # Educational Explanations ----
+      ,
+      .addExplanations = function() {
+        # Helper function to set explanation content
+        private$.setExplanationContent <- function(result_name, content) {
+          tryCatch({
+            self$results[[result_name]]$setContent(content)
+          }, error = function(e) {
+            # Silently ignore if result doesn't exist
+          })
+        }
+        
+        # Multivariable Cox Regression Explanation
+        private$.setExplanationContent("multivariableCoxExplanation", '
+        <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
+            <h4 style="margin-top: 0; color: #2c3e50;">Understanding Multivariable Cox Regression</h4>
+            <p><strong>Multivariable Analysis:</strong> Simultaneously evaluates multiple risk factors for their independent effects on survival.</p>
+            <ul>
+                <li><strong>Adjusted Hazard Ratios:</strong> Risk estimates after controlling for other variables in the model</li>
+                <li><strong>Independent Effects:</strong> Shows the effect of each variable while holding others constant</li>
+                <li><strong>Model Building:</strong> Allows identification of the most important prognostic factors</li>
+                <li><strong>Confounding Control:</strong> Accounts for relationships between predictor variables</li>
+            </ul>
+            <p><em>Clinical interpretation:</em> Provides a comprehensive view of which factors independently influence patient survival.</p>
+        </div>
+        ')
+        
+        # Adjusted Survival Curves Explanation
+        private$.setExplanationContent("adjustedSurvivalExplanation", '
+        <div style="margin-bottom: 20px; padding: 15px; background-color: #d1ecf1; border-left: 4px solid #bee5eb;">
+            <h4 style="margin-top: 0; color: #2c3e50;">Understanding Adjusted Survival Curves</h4>
+            <p><strong>Adjusted Curves:</strong> Survival curves that account for differences in patient characteristics between groups.</p>
+            <ul>
+                <li><strong>Covariate Adjustment:</strong> Controls for confounding variables that might bias group comparisons</li>
+                <li><strong>Average Patient:</strong> Shows survival for a typical patient with average covariate values</li>
+                <li><strong>True Group Effect:</strong> Isolates the effect of the grouping variable from other factors</li>
+                <li><strong>Fair Comparison:</strong> Enables valid comparisons between groups with different baseline characteristics</li>
+            </ul>
+            <p><em>When to use:</em> Essential when comparing groups that differ in important prognostic factors.</p>
+        </div>
+        ')
+        
+        # Risk Score Analysis Explanation
+        private$.setExplanationContent("riskScoreExplanation", '
+        <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+            <h4 style="margin-top: 0; color: #2c3e50;">Understanding Risk Score Analysis</h4>
+            <p><strong>Risk Scoring:</strong> Combines multiple prognostic factors into a single risk prediction score.</p>
+            <ul>
+                <li><strong>Linear Predictor:</strong> Weighted sum of all variables in the Cox model</li>
+                <li><strong>Risk Stratification:</strong> Divides patients into low, intermediate, and high-risk groups</li>
+                <li><strong>Prognostic Tool:</strong> Single score that summarizes overall patient risk</li>
+                <li><strong>Clinical Utility:</strong> Facilitates treatment decisions and patient counseling</li>
+            </ul>
+            <p><em>Advantage:</em> Simplifies complex multivariable models into an easily interpretable risk score.</p>
+        </div>
+        ')
+        
+        # Nomogram Explanation
+        private$.setExplanationContent("nomogramExplanation", '
+        <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
+            <h4 style="margin-top: 0; color: #721c24;">Understanding Nomograms</h4>
+            <p><strong>Nomogram:</strong> Graphical calculation tool that translates regression models into visual risk calculators.</p>
+            <ul>
+                <li><strong>Point System:</strong> Each predictor contributes points based on its value and hazard ratio</li>
+                <li><strong>Total Points:</strong> Sum of individual points provides overall risk score</li>
+                <li><strong>Survival Probability:</strong> Converts total points to predicted survival at specific time points</li>
+                <li><strong>Clinical Tool:</strong> Enables bedside risk calculation without complex mathematics</li>
+            </ul>
+            <p><em>Clinical application:</em> Allows clinicians to quickly estimate individual patient survival probabilities.</p>
+        </div>
+        ')
+        
+        # Person-Time Analysis Explanation
+        private$.setExplanationContent("personTimeExplanation", '
+        <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
+            <h4 style="margin-top: 0; color: #2c3e50;">Understanding Person-Time Analysis</h4>
+            <p><strong>Person-Time:</strong> Comprehensive measure combining participant count and observation duration.</p>
+            <ul>
+                <li><strong>Incidence Rates:</strong> Events per person-time unit across different time intervals</li>
+                <li><strong>Time-Stratified Analysis:</strong> Examines how event rates change over follow-up time</li>
+                <li><strong>Group Comparisons:</strong> Compares incidence rates between different risk groups</li>
+                <li><strong>Rate Ratios:</strong> Quantifies relative differences in event rates between groups</li>
+            </ul>
+            <p><em>Clinical insight:</em> Reveals patterns of risk over time and identifies periods of highest event rates.</p>
+        </div>
+        ')
+        
+        # Stratified Analysis Explanation
+        private$.setExplanationContent("stratifiedAnalysisExplanation", '
+        <div style="margin-bottom: 20px; padding: 15px; background-color: #e2e3e5; border-left: 4px solid #6c757d;">
+            <h4 style="margin-top: 0; color: #2c3e50;">Understanding Stratified Cox Regression</h4>
+            <p><strong>Stratification:</strong> Allows different baseline hazards for distinct patient subgroups while estimating common covariate effects.</p>
+            <ul>
+                <li><strong>Heterogeneous Baseline Risk:</strong> Accounts for fundamentally different risk levels between strata</li>
+                <li><strong>Common Covariate Effects:</strong> Assumes treatment/predictor effects are similar across strata</li>
+                <li><strong>Improved Model Fit:</strong> Better accommodates population heterogeneity</li>
+                <li><strong>Robust Estimates:</strong> Provides more accurate hazard ratios when baseline risks differ</li>
+            </ul>
+            <p><em>When to use:</em> When proportional hazards assumption is violated due to different baseline hazards between groups.</p>
+        </div>
+        ')
+      }
 
 
 

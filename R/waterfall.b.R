@@ -240,24 +240,58 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # For raw measurements, calculate percentage change from baseline
         if (inputType == "raw") {
-          processed_df <- df %>%
-            dplyr::group_by(!!rlang::sym(patientID)) %>%
-            dplyr::arrange(!!rlang::sym(patientID))
 
-          # Add time variable if present
+          # For raw data, we need time variable to identify baseline
           if (!is.null(timeVar)) {
-            processed_df <- processed_df %>%
-              dplyr::arrange(!!rlang::sym(timeVar))
+            # Ensure numeric conversion for calculations
+            df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
+            df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
+            
+            # First, identify baseline values for each patient
+            baseline_df <- df %>%
+              dplyr::filter(!!rlang::sym(timeVar) == 0) %>%
+              dplyr::select(!!rlang::sym(patientID), baseline = !!rlang::sym(responseVar))
+            
+            # Join baseline values and calculate response
+            processed_df <- df %>%
+              dplyr::left_join(baseline_df, by = patientID) %>%
+              dplyr::group_by(!!rlang::sym(patientID)) %>%
+              dplyr::arrange(!!rlang::sym(timeVar)) %>%
+              dplyr::mutate(
+                # Ensure baseline is numeric
+                baseline = jmvcore::toNumeric(baseline),
+                # Calculate percentage change from baseline
+                response = ifelse(!is.na(baseline) & baseline != 0,
+                                ((!!rlang::sym(responseVar) - baseline) / baseline) * 100,
+                                NA_real_)
+              ) %>%
+              dplyr::ungroup()
+          } else {
+            # Without time variable, assume first measurement is baseline
+            df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
+            
+            processed_df <- df %>%
+              dplyr::group_by(!!rlang::sym(patientID)) %>%
+              dplyr::arrange(!!rlang::sym(patientID)) %>%
+              dplyr::mutate(
+                baseline = dplyr::first(!!rlang::sym(responseVar)),
+                response = ((!!rlang::sym(responseVar) - baseline) / baseline) * 100
+              ) %>%
+              dplyr::ungroup()
           }
-
-          processed_df <- processed_df %>%
-            dplyr::mutate(
-              baseline = dplyr::first(!!rlang::sym(responseVar)),
-              response = ((!!rlang::sym(responseVar) - baseline) / baseline) * 100
-            ) %>%
-            dplyr::ungroup()
+          
+          # Debug: Check processed data
+          cat("Raw data processing completed. Sample data:\n")
+          if (nrow(processed_df) > 0) {
+            print(head(processed_df))
+            cat("Response range:", range(processed_df$response, na.rm = TRUE), "\n")
+            cat("Number of patients:", length(unique(processed_df[[patientID]])), "\n")
+          } else {
+            cat("ERROR: No data after processing!\n")
+          }
         } else {
           # Data is already in percentage format
+          df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
           processed_df <- df %>%
             dplyr::mutate(
               response = !!rlang::sym(responseVar)
@@ -265,11 +299,20 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         # Calculate RECIST categories - select best response (most negative for tumor shrinkage)
+        cat("Creating waterfall data - selecting best response per patient\n")
         df_waterfall <- processed_df %>%
           dplyr::group_by(!!rlang::sym(patientID)) %>%
+          dplyr::filter(!is.na(response)) %>%  # Filter out NA responses first
           dplyr::filter(response == min(response, na.rm = TRUE)) %>%
           dplyr::slice(1) %>%  # Take first row if there are ties
-          dplyr::ungroup() %>%
+          dplyr::ungroup()
+        
+        cat("Waterfall data created. Number of patients:", nrow(df_waterfall), "\n")
+        if (nrow(df_waterfall) > 0) {
+          cat("Best response range:", range(df_waterfall$response, na.rm = TRUE), "\n")
+        }
+        
+        df_waterfall <- df_waterfall %>%
           dplyr::mutate(
             category = factor(
               cut(response,
@@ -389,14 +432,32 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Convert time variable to numeric if needed
         df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
 
+        # Debug: Check what columns are available
+        cat("Available columns in person-time data:", paste(names(df), collapse = ", "), "\n")
+        
+        # Determine which column to use for response calculations
+        response_col <- NULL
+        if ("percentage_change" %in% names(df)) {
+          response_col <- "percentage_change"
+          cat("Using percentage_change column for person-time analysis\n")
+        } else if ("response" %in% names(df)) {
+          response_col <- "response" 
+          cat("Using response column for person-time analysis\n")
+        } else {
+          # For raw data, we can't do proper person-time analysis without percentage changes
+          cat("Warning: Person-time analysis requires percentage change data, not raw measurements\n")
+          cat("Available columns:", paste(names(df), collapse = ", "), "\n")
+          return(NULL)
+        }
+
         # Calculate person-time metrics by patient
         pt_by_patient <- df %>%
           dplyr::group_by(!!rlang::sym(patientID)) %>%
           dplyr::summarise(
             # Calculate total follow-up time (max time - baseline)
-            follow_up_time = max(!!rlang::sym(timeVar), na.rm = TRUE),
-            # Calculate best response
-            best_response = min(!!rlang::sym(responseVar), na.rm = TRUE),
+            follow_up_time = max(.data[[timeVar]], na.rm = TRUE),
+            # Calculate best response using the appropriate response column
+            best_response = min(.data[[response_col]], na.rm = TRUE),
             # Determine response category
             response_cat = factor(
               cut(best_response,
@@ -406,13 +467,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               levels = c("CR", "PR", "SD", "PD")
             ),
             # Calculate time to best response
-            time_to_best = !!rlang::sym(timeVar)[which.min(!!rlang::sym(responseVar))],
+            time_to_best = .data[[timeVar]][which.min(.data[[response_col]])],
             # Calculate time in response (for responders - PR or CR)
             time_in_response = ifelse(
               best_response <= -30,
               # For responders, calculate time from first response to last follow-up
-              max(!!rlang::sym(timeVar)[!!rlang::sym(responseVar) <= -30], na.rm = TRUE) -
-                min(!!rlang::sym(timeVar)[!!rlang::sym(responseVar) <= -30], na.rm = TRUE),
+              max(.data[[timeVar]][.data[[response_col]] <= -30], na.rm = TRUE) -
+                min(.data[[timeVar]][.data[[response_col]] <= -30], na.rm = TRUE),
               0
             ),
             .groups = "drop"
@@ -643,12 +704,17 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ))
 
         # Calculate and add person-time metrics if time variable is available
-        person_time_metrics <- private$.calculatePersonTimeMetrics(
-          processed_data$spider,
-          self$options$patientID,
-          self$options$timeVar,
-          self$options$responseVar
-        )
+        person_time_metrics <- tryCatch({
+          private$.calculatePersonTimeMetrics(
+            processed_data$spider,
+            self$options$patientID,
+            self$options$timeVar,
+            self$options$responseVar
+          )
+        }, error = function(e) {
+          cat("Error in person-time analysis:", e$message, "\n")
+          return(NULL)
+        })
 
         # Add person-time metrics to the results if available
         if (!is.null(person_time_metrics)) {
@@ -680,7 +746,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (!is.null(self$results$personTimeTable)) {
             for (i in seq_len(nrow(person_time_metrics$by_category))) {
               self$results$personTimeTable$addRow(rowKey = i, values = list(
-                category = person_time_metrics$by_category$response_cat[i],
+                category = as.character(person_time_metrics$by_category$response_cat[i]),
                 patients = person_time_metrics$by_category$patients[i],
                 patient_pct = sprintf("%.1f%%", person_time_metrics$by_category$pct_patients[i]),
                 person_time = sprintf("%.1f", person_time_metrics$by_category$person_time[i]),
@@ -701,6 +767,17 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               median_duration = ""
             ))
           }
+        } else {
+          # Add informative message when person-time analysis is not available
+          self$results$personTimeTable$addRow(rowKey = 1, values = list(
+            category = "Person-Time Analysis Not Available",
+            patients = "",
+            patient_pct = "",
+            person_time = "",
+            time_pct = "",
+            median_time = "Requires Time Variable",
+            median_duration = "Use longitudinal data with timeVar"
+          ))
         }
 
         # mydataview ----
@@ -1065,6 +1142,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Extract data and options
         df <- plotData$data$spider
         options <- plotData$options
+        
+        # Debug: Check if df exists and has data
+        if (is.null(df) || nrow(df) == 0) {
+          warning("Spider plot data is empty or null")
+          return()
+        }
 
         # Validate required variables exist
         required_vars <- c(options$timeVar, options$patientID)
@@ -1077,10 +1160,24 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Convert variables to numeric explicitly
         df$time <- jmvcore::toNumeric(df[[options$timeVar]])
-        df$response <- jmvcore::toNumeric(df$response)  # response should already be calculated
+        
+        # Check if response column exists, if not create it from the response variable
+        if ("response" %in% names(df)) {
+          df$response <- jmvcore::toNumeric(df$response)
+        } else if ("percentage_change" %in% names(df)) {
+          df$response <- jmvcore::toNumeric(df$percentage_change)
+        } else {
+          # For raw data, we need to calculate percentage change from baseline
+          df$response <- jmvcore::toNumeric(df[[options$responseVar]])
+        }
 
-        # Remove any rows with NA values
-        df <- df[complete.cases(df[c("time", "response")]), ]
+        # Remove any rows with NA values in required columns
+        if ("time" %in% names(df) && "response" %in% names(df)) {
+          df <- df[complete.cases(df[c("time", "response")]), ]
+        } else {
+          warning("Required columns 'time' or 'response' not found in spider plot data")
+          return()
+        }
 
         # Sort data by patient and time
         df <- df[order(df[[options$patientID]], df$time), ]
@@ -1092,22 +1189,24 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mapping = ggplot2::aes(
               x = time,                              # Use processed time variable
               y = response,                          # Use processed response
-              group = .data[[options$patientID]],   # Group by patient ID
-              color = response <= -30                # Color by response threshold
+              group = .data[[options$patientID]]    # Group by patient ID
             ),
-            size = 1
+            size = 1,
+            color = "gray50"  # Use neutral color for lines
           ) +
           # Add points at each measurement
           ggplot2::geom_point(
             mapping = ggplot2::aes(
               x = time,
               y = response,
-              color = response <= -30
+              fill = response <= -30    # Use fill instead of color
             ),
-            size = 2
+            size = 3,
+            shape = 21,  # Filled circle shape
+            color = "black"  # Border color
           ) +
           # Define colors for response categories
-          ggplot2::scale_color_manual(
+          ggplot2::scale_fill_manual(
             name = "Response",
             values = c("FALSE" = "#CC0000", "TRUE" = "#0066CC"),
             labels = c("Non-responder", "Responder")

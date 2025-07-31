@@ -1,0 +1,139 @@
+---
+name: continuousrelationship
+title: "Continuous Variable Relationship Analysis"
+jrs: '1.1'
+
+items:
+    - name: guidance
+      title: "BMJ Best Practices Guidance"
+      type: Html
+      visible: (showGuidance)
+      clearWith:
+        - predictor
+        - outcome
+
+    - name: warningMessage
+      title: "Important Warnings"
+      type: Html
+      visible: false
+      
+    - name: modelFormula
+      title: "Model Formula"
+      type: Html
+      visible: (showModel)
+      clearWith:
+        - predictor
+        - outcome
+        - modelType
+        - nKnots
+
+    - name: linearityTest
+      title: "Test for Non-linearity"
+      type: Table
+      visible: (testLinearity)
+      clearWith:
+        - predictor
+        - outcome
+        - modelType
+      columns:
+        - name: test
+          title: "Test"
+          type: text
+        - name: statistic
+          title: "Test Statistic"
+          type: number
+        - name: df
+          title: "df"
+          type: integer
+        - name: p
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: modelFit
+      title: "Model Fit Statistics"
+      type: Table
+      visible: (showModelFit)
+      clearWith:
+        - predictor
+        - outcome
+        - modelType
+      columns:
+        - name: model
+          title: "Model"
+          type: text
+        - name: aic
+          title: "AIC"
+          type: number
+        - name: bic
+          title: "BIC"
+          type: number
+        - name: loglik
+          title: "Log Likelihood"
+          type: number
+        - name: r2
+          title: "R²"
+          type: number
+          visible: false
+
+    - name: doseResponsePlot
+      title: "Dose-Response Relationship"
+      type: Image
+      renderFun: .doseResponsePlot
+      visible: (plotType:doseresponse)
+      clearWith:
+        - predictor
+        - outcome
+        - modelType
+        - referenceValue
+      height: 500
+      width: 700
+
+    - name: partialEffectPlot
+      title: "Partial Effect Plot"
+      type: Image
+      renderFun: .partialEffectPlot
+      visible: (plotType:partial)
+      clearWith:
+        - predictor
+        - outcome
+        - modelType
+        - covariates
+      height: 500
+      width: 700
+
+    - name: comparisonPlot
+      title: "Model Comparison Plot"
+      type: Image
+      renderFun: .comparisonPlot
+      visible: (plotType:comparison || compareWithLinear)
+      clearWith:
+        - predictor
+        - outcome
+        - modelType
+      height: 600
+      width: 800
+
+    - name: categorizedPlot
+      title: "Categorization Pitfall Demonstration"
+      type: Image
+      renderFun: .categorizedPlot
+      visible: (showCategorizedPitfall)
+      clearWith:
+        - predictor
+        - outcome
+      height: 500
+      width: 700
+
+    - name: interpretationGuide
+      title: "Interpretation Guide"
+      type: Preformatted
+      visible: (showGuidance)
+      clearWith:
+        - predictor
+        - outcome
+        - modelType
+...

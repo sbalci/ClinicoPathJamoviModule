@@ -469,7 +469,7 @@ options:
     - name: pplot
       title: p-value
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           If true, displays the p-value from the survival comparison test on the survival plot.
@@ -845,7 +845,7 @@ options:
     - name: show_terminal_nodes
       title: Show Survival Curves for Terminal Nodes
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           If true, displays Kaplan-Meier survival curves for each terminal node of the decision tree.
@@ -1001,6 +1001,14 @@ options:
           automatic smoothness selection. Natural splines are constrained to be linear
           at the boundaries.
 
+    - name: showExplanations
+      title: "Show Educational Explanations"
+      type: Bool
+      default: false
+      description: >-
+        Display educational explanations for each analysis type to help interpret 
+        multivariable survival analysis results, Cox regression, adjusted survival 
+        curves, nomograms, and model diagnostics.
 
 
 

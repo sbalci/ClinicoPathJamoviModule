@@ -67,6 +67,24 @@ items:
       visible: (sty:nejm || sty:lancet || sty:hmisc)
       refs: tangram
 
+    - name: qvalueExplanation
+      title: "Q-value Explanation"
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - sty
+      visible: (sty:gtsummary)
+
+    - name: testInformation
+      title: "Q-value Information"
+      type: Html
+      clearWith:
+          - vars
+          - group
+          - sty
+      visible: (sty:gtsummary)
+
 
 refs:
     - ClinicoPathJamoviModule

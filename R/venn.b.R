@@ -157,7 +157,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             TrueCount = true_count,
                             FalseCount = false_count,
                             TotalCount = total_count,
-                            TruePercentage = round((true_count / total_count) * 100, 2),
+                            TruePercentage = round(true_count / total_count, 4),
                             stringsAsFactors = FALSE
                         ))
                     }
@@ -171,7 +171,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             TrueCount = true_count,
                             FalseCount = false_count,
                             TotalCount = total_count,
-                            TruePercentage = round((true_count / total_count) * 100, 2),
+                            TruePercentage = round(true_count / total_count, 4),
                             stringsAsFactors = FALSE
                         ))
                     }
@@ -185,7 +185,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             TrueCount = true_count,
                             FalseCount = false_count,
                             TotalCount = total_count,
-                            TruePercentage = round((true_count / total_count) * 100, 2),
+                            TruePercentage = round(true_count / total_count, 4),
                             stringsAsFactors = FALSE
                         ))
                     }
@@ -199,7 +199,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             TrueCount = true_count,
                             FalseCount = false_count,
                             TotalCount = total_count,
-                            TruePercentage = round((true_count / total_count) * 100, 2),
+                            TruePercentage = round(true_count / total_count, 4),
                             stringsAsFactors = FALSE
                         ))
                     }
@@ -316,16 +316,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                         )
                     )
                     
-                    # Add annotations if requested
-                    if (showAnnotations) {
-                        # Add basic annotation showing intersection counts
-                        plot2 <- plot2 +
-                            ComplexUpset::annotate_text(
-                                mapping = ggplot2::aes(label = !!rlang::sym('intersection_size')),
-                                nudge_y = 0.1,
-                                size = 3
-                            )
-                    }
+                    # Note: ComplexUpset doesn't support annotate_text function
+                    # Annotations are built into the plot by default
                     
                     # Add title
                     plot2 <- plot2 + 
@@ -344,15 +336,17 @@ vennClass <- if (requireNamespace('jmvcore'))
                     orderBy <- switch(sortBy,
                         "freq" = "freq",
                         "degree" = "degree",
-                        "none" = NULL,
+                        "none" = "freq",  # Default to "freq" instead of NULL to avoid xtfrm error
                         "freq"  # default
                     )
                     
                     # Create UpSetR plot
+                    # Note: UpSetR shows intersection counts by default when showAnnotations is enabled
                     plot2 <- UpSetR::upset(
                         mydata2, 
                         order.by = orderBy,
-                        cutoff = minSize
+                        cutoff = minSize,
+                        text.scale = if(showAnnotations) c(1.3, 1.3, 1, 1, 2, 0.75) else c(1, 1, 1, 1, 1, 1)
                     )
                     
                     # Print the Upset Diagram.

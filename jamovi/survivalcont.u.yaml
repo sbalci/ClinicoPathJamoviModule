@@ -39,7 +39,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Cut-off Detection
+        label: Single Cut-off Detection
         children:
           - type: LayoutBox
             margin: large

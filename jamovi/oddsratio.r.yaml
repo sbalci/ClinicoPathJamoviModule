@@ -74,6 +74,43 @@ items:
       type: Html
       visible: (showNomogram)
 
+    # Odds Ratio Analysis Explanation
+    - name: oddsRatioExplanation
+      title: 'Understanding Odds Ratio Analysis'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
+
+    # Risk Measures Explanation
+    - name: riskMeasuresExplanation
+      title: 'Understanding Risk Measures'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
+
+    # Diagnostic Test Performance Explanation
+    - name: diagnosticTestExplanation
+      title: 'Understanding Diagnostic Test Performance'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
+
+    # Nomogram Analysis Explanation
+    - name: nomogramAnalysisExplanation
+      title: 'Understanding Nomogram Analysis'
+      type: Html
+      visible: (showNomogram && showExplanations)
+      clearWith:
+          - showNomogram
+          - explanatory
+          - outcome
+
 refs:
     - finalfit
     - rms

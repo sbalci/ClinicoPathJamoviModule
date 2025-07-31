@@ -644,6 +644,30 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         self$results$medianSummary$setContent(medianSummary)
 
+        # Add explanatory output for median survival
+        if (self$options$showExplanations) {
+            median_explanation_html <- '
+            <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Median Survival Analysis</h4>
+                <p style="margin-bottom: 10px;">Median survival represents the time point at which 50% of patients have experienced the event of interest:</p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Median Survival:</strong> Time when half the patients have experienced the event</li>
+                    <li><strong>95% CI:</strong> Range of plausible values for the true median survival</li>
+                    <li><strong>Events:</strong> Number of patients who experienced the event during follow-up</li>
+                    <li><strong>Records:</strong> Total number of patients in the analysis</li>
+                </ul>
+                <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>Median survival is robust to outliers and right-censoring</li>
+                    <li>When median is not reached (NR), more than 50% of patients remain event-free</li>
+                    <li>Wide confidence intervals suggest greater uncertainty in the estimate</li>
+                    <li>Consider both statistical significance and clinical meaningfulness</li>
+                </ul>
+            </div>
+            '
+            self$results$medianSurvivalExplanation$setContent(median_explanation_html)
+        }
+
 
       }
 
@@ -749,6 +773,31 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
 
         self$results$survTableSummary$setContent(survTableSummary)
+
+        # Add explanatory output for survival probabilities
+        if (self$options$showExplanations) {
+            survival_probability_explanation_html <- '
+            <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Survival Probabilities</h4>
+                <p style="margin-bottom: 10px;">Time-specific survival probabilities show the percentage of patients expected to be alive (event-free) at specific time points:</p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Time Point:</strong> Specific time of interest (e.g., 12, 36, 60 months)</li>
+                    <li><strong>Survival %:</strong> Percentage of patients alive at that time point</li>
+                    <li><strong>Number at Risk:</strong> Patients still being followed at that time</li>
+                    <li><strong>95% CI:</strong> Confidence interval for the survival probability</li>
+                </ul>
+                <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>Higher survival percentages indicate better prognosis</li>
+                    <li>Confidence intervals reflect uncertainty - wider intervals suggest less precision</li>
+                    <li>Number at risk decreases over time due to events and censoring</li>
+                    <li>These estimates help in patient counseling and treatment planning</li>
+                    <li>Compare with historical controls or published benchmarks for context</li>
+                </ul>
+            </div>
+            '
+            self$results$survivalProbabilityExplanation$setContent(survival_probability_explanation_html)
+        }
 
 
       }
@@ -885,6 +934,31 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
   ")
 
         self$results$personTimeSummary$setContent(summary_html)
+
+        # Add explanatory output for person-time analysis
+        if (self$options$showExplanations) {
+            person_time_explanation_html <- '
+            <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Person-Time Analysis</h4>
+                <p style="margin-bottom: 10px;">Person-time analysis calculates incidence rates by accounting for the total time each patient was at risk:</p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Person-Time:</strong> Sum of individual follow-up periods for all patients</li>
+                    <li><strong>Incidence Rate:</strong> Events per unit time (e.g., per 100 person-years)</li>
+                    <li><strong>Rate Multiplier:</strong> Scaling factor to express rates per standard unit</li>
+                    <li><strong>95% CI:</strong> Confidence interval calculated using exact Poisson method</li>
+                </ul>
+                <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>Person-time analysis handles varying follow-up durations effectively</li>
+                    <li>Incidence rates allow comparison with other studies or populations</li>
+                    <li>Higher rates indicate more frequent event occurrence</li>
+                    <li>Use stratified analysis to identify high-risk time periods</li>
+                    <li>Consider seasonal patterns or time-dependent effects</li>
+                </ul>
+            </div>
+            '
+            self$results$personTimeExplanation$setContent(person_time_explanation_html)
+        }
       }
 
 

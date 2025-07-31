@@ -711,15 +711,6 @@ items:
 
 
 
-
-
-    - name:  mydataview_multipleCutoffs
-      title: mydataview_multipleCutoffs
-      type:  Preformatted
-      visible: (multiple_cutoffs)
-
-
-
     - name: calculatedtime
       title: Add Calculated Time to Data
       type: Output

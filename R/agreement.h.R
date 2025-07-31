@@ -8,7 +8,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             vars = NULL,
             sft = FALSE,
-            heatmap = TRUE,
+            heatmap = FALSE,
             heatmapDetails = FALSE,
             wght = "unweighted",
             exct = FALSE,
@@ -36,7 +36,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..heatmap <- jmvcore::OptionBool$new(
                 "heatmap",
                 heatmap,
-                default=TRUE)
+                default=FALSE)
             private$..heatmapDetails <- jmvcore::OptionBool$new(
                 "heatmapDetails",
                 heatmapDetails,
@@ -212,14 +212,12 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="ci_lower", 
                         `title`="CI Lower", 
                         `type`="number", 
-                        `format`="zto", 
-                        `visible`="(bootstrap)"),
+                        `format`="zto"),
                     list(
                         `name`="ci_upper", 
                         `title`="CI Upper", 
                         `type`="number", 
-                        `format`="zto", 
-                        `visible`="(bootstrap)"),
+                        `format`="zto"),
                     list(
                         `name`="interpretation", 
                         `title`="Interpretation", 
@@ -308,7 +306,7 @@ agreement <- function(
     data,
     vars,
     sft = FALSE,
-    heatmap = TRUE,
+    heatmap = FALSE,
     heatmapDetails = FALSE,
     wght = "unweighted",
     exct = FALSE,

@@ -361,14 +361,18 @@ children:
             name: rate_multiplier
             format: number
   - type: CollapseBox
-    label: Model Selection
+    label: Model Selection (will be implemented later)
     collapsed: true
     children:
+      - type: Label
+        label: These features are being tested and will be activated in further releases
       - type: Label
         label: Variable Selection Method
         children:
           - type: CheckBox
             name: use_modelSelection
+            fitToGrid: true
+            enable: (false)
           - type: LayoutBox
             margin: large
             children:
@@ -389,15 +393,18 @@ children:
                 label: Removal Significance (p-value)
                 enable: (use_modelSelection)
   - type: CollapseBox
-    label: Survival Decision Tree
+    label: Survival Decision Tree (will be implemented later)
     collapsed: true
     children:
+      - type: Label
+        label: These features are being tested and will be activated in further releases
       - type: Label
         label: Decision Tree Analysis
         children:
           - type: CheckBox
             name: use_tree
             fitToGrid: true
+            enable: (false)
           - type: Label
             label: Tree Parameters
             children:
@@ -420,15 +427,18 @@ children:
                     name: show_terminal_nodes
                     enable: (use_tree)
   - type: CollapseBox
-    label: Time-Dependent Covariates
+    label: Time-Dependent Covariates (will be implemented later)
     collapsed: true
     children:
+      - type: Label
+        label: These features are being tested and will be activated in further releases
       - type: Label
         label: Time-Varying Variables
         children:
           - type: CheckBox
             name: use_time_dependent
             fitToGrid: true
+            enable: (false)
           - type: Label
             label: Specify Variables
             enable: (use_time_dependent)
@@ -442,7 +452,7 @@ children:
                     children:
                       - type: VariablesListBox
                         name: time_dep_vars
-                        isTarget: true
+                        isTarget: false
                         enable: (use_time_dependent)
                   - type: TargetLayoutBox
                     label: Start Time Variable
@@ -450,7 +460,7 @@ children:
                       - type: VariablesListBox
                         name: start_time_var
                         maxItemCount: 1
-                        isTarget: true
+                        isTarget: false
                         enable: (use_time_dependent)
                   - type: TargetLayoutBox
                     label: Stop Time Variable
@@ -458,18 +468,21 @@ children:
                       - type: VariablesListBox
                         name: stop_time_var
                         maxItemCount: 1
-                        isTarget: true
+                        isTarget: false
                         enable: (use_time_dependent)
   - type: CollapseBox
-    label: Frailty Models
+    label: Frailty Models (will be implemented later)
     collapsed: true
     children:
+      - type: Label
+        label: These features are being tested and will be activated in further releases
       - type: Label
         label: Random Effects for Clustering
         children:
           - type: CheckBox
             name: use_frailty
             fitToGrid: true
+            enable: (false)
           - type: Label
             label: Frailty Settings
             enable: (use_frailty)
@@ -484,41 +497,62 @@ children:
                       - type: VariablesListBox
                         name: frailty_var
                         maxItemCount: 1
-                        isTarget: true
-                        enable: (use_frailty)
+                        isTarget: false
+                        enable: (false && use_frailty)
               - type: ComboBox
                 name: frailty_distribution
-                enable: (use_frailty)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: change_times
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: td_format
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: td_suffix_pattern
-        format: string
+                enable: (false && use_frailty)
   - type: CollapseBox
-    label: Splines for Non-Proportional Hazards
+    label: Time-Dependent Data Configuration (will be implemented later)
     collapsed: true
     children:
+      - type: Label
+        label: These features are being tested and will be activated in further releases
+      - type: Label
+        label: Data Format Settings
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: td_format
+                enable: (false && use_time_dependent)
+      - type: Label
+        label: Change Time Configuration
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: change_times
+                format: string
+                enable: (FALSE && use_time_dependent)
+      - type: Label
+        label: Variable Naming Pattern
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: td_suffix_pattern
+                format: string
+                enable: (FALSE && use_time_dependent)
+  - type: CollapseBox
+    label: Splines for Non-Proportional Hazards (will be implemented later)
+    collapsed: true
+    children:
+      - type: Label
+        label: These features are being tested and will be activated in further releases
       - type: Label
         label: Time-Varying Effects
         children:
           - type: CheckBox
             name: use_splines
             fitToGrid: true
+            enable: (false)
           - type: Label
             label: Spline Settings
-            enable: (use_splines)
+            enable: (false && use_splines)
             children:
               - type: VariableSupplier
                 persistentItems: false
@@ -529,15 +563,15 @@ children:
                     children:
                       - type: VariablesListBox
                         name: spline_vars
-                        isTarget: true
-                        enable: (use_splines)
+                        isTarget: false
+                        enable: (false && use_splines)
               - type: LayoutBox
                 margin: large
                 children:
                   - type: TextBox
                     name: spline_df
                     format: number
-                    enable: (use_splines)
+                    enable: (false && use_splines)
                   - type: ComboBox
                     name: spline_type
-                    enable: (use_splines)
+                    enable: (false && use_splines)
