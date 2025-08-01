@@ -21,7 +21,7 @@ influence event rates relative to the person-time at risk in each subgroup."></h
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,7 @@ influence event rates relative to the person-time at risk in each subgroup."></h
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -98,7 +98,7 @@ influence event rates relative to the person-time at risk in each subgroup.</p>
 <span>  risktable <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  censored <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  medianline <span class="op">=</span> <span class="st">"none"</span>,</span>
-<span>  pplot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pplot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cutp <span class="op">=</span> <span class="st">"12, 36, 60"</span>,</span>
 <span>  calculateRiskScore <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  numRiskGroups <span class="op">=</span> <span class="st">"four"</span>,</span>
@@ -121,7 +121,7 @@ influence event rates relative to the person-time at risk in each subgroup.</p>
 <span>  min_node <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  complexity <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  max_depth <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  show_terminal_nodes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_terminal_nodes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  use_time_dependent <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  td_format <span class="op">=</span> <span class="st">"wide"</span>,</span>
 <span>  <span class="va">time_dep_vars</span>,</span>
@@ -135,7 +135,8 @@ influence event rates relative to the person-time at risk in each subgroup.</p>
 <span>  use_splines <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">spline_vars</span>,</span>
 <span>  spline_df <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  spline_type <span class="op">=</span> <span class="st">"pspline"</span></span>
+<span>  spline_type <span class="op">=</span> <span class="st">"pspline"</span>,</span>
+<span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -509,10 +510,16 @@ allow more flexible time-varying effects but may lead to overfitting.</p></dd>
 smooth functions with automatic smoothness selection. Natural splines are
 constrained to be linear at the boundaries.</p></dd>
 
+
+<dt id="arg-showexplanations">showExplanations<a class="anchor" aria-label="anchor" href="#arg-showexplanations"></a></dt>
+<dd><p>Display educational explanations for each analysis
+type to help interpret  multivariable survival analysis results, Cox
+regression, adjusted survival  curves, nomograms, and model diagnostics.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cox_ph</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot8</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotKM</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$risk_score_analysis</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$risk_score_analysis2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskScoreTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$riskScoreMetrics</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskGroupPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stratificationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$addRiskScore</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$addRiskGroup</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$plot_adj</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot_nomogram</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$nomogram_display</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tree_summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tree_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$node_survival_plots</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$mydataview_modelselection</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$text_model_selection</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$selection_method</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2_model_selection</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cox_ph</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot8</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotKM</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$risk_score_analysis</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$risk_score_analysis2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskScoreTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$riskScoreMetrics</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskGroupPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stratificationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$addRiskScore</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$addRiskGroup</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$plot_adj</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot_nomogram</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$nomogram_display</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$mydataview_survivaldecisiontree</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$tree_summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$tree_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$node_survival_plots</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$text_model_selection</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$selection_method</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2_model_selection</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multivariableCoxExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedSurvivalExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskScoreExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nomogramExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stratifiedAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$personTimeTable$asDF</code></p>
 <p><code>as.data.frame(results$personTimeTable)</code></p>
     </div>

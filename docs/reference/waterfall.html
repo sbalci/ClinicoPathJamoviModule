@@ -13,7 +13,7 @@ DCR, and person-time metrics."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,7 +26,7 @@ DCR, and person-time metrics."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -174,6 +174,9 @@ over time (requires time variable).</p></dd>
 <span class="r-in"><span>    responseVar <span class="op">=</span> <span class="st">"Response"</span>,</span></span>
 <span class="r-in"><span>    inputType <span class="op">=</span> <span class="st">"percentage"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Creating waterfall data - selecting best response per patient</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Waterfall data created. Number of patients: 5 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Best response range: -60 45 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  TREATMENT RESPONSE ANALYSIS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -196,11 +199,12 @@ over time (requires time variable).</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    increase in sum of target lesions.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Person-Time Analysis                                                                                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Response Category    Patients    % Patients    Person-Time    % Time    Median Time to Response    Median Duration   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Person-Time Analysis                                                                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Response Category                     Patients    % Patients    Person-Time    % Time    Median Time to Response    Median Duration                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Person-Time Analysis Not Available                                                       Requires Time Variable     Use longitudinal data with timeVar   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical Response Metrics                    </span>
@@ -227,7 +231,70 @@ over time (requires time variable).</p></dd>
 <span class="r-in"><span>    timeVar <span class="op">=</span> <span class="st">"Time"</span>,</span></span>
 <span class="r-in"><span>    inputType <span class="op">=</span> <span class="st">"raw"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in !rlang::sym(responseVar):</span> invalid argument type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Raw data processing completed. Sample data:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   PatientID Measurement  Time baseline response</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> PT1                50     0       50     0   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> PT2                60     0       60     0   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> PT3                55     0       55     0   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> PT1                30     2       50   -<span style="color: #BB0000;">40</span>   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> PT2                45     2       60   -<span style="color: #BB0000;">25</span>   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> PT3                50     2       55    -<span style="color: #BB0000;">9.09</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Response range: -50 0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Number of patients: 3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Creating waterfall data - selecting best response per patient</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Waterfall data created. Number of patients: 3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Best response range: -50 -12.72727 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Available columns in person-time data: PatientID, Measurement, Time, baseline, response </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Using response column for person-time analysis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  TREATMENT RESPONSE ANALYSIS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Response Categories Based on RECIST v1.1 Criteria </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Category    Number of Patients    Percentage   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CR     ᵃ                     0            0%   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    PR     ᵇ                     2         66.7%   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    SD     ᵈ                     1         33.3%   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    PD     ᵉ                     0            0%   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵃ Complete Response (CR): Complete</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    disappearance of all target lesions.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵇ Partial Response (PR): At least 30%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    decrease in sum of target lesions.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵈ Stable Disease (SD): Neither PR nor PD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    criteria met.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ᵉ Progressive Disease (PD): At least 20%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    increase in sum of target lesions.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Person-Time Analysis                                                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Response Category    Patients    % Patients    Person-Time    % Time    Median Time to Response    Median Duration   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CR                          0    0.0%          0.0            0.0%      NA                         NA                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    PR                          2    66.7%         8.0            66.7%     4.0                        1.0               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    SD                          1    33.3%         4.0            33.3%     4.0                        0.0               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    PD                          0    0.0%          0.0            0.0%      NA                         NA                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Total                       3    100.0%        12.0           100.0%                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical Response Metrics                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Metric                                     Value            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Objective Response Rate (CR+PR)            66.7%            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Disease Control Rate (CR+PR+SD)            100%             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Median Time to Response                    NA time units    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Median Duration of Response                2.0 time units   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Response Rate per 100 Person-Time Units    16.67            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-plt img"><img src="waterfall-3.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="waterfall-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -207,6 +207,15 @@
 </div>
 <div class="section level2">
 <h2 id="development-memories-1">Development Memories<a class="anchor" aria-label="anchor" href="#development-memories-1"></a></h2>
+<div class="section level3">
+<h3 id="documentation-structure">Documentation Structure<a class="anchor" aria-label="anchor" href="#documentation-structure"></a></h3>
+<div class="section level4">
+<h4 id="submodule-documentation-links">Submodule Documentation Links<a class="anchor" aria-label="anchor" href="#submodule-documentation-links"></a></h4>
+<p>All submodule documentation is hosted on their respective websites following a consistent pattern: - Base URL: <code>https://www.serdarbalci.com/{module-name}/</code> - Articles/Vignettes: <code>https://www.serdarbalci.com/{module-name}/articles/{document-name}.html</code></p>
+<p>The four main submodules and their documentation sites: 1. <strong>ClinicoPathDescriptives</strong>: <a href="https://www.serdarbalci.com/ClinicoPathDescriptives/" class="external-link uri">https://www.serdarbalci.com/ClinicoPathDescriptives/</a> 2. <strong>jjstatsplot</strong>: <a href="https://www.serdarbalci.com/jjstatsplot/" class="external-link uri">https://www.serdarbalci.com/jjstatsplot/</a> 3. <strong>jsurvival</strong>: <a href="https://www.serdarbalci.com/jsurvival/" class="external-link uri">https://www.serdarbalci.com/jsurvival/</a> 4. <strong>meddecide</strong>: <a href="https://www.serdarbalci.com/meddecide/" class="external-link uri">https://www.serdarbalci.com/meddecide/</a></p>
+<p>When updating documentation links in README.Rmd, ensure they point to these submodule-specific sites rather than the main ClinicoPathJamoviModule documentation.</p>
+</div>
+</div>
 <div class="section level3">
 <h3 id="file-update-instructions">File Update Instructions<a class="anchor" aria-label="anchor" href="#file-update-instructions"></a></h3>
 <ul><li>Update NEWS.md when there is version change</li>

@@ -40,6 +40,8 @@ A results object containing:
 \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
+\code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

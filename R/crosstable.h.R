@@ -93,7 +93,9 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tablestyle1 = function() private$.items[["tablestyle1"]],
         tablestyle2 = function() private$.items[["tablestyle2"]],
         tablestyle3 = function() private$.items[["tablestyle3"]],
-        tablestyle4 = function() private$.items[["tablestyle4"]]),
+        tablestyle4 = function() private$.items[["tablestyle4"]],
+        qvalueExplanation = function() private$.items[["qvalueExplanation"]],
+        testInformation = function() private$.items[["testInformation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -164,7 +166,25 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "group",
                     "sty"),
                 visible="(sty:nejm || sty:lancet || sty:hmisc)",
-                refs="tangram"))}))
+                refs="tangram"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="qvalueExplanation",
+                title="Q-value Explanation",
+                clearWith=list(
+                    "vars",
+                    "group",
+                    "sty"),
+                visible="(sty:gtsummary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="testInformation",
+                title="Q-value Information",
+                clearWith=list(
+                    "vars",
+                    "group",
+                    "sty"),
+                visible="(sty:gtsummary)"))}))
 
 crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "crosstableBase",
@@ -223,6 +243,8 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

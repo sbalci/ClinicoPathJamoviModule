@@ -33,7 +33,8 @@ vartree(
   mytitle = "",
   useprunesmaller = FALSE,
   prunesmaller = 5,
-  showInterpretation = TRUE
+  showInterpretation = TRUE,
+  maxwidth = 600
 )
 }
 \arguments{
@@ -97,6 +98,8 @@ colors),  minimal (simplified layout).}
 
 \item{showInterpretation}{Generate and display automatic interpretation of
 tree results.}
+
+\item{maxwidth}{Maximum width for tree display in pixels.}
 }
 \value{
 A results object containing:

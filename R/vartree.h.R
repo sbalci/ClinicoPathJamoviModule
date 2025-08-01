@@ -33,7 +33,8 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             mytitle = "",
             useprunesmaller = FALSE,
             prunesmaller = 5,
-            showInterpretation = TRUE, ...) {
+            showInterpretation = TRUE,
+            maxwidth = 600, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -183,6 +184,10 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showInterpretation",
                 showInterpretation,
                 default=TRUE)
+            private$..maxwidth <- jmvcore::OptionInteger$new(
+                "maxwidth",
+                maxwidth,
+                default=600)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..percvar)
@@ -212,6 +217,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..useprunesmaller)
             self$.addOption(private$..prunesmaller)
             self$.addOption(private$..showInterpretation)
+            self$.addOption(private$..maxwidth)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -241,7 +247,8 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         mytitle = function() private$..mytitle$value,
         useprunesmaller = function() private$..useprunesmaller$value,
         prunesmaller = function() private$..prunesmaller$value,
-        showInterpretation = function() private$..showInterpretation$value),
+        showInterpretation = function() private$..showInterpretation$value,
+        maxwidth = function() private$..maxwidth$value),
     private = list(
         ..vars = NA,
         ..percvar = NA,
@@ -270,7 +277,8 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..mytitle = NA,
         ..useprunesmaller = NA,
         ..prunesmaller = NA,
-        ..showInterpretation = NA)
+        ..showInterpretation = NA,
+        ..maxwidth = NA)
 )
 
 vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -385,6 +393,7 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param prunesmaller Minimum count threshold for node pruning.
 #' @param showInterpretation Generate and display automatic interpretation of
 #'   tree results.
+#' @param maxwidth Maximum width for tree display in pixels.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -422,7 +431,8 @@ vartree <- function(
     mytitle = "",
     useprunesmaller = FALSE,
     prunesmaller = 5,
-    showInterpretation = TRUE) {
+    showInterpretation = TRUE,
+    maxwidth = 600) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("vartree requires jmvcore to be installed (restart may be required)")
@@ -474,7 +484,8 @@ vartree <- function(
         mytitle = mytitle,
         useprunesmaller = useprunesmaller,
         prunesmaller = prunesmaller,
-        showInterpretation = showInterpretation)
+        showInterpretation = showInterpretation,
+        maxwidth = maxwidth)
 
     analysis <- vartreeClass$new(
         options = options,

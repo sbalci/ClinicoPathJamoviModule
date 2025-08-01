@@ -49,7 +49,8 @@ survivalcont(
   residual_diagnostics = FALSE,
   stratified_cox = FALSE,
   strata_variable,
-  loglog = FALSE
+  loglog = FALSE,
+  showExplanations = FALSE
 )
 }
 \arguments{
@@ -212,6 +213,10 @@ groups or populations.}
 \item{loglog}{Enable log-log plot for assessing proportional hazards
 assumption. Parallel lines  in the log-log plot suggest that proportional
 hazards assumption holds.}
+
+\item{showExplanations}{Display educational explanations for each analysis
+type to help interpret  survival analysis results, cut-off point analysis,
+Cox regression, and multiple  cutoffs analysis.}
 }
 \value{
 A results object containing:
@@ -246,6 +251,12 @@ A results object containing:
 \code{results$plotMultipleCutoffs} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotMultipleSurvival} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedmulticut} \tab \tab \tab \tab \tab an output \cr
+\code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$cutoffAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$multipleCutoffsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

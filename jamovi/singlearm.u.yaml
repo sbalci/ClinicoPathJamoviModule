@@ -222,3 +222,8 @@ children:
           - type: TextBox
             name: rate_multiplier
             format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showExplanations

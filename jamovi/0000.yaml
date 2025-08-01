@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.90
+version: 0.0.3.91
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-07-31'
+date: '2025-08-01'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -57,7 +57,7 @@ analyses:
     name: benford
     ns: ClinicoPath
     menuGroup: Exploration
-    menuSubgroup: ClinicoPath Descriptives
+    menuSubgroup: ClinicoPath Data Quality
     menuTitle: Benford Analysis
     ribbon: analyses
     category: analyses
@@ -529,7 +529,7 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: Performs Chi-Square test and post-hoc pairwise comparisons.
@@ -693,7 +693,7 @@ analyses:
   - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
     menuSubtitle: Advanced time interval analysis with quality assessment
@@ -796,7 +796,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1347,6 +1347,7 @@ analyses:
       ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
     ribbon: analyses
     category: analyses
+    menuSubtitle: Bar Charts, Grouped Bar Charts
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
@@ -1830,7 +1831,7 @@ analyses:
     name: tableone2
     ns: ClinicoPath
     category: analyses
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One Draft 2
     description: >
@@ -1912,6 +1913,18 @@ analyses:
       Key features include Simon-Makuch plots (modified Kaplan-Meier curves),
       landmark analysis, time-dependent Cox regression, and proper handling of
       immortal time bias.
+  - title: Continuous Variable Relationship Analysis
+    name: continuousrelationship
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives Data Quality
+    menuTitle: Continuous Variable Relationship Analysis
+    menuSubtitle: Evidence-Based Continuous Analysis
+    description: >
+      Analyzes relationships between continuous variables in clinical research
+      using  evidence-based approaches from BMJ best practices. Avoids common
+      pitfalls like  arbitrary categorization and linear assumptions.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

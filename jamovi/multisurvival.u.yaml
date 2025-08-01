@@ -365,7 +365,9 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: These features are being tested and will be activated in further releases
+        label: >-
+          These features are being tested and will be activated in further
+          releases
       - type: Label
         label: Variable Selection Method
         children:
@@ -397,7 +399,9 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: These features are being tested and will be activated in further releases
+        label: >-
+          These features are being tested and will be activated in further
+          releases
       - type: Label
         label: Decision Tree Analysis
         children:
@@ -431,7 +435,9 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: These features are being tested and will be activated in further releases
+        label: >-
+          These features are being tested and will be activated in further
+          releases
       - type: Label
         label: Time-Varying Variables
         children:
@@ -475,7 +481,9 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: These features are being tested and will be activated in further releases
+        label: >-
+          These features are being tested and will be activated in further
+          releases
       - type: Label
         label: Random Effects for Clustering
         children:
@@ -507,7 +515,9 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: These features are being tested and will be activated in further releases
+        label: >-
+          These features are being tested and will be activated in further
+          releases
       - type: Label
         label: Data Format Settings
         children:
@@ -542,7 +552,9 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: These features are being tested and will be activated in further releases
+        label: >-
+          These features are being tested and will be activated in further
+          releases
       - type: Label
         label: Time-Varying Effects
         children:
@@ -575,3 +587,8 @@ children:
                   - type: ComboBox
                     name: spline_type
                     enable: (false && use_splines)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showExplanations

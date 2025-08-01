@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -113,7 +113,163 @@
 <span>  showNestedModelTests <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showStepwiseResults <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showExplanations <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  showAbbreviationGlossary <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  showAbbreviationGlossary <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  calculateSME <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  calculateRMST <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  performCompetingRisks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">competingEventVar</span>,</span>
+<span>  performOptimalCutpoint <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">continuousStageVariable</span>,</span>
+<span>  cutpointMethod <span class="op">=</span> <span class="st">"maxstat"</span>,</span>
+<span>  cutpointRange <span class="op">=</span> <span class="st">"0.1, 0.9"</span>,</span>
+<span>  multipleTestingCorrection <span class="op">=</span> <span class="st">"bonferroni"</span>,</span>
+<span>  validateCutpoint <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cutpointBootstrap <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cutpointBootstrapReps <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  generateStagingSystem <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  stagingSystemLevels <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  performSHAPAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  shapAnalysisType <span class="op">=</span> <span class="st">"comprehensive"</span>,</span>
+<span>  <span class="va">shapCovariates</span>,</span>
+<span>  shapSampleSize <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  shapBackgroundSamples <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  shapExplanationType <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  generateSHAPPlots <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  shapPatientProfiles <span class="op">=</span> <span class="st">"representative"</span>,</span>
+<span>  shapInteractionAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  shapClinicalThresholds <span class="op">=</span> <span class="st">"0.25, 0.50, 0.75"</span>,</span>
+<span>  performCompetingRisksAdvanced <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  competingRisksMethod <span class="op">=</span> <span class="st">"comprehensive"</span>,</span>
+<span>  cifTimePoints <span class="op">=</span> <span class="st">"12, 24, 36, 60"</span>,</span>
+<span>  competingEventLevels <span class="op">=</span> <span class="st">"cancer_death, other_death, censored"</span>,</span>
+<span>  primaryEventLevel <span class="op">=</span> <span class="st">"cancer_death"</span>,</span>
+<span>  generateCIFPlots <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  performGrayTest <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cifConfidenceLevel <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  <span class="va">competingRisksCovariates</span>,</span>
+<span>  stratifyByStaging <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  calculateCRCIndex <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  generateCRSummary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  performMultiStateAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  multiStateModel <span class="op">=</span> <span class="st">"illness_death"</span>,</span>
+<span>  <span class="va">stateVariable</span>,</span>
+<span>  <span class="va">transitionTimeVariable</span>,</span>
+<span>  multiStateStates <span class="op">=</span> <span class="st">"healthy, disease, death"</span>,</span>
+<span>  absorptionStates <span class="op">=</span> <span class="st">"death"</span>,</span>
+<span>  <span class="va">multiStateCovariates</span>,</span>
+<span>  calculateTransitionProbabilities <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  multiStateTimePoints <span class="op">=</span> <span class="st">"6, 12, 24, 36, 60"</span>,</span>
+<span>  generateTransitionMatrix <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  multiStateGraphics <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  msStratifyByStaging <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  multiStateValidation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  generateMSMSummary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  performRandomForestAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  forestModelType <span class="op">=</span> <span class="st">"rsf"</span>,</span>
+<span>  forestNTrees <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  forestMTry <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  forestMinNodeSize <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  <span class="va">forestCovariates</span>,</span>
+<span>  calculateVariableImportance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  forestImportanceType <span class="op">=</span> <span class="st">"permutation"</span>,</span>
+<span>  performForestValidation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  forestPredictionTimePoints <span class="op">=</span> <span class="st">"12, 24, 36, 60"</span>,</span>
+<span>  generateSurvivalPredictions <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  forestDiscriminationMetrics <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  forestStagingComparison <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  forestBootstrap <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  forestBootstrapSamples <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  generateForestSummary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  performCureModelAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cureModelType <span class="op">=</span> <span class="st">"mixture"</span>,</span>
+<span>  cureDistribution <span class="op">=</span> <span class="st">"weibull"</span>,</span>
+<span>  cureAnalyzeOldStage <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cureAnalyzeNewStage <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cureFractionEstimation <span class="op">=</span> <span class="st">"parametric"</span>,</span>
+<span>  cureConfidenceLevel <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  cureBootstrapCI <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cureBootstrapReps <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  cureTimeHorizon <span class="op">=</span> <span class="fl">120</span>,</span>
+<span>  curePlateauThreshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  <span class="va">cureCovariates</span>,</span>
+<span>  cureModelComparison <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cureStageSpecificAnalysis <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cureGoodnessOfFit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  generateCureSummary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  performIntervalCensoringAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">intervalCensoringLeftTime</span>,</span>
+<span>  <span class="va">intervalCensoringRightTime</span>,</span>
+<span>  intervalCensoringDistribution <span class="op">=</span> <span class="st">"weibull"</span>,</span>
+<span>  intervalCensoringModel <span class="op">=</span> <span class="st">"both"</span>,</span>
+<span>  intervalCensoringBootstrap <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  intervalCensoringBootstrapSamples <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  intervalCensoringCompareStages <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  intervalCensoringPlots <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  intervalCensoringDiagnostics <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  intervalCensoringPredictionTime <span class="op">=</span> <span class="st">"12, 24, 36, 60"</span>,</span>
+<span>  intervalCensoringConfidenceLevel <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  <span class="va">intervalCensoringAdjustVariables</span>,</span>
+<span>  performInformativeCensoringAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  informativeCensoringTestMethod <span class="op">=</span> <span class="st">"all_tests"</span>,</span>
+<span>  <span class="va">informativeCensoringCovariates</span>,</span>
+<span>  informativeCensoringLandmarkTimes <span class="op">=</span> <span class="st">"12, 24, 36, 60"</span>,</span>
+<span>  informativeCensoringAdjustmentMethod <span class="op">=</span> <span class="st">"sensitivity_analysis"</span>,</span>
+<span>  <span class="va">informativeCensoringIPWVariables</span>,</span>
+<span>  informativeCensoringSensitivityRange <span class="op">=</span> <span class="st">"0.8, 0.9, 1.0, 1.1, 1.2"</span>,</span>
+<span>  informativeCensoringBootstrap <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  informativeCensoringBootstrapSamples <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  informativeCensoringAlpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  informativeCensoringPlots <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  informativeCensoringCompareStages <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  performConcordanceProbabilityAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  concordanceProbabilityMethods <span class="op">=</span> <span class="st">"all_methods"</span>,</span>
+<span>  concordanceProbabilityTimePoints <span class="op">=</span> <span class="st">"12, 24, 36, 60, 120"</span>,</span>
+<span>  concordanceProbabilityWeighting <span class="op">=</span> <span class="st">"uniform"</span>,</span>
+<span>  concordanceProbabilityBootstrap <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  concordanceProbabilityBootstrapSamples <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  concordanceProbabilityConfidenceLevel <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  concordanceProbabilityCompareStages <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">concordanceProbabilityAdjustVariables</span>,</span>
+<span>  concordanceProbabilityRobustnessAnalysis <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  concordanceProbabilityAlpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  concordanceProbabilityDiagnostics <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  performWinRatioAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  winRatioEndpoints <span class="op">=</span> <span class="st">"death_progression_response"</span>,</span>
+<span>  <span class="va">winRatioDeathVariable</span>,</span>
+<span>  <span class="va">winRatioSecondaryEndpoint</span>,</span>
+<span>  <span class="va">winRatioTertiaryEndpoint</span>,</span>
+<span>  <span class="va">winRatioTimeVariables</span>,</span>
+<span>  winRatioMatchingStrategy <span class="op">=</span> <span class="st">"all_pairs"</span>,</span>
+<span>  winRatioConfidenceMethod <span class="op">=</span> <span class="st">"bootstrap"</span>,</span>
+<span>  winRatioBootstrapSamples <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  winRatioConfidenceLevel <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  winRatioHandleTies <span class="op">=</span> <span class="st">"next_endpoint"</span>,</span>
+<span>  winRatioSensitivityAnalysis <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  winRatioGeneralizedPairwise <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  performFrailtyModelsAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">frailtyClusterVariable</span>,</span>
+<span>  frailtyDistribution <span class="op">=</span> <span class="st">"gamma"</span>,</span>
+<span>  frailtyBootstrap <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  frailtyBootstrapSamples <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  frailtyVarianceComponents <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  frailtyHeterogeneityTest <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  frailtyClusterComparison <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  frailtyModelSelection <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  frailtyPredictiveAccuracy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  frailtyDiagnostics <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  frailtyAdvancedInference <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  performClinicalUtilityAnalysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  clinicalUtilityPrevalence <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  clinicalUtilityTimePoint <span class="op">=</span> <span class="fl">60</span>,</span>
+<span>  clinicalUtilityThresholds <span class="op">=</span> <span class="st">"standard"</span>,</span>
+<span>  clinicalUtilityNNT <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  clinicalUtilityTreatmentEffect <span class="op">=</span> <span class="fl">0.7</span>,</span>
+<span>  clinicalUtilityComparison <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  clinicalUtilityCostEffectiveness <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  clinicalUtilityCostPerIntervention <span class="op">=</span> <span class="fl">5000</span>,</span>
+<span>  clinicalUtilityBootstrap <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  clinicalUtilityBootstrapSamples <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  clinicalUtilityTimeVarying <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -377,21 +533,516 @@ final model.</p>
 <p>showAbbreviationGlossaryDisplay a comprehensive glossary of all
 abbreviations, statistical terms,  and technical terminology used in the
 stage migration analysis. This  provides a quick reference for interpreting
-dashboard values and  understanding statistical outputs.</p></dd>
-
-</dl><p>A results object containing:
-</p><table class="table table"><tr><td><code>results$welcomeMessage</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$mydataview</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$mydataview2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$migrationOverviewExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationOverview</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$migrationMatrixExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationMatrix</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stageDistributionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stageDistribution</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$migrationSummaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$statisticalComparisonExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$statisticalComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$concordanceComparisonExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$concordanceComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$nriResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nriResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$idiResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$idiResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multifactorialAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multifactorialResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multifactorialResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedCIndexComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$adjustedCIndexComparisonExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nestedModelTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$nestedModelTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stepwiseResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stepwiseResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$interactionTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$interactionTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stratifiedAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stratifiedAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rocAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$integratedAUCAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$dcaResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$dcaResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$pseudoR2ResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$pseudoR2Results</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$decisionCurvesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$decisionCurves</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$bootstrapResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$bootstrapValidationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$willRogersAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$willRogersBasicAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$likelihoodTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$likelihoodTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$homogeneityTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$homogeneityTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$trendTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$trendTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$clinicalInterpretationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalInterpretation</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$executiveSummaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$executiveSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$statisticalSummaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$statisticalSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$effectSizesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$effectSizes</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$methodologyNotes</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationHeatmapExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationHeatmap</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$sankeyDiagram</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$rocComparisonExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rocComparisonPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$forestPlotExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$forestPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calibrationAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$calibrationAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$calibrationPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$calibrationPlots</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$advancedMigrationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$monotonicityCheck</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$willRogersAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$willRogersVisualization</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$migrationSurvivalComparison</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$willRogersEnhancedAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$willRogersStageDetail</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stageSpecificCIndex</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$enhancedPseudoR2</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$enhancedReclassificationMetrics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$proportionalHazardsTest</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$decisionCurveAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalCurvesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$survivalCurves</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$dashboardExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$comparativeAnalysisDashboard</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$abbreviationGlossary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$crossValidationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$crossValidationResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$crossValidationPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$enhancedLRComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr></table>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:<code>results$migrationOverview$asDF</code><code>as.data.frame(results$migrationOverview)</code>
-
-
-Comprehensive analysis for validating TNM staging system improvements using
+dashboard values and  understanding statistical outputs.</p>
+<p>calculateSMECalculate Stage Migration Effect Formula (SME) to
+quantify the cumulative  difference in survival between corresponding
+stages of old and new staging  systems. SME = Σ(S_new_i - S_old_i) where S
+represents stage-specific  survival rates. Positive values indicate Will
+Rogers phenomenon (apparent  improvement in new system), while negative
+values suggest understaging.</p>
+<p>calculateRMSTCalculate Restricted Mean Survival Time (RMST) metrics
+for robust  discrimination assessment. RMST provides clinically
+interpretable  survival measures that are independent of proportional
+hazards assumptions.  Particularly valuable when median survival is not
+reached or when comparing  absolute survival benefits between staging
+systems.</p>
+<p>performCompetingRisksPerform competing risks analysis for scenarios
+with multiple event types  (e.g., cancer-specific death vs. other causes).
+Implements Fine-Gray  subdistribution hazard models and Cumulative
+Incidence Function (CIF)  analysis. Essential when competing events prevent
+observation of primary  outcome and standard survival analysis may be
+biased.</p>
+<p>competingEventVarOptional variable indicating competing events
+(events other than primary  outcome). If not specified, the analysis will
+attempt to detect competing  risks from multi-level event variables. For
+cancer studies, this typically  represents non-cancer deaths when primary
+outcome is cancer-specific death.</p>
+<p>performOptimalCutpointDetermine optimal cut-points for continuous
+variables that create the most  statistically significant separation in
+survival outcomes. Uses maximal  selected rank statistics with appropriate
+multiple testing corrections.  Essential for developing new staging
+criteria from continuous biomarkers  or measurements.</p>
+<p>continuousStageVariableContinuous variable (e.g., tumor size,
+biomarker level, age) for optimal  cut-point determination. The analysis
+will find the cut-point that maximizes  the separation in survival outcomes
+while controlling for multiple testing.</p>
+<p>cutpointMethodMethod for optimal cut-point determination. Maximal
+selected rank statistics  provides the most rigorous approach with proper
+multiple testing correction.</p>
+<p>cutpointRangeProportion range for cut-point search (e.g., "0.1,
+0.9" excludes outer  10\<!-- % to maintain statistical power). Prevents extreme -->
+cut-points that  create unbalanced groups.</p>
+<p>multipleTestingCorrectionMultiple testing correction method for
+cut-point determination.  Bonferroni is most conservative; use when testing
+many cut-points.</p>
+<p>validateCutpointPerform cross-validation to assess stability of
+optimal cut-point.  Helps identify robust cut-points that are not dependent
+on specific  data characteristics.</p>
+<p>cutpointBootstrapUse bootstrap validation to assess cut-point
+stability and derive  confidence intervals. Provides robust assessment of
+cut-point reliability.</p>
+<p>cutpointBootstrapRepsNumber of bootstrap repetitions for cut-point
+validation.</p>
+<p>generateStagingSystemAutomatically generate a new staging system
+based on optimal cut-points.  Creates categorical staging variable from
+continuous measurements using  determined cut-points with appropriate stage
+labeling.</p>
+<p>stagingSystemLevelsNumber of staging levels to create from optimal
+cut-points (e.g., 3 for  Low/Intermediate/High or 4 for Stages I-IV).</p>
+<p>performSHAPAnalysisPerform Shapley Additive Explanations (SHAP)
+analysis to explain which  factors are driving the predictions of staging
+models. SHAP provides  both global feature importance and individual
+patient-level explanations  for complex staging decisions.</p>
+<p>shapAnalysisTypeType of SHAP analysis to perform. Global analysis
+shows overall feature  importance across all patients, individual analysis
+explains specific  patient predictions, comprehensive includes both
+approaches.</p>
+<p>shapCovariatesAdditional variables to include in SHAP
+interpretability analysis  alongside staging variables. Include key
+clinical variables that  might influence staging decisions or patient
+outcomes.</p>
+<p>shapSampleSizeNumber of patients to use for SHAP analysis. Larger
+samples provide  more comprehensive explanations but require more
+computation time.  Recommended: 100-200 for routine analysis, 500+ for
+detailed research.</p>
+<p>shapBackgroundSamplesNumber of background samples for SHAP baseline
+calculation. More  samples provide more stable explanations but increase
+computation time.</p>
+<p>shapExplanationTypeSHAP explanation method to use. Auto-detect
+chooses the most appropriate  method based on the model type. TreeSHAP is
+fastest for tree models,  Kernel SHAP works with any model but is slower.</p>
+<p>generateSHAPPlotsGenerate SHAP visualization plots including
+summary plots, bar plots,  and dependence plots for model interpretability.</p>
+<p>shapPatientProfilesTypes of patient profiles to include in
+individual SHAP explanations.  Helps understand how different patient
+characteristics influence  staging-based predictions.</p>
+<p>shapInteractionAnalysisPerform SHAP interaction analysis to
+identify important feature  interactions. Shows how combinations of
+features affect predictions  beyond individual feature effects.</p>
+<p>shapClinicalThresholdsComma-separated risk thresholds for clinical
+decision boundaries in  SHAP analysis (e.g., "0.25, 0.50, 0.75" for
+low/moderate/high risk).  Used to interpret SHAP values in clinical
+context.</p>
+<p>performCompetingRisksAdvancedPerform comprehensive competing risks
+analysis using Fine-Gray  subdistribution hazard models and Cumulative
+Incidence Function (CIF)  analysis. Essential when competing events prevent
+observation of primary  outcome and standard survival analysis may be
+biased.</p>
+<p>competingRisksMethodMethod for competing risks analysis. Fine-Gray
+models cumulative  incidence, cause-specific models instantaneous hazard
+rates.  Comprehensive includes both approaches for complete assessment.</p>
+<p>cifTimePointsTime points for Cumulative Incidence Function analysis
+(e.g.,  "12, 24, 36, 60" for 1, 2, 3, and 5-year analysis). Use clinically
+relevant time points for the specific cancer type.</p>
+<p>competingEventLevelsComma-separated list of event categories for
+competing risks analysis.  Typically includes primary event (cancer death),
+competing events  (other causes), and censoring indicator.</p>
+<p>primaryEventLevelSpecify the primary event of interest for
+competing risks analysis  (e.g., "cancer_death", "disease_progression",
+"cardiovascular_death").  Must match one of the competing event categories.</p>
+<p>generateCIFPlotsGenerate Cumulative Incidence Function plots
+showing probability of  each event type over time. Essential for
+visualizing competing risks  patterns and staging system comparisons.</p>
+<p>performGrayTestPerform Gray's test for equality of cumulative
+incidence functions  across staging groups. Tests whether CIF curves differ
+significantly  between stages for each event type.</p>
+<p>cifConfidenceLevelConfidence level for Cumulative Incidence
+Function confidence intervals  and statistical tests.</p>
+<p>competingRisksCovariatesAdditional variables to include in
+competing risks regression models.  Include important prognostic factors
+that may influence both primary  and competing events.</p>
+<p>stratifyByStagingPerform separate competing risks analysis for each
+staging system  (original vs new) to compare their performance in the
+presence of  competing events.</p>
+<p>calculateCRCIndexCalculate C-index specifically adapted for
+competing risks analysis.  Provides discrimination metrics that properly
+account for competing  events when evaluating staging system performance.</p>
+<p>generateCRSummaryGenerate comprehensive summary table with
+Fine-Gray regression results,  cumulative incidence estimates, and staging
+system comparisons in  competing risks context.</p>
+<p>performMultiStateAnalysisPerform multi-state survival analysis for
+complex disease progression  scenarios where patients can transition
+between multiple health states  over time. Essential for modeling disease
+progression, remission,  relapse, and death in oncology.</p>
+<p>multiStateModelType of multi-state model to fit. Illness-Death
+models progression  from healthy to disease to death. Progression models
+include stable,  progressive, terminal states. Comprehensive fits multiple
+models for  comparison.</p>
+<p>stateVariableVariable indicating patient disease states (e.g.,
+stable, progressive,  deceased, remission). Should contain all possible
+states that patients  can transition between during follow-up.</p>
+<p>transitionTimeVariableTime variable indicating when state
+transitions occurred. For multiple  transitions per patient, use
+comma-separated times or separate records  for each transition.</p>
+<p>multiStateStatesComma-separated list of all possible states in
+order of progression  (e.g., "healthy, disease, death" or "stable,
+progressive, remission, death").  Must match levels in the state variable.</p>
+<p>absorptionStatesComma-separated list of absorbing states that
+patients cannot leave  once entered (e.g., "death", "terminal"). These
+represent final  outcomes in the disease process.</p>
+<p>multiStateCovariatesAdditional variables to include in multi-state
+models as covariates.  Include important prognostic factors that may
+influence transition  rates between states.</p>
+<p>calculateTransitionProbabilitiesCalculate state transition
+probabilities between all possible state  pairs. Provides insight into
+likelihood of disease progression,  remission, and mortality transitions.</p>
+<p>multiStateTimePointsTime points for transition probability
+calculations (e.g.,  "6, 12, 24, 36, 60" for 6-month intervals up to 5
+years). Use  clinically relevant time points for disease monitoring.</p>
+<p>generateTransitionMatrixGenerate comprehensive transition intensity
+matrix showing hazard  rates for all possible state transitions. Essential
+for understanding  disease progression dynamics.</p>
+<p>multiStateGraphicsGenerate multi-state model visualizations
+including state transition  diagrams, probability plots, and Aalen-Johansen
+estimator curves for  state occupancy probabilities.</p>
+<p>msStratifyByStagingPerform separate multi-state analysis for each
+staging system to  compare their ability to predict disease transitions and
+progression  patterns.</p>
+<p>multiStateValidationPerform model validation including
+goodness-of-fit testing, residual  analysis, and cross-validation for
+multi-state models. Computationally  intensive but provides robust model
+assessment.</p>
+<p>generateMSMSummaryGenerate comprehensive summary table with
+transition intensities,  hazard ratios, and state occupancy probabilities
+comparing staging  systems in multi-state framework.</p>
+<p>performRandomForestAnalysisPerform Random Survival Forest analysis
+as a non-parametric alternative  to Cox proportional hazards models.
+Provides robust predictions through  ensemble methods without proportional
+hazards assumptions, ideal for  complex interactions and non-linear
+relationships.</p>
+<p>forestModelTypeType of random forest model to fit. RSF is the
+standard approach,  conditional inference forests handle categorical
+variables better,  extra trees provide additional randomization. Ensemble
+combines  multiple approaches for maximum robustness.</p>
+<p>forestNTreesNumber of trees in the random forest. More trees
+generally improve  performance but increase computation time. 500 trees
+provide good  balance between accuracy and speed for most applications.</p>
+<p>forestMTryNumber of variables randomly selected at each split. Use
+"auto" for  automatic selection (sqrt of total variables), or specify a
+number.  Lower values increase randomization, higher values may improve
+accuracy.</p>
+<p>forestMinNodeSizeMinimum number of observations in terminal nodes.
+Larger values prevent  overfitting but may reduce model flexibility.
+Recommended: 3-10 for  survival data depending on sample size.</p>
+<p>forestCovariatesAdditional variables to include in random forest
+models alongside  staging variables. Include important clinical variables
+for  comprehensive non-parametric survival modeling.</p>
+<p>calculateVariableImportanceCalculate variable importance measures
+using permutation-based methods.  Shows which variables contribute most to
+survival predictions,  complementing SHAP analysis with forest-specific
+importance metrics.</p>
+<p>forestImportanceTypeType of variable importance measure.
+Permutation importance is most  interpretable, VIMP is RF-specific, minimal
+depth shows variable  selection frequency. Comprehensive provides all
+measures.</p>
+<p>performForestValidationPerform out-of-bag validation and
+cross-validation for random forest  models. Provides robust assessment of
+model performance including  prediction error rates and concordance
+indices.</p>
+<p>forestPredictionTimePointsTime points for survival probability
+predictions from random forest  models (e.g., "12, 24, 36, 60" for 1, 2, 3,
+and 5-year predictions).  Use clinically relevant time points for staging
+comparison.</p>
+<p>generateSurvivalPredictionsGenerate individual patient survival
+probability predictions at  specified time points. Provides personalized
+risk assessments  based on random forest ensemble predictions.</p>
+<p>forestDiscriminationMetricsCalculate discrimination metrics
+specifically for random forest models  including C-index, Integrated Brier
+Score, and time-dependent AUC.  Compares forest performance with
+traditional Cox models.</p>
+<p>forestStagingComparisonUse random forest models to compare staging
+systems through  non-parametric ensemble methods. Provides robust staging
+comparison  without proportional hazards assumptions.</p>
+<p>forestBootstrapPerform bootstrap validation of random forest models
+with multiple  bootstrap samples. Provides confidence intervals for
+forest-based  predictions and importance measures.</p>
+<p>forestBootstrapSamplesNumber of bootstrap samples for forest
+validation. More samples  provide more stable confidence intervals but
+increase computation time.</p>
+<p>generateForestSummaryGenerate comprehensive summary of random
+forest analysis including  model performance, variable importance, staging
+comparison, and  clinical recommendations based on ensemble predictions.</p>
+<p>performCureModelAnalysisPerform cure model analysis for populations
+where a fraction of patients  may be effectively cured. Uses mixture models
+to separate susceptible  and cured populations, particularly relevant for
+cancer staging analysis.</p>
+<p>cureModelTypeType of cure model to fit. Mixture models assume a
+cured fraction with  infinite survival, promotion time models use
+biological mechanisms,  and both provides comprehensive comparison.</p>
+<p>cureDistributionUnderlying survival distribution for the
+susceptible population in  cure models. Weibull is most flexible,
+exponential is simplest,  log-normal and log-logistic provide alternative
+hazard shapes.</p>
+<p>cureAnalyzeOldStageFit cure models to original staging system to
+estimate cure fractions  and survival patterns for susceptible patients in
+each stage.</p>
+<p>cureAnalyzeNewStageFit cure models to new staging system to
+estimate cure fractions and  survival patterns, enabling comparison of
+staging discrimination for  both cured and susceptible populations.</p>
+<p>cureFractionEstimationMethod for estimating cure fractions.
+Parametric uses maximum likelihood  with specified distributions,
+non-parametric uses Kaplan-Meier plateau  detection, both provides
+validation.</p>
+<p>cureConfidenceLevelConfidence level for cure model parameter
+estimates and cure fraction  confidence intervals. Standard 95\<!-- % provides -->
+balance between precision  and coverage.</p>
+<p>cureBootstrapCICalculate bootstrap confidence intervals for cure
+fractions and model  parameters. Provides robust uncertainty quantification
+especially for  small samples or complex models.</p>
+<p>cureBootstrapRepsNumber of bootstrap replications for confidence
+interval calculation.  More replications provide more stable intervals but
+increase  computation time.</p>
+<p>cureTimeHorizonTime horizon for cure assessment in months. Patients
+surviving beyond  this time without events are considered potentially
+cured. Typical  values: 60-120 months for most cancers.</p>
+<p>curePlateauThresholdThreshold for detecting survival curve plateau
+in non-parametric cure  fraction estimation. Lower values detect smaller
+plateaus but may be  more sensitive to noise.</p>
+<p>cureCovariatesAdditional variables to include in cure model
+analysis alongside staging  variables. Can affect both cure probability and
+survival of susceptible  patients.</p>
+<p>cureModelComparisonCompare cure models between staging systems
+using likelihood ratio tests,  AIC/BIC criteria, and cure fraction
+differences. Assesses which staging  system better identifies cured
+patients.</p>
+<p>cureStageSpecificAnalysisPerform separate cure model analysis for
+each stage group to understand  stage-specific cure patterns and survival
+of susceptible patients.  Essential for staging validation.</p>
+<p>cureGoodnessOfFitPerform goodness-of-fit tests for cure models
+including Kolmogorov-Smirnov  tests and visual diagnostic plots. Validates
+model assumptions and  identifies potential misspecification.</p>
+<p>generateCureSummaryGenerate comprehensive summary of cure model
+analysis including cure  fractions by stage, model comparison results, and
+clinical interpretation  for staging system evaluation.</p>
+<p>performIntervalCensoringAnalysisPerform interval censoring analysis
+for events detected between visits. This handles cases where the exact
+event time is unknown but falls  within a known interval (e.g., between
+clinic visits). Uses icenReg  package for non-parametric and parametric
+interval-censored survival  analysis.</p>
+<p>intervalCensoringLeftTimeVariable containing the left endpoint of
+the censoring interval. For exact observations, this should equal the right
+endpoint. For left-censored observations, use 0 or NA.</p>
+<p>intervalCensoringRightTimeVariable containing the right endpoint of
+the censoring interval. For right-censored observations, use Inf or a large
+value. For exact observations, this should equal the left endpoint.</p>
+<p>intervalCensoringDistributionDistribution assumption for parametric
+interval-censored regression. Weibull is most commonly used and provides
+good flexibility.</p>
+<p>intervalCensoringModelType of interval censoring model to fit.
+Non-parametric uses non-parametric maximum likelihood estimation (NPMLE).
+Parametric fits accelerated failure time models with specified
+distribution.</p>
+<p>intervalCensoringBootstrapCalculate bootstrap confidence intervals
+for non-parametric estimates. This provides uncertainty quantification for
+the survival function estimates with interval-censored data.</p>
+<p>intervalCensoringBootstrapSamplesNumber of bootstrap samples for
+confidence interval calculation. More samples provide more accurate
+intervals but increase computation time.</p>
+<p>intervalCensoringCompareStagesCompare survival functions between
+different staging systems accounting for interval censoring. Provides
+likelihood ratio tests and information criteria for model comparison.</p>
+<p>intervalCensoringPlotsGenerate survival plots specifically designed
+for interval-censored data, including non-parametric survival function
+estimates and comparison plots between staging systems.</p>
+<p>intervalCensoringDiagnosticsPerform model diagnostics including
+convergence assessment, residual analysis for parametric models, and
+goodness-of-fit tests for interval-censored regression models.</p>
+<p>intervalCensoringPredictionTimeComma-separated list of time points
+(in months) for survival probability predictions. These will be used for
+staging system comparison and clinical interpretation of interval-censored
+survival estimates.</p>
+<p>intervalCensoringConfidenceLevelConfidence level for interval
+estimates and hypothesis tests. Standard choices are 0.90, 0.95, or 0.99.</p>
+<p>intervalCensoringAdjustVariablesAdditional variables to include in
+parametric interval-censored regression models for adjusted survival
+analysis. These will be included as covariates in the accelerated failure
+time model.</p>
+<p>performInformativeCensoringAnalysisPerform tests for informative
+censoring to validate the assumption that censoring is non-informative.
+Informative censoring occurs when the censoring mechanism is related to the
+failure time, potentially biasing survival estimates. This analysis
+provides tests and adjustments for non-random censoring patterns.</p>
+<p>informativeCensoringTestMethodMethod for testing informative
+censoring. Correlation tests examine relationship between censoring and
+survival times. Regression tests model censoring as outcome. Competing
+risks treats censoring as competing event. Landmark analysis examines
+censoring patterns.</p>
+<p>informativeCensoringCovariatesVariables that may be associated with
+the censoring mechanism. These could include clinical factors, treatment
+decisions, or administrative factors that might influence when patients are
+censored from the study.</p>
+<p>informativeCensoringLandmarkTimesComma-separated list of landmark
+time points (in months) for landmark analysis of censoring patterns.
+Analysis examines whether censoring probabilities differ across staging
+groups at these specific time points.</p>
+<p>informativeCensoringAdjustmentMethodMethod for adjusting survival
+estimates when informative censoring is detected. IPW uses inverse
+probability weighting. Multiple imputation imputes censored failure times.
+Sensitivity analysis explores range of possible bias effects.</p>
+<p>informativeCensoringIPWVariablesVariables to include in inverse
+probability weighting model for censoring probability estimation. Should
+include factors that predict censoring but are not affected by the outcome.</p>
+<p>informativeCensoringSensitivityRangeComma-separated list of
+sensitivity parameters for bias analysis. These represent hazard ratio
+multipliers for exploring potential bias from informative censoring (1.0 =
+no bias assumption).</p>
+<p>informativeCensoringBootstrapCalculate bootstrap confidence
+intervals for adjusted survival estimates and bias-corrected parameters.
+Provides uncertainty quantification for informative censoring adjustments.</p>
+<p>informativeCensoringBootstrapSamplesNumber of bootstrap samples for
+confidence interval calculation in informative censoring analysis. More
+samples provide more accurate intervals but increase computation time.</p>
+<p>informativeCensoringAlphaSignificance level for testing informative
+censoring hypotheses. Used for determining whether censoring appears to be
+informative and for confidence interval construction.</p>
+<p>informativeCensoringPlotsGenerate diagnostic plots for informative
+censoring assessment including censoring probability over time, correlation
+plots, and sensitivity analysis visualizations.</p>
+<p>informativeCensoringCompareStagesCompare censoring patterns across
+different staging groups to assess whether censoring differs by stage,
+which could indicate stage-related informative censoring that affects
+staging system evaluation.</p>
+<p>performConcordanceProbabilityAnalysisPerform advanced concordance
+probability analysis for heavily censored data. This provides alternative
+concordance measures beyond traditional C-index, including Harrell's
+C-index modifications, Uno's C-index for heavily censored data, and
+time-dependent concordance measures specifically designed for staging
+system evaluation with high censoring rates.</p>
+<p>concordanceProbabilityMethodsConcordance probability estimation
+methods. Harrell C-index is traditional but may be biased with heavy
+censoring. Uno C-index uses inverse probability weighting for censoring.
+Time-dependent measures evaluate concordance at specific time points. IPCW
+and weighted methods provide robust alternatives.</p>
+<p>concordanceProbabilityTimePointsComma-separated list of time points
+(in months) for time-dependent concordance assessment. These will be used
+for evaluating staging system discrimination at clinically relevant time
+horizons.</p>
+<p>concordanceProbabilityWeightingWeighting strategy for concordance
+probability estimation. Uniform gives equal weight to all pairs. Sample
+size weights by stage frequency. Event rate weights by observed events.
+Follow-up weights by observation time. Inverse variance uses precision
+weighting.</p>
+<p>concordanceProbabilityBootstrapCalculate bootstrap confidence
+intervals for concordance probability estimates. This provides uncertainty
+quantification for discrimination measures, especially important for
+heavily censored data where traditional standard errors may be unreliable.</p>
+<p>concordanceProbabilityBootstrapSamplesNumber of bootstrap samples
+for confidence interval calculation. More samples provide more accurate
+intervals but increase computation time. Recommended minimum 500 for
+reliable confidence intervals.</p>
+<p>concordanceProbabilityConfidenceLevelConfidence level for
+concordance probability confidence intervals. Standard choices are 0.90,
+0.95, or 0.99 for 90\<!-- %, 95\\%, or 99\\% confidence intervals respectively.} -->concordanceProbabilityCompareStagesCompare concordance
+probabilities between different staging systems using hypothesis tests and
+confidence interval overlap assessment. Provides statistical evidence for
+staging system discrimination differences accounting for heavy censoring.concordanceProbabilityAdjustVariablesAdditional variables to
+include in adjusted concordance analysis. These variables will be included
+alongside staging in multivariable models to assess staging contribution to
+discrimination beyond other prognostic factors.concordanceProbabilityRobustnessAnalysisPerform robustness analysis
+for concordance probability estimates including sensitivity to censoring
+assumptions, outlier influence, and temporal stability assessment for
+comprehensive validation of staging system discrimination.concordanceProbabilityAlphaSignificance level for concordance
+probability hypothesis tests and confidence interval construction. Used for
+testing differences between staging systems and assessing statistical
+significance of discrimination improvements.concordanceProbabilityDiagnosticsPerform diagnostic assessment of
+concordance probability estimates including convergence checks, influence
+diagnostics, and sensitivity analysis to ensure reliable discrimination
+assessment for staging system evaluation.performWinRatioAnalysisPerform win ratio analysis for composite
+endpoint analysis in staging comparison. The win ratio is a novel method
+for analyzing composite endpoints that respects the clinical hierarchy of
+outcomes and provides intuitive interpretation for staging system
+evaluation.winRatioEndpointsClinical hierarchy of endpoints for win ratio
+analysis. More important outcomes are prioritized in the analysis. Death is
+typically the most important endpoint, followed by disease-specific
+outcomes. The hierarchy determines how patient pairs are compared.winRatioDeathVariableVariable indicating death or primary endpoint
+occurrence (1 = event, 0 = no event). This is typically the most important
+outcome in the hierarchy and is compared first when evaluating patient
+pairs.winRatioSecondaryEndpointVariable for secondary endpoint (e.g.,
+disease progression, recurrence). This endpoint is evaluated when the
+primary endpoint comparison is tied. Can be binary (event/no event) or
+continuous (time to event).winRatioTertiaryEndpointVariable for tertiary endpoint (e.g.,
+response, quality of life). This endpoint is evaluated when both primary
+and secondary comparisons are tied. Can be binary or continuous.winRatioTimeVariablesTime variables corresponding to each endpoint
+in the hierarchy. Should be provided in the same order as the endpoints.
+Used for time-to-event comparisons when endpoints are not binary.winRatioMatchingStrategyStrategy for forming patient pairs for
+comparison. All pairs compares every patient from one group with every
+patient from another. Matched pairs uses pre-specified matching. Stratified
+performs within-stage comparisons. Propensity matching balances baseline
+characteristics.winRatioConfidenceMethodMethod for calculating confidence intervals
+for the win ratio. Bootstrap is most robust but computationally intensive.
+Asymptotic uses large sample theory. Permutation provides exact p-values.winRatioBootstrapSamplesNumber of bootstrap samples for confidence
+interval calculation when using bootstrap method. More samples provide more
+accurate intervals but increase computation time.winRatioConfidenceLevelConfidence level for win ratio confidence
+intervals and hypothesis tests. Standard choices are 0.90, 0.95, or 0.99
+for 90\<!-- %, 95\\%, or 99\\% confidence intervals respectively.} -->winRatioHandleTiesStrategy for handling tied comparisons. Split
+assigns 0.5 wins to each. Ignore excludes tied pairs from analysis. Next
+endpoint proceeds to compare the next outcome in the hierarchy for tied
+pairs.winRatioSensitivityAnalysisPerform sensitivity analysis for win
+ratio including assessment of endpoint ordering impact, missing data
+influence, and robustness to matching strategy choices.winRatioGeneralizedPairwiseUse generalized pairwise comparison
+(GPC) framework which extends win ratio to include continuous outcomes and
+provides additional metrics like net benefit and win odds.performFrailtyModelsAnalysisPerform frailty models analysis for
+clustered survival data using  mixed-effects Cox models (coxme) for
+multi-institutional data with  center-specific random effects and
+clustering adjustments.frailtyClusterVariableVariable defining clusters/institutions for
+frailty modeling (e.g.,  hospital, center, surgeon). Used to account for
+unobserved  heterogeneity and clustering effects in survival analysis.frailtyDistributionDistribution assumption for the frailty (random
+effects) terms. Gamma distribution is most common and provides
+multiplicative  frailty effects on the hazard function.frailtyBootstrapPerform bootstrap validation for frailty model
+parameters and  variance components to assess model stability and provide
+robust confidence intervals.frailtyBootstrapSamplesNumber of bootstrap samples for frailty
+model validation.  Higher values provide more stable estimates but increase
+computational time.frailtyVarianceComponentsAnalyze variance components to quantify
+the proportion of  total variation explained by cluster-level random
+effects  vs individual-level factors.frailtyHeterogeneityTestTest for significant frailty/heterogeneity
+using likelihood  ratio tests comparing frailty models to standard Cox
+models  without random effects.frailtyClusterComparisonPerform cluster-specific survival analysis
+comparing staging  systems within each cluster/institution to assess
+consistency  of staging performance across centers.frailtyModelSelectionPerform systematic model selection comparing
+different frailty  distributions and model specifications using AIC/BIC
+criteria  and likelihood ratio tests.frailtyPredictiveAccuracyAssess predictive accuracy of frailty
+models using cross-validation  and concordance measures accounting for
+clustering structure in  the data.frailtyDiagnosticsComprehensive model diagnostics including
+residual analysis,  influence detection, and goodness-of-fit assessment for
+frailty  models with clustering adjustments.frailtyAdvancedInferenceAdvanced statistical inference including
+profile likelihood  confidence intervals, score tests, and robust variance
+estimation for complex frailty model specifications.performClinicalUtilityAnalysisPerform clinical utility index
+analysis combining sensitivity/specificity  with disease prevalence to
+assess clinical decision-making value of  staging systems beyond
+statistical discrimination.clinicalUtilityPrevalenceDisease prevalence (proportion with
+events) for clinical utility  calculations. Can be estimated from study
+data or specified based  on population characteristics.clinicalUtilityTimePointTime point (in months) for clinical utility
+assessment. Should  represent clinically relevant decision-making horizon
+for the  specific cancer type and staging system.clinicalUtilityThresholdsRange of risk thresholds for clinical
+utility assessment. Different  ranges appropriate for different clinical
+decision contexts and  treatment aggressiveness preferences.clinicalUtilityNNTCalculate Number Needed to Treat (NNT) and Number
+Needed to Harm (NNH)  based on staging-guided interventions with
+configurable treatment  effect assumptions.clinicalUtilityTreatmentEffectAssumed treatment effect (hazard
+ratio) for calculating NNT/NNH.  Should reflect realistic treatment
+benefits for staging-guided  interventions in the specific clinical
+context.clinicalUtilityComparisonCompare clinical utility between staging
+systems using net benefit  difference analysis and utility improvement
+quantification across  different risk thresholds.clinicalUtilityCostEffectivenessInclude basic cost-effectiveness
+considerations in clinical utility  assessment with configurable cost
+assumptions for staging-guided  interventions and outcomes.clinicalUtilityCostPerInterventionEstimated cost per staging-guided
+intervention for cost-effectiveness  analysis. Should reflect realistic
+healthcare costs in the relevant  healthcare system and setting.clinicalUtilityBootstrapPerform bootstrap validation for clinical
+utility metrics including  confidence intervals for NNT, net benefit
+differences, and utility  improvement measures.clinicalUtilityBootstrapSamplesNumber of bootstrap samples for
+clinical utility validation. Higher  values provide more stable estimates
+but increase computational time.clinicalUtilityTimeVaryingAssess clinical utility across multiple
+time points to understand  how staging system value changes over time
+horizon and identify  optimal decision timing.A results object containing:
+</p><table class="table table"><tr><td><code>results$welcomeMessage</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$mydataview</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$mydataview2</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$migrationOverviewExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationOverview</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$migrationMatrixExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationMatrix</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stageDistributionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stageDistribution</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$migrationSummaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$statisticalComparisonExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$statisticalComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$concordanceComparisonExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$concordanceComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$nriResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nriResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$idiResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$idiResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multifactorialAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$multifactorialResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multifactorialResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedCIndexComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$adjustedCIndexComparisonExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nestedModelTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$nestedModelTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stepwiseResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stepwiseResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$interactionTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$interactionTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stratifiedAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stratifiedAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rocAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$integratedAUCAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$dcaResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$dcaResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$pseudoR2ResultsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$pseudoR2Results</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$decisionCurvesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$decisionCurves</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$bootstrapResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$bootstrapValidationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$willRogersAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$willRogersBasicAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$likelihoodTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$likelihoodTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$linearTrendTestExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$linearTrendTest</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$homogeneityTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$homogeneityTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$trendTestsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$trendTests</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$clinicalInterpretationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalInterpretation</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$executiveSummaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$executiveSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$statisticalSummaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$statisticalSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$effectSizesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$effectSizes</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$methodologyNotes</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationHeatmapExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$migrationHeatmap</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$sankeyDiagram</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$rocComparisonExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rocComparisonPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$forestPlotExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$forestPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calibrationAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$calibrationAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$calibrationPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$calibrationPlots</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$advancedMigrationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$monotonicityCheck</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$willRogersAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$willRogersVisualization</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$migrationSurvivalComparison</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$willRogersEnhancedAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$willRogersStageDetail</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stageSpecificCIndex</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$enhancedPseudoR2</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$enhancedReclassificationMetrics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$proportionalHazardsTest</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$decisionCurveAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalCurvesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$survivalCurves</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$dashboardExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$comparativeAnalysisDashboard</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$willRogersEvidenceSummaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$willRogersEvidenceSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$willRogersClinicalRecommendation</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$enhancedMigrationPatternAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$landmarkAnalysisResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$advancedMigrationHeatmapStats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$abbreviationGlossary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$crossValidationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$crossValidationResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$crossValidationPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$enhancedLRComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stageMigrationEffectExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$stageMigrationEffect</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stageMigrationEffectAssessment</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rmstAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rmstByStage</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rmstComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$competingRisksExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$competingRisksEventDistribution</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$competingRisksComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$optimalCutpointAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cutpointValidation</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$generatedStagingSystem</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$shapGlobalImportance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$shapIndividualExplanations</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$shapInteractions</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$shapSummaryStats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$fineGrayResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$causeSpecificResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cifSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$competingRisksCIndex</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$competingRisksSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$transitionIntensities</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$transitionProbabilities</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stateOccupancy</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multiStateComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$multiStateSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$forestVariableImportance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$forestModelPerformance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$forestSurvivalPredictions</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$forestCoxComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$forestStagingComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$forestAnalysisSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cureFractionEstimates</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cureModelParameters</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cureModelComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stageSpecificCureAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cureModelBootstrap</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cureAnalysisSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$intervalCensoringOverview</code></td><td></td><td></td><td></td><td></td><td>Summary of interval-censored data characteristics and model selection</td></tr><tr><td><code>results$intervalCensoringNonparametric</code></td><td></td><td></td><td></td><td></td><td>Non-parametric maximum likelihood survival estimates for interval-censored data</td></tr><tr><td><code>results$intervalCensoringParametric</code></td><td></td><td></td><td></td><td></td><td>Parametric survival regression results for interval-censored data</td></tr><tr><td><code>results$intervalCensoringComparison</code></td><td></td><td></td><td></td><td></td><td>Model comparison between staging systems accounting for interval censoring</td></tr><tr><td><code>results$intervalCensoringDiagnosticsTable</code></td><td></td><td></td><td></td><td></td><td>Diagnostic measures for interval-censored survival models</td></tr><tr><td><code>results$intervalCensoringSummary</code></td><td></td><td></td><td></td><td></td><td>Clinical interpretation and recommendations for interval-censored survival analysis</td></tr><tr><td><code>results$informativeCensoringOverview</code></td><td></td><td></td><td></td><td></td><td>Summary of informative censoring detection analysis and data characteristics</td></tr><tr><td><code>results$informativeCensoringTests</code></td><td></td><td></td><td></td><td></td><td>Statistical tests for detecting informative censoring patterns</td></tr><tr><td><code>results$informativeCensoringByStage</code></td><td></td><td></td><td></td><td></td><td>Comparison of censoring patterns across staging groups</td></tr><tr><td><code>results$informativeCensoringAdjustment</code></td><td></td><td></td><td></td><td></td><td>Survival estimates adjusted for informative censoring effects</td></tr><tr><td><code>results$informativeCensoringSensitivity</code></td><td></td><td></td><td></td><td></td><td>Sensitivity analysis exploring range of potential bias from informative censoring</td></tr><tr><td><code>results$informativeCensoringDiagnostics</code></td><td></td><td></td><td></td><td></td><td>Diagnostic measures for informative censoring assessment</td></tr><tr><td><code>results$informativeCensoringSummary</code></td><td></td><td></td><td></td><td></td><td>Summary of informative censoring findings and recommendations</td></tr><tr><td><code>results$concordanceProbabilityOverview</code></td><td></td><td></td><td></td><td></td><td>Summary of concordance probability analysis for staging system discrimination assessment</td></tr><tr><td><code>results$concordanceProbabilityEstimates</code></td><td></td><td></td><td></td><td></td><td>Concordance probability estimates using multiple methods for robust discrimination assessment</td></tr><tr><td><code>results$concordanceProbabilityTimeDependentComplex</code></td><td></td><td></td><td></td><td></td><td>Time-dependent concordance probability estimates at clinically relevant time points</td></tr><tr><td><code>results$concordanceProbabilityComparison</code></td><td></td><td></td><td></td><td></td><td>Statistical comparison of concordance probabilities between staging systems</td></tr><tr><td><code>results$concordanceProbabilityRobustness</code></td><td></td><td></td><td></td><td></td><td>Robustness analysis for concordance probability estimates under different assumptions</td></tr><tr><td><code>results$concordanceProbabilityDiagnosticsTable</code></td><td></td><td></td><td></td><td></td><td>Diagnostic measures for concordance probability analysis validation</td></tr><tr><td><code>results$concordanceProbabilitySummary</code></td><td></td><td></td><td></td><td></td><td>Summary of concordance probability findings and clinical interpretation</td></tr><tr><td><code>results$winRatioOverview</code></td><td></td><td></td><td></td><td></td><td>Summary of win ratio analysis configuration and data characteristics</td></tr><tr><td><code>results$winRatioPrimaryResults</code></td><td></td><td></td><td></td><td></td><td>Primary win ratio analysis results comparing staging systems</td></tr><tr><td><code>results$winRatioEndpointContributions</code></td><td></td><td></td><td></td><td></td><td>Contribution of each endpoint to the overall win ratio</td></tr><tr><td><code>results$winRatioStageSpecific</code></td><td></td><td></td><td></td><td></td><td>Win ratio analysis stratified by staging categories</td></tr><tr><td><code>results$winRatioSensitivityResults</code></td><td></td><td></td><td></td><td></td><td>Sensitivity analysis results for win ratio estimates</td></tr><tr><td><code>results$winRatioGeneralizedPairwiseResults</code></td><td></td><td></td><td></td><td></td><td>Extended metrics from generalized pairwise comparison framework</td></tr><tr><td><code>results$winRatioSummary</code></td><td></td><td></td><td></td><td></td><td>Summary of win ratio findings and clinical interpretation</td></tr><tr><td><code>results$frailtyModelsOverview</code></td><td></td><td></td><td></td><td></td><td>Overview of frailty models analysis for clustered survival data</td></tr><tr><td><code>results$frailtyModelsComparison</code></td><td></td><td></td><td></td><td></td><td>Comparison of staging systems using frailty models with clustering adjustments</td></tr><tr><td><code>results$frailtyModelsVarianceComponents</code></td><td></td><td></td><td></td><td></td><td>Detailed variance components analysis for frailty models</td></tr><tr><td><code>results$frailtyModelsClusterSpecific</code></td><td></td><td></td><td></td><td></td><td>Cluster-specific survival analysis comparing staging systems within institutions</td></tr><tr><td><code>results$frailtyModelsBootstrap</code></td><td></td><td></td><td></td><td></td><td>Bootstrap validation results for frailty model parameters and variance components</td></tr><tr><td><code>results$frailtyModelsDiagnostics</code></td><td></td><td></td><td></td><td></td><td>Comprehensive model diagnostics for frailty models including residual analysis and goodness-of-fit</td></tr><tr><td><code>results$frailtyModelsSummary</code></td><td></td><td></td><td></td><td></td><td>Executive summary of frailty models analysis with evidence-based recommendations</td></tr><tr><td><code>results$clinicalUtilityOverview</code></td><td></td><td></td><td></td><td></td><td>Overview of clinical utility index analysis combining discrimination with clinical decision-making value</td></tr><tr><td><code>results$clinicalUtilityComparison</code></td><td></td><td></td><td></td><td></td><td>Comparison of clinical utility between staging systems across different risk thresholds</td></tr><tr><td><code>results$clinicalUtilityNNT</code></td><td></td><td></td><td></td><td></td><td>Number Needed to Treat (NNT) and Number Needed to Harm (NNH) analysis for staging-guided interventions</td></tr><tr><td><code>results$clinicalUtilityNetBenefit</code></td><td></td><td></td><td></td><td></td><td>Net benefit analysis across risk thresholds with comparative utility assessment</td></tr><tr><td><code>results$clinicalUtilityTimeVarying</code></td><td></td><td></td><td></td><td></td><td>Time-varying clinical utility analysis showing how staging system value changes over time</td></tr><tr><td><code>results$clinicalUtilityBootstrap</code></td><td></td><td></td><td></td><td></td><td>Bootstrap validation results for clinical utility metrics with confidence intervals</td></tr><tr><td><code>results$clinicalUtilitySummary</code></td><td></td><td></td><td></td><td></td><td>Executive summary of clinical utility analysis with evidence-based recommendations</td></tr></table>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:<code>results$migrationOverview$asDF</code><code>as.data.frame(results$migrationOverview)</code>Comprehensive analysis for validating TNM staging system improvements using
 state-of-the-art  statistical methods. This analysis provides pathologists
 with robust tools to evaluate whether  a new staging system provides
 superior prognostic discrimination compared to existing systems.
 Includes advanced metrics: Net Reclassification Improvement (NRI),
 Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis,
 decision curve analysis, bootstrap validation,  and comprehensive clinical
-interpretation guidance.
-    </div>
+interpretation guidance.</dd>
+
+</dl></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

@@ -12,10 +12,10 @@ timeinterval(
   output_unit = "months",
   use_landmark = FALSE,
   landmark_time = 6,
-  remove_negative = TRUE,
-  remove_extreme = TRUE,
-  add_times = TRUE,
-  include_quality_metrics = TRUE,
+  remove_negative = FALSE,
+  remove_extreme = FALSE,
+  add_times = FALSE,
+  include_quality_metrics = FALSE,
   confidence_level = 95
 )
 }

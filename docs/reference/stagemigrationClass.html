@@ -13,7 +13,7 @@ discrimination compared to existing systems."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,7 +26,7 @@ discrimination compared to existing systems."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -80,11 +80,19 @@ clinical interpretation, and advanced visualizations</p>
 <li><p>Cross-validation options</p></li>
 <li><p>Stability assessment</p></li>
 <li><p>Internal validation metrics</p></li>
-</ul><p><strong>Advanced Visualizations:</strong></p><ul><li><p>Migration heatmaps</p></li>
+</ul><p><strong>Advanced Visualizations:</strong></p><ul><li><p>Migration heatmaps with flow statistics</p></li>
 <li><p>Time-dependent ROC curves</p></li>
 <li><p>Calibration plots</p></li>
 <li><p>Decision curves</p></li>
 <li><p>Forest plots with confidence intervals</p></li>
+</ul><p><strong>PHASE 1 ENHANCEMENTS - Evidence-Based Assessment Framework:</strong></p><ul><li><p><strong>Will Rogers Evidence Assessment:</strong> Multi-criteria evaluation framework</p></li>
+<li><p><strong>Migration Pattern Analysis:</strong> Advanced flow statistics and retention rates</p></li>
+<li><p><strong>Survival Pattern Validation:</strong> Upstaged patient survival similarity analysis</p></li>
+<li><p><strong>Biological Consistency Checks:</strong> Risk factor profile assessments</p></li>
+<li><p><strong>Landmark Analysis Integration:</strong> Time-based cutoff discrimination analysis</p></li>
+<li><p><strong>Clinical Decision Support:</strong> Evidence-based implementation recommendations</p></li>
+<li><p><strong>Traffic Light Assessment:</strong> PASS/BORDERLINE/CONCERN/FAIL evidence grading</p></li>
+<li><p><strong>Enhanced Heatmap Analytics:</strong> Major flow identification and net migration analysis</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="clinical-applications">Clinical Applications<a class="anchor" aria-label="anchor" href="#clinical-applications"></a></h2>
@@ -225,6 +233,36 @@ clinical interpretation, and advanced visualizations</p>
 <span class="r-in"><span>  calculateNRI <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  performBootstrap <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  bootstrapReps <span class="op">=</span> <span class="fl">1000</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># PHASE 1 ENHANCED: Evidence-based Will Rogers assessment</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="stagemigration.html">stagemigration</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="va">pancreatic_cohort</span>,</span></span>
+<span class="r-in"><span>  oldStage <span class="op">=</span> <span class="st">"T_AJCC8"</span>,</span></span>
+<span class="r-in"><span>  newStage <span class="op">=</span> <span class="st">"T_modified"</span>, </span></span>
+<span class="r-in"><span>  survivalTime <span class="op">=</span> <span class="st">"overall_survival_months"</span>,</span></span>
+<span class="r-in"><span>  event <span class="op">=</span> <span class="st">"death_status"</span>,</span></span>
+<span class="r-in"><span>  eventLevel <span class="op">=</span> <span class="st">"Dead"</span>,</span></span>
+<span class="r-in"><span>  analysisType <span class="op">=</span> <span class="st">"publication"</span>,</span></span>
+<span class="r-in"><span>  advancedMigrationAnalysis <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  showMigrationHeatmap <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  cancerType <span class="op">=</span> <span class="st">"other"</span>,</span></span>
+<span class="r-in"><span>  showExplanations <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Phase 1 Enhanced with landmark analysis for lung cancer</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="stagemigration.html">stagemigration</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="va">lung_staging_data</span>,</span></span>
+<span class="r-in"><span>  oldStage <span class="op">=</span> <span class="st">"stage_7th_edition"</span>,</span></span>
+<span class="r-in"><span>  newStage <span class="op">=</span> <span class="st">"stage_8th_edition"</span>,</span></span>
+<span class="r-in"><span>  survivalTime <span class="op">=</span> <span class="st">"survival_months"</span>,</span></span>
+<span class="r-in"><span>  event <span class="op">=</span> <span class="st">"vital_status"</span>,</span></span>
+<span class="r-in"><span>  eventLevel <span class="op">=</span> <span class="st">"deceased"</span>,</span></span>
+<span class="r-in"><span>  analysisType <span class="op">=</span> <span class="st">"comprehensive"</span>, </span></span>
+<span class="r-in"><span>  advancedMigrationAnalysis <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  cancerType <span class="op">=</span> <span class="st">"lung"</span>,  <span class="co"># Uses lung-specific landmark times: 3,6,12,24 months</span></span></span>
+<span class="r-in"><span>  showWillRogersVisualization <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  showMigrationSurvivalComparison <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

@@ -12,10 +12,10 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             output_unit = "months",
             use_landmark = FALSE,
             landmark_time = 6,
-            remove_negative = TRUE,
-            remove_extreme = TRUE,
-            add_times = TRUE,
-            include_quality_metrics = TRUE,
+            remove_negative = FALSE,
+            remove_extreme = FALSE,
+            add_times = FALSE,
+            include_quality_metrics = FALSE,
             confidence_level = 95, ...) {
 
             super$initialize(
@@ -76,19 +76,19 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..remove_negative <- jmvcore::OptionBool$new(
                 "remove_negative",
                 remove_negative,
-                default=TRUE)
+                default=FALSE)
             private$..remove_extreme <- jmvcore::OptionBool$new(
                 "remove_extreme",
                 remove_extreme,
-                default=TRUE)
+                default=FALSE)
             private$..add_times <- jmvcore::OptionBool$new(
                 "add_times",
                 add_times,
-                default=TRUE)
+                default=FALSE)
             private$..include_quality_metrics <- jmvcore::OptionBool$new(
                 "include_quality_metrics",
                 include_quality_metrics,
-                default=TRUE)
+                default=FALSE)
             private$..confidence_level <- jmvcore::OptionNumber$new(
                 "confidence_level",
                 confidence_level,
@@ -283,10 +283,10 @@ timeinterval <- function(
     output_unit = "months",
     use_landmark = FALSE,
     landmark_time = 6,
-    remove_negative = TRUE,
-    remove_extreme = TRUE,
-    add_times = TRUE,
-    include_quality_metrics = TRUE,
+    remove_negative = FALSE,
+    remove_extreme = FALSE,
+    add_times = FALSE,
+    include_quality_metrics = FALSE,
     confidence_level = 95) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

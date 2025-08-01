@@ -9,7 +9,7 @@ ggstatsplot::grouped_gghistostats to generate Histogram.'"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,7 +22,7 @@ ggstatsplot::grouped_gghistostats to generate Histogram.'"></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -59,7 +59,21 @@ ggstatsplot::grouped_gghistostats to generate Histogram.'</p>
 <span>  changebinwidth <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  binwidth <span class="op">=</span> <span class="fl">1.1</span>,</span>
 <span>  resultssubtitle <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  normalcurve <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  test.value <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  bf.message <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  title <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  subtitle <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  centralitytype <span class="op">=</span> <span class="st">"default"</span>,</span>
+<span>  binfill <span class="op">=</span> <span class="st">"skyblue"</span>,</span>
+<span>  bincolor <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  binalpha <span class="op">=</span> <span class="fl">0.7</span>,</span>
+<span>  centralitylinecolor <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>  centralitylinewidth <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  centralitylinetype <span class="op">=</span> <span class="st">"dashed"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -111,9 +125,73 @@ subtitle in the plot, including normality test results and descriptive
 statistics.</p></dd>
 
 
-<dt id="arg-normalcurve">normalcurve<a class="anchor" aria-label="anchor" href="#arg-normalcurve"></a></dt>
-<dd><p>Whether to overlay a normal distribution curve on the
-histogram for comparison with the theoretical normal distribution.</p></dd>
+<dt id="arg-test-value">test.value<a class="anchor" aria-label="anchor" href="#arg-test-value"></a></dt>
+<dd><p>Value to compare the sample against in one-sample test.
+Default is 0.</p></dd>
+
+
+<dt id="arg-conf-level">conf.level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
+<dd><p>Confidence level for confidence intervals (between 0 and
+1).</p></dd>
+
+
+<dt id="arg-bf-message">bf.message<a class="anchor" aria-label="anchor" href="#arg-bf-message"></a></dt>
+<dd><p>Whether to display Bayes Factor in the subtitle when
+using Bayesian analysis.</p></dd>
+
+
+<dt id="arg-digits">digits<a class="anchor" aria-label="anchor" href="#arg-digits"></a></dt>
+<dd><p>Number of decimal places for displaying statistics in the
+subtitle.</p></dd>
+
+
+<dt id="arg-xlab">xlab<a class="anchor" aria-label="anchor" href="#arg-xlab"></a></dt>
+<dd><p>Custom label for the x-axis. If empty, variable name will be
+used.</p></dd>
+
+
+<dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>
+<dd><p>Title for the plot.</p></dd>
+
+
+<dt id="arg-subtitle">subtitle<a class="anchor" aria-label="anchor" href="#arg-subtitle"></a></dt>
+<dd><p>Subtitle for the plot (overrides statistical results if
+provided).</p></dd>
+
+
+<dt id="arg-caption">caption<a class="anchor" aria-label="anchor" href="#arg-caption"></a></dt>
+<dd><p>Caption text to display at the bottom of the plot.</p></dd>
+
+
+<dt id="arg-centralitytype">centralitytype<a class="anchor" aria-label="anchor" href="#arg-centralitytype"></a></dt>
+<dd><p>Type of central tendency measure to display.
+'Default' uses the appropriate measure based on the statistical test type
+selected.</p></dd>
+
+
+<dt id="arg-binfill">binfill<a class="anchor" aria-label="anchor" href="#arg-binfill"></a></dt>
+<dd><p>Fill color for histogram bins.</p></dd>
+
+
+<dt id="arg-bincolor">bincolor<a class="anchor" aria-label="anchor" href="#arg-bincolor"></a></dt>
+<dd><p>Border color for histogram bins.</p></dd>
+
+
+<dt id="arg-binalpha">binalpha<a class="anchor" aria-label="anchor" href="#arg-binalpha"></a></dt>
+<dd><p>Transparency level for histogram bins (0 = fully
+transparent, 1 = opaque).</p></dd>
+
+
+<dt id="arg-centralitylinecolor">centralitylinecolor<a class="anchor" aria-label="anchor" href="#arg-centralitylinecolor"></a></dt>
+<dd><p>Color of the vertical centrality line.</p></dd>
+
+
+<dt id="arg-centralitylinewidth">centralitylinewidth<a class="anchor" aria-label="anchor" href="#arg-centralitylinewidth"></a></dt>
+<dd><p>Width of the vertical centrality line.</p></dd>
+
+
+<dt id="arg-centralitylinetype">centralitylinetype<a class="anchor" aria-label="anchor" href="#arg-centralitylinetype"></a></dt>
+<dd><p>Line type for the vertical centrality line.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -131,10 +209,9 @@ histogram for comparison with the theoretical normal distribution.</p></dd>
 <span class="r-in"><span><span class="fu">jjhistostats</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">jjhistostats_test_data</span>,</span></span>
 <span class="r-in"><span>  dep <span class="op">=</span> <span class="st">"age_years"</span>,</span></span>
-<span class="r-in"><span>  typestatistics <span class="op">=</span> <span class="st">"parametric"</span>,</span></span>
-<span class="r-in"><span>  normalcurve <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>  typestatistics <span class="op">=</span> <span class="st">"parametric"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in jjhistostats(data = jjhistostats_test_data, dep = "age_years",     typestatistics = "parametric", normalcurve = TRUE):</span> argument "grvar" is missing, with no default</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in jjhistostats(data = jjhistostats_test_data, dep = "age_years",     typestatistics = "parametric"):</span> argument "grvar" is missing, with no default</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Multiple histograms</span></span></span>
 <span class="r-in"><span><span class="fu">jjhistostats</span><span class="op">(</span></span></span>

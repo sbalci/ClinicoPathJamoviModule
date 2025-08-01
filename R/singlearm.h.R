@@ -37,7 +37,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             medianline = "none",
             person_time = FALSE,
             time_intervals = "12, 36, 60",
-            rate_multiplier = 100, ...) {
+            rate_multiplier = 100,
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -210,6 +211,10 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "rate_multiplier",
                 rate_multiplier,
                 default=100)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -245,6 +250,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..person_time)
             self$.addOption(private$..time_intervals)
             self$.addOption(private$..rate_multiplier)
+            self$.addOption(private$..showExplanations)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -280,7 +286,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         medianline = function() private$..medianline$value,
         person_time = function() private$..person_time$value,
         time_intervals = function() private$..time_intervals$value,
-        rate_multiplier = function() private$..rate_multiplier$value),
+        rate_multiplier = function() private$..rate_multiplier$value,
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -315,7 +322,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..medianline = NA,
         ..person_time = NA,
         ..time_intervals = NA,
-        ..rate_multiplier = NA)
+        ..rate_multiplier = NA,
+        ..showExplanations = NA)
 )
 
 singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -324,11 +332,14 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         medianSummary = function() private$.items[["medianSummary"]],
+        medianSurvivalExplanation = function() private$.items[["medianSurvivalExplanation"]],
         medianTable = function() private$.items[["medianTable"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
+        survivalProbabilityExplanation = function() private$.items[["survivalProbabilityExplanation"]],
         survTable = function() private$.items[["survTable"]],
         personTimeTable = function() private$.items[["personTimeTable"]],
         personTimeSummary = function() private$.items[["personTimeSummary"]],
+        personTimeExplanation = function() private$.items[["personTimeExplanation"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
@@ -365,6 +376,19 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="medianSummary",
                 title="Median Survival Summary and Table",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="medianSurvivalExplanation",
+                title="Understanding Median Survival Analysis",
+                visible="(showExplanations)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -421,6 +445,19 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="survTableSummary",
                 title="1, 3, 5-yr Survival Summary and Table",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survivalProbabilityExplanation",
+                title="Understanding Survival Probabilities",
+                visible="(showExplanations)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -542,6 +579,18 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="personTimeExplanation",
+                title="Understanding Person-Time Analysis",
+                visible="(person_time && showExplanations)",
+                clearWith=list(
+                    "person_time",
+                    "rate_multiplier",
+                    "time_intervals",
+                    "outcome",
+                    "outcomeLevel",
+                    "overalltime")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -565,7 +614,8 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "medianline")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -808,15 +858,21 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   60+.
 #' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
 #'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
+#' @param showExplanations Display educational explanations alongside analysis
+#'   results to help interpret survival statistics, median survival, and
+#'   person-time analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$survivalProbabilityExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
@@ -865,7 +921,8 @@ singlearm <- function(
     medianline = "none",
     person_time = FALSE,
     time_intervals = "12, 36, 60",
-    rate_multiplier = 100) {
+    rate_multiplier = 100,
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("singlearm requires jmvcore to be installed (restart may be required)")
@@ -915,7 +972,8 @@ singlearm <- function(
         medianline = medianline,
         person_time = person_time,
         time_intervals = time_intervals,
-        rate_multiplier = rate_multiplier)
+        rate_multiplier = rate_multiplier,
+        showExplanations = showExplanations)
 
     analysis <- singlearmClass$new(
         options = options,
