@@ -8,7 +8,7 @@ agreement(
   data,
   vars,
   sft = FALSE,
-  heatmap = TRUE,
+  heatmap = FALSE,
   heatmapDetails = FALSE,
   wght = "unweighted",
   exct = FALSE,

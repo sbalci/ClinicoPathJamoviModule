@@ -269,7 +269,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="median_duration", 
                         `title`="Median Duration", 
-                        `type`="text"))))
+                        `type`="text")),
+                visible="(!is.null(timeVar) && inputType == \"raw\")"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="clinicalMetrics",

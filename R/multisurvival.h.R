@@ -34,7 +34,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             risktable = FALSE,
             censored = FALSE,
             medianline = "none",
-            pplot = TRUE,
+            pplot = FALSE,
             cutp = "12, 36, 60",
             calculateRiskScore = FALSE,
             numRiskGroups = "four",
@@ -57,7 +57,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             min_node = 20,
             complexity = 0.01,
             max_depth = 5,
-            show_terminal_nodes = TRUE,
+            show_terminal_nodes = FALSE,
             use_time_dependent = FALSE,
             td_format = "wide",
             time_dep_vars = NULL,
@@ -71,7 +71,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             use_splines = FALSE,
             spline_vars = NULL,
             spline_df = 3,
-            spline_type = "pspline", ...) {
+            spline_type = "pspline",
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -241,7 +242,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..pplot <- jmvcore::OptionBool$new(
                 "pplot",
                 pplot,
-                default=TRUE)
+                default=FALSE)
             private$..cutp <- jmvcore::OptionString$new(
                 "cutp",
                 cutp,
@@ -372,7 +373,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..show_terminal_nodes <- jmvcore::OptionBool$new(
                 "show_terminal_nodes",
                 show_terminal_nodes,
-                default=TRUE)
+                default=FALSE)
             private$..use_time_dependent <- jmvcore::OptionBool$new(
                 "use_time_dependent",
                 use_time_dependent,
@@ -442,6 +443,10 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ns",
                     "bs"),
                 default="pspline")
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -513,6 +518,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..spline_vars)
             self$.addOption(private$..spline_df)
             self$.addOption(private$..spline_type)
+            self$.addOption(private$..showExplanations)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -584,7 +590,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         use_splines = function() private$..use_splines$value,
         spline_vars = function() private$..spline_vars$value,
         spline_df = function() private$..spline_df$value,
-        spline_type = function() private$..spline_type$value),
+        spline_type = function() private$..spline_type$value,
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -655,7 +662,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..use_splines = NA,
         ..spline_vars = NA,
         ..spline_df = NA,
-        ..spline_type = NA)
+        ..spline_type = NA,
+        ..showExplanations = NA)
 )
 
 multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -691,7 +699,13 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         node_survival_plots = function() private$.items[["node_survival_plots"]],
         text_model_selection = function() private$.items[["text_model_selection"]],
         selection_method = function() private$.items[["selection_method"]],
-        text2_model_selection = function() private$.items[["text2_model_selection"]]),
+        text2_model_selection = function() private$.items[["text2_model_selection"]],
+        multivariableCoxExplanation = function() private$.items[["multivariableCoxExplanation"]],
+        adjustedSurvivalExplanation = function() private$.items[["adjustedSurvivalExplanation"]],
+        riskScoreExplanation = function() private$.items[["riskScoreExplanation"]],
+        nomogramExplanation = function() private$.items[["nomogramExplanation"]],
+        personTimeExplanation = function() private$.items[["personTimeExplanation"]],
+        stratifiedAnalysisExplanation = function() private$.items[["stratifiedAnalysisExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1150,7 +1164,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="mydataview_survivaldecisiontree",
-                title="mydataview_survivaldecisiontree"))
+                title="mydataview_survivaldecisiontree",
+                visible="(FALSE)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tree_summary",
@@ -1267,7 +1282,61 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "modelSelection",
                     "selectionCriteria",
                     "pEntry",
-                    "pRemoval")))}))
+                    "pRemoval")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multivariableCoxExplanation",
+                title="Understanding Multivariable Cox Regression",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "explanatory",
+                    "contexpl",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="adjustedSurvivalExplanation",
+                title="Understanding Adjusted Survival Curves",
+                visible="(ac && showExplanations)",
+                clearWith=list(
+                    "ac",
+                    "adjexplanatory",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="riskScoreExplanation",
+                title="Understanding Risk Score Analysis",
+                visible="(calculateRiskScore && showExplanations)",
+                clearWith=list(
+                    "calculateRiskScore",
+                    "numRiskGroups",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nomogramExplanation",
+                title="Understanding Nomograms",
+                visible="(showNomogram && showExplanations)",
+                clearWith=list(
+                    "showNomogram",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="personTimeExplanation",
+                title="Understanding Person-Time Analysis",
+                visible="(person_time && showExplanations)",
+                clearWith=list(
+                    "person_time",
+                    "time_intervals",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="stratifiedAnalysisExplanation",
+                title="Understanding Stratified Cox Regression",
+                visible="(use_stratify && showExplanations)",
+                clearWith=list(
+                    "use_stratify",
+                    "stratvar",
+                    "outcome")))}))
 
 multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "multisurvivalBase",
@@ -1554,6 +1623,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param spline_type Type of spline basis to use. Penalized splines provide
 #'   smooth functions with automatic smoothness selection. Natural splines are
 #'   constrained to be linear at the boundaries.
+#' @param showExplanations Display educational explanations for each analysis
+#'   type to help interpret  multivariable survival analysis results, Cox
+#'   regression, adjusted survival  curves, nomograms, and model diagnostics.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1586,6 +1658,12 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text_model_selection} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$selection_method} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2_model_selection} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multivariableCoxExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$adjustedSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$riskScoreExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$nomogramExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1625,7 +1703,7 @@ multisurvival <- function(
     risktable = FALSE,
     censored = FALSE,
     medianline = "none",
-    pplot = TRUE,
+    pplot = FALSE,
     cutp = "12, 36, 60",
     calculateRiskScore = FALSE,
     numRiskGroups = "four",
@@ -1648,7 +1726,7 @@ multisurvival <- function(
     min_node = 20,
     complexity = 0.01,
     max_depth = 5,
-    show_terminal_nodes = TRUE,
+    show_terminal_nodes = FALSE,
     use_time_dependent = FALSE,
     td_format = "wide",
     time_dep_vars,
@@ -1662,7 +1740,8 @@ multisurvival <- function(
     use_splines = FALSE,
     spline_vars,
     spline_df = 3,
-    spline_type = "pspline") {
+    spline_type = "pspline",
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("multisurvival requires jmvcore to be installed (restart may be required)")
@@ -1768,7 +1847,8 @@ multisurvival <- function(
         use_splines = use_splines,
         spline_vars = spline_vars,
         spline_df = spline_df,
-        spline_type = spline_type)
+        spline_type = spline_type,
+        showExplanations = showExplanations)
 
     analysis <- multisurvivalClass$new(
         options = options,

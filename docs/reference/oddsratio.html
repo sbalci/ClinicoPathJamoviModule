@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -47,7 +47,14 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">oddsratio</span><span class="op">(</span><span class="va">data</span>, <span class="va">explanatory</span>, <span class="va">outcome</span>, <span class="va">outcomeLevel</span>, showNomogram <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">oddsratio</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">explanatory</span>,</span>
+<span>  <span class="va">outcome</span>,</span>
+<span>  <span class="va">outcomeLevel</span>,</span>
+<span>  showNomogram <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -77,10 +84,16 @@ use the second level alphabetically.</p></dd>
 to post-test  probabilities using likelihood ratios calculated from the
 data.</p></dd>
 
+
+<dt id="arg-showexplanations">showExplanations<a class="anchor" aria-label="anchor" href="#arg-showexplanations"></a></dt>
+<dd><p>Display educational explanations for each analysis
+type to help interpret  odds ratios, risk ratios, diagnostic test
+performance, ROC analysis,  and likelihood ratios.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot_nomogram</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$nomogram</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table></div>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot_nomogram</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$nomogram</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$oddsRatioExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$riskMeasuresExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$diagnosticTestExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$nomogramAnalysisExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

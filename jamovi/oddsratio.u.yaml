@@ -28,6 +28,8 @@ children:
       - type: CheckBox
         name: showNomogram
         label: Show diagnostic nomogram
+      - type: CheckBox
+        name: showExplanations
   - type: LayoutBox
     margin: large
     children:

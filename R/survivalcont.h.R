@@ -49,7 +49,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             residual_diagnostics = FALSE,
             stratified_cox = FALSE,
             strata_variable = NULL,
-            loglog = FALSE, ...) {
+            loglog = FALSE,
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -287,6 +288,10 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "loglog",
                 loglog,
                 default=FALSE)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -336,6 +341,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..stratified_cox)
             self$.addOption(private$..strata_variable)
             self$.addOption(private$..loglog)
+            self$.addOption(private$..showExplanations)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -385,7 +391,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         residual_diagnostics = function() private$..residual_diagnostics$value,
         stratified_cox = function() private$..stratified_cox$value,
         strata_variable = function() private$..strata_variable$value,
-        loglog = function() private$..loglog$value),
+        loglog = function() private$..loglog$value,
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -434,7 +441,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..residual_diagnostics = NA,
         ..stratified_cox = NA,
         ..strata_variable = NA,
-        ..loglog = NA)
+        ..loglog = NA,
+        ..showExplanations = NA)
 )
 
 survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -465,14 +473,18 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         calculatedtime = function() private$.items[["calculatedtime"]],
         outcomeredefined = function() private$.items[["outcomeredefined"]],
         calculatedcutoff = function() private$.items[["calculatedcutoff"]],
-        mydataview_multipleCutoffs1 = function() private$.items[["mydataview_multipleCutoffs1"]],
-        mydataview_multipleCutoffs2 = function() private$.items[["mydataview_multipleCutoffs2"]],
         multipleCutTable = function() private$.items[["multipleCutTable"]],
         multipleMedianTable = function() private$.items[["multipleMedianTable"]],
         multipleSurvTable = function() private$.items[["multipleSurvTable"]],
         plotMultipleCutoffs = function() private$.items[["plotMultipleCutoffs"]],
         plotMultipleSurvival = function() private$.items[["plotMultipleSurvival"]],
-        calculatedmulticut = function() private$.items[["calculatedmulticut"]]),
+        calculatedmulticut = function() private$.items[["calculatedmulticut"]],
+        coxRegressionExplanation = function() private$.items[["coxRegressionExplanation"]],
+        cutoffAnalysisExplanation = function() private$.items[["cutoffAnalysisExplanation"]],
+        multipleCutoffsExplanation = function() private$.items[["multipleCutoffsExplanation"]],
+        personTimeExplanation = function() private$.items[["personTimeExplanation"]],
+        rmstExplanation = function() private$.items[["rmstExplanation"]],
+        residualDiagnosticsExplanation = function() private$.items[["residualDiagnosticsExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1153,14 +1165,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dxdate",
                     "tint",
                     "multievent")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview_multipleCutoffs1",
-                title="mydataview_multipleCutoffs1"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview_multipleCutoffs2",
-                title="mydataview_multipleCutoffs2"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="multipleCutTable",
@@ -1389,7 +1393,60 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))}))
+                    "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="coxRegressionExplanation",
+                title="Understanding Cox Regression for Continuous Variables",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "contexpl",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="cutoffAnalysisExplanation",
+                title="Understanding Cut-off Point Analysis",
+                visible="(findcut && showExplanations)",
+                clearWith=list(
+                    "findcut",
+                    "contexpl",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multipleCutoffsExplanation",
+                title="Understanding Multiple Cut-offs Analysis",
+                visible="(multiple_cutoffs && showExplanations)",
+                clearWith=list(
+                    "multiple_cutoffs",
+                    "contexpl",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="personTimeExplanation",
+                title="Understanding Person-Time Analysis",
+                visible="(person_time && showExplanations)",
+                clearWith=list(
+                    "person_time",
+                    "contexpl",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="rmstExplanation",
+                title="Understanding RMST Analysis",
+                visible="(rmst_analysis && showExplanations)",
+                clearWith=list(
+                    "rmst_analysis",
+                    "contexpl",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="residualDiagnosticsExplanation",
+                title="Understanding Cox Model Residuals",
+                visible="(residual_diagnostics && showExplanations)",
+                clearWith=list(
+                    "residual_diagnostics",
+                    "contexpl",
+                    "outcome")))}))
 
 survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "survivalcontBase",
@@ -1530,6 +1587,9 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param loglog Enable log-log plot for assessing proportional hazards
 #'   assumption. Parallel lines  in the log-log plot suggest that proportional
 #'   hazards assumption holds.
+#' @param showExplanations Display educational explanations for each analysis
+#'   type to help interpret  survival analysis results, cut-off point analysis,
+#'   Cox regression, and multiple  cutoffs analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1556,14 +1616,18 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$calculatedcutoff} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$mydataview_multipleCutoffs1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$mydataview_multipleCutoffs2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$multipleCutTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multipleMedianTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multipleSurvTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plotMultipleCutoffs} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotMultipleSurvival} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedmulticut} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$cutoffAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multipleCutoffsExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1618,7 +1682,8 @@ survivalcont <- function(
     residual_diagnostics = FALSE,
     stratified_cox = FALSE,
     strata_variable,
-    loglog = FALSE) {
+    loglog = FALSE,
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survivalcont requires jmvcore to be installed (restart may be required)")
@@ -1684,7 +1749,8 @@ survivalcont <- function(
         residual_diagnostics = residual_diagnostics,
         stratified_cox = stratified_cox,
         strata_variable = strata_variable,
-        loglog = loglog)
+        loglog = loglog,
+        showExplanations = showExplanations)
 
     analysis <- survivalcontClass$new(
         options = options,

@@ -50,7 +50,7 @@ options:
       title: "Adjustment Variables"
       type: Variables
       suggested: [continuous, nominal]
-      required: false
+      default: NULL
       description:
           R: Variables to adjust for in the analysis
 
@@ -119,7 +119,6 @@ options:
     - name: referenceValue
       title: "Reference Value"
       type: Number
-      required: false
       description:
           R: >
             Reference value for the predictor (e.g., BMI=25). 

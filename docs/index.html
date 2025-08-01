@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -102,7 +102,7 @@
 <h2 id="installation-in-jamovi">Installation in <a href="https://www.jamovi.org" class="external-link">jamovi</a>
 <a class="anchor" aria-label="anchor" href="#installation-in-jamovi"></a>
 </h2>
-<p>You can install this module after installing jamovi version &gt;= 1.2.19 from here: <a href="https://www.jamovi.org/download.html" class="external-link uri">https://www.jamovi.org/download.html</a></p>
+<p>You can install this module after installing jamovi version &gt;= 2.7.2 from here: <a href="https://www.jamovi.org/download.html" class="external-link uri">https://www.jamovi.org/download.html</a></p>
 <p>Then you can install the submodules directly inside the jamovi, using library.</p>
 <p>Submodules are:</p>
 <ul>
@@ -134,13 +134,13 @@
 <h4 id="a-for-development-version">a: For development version<a class="anchor" aria-label="anchor" href="#a-for-development-version"></a>
 </h4>
 <ul>
-<li><a href="https://github.com/sbalci/ClinicoPathJamoviModule/releases/" class="external-link">releases</a></li>
 <li>
-<a href="https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download" class="external-link">sourceforge</a>.</li>
+<a href="https://github.com/sbalci/ClinicoPathJamoviModule/releases/" class="external-link">releases</a> <!-- - [sourceforge](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download). -->
+</li>
 </ul>
 </div>
 <div class="section level4">
-<h4 id="b-for-smaller-modules">b: For smaller modules<a class="anchor" aria-label="anchor" href="#b-for-smaller-modules"></a>
+<h4 id="b-for-modules">b: For modules<a class="anchor" aria-label="anchor" href="#b-for-modules"></a>
 </h4>
 <div class="section level5">
 <h5 id="clinicopathdescriptives">ClinicoPathDescriptives<a class="anchor" aria-label="anchor" href="#clinicopathdescriptives"></a>
@@ -149,68 +149,52 @@
 <p>ClinicoPathDescriptives module can be downloaded inside jamovi (click Modules and jamovi library)</p>
 <p><a href="https://github.com/sbalci/ClinicoPathDescriptives/" class="external-link uri">https://github.com/sbalci/ClinicoPathDescriptives/</a></p>
 <p><a href="https://github.com/sbalci/ClinicoPathDescriptives/releases/" class="external-link uri">https://github.com/sbalci/ClinicoPathDescriptives/releases/</a></p>
-<p><a href="https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo" class="external-link uri">https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo</a></p>
-<p><a href="https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo" class="external-link uri">https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo</a></p>
+<!-- https://library.jamovi.org/win64/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo -->
+<!-- https://library.jamovi.org/macos/R4.0.5/ClinicoPathDescriptives-0.0.2.02.jmo -->
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sbalci/ClinicoPathDescriptives"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="sc">-</span> name<span class="sc">:</span> ClinicoPathDescriptives</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  url<span class="sc">:</span> https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>sbalci<span class="sc">/</span>ClinicoPathDescriptives.git</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  commit<span class="sc">:</span> c425bb0021a097b76666006c19b3b87fa137264e</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  platforms<span class="sc">:</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>    <span class="sc">-</span> win64</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="sc">-</span> macos</span></code></pre></div>
-</div>
-<div class="section level5">
-<h5 id="clinicopathlinuxdescriptives">ClinicoPathLinuxDescriptives<a class="anchor" aria-label="anchor" href="#clinicopathlinuxdescriptives"></a>
-</h5>
-<p>ClinicoPath Descriptives functions for Linux</p>
-<p><a href="https://github.com/sbalci/ClinicoPathLinuxDescriptives/" class="external-link uri">https://github.com/sbalci/ClinicoPathLinuxDescriptives/</a></p>
-<p><a href="https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/" class="external-link uri">https://github.com/sbalci/ClinicoPathLinuxDescriptives/releases/</a></p>
-<p><a href="https://library.jamovi.org/linux/R4.0.5/ClinicoPathLinuxDescriptives-0.0.2.0084.jmo" class="external-link uri">https://library.jamovi.org/linux/R4.0.5/ClinicoPathLinuxDescriptives-0.0.2.0084.jmo</a></p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sbalci/ClinicoPathLinuxDescriptives"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="sc">-</span> name<span class="sc">:</span> ClinicoPathDescriptives</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  url<span class="sc">:</span> https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>sbalci<span class="sc">/</span>ClinicoPathLinuxDescriptives.git</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  commit<span class="sc">:</span> <span class="dv">0</span>bac188199fda2e8397f09a1416e162c18f6c85d</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  platforms<span class="sc">:</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="sc">-</span> linux</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    </span></code></pre></div>
+<!--    - name: ClinicoPathDescriptives -->
+<!--      url: https://github.com/sbalci/ClinicoPathDescriptives.git -->
+<!--      commit: c425bb0021a097b76666006c19b3b87fa137264e -->
+<!--      platforms: -->
+<!--        - win64 -->
+<!--        - macos -->
 </div>
 <div class="section level5">
 <h5 id="jjstatsplot">JJStatsPlot<a class="anchor" aria-label="anchor" href="#jjstatsplot"></a>
 </h5>
 <p>GGStatsPlot functions are separately added to jamovi library under jjstatsplot menu</p>
 <p>JJStastPlot module can be downloaded inside jamovi (click Modules and jamovi library)</p>
-<p><a href="https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.02.jmo" class="external-link uri">https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.02.jmo</a></p>
+<!-- https://library.jamovi.org/win64/R4.0.5/jjstatsplot-0.0.2.02.jmo  -->
 <!-- https://library.jamovi.org/linux/R3.6.3/jjstatsplot-0.0.2.0038.jmo   -->
-<p><a href="https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.02.jmo" class="external-link uri">https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.02.jmo</a></p>
+<!-- https://library.jamovi.org/macos/R4.0.5/jjstatsplot-0.0.2.02.jmo  -->
 <p><a href="https://github.com/sbalci/jjstatsplot" class="external-link uri">https://github.com/sbalci/jjstatsplot</a></p>
 <p><a href="https://github.com/sbalci/jjstatsplot/releases/" class="external-link uri">https://github.com/sbalci/jjstatsplot/releases/</a></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sbalci/jjstatsplot"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="sc">-</span> name<span class="sc">:</span> jjstatsplot</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  url<span class="sc">:</span> https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>sbalci<span class="sc">/</span>jjstatsplot.git</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  commit<span class="sc">:</span> b26c2c37f02b25ff3c3d32391a5cc7f413373a9d</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  platforms<span class="sc">:</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>    <span class="sc">-</span> win64</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>    <span class="sc">-</span> macos</span></code></pre></div>
+<!--    - name: jjstatsplot  -->
+<!--      url: https://github.com/sbalci/jjstatsplot.git  -->
+<!--      commit: b26c2c37f02b25ff3c3d32391a5cc7f413373a9d  -->
+<!--      platforms:  -->
+<!--        - win64  -->
+<!--        - macos  -->
 </div>
 <div class="section level5">
 <h5 id="jsurvival">jsurvival<a class="anchor" aria-label="anchor" href="#jsurvival"></a>
 </h5>
 <p><a href="https://github.com/sbalci/jsurvival" class="external-link uri">https://github.com/sbalci/jsurvival</a></p>
 <p><a href="https://github.com/sbalci/jsurvival/releases/" class="external-link uri">https://github.com/sbalci/jsurvival/releases/</a></p>
-<p><a href="https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.02.jmo" class="external-link uri">https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.02.jmo</a></p>
-<p><a href="https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.02.jmo" class="external-link uri">https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.02.jmo</a></p>
+<!-- https://library.jamovi.org/macos/R4.0.5/jsurvival-0.0.2.02.jmo  -->
+<!-- https://library.jamovi.org/win64/R4.0.5/jsurvival-0.0.2.02.jmo  -->
 <!-- https://library.jamovi.org/linux/R4.0.5/jsurvival-0.0.2.02.jmo -->
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sbalci/jsurvival"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="sc">-</span> name<span class="sc">:</span> jsurvival</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  url<span class="sc">:</span> https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>sbalci<span class="sc">/</span>jsurvival.git</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  commit<span class="sc">:</span> <span class="dv">080034635</span>c3f0173e5a22ddd2614d0af90504763</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  platforms<span class="sc">:</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    <span class="sc">-</span> win64</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="sc">-</span> macos</span></code></pre></div>
+<!--    - name: jsurvival  -->
+<!--      url: https://github.com/sbalci/jsurvival.git  -->
+<!--      commit: 080034635c3f0173e5a22ddd2614d0af90504763  -->
+<!--      platforms:  -->
+<!--        - win64  -->
+<!--        - macos  -->
 <!-- - linux -->
 </div>
 <div class="section level5">
@@ -218,25 +202,17 @@
 </h5>
 <p><a href="https://github.com/sbalci/meddecide/" class="external-link uri">https://github.com/sbalci/meddecide/</a></p>
 <p><a href="https://github.com/sbalci/meddecide/releases/" class="external-link uri">https://github.com/sbalci/meddecide/releases/</a></p>
-<p><a href="https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.2.04.jmo" class="external-link uri">https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.2.04.jmo</a></p>
+<!-- https://library.jamovi.org/win64/R4.0.5/meddecide-0.0.2.04.jmo  -->
 <!-- https://library.jamovi.org/linux/R4.0.5/meddecide-0.0.1.0005.jmo   -->
-<p><a href="https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.2.04.jmo" class="external-link uri">https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.2.04.jmo</a></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<!-- https://library.jamovi.org/macos/R4.0.5/meddecide-0.0.2.04.jmo  -->
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sbalci/meddecide"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="sc">-</span> name<span class="sc">:</span> meddecide</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  url<span class="sc">:</span> https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>sbalci<span class="sc">/</span>meddecide.git</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  commit<span class="sc">:</span> <span class="dv">2</span>bda14af05d8dafe33d9d137705f9fb8ac527279</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  platforms<span class="sc">:</span></span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>    <span class="sc">-</span> win64</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>    <span class="sc">-</span> macos</span></code></pre></div>
-</div>
-<div class="section level5">
-<h5 id="jbbplot">jbbplot<a class="anchor" aria-label="anchor" href="#jbbplot"></a>
-</h5>
-<p><a href="https://github.com/sbalci/jbbplot/" class="external-link uri">https://github.com/sbalci/jbbplot/</a></p>
-<p><a href="https://github.com/sbalci/jbbplot/releases/" class="external-link uri">https://github.com/sbalci/jbbplot/releases/</a></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sbalci/jbbplot"</span><span class="op">)</span></span></code></pre></div>
+<!--    - name: meddecide  -->
+<!--      url: https://github.com/sbalci/meddecide.git  -->
+<!--      commit: 2bda14af05d8dafe33d9d137705f9fb8ac527279  -->
+<!--      platforms:  -->
+<!--        - win64  -->
+<!--        - macos  -->
 <!-- #### c: For stable version    -->
 <!-- - windows: https://library.jamovi.org/win64/R3.6.3/ClinicoPath-0.0.2.jmo -->
 <!-- - macOS: https://library.jamovi.org/macos/R3.6.3/ClinicoPath-0.0.2.jmo -->
@@ -271,121 +247,121 @@
 </h4>
 <div class="section level5">
 <h5 id="age-pyramid">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/agepyramid_documentation.html" class="external-link">Age Pyramid</a><a class="anchor" aria-label="anchor" href="#age-pyramid"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/agepyramid_documentation.html" class="external-link">Age Pyramid</a><a class="anchor" aria-label="anchor" href="#age-pyramid"></a>
 </h5>
 <p><img src="reference/figures/jamovi-ClinicoPath-age-pyramid.png" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="age-pyramid-2">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/agepyramid2_documentation.html" class="external-link">Age Pyramid 2</a><a class="anchor" aria-label="anchor" href="#age-pyramid-2"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/agepyramid2_documentation.html" class="external-link">Age Pyramid 2</a><a class="anchor" aria-label="anchor" href="#age-pyramid-2"></a>
 </h5>
 <p>(Similar to Age Pyramid with more styling options)</p>
 </div>
 <div class="section level5">
 <h5 id="alluvial-diagrams">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/alluvial_documentation.html" class="external-link">Alluvial Diagrams</a><a class="anchor" aria-label="anchor" href="#alluvial-diagrams"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/alluvial_documentation.html" class="external-link">Alluvial Diagrams</a><a class="anchor" aria-label="anchor" href="#alluvial-diagrams"></a>
 </h5>
 <p><img src="reference/figures/jamovi-ClinicoPath-easyalluvial.gif" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="alluvial-diagrams-2">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/alluvial2_documentation.html" class="external-link">Alluvial Diagrams 2</a><a class="anchor" aria-label="anchor" href="#alluvial-diagrams-2"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/alluvial2_documentation.html" class="external-link">Alluvial Diagrams 2</a><a class="anchor" aria-label="anchor" href="#alluvial-diagrams-2"></a>
 </h5>
 <p>(Similar to Alluvial Diagrams with more styling options)</p>
 </div>
 <div class="section level5">
 <h5 id="missing-data-analysis-and-imputation">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/missingdata_documentation.html" class="external-link">Missing Data Analysis and Imputation</a><a class="anchor" aria-label="anchor" href="#missing-data-analysis-and-imputation"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/missingdata_documentation.html" class="external-link">Missing Data Analysis and Imputation</a><a class="anchor" aria-label="anchor" href="#missing-data-analysis-and-imputation"></a>
 </h5>
 <p>(Comprehensive missing data analysis and multiple imputation)</p>
 </div>
 <div class="section level5">
 <h5 id="outlier-detection">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/outlierdetection_documentation.html" class="external-link">Outlier Detection</a><a class="anchor" aria-label="anchor" href="#outlier-detection"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/outlierdetection_documentation.html" class="external-link">Outlier Detection</a><a class="anchor" aria-label="anchor" href="#outlier-detection"></a>
 </h5>
 <p>(Advanced outlier detection with multiple statistical methods)</p>
 </div>
 <div class="section level5">
 <h5 id="summary-of-categorical-variables">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/reportcat_documentation.html" class="external-link">Summary of Categorical Variables</a><a class="anchor" aria-label="anchor" href="#summary-of-categorical-variables"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/reportcat_documentation.html" class="external-link">Summary of Categorical Variables</a><a class="anchor" aria-label="anchor" href="#summary-of-categorical-variables"></a>
 </h5>
 <p><img src="reference/figures/jamovi-and-R-report.gif" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="summary-of-categorical-variables-2">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/reportcat2_documentation.html" class="external-link">Summary of Categorical Variables 2</a><a class="anchor" aria-label="anchor" href="#summary-of-categorical-variables-2"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/reportcat2_documentation.html" class="external-link">Summary of Categorical Variables 2</a><a class="anchor" aria-label="anchor" href="#summary-of-categorical-variables-2"></a>
 </h5>
 <p>(Enhanced categorical summary)</p>
 </div>
 <div class="section level5">
 <h5 id="raincloud-plot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/raincloud_documentation.html" class="external-link">Raincloud Plot</a><a class="anchor" aria-label="anchor" href="#raincloud-plot"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/raincloud_documentation.html" class="external-link">Raincloud Plot</a><a class="anchor" aria-label="anchor" href="#raincloud-plot"></a>
 </h5>
 <p>(Comprehensive distribution analysis)</p>
 </div>
 <div class="section level5">
 <h5 id="summary-of-continuous-variables">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/summarydata_documentation.html" class="external-link">Summary of Continuous Variables</a><a class="anchor" aria-label="anchor" href="#summary-of-continuous-variables"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/summarydata_documentation.html" class="external-link">Summary of Continuous Variables</a><a class="anchor" aria-label="anchor" href="#summary-of-continuous-variables"></a>
 </h5>
 <p><img src="reference/figures/jamovi-write-summary-continuous-variables.gif" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="summary-of-continuous-variables-2">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/summarydata2_documentation.html" class="external-link">Summary of Continuous Variables 2</a><a class="anchor" aria-label="anchor" href="#summary-of-continuous-variables-2"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/summarydata2_documentation.html" class="external-link">Summary of Continuous Variables 2</a><a class="anchor" aria-label="anchor" href="#summary-of-continuous-variables-2"></a>
 </h5>
 <p>(Enhanced summary statistics for continuous and date variables)</p>
 </div>
 <div class="section level5">
 <h5 id="swimmer-plot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/swimmerplot_documentation.html" class="external-link">Swimmer Plot</a><a class="anchor" aria-label="anchor" href="#swimmer-plot"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/swimmerplot_documentation.html" class="external-link">Swimmer Plot</a><a class="anchor" aria-label="anchor" href="#swimmer-plot"></a>
 </h5>
 <p>(Comprehensive swimmer plots for visualizing patient timelines)</p>
 </div>
 <div class="section level5">
 <h5 id="table-one">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/tableone_documentation.html" class="external-link">Table One</a><a class="anchor" aria-label="anchor" href="#table-one"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tableone_documentation.html" class="external-link">Table One</a><a class="anchor" aria-label="anchor" href="#table-one"></a>
 </h5>
 <p><img src="reference/figures/jamovi-and-R-tableone.gif" align="center" width="75%"><img src="reference/figures/jamovi-ClinicoPath-tableone.gif" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="table-one-2">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/tableone2_documentation.html" class="external-link">Table One 2</a><a class="anchor" aria-label="anchor" href="#table-one-2"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tableone2_documentation.html" class="external-link">Table One 2</a><a class="anchor" aria-label="anchor" href="#table-one-2"></a>
 </h5>
 <p>(Enhanced Table One with pivottabler)</p>
 </div>
 <div class="section level5">
 <h5 id="tidy-density">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/tidydensity_documentation.html" class="external-link">Tidy Density</a><a class="anchor" aria-label="anchor" href="#tidy-density"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tidydensity_documentation.html" class="external-link">Tidy Density</a><a class="anchor" aria-label="anchor" href="#tidy-density"></a>
 </h5>
 <p>(Statistical distribution generator and analyzer)</p>
 </div>
 <div class="section level5">
 <h5 id="tools-summary">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/toolssummary_documentation.html" class="external-link">Tools Summary</a><a class="anchor" aria-label="anchor" href="#tools-summary"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/toolssummary_documentation.html" class="external-link">Tools Summary</a><a class="anchor" aria-label="anchor" href="#tools-summary"></a>
 </h5>
 <p>(Tools for data summary with summarytools integration)</p>
 </div>
 <div class="section level5">
 <h5 id="toxicity-profile">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/toxicityprofile_documentation.html" class="external-link">Toxicity Profile</a><a class="anchor" aria-label="anchor" href="#toxicity-profile"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/toxicityprofile_documentation.html" class="external-link">Toxicity Profile</a><a class="anchor" aria-label="anchor" href="#toxicity-profile"></a>
 </h5>
 <p>(Treatment toxicity profile analysis)</p>
 </div>
 <div class="section level5">
 <h5 id="venn-diagram">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/venn_documentation.html" class="external-link">Venn Diagram</a><a class="anchor" aria-label="anchor" href="#venn-diagram"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/venn_documentation.html" class="external-link">Venn Diagram</a><a class="anchor" aria-label="anchor" href="#venn-diagram"></a>
 </h5>
 <p>(Venn and Upset diagrams)</p>
 </div>
 <div class="section level5">
 <h5 id="variable-tree">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/vartree_documentation.html" class="external-link">Variable Tree</a><a class="anchor" aria-label="anchor" href="#variable-tree"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/vartree_documentation.html" class="external-link">Variable Tree</a><a class="anchor" aria-label="anchor" href="#variable-tree"></a>
 </h5>
 <p><img src="reference/figures/jamovi-ClinicoPath-VariableTree.gif" align="center" width="75%"><br><img src="reference/figures/jamovi-ClinicoPath-VariableTree2.gif" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="waterfall-plot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-ClinicoPathDescriptives/waterfall_documentation.html" class="external-link">Waterfall Plot</a><a class="anchor" aria-label="anchor" href="#waterfall-plot"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/waterfall_documentation.html" class="external-link">Waterfall Plot</a><a class="anchor" aria-label="anchor" href="#waterfall-plot"></a>
 </h5>
 <p>(Treatment response analysis)</p>
 <hr>
@@ -416,97 +392,97 @@
 </h4>
 <div class="section level5">
 <h5 id="advanced-barplot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/advancedbarplot_documentation.html" class="external-link">Advanced Barplot</a><a class="anchor" aria-label="anchor" href="#advanced-barplot"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/advancedbarplot_documentation.html" class="external-link">Advanced Barplot</a><a class="anchor" aria-label="anchor" href="#advanced-barplot"></a>
 </h5>
 <p>(Advanced bar charts - 5 ways)</p>
 </div>
 <div class="section level5">
 <h5 id="advanced-raincloud-plot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/advancedraincloud_documentation.html" class="external-link">Advanced Raincloud Plot</a><a class="anchor" aria-label="anchor" href="#advanced-raincloud-plot"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/advancedraincloud_documentation.html" class="external-link">Advanced Raincloud Plot</a><a class="anchor" aria-label="anchor" href="#advanced-raincloud-plot"></a>
 </h5>
 <p>(Advanced raincloud plot with longitudinal support)</p>
 </div>
 <div class="section level5">
 <h5 id="predictive-power-score-analysis">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/jpps_documentation.html" class="external-link">Predictive Power Score Analysis</a><a class="anchor" aria-label="anchor" href="#predictive-power-score-analysis"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/jpps_documentation.html" class="external-link">Predictive Power Score Analysis</a><a class="anchor" aria-label="anchor" href="#predictive-power-score-analysis"></a>
 </h5>
 <p>(Predictive Power Score Analysis)</p>
 </div>
 <div class="section level5">
 <h5 id="high-performance-scatter-plots">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/jscattermore_documentation.html" class="external-link">High-Performance Scatter Plots</a><a class="anchor" aria-label="anchor" href="#high-performance-scatter-plots"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/jscattermore_documentation.html" class="external-link">High-Performance Scatter Plots</a><a class="anchor" aria-label="anchor" href="#high-performance-scatter-plots"></a>
 </h5>
 <p>(Fast scatter plots for large datasets)</p>
 </div>
 <div class="section level5">
 <h5 id="social-science-statistical-visualization">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/jsjplot_documentation.html" class="external-link">Social Science Statistical Visualization</a><a class="anchor" aria-label="anchor" href="#social-science-statistical-visualization"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/jsjplot_documentation.html" class="external-link">Social Science Statistical Visualization</a><a class="anchor" aria-label="anchor" href="#social-science-statistical-visualization"></a>
 </h5>
 <p>(sjPlot Integration for Social Science Research)</p>
 </div>
 <div class="section level5">
 <h5 id="professional-violin-plot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/jviolin_documentation.html" class="external-link">Professional Violin Plot</a><a class="anchor" aria-label="anchor" href="#professional-violin-plot"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/jviolin_documentation.html" class="external-link">Professional Violin Plot</a><a class="anchor" aria-label="anchor" href="#professional-violin-plot"></a>
 </h5>
 <p>(Advanced Violin Plots for Data Distribution)</p>
 </div>
 <div class="section level5">
 <h5 id="waffle-charts">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/jwaffle_documentation.html" class="external-link">Waffle Charts</a><a class="anchor" aria-label="anchor" href="#waffle-charts"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/jwaffle_documentation.html" class="external-link">Waffle Charts</a><a class="anchor" aria-label="anchor" href="#waffle-charts"></a>
 </h5>
 <p>(Create Waffle Charts to visualize distributions)</p>
 </div>
 <div class="section level5">
 <h5 id="line-chart">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/linechart_documentation.html" class="external-link">Line Chart</a><a class="anchor" aria-label="anchor" href="#line-chart"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/linechart_documentation.html" class="external-link">Line Chart</a><a class="anchor" aria-label="anchor" href="#line-chart"></a>
 </h5>
 <p>(Line Chart for Time Series and Trend Analysis)</p>
 </div>
 <div class="section level5">
 <h5 id="lasso-cox-regression">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/lassocox_documentation.html" class="external-link">Lasso-Cox Regression</a><a class="anchor" aria-label="anchor" href="#lasso-cox-regression"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/lassocox_documentation.html" class="external-link">Lasso-Cox Regression</a><a class="anchor" aria-label="anchor" href="#lasso-cox-regression"></a>
 </h5>
 <p>(Lasso-Cox Regression for Variable Selection in Survival Analysis)</p>
 </div>
 <div class="section level5">
 <h5 id="parallel-coordinates-plot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/parallelplot_documentation.html" class="external-link">Parallel Coordinates Plot</a><a class="anchor" aria-label="anchor" href="#parallel-coordinates-plot"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/parallelplot_documentation.html" class="external-link">Parallel Coordinates Plot</a><a class="anchor" aria-label="anchor" href="#parallel-coordinates-plot"></a>
 </h5>
 <p>(Multivariate Exploration)</p>
 </div>
 <div class="section level5">
 <h5 id="automatic-plot-selection">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/statsplot2_documentation.html" class="external-link">Automatic Plot Selection</a><a class="anchor" aria-label="anchor" href="#automatic-plot-selection"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/statsplot2_documentation.html" class="external-link">Automatic Plot Selection</a><a class="anchor" aria-label="anchor" href="#automatic-plot-selection"></a>
 </h5>
 <p>(Automatic Plot Selection Based on Variable Types)</p>
 </div>
 <div class="section level5">
 <h5 id="statistical-distribution-generator">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/tidydensity_documentation.html" class="external-link">Statistical Distribution Generator</a><a class="anchor" aria-label="anchor" href="#statistical-distribution-generator"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/tidydensity_documentation.html" class="external-link">Statistical Distribution Generator</a><a class="anchor" aria-label="anchor" href="#statistical-distribution-generator"></a>
 </h5>
 <p>(TidyDensity - Distribution Analysis &amp; Simulation)</p>
 </div>
 <div class="section level5">
 <h5 id="within-group-comparison">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/jjwithinstats_documentation.html" class="external-link">Within-Group Comparison</a><a class="anchor" aria-label="anchor" href="#within-group-comparison"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/jjwithinstats_documentation.html" class="external-link">Within-Group Comparison</a><a class="anchor" aria-label="anchor" href="#within-group-comparison"></a>
 </h5>
 <p>(Violin Plots to Compare Within Groups)</p>
 </div>
 <div class="section level5">
 <h5 id="treemap">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/jjtreemap_documentation.html" class="external-link">Treemap</a><a class="anchor" aria-label="anchor" href="#treemap"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/jjtreemap_documentation.html" class="external-link">Treemap</a><a class="anchor" aria-label="anchor" href="#treemap"></a>
 </h5>
 <p>(Creates treemap visualizations for categorical data)</p>
 </div>
 <div class="section level5">
 <h5 id="streamgraphs">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/jjstreamgraph_documentation.html" class="external-link">StreamGraphs</a><a class="anchor" aria-label="anchor" href="#streamgraphs"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/jjstreamgraph_documentation.html" class="external-link">StreamGraphs</a><a class="anchor" aria-label="anchor" href="#streamgraphs"></a>
 </h5>
 <p>(Create interactive StreamGraphs using R streamgraph package.)</p>
 </div>
 <div class="section level5">
 <h5 id="scatter-plot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jjstatsplot/jjscatterstats_documentation.html" class="external-link">Scatter Plot</a><a class="anchor" aria-label="anchor" href="#scatter-plot"></a>
+<a href="https://www.serdarbalci.com/jjstatsplot/articles/jjscatterstats_documentation.html" class="external-link">Scatter Plot</a><a class="anchor" aria-label="anchor" href="#scatter-plot"></a>
 </h5>
 <p>(Scatter Plot for Continuous Variables)</p>
 <p><img src="reference/figures/jamovi-ClinicoPath-ggstatsplot-alluvial-plots.gif" align="center" width="75%"></p>
@@ -524,73 +500,73 @@
 </h4>
 <div class="section level5">
 <h5 id="alluvial-survival-plot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/alluvialsurvival_documentation.html" class="external-link">Alluvial Survival Plot</a><a class="anchor" aria-label="anchor" href="#alluvial-survival-plot"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/alluvialsurvival_documentation.html" class="external-link">Alluvial Survival Plot</a><a class="anchor" aria-label="anchor" href="#alluvial-survival-plot"></a>
 </h5>
 <p>(Treatment Pathway Alluvial Plot)</p>
 </div>
 <div class="section level5">
 <h5 id="multivariable-survival-analysis">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/multisurvival_documentation.html" class="external-link">Multivariable Survival Analysis</a><a class="anchor" aria-label="anchor" href="#multivariable-survival-analysis"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/multisurvival_documentation.html" class="external-link">Multivariable Survival Analysis</a><a class="anchor" aria-label="anchor" href="#multivariable-survival-analysis"></a>
 </h5>
 <p><img src="reference/figures/jamovi-and-survival-analysis-multivariate-finalfit.png" align="center" width="75%"><img src="reference/figures/jamovi-and-multivariate-survival.gif" align="center" width="75%"><img src="reference/figures/jamovi-clinicopath-multivariate-survival.gif" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="odds-ratio-table-and-plot">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/oddsratio_documentation.html" class="external-link">Odds Ratio Table and Plot</a><a class="anchor" aria-label="anchor" href="#odds-ratio-table-and-plot"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/oddsratio_documentation.html" class="external-link">Odds Ratio Table and Plot</a><a class="anchor" aria-label="anchor" href="#odds-ratio-table-and-plot"></a>
 </h5>
 <p><img src="reference/figures/jamovi-ClinicoPath-oddsratio.gif" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="kaplan-meier-survival-analysis-for-single-group">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/onesurvival_documentation.html" class="external-link">Kaplan-Meier Survival Analysis for Single Group</a><a class="anchor" aria-label="anchor" href="#kaplan-meier-survival-analysis-for-single-group"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/onesurvival_documentation.html" class="external-link">Kaplan-Meier Survival Analysis for Single Group</a><a class="anchor" aria-label="anchor" href="#kaplan-meier-survival-analysis-for-single-group"></a>
 </h5>
 <p>(Kaplan-Meier Survival Analysis for Single Group)</p>
 </div>
 <div class="section level5">
 <h5 id="single-arm-survival">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/singlearm_documentation.html" class="external-link">Single Arm Survival</a><a class="anchor" aria-label="anchor" href="#single-arm-survival"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/singlearm_documentation.html" class="external-link">Single Arm Survival</a><a class="anchor" aria-label="anchor" href="#single-arm-survival"></a>
 </h5>
 <p>(Survival for whole group, no explanatory factor)</p>
 </div>
 <div class="section level5">
 <h5 id="comprehensive-survival-analysis">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/survival_documentation.html" class="external-link">Comprehensive Survival Analysis</a><a class="anchor" aria-label="anchor" href="#comprehensive-survival-analysis"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/survival_documentation.html" class="external-link">Comprehensive Survival Analysis</a><a class="anchor" aria-label="anchor" href="#comprehensive-survival-analysis"></a>
 </h5>
 <p><img src="reference/figures/jamovi-and-survival-analysis-finalfit.png" align="center" width="75%"><img src="reference/figures/jamovi-and-survival-analysis-finalfit-2.png" align="center" width="75%"><img src="reference/figures/jamovi-and-survival-analysis-finalfit-3.png" align="center" width="75%"><img src="reference/figures/jamovi-KMunicate-survival.png" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="survival-analysis-for-continuous-explanatory-variable">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/survivalcont_documentation.html" class="external-link">Survival Analysis for Continuous Explanatory Variable</a><a class="anchor" aria-label="anchor" href="#survival-analysis-for-continuous-explanatory-variable"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/survivalcont_documentation.html" class="external-link">Survival Analysis for Continuous Explanatory Variable</a><a class="anchor" aria-label="anchor" href="#survival-analysis-for-continuous-explanatory-variable"></a>
 </h5>
 <p>(Cut-off &amp; Univariate Survival Analysis)</p>
 </div>
 <div class="section level5">
 <h5 id="survival-analysis-power--sample-size">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/survivalpower_documentation.html" class="external-link">Survival Analysis Power &amp; Sample Size</a><a class="anchor" aria-label="anchor" href="#survival-analysis-power--sample-size"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/survivalpower_documentation.html" class="external-link">Survival Analysis Power &amp; Sample Size</a><a class="anchor" aria-label="anchor" href="#survival-analysis-power--sample-size"></a>
 </h5>
 <p>(Power Analysis for Survival Studies)</p>
 </div>
 <div class="section level5">
 <h5 id="time-dependent-roc-analysis">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/timeroc_documentation.html" class="external-link">Time-Dependent ROC Analysis</a><a class="anchor" aria-label="anchor" href="#time-dependent-roc-analysis"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/timeroc_documentation.html" class="external-link">Time-Dependent ROC Analysis</a><a class="anchor" aria-label="anchor" href="#time-dependent-roc-analysis"></a>
 </h5>
 <p>(Predictive Performance Over Time)</p>
 </div>
 <div class="section level5">
 <h5 id="comprehensive-time-interval-calculator">
-<a href="https://sbalci.github.io/ClinicoPathJamoviModule/vignettes/vignettes-jsurvival/timeinterval_documentation.html" class="external-link">Comprehensive Time Interval Calculator</a><a class="anchor" aria-label="anchor" href="#comprehensive-time-interval-calculator"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/timeinterval_documentation.html" class="external-link">Comprehensive Time Interval Calculator</a><a class="anchor" aria-label="anchor" href="#comprehensive-time-interval-calculator"></a>
 </h5>
 <p>(Advanced time interval analysis with quality assessment)</p>
 </div>
 <div class="section level5">
 <h5 id="jvisr">
-<a href="vignettes-jsurvival/jvisr_documentation.html">Jvisr</a><a class="anchor" aria-label="anchor" href="#jvisr"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/jvisr_documentation.html" class="external-link">Jvisr</a><a class="anchor" aria-label="anchor" href="#jvisr"></a>
 </h5>
 <p>(Fit-for-Purpose Clinical Visualizations)</p>
 </div>
 <div class="section level5">
 <h5 id="competing-survival">
-<a href="vignettes-jsurvival/15-competing-survival.Rmd">Competing Survival</a><a class="anchor" aria-label="anchor" href="#competing-survival"></a>
+<a href="https://www.serdarbalci.com/jsurvival/articles/15-competing-survival.html" class="external-link">Competing Survival</a><a class="anchor" aria-label="anchor" href="#competing-survival"></a>
 </h5>
 <p>🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩</p>
 <hr>
@@ -625,19 +601,19 @@
 </div>
 <div class="section level5">
 <h5 id="decision-calculator">
-<a href="vignettes-meddecide/35-screening-calculator-comprehensive.Rmd">Decision Calculator</a><a class="anchor" aria-label="anchor" href="#decision-calculator"></a>
+<a href="https://www.serdarbalci.com/meddecide/articles/35-screening-calculator-comprehensive.html" class="external-link">Decision Calculator</a><a class="anchor" aria-label="anchor" href="#decision-calculator"></a>
 </h5>
 <p><img src="reference/figures/jamovi-and-R-caret-user-input.png" align="center" width="75%"></p>
 <p><img src="reference/figures/jamovi-ClinicoPath-FaganNomogram.gif" align="center" width="75%"></p>
 </div>
 <div class="section level5">
 <h5 id="decision-tree">
-<a href="vignettes-meddecide/05-decision-tree-analysis.Rmd">Decision Tree</a><a class="anchor" aria-label="anchor" href="#decision-tree"></a>
+<a href="https://www.serdarbalci.com/meddecide/articles/05-decision-tree-analysis.html" class="external-link">Decision Tree</a><a class="anchor" aria-label="anchor" href="#decision-tree"></a>
 </h5>
 </div>
 <div class="section level5">
 <h5 id="decision-tree-explore">
-<a href="vignettes-meddecide/05-decision-tree-analysis.Rmd">Decision Tree explore</a><a class="anchor" aria-label="anchor" href="#decision-tree-explore"></a>
+<a href="https://www.serdarbalci.com/meddecide/articles/05-decision-tree-analysis.html" class="external-link">Decision Tree explore</a><a class="anchor" aria-label="anchor" href="#decision-tree-explore"></a>
 </h5>
 <p>🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩</p>
 <p><img src="reference/figures/jamovi-clinicopath-explore-decision-tree.png" align="center" width="75%"></p>
@@ -656,7 +632,7 @@
 </div>
 <div class="section level5">
 <h5 id="roc-analysis">
-<a href="vignettes-meddecide/03-roc-analysis.Rmd">ROC Analysis</a><a class="anchor" aria-label="anchor" href="#roc-analysis"></a>
+<a href="https://www.serdarbalci.com/meddecide/articles/03-roc-analysis.html" class="external-link">ROC Analysis</a><a class="anchor" aria-label="anchor" href="#roc-analysis"></a>
 </h5>
 <p>🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩</p>
 <hr>
@@ -668,7 +644,7 @@
 </h3>
 <div class="section level4">
 <h4 id="correlation-1">
-<a href="vignettes-ClinicoPathDescriptives/01-correlation-analysis.Rmd">Correlation</a><a class="anchor" aria-label="anchor" href="#correlation-1"></a>
+<a href="https://www.serdarbalci.com/ClinicoPathDescriptives/articles/01-correlation-analysis.html" class="external-link">Correlation</a><a class="anchor" aria-label="anchor" href="#correlation-1"></a>
 </h4>
 <hr>
 </div>
@@ -682,7 +658,7 @@
 <!-- install.packages("ClinicoPath") -->
 <!-- ``` -->
 <p>You can install the development version from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sbalci/ClinicoPathJamoviModule"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -739,7 +715,7 @@
 <p><strong>Status</strong><br><a href="https://www.repostatus.org/#active" class="external-link"><img src="https://www.repostatus.org/badges/latest/active.svg" alt="Project Status: Active – The project has reached a stable, usable state and is being actively developed."></a><br><a href="https://www.tidyverse.org/lifecycle/" class="external-link"><img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" alt="lifecycle"></a> <a href="https://github.com/joethorley/stability-badges#unstable" class="external-link"><img src="https://img.shields.io/badge/stability-unstable-yellow.svg" alt="stability-unstable"></a> <a href="https://github.com/sbalci/clinicopathjamovimodule/issues" class="external-link"><img src="https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule.svg" alt="GitHub issues"></a> <img src="https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule" alt="GitHub issues"></p>
 <p><strong>Check, CI</strong><br><img src="https://github.com/sbalci/ClinicoPathJamoviModule/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></p>
 <p><a href="https://www.codacy.com/manual/drserdarbalci/ClinicoPathJamoviModule?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sbalci/ClinicoPathJamoviModule&amp;utm_campaign=Badge_Grade" class="external-link"><img src="https://app.codacy.com/project/badge/Grade/cdf2bede535c439d826b6dffdff40764" alt="Codacy Badge"></a> <a href="https://www.codefactor.io/repository/github/sbalci/clinicopathjamovimodule" class="external-link"><img src="https://www.codefactor.io/repository/github/sbalci/clinicopathjamovimodule/badge" alt="CodeFactor"></a> <a href="https://coveralls.io/github/sbalci/ClinicoPathJamoviModule?branch=master" class="external-link"><img src="https://coveralls.io/repos/github/sbalci/ClinicoPathJamoviModule/badge.svg?branch=master" alt="Coverage Status"></a> <a href="https://travis-ci.com/sbalci/ClinicoPathJamoviModule" class="external-link"><img src="https://travis-ci.com/sbalci/ClinicoPathJamoviModule.svg?branch=master" alt="Build Status"></a> <a href="https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule" class="external-link"><img src="https://ci.appveyor.com/api/projects/status/ftdd497g9qamm4ov?svg=true" alt="Build status"></a> <a href="https://codecov.io/gh/sbalci/ClinicoPathJamoviModule" class="external-link"><img src="https://codecov.io/gh/sbalci/ClinicoPathJamoviModule/branch/master/graph/badge.svg" alt="codecov"></a> <a href="https://circleci.com/gh/sbalci/ClinicoPathJamoviModule" class="external-link"><img src="https://circleci.com/gh/sbalci/ClinicoPathJamoviModule.svg?style=svg" alt="CircleCI"></a> <a href="https://dashboard.guardrails.io/gh/sbalci/33943" class="external-link"><img src="https://badges.guardrails.io/sbalci/ClinicoPathJamoviModule.svg?token=9402aef8ace3415bad8f423a384b631c7319e5faffc96e2e299b603ace62d68e&amp;provider=github" alt="GuardRails badge"></a> <a href="https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/maintainability" class="external-link"><img src="https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/maintainability" alt="Maintainability"></a> <a href="https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/test_coverage" class="external-link"><img src="https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_coverage" alt="Test Coverage"></a> <!-- [![DepShield Badge](https://depshield.sonatype.org/badges/sbalci/ClinicoPathJamoviModule/depshield.svg)](https://depshield.github.io) --></p>
-<p><strong>Recency, Updates</strong><br><img src="https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg" alt="GitHub"><!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) --><a href="https://github.com/sbalci/clinicopathjamovimodule/commits/master" class="external-link"><img src="https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule" alt="GitHub last commit"></a> <a href="https://github.com/sbalci/clinicopathjamovimodule/commits/master" class="external-link"><img src="https://img.shields.io/badge/last%20change-2025--07--19-yellowgreen.svg" alt="Last-changedate"></a> <img src="https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule" alt="GitHub Release Date"><img src="https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule" alt="GitHub commit activity"></p>
+<p><strong>Recency, Updates</strong><br><img src="https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg" alt="GitHub"><!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) --><a href="https://github.com/sbalci/clinicopathjamovimodule/commits/master" class="external-link"><img src="https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule" alt="GitHub last commit"></a> <a href="https://github.com/sbalci/clinicopathjamovimodule/commits/master" class="external-link"><img src="https://img.shields.io/badge/last%20change-2025--07--31-yellowgreen.svg" alt="Last-changedate"></a> <img src="https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule" alt="GitHub Release Date"><img src="https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule" alt="GitHub commit activity"></p>
 <p><strong>Webpage, Links, Size, Download</strong><br><a href="https://sbalci.github.io/ClinicoPathJamoviModule/" class="external-link"><img src="https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63" alt="Website"></a> <a href="https://github.com/sbalci/ClinicoPathJamoviModule" class="external-link"><img src="https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg" alt="GitHub code size in bytes"></a></p>
 <p><strong>Dependencies</strong><br><a href="https://cran.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R%3E%3D-3.6.3-6666ff.svg" alt="minimal R version"></a> <a href="https://libraries.io/github/sbalci/clinicopathjamovimodule" class="external-link"><img src="https://img.shields.io/librariesio/github/sbalci/clinicopathjamovimodule.svg" alt="Libraries.io dependency status for GitHub repo"></a> <a href="https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements/?branch=gh-pages" class="external-link"><img src="https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements.svg?branch=gh-pages" alt="Requirements Status"></a> <!-- [![DepShield Badge](https://depshield.sonatype.org/badges/sbalci/clinicopathjamovimodule/depshield.svg)](https://depshield.github.io) --></p>
 <p><strong>Interaction, Shares</strong><br><a href="https://github.com/sbalci/clinicopathjamovimodule/network" class="external-link"><img src="https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule.svg" alt="GitHub forks"></a> <img src="https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule?style=social" alt="GitHub forks"><a href="https://github.com/sbalci/clinicopathjamovimodule/stargazers" class="external-link"><img src="https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg" alt="GitHub stars"></a> <a href="https://github.com/sbalci/clinicopathjamovimodule" class="external-link"><img src="https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg?style=social&amp;label=Github" alt="Github Stars"></a> <img src="https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule?style=social" alt="GitHub stars"><a href="https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20%23histopathology%20%23clinicopathology%20%23pathology%20%23research%20using%20various%20%23rstats%20packages%20%F0%9F%93%A6.%20@serdarbalci&amp;url=https%3A%2F%2Fsbalci.github.io%2ClinicoPathJamoviModule%2" class="external-link"><img src="https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social" alt="Twitter"></a> <a href="https://github.com/sbalci/clinicopathjamovimodule/issues" class="external-link"><img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat" alt="contributions welcome"></a> <img src="https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?style=social" alt="GitHub watchers"></p>
@@ -755,7 +731,7 @@
 </h2>
 <p>Beyond the datasets readily available with <code>data(dataset_name)</code>, this package also includes various raw and external data files in other formats like CSV (Comma Separated Values), XLSX (Excel), and OMV (Jamovi files). These can be useful for users who want to access the original data, use it with other software, or understand how the R data objects (<code>.rda</code> files) were generated.</p>
 <p>These files are typically located in the <code>inst/extdata</code> directory of the package. You can get the full path to a file in <code>inst/extdata</code> using the <code><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file()</a></code> function. For example:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get the path to 'BreastCancer.csv' in inst/extdata</span></span>
 <span><span class="co"># (Assuming BreastCancer.csv will be moved to inst/extdata in a later step)</span></span>
 <span><span class="va">csv_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"BreastCancer.csv"</span>, package <span class="op">=</span> <span class="st">"ClinicoPath"</span><span class="op">)</span></span>
@@ -787,7 +763,7 @@
 <ul>
 <li>
 <p><strong>Example:</strong> <code>heartdisease.xlsx</code></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Ensure readxl is installed: install.packages("readxl")</span></span>
 <span><span class="co"># xlsx_path &lt;- system.file("extdata", "heartdisease.xlsx", package = "ClinicoPath")</span></span>
 <span><span class="co"># if (nzchar(xlsx_path)) {</span></span>
@@ -879,7 +855,7 @@
 <li><a href="https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/maintainability" class="external-link"><img src="https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/maintainability" alt="Maintainability"></a></li>
 <li><a href="https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/test_coverage" class="external-link"><img src="https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_coverage" alt="Test Coverage"></a></li>
 <li><a href="https://github.com/sbalci/clinicopathjamovimodule/commits/master" class="external-link"><img src="https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule" alt="GitHub last commit"></a></li>
-<li><a href="https://github.com/sbalci/clinicopathjamovimodule/commits/master" class="external-link"><img src="https://img.shields.io/badge/last%20change-2025--07--19-yellowgreen.svg" alt="Last-changedate"></a></li>
+<li><a href="https://github.com/sbalci/clinicopathjamovimodule/commits/master" class="external-link"><img src="https://img.shields.io/badge/last%20change-2025--07--31-yellowgreen.svg" alt="Last-changedate"></a></li>
 <li><a href="https://sbalci.github.io/ClinicoPathJamoviModule/" class="external-link"><img src="https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63" alt="Website"></a></li>
 <li><a href="https://github.com/sbalci/ClinicoPathJamoviModule" class="external-link"><img src="https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg" alt="GitHub code size in bytes"></a></li>
 <li><a href="https://cran.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R%3E%3D-4.1.0-6666ff.svg" alt="minimal R version"></a></li>

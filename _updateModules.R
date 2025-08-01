@@ -83,6 +83,7 @@ extended <- modes$extended %||% FALSE
 webpage <- modes$webpage %||% FALSE
 commit_modules <- modes$commit_modules %||% FALSE
 WIP <- modes$WIP %||% FALSE
+TEST <- modes$TEST %||% FALSE
 
 # File copying control modes
 copy_vignettes <- modes$copy_vignettes %||% TRUE
@@ -104,6 +105,19 @@ if (WIP) {
   webpage <- FALSE
   commit_modules <- FALSE
   cat("🔧 WIP mode enabled - using sandbox environment\n")
+}
+
+# Apply TEST mode overrides
+if (TEST) {
+  quick <- FALSE
+  check <- FALSE
+  extended <- TRUE
+  webpage <- FALSE
+  commit_modules <- FALSE
+  cat("🧪 TEST mode enabled - creating standalone JamoviTest module\n")
+  
+  # Enable JamoviTest module when TEST mode is active
+  modules_config$JamoviTest$enabled <- TRUE
 }
 
 # Load required packages with validation
@@ -165,8 +179,64 @@ for (module_name in names(modules_config)) {
   }
 }
 
-if (module_validation_failed && !WIP) {
-  stop("❌ Some module directories are invalid. Check configuration or enable WIP mode.")
+if (module_validation_failed && !WIP && !TEST) {
+  stop("❌ Some module directories are invalid. Check configuration or enable WIP/TEST mode.")
+}
+
+# Handle JamoviTest module creation in TEST mode
+if (TEST && modules_config$JamoviTest$enabled) {
+  test_dir <- modules_config$JamoviTest$directory
+  cat("\n🧪 Setting up JamoviTest module...\n")
+  
+  # Create JamoviTest directory if it doesn't exist
+  if (!dir.exists(test_dir)) {
+    cat("  📁 Creating new JamoviTest module:", test_dir, "\n")
+    with_error_handling({
+      jmvtools::create(path = test_dir)
+    }, "creating JamoviTest module", continue_on_error = FALSE)
+    cat("  ✅ JamoviTest module created successfully\n")
+  } else {
+    cat("  ♻️ Using existing JamoviTest module:", test_dir, "\n")
+    
+    # Remove NAMESPACE file for clean build
+    namespace_file <- file.path(test_dir, "NAMESPACE")
+    if (file.exists(namespace_file)) {
+      cat("  🧹 Removing NAMESPACE file for clean build...\n")
+      file.remove(namespace_file)
+    }
+    
+    # Remove any .jmo files
+    jmo_files <- list.files(test_dir, pattern = "\\.jmo$", full.names = TRUE)
+    if (length(jmo_files) > 0) {
+      cat("  🧹 Removing", length(jmo_files), ".jmo file(s)...\n")
+      file.remove(jmo_files)
+    }
+    
+    # Clean only the R and jamovi directories to refresh functions
+    r_dir <- file.path(test_dir, "R")
+    jamovi_dir <- file.path(test_dir, "jamovi")
+    
+    if (dir.exists(r_dir)) {
+      cat("  🧹 Cleaning R directory for fresh functions...\n")
+      # Remove all .b.R files but keep other R files
+      r_files <- list.files(r_dir, pattern = "\\.b\\.R$", full.names = TRUE)
+      if (length(r_files) > 0) {
+        file.remove(r_files)
+      }
+    }
+    
+    if (dir.exists(jamovi_dir)) {
+      cat("  🧹 Cleaning jamovi directory for fresh function definitions...\n")
+      # Remove ALL yaml files including 0000.yaml for clean rebuild
+      yaml_files <- list.files(jamovi_dir, pattern = "\\.yaml$", full.names = TRUE)
+      if (length(yaml_files) > 0) {
+        file.remove(yaml_files)
+      }
+    }
+  }
+  
+  # Add to module_dirs
+  module_dirs$JamoviTest <- test_dir
 }
 
 # Legacy variable assignments for backward compatibility (using config values)
@@ -175,15 +245,17 @@ meddecide_dir <- module_dirs$meddecide %||% modules_config$meddecide$directory
 jsurvival_dir <- module_dirs$jsurvival %||% modules_config$jsurvival$directory
 ClinicoPathDescriptives_dir <- module_dirs$ClinicoPathDescriptives %||% modules_config$ClinicoPathDescriptives$directory
 
-# Enhanced WIP mode with backup and validation
+# Enhanced WIP mode with backup and validation (TEST mode uses standalone JamoviTest only)
 if (WIP) {
-  cat("\n🔧 Setting up WIP (Work-In-Progress) environment...\n")
+  mode_name <- "WIP (Work-In-Progress)"
+  mode_suffix <- "-WIP"
+  cat("\n🔧 Setting up", mode_name, "environment...\n")
 
   wip_setup_success <- TRUE
 
   for (module_name in names(module_dirs)) {
     original_dir <- module_dirs[[module_name]]
-    wip_dir <- paste0(original_dir, "-WIP")
+    wip_dir <- paste0(original_dir, mode_suffix)
 
     # Validate original directory exists
     if (!dir.exists(original_dir)) {
@@ -192,29 +264,29 @@ if (WIP) {
       next
     }
 
-    cat("🔧 Setting up WIP environment for", module_name, "\n")
+    cat("🔧 Setting up", mode_name, "environment for", module_name, "\n")
 
-    # Delete existing WIP directory if it exists
+    # Delete existing directory if it exists
     if (dir.exists(wip_dir)) {
-      cat("  🗑️ Removing existing WIP directory:", wip_dir, "\n")
+      cat("  🗑️ Removing existing", mode_name, "directory:", wip_dir, "\n")
       with_error_handling({
         fs::dir_delete(wip_dir)
-      }, paste("removing existing WIP directory for", module_name), continue_on_error = TRUE)
+      }, paste("removing existing", mode_name, "directory for", module_name), continue_on_error = TRUE)
     }
 
     # Create backup of original directory
     backup_path <- create_backup(original_dir, "wip_backups")
     if (is.null(backup_path)) {
-      warning("⚠️ Failed to create backup for ", module_name, ", skipping WIP setup")
+      warning("⚠️ Failed to create backup for ", module_name, ", skipping", mode_name, "setup")
       wip_setup_success <- FALSE
       next
     }
 
-    # Copy original to WIP directory
-    cat("  📁 Creating WIP copy:", wip_dir, "\n")
+    # Copy original to directory
+    cat("  📁 Creating", mode_name, "copy:", wip_dir, "\n")
     copy_result <- with_error_handling({
       fs::dir_copy(path = original_dir, new_path = wip_dir, overwrite = TRUE)
-    }, paste("creating WIP directory for", module_name), continue_on_error = TRUE)
+    }, paste("creating", mode_name, "directory for", module_name), continue_on_error = TRUE)
 
     if (!copy_result$success) {
       wip_setup_success <- FALSE
@@ -224,7 +296,7 @@ if (WIP) {
     # Update module directory reference
     module_dirs[[module_name]] <- wip_dir
 
-    cat("  ✅ WIP environment ready for", module_name, "\n")
+    cat("  ✅", mode_name, "environment ready for", module_name, "\n")
   }
 
   # Update legacy variables for WIP
@@ -234,10 +306,10 @@ if (WIP) {
   ClinicoPathDescriptives_dir <- module_dirs$ClinicoPathDescriptives %||% ClinicoPathDescriptives_dir
 
   if (!wip_setup_success) {
-    stop("❌ WIP setup failed for one or more modules. Check warnings above.")
+    stop("❌", mode_name, "setup failed for one or more modules. Check warnings above.")
   }
 
-  cat("✅ WIP environment setup completed successfully\n")
+  cat("✅", mode_name, "environment setup completed successfully\n")
 }
 
 
@@ -591,7 +663,7 @@ replace_clinicopath_with_module <- function(base_dir, module_name) {
 }
 
 # Enhanced configuration-based asset copying ----
-if (!WIP) {
+if (!WIP && !TEST) {
   cat("\n📁 Copying assets with configuration-based logic...\n")
 
   for (module_name in names(modules_config)) {
@@ -786,7 +858,7 @@ if (!WIP) {
 # to the enhanced configuration-based asset copying section.
 # To add files to modules, update the _updateModules_config.yaml file.
 
-if (!WIP) {
+if (!WIP && !TEST) {
   # All legacy file copying sections have been removed
   # File copying is now handled by the configuration-based system above
   cat("📁 Legacy file copying sections have been removed - using configuration-based system\n")
@@ -838,6 +910,21 @@ if (WIP) {
   jjstatsplot_modules <- jjstatsplot_a_yaml_files
 }
 
+if (TEST) {
+  jjstatsplot_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+    any(grepl("menuGroup: JJStatsPlotT$", readLines(f, warn = FALSE)))
+  })
+
+  jjstatsplot_a_yaml_files <- gsub(pattern = "./jamovi/",
+                                   replacement = "",
+                                   x = jjstatsplot_a_yaml_files)
+  jjstatsplot_a_yaml_files <- gsub(pattern = ".a.yaml",
+                                   replacement = "",
+                                   x = jjstatsplot_a_yaml_files)
+
+  jjstatsplot_modules <- jjstatsplot_a_yaml_files
+}
+
 
 ## meddecide module functions ----
 
@@ -855,6 +942,21 @@ meddecide_modules <- meddecide_a_yaml_files
 if (WIP) {
   meddecide_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
     any(grepl("menuGroup: meddecide", readLines(f, warn = FALSE)))
+  })
+
+  meddecide_a_yaml_files <- gsub(pattern = "./jamovi/",
+                                 replacement = "",
+                                 x = meddecide_a_yaml_files)
+  meddecide_a_yaml_files <- gsub(pattern = ".a.yaml",
+                                 replacement = "",
+                                 x = meddecide_a_yaml_files)
+
+  meddecide_modules <- meddecide_a_yaml_files
+}
+
+if (TEST) {
+  meddecide_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
+    any(grepl("menuGroup: meddecideT$", readLines(f, warn = FALSE)))
   })
 
   meddecide_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -929,6 +1031,37 @@ if (WIP) {
   ClinicoPathDescriptives_modules <- ClinicoPathDescriptives_a_yaml_files
 }
 
+## JamoviTest module functions (TEST mode) ----
+JamoviTest_modules <- c()
+
+if (TEST) {
+  cat("\n🧪 Collecting TEST functions for JamoviTest module...\n")
+  
+  # Collect all test functions ending with 'T' from all categories
+  test_patterns <- modules_config$JamoviTest$test_patterns
+  
+  for (pattern in test_patterns) {
+    test_files <- purrr::keep(a_yaml_files, function(f) {
+      any(grepl(pattern, readLines(f, warn = FALSE)))
+    })
+    
+    if (length(test_files) > 0) {
+      # Clean file paths
+      test_files_cleaned <- gsub(pattern = "./jamovi/", replacement = "", x = test_files)
+      test_files_cleaned <- gsub(pattern = ".a.yaml", replacement = "", x = test_files_cleaned)
+      
+      JamoviTest_modules <- c(JamoviTest_modules, test_files_cleaned)
+      cat("  ✅ Found", length(test_files_cleaned), "test functions matching:", pattern, "\n")
+    }
+  }
+  
+  cat("  📊 Total TEST functions collected:", length(JamoviTest_modules), "\n")
+  
+  if (length(JamoviTest_modules) > 0) {
+    cat("  🧪 TEST functions:", paste(JamoviTest_modules, collapse = ", "), "\n")
+  }
+}
+
 
 
 # Update DESCRIPTION files ----
@@ -991,12 +1124,14 @@ update_yaml_0000_files(paths = yaml_0000_paths,
 
 update_yaml_a_files(paths = yaml_a_paths, version = new_version)
 
+
 # Copy module files with enhanced error handling ----
+# Skip regular module copying in TEST mode - only JamoviTest is processed
+if (!TEST) {
+  cat("\n🔄 Copying jamovi module files to target repositories...\n")
 
-cat("\n🔄 Copying jamovi module files to target repositories...\n")
-
-# jjstatsplot_modules
-if (jjstatsplot_module && length(jjstatsplot_modules) > 0) {
+  # jjstatsplot_modules
+  if (jjstatsplot_module && length(jjstatsplot_modules) > 0) {
   cat("\n📋 Processing jjstatsplot modules...\n")
 
   # Copy R backend files
@@ -1118,6 +1253,85 @@ if (ClinicoPathDescriptives_module && length(ClinicoPathDescriptives_modules) > 
 }
 
 
+} else {
+  cat("\n🧪 TEST mode: Skipping regular module processing - only JamoviTest will be processed\n")
+}
+
+# JamoviTest_modules (TEST mode only) - Process outside of the regular module block
+if (TEST && modules_config$JamoviTest$enabled && length(JamoviTest_modules) > 0) {
+  cat("\n🧪 Processing JamoviTest modules...\n")
+  
+  test_dir <- modules_config$JamoviTest$directory
+
+  # Copy R backend files
+  copy_module_files(
+    JamoviTest_modules,
+    source_dir = file.path(main_repo_dir, "R"),
+    dest_dir = file.path(test_dir, "R"),
+    file_extensions = c(".b.R")
+  )
+
+  # Ensure jamovi directory exists
+  jamovi_dir <- file.path(test_dir, "jamovi")
+  if (!dir.exists(jamovi_dir)) {
+    cat("  📁 Creating jamovi directory: ", jamovi_dir, "\n")
+    dir.create(jamovi_dir, recursive = TRUE)
+  }
+
+  # Copy jamovi definition files
+  copy_module_files(
+    JamoviTest_modules,
+    source_dir = file.path(main_repo_dir, "jamovi"),
+    dest_dir = jamovi_dir,
+    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+  )
+  
+  # Copy utils.R and other R helper files if specified in config
+  if (copy_r_files && length(modules_config$JamoviTest$r_files) > 0) {
+    cat("  📁 Copying helper R files...\n")
+    r_dir <- file.path(test_dir, "R")
+    if (!dir.exists(r_dir)) {
+      dir.create(r_dir, recursive = TRUE)
+    }
+    
+    for (r_file in modules_config$JamoviTest$r_files) {
+      source_path <- file.path(main_repo_dir, "R", r_file)
+      if (file.exists(source_path)) {
+        fs::file_copy(source_path, file.path(r_dir, r_file), overwrite = TRUE)
+        cat("    ✅ Copied:", r_file, "\n")
+      } else {
+        warning("⚠️ R file not found: ", source_path)
+      }
+    }
+  }
+  
+  # Copy data files if specified and enabled
+  if (copy_data_files && length(modules_config$JamoviTest$data_files) > 0) {
+    cat("  📁 Copying data files...\n")
+    data_dir <- file.path(test_dir, "data")
+    if (!dir.exists(data_dir)) {
+      dir.create(data_dir, recursive = TRUE)
+    }
+    
+    for (data_file in modules_config$JamoviTest$data_files) {
+      source_path <- file.path(main_repo_dir, "data", data_file)
+      if (file.exists(source_path)) {
+        fs::file_copy(source_path, file.path(data_dir, data_file), overwrite = TRUE)
+        cat("    ✅ Copied:", data_file, "\n")
+      } else {
+        warning("⚠️ Data file not found: ", source_path)
+      }
+    }
+  }
+  
+  cat("  ✅ JamoviTest module populated with", length(JamoviTest_modules), "test functions\n")
+} else if (TEST && modules_config$JamoviTest$enabled) {
+  cat("\n⚠️ No TEST functions found - JamoviTest module will be empty\n")
+} else if (TEST) {
+  cat("\n⏭️ Skipping JamoviTest modules (JamoviTest disabled)\n")
+}
+
+
 
 
 
@@ -1139,7 +1353,7 @@ if (!extended) {
 }
 
 # --- Commit changes in each repository ----
-if (commit_modules || !WIP) {
+if ((commit_modules || !WIP) && !TEST) {
   cat("\n📦 Committing changes to repositories...\n")
 
   commit_message <- sprintf("Update modules to version %s and date %s",
@@ -1174,7 +1388,7 @@ if (commit_modules || !WIP) {
     cat("⏭️ Skipping module commits (commit_modules: false)\n")
   }
 } else {
-  cat("\n⏭️ Skipping all commits (WIP mode or commit disabled)\n")
+  cat("\n⏭️ Skipping all commits (WIP/TEST mode or commit disabled)\n")
 }
 
 # Final status report ----
@@ -1185,6 +1399,10 @@ cat("📁 Main repository:", main_repo_dir, "\n")
 
 if (WIP) {
   cat("🔧 WIP mode was enabled - using sandbox directories\n")
+}
+
+if (TEST) {
+  cat("🧪 TEST mode was enabled - using standalone JamoviTest module\n")
 }
 
 active_modules <- sum(c(jjstatsplot_module, meddecide_module, jsurvival_module, ClinicoPathDescriptives_module))
@@ -1363,6 +1581,37 @@ if (extended) {
     })
   } else {
     cat("\n⏭️ Skipping ClinicoPathDescriptives package (disabled)\n")
+  }
+
+  # Process JamoviTest in TEST mode
+  if (TEST && modules_config$JamoviTest$enabled && length(JamoviTest_modules) > 0) {
+    cat("\n🧪 Processing JamoviTest package...\n")
+    old_wd <- getwd()
+    test_dir <- modules_config$JamoviTest$directory
+    
+    tryCatch({
+      setwd(test_dir)
+      cat("  📄 Preparing package...\n")
+      jmvtools::prepare()
+      cat("  📝 Documenting...\n")
+      devtools::document()
+      jmvtools::prepare()
+      devtools::document()
+      cat("  📦 Installing...\n")
+      jmvtools::install()
+
+      if (check) {
+        cat("  🔍 Running R CMD check...\n")
+        devtools::check()
+      }
+      cat("  ✅ JamoviTest processing completed with", length(JamoviTest_modules), "test functions\n")
+    }, error = function(e) {
+      warning("⚠️ Error processing JamoviTest: ", e$message)
+    }, finally = {
+      setwd(old_wd)
+    })
+  } else if (TEST) {
+    cat("\n⏭️ Skipping JamoviTest package (no test functions found or disabled)\n")
   }
 
 }

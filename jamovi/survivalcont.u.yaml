@@ -33,7 +33,6 @@ children:
             name: contexpl
             maxItemCount: 1
             isTarget: true
-
   - type: CollapseBox
     label: Finding Cut-off
     collapsed: true
@@ -71,7 +70,6 @@ children:
                 label: Minimum Group Size (%)
               - type: Output
                 name: calculatedmulticut
-
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -139,7 +137,6 @@ children:
                     format: number
                     label: Landmark Time
                     enable: (uselandmark)
-
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -181,7 +178,6 @@ children:
                 name: outcomeredefined
                 enable: (outcome && multievent)
                 label: Redefined Outcome Preview
-
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -250,7 +246,6 @@ children:
                 name: medianline
                 enable: (findcut)
                 label: Median Survival Line
-
   - type: CollapseBox
     label: Survival Tables
     collapsed: true
@@ -267,7 +262,6 @@ children:
                 format: string
                 width: large
                 label: Time Points for Table
-
   - type: CollapseBox
     label: Advanced Analysis Options
     collapsed: true
@@ -298,6 +292,8 @@ children:
                         name: strata_variable
                         maxItemCount: 1
                         isTarget: true
+              - type: CheckBox
+                name: showExplanations
       - type: Label
         label: Restricted Mean Survival Time
         children:
@@ -311,7 +307,6 @@ children:
                 name: rmst_tau
                 format: number
                 label: Tau (Restriction Time)
-
   - type: CollapseBox
     label: Person-Time Analysis
     collapsed: true

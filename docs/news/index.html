@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -40,6 +40,1620 @@
       <small>Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.90" id="clinicopath-00390">ClinicoPath 0.0.3.90<a class="anchor" aria-label="anchor" href="#clinicopath-00390"></a></h2>
+<div class="section level3">
+<h3 id="documentation-updates-0-0-3-90">Documentation Updates<a class="anchor" aria-label="anchor" href="#documentation-updates-0-0-3-90"></a></h3>
+<div class="section level4">
+<h4 id="submodule-documentation-links-0-0-3-90">Submodule Documentation Links<a class="anchor" aria-label="anchor" href="#submodule-documentation-links-0-0-3-90"></a></h4>
+<ul><li>
+<strong>Updated Documentation Structure</strong>: All submodule documentation links in README now point to their respective module documentation sites</li>
+<li>
+<strong>Consistent URL Pattern</strong>: Documentation links now follow the pattern <code>https://www.serdarbalci.com/{module-name}/articles/</code>
+</li>
+<li>
+<strong>ClinicoPathDescriptives</strong>: Updated 20 documentation links</li>
+<li>
+<strong>jjstatsplot</strong>: Updated 16 documentation links<br></li>
+<li>
+<strong>jsurvival</strong>: Updated 12 documentation links</li>
+<li>
+<strong>meddecide</strong>: Updated 5 documentation links</li>
+<li>
+<strong>Improved User Experience</strong>: Direct access to module-specific documentation with consistent navigation</li>
+</ul></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.82" id="clinicopath-00382">ClinicoPath 0.0.3.82<a class="anchor" aria-label="anchor" href="#clinicopath-00382"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-features---clinical-utility-index-0-0-3-82">PHASE 5 ADVANCED FEATURES - Clinical Utility Index<a class="anchor" aria-label="anchor" href="#phase-advanced-features---clinical-utility-index-0-0-3-82"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-clinical-utility-index-framework-0-0-3-82">Comprehensive Clinical Utility Index Framework<a class="anchor" aria-label="anchor" href="#comprehensive-clinical-utility-index-framework-0-0-3-82"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: Advanced clinical utility index analysis combining sensitivity/specificity with disease prevalence to assess clinical decision-making value of staging systems beyond statistical discrimination</li>
+<li>
+<strong>Clinical Decision Integration</strong>: Bridges gap between statistical performance metrics and real-world clinical utility for staging-guided treatment decisions</li>
+<li>
+<strong>Risk-Benefit Analysis</strong>: Comprehensive assessment of clinical utility across multiple risk thresholds with treatment benefit quantification and harm assessment</li>
+<li>
+<strong>Evidence-Based Decision Support</strong>: Translates staging system discrimination into actionable clinical recommendations with cost-effectiveness considerations</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-net-benefit-analysis-framework-0-0-3-82">Advanced Net Benefit Analysis Framework<a class="anchor" aria-label="anchor" href="#advanced-net-benefit-analysis-framework-0-0-3-82"></a></h4>
+<ul><li>
+<strong>Decision Curve Analysis Integration</strong>: Extends existing DCA framework with clinical utility index calculations providing comprehensive net benefit assessment across risk thresholds</li>
+<li>
+<strong>Multi-Threshold Evaluation</strong>: Systematic evaluation across conservative (5-25%), standard (10-50%), aggressive (15-75%), and comprehensive (5-95%) risk threshold ranges</li>
+<li>
+<strong>Optimal Strategy Identification</strong>: Automated identification of optimal clinical strategy (treat all, treat none, or staging-guided treatment) at each risk threshold</li>
+<li>
+<strong>Clinical Significance Assessment</strong>: Evidence-based thresholds for determining clinically meaningful improvements in net benefit (&gt;0.01 clinically significant)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="number-needed-to-treat-nnt-analysis-0-0-3-82">Number Needed to Treat (NNT) Analysis<a class="anchor" aria-label="anchor" href="#number-needed-to-treat-nnt-analysis-0-0-3-82"></a></h4>
+<ul><li>
+<strong>Comprehensive NNT Calculations</strong>: Number Needed to Treat and Number Needed to Harm calculations based on staging-guided interventions with configurable treatment effect assumptions</li>
+<li>
+<strong>Treatment Benefit Quantification</strong>: Absolute risk reduction calculations with sensitivity-adjusted treatment benefits for realistic clinical outcome estimation</li>
+<li>
+<strong>Cost-Effectiveness Integration</strong>: Basic cost-effectiveness analysis with cost per QALY calculations and cost-effectiveness classification (cost-effective &lt;$50,000, borderline &lt;$100,000)</li>
+<li>
+<strong>Clinical Recommendation Engine</strong>: Automated clinical recommendations based on NNT thresholds (strongly recommend &lt;20, consider &lt;50, not recommended ≥50)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-utility-index-methodology-0-0-3-82">Clinical Utility Index Methodology<a class="anchor" aria-label="anchor" href="#clinical-utility-index-methodology-0-0-3-82"></a></h4>
+<ul><li>
+<strong>Novel Utility Metric</strong>: Clinical Utility Index combining sensitivity, specificity, and disease prevalence weighted by net benefit for comprehensive clinical value assessment</li>
+<li>
+<strong>Prevalence-Adjusted Assessment</strong>: Disease prevalence integration allowing customized analysis based on population characteristics or study-specific event rates</li>
+<li>
+<strong>Time-Point Specific Analysis</strong>: Clinical utility assessment at clinically relevant time horizons (12-240 months) optimized for different cancer types and staging contexts</li>
+<li>
+<strong>Comparative Utility Assessment</strong>: Side-by-side comparison of clinical utility between staging systems with utility improvement quantification</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-statistical-validation-framework-0-0-3-82">Advanced Statistical Validation Framework<a class="anchor" aria-label="anchor" href="#advanced-statistical-validation-framework-0-0-3-82"></a></h4>
+<ul><li>
+<strong>Bootstrap Validation</strong>: Robust bootstrap confidence intervals for clinical utility metrics including bias assessment and parameter stability evaluation</li>
+<li>
+<strong>Risk Classification Metrics</strong>: Comprehensive sensitivity, specificity, positive predictive value, and negative predictive value calculations across risk thresholds</li>
+<li>
+<strong>Treatment Effect Modeling</strong>: Configurable hazard ratio assumptions (0.1-2.0) for realistic treatment benefit modeling in staging-guided interventions</li>
+<li>
+<strong>Uncertainty Quantification</strong>: Complete statistical framework with confidence intervals and stability assessment for reliable clinical decision support</li>
+</ul></div>
+<div class="section level4">
+<h4 id="time-varying-clinical-utility-analysis-0-0-3-82">Time-Varying Clinical Utility Analysis<a class="anchor" aria-label="anchor" href="#time-varying-clinical-utility-analysis-0-0-3-82"></a></h4>
+<ul><li>
+<strong>Longitudinal Utility Assessment</strong>: Time-varying clinical utility analysis showing how staging system value changes over different time horizons</li>
+<li>
+<strong>Optimal Decision Timing</strong>: Identification of optimal timing for staging-based treatment decisions with early/standard/late intervention classification</li>
+<li>
+<strong>Temporal Utility Trends</strong>: Assessment of utility trend patterns (increasing, stable, decreasing) across follow-up periods for clinical planning</li>
+<li>
+<strong>Decision Horizon Optimization</strong>: Evidence-based recommendations for optimal clinical decision timing based on utility maximization</li>
+</ul></div>
+<div class="section level4">
+<h4 id="cost-effectiveness-integration-0-0-3-82">Cost-Effectiveness Integration<a class="anchor" aria-label="anchor" href="#cost-effectiveness-integration-0-0-3-82"></a></h4>
+<ul><li>
+<strong>Basic Economic Evaluation</strong>: Integration of cost considerations with configurable cost per intervention assumptions ($100-$100,000) for healthcare economic assessment</li>
+<li>
+<strong>Cost Per QALY Calculations</strong>: Simplified cost-effectiveness analysis assuming quality-adjusted life years gained per prevented event</li>
+<li>
+<strong>Healthcare Economic Context</strong>: Realistic cost assumptions adaptable to different healthcare systems and practice settings</li>
+<li>
+<strong>Economic Decision Support</strong>: Cost-effectiveness classification and recommendations based on established healthcare economic thresholds</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-results-framework-0-0-3-82">Comprehensive Results Framework<a class="anchor" aria-label="anchor" href="#comprehensive-results-framework-0-0-3-82"></a></h4>
+<ul><li>
+<strong>Seven Results Tables</strong>: Overview, staging comparison, NNT analysis, net benefit analysis, time-varying analysis, bootstrap validation, and executive summary</li>
+<li>
+<strong>Statistical Rigor</strong>: Complete clinical utility framework with proper confidence intervals, significance testing, and uncertainty quantification following current clinical decision analysis standards</li>
+<li>
+<strong>Clinical Interpretation</strong>: Automated assessment of clinical utility improvements with evidence-based recommendations for staging system adoption in clinical practice</li>
+<li>
+<strong>Decision Support Integration</strong>: Actionable clinical recommendations with cost-effectiveness considerations and implementation guidance</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-clinical-decision-analysis-0-0-3-82">Integration with Clinical Decision Analysis<a class="anchor" aria-label="anchor" href="#integration-with-clinical-decision-analysis-0-0-3-82"></a></h4>
+<ul><li>
+<strong>Seamless DCA Extension</strong>: Clinical utility index analysis integrates with existing decision curve analysis framework maintaining full compatibility</li>
+<li>
+<strong>Progressive Enhancement</strong>: Builds on advanced survival analysis features (Frailty Models v0.0.3.81, Win Ratio v0.0.3.80) for comprehensive clinical decision support</li>
+<li>
+<strong>Non-breaking Implementation</strong>: Optional activation via boolean option ensuring existing workflows continue unchanged while adding clinical utility assessment</li>
+<li>
+<strong>Clinical Translation Bridge</strong>: Provides essential bridge between statistical discrimination metrics and real-world clinical decision-making value</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.81" id="clinicopath-00381">ClinicoPath 0.0.3.81<a class="anchor" aria-label="anchor" href="#clinicopath-00381"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-features---frailty-models-for-clustering-0-0-3-81">PHASE 5 ADVANCED FEATURES - Frailty Models for Clustering<a class="anchor" aria-label="anchor" href="#phase-advanced-features---frailty-models-for-clustering-0-0-3-81"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-frailty-models-analysis-framework-0-0-3-81">Comprehensive Frailty Models Analysis Framework<a class="anchor" aria-label="anchor" href="#comprehensive-frailty-models-analysis-framework-0-0-3-81"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: Advanced frailty models analysis for clustered survival data using mixed-effects Cox models (coxme) for multi-institutional data with center-specific random effects</li>
+<li>
+<strong>Multi-Institutional Support</strong>: Designed for studies with clustering structure such as multi-center trials, hospital-based studies, or surgeon-specific analyses where unobserved heterogeneity affects survival outcomes</li>
+<li>
+<strong>Advanced Clustering Adjustments</strong>: Proper statistical modeling accounting for intracluster correlation (ICC) and variance components with robust parameter estimation</li>
+<li>
+<strong>Hierarchical Data Structure</strong>: Comprehensive framework for analyzing staging systems in the presence of clustering effects and institutional variations</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-mixed-effects-cox-modeling-0-0-3-81">Advanced Mixed-Effects Cox Modeling<a class="anchor" aria-label="anchor" href="#advanced-mixed-effects-cox-modeling-0-0-3-81"></a></h4>
+<ul><li>
+<strong>coxme Package Integration</strong>: State-of-the-art mixed-effects Cox regression using coxme package with random effects for cluster-level heterogeneity modeling</li>
+<li>
+<strong>Multiple Frailty Distributions</strong>: Support for gamma, gaussian, and log-normal frailty distributions with automatic model selection and goodness-of-fit assessment</li>
+<li>
+<strong>Variance Components Analysis</strong>: Detailed decomposition of total variation into cluster-level and individual-level components with clinical interpretation</li>
+<li>
+<strong>Fallback Implementation</strong>: Robust fallback to survival::coxph with frailty() terms when coxme package is unavailable ensuring universal compatibility</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-clustering-assessment-0-0-3-81">Comprehensive Clustering Assessment<a class="anchor" aria-label="anchor" href="#comprehensive-clustering-assessment-0-0-3-81"></a></h4>
+<ul><li>
+<strong>Intracluster Correlation (ICC)</strong>: Quantitative assessment of clustering effects with ICC calculation and clinical significance thresholds (substantial &gt;0.1, moderate &gt;0.05)</li>
+<li>
+<strong>Heterogeneity Testing</strong>: Formal statistical tests for significant frailty/heterogeneity using likelihood ratio tests comparing frailty models to standard Cox models</li>
+<li>
+<strong>Cluster Characteristics Analysis</strong>: Detailed assessment of cluster count, average cluster size, and distribution with adequacy validation for frailty modeling</li>
+<li>
+<strong>Center-Specific Effects</strong>: Quantification of institution-specific or surgeon-specific effects on staging system performance with consistency evaluation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-statistical-inference-framework-0-0-3-81">Advanced Statistical Inference Framework<a class="anchor" aria-label="anchor" href="#advanced-statistical-inference-framework-0-0-3-81"></a></h4>
+<ul><li>
+<strong>Likelihood-Based Model Comparison</strong>: Comprehensive model selection using log-likelihood, AIC, BIC criteria with statistical significance testing for staging system comparison</li>
+<li>
+<strong>Bootstrap Validation</strong>: Robust bootstrap confidence intervals for frailty variance components and model parameters with bias assessment and coverage validation</li>
+<li>
+<strong>Model Diagnostics</strong>: Comprehensive diagnostic framework including residual analysis, influence detection, and goodness-of-fit assessment for frailty models</li>
+<li>
+<strong>Profile Likelihood Methods</strong>: Advanced statistical inference with profile likelihood confidence intervals and robust variance estimation for complex model specifications</li>
+</ul></div>
+<div class="section level4">
+<h4 id="cluster-specific-analysis-capabilities-0-0-3-81">Cluster-Specific Analysis Capabilities<a class="anchor" aria-label="anchor" href="#cluster-specific-analysis-capabilities-0-0-3-81"></a></h4>
+<ul><li>
+<strong>Institution-Level Comparison</strong>: Separate staging system analysis within each cluster/institution to assess consistency of staging performance across centers</li>
+<li>
+<strong>Center-Specific Concordance</strong>: Cluster-adjusted concordance measures accounting for institutional effects with consistency rating across centers</li>
+<li>
+<strong>Risk Stratification by Center</strong>: Institution-specific event rates and risk profiles with automated high/moderate/low risk classification</li>
+<li>
+<strong>Performance Heterogeneity</strong>: Assessment of staging system performance variability across different institutional settings and practice patterns</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-variance-components-framework-0-0-3-81">Comprehensive Variance Components Framework<a class="anchor" aria-label="anchor" href="#comprehensive-variance-components-framework-0-0-3-81"></a></h4>
+<ul><li>
+<strong>Random Effects Decomposition</strong>: Detailed analysis of cluster-level random effects variance with percentage change calculations between staging systems</li>
+<li>
+<strong>Clinical Relevance Thresholds</strong>: Evidence-based thresholds for determining clinically meaningful differences in variance components (&gt;0.05 clinically relevant)</li>
+<li>
+<strong>Statistical Significance Assessment</strong>: Formal testing of variance component differences with confidence intervals and effect size quantification</li>
+<li>
+<strong>Interpretive Guidelines</strong>: Automated clinical interpretation of variance components with actionable recommendations for clustering impact</li>
+</ul></div>
+<div class="section level4">
+<h4 id="bootstrap-validation-and-uncertainty-quantification-0-0-3-81">Bootstrap Validation and Uncertainty Quantification<a class="anchor" aria-label="anchor" href="#bootstrap-validation-and-uncertainty-quantification-0-0-3-81"></a></h4>
+<ul><li>
+<strong>Parameter Stability Assessment</strong>: Bootstrap validation of frailty model parameters with configurable replication (100-2000 samples) for optimal accuracy-efficiency balance</li>
+<li>
+<strong>Bias Correction Analysis</strong>: Comprehensive bias assessment for variance components with bootstrap bias estimates and coverage probability validation</li>
+<li>
+<strong>Confidence Interval Properties</strong>: Assessment of bootstrap confidence interval coverage properties ensuring reliable statistical inference</li>
+<li>
+<strong>Stability Classification</strong>: Automated parameter stability rating (High/Moderate/Low) based on bootstrap standard error assessment</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-research-applications-0-0-3-81">Clinical Research Applications<a class="anchor" aria-label="anchor" href="#clinical-research-applications-0-0-3-81"></a></h4>
+<ul><li>
+<strong>Multi-Center Trial Analysis</strong>: Essential framework for analyzing staging systems in multi-institutional clinical trials with proper clustering adjustments</li>
+<li>
+<strong>Healthcare Quality Assessment</strong>: Tools for evaluating staging system performance across different healthcare institutions and practice settings</li>
+<li>
+<strong>Surgeon-Specific Analysis</strong>: Framework for analyzing surgeon-specific or provider-specific effects on staging system accuracy and patient outcomes</li>
+<li>
+<strong>Registry Data Analysis</strong>: Specialized methods for large-scale cancer registry data with inherent clustering by institution, region, or time period</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-results-framework-0-0-3-81">Comprehensive Results Framework<a class="anchor" aria-label="anchor" href="#comprehensive-results-framework-0-0-3-81"></a></h4>
+<ul><li>
+<strong>Seven Results Tables</strong>: Overview, staging comparison, variance components, cluster-specific analysis, bootstrap validation, diagnostics, and executive summary</li>
+<li>
+<strong>Statistical Rigor</strong>: Complete statistical framework with proper clustering adjustments, confidence intervals, and hypothesis testing following current mixed-effects modeling standards</li>
+<li>
+<strong>Clinical Interpretation</strong>: Automated assessment of clustering impact on staging system evaluation with evidence-based recommendations for multi-institutional data</li>
+<li>
+<strong>Methodological Transparency</strong>: Complete reporting of frailty model specifications, variance components, and diagnostic measures for reproducible research</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-survival-analysis-0-0-3-81">Integration with Advanced Survival Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-survival-analysis-0-0-3-81"></a></h4>
+<ul><li>
+<strong>Seamless Module Integration</strong>: Frailty models analysis integrates with existing stagemigration module maintaining full compatibility with all existing analyses</li>
+<li>
+<strong>Progressive Enhancement</strong>: Builds on advanced survival analysis features (Win Ratio v0.0.3.80, Concordance Probability v0.0.3.80) for comprehensive multi-institutional staging evaluation</li>
+<li>
+<strong>Non-breaking Implementation</strong>: Optional activation via boolean option ensuring existing workflows continue unchanged</li>
+<li>
+<strong>Clinical Decision Support</strong>: Provides specialized evidence for staging system selection in multi-institutional and clustered data contexts</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.80" id="clinicopath-00380">ClinicoPath 0.0.3.80<a class="anchor" aria-label="anchor" href="#clinicopath-00380"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-features---concordance-probability-estimates-0-0-3-80">PHASE 5 ADVANCED FEATURES - Concordance Probability Estimates<a class="anchor" aria-label="anchor" href="#phase-advanced-features---concordance-probability-estimates-0-0-3-80"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-concordance-probability-analysis-0-0-3-80">Comprehensive Concordance Probability Analysis<a class="anchor" aria-label="anchor" href="#comprehensive-concordance-probability-analysis-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: Advanced concordance probability analysis for heavily censored data with alternative concordance measures beyond traditional C-index, specifically designed for staging system evaluation with high censoring rates</li>
+<li>
+<strong>Multiple Concordance Methods</strong>: Harrell’s C-index, Uno’s C-index for heavily censored data, IPCW (Inverse Probability of Censoring Weighted) concordance, and weighted concordance approaches for robust discrimination assessment</li>
+<li>
+<strong>Time-Dependent Concordance</strong>: Time-dependent concordance measures evaluating staging system discrimination at clinically relevant time points with proper handling of censoring patterns</li>
+<li>
+<strong>Advanced Weighting Strategies</strong>: Uniform, sample size, event rate, follow-up time, and inverse variance weighting for customized concordance probability estimation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="robust-discrimination-assessment-methods-0-0-3-80">Robust Discrimination Assessment Methods<a class="anchor" aria-label="anchor" href="#robust-discrimination-assessment-methods-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Harrell’s C-index</strong>: Traditional concordance measure with Cox proportional hazards modeling for established baseline discrimination assessment</li>
+<li>
+<strong>Uno’s C-index</strong>: Inverse probability weighting approach specifically designed for heavily censored survival data with improved bias properties</li>
+<li>
+<strong>IPCW Concordance</strong>: Comprehensive inverse probability of censoring weighted concordance accounting for informative censoring patterns</li>
+<li>
+<strong>Weighted Concordance</strong>: Flexible weighting framework allowing customized concordance estimation based on sample characteristics</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-time-dependent-analysis-0-0-3-80">Advanced Time-Dependent Analysis<a class="anchor" aria-label="anchor" href="#advanced-time-dependent-analysis-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Landmark Analysis Framework</strong>: Time-dependent concordance evaluation at multiple clinically relevant time points (12, 24, 36, 60, 120 months)</li>
+<li>
+<strong>Binary Outcome Conversion</strong>: Conversion of survival outcomes to binary at specific time points for AUC-based concordance assessment</li>
+<li>
+<strong>ROC Integration</strong>: Integration with pROC package for robust AUC estimation with confidence intervals when available</li>
+<li>
+<strong>Temporal Stability Assessment</strong>: Evaluation of concordance stability across different follow-up periods for comprehensive discrimination validation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-statistical-comparison-framework-0-0-3-80">Comprehensive Statistical Comparison Framework<a class="anchor" aria-label="anchor" href="#comprehensive-statistical-comparison-framework-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Staging System Comparison</strong>: Statistical comparison of concordance probabilities between different staging systems using hypothesis tests</li>
+<li>
+<strong>Method Agreement Assessment</strong>: Evaluation of concordance agreement across multiple estimation methods for robustness validation</li>
+<li>
+<strong>Confidence Interval Overlap</strong>: Analysis of confidence interval overlap for informal comparison of staging system performance</li>
+<li>
+<strong>Evidence-Based Interpretation</strong>: Automatic interpretation of statistical significance and clinical meaningfulness of concordance differences</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-robustness-analysis-0-0-3-80">Advanced Robustness Analysis<a class="anchor" aria-label="anchor" href="#advanced-robustness-analysis-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Outlier Sensitivity Analysis</strong>: Assessment of concordance estimate stability when extreme survival times are removed</li>
+<li>
+<strong>Censoring Sensitivity Analysis</strong>: Evaluation of concordance robustness to early censoring patterns and mechanisms</li>
+<li>
+<strong>Bootstrap Stability Assessment</strong>: Bootstrap variance analysis for concordance estimate stability with configurable replication numbers</li>
+<li>
+<strong>Assumption Testing</strong>: Comprehensive testing of concordance estimation assumptions under different data scenarios</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-diagnostic-framework-0-0-3-80">Comprehensive Diagnostic Framework<a class="anchor" aria-label="anchor" href="#comprehensive-diagnostic-framework-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Sample Size Adequacy</strong>: Assessment of sample size and event count adequacy for reliable concordance estimation</li>
+<li>
+<strong>Censoring Impact Assessment</strong>: Risk stratification based on censoring rates (low &lt;30%, moderate 30-60%, high &gt;60%) with method recommendations</li>
+<li>
+<strong>Method Concordance Evaluation</strong>: Assessment of agreement between different concordance estimation methods for validation</li>
+<li>
+<strong>Stage Distribution Analysis</strong>: Evaluation of staging category balance and its impact on concordance estimation reliability</li>
+</ul></div>
+<div class="section level4">
+<h4 id="bootstrap-confidence-interval-methods-0-0-3-80">Bootstrap Confidence Interval Methods<a class="anchor" aria-label="anchor" href="#bootstrap-confidence-interval-methods-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Method-Specific Bootstrap</strong>: Tailored bootstrap procedures for each concordance estimation method ensuring appropriate uncertainty quantification</li>
+<li>
+<strong>Configurable Replication</strong>: Bootstrap sample sizes from 100-5000 for optimal balance between accuracy and computational efficiency</li>
+<li>
+<strong>Coverage Probability Validation</strong>: Assessment of bootstrap confidence interval coverage properties for reliable statistical inference</li>
+<li>
+<strong>Robust Variance Estimation</strong>: Bootstrap-based variance estimation specifically designed for concordance measures in survival analysis</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-research-applications-0-0-3-80">Clinical Research Applications<a class="anchor" aria-label="anchor" href="#clinical-research-applications-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Staging System Development</strong>: Essential discrimination assessment for new staging system development with proper censoring handling</li>
+<li>
+<strong>Performance Validation</strong>: Comprehensive validation framework for staging systems in heavily censored clinical datasets</li>
+<li>
+<strong>Method Selection Guidance</strong>: Evidence-based recommendations for concordance method selection based on data characteristics</li>
+<li>
+<strong>Regulatory Compliance</strong>: Robust discrimination assessment meeting current methodological standards for staging system evaluation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-results-framework-0-0-3-80">Comprehensive Results Framework<a class="anchor" aria-label="anchor" href="#comprehensive-results-framework-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Seven Results Tables</strong>: Analysis overview, concordance estimates, time-dependent analysis, system comparison, robustness analysis, diagnostics, and comprehensive summary</li>
+<li>
+<strong>Statistical Rigor</strong>: Multiple concordance methods with proper uncertainty quantification, bootstrap validation, and comprehensive diagnostic assessment</li>
+<li>
+<strong>Clinical Interpretation</strong>: Automated assessment of staging system discrimination quality (Excellent ≥0.8, Good ≥0.7, Moderate ≥0.6, Poor &lt;0.6) with evidence-based recommendations</li>
+<li>
+<strong>Methodological Transparency</strong>: Complete reporting of method selection rationale, robustness assessment results, and diagnostic measures for reproducible research</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-survival-analysis-0-0-3-80">Integration with Advanced Survival Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-survival-analysis-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Seamless Workflow Integration</strong>: Concordance probability analysis integrates with existing stagemigration module maintaining full backward compatibility</li>
+<li>
+<strong>Multi-Modal Compatibility</strong>: Extends discrimination assessment capabilities with specialized methods for heavily censored survival data</li>
+<li>
+<strong>Non-breaking Enhancement</strong>: Optional activation via boolean option ensuring existing analyses continue to work as before</li>
+<li>
+<strong>Progressive Analysis Suite</strong>: Builds on previous implementations (Informative Censoring Detection v0.0.3.79, Interval Censoring v0.0.3.78, Cure Models v0.0.3.77) for comprehensive advanced survival methodology</li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="phase-advanced-features---win-ratio-analysis-0-0-3-80">PHASE 5 ADVANCED FEATURES - Win Ratio Analysis<a class="anchor" aria-label="anchor" href="#phase-advanced-features---win-ratio-analysis-0-0-3-80"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-win-ratio-analysis-framework-0-0-3-80">Comprehensive Win Ratio Analysis Framework<a class="anchor" aria-label="anchor" href="#comprehensive-win-ratio-analysis-framework-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: Advanced win ratio analysis for composite endpoint evaluation in staging system comparisons with hierarchical endpoint prioritization</li>
+<li>
+<strong>Composite Endpoint Support</strong>: Hierarchical comparison of multiple endpoints with clinical priority ranking, designed for complex staging system evaluation with primary and secondary outcomes</li>
+<li>
+<strong>Patient-Level Comparisons</strong>: Pairwise patient comparisons between staging systems using hierarchical win-loss-tie methodology with proper statistical inference</li>
+<li>
+<strong>Clinical Hierarchy Respect</strong>: Maintains clinical endpoint importance through priority-based hierarchical comparison ensuring primary endpoints drive decisions</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-endpoint-management-0-0-3-80">Advanced Endpoint Management<a class="anchor" aria-label="anchor" href="#advanced-endpoint-management-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Primary Endpoint Integration</strong>: Time-to-event analysis using overall survival as primary endpoint with proper censoring handling</li>
+<li>
+<strong>Secondary Endpoint Support</strong>: Integration of continuous secondary endpoints (quality of life, biomarkers, clinical scores) with directional preferences</li>
+<li>
+<strong>Hierarchical Decision Framework</strong>: Endpoint priority system ensuring clinical relevance with primary endpoints taking precedence over secondary measures</li>
+<li>
+<strong>Flexible Endpoint Configuration</strong>: Support for varying endpoint types (time-to-event, continuous) with configurable direction preferences (higher/lower better)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-statistical-analysis-0-0-3-80">Comprehensive Statistical Analysis<a class="anchor" aria-label="anchor" href="#comprehensive-statistical-analysis-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Win Ratio Calculation</strong>: Classical win ratio methodology with wins/losses ratio calculation and confidence interval estimation using normal approximation</li>
+<li>
+<strong>Statistical Inference</strong>: P-value calculation using binomial test framework with two-sided hypothesis testing for win ratio significance</li>
+<li>
+<strong>Effect Size Interpretation</strong>: Automated clinical interpretation (Strongly favors, Favors, No significant difference) based on win ratio magnitude and statistical significance</li>
+<li>
+<strong>Confidence Intervals</strong>: Bootstrap-based confidence interval estimation for win ratio with coverage probability assessment</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-sensitivity-analysis-0-0-3-80">Advanced Sensitivity Analysis<a class="anchor" aria-label="anchor" href="#advanced-sensitivity-analysis-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Follow-up Time Sensitivity</strong>: Systematic evaluation of win ratio stability across different follow-up time cutoffs (50%, 75%, 100%, 125%, 150% of maximum follow-up)</li>
+<li>
+<strong>Endpoint Contribution Analysis</strong>: Detailed breakdown of which endpoints contribute to overall win ratio with percentage contributions and priority assessment</li>
+<li>
+<strong>Robustness Assessment</strong>: Evaluation of win ratio stability across different analytical assumptions and time horizons</li>
+<li>
+<strong>Clinical Scenario Testing</strong>: Multiple staging system comparisons with comprehensive sensitivity analysis for clinical decision support</li>
+</ul></div>
+<div class="section level4">
+<h4 id="detailed-results-framework-0-0-3-80">Detailed Results Framework<a class="anchor" aria-label="anchor" href="#detailed-results-framework-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Seven Comprehensive Tables</strong>: Overview summary, primary results, endpoint contributions, detailed comparisons, sensitivity analysis, pairwise analysis, and executive summary</li>
+<li>
+<strong>Statistical Rigor</strong>: Win ratio estimation with confidence intervals, p-values, and comprehensive uncertainty quantification for reliable clinical inference</li>
+<li>
+<strong>Clinical Interpretation</strong>: Automated assessment of staging system preference with evidence-based recommendations for clinical practice</li>
+<li>
+<strong>Endpoint Transparency</strong>: Complete reporting of endpoint contribution to overall win ratio with priority-based decision tracking</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-staging-system-evaluation-0-0-3-80">Integration with Staging System Evaluation<a class="anchor" aria-label="anchor" href="#integration-with-staging-system-evaluation-0-0-3-80"></a></h4>
+<ul><li>
+<strong>Seamless Module Integration</strong>: Win ratio analysis integrates with existing stagemigration module maintaining full compatibility with all existing analyses</li>
+<li>
+<strong>Progressive Enhancement</strong>: Builds on advanced survival analysis features (Concordance Probability v0.0.3.80, Informative Censoring v0.0.3.79) for comprehensive staging evaluation</li>
+<li>
+<strong>Non-breaking Implementation</strong>: Optional activation via boolean option ensuring existing workflows continue unchanged</li>
+<li>
+<strong>Clinical Decision Support</strong>: Provides additional evidence for staging system selection through composite endpoint analysis respecting clinical priorities</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.79" id="clinicopath-00379">ClinicoPath 0.0.3.79<a class="anchor" aria-label="anchor" href="#clinicopath-00379"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-features---informative-censoring-detection-0-0-3-79">PHASE 5 ADVANCED FEATURES - Informative Censoring Detection<a class="anchor" aria-label="anchor" href="#phase-advanced-features---informative-censoring-detection-0-0-3-79"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-informative-censoring-analysis-0-0-3-79">Comprehensive Informative Censoring Analysis<a class="anchor" aria-label="anchor" href="#comprehensive-informative-censoring-analysis-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: Advanced statistical tests for detecting informative censoring patterns where censoring mechanism is related to failure time, potentially biasing survival estimates and staging system evaluation</li>
+<li>
+<strong>Multiple Test Methods</strong>: Correlation tests, regression-based detection, competing risks approach, and landmark analysis for comprehensive informative censoring assessment</li>
+<li>
+<strong>Bias Adjustment Framework</strong>: Inverse probability weighting (IPW), multiple imputation, and sensitivity analysis methods for correcting survival estimates when informative censoring is detected</li>
+<li>
+<strong>Stage-Dependent Assessment</strong>: Comparative analysis of censoring patterns across staging groups to identify differential censoring that could bias staging system evaluation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-statistical-detection-methods-0-0-3-79">Advanced Statistical Detection Methods<a class="anchor" aria-label="anchor" href="#advanced-statistical-detection-methods-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Correlation Testing</strong>: Kendall’s tau correlation analysis between censoring time and survival time to detect temporal dependencies</li>
+<li>
+<strong>Regression-Based Detection</strong>: Logistic regression modeling with time and stage as predictors of censoring probability for systematic pattern identification</li>
+<li>
+<strong>Competing Risks Approach</strong>: Treating censoring as competing event using cmprsk package to test for stage-dependent censoring differences</li>
+<li>
+<strong>Landmark Analysis</strong>: Chi-square testing for censoring pattern differences across staging groups at clinically relevant time points</li>
+</ul></div>
+<div class="section level4">
+<h4 id="robust-bias-correction-methods-0-0-3-79">Robust Bias Correction Methods<a class="anchor" aria-label="anchor" href="#robust-bias-correction-methods-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Inverse Probability Weighting</strong>: IPW model construction for censoring probability estimation with proper covariate adjustment</li>
+<li>
+<strong>Multiple Imputation</strong>: MI methods for imputing censored failure times with uncertainty quantification</li>
+<li>
+<strong>Sensitivity Analysis</strong>: Systematic exploration of potential bias effects using configurable hazard ratio multipliers (0.8-1.2 range)</li>
+<li>
+<strong>Bootstrap Validation</strong>: Comprehensive uncertainty quantification for bias-corrected survival estimates with 100-5000 bootstrap replications</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-diagnostic-framework-0-0-3-79">Comprehensive Diagnostic Framework<a class="anchor" aria-label="anchor" href="#comprehensive-diagnostic-framework-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Censoring Rate Assessment</strong>: Risk stratification based on overall censoring percentage (low &lt;30%, moderate 30-60%, high &gt;60%)</li>
+<li>
+<strong>Test Concordance Evaluation</strong>: Assessment of agreement across multiple informative censoring tests for robust detection</li>
+<li>
+<strong>Censoring Pattern Analysis</strong>: Variability assessment of censoring times to identify systematic vs. random censoring mechanisms</li>
+<li>
+<strong>Evidence Strength Classification</strong>: Hierarchical classification (None/Weak/Moderate/Strong) based on statistical significance levels</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-stage-comparison-analysis-0-0-3-79">Advanced Stage Comparison Analysis<a class="anchor" aria-label="anchor" href="#advanced-stage-comparison-analysis-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Differential Censoring Detection</strong>: Statistical tests for comparing censoring rates and patterns across different staging groups</li>
+<li>
+<strong>Proportional Testing</strong>: Formal hypothesis testing for differences from overall censoring rates using proportion tests</li>
+<li>
+<strong>Temporal Censoring Assessment</strong>: Median censoring time analysis for identifying stage-specific censoring patterns</li>
+<li>
+<strong>Clinical Impact Evaluation</strong>: Assessment of how stage-dependent censoring affects staging system validity and interpretation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-sensitivity-analysis-framework-0-0-3-79">Comprehensive Sensitivity Analysis Framework<a class="anchor" aria-label="anchor" href="#comprehensive-sensitivity-analysis-framework-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Parametric Bias Exploration</strong>: Systematic evaluation of survival estimate sensitivity to informative censoring assumptions</li>
+<li>
+<strong>Clinical Impact Classification</strong>: Quantitative assessment of bias magnitude (Minimal &lt;5%, Moderate 5-10%, Substantial &gt;10%)</li>
+<li>
+<strong>Bias Direction Assessment</strong>: Identification of upward vs. downward bias patterns in survival estimates</li>
+<li>
+<strong>Robustness Evaluation</strong>: Range-based analysis of staging system performance under different bias scenarios</li>
+</ul></div>
+<div class="section level4">
+<h4 id="bootstrap-confidence-interval-methods-0-0-3-79">Bootstrap Confidence Interval Methods<a class="anchor" aria-label="anchor" href="#bootstrap-confidence-interval-methods-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Bias-Corrected Estimation</strong>: Bootstrap confidence intervals specifically designed for informative censoring adjustments</li>
+<li>
+<strong>Coverage Probability Assessment</strong>: Validation of confidence interval properties ensuring reliable statistical inference</li>
+<li>
+<strong>Method-Specific Bootstrap</strong>: Tailored bootstrap procedures for IPW, multiple imputation, and sensitivity analysis approaches</li>
+<li>
+<strong>Uncertainty Propagation</strong>: Proper handling of uncertainty from both estimation and bias correction procedures</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-research-applications-0-0-3-79">Clinical Research Applications<a class="anchor" aria-label="anchor" href="#clinical-research-applications-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Methodological Validation</strong>: Essential tool for validating non-informative censoring assumption in survival studies</li>
+<li>
+<strong>Staging System Development</strong>: Critical assessment framework for new staging systems ensuring valid survival comparisons</li>
+<li>
+<strong>Registry Data Analysis</strong>: Specialized methods for large-scale cancer registry data with potential administrative censoring bias</li>
+<li>
+<strong>Clinical Trial Design</strong>: Bias assessment framework for randomized trials with differential follow-up patterns</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-results-framework-0-0-3-79">Comprehensive Results Framework<a class="anchor" aria-label="anchor" href="#comprehensive-results-framework-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Seven Results Tables</strong>: Analysis overview, detection tests, stage comparison, adjusted estimates, sensitivity analysis, diagnostics, and comprehensive summary</li>
+<li>
+<strong>Statistical Rigor</strong>: Proper hypothesis testing with multiple methods, bias correction, and comprehensive uncertainty quantification following current methodological standards</li>
+<li>
+<strong>Clinical Interpretation</strong>: Automated assessment of censoring mechanism impact on staging system evaluation with evidence-based recommendations</li>
+<li>
+<strong>Methodological Transparency</strong>: Complete reporting of test results, bias estimates, and diagnostic measures for reproducible research</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-survival-analysis-0-0-3-79">Integration with Advanced Survival Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-survival-analysis-0-0-3-79"></a></h4>
+<ul><li>
+<strong>Seamless Workflow Integration</strong>: Informative censoring detection integrates with existing stagemigration module maintaining full backward compatibility</li>
+<li>
+<strong>Multi-Modal Compatibility</strong>: Extends traditional survival analysis to properly assess and correct for informative censoring bias</li>
+<li>
+<strong>Non-breaking Enhancement</strong>: Optional activation via boolean option ensuring existing analyses continue to work as before</li>
+<li>
+<strong>Progressive Analysis Suite</strong>: Builds on previous implementations (Interval Censoring v0.0.3.78, Cure Models v0.0.3.77, Multi-state models v0.0.3.75) for comprehensive advanced survival methodology</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.78" id="clinicopath-00378">ClinicoPath 0.0.3.78<a class="anchor" aria-label="anchor" href="#clinicopath-00378"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-features---interval-censoring-support-0-0-3-78">PHASE 5 ADVANCED FEATURES - Interval Censoring Support<a class="anchor" aria-label="anchor" href="#phase-advanced-features---interval-censoring-support-0-0-3-78"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-interval-censored-survival-analysis-0-0-3-78">Comprehensive Interval-Censored Survival Analysis<a class="anchor" aria-label="anchor" href="#comprehensive-interval-censored-survival-analysis-0-0-3-78"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: State-of-the-art interval censoring analysis using icenReg for events detected between visits, handling uncertainty in exact event timing common in clinical follow-up scenarios</li>
+<li>
+<strong>Dual Analysis Approach</strong>: Non-parametric maximum likelihood estimation (NPMLE) and parametric regression models for comprehensive interval-censored survival assessment</li>
+<li>
+<strong>Multiple Parametric Distributions</strong>: Weibull, log-logistic, log-normal, exponential, and gamma distributions for flexible modeling of interval-censored survival patterns</li>
+<li>
+<strong>Staging System Validation</strong>: Comparative survival analysis between staging systems properly accounting for interval censoring effects</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-non-parametric-methods-0-0-3-78">Advanced Non-Parametric Methods<a class="anchor" aria-label="anchor" href="#advanced-non-parametric-methods-0-0-3-78"></a></h4>
+<ul><li>
+<strong>NPMLE Implementation</strong>: Non-parametric maximum likelihood estimation for assumption-free survival function estimation with interval-censored data</li>
+<li>
+<strong>Bootstrap Confidence Intervals</strong>: Robust uncertainty quantification with 100-10000 bootstrap replications for reliable statistical inference</li>
+<li>
+<strong>Time-Point Specific Analysis</strong>: Survival probability estimates at clinically relevant time points (configurable 12-240 months) optimized for different cancer types</li>
+<li>
+<strong>Stage-Specific Estimation</strong>: Individual survival function estimates for each staging group accounting for interval censoring patterns</li>
+</ul></div>
+<div class="section level4">
+<h4 id="parametric-interval-censored-regression-0-0-3-78">Parametric Interval-Censored Regression<a class="anchor" aria-label="anchor" href="#parametric-interval-censored-regression-0-0-3-78"></a></h4>
+<ul><li>
+<strong>Accelerated Failure Time Models</strong>: Comprehensive parametric regression framework with proper handling of interval-censored observations</li>
+<li>
+<strong>Covariate Adjustment</strong>: Support for additional prognostic factors alongside staging variables for adjusted survival analysis</li>
+<li>
+<strong>Distribution Selection</strong>: Flexible parametric model selection with automatic convergence monitoring and model validation</li>
+<li>
+<strong>Statistical Inference</strong>: Complete coefficient estimation with standard errors, confidence intervals, and hypothesis testing</li>
+</ul></div>
+<div class="section level4">
+<h4 id="robust-model-comparison-framework-0-0-3-78">Robust Model Comparison Framework<a class="anchor" aria-label="anchor" href="#robust-model-comparison-framework-0-0-3-78"></a></h4>
+<ul><li>
+<strong>Likelihood Ratio Testing</strong>: Statistical comparison of staging systems using proper interval-censored likelihood methods</li>
+<li>
+<strong>Information Criteria</strong>: AIC/BIC-based model selection accounting for interval censoring complexity in staging system evaluation</li>
+<li>
+<strong>Convergence Assessment</strong>: Comprehensive model diagnostics with convergence status reporting and fallback mechanisms</li>
+<li>
+<strong>Goodness-of-Fit Evaluation</strong>: Model validation ensuring appropriate distributional assumptions for reliable staging comparison</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-bootstrap-validation-0-0-3-78">Advanced Bootstrap Validation<a class="anchor" aria-label="anchor" href="#advanced-bootstrap-validation-0-0-3-78"></a></h4>
+<ul><li>
+<strong>Uncertainty Quantification</strong>: Bootstrap confidence intervals for non-parametric survival estimates with configurable confidence levels (80-99%)</li>
+<li>
+<strong>Robust Sampling</strong>: Bootstrap resampling specifically designed for interval-censored data structures with proper handling of censoring patterns</li>
+<li>
+<strong>Coverage Assessment</strong>: Validation of confidence interval coverage properties ensuring reliable statistical inference</li>
+<li>
+<strong>Bias Correction</strong>: Bootstrap bias assessment for survival function estimates improving accuracy of interval-censored analysis</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-research-applications-0-0-3-78">Clinical Research Applications<a class="anchor" aria-label="anchor" href="#clinical-research-applications-0-0-3-78"></a></h4>
+<ul><li>
+<strong>Follow-up Study Design</strong>: Optimal analysis framework for studies with periodic clinic visits where exact event times are unknown</li>
+<li>
+<strong>Registry Data Analysis</strong>: Specialized methods for cancer registry data with inherent interval censoring due to reporting intervals</li>
+<li>
+<strong>Biomarker Studies</strong>: Integration framework for molecular markers in staging systems accounting for interval-censored outcome assessment</li>
+<li>
+<strong>Treatment Efficacy</strong>: Proper survival analysis for clinical trials with interval-censored endpoints ensuring valid staging comparisons</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-diagnostic-framework-0-0-3-78">Comprehensive Diagnostic Framework<a class="anchor" aria-label="anchor" href="#comprehensive-diagnostic-framework-0-0-3-78"></a></h4>
+<ul><li>
+<strong>Censoring Pattern Analysis</strong>: Detailed assessment of left, right, interval, and exact censoring patterns in the dataset</li>
+<li>
+<strong>Model Convergence</strong>: Automatic convergence monitoring with convergence status reporting and diagnostic recommendations</li>
+<li>
+<strong>Distribution Validation</strong>: Goodness-of-fit assessment for parametric assumptions ensuring appropriate model specification</li>
+<li>
+<strong>Statistical Quality Control</strong>: Comprehensive diagnostic suite ensuring reliable interval-censored survival analysis</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-results-framework-0-0-3-78">Comprehensive Results Framework<a class="anchor" aria-label="anchor" href="#comprehensive-results-framework-0-0-3-78"></a></h4>
+<ul><li>
+<strong>Six Results Tables</strong>: Analysis overview, non-parametric estimates, parametric regression, model comparison, diagnostics, and comprehensive summary</li>
+<li>
+<strong>Statistical Rigor</strong>: Proper handling of interval censoring with likelihood-based inference and bootstrap validation following current methodological standards</li>
+<li>
+<strong>Clinical Interpretation</strong>: Automated assessment of staging system performance with interval-censored data including evidence-based recommendations</li>
+<li>
+<strong>Methodological Transparency</strong>: Complete reporting of censoring patterns, model assumptions, and diagnostic results for reproducible research</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-survival-analysis-0-0-3-78">Integration with Advanced Survival Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-survival-analysis-0-0-3-78"></a></h4>
+<ul><li>
+<strong>Seamless Workflow Integration</strong>: Interval censoring analysis integrates with existing stagemigration module maintaining full backward compatibility</li>
+<li>
+<strong>Multi-Modal Compatibility</strong>: Extends traditional survival analysis to properly handle interval-censored observations common in clinical practice</li>
+<li>
+<strong>Non-breaking Enhancement</strong>: Optional activation via boolean option ensuring existing analyses continue to work as before</li>
+<li>
+<strong>Progressive Analysis Suite</strong>: Builds on previous implementations (Multi-state models v0.0.3.75, Random Survival Forests v0.0.3.76, Cure Models v0.0.3.77) for comprehensive advanced survival analysis</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.77" id="clinicopath-00377">ClinicoPath 0.0.3.77<a class="anchor" aria-label="anchor" href="#clinicopath-00377"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-features---cure-models-implementation-0-0-3-77">PHASE 5 ADVANCED FEATURES - Cure Models Implementation<a class="anchor" aria-label="anchor" href="#phase-advanced-features---cure-models-implementation-0-0-3-77"></a></h3>
+<div class="section level4">
+<h4 id="mixture-models-for-populations-with-cured-fraction-0-0-3-77">Mixture Models for Populations with Cured Fraction<a class="anchor" aria-label="anchor" href="#mixture-models-for-populations-with-cured-fraction-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: State-of-the-art cure model analysis using flexsurv for populations where a fraction of patients may be effectively cured, separating susceptible and cured populations</li>
+<li>
+<strong>Multiple Model Types</strong>: Mixture cure models (infinite survival assumption) and promotion time models (biological mechanisms) with comprehensive model comparison capabilities</li>
+<li>
+<strong>Flexible Distribution Support</strong>: Weibull, exponential, log-normal, and log-logistic distributions for modeling susceptible population survival patterns</li>
+<li>
+<strong>Staging System Validation</strong>: Comparative cure model analysis between old and new staging systems to assess cure prediction capability</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-cure-fraction-estimation-0-0-3-77">Advanced Cure Fraction Estimation<a class="anchor" aria-label="anchor" href="#advanced-cure-fraction-estimation-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Parametric Estimation</strong>: Maximum likelihood estimation with specified survival distributions for robust cure fraction quantification</li>
+<li>
+<strong>Non-parametric Methods</strong>: Kaplan-Meier plateau detection for model-free cure fraction estimation with configurable detection thresholds</li>
+<li>
+<strong>Bootstrap Validation</strong>: Robust confidence intervals for cure fractions and model parameters with 100-2000 bootstrap replications</li>
+<li>
+<strong>Time Horizon Analysis</strong>: Configurable cure assessment periods (12-240 months) optimized for different cancer types and follow-up patterns</li>
+</ul></div>
+<div class="section level4">
+<h4 id="stage-specific-cure-pattern-analysis-0-0-3-77">Stage-Specific Cure Pattern Analysis<a class="anchor" aria-label="anchor" href="#stage-specific-cure-pattern-analysis-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Individual Stage Assessment</strong>: Separate cure fraction estimates for each staging group to understand stage-specific cure potential</li>
+<li>
+<strong>Discrimination Quality Assessment</strong>: Automatic evaluation of staging system ability to discriminate between cure probabilities (Good/Moderate/Poor classification)</li>
+<li>
+<strong>Cure Fraction Range Analysis</strong>: Quantitative assessment of cure fraction variability across stages for staging validation</li>
+<li>
+<strong>Treatment Stratification Guidance</strong>: Clinical utility assessment for treatment planning based on cure prediction accuracy</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-model-comparison-framework-0-0-3-77">Comprehensive Model Comparison Framework<a class="anchor" aria-label="anchor" href="#comprehensive-model-comparison-framework-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Likelihood Ratio Testing</strong>: Statistical comparison of cure models between staging systems with proper hypothesis testing</li>
+<li>
+<strong>Information Criteria</strong>: AIC/BIC-based model selection for identifying superior staging approaches in cure prediction</li>
+<li>
+<strong>Cure Fraction Differences</strong>: Quantitative assessment of absolute and relative improvements in cure prediction capability</li>
+<li>
+<strong>Stage Discrimination Comparison</strong>: Range and coefficient of variation analysis for staging system discrimination assessment</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-statistical-validation-0-0-3-77">Advanced Statistical Validation<a class="anchor" aria-label="anchor" href="#advanced-statistical-validation-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Convergence Monitoring</strong>: Robust model fitting with convergence status reporting and fallback mechanisms for challenging datasets</li>
+<li>
+<strong>Goodness-of-Fit Testing</strong>: Kolmogorov-Smirnov tests and diagnostic validation to ensure appropriate model specification</li>
+<li>
+<strong>Bootstrap Confidence Intervals</strong>: Comprehensive uncertainty quantification for cure fractions, model parameters, and comparative metrics</li>
+<li>
+<strong>Evidence-Based Thresholds</strong>: Clinical significance criteria (&gt;10% cure fraction difference) for meaningful staging improvement assessment</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-research-applications-0-0-3-77">Clinical Research Applications<a class="anchor" aria-label="anchor" href="#clinical-research-applications-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Long-term Prognosis</strong>: Identification of patients with cure potential for personalized treatment planning and follow-up strategies</li>
+<li>
+<strong>Treatment Stratification</strong>: Evidence-based framework for treatment intensity decisions based on cure probability predictions</li>
+<li>
+<strong>Staging System Development</strong>: Validation tool for new staging systems focusing on cure prediction accuracy and clinical utility</li>
+<li>
+<strong>Biomarker Integration</strong>: Support for additional prognostic factors in cure probability modeling alongside anatomic staging</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-results-framework-0-0-3-77">Comprehensive Results Framework<a class="anchor" aria-label="anchor" href="#comprehensive-results-framework-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Six Results Tables</strong>: Cure fraction estimates, model parameters, staging comparison, stage-specific analysis, bootstrap validation, and comprehensive summary</li>
+<li>
+<strong>Statistical Rigor</strong>: Proper confidence intervals, likelihood ratio tests, and goodness-of-fit assessment following current survival analysis standards</li>
+<li>
+<strong>Clinical Interpretation</strong>: Automated assessment of cure prediction quality with evidence-based recommendations for staging adoption</li>
+<li>
+<strong>Bootstrap Validation Summary</strong>: Bias assessment, coverage probability, and confidence interval validation for robust statistical inference</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-survival-analysis-0-0-3-77">Integration with Advanced Survival Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-survival-analysis-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Seamless Workflow Integration</strong>: Cure model analysis integrates with existing stagemigration module maintaining full backward compatibility</li>
+<li>
+<strong>Multi-Modal Compatibility</strong>: Extends beyond traditional survival analysis to handle populations with mixed susceptible and cured patients</li>
+<li>
+<strong>Non-breaking Enhancement</strong>: Optional activation via boolean option ensuring existing analyses continue to work as before</li>
+<li>
+<strong>Package Management</strong>: Intelligent package detection with graceful fallbacks when flexsurv is unavailable</li>
+</ul></div>
+<div class="section level4">
+<h4 id="research-and-clinical-impact-0-0-3-77">Research and Clinical Impact<a class="anchor" aria-label="anchor" href="#research-and-clinical-impact-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Cancer Outcome Prediction</strong>: Specialized analysis for cancers with potential cure fractions (breast, prostate, melanoma, thyroid)</li>
+<li>
+<strong>Treatment Planning</strong>: Evidence-based cure probability estimates for treatment intensity and follow-up duration decisions</li>
+<li>
+<strong>Staging Validation</strong>: Comprehensive framework for evaluating staging systems’ ability to identify cured vs. susceptible patients</li>
+<li>
+<strong>Long-term Survivorship</strong>: Tools for understanding and predicting long-term survival patterns in cancer populations</li>
+</ul></div>
+<div class="section level4">
+<h4 id="publication-ready-cure-model-outputs-0-0-3-77">Publication-Ready Cure Model Outputs<a class="anchor" aria-label="anchor" href="#publication-ready-cure-model-outputs-0-0-3-77"></a></h4>
+<ul><li>
+<strong>Manuscript-Quality Tables</strong>: Six comprehensive results tables with statistical measures suitable for high-impact survival analysis publications</li>
+<li>
+<strong>Methodology Documentation</strong>: Complete statistical methodology descriptions for cure model analysis suitable for peer review and regulatory submissions</li>
+<li>
+<strong>Clinical Interpretation Guidelines</strong>: Automated clinical significance assessment with evidence-based guidelines for cure model application</li>
+<li>
+<strong>Comparative Analysis Framework</strong>: Robust statistical comparison methods for evaluating staging systems in cure prediction contexts</li>
+</ul></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.76" id="clinicopath-00376">ClinicoPath 0.0.3.76<a class="anchor" aria-label="anchor" href="#clinicopath-00376"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-features---random-survival-forests-implementation-0-0-3-76">PHASE 5 ADVANCED FEATURES - Random Survival Forests Implementation<a class="anchor" aria-label="anchor" href="#phase-advanced-features---random-survival-forests-implementation-0-0-3-76"></a></h3>
+<div class="section level4">
+<h4 id="non-parametric-ensemble-survival-analysis-with-variable-importance-0-0-3-76">Non-Parametric Ensemble Survival Analysis with Variable Importance<a class="anchor" aria-label="anchor" href="#non-parametric-ensemble-survival-analysis-with-variable-importance-0-0-3-76"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: State-of-the-art Random Survival Forests using randomForestSRC for model-free survival analysis without distributional assumptions</li>
+<li>
+<strong>Ensemble Method Integration</strong>: Bootstrap aggregating (bagging) of survival trees with out-of-bag (OOB) validation for robust performance estimation</li>
+<li>
+<strong>Variable Importance Assessment</strong>: VIMP (Variable Importance) and permutation-based importance measures to identify key prognostic factors</li>
+<li>
+<strong>Comparative Forest Analysis</strong>: Side-by-side Random Forest models for old vs. new staging systems with comprehensive performance comparison</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-machine-learning-for-survival-data-0-0-3-76">Advanced Machine Learning for Survival Data<a class="anchor" aria-label="anchor" href="#advanced-machine-learning-for-survival-data-0-0-3-76"></a></h4>
+<ul><li>
+<strong>Non-Parametric Modeling</strong>: Tree-based ensemble methods that capture complex interactions and non-linear relationships without Cox model assumptions</li>
+<li>
+<strong>Bootstrap Validation</strong>: Out-of-bag error estimation and prediction accuracy assessment with configurable bootstrap strategies (by.root vs. by.node)</li>
+<li>
+<strong>Flexible Sampling</strong>: Support for sampling with replacement (swr) and without replacement (swor) for different analytical scenarios</li>
+<li>
+<strong>Automatic Hyperparameter Tuning</strong>: Configurable tree parameters (ntree, nodesize, mtry) with automatic optimization options</li>
+</ul></div>
+<div class="section level4">
+<h4 id="machine-learning-performance-metrics-0-0-3-76">Machine Learning Performance Metrics<a class="anchor" aria-label="anchor" href="#machine-learning-performance-metrics-0-0-3-76"></a></h4>
+<ul><li>
+<strong>Out-of-Bag Error Rates</strong>: Unbiased error estimation using samples not included in tree construction with temporal tracking across ensemble building</li>
+<li>
+<strong>Concordance Index (C-Index)</strong>: Discrimination assessment for Random Forest survival predictions with comparative analysis between staging systems</li>
+<li>
+<strong>Prediction Quality Assessment</strong>: Median survival prediction accuracy with time-specific survival probability estimation</li>
+<li>
+<strong>Model Complexity Analysis</strong>: Variable count and tree structure assessment for optimal model selection</li>
+</ul></div>
+<div class="section level4">
+<h4 id="variable-importance-and-feature-selection-0-0-3-76">Variable Importance and Feature Selection<a class="anchor" aria-label="anchor" href="#variable-importance-and-feature-selection-0-0-3-76"></a></h4>
+<ul><li>
+<strong>Permutation Importance</strong>: Variable importance based on prediction accuracy degradation when variables are randomly permuted</li>
+<li>
+<strong>Minimal Depth Analysis</strong>: Tree-based variable selection using minimal depth of maximal subtree for each variable</li>
+<li>
+<strong>Ranking System</strong>: Comprehensive variable ranking combining multiple importance measures for robust feature selection</li>
+<li>
+<strong>Staging Variable Prioritization</strong>: Specific assessment of staging system importance relative to other clinical factors</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-forest-configuration-and-optimization-0-0-3-76">Advanced Forest Configuration and Optimization<a class="anchor" aria-label="anchor" href="#advanced-forest-configuration-and-optimization-0-0-3-76"></a></h4>
+<ul><li>
+<strong>Tree Ensemble Parameters</strong>: Full control over number of trees (default: 500), node size constraints, and variables per split (mtry)</li>
+<li>
+<strong>Bootstrap Strategies</strong>: Flexible bootstrap sampling methods optimized for survival data with censoring patterns</li>
+<li>
+<strong>Missing Data Handling</strong>: Automatic imputation strategies for missing covariate data using na.impute with robust fallback methods</li>
+<li>
+<strong>Performance Optimization</strong>: Optimized computation for large datasets with efficient memory management</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-results-framework-0-0-3-76">Comprehensive Results Framework<a class="anchor" aria-label="anchor" href="#comprehensive-results-framework-0-0-3-76"></a></h4>
+<ul><li>
+<strong>Four Results Tables</strong>: Forest performance metrics, variable importance rankings, comparative analysis, and summary recommendations</li>
+<li>
+<strong>Statistical Comparison</strong>: Quantitative comparison of OOB error rates, C-index improvements, and variable importance changes</li>
+<li>
+<strong>Clinical Interpretation</strong>: Evidence-based assessment of staging system performance improvements with practical significance thresholds</li>
+<li>
+<strong>Recommendation Engine</strong>: Automated recommendations for staging system adoption based on ensemble performance metrics</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-survival-analysis-0-0-3-76">Integration with Advanced Survival Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-survival-analysis-0-0-3-76"></a></h4>
+<ul><li>
+<strong>Seamless Workflow Integration</strong>: Random Forest analysis integrates with existing stagemigration module maintaining full backward compatibility</li>
+<li>
+<strong>Multi-State Compatibility</strong>: Extends multi-state models with non-parametric approaches for complex transition modeling</li>
+<li>
+<strong>Non-breaking Enhancement</strong>: Optional activation via boolean option ensuring existing analyses continue to work as before</li>
+<li>
+<strong>Package Management</strong>: Intelligent package detection and loading with graceful fallbacks when randomForestSRC is unavailable</li>
+</ul></div>
+<div class="section level4">
+<h4 id="research-and-clinical-applications-0-0-3-76">Research and Clinical Applications<a class="anchor" aria-label="anchor" href="#research-and-clinical-applications-0-0-3-76"></a></h4>
+<ul><li>
+<strong>Personalized Risk Assessment</strong>: Individual patient risk prediction using ensemble methods for precision medicine applications</li>
+<li>
+<strong>Biomarker Discovery</strong>: Variable importance analysis for identifying novel prognostic factors and biomarker combinations</li>
+<li>
+<strong>Treatment Response Prediction</strong>: Non-parametric modeling of treatment effects without restrictive parametric assumptions</li>
+<li>
+<strong>Robust Validation</strong>: Bootstrap-based validation suitable for smaller datasets and complex interaction detection</li>
+</ul></div>
+<div class="section level4">
+<h4 id="publication-ready-machine-learning-outputs-0-0-3-76">Publication-Ready Machine Learning Outputs<a class="anchor" aria-label="anchor" href="#publication-ready-machine-learning-outputs-0-0-3-76"></a></h4>
+<ul><li>
+<strong>Performance Comparison Tables</strong>: Comprehensive comparison of traditional Cox models vs. Random Forest approaches with statistical significance testing</li>
+<li>
+<strong>Variable Importance Visualizations</strong>: Ranked importance plots suitable for manuscript inclusion with clinical interpretation</li>
+<li>
+<strong>Methodology Documentation</strong>: Complete documentation of Random Forest parameters and validation strategies for peer review</li>
+<li>
+<strong>Clinical Decision Support</strong>: Practical guidelines for when to use ensemble methods vs. traditional survival analysis approaches</li>
+</ul></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.75" id="clinicopath-00375">ClinicoPath 0.0.3.75<a class="anchor" aria-label="anchor" href="#clinicopath-00375"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-features---multi-state-models-implementation-0-0-3-75">PHASE 5 ADVANCED FEATURES - Multi-State Models Implementation<a class="anchor" aria-label="anchor" href="#phase-advanced-features---multi-state-models-implementation-0-0-3-75"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-multi-state-survival-models-for-complex-disease-transitions-0-0-3-75">Comprehensive Multi-State Survival Models for Complex Disease Transitions<a class="anchor" aria-label="anchor" href="#comprehensive-multi-state-survival-models-for-complex-disease-transitions-0-0-3-75"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: State-of-the-art multi-state survival analysis for complex disease progression scenarios where patients can transition between multiple health states over time</li>
+<li>
+<strong>Multiple Model Types</strong>: Illness-Death models (3 states), Progression models (4 states), Relapse-Death models (4 states), and comprehensive analysis frameworks</li>
+<li>
+<strong>Transition Intensity Matrix</strong>: Complete calculation of hazard rates for all possible state transitions with statistical inference and clinical significance assessment</li>
+<li>
+<strong>State Transition Probabilities</strong>: Time-dependent probability calculations for transitions between all disease states with confidence intervals and comparative analysis</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-disease-progression-modeling-0-0-3-75">Advanced Disease Progression Modeling<a class="anchor" aria-label="anchor" href="#advanced-disease-progression-modeling-0-0-3-75"></a></h4>
+<ul><li>
+<strong>State Occupancy Probabilities</strong>: Comprehensive analysis of state occupancy over time using Aalen-Johansen estimators with prediction quality assessment</li>
+<li>
+<strong>Absorption State Modeling</strong>: Proper handling of absorbing states (death, terminal conditions) that patients cannot leave once entered</li>
+<li>
+<strong>Multi-State Covariate Integration</strong>: Support for additional prognostic factors in transition models with automatic model building and validation</li>
+<li>
+<strong>Staging System Stratification</strong>: Separate multi-state analysis for each staging system to compare their ability to predict disease transitions and progression patterns</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-applications-and-disease-states-0-0-3-75">Clinical Applications and Disease States<a class="anchor" aria-label="anchor" href="#clinical-applications-and-disease-states-0-0-3-75"></a></h4>
+<ul><li>
+<strong>Cancer Progression Modeling</strong>: Comprehensive framework for modeling stable → progressive → terminal disease transitions in oncology</li>
+<li>
+<strong>Remission and Relapse Analysis</strong>: Advanced modeling of disease remission, relapse patterns, and recovery trajectories</li>
+<li>
+<strong>Chronic Disease Management</strong>: Multi-state frameworks for long-term disease progression with reversible and irreversible transitions</li>
+<li>
+<strong>Treatment Response Modeling</strong>: Integration of treatment effects and patient factors affecting transition rates between health states</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-technical-architecture-0-0-3-75">Advanced Technical Architecture<a class="anchor" aria-label="anchor" href="#advanced-technical-architecture-0-0-3-75"></a></h4>
+<ul><li>
+<strong>MSM Package Integration</strong>: Professional integration with msm package for robust multi-state modeling with graceful fallbacks for simplified analysis</li>
+<li>
+<strong>Transition Classification System</strong>: Intelligent classification of transition types (progression, regression/recovery, self-transition) with clinical interpretation</li>
+<li>
+<strong>Statistical Validation Framework</strong>: Comprehensive statistical testing including probability difference tests and confidence interval estimation</li>
+<li>
+<strong>Flexible State Configuration</strong>: User-defined state definitions and absorption states with intelligent state mapping and validation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-results-framework-0-0-3-75">Comprehensive Results Framework<a class="anchor" aria-label="anchor" href="#comprehensive-results-framework-0-0-3-75"></a></h4>
+<ul><li>
+<strong>Five Results Tables</strong>: Transition intensities, transition probabilities, state occupancy, model comparison, and comprehensive summary tables</li>
+<li>
+<strong>Statistical Rigor</strong>: Proper confidence intervals, p-values, and effect sizes following current biostatistics standards for multi-state analysis</li>
+<li>
+<strong>Clinical Significance Assessment</strong>: Evidence-based thresholds for determining clinically meaningful improvements in transition modeling</li>
+<li>
+<strong>Predictive Quality Metrics</strong>: Assessment of prediction quality (High/Moderate/Low) and clinical relevance for each analysis component</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-survival-analysis-0-0-3-75">Integration with Advanced Survival Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-survival-analysis-0-0-3-75"></a></h4>
+<ul><li>
+<strong>Seamless Workflow Integration</strong>: Multi-state analysis integrates with existing stagemigration module maintaining full backward compatibility</li>
+<li>
+<strong>Competing Risks Compatibility</strong>: Extends competing risks analysis to handle more complex scenarios with multiple reversible and irreversible transitions</li>
+<li>
+<strong>Advanced Visualization Support</strong>: Framework for multi-state model visualizations including transition diagrams and probability plots</li>
+<li>
+<strong>Non-breaking Enhancement</strong>: Optional activation via boolean option ensuring existing analyses continue to work as before</li>
+</ul></div>
+<div class="section level4">
+<h4 id="research-and-clinical-impact-0-0-3-75">Research and Clinical Impact<a class="anchor" aria-label="anchor" href="#research-and-clinical-impact-0-0-3-75"></a></h4>
+<ul><li>
+<strong>Disease Progression Research</strong>: Tools for understanding complex disease trajectories and identifying factors that influence transition rates</li>
+<li>
+<strong>Treatment Efficacy Assessment</strong>: Framework for evaluating how treatments affect disease progression patterns and transition probabilities</li>
+<li>
+<strong>Resource Planning</strong>: State occupancy analysis supports healthcare resource allocation and long-term care planning</li>
+<li>
+<strong>Patient Counseling</strong>: Precise transition probabilities enable evidence-based patient counseling about disease progression expectations</li>
+</ul></div>
+<div class="section level4">
+<h4 id="publication-ready-outputs-0-0-3-75">Publication-Ready Outputs<a class="anchor" aria-label="anchor" href="#publication-ready-outputs-0-0-3-75"></a></h4>
+<ul><li>
+<strong>Manuscript-Quality Tables</strong>: Five comprehensive results tables with statistical measures suitable for high-impact publication</li>
+<li>
+<strong>Methodology Documentation</strong>: Complete statistical methodology descriptions for regulatory submissions and peer review</li>
+<li>
+<strong>Clinical Interpretation Guidelines</strong>: Automated clinical significance assessment with evidence-based guidelines for staging system adoption</li>
+<li>
+<strong>Research Validation</strong>: Robust statistical framework suitable for external validation and cross-population studies</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.74" id="clinicopath-00374">ClinicoPath 0.0.3.74<a class="anchor" aria-label="anchor" href="#clinicopath-00374"></a></h2>
+<div class="section level3">
+<h3 id="phase-cutting-edge-features---competing-risks-analysis-implementation-0-0-3-74">PHASE 3 CUTTING-EDGE FEATURES - Competing Risks Analysis Implementation<a class="anchor" aria-label="anchor" href="#phase-cutting-edge-features---competing-risks-analysis-implementation-0-0-3-74"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-competing-risks-analysis-with-fine-gray-models-0-0-3-74">Comprehensive Competing Risks Analysis with Fine-Gray Models<a class="anchor" aria-label="anchor" href="#comprehensive-competing-risks-analysis-with-fine-gray-models-0-0-3-74"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: State-of-the-art competing risks analysis using Fine-Gray subdistribution hazard models and Cumulative Incidence Function (CIF) analysis for scenarios with multiple event types</li>
+<li>
+<strong>Fine-Gray Subdistribution Hazard Models</strong>: Proper modeling of cumulative incidence when competing events prevent observation of primary outcomes, essential for cancer survival analysis</li>
+<li>
+<strong>Cause-Specific Hazard Models</strong>: Traditional Cox regression approach for instantaneous hazard rates of specific event types with comprehensive model comparison</li>
+<li>
+<strong>Comprehensive Analysis Framework</strong>: Integrated approach combining both Fine-Gray and cause-specific methods for complete competing risks assessment</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-cumulative-incidence-function-cif-analysis-0-0-3-74">Advanced Cumulative Incidence Function (CIF) Analysis<a class="anchor" aria-label="anchor" href="#advanced-cumulative-incidence-function-cif-analysis-0-0-3-74"></a></h4>
+<ul><li>
+<strong>Multi-timepoint CIF Calculation</strong>: Comprehensive cumulative incidence assessment at clinically relevant time points (12, 24, 36, 60 months) with proper confidence intervals</li>
+<li>
+<strong>Gray’s Test for CIF Equality</strong>: Statistical testing for differences in cumulative incidence functions across staging groups and event types</li>
+<li>
+<strong>Staging System Comparison</strong>: Side-by-side CIF comparison between original and new staging systems for both primary and competing events</li>
+<li>
+<strong>Clinical Risk Stratification</strong>: Event-specific risk assessment with confidence intervals and statistical significance testing for clinical decision support</li>
+</ul></div>
+<div class="section level4">
+<h4 id="competing-risks-discrimination-metrics-0-0-3-74">Competing Risks Discrimination Metrics<a class="anchor" aria-label="anchor" href="#competing-risks-discrimination-metrics-0-0-3-74"></a></h4>
+<ul><li>
+<strong>Competing Risks C-Index</strong>: Specialized concordance index calculations adapted for competing risks scenarios with proper statistical inference</li>
+<li>
+<strong>Event-Specific Discrimination</strong>: Separate discrimination assessment for primary events and competing events with improvement quantification</li>
+<li>
+<strong>Statistical Significance Testing</strong>: Formal testing of C-index differences between staging systems using appropriate competing risks methodology</li>
+<li>
+<strong>Clinical Significance Assessment</strong>: Evidence-based thresholds (≥0.02 improvement) for determining clinically meaningful discrimination improvements</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-technical-architecture-0-0-3-74">Advanced Technical Architecture<a class="anchor" aria-label="anchor" href="#advanced-technical-architecture-0-0-3-74"></a></h4>
+<ul><li>
+<strong>Multiple Analysis Methods</strong>: Comprehensive framework supporting Fine-Gray subdistribution hazards, cause-specific hazards, and integrated approaches</li>
+<li>
+<strong>Covariate Integration</strong>: Support for additional prognostic factors in competing risks models with automatic model building and validation</li>
+<li>
+<strong>Robust Statistical Foundation</strong>: cmprsk package integration with graceful fallbacks and simplified implementations for enhanced reliability</li>
+<li>
+<strong>Flexible Event Configuration</strong>: Customizable event categories (cancer death, other causes, censoring) with intelligent event mapping and validation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-research-applications-0-0-3-74">Clinical Research Applications<a class="anchor" aria-label="anchor" href="#clinical-research-applications-0-0-3-74"></a></h4>
+<ul><li>
+<strong>Cancer-Specific Death Analysis</strong>: Proper handling of competing mortality causes (cancer death vs. other causes) essential for accurate survival assessment</li>
+<li>
+<strong>Staging System Validation</strong>: Comprehensive evaluation of staging systems in realistic clinical scenarios with competing risks considerations</li>
+<li>
+<strong>Treatment Effect Assessment</strong>: Analysis framework for evaluating treatment effects when multiple outcome types can occur</li>
+<li>
+<strong>Multi-center Studies</strong>: Robust methods suitable for complex real-world clinical research with heterogeneous patient populations</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-migration-analysis-0-0-3-74">Integration with Advanced Migration Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-migration-analysis-0-0-3-74"></a></h4>
+<ul><li>
+<strong>Seamless Workflow Integration</strong>: Competing risks analysis integrates with existing stagemigration module maintaining full backward compatibility</li>
+<li>
+<strong>Comprehensive Summary Tables</strong>: Publication-ready results tables with Fine-Gray regression results, CIF estimates, and discrimination comparisons</li>
+<li>
+<strong>Visual Integration</strong>: Support for CIF plots and competing risks visualizations within the existing visualization framework</li>
+<li>
+<strong>Non-breaking Enhancement</strong>: Optional activation via boolean option ensuring existing analyses continue to work as before</li>
+</ul></div>
+<div class="section level4">
+<h4 id="publication-ready-outputs-0-0-3-74">Publication-Ready Outputs<a class="anchor" aria-label="anchor" href="#publication-ready-outputs-0-0-3-74"></a></h4>
+<ul><li>
+<strong>Five Comprehensive Results Tables</strong>: Fine-Gray results, cause-specific results, CIF summary, competing risks C-index, and comprehensive summary</li>
+<li>
+<strong>Statistical Rigor</strong>: Proper confidence intervals, p-values, and effect sizes following current biostatistics standards for competing risks analysis</li>
+<li>
+<strong>Clinical Interpretation</strong>: Automated clinical significance assessment with evidence-based guidelines for staging system adoption decisions</li>
+<li>
+<strong>Research Documentation</strong>: Complete methodology descriptions suitable for manuscript preparation and regulatory submissions</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.73" id="clinicopath-00373">ClinicoPath 0.0.3.73<a class="anchor" aria-label="anchor" href="#clinicopath-00373"></a></h2>
+<div class="section level3">
+<h3 id="phase-cutting-edge-features---shap-model-interpretability-implementation-0-0-3-73">PHASE 3 CUTTING-EDGE FEATURES - SHAP Model Interpretability Implementation<a class="anchor" aria-label="anchor" href="#phase-cutting-edge-features---shap-model-interpretability-implementation-0-0-3-73"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-shap-analysis-for-staging-model-interpretability-0-0-3-73">Comprehensive SHAP Analysis for Staging Model Interpretability<a class="anchor" aria-label="anchor" href="#comprehensive-shap-analysis-for-staging-model-interpretability-0-0-3-73"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: State-of-the-art Shapley Additive Explanations (SHAP) analysis for explaining staging model predictions and understanding feature contributions</li>
+<li>
+<strong>Global and Individual Explanations</strong>: Comprehensive framework supporting both population-level feature importance and patient-specific prediction explanations</li>
+<li>
+<strong>Multiple SHAP Methods</strong>: Simplified permutation-based implementation providing SHAP-like explanations with proper statistical foundation</li>
+<li>
+<strong>Advanced Interaction Detection</strong>: SHAP interaction analysis revealing how combinations of features affect staging predictions beyond individual effects</li>
+<li>
+<strong>Clinical Risk Stratification</strong>: Patient profile analysis (high-risk, low-risk, representative) with clinical threshold integration for decision support</li>
+</ul></div>
+<div class="section level4">
+<h4 id="shap-visualization-and-reporting-suite-0-0-3-73">SHAP Visualization and Reporting Suite<a class="anchor" aria-label="anchor" href="#shap-visualization-and-reporting-suite-0-0-3-73"></a></h4>
+<ul><li>
+<strong>Summary Plots</strong>: Global feature importance visualization showing direction and magnitude of feature impacts across the entire dataset</li>
+<li>
+<strong>Bar Plots</strong>: Feature ranking by average absolute SHAP values providing clear importance hierarchy for clinical interpretation</li>
+<li>
+<strong>Individual Explanations</strong>: Patient-specific force plots and waterfall charts showing how features contribute to individual predictions</li>
+<li>
+<strong>Interaction Plots</strong>: Advanced visualization of feature interactions and their combined effects on staging outcomes</li>
+<li>
+<strong>Clinical Context Integration</strong>: Risk threshold visualization (0.25, 0.50, 0.75) for clinical decision boundary interpretation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-technical-architecture-0-0-3-73">Advanced Technical Architecture<a class="anchor" aria-label="anchor" href="#advanced-technical-architecture-0-0-3-73"></a></h4>
+<ul><li>
+<strong>Flexible Sample Size Management</strong>: Configurable analysis with 50-1000 patients (default: 100) and 10-500 background samples (default: 50)</li>
+<li>
+<strong>Multiple Explanation Methods</strong>: Auto-detection framework supporting TreeSHAP, Kernel SHAP, Linear SHAP with intelligent method selection</li>
+<li>
+<strong>Robust Statistical Foundation</strong>: Permutation-based approach ensuring reliable explanations with proper uncertainty quantification</li>
+<li>
+<strong>Performance Optimization</strong>: Efficient computation with configurable background sampling and optimized statistical calculations</li>
+<li>
+<strong>Comprehensive Error Handling</strong>: Graceful fallbacks and informative error messages for challenging datasets</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-research-applications-0-0-3-73">Clinical Research Applications<a class="anchor" aria-label="anchor" href="#clinical-research-applications-0-0-3-73"></a></h4>
+<ul><li>
+<strong>Staging System Validation</strong>: Explanation of which factors drive staging decisions and predict patient outcomes</li>
+<li>
+<strong>Feature Importance Analysis</strong>: Quantitative assessment of clinical variables’ contribution to staging model performance</li>
+<li>
+<strong>Patient Stratification</strong>: Individual-level explanations for personalized treatment planning and risk assessment</li>
+<li>
+<strong>Model Transparency</strong>: Clear interpretation of complex staging models for clinical decision support and regulatory compliance</li>
+<li>
+<strong>Research Publication Support</strong>: Publication-ready SHAP visualizations and statistical summaries for manuscript preparation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-with-advanced-migration-analysis-0-0-3-73">Integration with Advanced Migration Analysis<a class="anchor" aria-label="anchor" href="#integration-with-advanced-migration-analysis-0-0-3-73"></a></h4>
+<ul><li>
+<strong>Seamless Workflow Integration</strong>: SHAP analysis integrates with existing stagemigration module without breaking changes</li>
+<li>
+<strong>Covariate Compatibility</strong>: Works with multifactorial analysis including continuous and categorical covariates</li>
+<li>
+<strong>Non-breaking Enhancement</strong>: Optional activation via boolean option maintaining full backward compatibility</li>
+<li>
+<strong>Comprehensive Documentation</strong>: Detailed explanations and clinical interpretation guidance for all SHAP outputs</li>
+<li>
+<strong>Quality Assurance</strong>: Extensive validation and testing ensuring robust performance across diverse clinical datasets</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.72" id="clinicopath-00372">ClinicoPath 0.0.3.72<a class="anchor" aria-label="anchor" href="#clinicopath-00372"></a></h2>
+<div class="section level3">
+<h3 id="phase-cutting-edge-features---optimal-cut-point-determination-implementation-0-0-3-72">PHASE 3 CUTTING-EDGE FEATURES - Optimal Cut-point Determination Implementation<a class="anchor" aria-label="anchor" href="#phase-cutting-edge-features---optimal-cut-point-determination-implementation-0-0-3-72"></a></h3>
+<div class="section level4">
+<h4 id="optimal-cut-point-determination-for-continuous-variables-0-0-3-72">Optimal Cut-point Determination for Continuous Variables<a class="anchor" aria-label="anchor" href="#optimal-cut-point-determination-for-continuous-variables-0-0-3-72"></a></h4>
+<ul><li>
+<strong>Complete Implementation</strong>: State-of-the-art optimal cut-point determination for developing new staging criteria from continuous biomarkers and measurements</li>
+<li>
+<strong>Multiple Statistical Methods</strong>: Maximal selected rank statistics, minimum p-value approach, survminer optimal separation, and comprehensive multi-method comparison</li>
+<li>
+<strong>Rigorous Multiple Testing Correction</strong>: Bonferroni, Benjamini-Hochberg (FDR), Holm, and customizable correction methods to control false discovery rates</li>
+<li>
+<strong>Advanced Validation Framework</strong>: Bootstrap validation with stability assessment and cross-validation for cut-point reliability testing</li>
+<li>
+<strong>Automated Staging System Generation</strong>: Creates new categorical staging variables (2-6 levels) from optimal cut-points with comprehensive survival statistics</li>
+<li>
+<strong>Clinical Decision Support</strong>: Automated interpretation with significance testing, hazard ratio assessment, and group size validation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-cut-point-analysis-suite-0-0-3-72">Comprehensive Cut-point Analysis Suite<a class="anchor" aria-label="anchor" href="#comprehensive-cut-point-analysis-suite-0-0-3-72"></a></h4>
+<ul><li>
+<strong>Range-Based Search</strong>: Configurable cut-point search range (default 10%-90%) to exclude extreme values and maintain statistical power</li>
+<li>
+<strong>Statistical Rigor</strong>: Log-rank testing, Cox regression analysis, and hazard ratio calculation with confidence intervals for each potential cut-point</li>
+<li>
+<strong>Method Comparison</strong>: Side-by-side comparison of different cut-point determination approaches with automated best-method selection</li>
+<li>
+<strong>Stability Assessment</strong>: Bootstrap coefficient of variation and cross-validation consistency metrics for cut-point robustness evaluation</li>
+<li>
+<strong>Group Balance Validation</strong>: Automatic detection and handling of unbalanced groups to ensure valid statistical comparisons</li>
+</ul></div>
+<div class="section level4">
+<h4 id="new-staging-system-development-tools-0-0-3-72">New Staging System Development Tools<a class="anchor" aria-label="anchor" href="#new-staging-system-development-tools-0-0-3-72"></a></h4>
+<ul><li>
+<strong>Multi-level Staging Creation</strong>: Supports 2-6 staging levels with intelligent cut-point distribution (binary, tertile, quartile, quintile, sextile)</li>
+<li>
+<strong>Stage-Specific Statistics</strong>: Complete survival analysis for each generated stage including median survival, hazard ratios, and confidence intervals</li>
+<li>
+<strong>Prognostic Validation</strong>: Automated assessment of stage ordering, monotonicity, and discrimination performance</li>
+<li>
+<strong>Clinical Interpretation</strong>: Comprehensive interpretation framework with significance levels and risk stratification guidance</li>
+</ul></div>
+<div class="section level4">
+<h4 id="technical-architecture-excellence-0-0-3-72">Technical Architecture Excellence<a class="anchor" aria-label="anchor" href="#technical-architecture-excellence-0-0-3-72"></a></h4>
+<ul><li>
+<strong>Robust Error Handling</strong>: Comprehensive fallback mechanisms and informative error messages for challenging datasets</li>
+<li>
+<strong>Package Integration</strong>: Seamless integration with survival, survminer, and maxstat packages with graceful degradation</li>
+<li>
+<strong>Performance Optimization</strong>: Efficient algorithms for large-scale cut-point testing with configurable bootstrap iterations</li>
+<li>
+<strong>Non-breaking Enhancement</strong>: Full backward compatibility with existing stagemigration functionality</li>
+</ul></div>
+<div class="section level4">
+<h4 id="research-applications-0-0-3-72">Research Applications<a class="anchor" aria-label="anchor" href="#research-applications-0-0-3-72"></a></h4>
+<ul><li>
+<strong>Biomarker Threshold Development</strong>: Optimal thresholds for continuous biomarkers (tumor markers, inflammatory indices, molecular scores)</li>
+<li>
+<strong>Staging Criteria Optimization</strong>: Data-driven development of new staging criteria from morphometric measurements</li>
+<li>
+<strong>Clinical Decision Thresholds</strong>: Evidence-based cut-points for treatment decisions and risk stratification</li>
+<li>
+<strong>Multi-institutional Validation</strong>: Robust methods suitable for external validation and cross-population studies</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.71" id="clinicopath-00371">ClinicoPath 0.0.3.71<a class="anchor" aria-label="anchor" href="#clinicopath-00371"></a></h2>
+<div class="section level3">
+<h3 id="stagemigration-module-completion---all-core-features-implemented-0-0-3-71">STAGEMIGRATION MODULE COMPLETION - All Core Features Implemented<a class="anchor" aria-label="anchor" href="#stagemigration-module-completion---all-core-features-implemented-0-0-3-71"></a></h3>
+<div class="section level4">
+<h4 id="complete-implementation-status-0-0-3-71">Complete Implementation Status<a class="anchor" aria-label="anchor" href="#complete-implementation-status-0-0-3-71"></a></h4>
+<p>The stagemigration module has reached full implementation with all core functionality and advanced features completed through <strong>Phase 4-5</strong>. All foundational features, advanced validation methods, clinical integration tools, and enhanced statistical analysis suite are now fully operational and production-ready.</p>
+</div>
+<div class="section level4">
+<h4 id="major-implementation-milestones-completed-0-0-3-71">Major Implementation Milestones Completed<a class="anchor" aria-label="anchor" href="#major-implementation-milestones-completed-0-0-3-71"></a></h4>
+<ul><li>
+<strong>Phase 1</strong>: Foundational Features - Migration matrix analysis, C-index comparison, NRI/IDI suite, DCA, Will Rogers detection</li>
+<li>
+<strong>Phase 2</strong>: Advanced Validation &amp; Clinical Utility - Enhanced calibration, comprehensive model diagnostics, bootstrap frameworks</li>
+<li>
+<strong>Phase 3</strong>: Clinical Integration Features - Patient risk stratification, clinical alerts, implementation guidance, quality assurance</li>
+<li>
+<strong>Phase 4-5</strong>: Enhanced Statistical Analysis Suite - SME quantification, RMST discrimination, advanced testing frameworks</li>
+</ul></div>
+<div class="section level4">
+<h4 id="next-development-focus-0-0-3-71">Next Development Focus<a class="anchor" aria-label="anchor" href="#next-development-focus-0-0-3-71"></a></h4>
+<p>With stagemigration module completion, development focus shifts to remaining TODO items from Phases 3-6 for specialized research applications and cutting-edge methodological enhancements.</p>
+<hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.70" id="clinicopath-00370">ClinicoPath 0.0.3.70<a class="anchor" aria-label="anchor" href="#clinicopath-00370"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-features---enhanced-statistical-analysis-suite-0-0-3-70">PHASE 4-5 ADVANCED FEATURES - Enhanced Statistical Analysis Suite<a class="anchor" aria-label="anchor" href="#phase-advanced-features---enhanced-statistical-analysis-suite-0-0-3-70"></a></h3>
+<div class="section level4">
+<h4 id="advanced-migration-effect-quantification-0-0-3-70">Advanced Migration Effect Quantification<a class="anchor" aria-label="anchor" href="#advanced-migration-effect-quantification-0-0-3-70"></a></h4>
+<ul><li>
+<strong>Stage Migration Effect Formula (SME)</strong>: Mathematical quantification of cumulative survival differences between staging systems using SME = Σ(S_new_i - S_old_i) formula</li>
+<li>
+<strong>Multi-timepoint SME Analysis</strong>: Comprehensive assessment at 1, 2, 3, and 5-year survival with stage-specific contributions and overall effect magnitude</li>
+<li>
+<strong>Clinical Significance Thresholds</strong>: Evidence-based interpretation with &gt;0.10 (clinically significant), &gt;0.05 (moderate), ≤0.05 (minimal) migration effect classifications</li>
+<li>
+<strong>Will Rogers Phenomenon Detection</strong>: Automated identification of artificial survival improvements through SME pattern analysis</li>
+</ul></div>
+<div class="section level4">
+<h4 id="robust-survival-discrimination-metrics-0-0-3-70">Robust Survival Discrimination Metrics<a class="anchor" aria-label="anchor" href="#robust-survival-discrimination-metrics-0-0-3-70"></a></h4>
+<ul><li>
+<strong>Restricted Mean Survival Time (RMST)</strong>: Model-free survival discrimination independent of proportional hazards assumptions</li>
+<li>
+<strong>RMST-based Discrimination Assessment</strong>: Stage-specific RMST calculation with automatic tau selection (75th percentile of observed times)</li>
+<li>
+<strong>Comprehensive RMST Analysis</strong>: Range-based discrimination evaluation (&gt;6 months = good, 3-6 months = moderate, &lt;3 months = poor)</li>
+<li>
+<strong>Clinical Interpretability</strong>: Direct comparison of absolute survival benefits with median survival comparison and confidence assessment</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-statistical-testing-framework-0-0-3-70">Advanced Statistical Testing Framework<a class="anchor" aria-label="anchor" href="#advanced-statistical-testing-framework-0-0-3-70"></a></h4>
+<ul><li>
+<strong>Linear Trend Chi-square Tests</strong>: Ordinal trend assessment across staging systems with Wald statistics and coefficient analysis</li>
+<li>
+<strong>Simulation-Based Will Rogers Validation</strong>: Synthetic data generation to demonstrate and validate Will Rogers effects with controlled scenarios</li>
+<li>
+<strong>Martingale Residual Analysis</strong>: Comprehensive Cox model assumption testing with outlier detection and systematic pattern identification</li>
+<li>
+<strong>Enhanced Model Diagnostics</strong>: Runs test for systematic patterns, heteroscedasticity testing, and autocorrelation assessment</li>
+</ul></div>
+<div class="section level4">
+<h4 id="comprehensive-clinical-integration-0-0-3-70">Comprehensive Clinical Integration<a class="anchor" aria-label="anchor" href="#comprehensive-clinical-integration-0-0-3-70"></a></h4>
+<ul><li>
+<strong>Evidence-Based Recommendations</strong>: Automated clinical guidance based on SME magnitude and RMST discrimination patterns</li>
+<li>
+<strong>Migration Effect Interpretation</strong>: Clear clinical context for positive (Will Rogers phenomenon) vs negative (understaging) migration effects</li>
+<li>
+<strong>Publication-Ready Outputs</strong>: Statistical tables with confidence intervals, p-values, and clinical interpretation suitable for manuscript preparation</li>
+<li>
+<strong>Robust Error Handling</strong>: Comprehensive fallback mechanisms ensuring analysis completion even with challenging data structures</li>
+</ul></div>
+<div class="section level4">
+<h4 id="technical-architecture-excellence-0-0-3-70">Technical Architecture Excellence<a class="anchor" aria-label="anchor" href="#technical-architecture-excellence-0-0-3-70"></a></h4>
+<ul><li>
+<strong>Modular Implementation</strong>: Independent calculation functions for SME, RMST, linear trends, simulation, and residual analysis</li>
+<li>
+<strong>Seamless Integration</strong>: Optional activation via boolean options (calculateSME, calculateRMST) without breaking existing workflows</li>
+<li>
+<strong>Comprehensive Validation</strong>: Extensive input checking, sample size requirements, and data structure verification</li>
+<li>
+<strong>Performance Optimization</strong>: Efficient bootstrap operations and memory management for large datasets</li>
+</ul></div>
+<div class="section level4">
+<h4 id="enhanced-user-experience-0-0-3-70">Enhanced User Experience<a class="anchor" aria-label="anchor" href="#enhanced-user-experience-0-0-3-70"></a></h4>
+<ul><li>
+<strong>Interactive Explanations</strong>: Comprehensive HTML explanations for each advanced method with clinical context and interpretation guidance</li>
+<li>
+<strong>Statistical Education</strong>: Built-in methodology descriptions covering advantages, limitations, and appropriate use cases</li>
+<li>
+<strong>Visual Integration</strong>: Enhanced table presentations with notes, interpretations, and methodological context</li>
+<li>
+<strong>Configuration Flexibility</strong>: User-controlled activation allowing selective use of advanced features based on research needs</li>
+</ul></div>
+<div class="section level4">
+<h4 id="research-applications-0-0-3-70">Research Applications<a class="anchor" aria-label="anchor" href="#research-applications-0-0-3-70"></a></h4>
+<ul><li>
+<strong>Staging System Validation</strong>: Complete framework for evaluating new staging systems against established standards</li>
+<li>
+<strong>Will Rogers Phenomenon Research</strong>: Tools for detecting, quantifying, and validating migration artifacts in clinical data</li>
+<li>
+<strong>Regulatory Compliance</strong>: Statistical rigor meeting current oncology and biostatistics publication standards</li>
+<li>
+<strong>Multi-institutional Studies</strong>: Robust methods suitable for complex real-world clinical research scenarios</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.69" id="clinicopath-00369">ClinicoPath 0.0.3.69<a class="anchor" aria-label="anchor" href="#clinicopath-00369"></a></h2>
+<div class="section level3">
+<h3 id="phase-clinical-integration-features---complete-implementation-0-0-3-69">PHASE 3 CLINICAL INTEGRATION FEATURES - Complete Implementation<a class="anchor" aria-label="anchor" href="#phase-clinical-integration-features---complete-implementation-0-0-3-69"></a></h3>
+<div class="section level4">
+<h4 id="clinical-decision-support-system-0-0-3-69">Clinical Decision Support System<a class="anchor" aria-label="anchor" href="#clinical-decision-support-system-0-0-3-69"></a></h4>
+<ul><li>
+<strong>Patient Risk Stratification</strong>: Automated risk category reclassification analysis with Low/Moderate/High risk groupings based on quantile-based thresholds</li>
+<li>
+<strong>Clinical Alert System</strong>: Intelligent alerts for Will Rogers phenomenon detection, sample size adequacy warnings, and clinical significance thresholds</li>
+<li>
+<strong>Implementation Guidance</strong>: Evidence-based recommendations with priority levels (High/Medium/Low/None) and detailed implementation steps</li>
+<li>
+<strong>Quality Assurance Framework</strong>: Structured audit guidelines and performance monitoring protocols for staging system transitions</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-analytics-suite-phase-complete-0-0-3-69">Advanced Analytics Suite (Phase 2 Complete)<a class="anchor" aria-label="anchor" href="#advanced-analytics-suite-phase-complete-0-0-3-69"></a></h4>
+<ul><li>
+<strong>Time-Dependent Calibration Assessment</strong>: Multi-timepoint calibration analysis with enhanced Hosmer-Lemeshow testing and calibration slope evaluation</li>
+<li>
+<strong>Comprehensive Homogeneity Testing</strong>: Within-stage and between-stage homogeneity validation with Jonckheere-Terpstra trend testing</li>
+<li>
+<strong>Time-Varying Coefficient Analysis</strong>: Advanced Cox model extension testing for proportional hazards violations and time-dependent effects</li>
+<li>
+<strong>Enhanced Model Diagnostics</strong>: Comprehensive residual analysis, influence detection, and goodness-of-fit assessment comparing staging systems</li>
+</ul></div>
+<div class="section level4">
+<h4 id="publication-ready-reporting-system-0-0-3-69">Publication-Ready Reporting System<a class="anchor" aria-label="anchor" href="#publication-ready-reporting-system-0-0-3-69"></a></h4>
+<ul><li>
+<strong>Executive Summary Generator</strong>: Automated publication-quality summaries with key findings extraction and clinical interpretation</li>
+<li>
+<strong>Methods Documentation</strong>: Standardized methodology descriptions for manuscript preparation</li>
+<li>
+<strong>Key Findings Extraction</strong>: Automatic identification and formatting of primary outcomes for scientific reporting</li>
+<li>
+<strong>Implementation Integration</strong>: Seamless integration with advanced migration analysis workflow</li>
+</ul></div>
+<div class="section level4">
+<h4 id="backward-compatibility-and-integration-0-0-3-69">Backward Compatibility and Integration<a class="anchor" aria-label="anchor" href="#backward-compatibility-and-integration-0-0-3-69"></a></h4>
+<ul><li>All new features are fully backward compatible with existing analyses</li>
+<li>Phase 3 features activate automatically when <code>advancedMigrationAnalysis = TRUE</code>
+</li>
+<li>Enhanced error handling and graceful degradation for incomplete data scenarios</li>
+<li>Comprehensive debug logging for clinical validation and troubleshooting</li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.3.68" id="clinicopath-00368">ClinicoPath 0.0.3.68<a class="anchor" aria-label="anchor" href="#clinicopath-00368"></a></h2>
+<div class="section level3">
+<h3 id="phase-advanced-enhancements---evidence-based-assessment-framework-0-0-3-68">PHASE 1 ADVANCED ENHANCEMENTS - Evidence-Based Assessment Framework<a class="anchor" aria-label="anchor" href="#phase-advanced-enhancements---evidence-based-assessment-framework-0-0-3-68"></a></h3>
+<div class="section level4">
+<h4 id="revolutionary-will-rogers-phenomenon-evidence-assessment-0-0-3-68">Revolutionary Will Rogers Phenomenon Evidence Assessment<a class="anchor" aria-label="anchor" href="#revolutionary-will-rogers-phenomenon-evidence-assessment-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Multi-criteria evaluation framework</strong> with comprehensive evidence assessment across migration patterns, survival similarity, biological consistency, and prognostic discrimination</li>
+<li>
+<strong>Traffic light assessment system</strong> providing clear PASS/BORDERLINE/CONCERN/FAIL evidence grading for clinical decision-making</li>
+<li>
+<strong>Automated clinical recommendations</strong> with implementation guidance based on evidence strength and confidence levels</li>
+<li>
+<strong>Advanced migration pattern analysis</strong> with stability assessment, upstaging/downstaging balance evaluation, and staging criteria validation</li>
+<li>
+<strong>Survival pattern validation</strong> ensuring upstaged patients show appropriate survival similarity to target stages</li>
+</ul></div>
+<div class="section level4">
+<h4 id="enhanced-migration-analytics-with-advanced-statistics-0-0-3-68">Enhanced Migration Analytics with Advanced Statistics<a class="anchor" aria-label="anchor" href="#enhanced-migration-analytics-with-advanced-statistics-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Major migration flow identification</strong> automatically detecting significant reclassification patterns (&gt;10% threshold)</li>
+<li>
+<strong>Stage retention rate analysis</strong> with clinical interpretations for staging system stability assessment</li>
+<li>
+<strong>Net migration flow calculations</strong> showing patient gains/losses per stage with impact assessment</li>
+<li>
+<strong>Flow intensity mapping</strong> for enhanced visualization and publication-quality migration heatmaps</li>
+<li>
+<strong>Advanced heatmap statistics</strong> providing comprehensive migration pattern documentation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="landmark-analysis-integration-with-cancer-type-optimization-0-0-3-68">Landmark Analysis Integration with Cancer-Type Optimization<a class="anchor" aria-label="anchor" href="#landmark-analysis-integration-with-cancer-type-optimization-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Time-based discrimination analysis</strong> with cancer-specific landmark cutoffs for optimal clinical relevance</li>
+<li>
+<strong>Cancer-type specific landmark times</strong>: Lung (3,6,12,24), Breast (6,12,24,60), Colorectal (6,12,24,36), Prostate (12,24,60,120) months</li>
+<li>
+<strong>Post-landmark survival discrimination</strong> measuring staging system performance across different time horizons<br></li>
+<li>
+<strong>Landmark-specific C-index comparisons</strong> providing time-dependent validation of staging improvements</li>
+<li>
+<strong>Clinical interpretation framework</strong> for landmark analysis results with actionable guidance</li>
+</ul></div>
+<div class="section level4">
+<h4 id="evidence-based-clinical-decision-support-system-0-0-3-68">Evidence-Based Clinical Decision Support System<a class="anchor" aria-label="anchor" href="#evidence-based-clinical-decision-support-system-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Comprehensive recommendation engine</strong> synthesizing multiple lines of evidence for staging system adoption decisions</li>
+<li>
+<strong>Implementation guidance framework</strong> with specific steps for different recommendation levels (Strong/Moderate/Weak confidence)</li>
+<li>
+<strong>Quality control integration</strong> ensuring robust evidence evaluation before clinical implementation</li>
+<li>
+<strong>Risk assessment protocols</strong> identifying potential Will Rogers phenomenon with specific mitigation strategies</li>
+<li>
+<strong>Clinical validation checklists</strong> providing structured approach to staging system evaluation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="technical-excellence-and-integration-0-0-3-68">Technical Excellence and Integration<a class="anchor" aria-label="anchor" href="#technical-excellence-and-integration-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Seamless backward compatibility</strong> preserving all existing functionality while adding advanced capabilities</li>
+<li>
+<strong>Comprehensive error handling</strong> with graceful failure modes and informative diagnostic messages</li>
+<li>
+<strong>Extensive debug instrumentation</strong> for troubleshooting and performance monitoring</li>
+<li>
+<strong>Modular architecture</strong> allowing selective activation of advanced features based on analysis requirements</li>
+<li>
+<strong>Publication-ready outputs</strong> with detailed statistical tables and clinical interpretation guidance</li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="complete-documentation-system--configuration-guidance---enhanced-user-experience-0-0-3-68">Complete Documentation System &amp; Configuration Guidance - Enhanced User Experience<a class="anchor" aria-label="anchor" href="#complete-documentation-system--configuration-guidance---enhanced-user-experience-0-0-3-68"></a></h3>
+<div class="section level4">
+<h4 id="comprehensive-analysis-configuration-guide-0-0-3-68">Comprehensive Analysis Configuration Guide<a class="anchor" aria-label="anchor" href="#comprehensive-analysis-configuration-guide-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Complete decision framework</strong> for selecting optimal analysis configurations based on research context</li>
+<li>
+<strong>Evidence-based selection matrices</strong> covering analysis scope, cancer type, multifactorial comparison, and baseline models</li>
+<li>
+<strong>Resource-based optimization</strong> with computational time estimates and memory requirements for different configurations</li>
+<li>
+<strong>Publication target guidance</strong> with specific configurations for high-impact (IF &gt; 10), specialty (IF 3-10), and general journals</li>
+<li>
+<strong>Cancer-specific optimization</strong> with tailored time points and thresholds for lung, breast, colorectal, prostate, and other cancers</li>
+</ul></div>
+<div class="section level4">
+<h4 id="enhanced-user-experience-and-documentation-0-0-3-68">Enhanced User Experience and Documentation<a class="anchor" aria-label="anchor" href="#enhanced-user-experience-and-documentation-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Real-time configuration guidance</strong> integrated directly into the analysis interface with resource estimation</li>
+<li>
+<strong>Comprehensive glossary expansion</strong> including all new statistical terms and clinical interpretation thresholds<br></li>
+<li>
+<strong>Interactive decision support</strong> with quick decision matrices for pilot studies, standard research, and high-impact publications</li>
+<li>
+<strong>Sample size guidelines</strong> with specific recommendations for different dataset sizes and computational constraints</li>
+<li>
+<strong>Performance optimization strategies</strong> for large datasets and resource-limited environments</li>
+</ul></div>
+<div class="section level4">
+<h4 id="professional-documentation-suite-0-0-3-68">Professional Documentation Suite<a class="anchor" aria-label="anchor" href="#professional-documentation-suite-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Complete analysis guide</strong> (stagemigration_analysis_guide.md) with 400+ lines of detailed configuration guidance</li>
+<li>
+<strong>Decision matrices and examples</strong> covering research type, resource availability, and publication targets</li>
+<li>
+<strong>Quality control guidelines</strong> with minimum sample sizes, follow-up requirements, and validation standards</li>
+<li>
+<strong>Troubleshooting guidance</strong> for common configuration issues and performance optimization</li>
+<li>
+<strong>Real-world examples</strong> with complete code for different research scenarios and study designs</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-configuration-framework-0-0-3-68">Advanced Configuration Framework<a class="anchor" aria-label="anchor" href="#advanced-configuration-framework-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Analysis scope optimization</strong> with clear guidance on Basic vs Standard vs Comprehensive vs Publication-ready approaches</li>
+<li>
+<strong>Multifactorial comparison strategies</strong> explaining when to use Adjusted C-index vs Nested models vs Stepwise vs Comprehensive</li>
+<li>
+<strong>Baseline model selection</strong> guidance for Covariates-only vs Original+covariates vs New+covariates approaches</li>
+<li>
+<strong>Cancer type-specific recommendations</strong> with literature-based time points and clinical significance thresholds</li>
+<li>
+<strong>Multi-center study support</strong> with institution variable guidance and internal-external cross-validation setup</li>
+</ul></div>
+<div class="section level4">
+<h4 id="in-function-guidance-integration-0-0-3-68">In-Function Guidance Integration<a class="anchor" aria-label="anchor" href="#in-function-guidance-integration-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Enhanced explanatory outputs</strong> with resource estimation and configuration recommendations directly in the interface</li>
+<li>
+<strong>Quick reference links</strong> to detailed documentation files for comprehensive guidance</li>
+<li>
+<strong>Performance estimates</strong> showing computational time and memory requirements for different configurations</li>
+<li>
+<strong>Sample size recommendations</strong> with specific thresholds for optimal analysis performance</li>
+<li>
+<strong>Clinical significance thresholds</strong> clearly explained with evidence-based cutoffs for different metrics</li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="major-multivariable-analysis-enhancement---complete-state-of-the-art-implementation-0-0-3-68">Major Multivariable Analysis Enhancement - Complete State-of-the-Art Implementation<a class="anchor" aria-label="anchor" href="#major-multivariable-analysis-enhancement---complete-state-of-the-art-implementation-0-0-3-68"></a></h3>
+<div class="section level4">
+<h4 id="revolutionary-multivariable-stage-migration-analysis-0-0-3-68">Revolutionary Multivariable Stage Migration Analysis<a class="anchor" aria-label="anchor" href="#revolutionary-multivariable-stage-migration-analysis-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Complete multivariable analysis overhaul</strong> with state-of-the-art statistical methods for staging system validation</li>
+<li>
+<strong>Bootstrap model selection stability</strong> using 500 bootstrap samples with comprehensive variable selection assessment</li>
+<li>
+<strong>Advanced interaction detection</strong> with statistical tests for stage-covariate interactions and clinical significance evaluation</li>
+<li>
+<strong>Comprehensive model diagnostics</strong> including validation metrics, residual analysis, and assumption testing</li>
+<li>
+<strong>Research-grade statistical rigor</strong> matching current oncology and biostatistics literature standards</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-net-reclassification-improvement-nri-0-0-3-68">Advanced Net Reclassification Improvement (NRI)<a class="anchor" aria-label="anchor" href="#advanced-net-reclassification-improvement-nri-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Adjusted NRI calculation</strong> accounting for baseline covariates in multifactorial analysis</li>
+<li>
+<strong>Multiple model comparisons</strong> including baseline (covariates only), old staging + covariates, and new staging + covariates</li>
+<li>
+<strong>Time-specific analysis</strong> at customizable time points (default: 12, 24, 60 months)</li>
+<li>
+<strong>Comprehensive NRI components</strong> with event-specific and overall metrics, confidence intervals, and p-values</li>
+<li>
+<strong>Clinical interpretation framework</strong> with automatic significance assessment and practical relevance evaluation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="multivariable-decision-curve-analysis-0-0-3-68">Multivariable Decision Curve Analysis<a class="anchor" aria-label="anchor" href="#multivariable-decision-curve-analysis-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Clinical utility assessment</strong> comparing multiple model combinations across probability thresholds (0.01-0.99)</li>
+<li>
+<strong>Net benefit calculations</strong> for baseline, old staging + covariates, new staging + covariates, and combined models</li>
+<li>
+<strong>Optimal threshold identification</strong> showing where each model provides maximum clinical utility</li>
+<li>
+<strong>Model superiority ranges</strong> identifying threshold ranges where each model outperforms others</li>
+<li>
+<strong>Standardized comparisons</strong> relative to treat-all and treat-none strategies for clinical decision support</li>
+</ul></div>
+<div class="section level4">
+<h4 id="personalized-risk-prediction-system-0-0-3-68">Personalized Risk Prediction System<a class="anchor" aria-label="anchor" href="#personalized-risk-prediction-system-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Individual patient assessments</strong> with personalized risk predictions at multiple time points</li>
+<li>
+<strong>Risk categorization</strong> using clinical thresholds (Low/Moderate/High/Very High) with automated reclassification analysis</li>
+<li>
+<strong>Clinical recommendations</strong> providing automated treatment intensity guidance based on risk changes</li>
+<li>
+<strong>Representative patient profiles</strong> including young/low risk, older/high risk, and average patient archetypes</li>
+<li>
+<strong>Population-level insights</strong> with comprehensive reclassification statistics and summary metrics</li>
+</ul></div>
+<div class="section level4">
+<h4 id="bootstrap-model-selection-stability-0-0-3-68">Bootstrap Model Selection Stability<a class="anchor" aria-label="anchor" href="#bootstrap-model-selection-stability-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Variable selection stability</strong> using 500 bootstrap samples with stepwise selection</li>
+<li>
+<strong>AIC impact assessment</strong> measuring average model improvement when variables are included vs excluded</li>
+<li>
+<strong>Selection frequency analysis</strong> identifying variables selected in &gt;80% of samples as highly stable</li>
+<li>
+<strong>Confidence intervals</strong> for AIC impact with bootstrap-derived uncertainty quantification</li>
+<li>
+<strong>Clinical relevance thresholds</strong> for interpreting variable importance and model stability</li>
+</ul></div>
+<div class="section level4">
+<h4 id="advanced-interaction-detection-framework-0-0-3-68">Advanced Interaction Detection Framework<a class="anchor" aria-label="anchor" href="#advanced-interaction-detection-framework-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Formal statistical testing</strong> for stage-covariate interactions using likelihood ratio tests</li>
+<li>
+<strong>Clinical significance assessment</strong> with automated interpretation of interaction effects</li>
+<li>
+<strong>Subgroup identification</strong> revealing patient populations with differential staging system benefit</li>
+<li>
+<strong>Comprehensive interaction analysis</strong> including chi-square statistics, degrees of freedom, and p-values</li>
+<li>
+<strong>Evidence-based interpretation</strong> with clinical recommendations for subgroup-specific approaches</li>
+</ul></div>
+<div class="section level4">
+<h4 id="enhanced-user-experience-and-documentation-0-0-3-68-1">Enhanced User Experience and Documentation<a class="anchor" aria-label="anchor" href="#enhanced-user-experience-and-documentation-0-0-3-68-1"></a></h4>
+<ul><li>
+<strong>Comprehensive explanatory outputs</strong> with state-of-the-art method descriptions and clinical interpretations</li>
+<li>
+<strong>Advanced glossary system</strong> including all new multivariable analysis terms and statistical concepts</li>
+<li>
+<strong>Clinical significance thresholds</strong> with evidence-based cutoffs (C-index ≥ 0.02, NRI ≥ 20%, selection frequency &gt; 80%)</li>
+<li>
+<strong>Complete documentation</strong> with comprehensive stagemigration_documentation.md covering all new features</li>
+<li>
+<strong>Professional visualization support</strong> with enhanced explanations for all advanced analysis components</li>
+</ul></div>
+<div class="section level4">
+<h4 id="technical-architecture-improvements-0-0-3-68">Technical Architecture Improvements<a class="anchor" aria-label="anchor" href="#technical-architecture-improvements-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Modular analysis framework</strong> with independent error handling for each advanced method</li>
+<li>
+<strong>Robust statistical calculations</strong> with comprehensive fallback mechanisms and edge case handling</li>
+<li>
+<strong>Performance optimization</strong> with efficient bootstrap operations and memory management</li>
+<li>
+<strong>Error isolation</strong> ensuring advanced analysis failures don’t affect core functionality</li>
+<li>
+<strong>Comprehensive validation</strong> with extensive input checking and data structure verification</li>
+</ul></div>
+<div class="section level4">
+<h4 id="clinical-research-applications-0-0-3-68">Clinical Research Applications<a class="anchor" aria-label="anchor" href="#clinical-research-applications-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Publication-ready outputs</strong> meeting current standards for staging system validation studies</li>
+<li>
+<strong>Evidence-based recommendations</strong> using multiple criteria synthesis for adoption decisions</li>
+<li>
+<strong>Real-world performance assessment</strong> accounting for confounding by other prognostic factors</li>
+<li>
+<strong>Personalized medicine support</strong> with individual risk assessments and clinical decision guidance</li>
+<li>
+<strong>Multi-center validation</strong> compatibility with internal-external cross-validation methodologies</li>
+</ul></div>
+<div class="section level4">
+<h4 id="integration-and-compatibility-0-0-3-68">Integration and Compatibility<a class="anchor" aria-label="anchor" href="#integration-and-compatibility-0-0-3-68"></a></h4>
+<ul><li>
+<strong>Seamless integration</strong> with existing stage migration workflow without breaking changes</li>
+<li>
+<strong>Backward compatibility</strong> maintaining all existing functionality while adding advanced features</li>
+<li>
+<strong>Configurable activation</strong> via multifactorialComparisonType option (comprehensive mode recommended)</li>
+<li>
+<strong>Non-breaking enhancement</strong> ensuring existing analyses continue to work as before</li>
+<li>
+<strong>Progressive enhancement</strong> allowing users to access advanced features when needed</li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.3.66" id="clinicopath-00366">ClinicoPath 0.0.3.66<a class="anchor" aria-label="anchor" href="#clinicopath-00366"></a></h2>
 <div class="section level3">

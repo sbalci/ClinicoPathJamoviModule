@@ -19,7 +19,7 @@ study population - for example, to determine median  survival time or
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@ study population - for example, to determine median  survival time or
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">Comprehensive Guide to jamovi Module Development</a></li>
+    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
     <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
     <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
     <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
@@ -98,7 +98,8 @@ study population - for example, to determine median  survival time or
 <span>  medianline <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  person_time <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  time_intervals <span class="op">=</span> <span class="st">"12, 36, 60"</span>,</span>
-<span>  rate_multiplier <span class="op">=</span> <span class="fl">100</span></span>
+<span>  rate_multiplier <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -311,10 +312,16 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 <dd><p>Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 person-years, 1000 for rates per 1000 person-years).</p></dd>
 
+
+<dt id="arg-showexplanations">showExplanations<a class="anchor" aria-label="anchor" href="#arg-showexplanations"></a></dt>
+<dd><p>Display educational explanations alongside analysis
+results to help interpret survival statistics, median survival, and
+person-time analysis.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianSurvivalExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalProbabilityExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$medianTable$asDF</code></p>
 <p><code>as.data.frame(results$medianTable)</code></p>
     </div>

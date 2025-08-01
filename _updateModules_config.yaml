@@ -3,8 +3,8 @@
 
 # Global settings
 global:
-  new_version: "0.0.3.90"  # New version number for the modules
-  new_date: "2025-07-31" # New date for the modules
+  new_version: "0.0.3.91"  # New version number for the modules
+  new_date: "2025-08-01" # New date for the modules
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 # Operation modes
@@ -15,6 +15,7 @@ modes:
   webpage: false
   commit_modules: false
   WIP: false
+  TEST: true  # Enable TEST mode for development/testing purposes
 
   # File copying control modes
   copy_vignettes: false       # Enable/disable vignette file copying
@@ -76,7 +77,7 @@ vignette_folders:
 # Module definitions
 modules:
   jjstatsplot:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
     menuGroup_pattern: "menuGroup: JJStatsPlot$"
     menuGroup_pattern_wip: "menuGroup: JJStatsPlot"
@@ -120,7 +121,7 @@ modules:
       - "jamovi"
 
   meddecide:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
     menuGroup_pattern: "menuGroup: meddecide$"
     menuGroup_pattern_wip: "menuGroup: meddecide"
@@ -164,7 +165,7 @@ modules:
       - "tests/testthat"
 
   jsurvival:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     menuGroup_pattern: "menuGroup: Survival$"
     menuGroup_pattern_wip: "menuGroup: Survival"
@@ -202,51 +203,31 @@ modules:
       - "jamovi"
 
   ClinicoPathDescriptives:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     menuGroup_pattern: "menuGroup: Exploration$"
     menuGroup_pattern_wip: "menuGroup: Exploration"
 
+  JamoviTest:
+    enabled: false  # Automatically enabled when TEST mode is active
+    directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
+    test_patterns:
+      - "menuGroup: JJStatsPlotT$"
+      - "menuGroup: meddecideT$"
+      - "menuGroup: SurvivalT$"
+      - "menuGroup: ExplorationT$"
+    
     data_files:
       - "histopathology.rda"
-      - "histopathologyDescriptives.omv"
-      - "treatmentResponse.omv"
-      - "treatmentResponse.rda"
-      - "multi_group_workflow.rda"
-      - "colorectal_ihc_data.csv"
-      - "sarcoma_ihc_data.rda"
-      - "raw_with_time.rda"
-      - "ggflowchart_comprehensive_data.rda"
-      - "ihc_test_data.rda"
-      - "percent_no_time.csv"
-      - "election_survey_data.rda"
-      # OutlierDetection test data files
-      - "outlierdetection_basic.rda"
-      - "outlierdetection_multivariate.rda"
-      - "outlierdetection_edge_cases.rda"
-      - "outlierdetection_international.rda"
-      - "outlierdetection_large.rda"
-      - "outlierdetection_clinical.rda"
-      - "outlierdetection_psychological.rda"
-      - "outlierdetection_temporal.rda"
-      - "outlierdetection_problematic.rda"
-      - "outlierdetection_test_data.rda"
-
+    
     r_files: 
       - "utils.R"
-
-    vignette_files:
-      # Manual files (when use_folder_based: false)
-      # Example: ["03-data-summary.Rmd", "10-visualization-gallery.Rmd"]
-      # Leave empty to use folder-based copying
-      []
-
+    
+    vignette_files: []
     test_files: []
-
+    
     required_directories:
-      - "data"
       - "R"
-      - "vignettes"
       - "jamovi"
 
 # File extensions to copy for jamovi modules

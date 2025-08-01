@@ -34,7 +34,7 @@ multisurvival(
   risktable = FALSE,
   censored = FALSE,
   medianline = "none",
-  pplot = TRUE,
+  pplot = FALSE,
   cutp = "12, 36, 60",
   calculateRiskScore = FALSE,
   numRiskGroups = "four",
@@ -57,7 +57,7 @@ multisurvival(
   min_node = 20,
   complexity = 0.01,
   max_depth = 5,
-  show_terminal_nodes = TRUE,
+  show_terminal_nodes = FALSE,
   use_time_dependent = FALSE,
   td_format = "wide",
   time_dep_vars,
@@ -71,7 +71,8 @@ multisurvival(
   use_splines = FALSE,
   spline_vars,
   spline_df = 3,
-  spline_type = "pspline"
+  spline_type = "pspline",
+  showExplanations = FALSE
 )
 }
 \arguments{
@@ -307,6 +308,10 @@ allow more flexible time-varying effects but may lead to overfitting.}
 \item{spline_type}{Type of spline basis to use. Penalized splines provide
 smooth functions with automatic smoothness selection. Natural splines are
 constrained to be linear at the boundaries.}
+
+\item{showExplanations}{Display educational explanations for each analysis
+type to help interpret  multivariable survival analysis results, Cox
+regression, adjusted survival  curves, nomograms, and model diagnostics.}
 }
 \value{
 A results object containing:
@@ -341,6 +346,12 @@ A results object containing:
 \code{results$text_model_selection} \tab \tab \tab \tab \tab a html \cr
 \code{results$selection_method} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2_model_selection} \tab \tab \tab \tab \tab a html \cr
+\code{results$multivariableCoxExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$riskScoreExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogramExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

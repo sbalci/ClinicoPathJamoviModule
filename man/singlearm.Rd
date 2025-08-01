@@ -37,7 +37,8 @@ singlearm(
   medianline = "none",
   person_time = FALSE,
   time_intervals = "12, 36, 60",
-  rate_multiplier = 100
+  rate_multiplier = 100,
+  showExplanations = FALSE
 )
 }
 \arguments{
@@ -180,17 +181,24 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 
 \item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
+
+\item{showExplanations}{Display educational explanations alongside analysis
+results to help interpret survival statistics, median survival, and
+person-time analysis.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survivalProbabilityExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr

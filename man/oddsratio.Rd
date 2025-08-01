@@ -4,7 +4,14 @@
 \alias{oddsratio}
 \title{Odds Ratio Table and Plot}
 \usage{
-oddsratio(data, explanatory, outcome, outcomeLevel, showNomogram = FALSE)
+oddsratio(
+  data,
+  explanatory,
+  outcome,
+  outcomeLevel,
+  showNomogram = FALSE,
+  showExplanations = FALSE
+)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -20,6 +27,10 @@ use the second level alphabetically.}
 \item{showNomogram}{Display an interactive nomogram for converting pre-test
 to post-test  probabilities using likelihood ratios calculated from the
 data.}
+
+\item{showExplanations}{Display educational explanations for each analysis
+type to help interpret  odds ratios, risk ratios, diagnostic test
+performance, ROC analysis,  and likelihood ratios.}
 }
 \value{
 A results object containing:
@@ -30,6 +41,10 @@ A results object containing:
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
+\code{results$oddsRatioExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$riskMeasuresExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$diagnosticTestExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogramAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
