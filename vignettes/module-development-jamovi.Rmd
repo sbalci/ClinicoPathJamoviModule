@@ -1,10 +1,14 @@
 ---
 title: "ClinicoPath Module Development Guide"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{ClinicoPath Module Development Guide}
-  %\VignetteEngineknitr::rmarkdown
-  %\VignetteEncodingUTF-8
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
@@ -21,9 +25,27 @@ knitr::opts_chunk$set(
 
 # ClinicoPath Module Development Guide
 
-This guide provides comprehensive instructions for developing and maintaining the ClinicoPath jamovi module for clinicopathological research analysis.
+This comprehensive guide provides instructions for developing and maintaining the ClinicoPath jamovi module for clinicopathological research analysis.
 
-> **Note**: This guide focuses specifically on ClinicoPath module development. Generic jamovi tutorial content and examples using non-ClinicoPath datasets have been commented out to maintain focus on the actual ClinicoPath development workflow. Developers can refer to commented sections for general jamovi concepts if needed.
+> **📝 Development Focus**: This guide focuses specifically on ClinicoPath module development. Generic jamovi tutorial content and examples using non-ClinicoPath datasets have been preserved in commented sections for reference.
+
+> **🎯 Target Audience**: R developers, statistical analysts, and researchers working with jamovi module development for clinical and pathological data analysis.
+
+## Guide Overview
+
+1. **[Prerequisites & Quick Setup](#prerequisites--quick-setup)** - Development environment setup
+2. **[Advanced Development Patterns](#advanced-development-patterns--best-practices)** - Production-ready patterns
+3. **[Data Flow Architecture](#clinicopath-data-flow-architecture)** - Understanding the module architecture
+4. **[Developer Tips & Production Patterns](#developer-tips--production-patterns)** - Best practices and patterns
+5. **[Common Pitfalls & Solutions](#common-pitfalls--solutions)** - Troubleshooting guide
+6. **[Production Deployment](#production-deployment-workflow)** - Release and deployment
+7. **[File Architecture Deep Dives](#file-architecture-deep-dives)** - Detailed file format guides
+   - [.b.R Backend Implementation](#br-function-architecture-deep-dive)
+   - [.a.yaml Analysis Definition](#ayaml-analysis-definition-complete-architecture-guide)
+   - [.r.yaml Results Definition](#ryaml-results-definition-architecture)
+   - [.u.yaml User Interface](#uyaml-user-interface-definition-architecture)
+8. **[Reference Materials](#reference-materials)** - Additional resources and examples
+9. **[Legacy Code Examples](#legacy-code-examples)** - Historical implementations for reference
 
 ## Prerequisites & Quick Setup
 
@@ -74,6 +96,12 @@ https://dev.jamovi.org/tuts0104-implementing-an-analysis.html
 https://dev.jamovi.org/tuts0105-debugging-an-analysis.html
 - In DESCRIPTION file change `spgarbet/tangram@0.3.2` to the version you want to test
 -->
+
+---
+
+# Core Development Guide
+
+This section covers the essential development workflows, patterns, and best practices for ClinicoPath module development.
 
 ---
 
@@ -446,6 +474,14 @@ advanced_analysis <- function(data, dependent, covariates, method = "standard") 
     # Implementation here
 }
 ```
+
+---
+
+---
+
+# File Architecture Deep Dives
+
+This section provides comprehensive guides for each of the four jamovi file types that make up an analysis module.
 
 ---
 
@@ -1384,6 +1420,14 @@ jmvtools::install()
 
 ---
 
+---
+
+# Reference Materials
+
+This section contains additional resources, documentation links, and reference materials for jamovi module development.
+
+---
+
 ## 📞 Getting Help & Resources
 
 ### Development Resources
@@ -2150,7 +2194,11 @@ Oh, I see. Thank you :slightly_smiling_face:
 
 ---
 
-# Develop
+# Legacy Code Examples
+
+> **⚠️ Historical Reference**: The following sections contain legacy code examples, development notes, and historical implementations. This content is preserved for reference but may contain outdated patterns. Current development should follow the patterns described in the earlier sections of this guide.
+
+## Legacy Development Commands
 
 
 
@@ -7057,6 +7105,23 @@ install.packages('node', repos='https://repo.jamovi.org')
 install.packages('jmvtools', repos='https://repo.jamovi.org')
 jmvtools::install(home='/app/bin/')
 ```
+
+---
+
+# Conclusion
+
+This comprehensive guide covers the complete development lifecycle for ClinicoPath jamovi modules. For current development practices, focus on the sections covering:
+
+1. **Enhanced Development Workflow** - Use the configuration-driven approach with `_updateModules.R`
+2. **4-File Architecture** - Master the `.b.R`, `.a.yaml`, `.r.yaml`, and `.u.yaml` patterns
+3. **Advanced Analysis Patterns** - Implement complex analyses like stage migration and survival analysis
+4. **Production Deployment** - Follow the structured release and distribution process
+
+For questions or contributions, please refer to the GitHub repository and community resources listed in the Reference Materials section.
+
+---
+
+<!-- Developed by Serdar Balci for ClinicoPath Module Development -->
 
 
 
