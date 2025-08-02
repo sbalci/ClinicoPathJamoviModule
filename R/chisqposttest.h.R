@@ -8,6 +8,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         initialize = function(
             rows = NULL,
             cols = NULL,
+            counts = NULL,
             posthoc = "bonferroni",
             sig = 0.05,
             excl = FALSE,
@@ -41,6 +42,13 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..counts <- jmvcore::OptionVariable$new(
+                "counts",
+                counts,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..posthoc <- jmvcore::OptionList$new(
                 "posthoc",
                 posthoc,
@@ -97,6 +105,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
             self$.addOption(private$..rows)
             self$.addOption(private$..cols)
+            self$.addOption(private$..counts)
             self$.addOption(private$..posthoc)
             self$.addOption(private$..sig)
             self$.addOption(private$..excl)
@@ -111,6 +120,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         rows = function() private$..rows$value,
         cols = function() private$..cols$value,
+        counts = function() private$..counts$value,
         posthoc = function() private$..posthoc$value,
         sig = function() private$..sig$value,
         excl = function() private$..excl$value,
@@ -124,6 +134,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     private = list(
         ..rows = NA,
         ..cols = NA,
+        ..counts = NA,
         ..posthoc = NA,
         ..sig = NA,
         ..excl = NA,
@@ -143,12 +154,14 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         todo = function() private$.items[["todo"]],
         chisqTable = function() private$.items[["chisqTable"]],
         educationalOverview = function() private$.items[["educationalOverview"]],
+        weightedDataInfo = function() private$.items[["weightedDataInfo"]],
         contingencyTable = function() private$.items[["contingencyTable"]],
         residualsAnalysis = function() private$.items[["residualsAnalysis"]],
         multipleTestingInfo = function() private$.items[["multipleTestingInfo"]],
         posthocTable = function() private$.items[["posthocTable"]],
         detailedComparisons = function() private$.items[["detailedComparisons"]],
-        plotOutput = function() private$.items[["plotOutput"]]),
+        mydataview_plot = function() private$.items[["mydataview_plot"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -201,6 +214,15 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="weightedDataInfo",
+                title="Weighted Data Information",
+                visible="(counts)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="contingencyTable",
@@ -277,14 +299,19 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "posthoc",
                     "sig",
                     "excl")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="mydataview_plot",
+                title="mydataview_plot"))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plotOutput",
+                name="plot",
                 title="Standardized Residuals",
                 width=600,
                 height=400,
                 renderFun=".plot",
                 visible="(plot)",
+                requiresData=TRUE,
                 clearWith=list(
                     "rows",
                     "cols",
@@ -322,6 +349,9 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param rows variable in the rows
 #' @param cols variable in the columns
+#' @param counts Frequency/weight variable for contingency table data. When
+#'   specified, the data is treated as already summarized with counts per
+#'   combination.
 #' @param posthoc Method for p-value adjustment in post-hoc tests
 #' @param sig alpha level for significance testing
 #' @param excl exclude missing values from analysis
@@ -341,12 +371,14 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$weightedDataInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$residualsAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plotOutput} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$mydataview_plot} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -360,6 +392,7 @@ chisqposttest <- function(
     data,
     rows,
     cols,
+    counts,
     posthoc = "bonferroni",
     sig = 0.05,
     excl = FALSE,
@@ -376,11 +409,13 @@ chisqposttest <- function(
 
     if ( ! missing(rows)) rows <- jmvcore::resolveQuo(jmvcore::enquo(rows))
     if ( ! missing(cols)) cols <- jmvcore::resolveQuo(jmvcore::enquo(cols))
+    if ( ! missing(counts)) counts <- jmvcore::resolveQuo(jmvcore::enquo(counts))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(rows), rows, NULL),
-            `if`( ! missing(cols), cols, NULL))
+            `if`( ! missing(cols), cols, NULL),
+            `if`( ! missing(counts), counts, NULL))
 
     for (v in rows) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in cols) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -388,6 +423,7 @@ chisqposttest <- function(
     options <- chisqposttestOptions$new(
         rows = rows,
         cols = cols,
+        counts = counts,
         posthoc = posthoc,
         sig = sig,
         excl = excl,

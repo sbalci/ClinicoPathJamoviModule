@@ -15,7 +15,7 @@ modes:
   webpage: false
   commit_modules: false
   WIP: false
-  TEST: true  # Enable TEST mode for development/testing purposes
+  TEST: false  # Enable TEST mode for development/testing purposes
 
   # File copying control modes
   copy_vignettes: false       # Enable/disable vignette file copying

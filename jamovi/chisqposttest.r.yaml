@@ -41,6 +41,15 @@ items:
           - rows
           - cols
 
+    - name:  weightedDataInfo
+      title: 'Weighted Data Information'
+      type:  Html
+      visible: (counts)
+      clearWith:
+          - rows
+          - cols
+          - counts
+
     - name:  contingencyTable
       title: 'Contingency Table'
       type:  Html
@@ -110,13 +119,19 @@ items:
           - sig
           - excl
 
-    - name:  plotOutput
+    # - name: mydataview_plot
+    #   title: mydataview_plot
+    #   type: Preformatted
+
+
+    - name:  plot
       title: 'Standardized Residuals'
       type:  Image
       width: 600
       height: 400
       renderFun: .plot
       visible: (plot)
+      requiresData: true
       clearWith:
           - rows
           - cols
