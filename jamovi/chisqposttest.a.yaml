@@ -36,6 +36,15 @@ options:
       description: >
                   variable in the columns
 
+    - name: counts
+      title: Counts (optional)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >
+                  Frequency/weight variable for contingency table data.
+                  When specified, the data is treated as already summarized with counts per combination.
+
     - name: posthoc
       title: Post-Hoc Method
       type: List

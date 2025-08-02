@@ -301,6 +301,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <br><br>
                 This tool performs a Chi-Square test followed by pairwise post-hoc tests for all combinations of category levels when the overall Chi-Square test is significant.
                 <br><br>
+                <strong>Data Input Options:</strong>
+                <br>• <strong>Individual observations:</strong> Select row and column variables from raw data
+                <br>• <strong>Frequency counts:</strong> Select row and column variables plus a counts variable for aggregated data
+                <br><br>
                 The post-hoc tests help identify which specific group combinations contribute to the significant overall effect.
                 <hr><br>
                 "
@@ -320,6 +324,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             data <- self$data
             rows <- self$options$rows
             cols <- self$options$cols
+            counts <- self$options$counts
+
+            # Check if counts variable exists when specified
+            if (!is.null(counts) && !(counts %in% names(data))) {
+                stop(paste("The counts variable '", counts, "' does not exist in the data. Please select a valid numeric variable for counts.", sep = ""))
+            }
 
             # Exclude NA ----
             excl <- self$options$excl
@@ -328,7 +338,28 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Create the contingency table
-            contTable <- table(data[[rows]], data[[cols]], useNA = if(excl) "no" else "ifany")
+            if (!is.null(counts)) {
+                # Data is already summarized with counts - create weighted contingency table
+                # Ensure counts variable is numeric (jamovi may convert it to factor)
+                data[[counts]] <- as.numeric(as.character(data[[counts]]))
+                
+                # Build formula with backticks to handle special variable names
+                formula_str <- paste0("`", counts, "` ~ `", rows, "` + `", cols, "`")
+                contTable <- xtabs(as.formula(formula_str), data = data)
+                
+                # Add warning message about weighted data
+                if (self$options$showEducational) {
+                    weight_warning <- htmltools::div(
+                        style = "padding: 10px; background-color: #e1f5fe; border-left: 4px solid #0277bd; margin: 10px 0;",
+                        htmltools::h5("📊 Weighted Data Analysis", style = "color: #01579b; margin-top: 0;"),
+                        htmltools::p("The data is being treated as frequency counts. Each row represents a combination of categories with the specified count/weight.")
+                    )
+                    self$results$weightedDataInfo$setContent(as.character(weight_warning))
+                }
+            } else {
+                # Regular individual observation data
+                contTable <- table(data[[rows]], data[[cols]], useNA = if(excl) "no" else "ifany")
+            }
 
             # Perform Chi-Square Test ----
             chiSqTest <- stats::chisq.test(contTable, correct = FALSE)
@@ -546,54 +577,95 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .plot = function(image, ggtheme, theme, ...) {
-            # Only run if plot option is selected
-            if (!self$options$plot) {
+            # Only draw if requested
+            if (!self$options$plot)
+                return()
+
+            # Sanity checks
+            rows   <- self$options$rows
+            cols   <- self$options$cols
+            counts <- self$options$counts
+            if (is.null(rows) || is.null(cols))
                 return(FALSE)
-            }
 
-            # Get data
-            data <- self$data
-            rows <- self$options$rows
-            cols <- self$options$cols
+            # Optionally omit NAs
+            data <- if (self$options$excl) jmvcore::naOmit(self$data) else self$data
 
-            # Check for required variables
-            if (is.null(rows) || is.null(cols)) {
-                return(FALSE)
-            }
-
-            # Exclude NA if selected
-            excl <- self$options$excl
-            if (excl) {
-                data <- jmvcore::naOmit(data)
-            }
-
-            # Create the contingency table
-            contTable <- table(data[[rows]], data[[cols]], useNA = if(excl) "no" else "ifany")
-
-            # Check if table has sufficient data
-            if (any(dim(contTable) < 2)) {
-                return(FALSE)
-            }
-
-            # Perform Chi-Square Test for residuals
-            chiSqTest <- try(stats::chisq.test(contTable, correct = FALSE), silent = TRUE)
-            
-            if (inherits(chiSqTest, "try-error")) {
-                return(FALSE)
-            }
-
-            # Create mosaic plot with residuals using base graphics
-            # This integrates better with jamovi's plotting system
-            try({
-                vcd::mosaic(contTable, 
-                           shade = TRUE,
-                           legend = TRUE,
-                           main = paste("Standardized Residuals:", rows, "vs", cols),
-                           gp = grid::gpar(fill = grDevices::hcl.colors(5, "Blue-Red")))
+            # Build contingency table
+            contTable <- try({
+                if (!is.null(counts)) {
+                    data[[counts]] <- as.numeric(as.character(data[[counts]]))
+                    formula_str <- paste0("`", counts, "` ~ `", rows, "` + `", cols, "`")
+                    xtabs(as.formula(formula_str), data = data)
+                }
+                else
+                    table(data[[rows]], data[[cols]], useNA = if(self$options$excl) "no" else "ifany")
             }, silent = TRUE)
+            if (inherits(contTable, "try-error") || any(dim(contTable) < 2))
+                return(FALSE)
 
-            # Return TRUE to indicate the plot was created successfully
-            return(TRUE)
+            # Chi-square → residuals
+            chiSqTest <- try(stats::chisq.test(contTable, correct = FALSE), silent = TRUE)
+            if (inherits(chiSqTest, "try-error"))
+                return(FALSE)
+            resids <- chiSqTest$residuals
+
+            # Melt into a data.frame
+            df <- as.data.frame(as.table(resids), responseName = "residual")
+            names(df) <- c("Row", "Col", "Residual")
+            df$Row <- factor(df$Row, levels = rev(rownames(resids)))
+            df$Col <- factor(df$Col, levels = colnames(resids))
+
+
+            # self$results$mydataview_plot$setContent(
+            #     list(
+            #         df = df, 
+            #         rows = rows, 
+            #         cols = cols, 
+            #         counts = counts,
+            #         contTable = contTable,
+            #         chiSqTest = chiSqTest,
+            #         df = df,
+            #         residuals = resids, 
+            #         ggtheme = ggtheme, 
+            #         theme = theme
+            #     )
+            # )
+
+
+            # Build ggplot
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Col, y = Row, fill = Residual)) +
+                ggplot2::geom_tile(color = "grey80") +
+                ggplot2::geom_text(ggplot2::aes(label = round(Residual, 2)), size = 3, color = "black") +
+                ggplot2::scale_fill_gradient2(
+                    low    = "blue",
+                    mid    = "white", 
+                    high   = "red",
+                    midpoint = 0,
+                    name     = "Std. Resid.",
+                    guide    = ggplot2::guide_colorbar()
+                ) +
+                ggplot2::labs(
+                    title = sprintf("Standardized Residuals: %s vs %s", rows, cols),
+                    x     = cols,
+                    y     = rows
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                    panel.grid  = ggplot2::element_blank(),
+                    plot.title  = ggplot2::element_text(hjust = 0.5)
+                )
+
+            # Print to jamovi's graphics device
+            print(p)
+            TRUE
         }
+
+
+
+
+
+
     )
 )
