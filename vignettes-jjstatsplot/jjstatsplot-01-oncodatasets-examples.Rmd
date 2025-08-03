@@ -1,0 +1,377 @@
+---
+title: "jjstatsplot: Statistical Visualization with Oncology Data"
+author: "ClinicoPath Team"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{jjstatsplot: Statistical Visualization with Oncology Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+This vignette demonstrates the jjstatsplot module's visualization capabilities using oncology datasets from the `OncoDataSets` package. We'll create publication-ready statistical plots that combine beautiful visualizations with rigorous statistical testing.
+
+## Loading Required Packages
+
+```{r packages, message=FALSE}
+library(ClinicoPath)
+library(OncoDataSets)
+library(dplyr)
+library(ggplot2)
+```
+
+## Example 1: Melanoma - Comparing Thickness by Ulceration
+
+```{r melanoma-boxplot}
+data("Melanoma_df")
+
+# Prepare data
+Melanoma_df$ulcer_status <- factor(Melanoma_df$ulcer,
+                                  levels = c(0, 1),
+                                  labels = c("No Ulceration", "Ulceration"))
+
+# Log transform thickness for better visualization
+Melanoma_df$log_thickness <- log(Melanoma_df$thickness + 0.1)
+```
+
+### Box-Violin Plot with Statistics
+
+```{r box-violin, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → jjstatsplot → Box-Violin Plot
+# 2. Set 'log_thickness' as dependent variable
+# 3. Set 'ulcer_status' as grouping variable
+# 4. Options:
+#    - Type: "parametric" (t-test) or "nonparametric" (Mann-Whitney)
+#    - Add mean point
+#    - Show sample sizes
+#    - Pairwise comparisons: Games-Howell
+#    - Effect size: Cohen's d
+# 5. Customization:
+#    - Title: "Tumor Thickness by Ulceration Status"
+#    - X-axis: "Ulceration Status"
+#    - Y-axis: "Log Tumor Thickness (mm)"
+```
+
+### Grouped Analysis by Sex
+
+```{r grouped-boxplot, eval=FALSE}
+# In jamovi:
+# 1. Same as above but add 'sex' as grouping factor
+# 2. This creates separate panels for males and females
+# 3. Enable "Grouped Analysis" option
+# 4. Compare patterns across sexes
+```
+
+## Example 2: Breast Cancer Wisconsin - Multiple Group Comparisons
+
+```{r breast-cancer-prep}
+data("BreastCancerWI_df")
+
+# Create radius categories for visualization
+BreastCancerWI_df$diagnosis_label <- factor(BreastCancerWI_df$diagnosis,
+                                           levels = c("0", "1"),
+                                           labels = c("Benign", "Malignant"))
+
+# Select key measurements
+bc_subset <- BreastCancerWI_df %>%
+  select(diagnosis_label, radius_mean, texture_mean, perimeter_mean, area_mean)
+```
+
+### Correlation Matrix
+
+```{r correlation-matrix, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → jjstatsplot → Correlation Matrix
+# 2. Add continuous variables:
+#    - radius_mean
+#    - texture_mean  
+#    - perimeter_mean
+#    - area_mean
+# 3. Options:
+#    - Correlation type: Pearson or Spearman
+#    - Show significance stars
+#    - Adjust p-values: Holm
+# 4. Split by diagnosis for separate matrices
+```
+
+### Scatter Plot with Marginal Distributions
+
+```{r scatter-marginal, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → jjstatsplot → Scatter Plot
+# 2. X-axis: radius_mean
+# 3. Y-axis: texture_mean
+# 4. Group by: diagnosis_label
+# 5. Options:
+#    - Add regression lines per group
+#    - Show confidence intervals
+#    - Marginal plots: density
+#    - Correlation coefficient per group
+```
+
+## Example 3: Smoking and Lung Cancer - Categorical Analysis
+
+```{r smoking-data}
+data("SmokingLungCancer_df")
+
+# Examine structure
+str(SmokingLungCancer_df)
+```
+
+### Pie/Donut Chart with Chi-square Test
+
+```{r pie-chart, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → jjstatsplot → Pie Chart
+# 2. Main variable: cancer_status
+# 3. Grouping: smoking_status
+# 4. Options:
+#    - Display: "donut" (modern) or "pie" (classic)
+#    - Show percentages
+#    - Chi-square test results
+#    - Paired comparisons with adjusted p-values
+```
+
+### Contingency Table Visualization
+
+```{r contingency, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → jjstatsplot → Contingency Table Plot
+# 2. Rows: smoking_status
+# 3. Columns: cancer_status
+# 4. Statistics:
+#    - Chi-square test
+#    - Cramer's V effect size
+#    - Standardized residuals
+# 5. Visual options:
+#    - Mosaic plot
+#    - Association plot
+#    - Pearson residuals shading
+```
+
+## Example 4: Survival Data Visualization
+
+```{r survival-viz}
+data("LeukemiaSurvival_df")
+
+# Create categories for visualization
+LeukemiaSurvival_df$wbc_category <- cut(LeukemiaSurvival_df$logWBC,
+                                        breaks = quantile(LeukemiaSurvival_df$logWBC),
+                                        labels = c("Q1", "Q2", "Q3", "Q4"))
+```
+
+### Dot Plot with Summary Statistics
+
+```{r dot-plot, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → jjstatsplot → Dot Plot
+# 2. Continuous: time (survival time)
+# 3. Grouping: wbc_category
+# 4. Options:
+#    - Central tendency: mean or median
+#    - Error bars: 95% CI or SE
+#    - Test: ANOVA or Kruskal-Wallis
+#    - Post-hoc: Tukey HSD
+```
+
+## Example 5: Paired Data - Before/After Treatment
+
+```{r paired-data}
+# Simulate paired data (before/after treatment)
+set.seed(123)
+paired_data <- data.frame(
+  patient_id = 1:30,
+  before = rnorm(30, mean = 10, sd = 2),
+  after = rnorm(30, mean = 8, sd = 2)
+)
+```
+
+### Paired Box-Violin Plot
+
+```{r paired-plot, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → jjstatsplot → Paired Box-Violin
+# 2. Set data in long format with:
+#    - Measurement variable
+#    - Time variable (before/after)
+#    - ID variable (patient_id)
+# 3. Statistics:
+#    - Paired t-test or Wilcoxon
+#    - Effect size: Cohen's d
+#    - Individual change lines
+```
+
+## Example 6: Multi-Panel Visualizations
+
+### Histogram Matrix by Groups
+
+```{r histogram-matrix, eval=FALSE}
+# Using Melanoma data:
+# 1. Select Analyses → jjstatsplot → Histogram
+# 2. Variable: age
+# 3. Grouping: status (survival outcome)
+# 4. Options:
+#    - Bin width: automatic or manual
+#    - Overlay: density curve
+#    - Test normality per group
+#    - Show group statistics
+```
+
+### Advanced Customization
+
+```{r customization, eval=FALSE}
+# All jjstatsplot visualizations support:
+# 1. Themes:
+#    - ggplot2 themes (minimal, classic, dark)
+#    - Custom color palettes
+#    - Font adjustments
+# 2. Annotations:
+#    - Custom titles and subtitles
+#    - Caption with statistical results
+#    - Sample size annotations
+# 3. Export options:
+#    - High-resolution PNG/PDF
+#    - Customizable dimensions
+#    - Publication-ready formatting
+```
+
+## Example 7: Complex Relationships
+
+```{r brain-cancer}
+data("BrainCancerCases_df")
+str(BrainCancerCases_df)
+```
+
+### Matrix Scatter Plot
+
+```{r matrix-scatter, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → jjstatsplot → Scatter Matrix
+# 2. Add multiple continuous variables
+# 3. Group by categorical variable
+# 4. Options:
+#    - Lower triangle: scatter plots
+#    - Diagonal: density plots
+#    - Upper triangle: correlation coefficients
+#    - Smooth lines with confidence bands
+```
+
+## Best Practices for Statistical Visualization
+
+### 1. Choose Appropriate Plot Types
+
+- **Continuous vs. Categorical**: Box plots, violin plots
+- **Two Continuous**: Scatter plots with regression
+- **Multiple Groups**: Faceted plots
+- **Correlations**: Heatmaps with significance
+
+### 2. Statistical Rigor
+
+- Always show confidence intervals
+- Report exact p-values
+- Include effect sizes
+- Adjust for multiple comparisons
+
+### 3. Visual Clarity
+
+- Use color-blind friendly palettes
+- Add clear labels and titles
+- Include sample sizes
+- Highlight significant findings
+
+### 4. Reproducibility
+
+```{r reproducibility, eval=FALSE}
+# Document your choices:
+# - Statistical test used
+# - Assumptions checked
+# - Data transformations
+# - Outlier handling
+```
+
+## Integration with Research Workflow
+
+### Publication Pipeline
+
+```{r publication-pipeline, eval=FALSE}
+# 1. Exploratory Analysis
+#    - Use jjstatsplot for initial visualization
+#    - Identify patterns and outliers
+#    
+# 2. Statistical Testing
+#    - Integrated tests in all plots
+#    - Effect sizes automatically calculated
+#    
+# 3. Publication Preparation
+#    - Export high-quality figures
+#    - Extract statistical results
+#    - Create supplementary materials
+#
+# 4. Presentation
+#    - Use consistent themes
+#    - Create plot series
+#    - Generate summary slides
+```
+
+### Combining with Other Modules
+
+```{r module-integration, eval=FALSE}
+# Workflow example:
+# 1. Data cleaning with ClinicoPathDescriptives
+# 2. Survival analysis with jsurvival
+# 3. Visualize results with jjstatsplot:
+#    - Kaplan-Meier curve comparisons
+#    - Hazard ratio forest plots
+#    - Time-dependent ROC curves
+```
+
+## Advanced Features
+
+### Custom Statistical Tests
+
+```{r custom-stats, eval=FALSE}
+# jjstatsplot supports:
+# 1. Parametric tests (t-test, ANOVA)
+# 2. Non-parametric alternatives
+# 3. Robust statistics
+# 4. Bayesian approaches
+# 5. Bootstrap confidence intervals
+```
+
+### Interactive Features
+
+```{r interactive, eval=FALSE}
+# When used in jamovi:
+# - Hover for exact values
+# - Click to highlight groups
+# - Zoom for detailed views
+# - Export selected regions
+```
+
+## Conclusion
+
+The jjstatsplot module transforms statistical analysis into publication-ready visualizations by:
+
+- Combining beautiful plots with rigorous statistics
+- Providing appropriate tests for each data type
+- Including effect sizes and confidence intervals
+- Supporting complex multi-group comparisons
+- Offering extensive customization options
+
+Used with `OncoDataSets`, researchers can quickly create compelling visualizations that effectively communicate their findings while maintaining statistical integrity.
+
+## References
+
+- OncoDataSets package: https://cran.r-project.org/package=OncoDataSets
+- jjstatsplot documentation: https://www.serdarbalci.com/jjstatsplot/
+- ggstatsplot (underlying package): https://indrajeetpatil.github.io/ggstatsplot/
