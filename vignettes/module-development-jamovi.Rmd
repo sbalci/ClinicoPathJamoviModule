@@ -7175,3 +7175,43 @@ For questions or contributions, please refer to the GitHub repository and commun
 <!-- jonathon -->
 <!-- :whale2:  2 months ago -->
 <!-- oh yeah, i’ve got enough on my plate, to worry about warnings :stuck_out_tongue: -->
+
+
+---
+
+
+<!--
+
+I'm developing a module with some ML models which are computationally expensive. Is there a way to save the model so that it doesn't have to be retrained everytime I select a new plot/results option? I have tried the self$results$.setModel with a "property" type on the results file but everytime a new plotting option is selected, it turns to NULL. I have also played with the clearWith options but it doesn't prevent retraining either. Thank you in advanced.
+
+just after computationally expensive calculation add checkpoint
+
+# Push results and check for user changes:
+private$.checkpoint()
+
+# If you only want to poll for changes without re-pushing identical results:
+private$.checkpoint(flush = FALSE)
+
+
+https://github.com/jamovi/jmv/blob/master/R/ancova.b.R#L525
+
+https://github.com/jamovi/jmv/blob/master/R/anovanp.b.R#L52
+
+if you want to persist values between runs, you need to store that value in state.
+
+analyses are completely destroyed between runs, and often don't run in the same process twice, so the only way to store and restore is to use the state system.
+
+https://dev.jamovi.org/tuts0203-state.html#setstate()
+
+self$results$aResultsElementWithAppropriateClearWiths$setState(state)
+
+state <- self$results$aResultsElementWithAppropriateClearWiths$state
+
+but you need to be mindful of how large the objects are that are going into state (see the note on the state page).
+
+ -->
+
+
+
+
+

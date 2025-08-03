@@ -1,0 +1,380 @@
+---
+title: "meddecide: Medical Decision Analysis with Oncology Data"
+author: "ClinicoPath Team"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{meddecide: Medical Decision Analysis with Oncology Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+This vignette demonstrates medical decision analysis using the meddecide module with oncology datasets from the `OncoDataSets` package. We'll cover diagnostic test evaluation, ROC analysis, decision curves, and decision tree modeling.
+
+## Loading Required Packages
+
+```{r packages, message=FALSE}
+library(ClinicoPath)
+library(OncoDataSets)
+library(dplyr)
+library(knitr)
+```
+
+## Example 1: PSA for Prostate Cancer Detection
+
+The PSA dataset contains prostate-specific antigen measurements and cancer outcomes.
+
+```{r psa-data}
+data("PSAProstateCancer_df")
+
+# Dataset overview
+str(PSAProstateCancer_df)
+
+# Create binary outcome for high-grade cancer
+PSAProstateCancer_df$high_grade <- ifelse(PSAProstateCancer_df$gleason >= 7, 1, 0)
+
+# PSA levels (back-transform from log)
+PSAProstateCancer_df$psa <- exp(PSAProstateCancer_df$lpsa)
+
+summary(PSAProstateCancer_df$psa)
+table(PSAProstateCancer_df$high_grade)
+```
+
+### ROC Analysis for PSA
+
+```{r roc-analysis, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → meddecide → ROC Analysis
+# 2. Set 'psa' as test variable
+# 3. Set 'high_grade' as state variable (1 = disease)
+# 4. Enable:
+#    - ROC curve with confidence bands
+#    - Optimal cutoff calculation
+#    - Sensitivity/specificity table
+#    - Likelihood ratios
+```
+
+### Multiple Biomarker Comparison
+
+Compare PSA with other clinical factors:
+
+```{r multi-roc, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → meddecide → ROC Comparison
+# 2. Add multiple test variables:
+#    - psa
+#    - age
+#    - lweight (log prostate weight)
+# 3. Compare AUCs with DeLong test
+# 4. Generate comparative ROC plot
+```
+
+### Decision Curve Analysis
+
+Evaluate clinical utility across different threshold probabilities:
+
+```{r decision-curve, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → meddecide → Decision Curve
+# 2. Add PSA-based model
+# 3. Compare with:
+#    - Treat all strategy
+#    - Treat none strategy
+# 4. Set threshold probability range (0-50%)
+# 5. Calculate net benefit
+```
+
+## Example 2: CA19-9 for Pancreatic Cancer
+
+Meta-analysis data for CA19-9 diagnostic accuracy:
+
+```{r ca19-data}
+data("CA19PancreaticCancer_df")
+
+# Dataset structure (diagnostic accuracy studies)
+str(CA19PancreaticCancer_df)
+
+# Calculate sensitivity and specificity for each study
+CA19PancreaticCancer_df <- CA19PancreaticCancer_df %>%
+  mutate(
+    sensitivity = TP / (TP + FN),
+    specificity = TN / (TN + FP),
+    total_n = TP + FP + FN + TN
+  )
+
+kable(CA19PancreaticCancer_df[1:5, c("study", "sensitivity", "specificity", "total_n")])
+```
+
+### Meta-analysis of Diagnostic Accuracy
+
+```{r meta-analysis, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → meddecide → Diagnostic Meta-analysis
+# 2. Input TP, FP, FN, TN for each study
+# 3. Enable:
+#    - Summary ROC curve
+#    - Heterogeneity assessment
+#    - Forest plots
+#    - Publication bias analysis
+```
+
+### Bayesian Analysis
+
+Calculate post-test probabilities:
+
+```{r bayesian, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → meddecide → Bayesian Calculator
+# 2. Input pooled sensitivity/specificity
+# 3. Set pre-test probabilities (prevalence)
+# 4. Calculate:
+#    - Positive predictive value
+#    - Negative predictive value
+#    - Post-test probability curves
+```
+
+## Example 3: Lung Nodule Evaluation
+
+```{r lung-nodules}
+data("LungNodulesDetected_df")
+
+# Dataset overview
+str(LungNodulesDetected_df)
+
+# Malignancy by nodule characteristics
+table(LungNodulesDetected_df$spiculate, LungNodulesDetected_df$malignant)
+table(cut(LungNodulesDetected_df$diameter, c(0, 5, 10, 20, Inf)), 
+      LungNodulesDetected_df$malignant)
+```
+
+### Decision Tree for Nodule Management
+
+```{r decision-tree, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → meddecide → Decision Tree
+# 2. Create decision nodes:
+#    - Nodule detected
+#    - Size > 8mm?
+#    - Spiculated?
+#    - Biopsy vs. follow-up
+# 3. Input probabilities:
+#    - Malignancy rates by size/features
+#    - Test characteristics (biopsy sensitivity/specificity)
+# 4. Input utilities/costs:
+#    - Early detection benefit
+#    - Biopsy complications
+#    - Anxiety from follow-up
+# 5. Calculate expected values
+```
+
+### Clinical Decision Rule Development
+
+```{r decision-rule, eval=FALSE}
+# In jamovi:
+# 1. Use Classification Analysis
+# 2. Predictors: diameter, spiculate, age, smoking
+# 3. Outcome: malignant
+# 4. Methods:
+#    - Logistic regression
+#    - Decision tree (CART)
+#    - Random forest
+# 5. Validate with cross-validation
+# 6. Create clinical scoring system
+```
+
+## Example 4: Comparative Effectiveness
+
+Using multiple datasets to compare diagnostic strategies:
+
+### Prostate Cancer Screening Strategies
+
+```{r screening-comparison, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → meddecide → Decision Compare
+# 2. Define strategies:
+#    - PSA alone (cutoff 4.0)
+#    - PSA + age adjustment
+#    - PSA + free/total ratio
+#    - MRI-based screening
+# 3. Input:
+#    - Test characteristics
+#    - Costs
+#    - Quality-adjusted life years
+# 4. Perform cost-effectiveness analysis
+# 5. Generate efficiency frontier
+```
+
+## Example 5: Markov Model for Cancer Progression
+
+Long-term outcomes modeling:
+
+```{r markov-model, eval=FALSE}
+# In jamovi:
+# 1. Select Analyses → meddecide → Decision Tree (Markov mode)
+# 2. Define health states:
+#    - No cancer
+#    - Localized cancer
+#    - Advanced cancer
+#    - Death
+# 3. Input transition probabilities
+# 4. Set cycle length (e.g., 1 year)
+# 5. Time horizon (e.g., lifetime)
+# 6. Calculate:
+#    - Life expectancy
+#    - Quality-adjusted life years
+#    - Incremental cost-effectiveness
+```
+
+## Practical Applications
+
+### 1. Biomarker Cutoff Optimization
+
+```{r cutoff-optimization, eval=FALSE}
+# Workflow:
+# 1. ROC analysis to assess discrimination
+# 2. Calculate optimal cutoffs for:
+#    - Youden index (sensitivity + specificity)
+#    - Clinical utility (weighted by consequences)
+#    - Cost-effectiveness
+# 3. Validate in independent dataset
+```
+
+### 2. Risk Prediction Model
+
+```{r risk-model, eval=FALSE}
+# Using PSA data:
+# 1. Develop multivariable model
+# 2. Generate risk scores
+# 3. Create risk categories
+# 4. Decision curve analysis
+# 5. Clinical impact assessment:
+#    - Number needed to screen
+#    - False positives avoided
+#    - Cancers detected
+```
+
+### 3. Diagnostic Pathway Design
+
+```{r diagnostic-pathway, eval=FALSE}
+# Example: Lung nodule workup
+# 1. Initial CT findings
+# 2. Risk stratification (size, features)
+# 3. Decision points:
+#    - Immediate biopsy
+#    - PET scan
+#    - Short-term follow-up
+#    - Annual screening
+# 4. Calculate pathway efficiency
+```
+
+## Advanced Features
+
+### Sensitivity Analysis
+
+```{r sensitivity-analysis, eval=FALSE}
+# In jamovi meddecide:
+# 1. One-way sensitivity analysis
+#    - Vary each parameter
+#    - Identify threshold values
+# 2. Two-way sensitivity analysis
+#    - Vary two parameters simultaneously
+#    - Create contour plots
+# 3. Probabilistic sensitivity analysis
+#    - Monte Carlo simulation
+#    - Confidence ellipses
+```
+
+### Time-to-Event Integration
+
+```{r time-integration, eval=FALSE}
+# Combine with survival data:
+# 1. Time-dependent ROC curves
+# 2. Dynamic decision curves
+# 3. Landmark analysis
+# 4. Risk prediction over time
+```
+
+## Best Practices
+
+1. **Define Clinical Question**: Clear objectives for decision analysis
+2. **Evidence Quality**: Document sources for probabilities/utilities
+3. **Perspective**: Specify (patient, provider, societal)
+4. **Uncertainty**: Always perform sensitivity analyses
+5. **Validation**: Test models in independent data
+
+## Reporting Guidelines
+
+### For Diagnostic Studies
+- STARD checklist compliance
+- Report all performance metrics
+- Confidence intervals
+- Clinical utility measures
+
+### For Decision Analysis
+- Model structure diagram
+- Parameter sources
+- Base case results
+- Sensitivity analyses
+- Clinical implications
+
+## Integration Example
+
+Complete diagnostic evaluation workflow:
+
+```{r complete-workflow, eval=FALSE}
+# 1. Data Preparation
+#    - Load OncoDataSets
+#    - Define outcomes
+#    - Handle missing data
+
+# 2. Test Performance
+#    - ROC analysis
+#    - Optimal cutoffs
+#    - Subgroup analyses
+
+# 3. Clinical Utility
+#    - Decision curves
+#    - Net benefit calculation
+#    - Number needed to test
+
+# 4. Decision Modeling
+#    - Build decision tree
+#    - Input probabilities
+#    - Calculate expected values
+
+# 5. Sensitivity Analysis
+#    - Test robustness
+#    - Identify key drivers
+
+# 6. Implementation
+#    - Clinical algorithm
+#    - Decision support tool
+#    - Monitoring plan
+```
+
+## Conclusion
+
+The meddecide module provides comprehensive tools for medical decision analysis in oncology:
+
+- Evaluate diagnostic test performance
+- Compare multiple biomarkers
+- Assess clinical utility beyond accuracy
+- Model complex decision scenarios
+- Support evidence-based clinical guidelines
+
+Combined with `OncoDataSets`, researchers can develop and validate decision support tools using real-world cancer data.
+
+## References
+
+- OncoDataSets package: https://cran.r-project.org/package=OncoDataSets
+- meddecide documentation: https://www.serdarbalci.com/meddecide/
+- Decision curve analysis: https://www.mskcc.org/departments/epidemiology-biostatistics/biostatistics/decision-curve-analysis

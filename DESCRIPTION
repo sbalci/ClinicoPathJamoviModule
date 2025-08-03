@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.3.91
-Date: 2025-08-01
+Version: 0.0.3.92
+Date: 2025-08-03
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -228,4 +228,5 @@ Suggests:
     rmarkdown,
     randomForestSRC,
     flexsurv,
-    icenReg
+    icenReg,
+    OncoDataSets
