@@ -9,18 +9,14 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Y-Axis Variable
+        label: Y-Axis Variable (Continuous)
         children:
           - type: VariablesListBox
             name: y_var
             maxItemCount: 1
             isTarget: true
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
       - type: TargetLayoutBox
-        label: X-Axis Variable (Grouping)
+        label: X-Axis Variable (Groups)
         children:
           - type: VariablesListBox
             name: x_var
@@ -41,77 +37,176 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Point Color Variable (Optional)
+        label: Point Color Mapping (Optional)
         children:
           - type: VariablesListBox
             name: cov_var
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+  
+  - type: CollapseBox
+    label: Plot Configuration
+    collapsed: false
     children:
-      - type: ComboBox
-        name: rain_side
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: rain_side
+          - type: CheckBox
+            name: likert_mode
+          - type: CheckBox
+            name: show_longitudinal
+
+  - type: CollapseBox
+    label: Clinical Significance
+    collapsed: true
     children:
-      - type: CheckBox
-        name: likert_mode
-      - type: CheckBox
-        name: show_longitudinal
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: clinical_cutoff
+            format: number
+          - type: TextBox
+            name: reference_range_min
+            format: number
+          - type: TextBox
+            name: reference_range_max
+            format: number
+          - type: CheckBox
+            name: show_mcid
+          - type: TextBox
+            name: mcid_value
+            format: number
+
+  - type: CollapseBox
+    label: Effect Size & Comparisons
+    collapsed: true
     children:
-      - type: TextBox
-        name: point_size
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_effect_size
+          - type: ComboBox
+            name: effect_size_type
+          - type: CheckBox
+            name: show_change_scores
+          - type: TextBox
+            name: baseline_group
+            format: string
+          - type: TextBox
+            name: responder_threshold
+            format: number
+
+  - type: CollapseBox
+    label: Sample Size & Data Info
+    collapsed: true
     children:
-      - type: TextBox
-        name: point_alpha
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_sample_size
+          - type: CheckBox
+            name: show_missing_info
+
+  - type: CollapseBox
+    label: Clinical Trial Settings
+    collapsed: true
     children:
-      - type: TextBox
-        name: violin_alpha
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: trial_arms
+            format: string
+          - type: TextBox
+            name: time_labels
+            format: string
+          - type: ComboBox
+            name: population_type
+
+  - type: CollapseBox
+    label: Biomarker Analysis
+    collapsed: true
     children:
-      - type: TextBox
-        name: boxplot_width
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: log_transform
+          - type: ComboBox
+            name: outlier_method
+          - type: CheckBox
+            name: show_cv_bands
+
+  - type: CollapseBox
+    label: Visual Appearance
+    collapsed: true
     children:
-      - type: ComboBox
-        name: color_palette
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: point_size
+            format: number
+          - type: TextBox
+            name: point_alpha
+            format: number
+          - type: TextBox
+            name: violin_alpha
+            format: number
+          - type: TextBox
+            name: boxplot_width
+            format: number
+          - type: ComboBox
+            name: color_palette
+
+  - type: CollapseBox
+    label: Labels & Titles
+    collapsed: true
     children:
-      - type: TextBox
-        name: plot_title
-        format: string
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: plot_title
+            format: string
+          - type: TextBox
+            name: x_label
+            format: string
+          - type: TextBox
+            name: y_label
+            format: string
+
+  - type: CollapseBox
+    label: Publication & Export
+    collapsed: true
     children:
-      - type: TextBox
-        name: x_label
-        format: string
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: p_value_position
+          - type: ComboBox
+            name: journal_style
+          - type: CheckBox
+            name: generate_report
+          - type: CheckBox
+            name: include_methods
+
+  - type: CollapseBox
+    label: Analysis & Output
+    collapsed: false
     children:
-      - type: TextBox
-        name: y_label
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_statistics
-      - type: CheckBox
-        name: show_comparisons
-      - type: CheckBox
-        name: show_interpretation
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_statistics
+          - type: CheckBox
+            name: show_comparisons
+          - type: CheckBox
+            name: show_interpretation

@@ -31,4 +31,24 @@ items:
       type: Html
       visible: (show_interpretation)
 
+    - name: effect_sizes
+      title: Effect Size Analysis
+      type: Html
+      visible: (show_effect_size)
+
+    - name: change_analysis
+      title: Change Score Analysis
+      type: Html
+      visible: (show_change_scores)
+
+    - name: clinical_report
+      title: Clinical Analysis Report
+      type: Html
+      visible: (generate_report)
+
+    - name: methods_text
+      title: Methods Section
+      type: Html
+      visible: (include_methods)
+
 ...

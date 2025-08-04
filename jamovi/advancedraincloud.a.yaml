@@ -239,4 +239,229 @@ options:
         R: >
           If TRUE, displays interpretation and feature guide.
 
+    # Clinical Significance Options
+    - name: clinical_cutoff
+      title: Clinical Cutoff Value
+      type: Number
+      description:
+        R: >
+          Add horizontal line for clinical threshold or decision boundary.
+
+    - name: reference_range_min
+      title: Reference Range Minimum
+      type: Number
+      description:
+        R: >
+          Lower bound of normal reference range (shaded area).
+          
+    - name: reference_range_max
+      title: Reference Range Maximum
+      type: Number
+      description:
+        R: >
+          Upper bound of normal reference range (shaded area).
+
+    - name: show_mcid
+      title: Show MCID Band
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display Minimal Clinically Important Difference band.
+          
+    - name: mcid_value
+      title: MCID Value
+      type: Number
+      description:
+        R: >
+          Size of the Minimal Clinically Important Difference.
+
+    # Effect Size Options
+    - name: show_effect_size
+      title: Display Effect Size
+      type: Bool
+      default: false
+      description:
+        R: >
+          Show effect size calculations between groups.
+
+    - name: effect_size_type
+      title: Effect Size Type
+      type: List
+      options:
+        - title: "Cohen's d"
+          name: cohens_d
+        - title: "Hedges' g"
+          name: hedges_g
+        - title: "Glass's delta"
+          name: glass_delta
+      default: cohens_d
+      description:
+        R: >
+          Method for calculating effect size.
+
+    # Change Score Analysis
+    - name: show_change_scores
+      title: Show Change Analysis
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display change from baseline analysis for longitudinal data.
+          
+    - name: baseline_group
+      title: Baseline Group Identifier
+      type: String
+      default: ""
+      description:
+        R: >
+          Name or level of the baseline/reference group.
+          
+    - name: responder_threshold
+      title: Response Threshold (%)
+      type: Number
+      default: 20
+      description:
+        R: >
+          Percentage change threshold for responder classification.
+
+    # Sample Size Annotations
+    - name: show_sample_size
+      title: Display Sample Sizes
+      type: Bool
+      default: true
+      description:
+        R: >
+          Show sample size (N) for each group on the plot.
+          
+    - name: show_missing_info
+      title: Show Missing Data Info
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display information about missing data and exclusions.
+
+    # Clinical Trial Features
+    - name: trial_arms
+      title: Treatment Arm Labels
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom labels for treatment arms (comma-separated).
+          
+    - name: time_labels
+      title: Time Point Labels
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom labels for time points (comma-separated).
+          
+    - name: population_type
+      title: Analysis Population
+      type: List
+      options:
+        - title: "Intention-to-Treat"
+          name: itt
+        - title: "Per-Protocol"
+          name: pp
+        - title: "Modified ITT"
+          name: mitt
+        - title: "As-Treated"
+          name: at
+      default: itt
+      description:
+        R: >
+          Type of analysis population for clinical trials.
+
+    # Biomarker Features
+    - name: log_transform
+      title: Log Transform Y-axis
+      type: Bool
+      default: false
+      description:
+        R: >
+          Apply log transformation to Y-axis values.
+          
+    - name: outlier_method
+      title: Outlier Handling
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "Winsorize (5/95%)"
+          name: winsorize
+        - title: "Trim (5/95%)"
+          name: trim
+        - title: "IQR Method"
+          name: iqr
+      default: none
+      description:
+        R: >
+          Method for handling outliers in the data.
+          
+    - name: show_cv_bands
+      title: Show CV% Bands
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display coefficient of variation bands for assay variability.
+
+    # Publication Options
+    - name: p_value_position
+      title: P-value Display Position
+      type: List
+      options:
+        - title: "Above Plot"
+          name: above
+        - title: "In Legend"
+          name: legend
+        - title: "In Table"
+          name: table
+        - title: "None"
+          name: none
+      default: above
+      description:
+        R: >
+          Where to display p-values from group comparisons.
+          
+    - name: journal_style
+      title: Journal Style Format
+      type: List
+      options:
+        - title: "Default"
+          name: default
+        - title: "Nature"
+          name: nature
+        - title: "NEJM"
+          name: nejm
+        - title: "Lancet"
+          name: lancet
+        - title: "JAMA"
+          name: jama
+      default: default
+      description:
+        R: >
+          Apply journal-specific formatting guidelines.
+
+    # Report Generation
+    - name: generate_report
+      title: Generate Clinical Report
+      type: Bool
+      default: false
+      description:
+        R: >
+          Generate comprehensive clinical analysis report.
+          
+    - name: include_methods
+      title: Include Methods Text
+      type: Bool
+      default: false
+      description:
+        R: >
+          Include methods section text for publications.
+
 ...

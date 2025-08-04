@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.92
+version: 0.0.3.93
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-03'
+date: '2025-08-04'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -529,7 +529,7 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: ExplorationD
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: Performs Chi-Square test and post-hoc pairwise comparisons.
@@ -1210,7 +1210,7 @@ analyses:
   - title: Advanced Decision Tree Analysis
     name: advancedtree
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Advanced Decision Tree Analysis
     menuSubtitle: Modern Tree Algorithms for Clinical Research

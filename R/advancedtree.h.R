@@ -388,11 +388,16 @@ advancedtreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         todo = function() private$.items[["todo"]],
         model_summary = function() private$.items[["model_summary"]],
         tree_plot = function() private$.items[["tree_plot"]],
+        tree_plot_explanation = function() private$.items[["tree_plot_explanation"]],
         importance_plot = function() private$.items[["importance_plot"]],
+        importance_plot_explanation = function() private$.items[["importance_plot_explanation"]],
         performance_table = function() private$.items[["performance_table"]],
+        performance_table_explanation = function() private$.items[["performance_table_explanation"]],
         roc_plot = function() private$.items[["roc_plot"]],
+        roc_plot_explanation = function() private$.items[["roc_plot_explanation"]],
         validation_curves = function() private$.items[["validation_curves"]],
         confusion_matrix = function() private$.items[["confusion_matrix"]],
+        confusion_matrix_explanation = function() private$.items[["confusion_matrix_explanation"]],
         calibration_plot = function() private$.items[["calibration_plot"]],
         shap_plot = function() private$.items[["shap_plot"]],
         partial_dependence_plot = function() private$.items[["partial_dependence_plot"]],
@@ -443,6 +448,13 @@ advancedtreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "max_depth",
                     "min_samples_split",
                     "min_samples_leaf")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="tree_plot_explanation",
+                title="How to Read the Decision Tree",
+                visible="(show_tree_plot && algorithm:rpart || algorithm:ctree)",
+                clearWith=list(
+                    "algorithm")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="importance_plot",
@@ -456,6 +468,14 @@ advancedtreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "facs",
                     "target",
                     "targetLevel",
+                    "algorithm",
+                    "importance_method")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="importance_plot_explanation",
+                title="Understanding Feature Importance",
+                visible="(show_importance_plot)",
+                clearWith=list(
                     "algorithm",
                     "importance_method")))
             self$add(jmvcore::Table$new(
@@ -490,6 +510,11 @@ advancedtreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "targetLevel",
                     "algorithm",
                     "validation")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="performance_table_explanation",
+                title="Interpreting Performance Metrics",
+                visible="(show_performance_metrics)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="roc_plot",
@@ -505,6 +530,11 @@ advancedtreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "targetLevel",
                     "algorithm",
                     "validation")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="roc_plot_explanation",
+                title="Understanding the ROC Curve",
+                visible="(show_roc_curve)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="validation_curves",
@@ -533,6 +563,11 @@ advancedtreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "targetLevel",
                     "algorithm",
                     "validation")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="confusion_matrix_explanation",
+                title="Reading the Confusion Matrix",
+                visible="(show_confusion_matrix)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="calibration_plot",
@@ -786,11 +821,16 @@ advancedtreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$model_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$tree_plot_explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$importance_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$importance_plot_explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$performance_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$performance_table_explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$roc_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$roc_plot_explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$validation_curves} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$confusion_matrix} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$confusion_matrix_explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$calibration_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$shap_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$partial_dependence_plot} \tab \tab \tab \tab \tab an image \cr

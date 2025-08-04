@@ -160,7 +160,6 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         multipleTestingInfo = function() private$.items[["multipleTestingInfo"]],
         posthocTable = function() private$.items[["posthocTable"]],
         detailedComparisons = function() private$.items[["detailedComparisons"]],
-        mydataview_plot = function() private$.items[["mydataview_plot"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -299,10 +298,6 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "posthoc",
                     "sig",
                     "excl")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview_plot",
-                title="mydataview_plot"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -377,7 +372,6 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$mydataview_plot} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
