@@ -24,7 +24,29 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             y_label = "",
             show_statistics = TRUE,
             show_comparisons = FALSE,
-            show_interpretation = TRUE, ...) {
+            show_interpretation = TRUE,
+            clinical_cutoff = NULL,
+            reference_range_min = NULL,
+            reference_range_max = NULL,
+            show_mcid = FALSE,
+            mcid_value = NULL,
+            show_effect_size = FALSE,
+            effect_size_type = "cohens_d",
+            show_change_scores = FALSE,
+            baseline_group = "",
+            responder_threshold = 20,
+            show_sample_size = TRUE,
+            show_missing_info = FALSE,
+            trial_arms = "",
+            time_labels = "",
+            population_type = "itt",
+            log_transform = FALSE,
+            outlier_method = "none",
+            show_cv_bands = FALSE,
+            p_value_position = "above",
+            journal_style = "default",
+            generate_report = FALSE,
+            include_methods = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -155,6 +177,115 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "show_interpretation",
                 show_interpretation,
                 default=TRUE)
+            private$..clinical_cutoff <- jmvcore::OptionNumber$new(
+                "clinical_cutoff",
+                clinical_cutoff)
+            private$..reference_range_min <- jmvcore::OptionNumber$new(
+                "reference_range_min",
+                reference_range_min)
+            private$..reference_range_max <- jmvcore::OptionNumber$new(
+                "reference_range_max",
+                reference_range_max)
+            private$..show_mcid <- jmvcore::OptionBool$new(
+                "show_mcid",
+                show_mcid,
+                default=FALSE)
+            private$..mcid_value <- jmvcore::OptionNumber$new(
+                "mcid_value",
+                mcid_value)
+            private$..show_effect_size <- jmvcore::OptionBool$new(
+                "show_effect_size",
+                show_effect_size,
+                default=FALSE)
+            private$..effect_size_type <- jmvcore::OptionList$new(
+                "effect_size_type",
+                effect_size_type,
+                options=list(
+                    "cohens_d",
+                    "hedges_g",
+                    "glass_delta"),
+                default="cohens_d")
+            private$..show_change_scores <- jmvcore::OptionBool$new(
+                "show_change_scores",
+                show_change_scores,
+                default=FALSE)
+            private$..baseline_group <- jmvcore::OptionString$new(
+                "baseline_group",
+                baseline_group,
+                default="")
+            private$..responder_threshold <- jmvcore::OptionNumber$new(
+                "responder_threshold",
+                responder_threshold,
+                default=20)
+            private$..show_sample_size <- jmvcore::OptionBool$new(
+                "show_sample_size",
+                show_sample_size,
+                default=TRUE)
+            private$..show_missing_info <- jmvcore::OptionBool$new(
+                "show_missing_info",
+                show_missing_info,
+                default=FALSE)
+            private$..trial_arms <- jmvcore::OptionString$new(
+                "trial_arms",
+                trial_arms,
+                default="")
+            private$..time_labels <- jmvcore::OptionString$new(
+                "time_labels",
+                time_labels,
+                default="")
+            private$..population_type <- jmvcore::OptionList$new(
+                "population_type",
+                population_type,
+                options=list(
+                    "itt",
+                    "pp",
+                    "mitt",
+                    "at"),
+                default="itt")
+            private$..log_transform <- jmvcore::OptionBool$new(
+                "log_transform",
+                log_transform,
+                default=FALSE)
+            private$..outlier_method <- jmvcore::OptionList$new(
+                "outlier_method",
+                outlier_method,
+                options=list(
+                    "none",
+                    "winsorize",
+                    "trim",
+                    "iqr"),
+                default="none")
+            private$..show_cv_bands <- jmvcore::OptionBool$new(
+                "show_cv_bands",
+                show_cv_bands,
+                default=FALSE)
+            private$..p_value_position <- jmvcore::OptionList$new(
+                "p_value_position",
+                p_value_position,
+                options=list(
+                    "above",
+                    "legend",
+                    "table",
+                    "none"),
+                default="above")
+            private$..journal_style <- jmvcore::OptionList$new(
+                "journal_style",
+                journal_style,
+                options=list(
+                    "default",
+                    "nature",
+                    "nejm",
+                    "lancet",
+                    "jama"),
+                default="default")
+            private$..generate_report <- jmvcore::OptionBool$new(
+                "generate_report",
+                generate_report,
+                default=FALSE)
+            private$..include_methods <- jmvcore::OptionBool$new(
+                "include_methods",
+                include_methods,
+                default=FALSE)
 
             self$.addOption(private$..y_var)
             self$.addOption(private$..x_var)
@@ -175,6 +306,28 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..show_statistics)
             self$.addOption(private$..show_comparisons)
             self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..clinical_cutoff)
+            self$.addOption(private$..reference_range_min)
+            self$.addOption(private$..reference_range_max)
+            self$.addOption(private$..show_mcid)
+            self$.addOption(private$..mcid_value)
+            self$.addOption(private$..show_effect_size)
+            self$.addOption(private$..effect_size_type)
+            self$.addOption(private$..show_change_scores)
+            self$.addOption(private$..baseline_group)
+            self$.addOption(private$..responder_threshold)
+            self$.addOption(private$..show_sample_size)
+            self$.addOption(private$..show_missing_info)
+            self$.addOption(private$..trial_arms)
+            self$.addOption(private$..time_labels)
+            self$.addOption(private$..population_type)
+            self$.addOption(private$..log_transform)
+            self$.addOption(private$..outlier_method)
+            self$.addOption(private$..show_cv_bands)
+            self$.addOption(private$..p_value_position)
+            self$.addOption(private$..journal_style)
+            self$.addOption(private$..generate_report)
+            self$.addOption(private$..include_methods)
         }),
     active = list(
         y_var = function() private$..y_var$value,
@@ -195,7 +348,29 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         y_label = function() private$..y_label$value,
         show_statistics = function() private$..show_statistics$value,
         show_comparisons = function() private$..show_comparisons$value,
-        show_interpretation = function() private$..show_interpretation$value),
+        show_interpretation = function() private$..show_interpretation$value,
+        clinical_cutoff = function() private$..clinical_cutoff$value,
+        reference_range_min = function() private$..reference_range_min$value,
+        reference_range_max = function() private$..reference_range_max$value,
+        show_mcid = function() private$..show_mcid$value,
+        mcid_value = function() private$..mcid_value$value,
+        show_effect_size = function() private$..show_effect_size$value,
+        effect_size_type = function() private$..effect_size_type$value,
+        show_change_scores = function() private$..show_change_scores$value,
+        baseline_group = function() private$..baseline_group$value,
+        responder_threshold = function() private$..responder_threshold$value,
+        show_sample_size = function() private$..show_sample_size$value,
+        show_missing_info = function() private$..show_missing_info$value,
+        trial_arms = function() private$..trial_arms$value,
+        time_labels = function() private$..time_labels$value,
+        population_type = function() private$..population_type$value,
+        log_transform = function() private$..log_transform$value,
+        outlier_method = function() private$..outlier_method$value,
+        show_cv_bands = function() private$..show_cv_bands$value,
+        p_value_position = function() private$..p_value_position$value,
+        journal_style = function() private$..journal_style$value,
+        generate_report = function() private$..generate_report$value,
+        include_methods = function() private$..include_methods$value),
     private = list(
         ..y_var = NA,
         ..x_var = NA,
@@ -215,7 +390,29 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..y_label = NA,
         ..show_statistics = NA,
         ..show_comparisons = NA,
-        ..show_interpretation = NA)
+        ..show_interpretation = NA,
+        ..clinical_cutoff = NA,
+        ..reference_range_min = NA,
+        ..reference_range_max = NA,
+        ..show_mcid = NA,
+        ..mcid_value = NA,
+        ..show_effect_size = NA,
+        ..effect_size_type = NA,
+        ..show_change_scores = NA,
+        ..baseline_group = NA,
+        ..responder_threshold = NA,
+        ..show_sample_size = NA,
+        ..show_missing_info = NA,
+        ..trial_arms = NA,
+        ..time_labels = NA,
+        ..population_type = NA,
+        ..log_transform = NA,
+        ..outlier_method = NA,
+        ..show_cv_bands = NA,
+        ..p_value_position = NA,
+        ..journal_style = NA,
+        ..generate_report = NA,
+        ..include_methods = NA)
 )
 
 advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -226,7 +423,11 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         plot = function() private$.items[["plot"]],
         statistics = function() private$.items[["statistics"]],
         comparisons = function() private$.items[["comparisons"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        effect_sizes = function() private$.items[["effect_sizes"]],
+        change_analysis = function() private$.items[["change_analysis"]],
+        clinical_report = function() private$.items[["clinical_report"]],
+        methods_text = function() private$.items[["methods_text"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -260,7 +461,27 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="interpretation",
                 title="Feature Guide",
-                visible="(show_interpretation)"))}))
+                visible="(show_interpretation)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="effect_sizes",
+                title="Effect Size Analysis",
+                visible="(show_effect_size)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="change_analysis",
+                title="Change Score Analysis",
+                visible="(show_change_scores)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_report",
+                title="Clinical Analysis Report",
+                visible="(generate_report)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="methods_text",
+                title="Methods Section",
+                visible="(include_methods)"))}))
 
 advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "advancedraincloudBase",
@@ -331,6 +552,35 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param show_comparisons If TRUE, performs statistical tests between groups.
 #' @param show_interpretation If TRUE, displays interpretation and feature
 #'   guide.
+#' @param clinical_cutoff Add horizontal line for clinical threshold or
+#'   decision boundary.
+#' @param reference_range_min Lower bound of normal reference range (shaded
+#'   area).
+#' @param reference_range_max Upper bound of normal reference range (shaded
+#'   area).
+#' @param show_mcid Display Minimal Clinically Important Difference band.
+#' @param mcid_value Size of the Minimal Clinically Important Difference.
+#' @param show_effect_size Show effect size calculations between groups.
+#' @param effect_size_type Method for calculating effect size.
+#' @param show_change_scores Display change from baseline analysis for
+#'   longitudinal data.
+#' @param baseline_group Name or level of the baseline/reference group.
+#' @param responder_threshold Percentage change threshold for responder
+#'   classification.
+#' @param show_sample_size Show sample size (N) for each group on the plot.
+#' @param show_missing_info Display information about missing data and
+#'   exclusions.
+#' @param trial_arms Custom labels for treatment arms (comma-separated).
+#' @param time_labels Custom labels for time points (comma-separated).
+#' @param population_type Type of analysis population for clinical trials.
+#' @param log_transform Apply log transformation to Y-axis values.
+#' @param outlier_method Method for handling outliers in the data.
+#' @param show_cv_bands Display coefficient of variation bands for assay
+#'   variability.
+#' @param p_value_position Where to display p-values from group comparisons.
+#' @param journal_style Apply journal-specific formatting guidelines.
+#' @param generate_report Generate comprehensive clinical analysis report.
+#' @param include_methods Include methods section text for publications.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -338,6 +588,10 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$statistics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$comparisons} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$effect_sizes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$change_analysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinical_report} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$methods_text} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export
@@ -361,7 +615,29 @@ advancedraincloud <- function(
     y_label = "",
     show_statistics = TRUE,
     show_comparisons = FALSE,
-    show_interpretation = TRUE) {
+    show_interpretation = TRUE,
+    clinical_cutoff,
+    reference_range_min,
+    reference_range_max,
+    show_mcid = FALSE,
+    mcid_value,
+    show_effect_size = FALSE,
+    effect_size_type = "cohens_d",
+    show_change_scores = FALSE,
+    baseline_group = "",
+    responder_threshold = 20,
+    show_sample_size = TRUE,
+    show_missing_info = FALSE,
+    trial_arms = "",
+    time_labels = "",
+    population_type = "itt",
+    log_transform = FALSE,
+    outlier_method = "none",
+    show_cv_bands = FALSE,
+    p_value_position = "above",
+    journal_style = "default",
+    generate_report = FALSE,
+    include_methods = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("advancedraincloud requires jmvcore to be installed (restart may be required)")
@@ -400,7 +676,29 @@ advancedraincloud <- function(
         y_label = y_label,
         show_statistics = show_statistics,
         show_comparisons = show_comparisons,
-        show_interpretation = show_interpretation)
+        show_interpretation = show_interpretation,
+        clinical_cutoff = clinical_cutoff,
+        reference_range_min = reference_range_min,
+        reference_range_max = reference_range_max,
+        show_mcid = show_mcid,
+        mcid_value = mcid_value,
+        show_effect_size = show_effect_size,
+        effect_size_type = effect_size_type,
+        show_change_scores = show_change_scores,
+        baseline_group = baseline_group,
+        responder_threshold = responder_threshold,
+        show_sample_size = show_sample_size,
+        show_missing_info = show_missing_info,
+        trial_arms = trial_arms,
+        time_labels = time_labels,
+        population_type = population_type,
+        log_transform = log_transform,
+        outlier_method = outlier_method,
+        show_cv_bands = show_cv_bands,
+        p_value_position = p_value_position,
+        journal_style = journal_style,
+        generate_report = generate_report,
+        include_methods = include_methods)
 
     analysis <- advancedraincloudClass$new(
         options = options,

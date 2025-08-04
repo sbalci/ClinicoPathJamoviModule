@@ -52,7 +52,7 @@ This comprehensive guide provides instructions for developing and maintaining th
 <!-- Generic jamovi setup - commented out for ClinicoPath-specific focus
 Official documentation is here: https://dev.jamovi.org/
 
-- Use `R >= 4.0.5`
+- Use `R >= 4.5.0`
 - Install jamovi from: https://www.jamovi.org/download.html 
 - Install jmvtools package with:
 ```r
@@ -1910,15 +1910,14 @@ add following to .gitignore file
 
 Try to use compatible packages with the jamovi's R version.
 
-Use: **R 4.0.5**
-https://cran.r-project.org/bin/macosx/R-4.0.5.pkg
+Use: **R 4.5.0**
+https://cran.r-project.org/bin/macosx/r-release/R-4.5.0-x86_64.pkg
 
-
-Use packages from mran:
+Use packages from CRAN snapshot:
 
 ```r
 options(
-repos = "https://cran.microsoft.com/snapshot/2021-04-01"
+repos = "https://packagemanager.posit.co/cran/2025-05-25"
                 )
 ```
 

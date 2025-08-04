@@ -38,6 +38,13 @@ items:
         - min_samples_split
         - min_samples_leaf
 
+    - name: tree_plot_explanation
+      title: How to Read the Decision Tree
+      type: Html
+      visible: (show_tree_plot && algorithm:rpart || algorithm:ctree)
+      clearWith:
+        - algorithm
+
     - name: importance_plot
       title: Feature Importance
       type: Image
@@ -50,6 +57,14 @@ items:
         - facs
         - target
         - targetLevel
+        - algorithm
+        - importance_method
+
+    - name: importance_plot_explanation
+      title: Understanding Feature Importance
+      type: Html
+      visible: (show_importance_plot)
+      clearWith:
         - algorithm
         - importance_method
 
@@ -81,6 +96,11 @@ items:
         - algorithm
         - validation
 
+    - name: performance_table_explanation
+      title: Interpreting Performance Metrics
+      type: Html
+      visible: (show_performance_metrics)
+
     - name: roc_plot
       title: ROC Curve Analysis
       type: Image
@@ -95,6 +115,11 @@ items:
         - targetLevel
         - algorithm
         - validation
+
+    - name: roc_plot_explanation
+      title: Understanding the ROC Curve
+      type: Html
+      visible: (show_roc_curve)
 
     - name: validation_curves
       title: Validation Performance
@@ -123,6 +148,11 @@ items:
         - targetLevel
         - algorithm
         - validation
+
+    - name: confusion_matrix_explanation
+      title: Reading the Confusion Matrix
+      type: Html
+      visible: (show_confusion_matrix)
 
     - name: calibration_plot
       title: Probability Calibration
