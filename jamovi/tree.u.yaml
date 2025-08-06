@@ -174,6 +174,60 @@ children:
             name: pruning_validation_split
             label: Pruning Validation Split (%)
             format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: consensus_validation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: cp_auto_selection
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: rpart_prior
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: cp_sequence_analysis
+      - type: CheckBox
+        name: xerror_detailed_analysis
+      - type: CheckBox
+        name: impurity_analysis
+      - type: CheckBox
+        name: recursive_partitioning_trace
+      - type: CheckBox
+        name: use_custom_splitting
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: kappa_analysis
+      - type: CheckBox
+        name: advanced_metrics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: custom_splitting_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: rpart_loss_matrix
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: custom_splitting_validation
+      - type: CheckBox
+        name: ensemble_diversity
   - type: CollapseBox
     label: Engine-Specific Options
     collapsed: true
@@ -219,6 +273,49 @@ children:
             name: xgb_eta
             label: XGBoost Learning Rate
             format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ensemble_size
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: clinical_loss_preset
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: weighted_voting
+      - type: CheckBox
+        name: uncertainty_quantification
+      - type: CheckBox
+        name: calibration_analysis
+      - type: CheckBox
+        name: clinical_thresholds
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_samples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: threshold_optimization
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: enhanced_prior_probs
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: multi_threshold_analysis
   - type: CollapseBox
     label: Reproducibility & Analysis
     collapsed: true
@@ -244,6 +341,46 @@ children:
           - type: CheckBox
             name: show_variable_importance_detailed
             label: Detailed Variable Importance
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: consensus_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: population_prevalence
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: stability_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: model_averaging
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: advanced_pruning_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: custom_prior_values
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: pre_pruning_threshold
+        format: number
   - type: CollapseBox
     label: Data Preprocessing
     collapsed: true
@@ -269,6 +406,22 @@ children:
             name: n_trees
             label: Number of Trees
             format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: post_pruning_validation_split
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: rpart_split
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: rf_feature_selection_method
   - type: CollapseBox
     label: Output Options
     collapsed: false
@@ -313,6 +466,61 @@ children:
           - type: CheckBox
             name: show_node_statistics
             label: Show Node Statistics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: rf_proximity_analysis
+      - type: CheckBox
+        name: rf_oob_detailed_analysis
+      - type: CheckBox
+        name: algorithm_benchmarking
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: rpart_surrogate
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: benchmark_algorithms
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: probability_display
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: performance_profiling
+      - type: CheckBox
+        name: adaptive_complexity_parameter
+      - type: CheckBox
+        name: dynamic_splitting_criteria
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: plot_branch_style
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: tree_regularization_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: enhanced_node_info
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: regularization_strength
+        format: number
   - type: CollapseBox
     label: Feature Analysis
     collapsed: true
@@ -332,6 +540,34 @@ children:
           - type: ComboBox
             name: importance_method
             label: Importance Method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: automated_feature_engineering
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: plot_margin
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: interaction_depth
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: rpart_usesurrogate
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: polynomial_degree
+        format: number
   - type: CollapseBox
     label: Interpretability Analysis
     collapsed: true
@@ -356,6 +592,37 @@ children:
           - type: CheckBox
             name: interaction_analysis
             label: Feature Interactions
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: fancy_tree_plot
+      - type: CheckBox
+        name: tree_structure_analysis
+      - type: CheckBox
+        name: cp_selection_visualization
+      - type: CheckBox
+        name: f1_score_analysis
+      - type: CheckBox
+        name: learning_curve_analysis
+      - type: CheckBox
+        name: residual_diagnostics
+      - type: CheckBox
+        name: hyperparameter_grid_search
+      - type: CheckBox
+        name: cross_validation_optimization
+      - type: CheckBox
+        name: ensemble_optimization
+      - type: CheckBox
+        name: surrogate_split_analysis
+      - type: CheckBox
+        name: missing_pattern_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: rpart_maxsurrogate
+        format: number
   - type: CollapseBox
     label: Clinical Settings
     collapsed: true
@@ -387,6 +654,12 @@ children:
             name: expectedPrevalence
             label: Expected Population Prevalence (%)
             format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: rpart_xval
+        format: number
   - type: CollapseBox
     label: Advanced Validation
     collapsed: true
@@ -412,6 +685,12 @@ children:
           - type: ComboBox
             name: modelComparisonMetric
             label: Comparison Metric
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: rpart_maxcompete
+        format: number
   - type: CollapseBox
     label: Export & Reporting
     collapsed: true
@@ -455,3 +734,17 @@ children:
           - type: CheckBox
             name: prediction_intervals
             label: Prediction Intervals
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: rpart_prediction_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_rsq_plot
+      - type: CheckBox
+        name: competing_splits
+      - type: CheckBox
+        name: surrogate_splits

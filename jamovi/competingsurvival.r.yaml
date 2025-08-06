@@ -16,12 +16,12 @@ items:
     - name:  summary
       title: Analysis Summary
       type:  Html
-      visible: (explanatory && outcome && overalltime)
+      visible: true
 
     - name:  survivalTable
       title: Survival Analysis Results
       type:  Table
-      visible: (explanatory && outcome && overalltime)
+      visible: true
       rows: 1
       columns:
           - name: term
@@ -44,7 +44,7 @@ items:
     - name:  cuminc
       title: Cumulative Incidence Function
       type:  Table
-      visible: (explanatory && outcome && overalltime && analysistype:compete)
+      visible: (analysistype:compete)
       rows: 1
       columns:
           - name: time
@@ -69,7 +69,7 @@ items:
       width:  700
       height: 400
       renderFun: .plotCompetingRisks
-      visible: (explanatory && outcome && overalltime && analysistype:compete)
+      visible: (analysistype:compete)
       clearWith:
           - explanatory
           - outcome
@@ -79,6 +79,6 @@ items:
     - name:  interpretation
       title: Clinical Interpretation
       type:  Html
-      visible: (explanatory && outcome && overalltime)
+      visible: true
 
 ...

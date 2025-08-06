@@ -1,7 +1,7 @@
 ---
 name: decisiongraph
 title: Decision Tree Graph
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: DecisionD
 menuSubtitle: Cost-Effectiveness Decision Tree Visualization
 version: '0.0.3'
@@ -338,6 +338,26 @@ options:
           R: >
             Perform incremental cost-effectiveness ratio (ICER) calculations.
 
+    - name: dominanceAnalysis
+      title: Dominance Analysis
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Identify dominated and extendedly dominated strategies in ICER analysis.
+          R: >
+            Identify dominated and extendedly dominated strategies in ICER analysis.
+
+    - name: icer_confidence_intervals
+      title: ICER Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Calculate confidence intervals for ICERs using bootstrap or PSA results.
+          R: >
+            Calculate confidence intervals for ICERs using bootstrap or PSA results.
+
     - name: probabilisticAnalysis
       title: Probabilistic Sensitivity Analysis
       type: Bool
@@ -347,6 +367,16 @@ options:
             Perform probabilistic sensitivity analysis using Monte Carlo simulation.
           R: >
             Perform probabilistic sensitivity analysis using Monte Carlo simulation.
+
+    - name: psa_advanced_outputs
+      title: Advanced PSA Outputs
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Generate advanced PSA outputs (CEAC, EVPI, net benefit distributions).
+          R: >
+            Generate advanced PSA outputs (CEAC, EVPI, net benefit distributions).
 
     - name: numSimulations
       title: Number of Simulations
@@ -359,6 +389,49 @@ options:
             Number of Monte Carlo simulations for probabilistic analysis.
           R: >
             Number of Monte Carlo simulations for probabilistic analysis.
+
+    # Advanced Markov Modeling Options
+    - name: markovAdvanced
+      title: Advanced Markov Features
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Enable advanced Markov modeling features (tunnel states, time-varying transitions).
+          R: >
+            Enable advanced Markov modeling features.
+
+    - name: tunnelStates
+      title: Tunnel States
+      type: Variables
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Define tunnel states for temporary health states (e.g., post-surgical recovery).
+          R: >
+            Define tunnel states for temporary health states.
+
+    - name: timeVaryingTransitions
+      title: Time-Varying Transition Probabilities
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Allow transition probabilities to change over time (age-dependent rates).
+          R: >
+            Allow transition probabilities to change over time.
+
+    - name: ageSpecificTransitions
+      title: Age-Specific Transition Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Variables defining age-specific or time-dependent transition rates.
+          R: >
+            Variables defining age-specific transition rates.
 
     # Chance Node Options
     - name: chanceNodeMethod
@@ -387,5 +460,145 @@ options:
             Apply risk adjustment to probabilities based on patient characteristics.
           R: >
             Apply risk adjustment to probabilities based on patient characteristics.
+
+    # Health Economics Modeling Enhancements
+    - name: cycleCorrection
+      title: Half-Cycle Correction
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Apply half-cycle correction for more accurate discounting in Markov models.
+          R: >
+            Apply half-cycle correction for more accurate discounting in Markov models.
+
+    - name: cohortTrace
+      title: Cohort Trace Analysis
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Generate cohort trace showing population distribution across health states over time.
+          R: >
+            Generate cohort trace showing population distribution across health states over time.
+
+    - name: cohortSize
+      title: Starting Cohort Size
+      type: Integer
+      default: 1000
+      min: 100
+      max: 1000000
+      description:
+          ui: >
+            Size of hypothetical cohort for trace analysis and budget impact modeling.
+          R: >
+            Size of hypothetical cohort for trace analysis and budget impact modeling.
+
+    - name: valueOfInformation
+      title: Value of Information Analysis
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform Expected Value of Perfect Information (EVPI) and partial EVPI analysis.
+          R: >
+            Perform Expected Value of Perfect Information (EVPI) and partial EVPI analysis.
+
+    - name: evpi_parameters
+      title: EVPI Analysis Parameters
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Parameters for partial EVPI analysis (subset of key uncertain parameters).
+          R: >
+            Parameters for partial EVPI analysis.
+
+    - name: budgetImpactAnalysis
+      title: Budget Impact Analysis
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform budget impact analysis comparing total costs of alternative strategies.
+          R: >
+            Perform budget impact analysis comparing total costs of alternative strategies.
+
+    - name: targetPopulationSize
+      title: Target Population Size
+      type: Integer
+      default: 10000
+      min: 1000
+      max: 10000000
+      description:
+          ui: >
+            Size of target population for budget impact calculations.
+          R: >
+            Size of target population for budget impact calculations.
+
+    - name: marketPenetration
+      title: Market Penetration Rate
+      type: Number
+      default: 0.5
+      min: 0.0
+      max: 1.0
+      description:
+          ui: >
+            Expected market penetration rate for new intervention (0-100%).
+          R: >
+            Expected market penetration rate for new intervention.
+
+    - name: ceacThresholds
+      title: CEAC Threshold Range
+      type: String
+      default: "0,100000,5000"
+      description:
+          ui: >
+            Cost-effectiveness acceptability curve thresholds (min,max,step) for PSA.
+          R: >
+            Cost-effectiveness acceptability curve thresholds (min,max,step).
+
+    - name: psa_distributions
+      title: PSA Parameter Distributions
+      type: List
+      options:
+        - name: normal
+          title: Normal Distribution
+        - name: lognormal
+          title: Log-Normal Distribution
+        - name: beta
+          title: Beta Distribution (probabilities)
+        - name: gamma
+          title: Gamma Distribution (costs)
+        - name: dirichlet
+          title: Dirichlet Distribution (multinomial probabilities)
+      default: normal
+      description:
+          ui: >
+            Default probability distribution for uncertain parameters in PSA.
+          R: >
+            Default probability distribution for uncertain parameters in PSA.
+
+    - name: correlatedParameters
+      title: Parameter Correlations
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Account for correlations between uncertain parameters in PSA.
+          R: >
+            Account for correlations between uncertain parameters in PSA.
+
+    - name: correlationMatrix
+      title: Correlation Matrix Variables
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Variables defining correlation structure between uncertain parameters.
+          R: >
+            Variables defining correlation structure between uncertain parameters.
 
 ...

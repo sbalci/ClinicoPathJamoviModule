@@ -29,6 +29,19 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             message("[DEBUG] === TREE FUNCTION STARTING ===")
             message("[DEBUG] Algorithm: ", self$options$algorithm)
 
+            # Method-specific parameter validation and guidance
+            param_validation <- private$.validate_method_parameters()
+            if (length(param_validation$warnings) > 0) {
+                for (warning_msg in param_validation$warnings) {
+                    message("[PARAMETER WARNING] ", warning_msg)
+                }
+            }
+            if (length(param_validation$recommendations) > 0) {
+                for (rec_msg in param_validation$recommendations) {
+                    message("[RECOMMENDATION] ", rec_msg)
+                }
+            }
+
             # Comprehensive validation and welcome message handling
             validation_result <- private$.validate_inputs()
 
@@ -227,6 +240,52 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                     detailed_importance_html <- private$.generate_detailed_importance_analysis(model_results)
                     if (!is.null(detailed_importance_html)) {
                         self$results$detailed_importance_analysis$setContent(detailed_importance_html)
+                    }
+                }
+
+                # Enhanced rpart analysis
+                if (self$options$competing_splits && self$options$algorithm == "rpart") {
+                    competing_splits_html <- private$.generate_competing_splits_analysis(model_results)
+                    if (!is.null(competing_splits_html)) {
+                        self$results$competing_splits_analysis$setContent(competing_splits_html)
+                    }
+                }
+
+                if (self$options$surrogate_splits && self$options$algorithm == "rpart") {
+                    surrogate_splits_html <- private$.generate_surrogate_splits_analysis(model_results)
+                    if (!is.null(surrogate_splits_html)) {
+                        self$results$surrogate_splits_analysis$setContent(surrogate_splits_html)
+                    }
+                }
+
+                # Advanced rpart analysis features
+                if (self$options$algorithm == "rpart") {
+                    if (self$options$cp_sequence_analysis) {
+                        cp_sequence_html <- private$.generate_cp_sequence_analysis(model_results)
+                        if (!is.null(cp_sequence_html)) {
+                            self$results$cp_sequence_analysis_results$setContent(cp_sequence_html)
+                        }
+                    }
+
+                    if (self$options$xerror_detailed_analysis) {
+                        xerror_html <- private$.generate_xerror_detailed_analysis(model_results)
+                        if (!is.null(xerror_html)) {
+                            self$results$xerror_detailed_analysis_results$setContent(xerror_html)
+                        }
+                    }
+
+                    if (self$options$impurity_analysis) {
+                        impurity_html <- private$.generate_impurity_analysis(model_results)
+                        if (!is.null(impurity_html)) {
+                            self$results$impurity_analysis_results$setContent(impurity_html)
+                        }
+                    }
+
+                    if (self$options$recursive_partitioning_trace) {
+                        trace_html <- private$.generate_recursive_partitioning_trace(model_results)
+                        if (!is.null(trace_html)) {
+                            self$results$recursive_partitioning_trace_results$setContent(trace_html)
+                        }
                     }
                 }
 
@@ -1001,14 +1060,148 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             })
         },
 
+        .plot_rsq = function(image, ggtheme, theme, ...) {
+
+            if (is.null(private$.model_results)) {
+                return()
+            }
+
+            model <- private$.model_results$model
+            algorithm <- self$options$algorithm
+
+            if (algorithm != "rpart" || !inherits(model, "rpart")) {
+                return()
+            }
+
+            # Check if this is a regression tree
+            if (self$options$tree_mode != "regression") {
+                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                text(1, 1, "R-squared plot only available for regression trees", cex = 0.8)
+                return()
+            }
+
+            tryCatch({
+                # Use rsq.rpart to plot R-squared vs tree size
+                rsq.rpart(model)
+
+                # Add title and labels
+                title(main = "R-squared vs Tree Size",
+                      sub = "Shows explained variance as tree complexity increases")
+
+            }, error = function(e) {
+                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                text(1, 1, paste("Error creating R-squared plot:", e$message), cex = 0.8)
+            })
+        },
+
+        .plot_xerror_confidence = function(image, ggtheme, theme, ...) {
+
+            if (is.null(private$.model_results)) {
+                return()
+            }
+
+            model <- private$.model_results$model
+            algorithm <- self$options$algorithm
+
+            if (algorithm != "rpart" || !inherits(model, "rpart")) {
+                return()
+            }
+
+            tryCatch({
+                cp_table <- model$cptable
+                if (is.null(cp_table) || nrow(cp_table) == 0) {
+                    plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                    text(1, 1, "No CP table available", cex = 0.8)
+                    return()
+                }
+
+                # Extract data for plotting
+                cp_values <- cp_table[, "CP"]
+                xerror <- cp_table[, "xerror"]
+                xstd <- cp_table[, "xstd"]
+
+                # Calculate confidence bands
+                upper_ci <- xerror + xstd
+                lower_ci <- xerror - xstd
+
+                # Find optimal points
+                min_xerror_idx <- which.min(xerror)
+                min_xerror <- xerror[min_xerror_idx]
+                se_threshold <- min_xerror + xstd[min_xerror_idx]
+                one_se_idx <- which(xerror <= se_threshold)[1]
+
+                # Create the plot
+                x_vals <- 1:length(cp_values)
+
+                # Plot xerror with confidence bands
+                plot(x_vals, xerror, type = "b", pch = 16, col = "blue", lwd = 2,
+                     xlab = "CP Table Row", ylab = "Cross-Validation Error",
+                     main = "Cross-Validation Error with Confidence Bands",
+                     ylim = range(c(lower_ci, upper_ci), na.rm = TRUE))
+
+                # Add confidence bands
+                polygon(c(x_vals, rev(x_vals)), c(upper_ci, rev(lower_ci)),
+                        col = rgb(0, 0, 1, 0.2), border = NA)
+
+                # Add confidence band lines
+                lines(x_vals, upper_ci, col = "lightblue", lty = 2, lwd = 1)
+                lines(x_vals, lower_ci, col = "lightblue", lty = 2, lwd = 1)
+
+                # Mark minimum xerror point
+                points(min_xerror_idx, xerror[min_xerror_idx], col = "orange", pch = 19, cex = 2)
+
+                # Mark 1-SE rule selection
+                points(one_se_idx, xerror[one_se_idx], col = "green", pch = 19, cex = 2)
+
+                # Add horizontal line for 1-SE threshold
+                abline(h = se_threshold, col = "green", lty = 2, lwd = 2)
+
+                # Add grid
+                grid(col = "gray90", lty = 1)
+
+                # Add legend
+                legend("topright",
+                       legend = c("Cross-validation Error",
+                                 "±1 Standard Error",
+                                 "Minimum Error",
+                                 "1-SE Rule Selection",
+                                 "1-SE Threshold"),
+                       col = c("blue", "lightblue", "orange", "green", "green"),
+                       pch = c(16, NA, 19, 19, NA),
+                       lty = c(1, 2, NA, NA, 2),
+                       lwd = c(2, 1, NA, NA, 2),
+                       cex = 0.8)
+
+                # Add text annotations
+                text(min_xerror_idx, xerror[min_xerror_idx] + 0.02,
+                     paste("Min\n(Row", min_xerror_idx, ")"),
+                     col = "orange", cex = 0.8, adj = c(0.5, 0))
+
+                text(one_se_idx, xerror[one_se_idx] - 0.02,
+                     paste("1-SE Rule\n(Row", one_se_idx, ")"),
+                     col = "green", cex = 0.8, adj = c(0.5, 1))
+
+            }, error = function(e) {
+                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                text(1, 1, paste("Error creating xerror confidence plot:", e$message), cex = 0.8)
+            })
+        },
+
         .prepare_data = function() {
 
             tryCatch({
+                message("[DEBUG-PREPARE] Starting data preparation...")
+
                 # Get variables
                 continuous_vars <- self$options$vars
                 categorical_vars <- self$options$facs
                 target_var <- self$options$target
                 target_level <- self$options$targetLevel
+
+                message("[DEBUG-PREPARE] Variables - Continuous: ", paste(continuous_vars %||% "none", collapse = ", "))
+                message("[DEBUG-PREPARE] Variables - Categorical: ", paste(categorical_vars %||% "none", collapse = ", "))
+                message("[DEBUG-PREPARE] Target: ", target_var %||% "none", " (level: ", target_level %||% "none", ")")
+                message("[DEBUG-PREPARE] Data dimensions: ", nrow(self$data), " x ", ncol(self$data))
 
                 # Combine all predictor variables
                 all_vars <- c(continuous_vars, categorical_vars)
@@ -1162,10 +1355,20 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 return(analysis_data)
 
             }, error = function(e) {
+                message("[DEBUG] Data preparation error: ", e$message)
+                message("[DEBUG] Continuous vars: ", paste(self$options$vars %||% "none", collapse = ", "))
+                message("[DEBUG] Categorical vars: ", paste(self$options$facs %||% "none", collapse = ", "))
+                message("[DEBUG] Target var: ", self$options$target %||% "none")
+                message("[DEBUG] Target level: ", self$options$targetLevel %||% "none")
+
                 error_msg <- paste0("
                 <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
                 <h4>Data Preparation Error</h4>
-                <p>", e$message, "</p>
+                <p><strong>Error:</strong> ", e$message, "</p>
+                <p><strong>Variables:</strong> Continuous: ", paste(self$options$vars %||% "none", collapse = ", "),
+                ", Categorical: ", paste(self$options$facs %||% "none", collapse = ", "), "</p>
+                <p><strong>Target:</strong> ", self$options$target %||% "none", " (level: ", self$options$targetLevel %||% "none", ")</p>
+                <p>Please check that all variables exist in your dataset and that the target variable has at least two categories.</p>
                 </div>")
                 self$results$model_summary$setContent(error_msg)
                 return(NULL)
@@ -1347,779 +1550,6 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 return(data)
             })
         },
-
-        .train_model = function(data, tree_mode = "classification") {
-            tryCatch({
-                algorithm <- self$options$algorithm
-                target_var <- self$options$target
-
-                message("[DEBUG] Algorithm selected: ", algorithm)
-                message("[DEBUG] Target variable: ", target_var)
-                message("[DEBUG] Data dimensions before split: ", nrow(data), " x ", ncol(data))
-
-                # Prepare formula
-                predictors <- setdiff(names(data), target_var)
-                formula_str <- paste(target_var, "~", paste(predictors, collapse = " + "))
-                model_formula <- as.formula(formula_str)
-
-                message("[DEBUG] Predictors: ", paste(predictors, collapse = ", "))
-                message("[DEBUG] Formula created: ", formula_str)
-
-                # Split data for validation
-                validation_method <- self$options$validation
-                message("[DEBUG] Validation method: ", validation_method)
-
-                if (validation_method == "holdout") {
-                    set.seed(123)
-                    message("[DEBUG] Creating holdout split with test_split = ", self$options$test_split)
-                    train_idx <- caret::createDataPartition(data[[target_var]],
-                                                          p = 1 - self$options$test_split,
-                                                          list = FALSE)
-                    train_data <- data[train_idx, ]
-                    test_data <- data[-train_idx, ]
-                    message("[DEBUG] Train set size: ", nrow(train_data))
-                    message("[DEBUG] Test set size: ", nrow(test_data))
-                } else {
-                    message("[DEBUG] Using full data for both train and test")
-                    train_data <- data
-                    test_data <- data
-                }
-
-                private$.training_data <- train_data
-                private$.test_data <- test_data
-
-                # Define positive and negative classes
-                positive_level <- self$options$targetLevel
-                target_levels <- levels(as.factor(train_data[[target_var]]))
-                negative_class <- setdiff(target_levels, positive_level)[1]
-                target_level <- positive_level  # Alias for consistency
-
-                # Train model based on algorithm
-                if (algorithm == "fftrees") {
-                    # DEBUG: Starting FFTrees processing
-                    message("[DEBUG] Starting FFTrees algorithm")
-                    message("[DEBUG] Train data dimensions: ", nrow(train_data), " x ", ncol(train_data))
-                    message("[DEBUG] Test data dimensions: ", nrow(test_data), " x ", ncol(test_data))
-                    message("[DEBUG] Formula: ", deparse(model_formula))
-
-                    # Check target variable levels for FFTrees (requires binary)
-                    message("[DEBUG] Original target variable levels: ", paste(target_levels, collapse = ", "))
-                    message("[DEBUG] Target variable class: ", class(train_data[[target_var]]))
-                    message("[DEBUG] Target variable sample values: ", paste(head(train_data[[target_var]], 10), collapse = ", "))
-                    message("[DEBUG] Selected positive level (targetLevel): ", self$options$targetLevel)
-
-                    # Check if targetLevel actually exists in the data
-                    if (!self$options$targetLevel %in% train_data[[target_var]]) {
-                        message("[DEBUG] WARNING: targetLevel '", self$options$targetLevel, "' not found in train data!")
-                        message("[DEBUG] Available values: ", paste(unique(train_data[[target_var]]), collapse = ", "))
-                    }
-
-                    # FFTrees requires binary classification
-                    if (length(target_levels) != 2) {
-                        message("[DEBUG] FFTrees requires binary classification. Converting to binary...")
-
-                        message("[DEBUG] Before conversion - train target unique: ",
-                               paste(unique(train_data[[target_var]]), collapse = ", "))
-                        message("[DEBUG] Before conversion - test target unique: ",
-                               paste(unique(test_data[[target_var]]), collapse = ", "))
-
-                        train_data[[target_var]] <- factor(
-                            ifelse(train_data[[target_var]] == positive_level, positive_level, "Other"),
-                            levels = c("Other", positive_level)
-                        )
-                        test_data[[target_var]] <- factor(
-                            ifelse(test_data[[target_var]] == positive_level, positive_level, "Other"),
-                            levels = c("Other", positive_level)
-                        )
-
-                        negative_class <- "Other"
-
-                        message("[DEBUG] After conversion - train target unique: ",
-                               paste(unique(train_data[[target_var]]), collapse = ", "))
-                        message("[DEBUG] After conversion - test target unique: ",
-                               paste(unique(test_data[[target_var]]), collapse = ", "))
-                        message("[DEBUG] Converted to binary: Other vs ", positive_level)
-                        message("[DEBUG] New train target distribution: ",
-                               paste(names(table(train_data[[target_var]])), "=",
-                                     table(train_data[[target_var]]), collapse = ", "))
-                        message("[DEBUG] New test target distribution: ",
-                               paste(names(table(test_data[[target_var]])), "=",
-                                     table(test_data[[target_var]]), collapse = ", "))
-                    }
-
-                    # Get positive and negative class labels from data attributes
-                    positive_class <- attr(data, "positive_class")
-                    if (is.null(negative_class)) {
-                        negative_class <- attr(data, "negative_class")
-                    }
-
-                    message("[DEBUG] Positive class: ", ifelse(is.null(positive_class), "NULL", positive_class))
-                    message("[DEBUG] Negative class: ", ifelse(is.null(negative_class), "NULL", negative_class))
-
-                    # Set decision labels based on our selected positive class
-                    other_levels <- setdiff(levels(train_data[[target_var]]), positive_level)
-                    negative_level <- if(length(other_levels) == 1) other_levels[1] else "Other"
-
-                    decision_labels <- c(paste("Predict", negative_level), paste("Predict", positive_level))
-                    message("[DEBUG] Corrected decision labels: ", paste(decision_labels, collapse = ", "))
-                    message("[DEBUG] About to call FFTrees::FFTrees()")
-
-                    # Debug data structure being passed to FFTrees
-                    message("[DEBUG] Train data structure:")
-                    message("[DEBUG]   Columns: ", paste(names(train_data), collapse = ", "))
-                    message("[DEBUG]   Target column '", target_var, "' class: ", class(train_data[[target_var]]))
-                    message("[DEBUG]   Target column '", target_var, "' levels: ",
-                           paste(levels(train_data[[target_var]]), collapse = ", "))
-                    message("[DEBUG]   Formula to FFTrees: ", deparse(model_formula))
-
-                    # Fix FFTrees criterion issue by converting target to logical ourselves
-                    # This ensures FFTrees uses our selected positive class correctly
-                    message("[DEBUG] Converting target to logical: ", target_var, " == '", positive_level, "'")
-
-                    # Create logical version of target variable where TRUE = positive class
-                    train_data[[paste0(target_var, "_logical")]] <- as.logical(train_data[[target_var]] == positive_level)
-                    test_data[[paste0(target_var, "_logical")]] <- as.logical(test_data[[target_var]] == positive_level)
-
-                    # Create new formula using the logical target
-                    logical_target <- paste0(target_var, "_logical")
-                    predictors <- setdiff(names(train_data), c(target_var, logical_target))
-                    model_formula_logical <- as.formula(paste(logical_target, "~", paste(predictors, collapse = " + ")))
-
-                    message("[DEBUG] New logical formula: ", deparse(model_formula_logical))
-                    message("[DEBUG] Logical target distribution - Train: ",
-                           paste(names(table(train_data[[logical_target]])), "=",
-                                 table(train_data[[logical_target]]), collapse = ", "))
-
-                    # Wrap FFTrees call in tryCatch for better error handling
-                    tryCatch({
-                        # Train FFTrees model with logical target
-                        model <- FFTrees::FFTrees(
-                            formula = model_formula_logical,
-                            data = train_data,
-                            data.test = test_data,
-                            main = "Medical Decision Tree",
-                            decision.labels = decision_labels,
-                            quiet = list(ini = TRUE, fin = FALSE, mis = FALSE, set = TRUE)
-                        )
-                        message("[DEBUG] FFTrees model created successfully")
-
-                        # Inspect FFTrees model structure
-                        message("[DEBUG] FFTrees model class: ", class(model))
-                        message("[DEBUG] FFTrees model names: ", paste(names(model), collapse = ", "))
-
-                        if ("trees" %in% names(model)) {
-                            message("[DEBUG] model$trees names: ", paste(names(model$trees), collapse = ", "))
-                            if ("decisions" %in% names(model$trees)) {
-                                message("[DEBUG] model$trees$decisions names: ", paste(names(model$trees$decisions), collapse = ", "))
-                                if ("test" %in% names(model$trees$decisions)) {
-                                    message("[DEBUG] model$trees$decisions$test class: ", class(model$trees$decisions$test))
-                                    message("[DEBUG] model$trees$decisions$test dim: ",
-                                           ifelse(is.null(dim(model$trees$decisions$test)), "NULL",
-                                                  paste(dim(model$trees$decisions$test), collapse = " x ")))
-                                }
-                            }
-                        }
-
-                    }, error = function(e) {
-                        message("[DEBUG] FFTrees error: ", e$message)
-                        stop("FFTrees failed: ", e$message)
-                    })
-
-                    message("[DEBUG] FFTrees model created successfully")
-
-                    # Get predictions using the reliable predict() method
-                    message("[DEBUG] Extracting predictions using predict() method")
-
-                    tryCatch({
-                        # Use predict() method - most reliable approach
-                        test_pred <- predict(model, newdata = test_data)
-                        message("[DEBUG] predict() result class: ", class(test_pred))
-                        message("[DEBUG] predict() result length: ", length(test_pred))
-                        message("[DEBUG] predict() result sample: ", paste(head(test_pred, 5), collapse = ", "))
-
-                        # Convert to logical
-                        predictions_logical <- as.logical(test_pred)
-
-                        # Convert logical to factor matching original levels
-                        predictions_class <- factor(
-                            ifelse(predictions_logical, positive_level, negative_class),
-                            levels = c(negative_class, positive_level)
-                        )
-
-                        # Get probabilities
-                        predictions_prob <- as.numeric(predictions_logical)
-
-                        message("[DEBUG] Final predictions_prob sample: ", paste(head(predictions_prob, 5), collapse = ", "))
-                        message("[DEBUG] Final predictions_class sample: ", paste(head(predictions_class, 5), collapse = ", "))
-
-                    }, error = function(e) {
-                        message("[DEBUG] predict() method failed: ", e$message)
-                        message("[DEBUG] Trying alternative prediction extraction...")
-
-                        # Fallback to complex extraction - keep original logic as backup
-                        # FFTrees stores predictions as a nested list structure
-                        if (!is.null(model$trees$decisions$test)) {
-                            # Find the best tree - typically stored in model$trees$best$test
-                            if (!is.null(model$trees$best) && !is.null(model$trees$best$test)) {
-                                best_tree <- model$trees$best$test
-                                message("[DEBUG] Using best tree index: ", best_tree)
-                            } else {
-                                best_tree <- 1
-                                message("[DEBUG] Using default tree index: ", best_tree)
-                            }
-
-                            # model$trees$decisions$test is a list where each element contains multiple trees
-                            if (is.list(model$trees$decisions$test) && length(model$trees$decisions$test) >= best_tree) {
-                                # The structure appears to be decisions$test[[tree_index]]
-                                tree_decisions <- model$trees$decisions$test[[best_tree]]
-                                message("[DEBUG] Tree decisions class: ", class(tree_decisions))
-                                message("[DEBUG] Tree decisions length: ", length(tree_decisions))
-
-                                # If it's still a list, it might be per test case
-                                if (is.list(tree_decisions)) {
-                                    # Check if we have the right number of elements for our test set
-                                    message("[DEBUG] Expected test cases: ", nrow(test_data))
-
-                                    # Try different extraction methods
-                                    if (length(tree_decisions) == nrow(test_data)) {
-                                        # Each element is one prediction
-                                        predictions_logical <- as.logical(unlist(tree_decisions))
-                                        message("[DEBUG] Method 1 - Direct unlist - length: ", length(predictions_logical))
-                                    } else {
-                                        # Maybe it's structured differently - try just the first element
-                                        if (length(tree_decisions) > 0 && is.logical(tree_decisions[[1]])) {
-                                            # Take only the first set of predictions that matches our test size
-                                            for (i in 1:length(tree_decisions)) {
-                                                if (length(tree_decisions[[i]]) == nrow(test_data)) {
-                                                    predictions_logical <- tree_decisions[[i]]
-                                                    message("[DEBUG] Method 2 - Found matching length at position ", i, " - length: ", length(predictions_logical))
-                                                    break
-                                                }
-                                            }
-                                            if (!exists("predictions_logical")) {
-                                                # Fallback - take first nrow(test_data) predictions
-                                                all_predictions <- unlist(tree_decisions)
-                                                predictions_logical <- all_predictions[1:nrow(test_data)]
-                                                message("[DEBUG] Method 3 - Truncated to test size - length: ", length(predictions_logical))
-                                            }
-                                        } else {
-                                            # Final fallback
-                                            predictions_logical <- as.logical(unlist(tree_decisions))[1:nrow(test_data)]
-                                            message("[DEBUG] Method 4 - Fallback truncation - length: ", length(predictions_logical))
-                                        }
-                                    }
-
-                                    message("[DEBUG] Final predictions class: ", class(predictions_logical))
-                                    message("[DEBUG] Final predictions sample: ", paste(head(predictions_logical, 10), collapse = ", "))
-                                } else if (is.logical(tree_decisions)) {
-                                    predictions_logical <- tree_decisions
-                                    message("[DEBUG] Direct logical vector - length: ", length(predictions_logical))
-                                } else {
-                                    # Fallback: try to coerce to logical
-                                    predictions_logical <- as.logical(tree_decisions)
-                                    message("[DEBUG] Coerced to logical - length: ", length(predictions_logical))
-                                }
-
-                                # Convert logical to factor matching original levels
-                                predictions_class <- factor(
-                                    ifelse(predictions_logical, positive_level, "Other"),
-                                    levels = c("Other", positive_level)
-                                )
-
-                                # Get probabilities - use proportion of positive predictions as rough estimate
-                                predictions_prob <- as.numeric(predictions_logical)
-
-                            } else {
-                                message("[DEBUG] ERROR: Cannot access tree ", best_tree, " from decisions list")
-                                message("[DEBUG] decisions$test length: ", length(model$trees$decisions$test))
-                                stop("Cannot extract predictions from FFTrees model structure")
-                            }
-                        } else {
-                            message("[DEBUG] No test decisions found, trying predict()")
-                            # Alternative: make predictions manually
-                            test_pred <- predict(model, newdata = test_data)
-                            message("[DEBUG] fallback predict() result length: ", length(test_pred))
-
-                            predictions_class <- factor(
-                                ifelse(test_pred, positive_level, negative_class),
-                                levels = c(negative_class, positive_level)
-                            )
-                            predictions_prob <- as.numeric(test_pred)
-                        }
-                    }) # Close the tryCatch for predict() method
-
-                    message("[DEBUG] Predictions extracted - prob length: ", length(predictions_prob),
-                           ", class length: ", length(predictions_class))
-
-                } else if (algorithm == "rpart") {
-                    message("[DEBUG] Training enhanced CART model")
-
-                    # Determine if hyperparameter tuning is enabled
-                    if (self$options$hyperparameter_tuning) {
-                        private$.update_algorithm_progress(algorithm, "hyperparameter_tuning")
-                        message("[DEBUG] Performing hyperparameter tuning for ", algorithm)
-                        model <- private$.tune_hyperparameters(model_formula, train_data, test_data, algorithm)
-                    } else {
-                        # Train with user-specified parameters
-                        message("[DEBUG] Using user-specified parameters")
-
-                        # Handle missing data based on user preference
-                        missing_method <- self$options$missing_data_method %||% "native"
-                        if (missing_method == "clinical_impute") {
-                            train_data <- private$.clinical_imputation(train_data, target_var)
-                            test_data <- private$.clinical_imputation(test_data, target_var)
-                        } else if (missing_method == "exclude") {
-                            complete_vars <- c(self$options$vars, self$options$facs, target_var)
-                            train_data <- train_data[complete.cases(train_data[complete_vars]), ]
-                            test_data <- test_data[complete.cases(test_data[complete_vars]), ]
-                        }
-                        # native and multiple_impute handled by rpart automatically
-
-                        # Check for ensemble method
-                        ensemble_method <- self$options$ensemble_method %||% "none"
-
-                        if (ensemble_method == "random_forest") {
-                            message("[DEBUG] Training Random Forest ensemble")
-                            if (!requireNamespace("randomForest", quietly = TRUE)) {
-                                message("[DEBUG] randomForest package not available, falling back to single tree")
-                                ensemble_method <- "none"
-                            } else {
-                                model <- randomForest::randomForest(
-                                    model_formula,
-                                    data = train_data,
-                                    ntree = self$options$n_trees %||% 100,
-                                    na.action = na.roughfix
-                                )
-                            }
-                        } else if (ensemble_method == "bagging") {
-                            message("[DEBUG] Training Bagged trees ensemble")
-                            if (!requireNamespace("randomForest", quietly = TRUE)) {
-                                message("[DEBUG] randomForest package not available, falling back to single tree")
-                                ensemble_method <- "none"
-                            } else {
-                                # Bagging is random forest with all variables considered at each split
-                                n_vars <- length(c(self$options$vars, self$options$facs))
-                                model <- randomForest::randomForest(
-                                    model_formula,
-                                    data = train_data,
-                                    ntree = self$options$n_trees %||% 100,
-                                    mtry = n_vars,  # Use all variables for bagging
-                                    na.action = na.roughfix
-                                )
-                            }
-                        }
-
-                        if (ensemble_method == "none") {
-                            # Single tree with tidymodels-style parameters
-                            model <- rpart::rpart(
-                                model_formula,
-                                data = train_data,
-                                control = rpart::rpart.control(
-                                    maxdepth = self$options$tree_depth %||% self$options$max_depth %||% 6,
-                                    minsplit = self$options$min_n %||% self$options$min_samples_split %||% 20,
-                                    minbucket = self$options$min_samples_leaf %||% 10,
-                                    cp = self$options$cost_complexity %||% self$options$complexity_parameter %||% 0.01
-                                )
-                            )
-                        }
-                    }
-
-                    message("[DEBUG] Model training completed, making predictions")
-
-                    # Make predictions based on model type
-                    ensemble_method <- self$options$ensemble_method %||% "none"
-                    if (ensemble_method %in% c("random_forest", "bagging")) {
-                        # Ensemble predictions
-                        predictions_prob <- predict(model, test_data, type = "prob")[, 2]
-                        predictions_class <- predict(model, test_data, type = "class")
-                    } else {
-                        # Single tree predictions
-                        predictions_prob <- predict(model, test_data, type = "prob")[, 2]
-                        predictions_class <- predict(model, test_data, type = "class")
-                    }
-
-                    message("[DEBUG] Predictions completed")
-
-                } else if (algorithm == "c50") {
-                    message("[DEBUG] Training C5.0 classification model")
-
-                    if (!requireNamespace("C50", quietly = TRUE)) {
-                        stop("C50 package required but not installed. Please install with: install.packages('C50')")
-                    }
-
-                    # Determine if hyperparameter tuning is enabled
-                    if (self$options$hyperparameter_tuning) {
-                        message("[DEBUG] Performing hyperparameter tuning for C5.0")
-                        model <- private$.tune_hyperparameters(model_formula, train_data, test_data, algorithm)
-
-                        # Make predictions with tuned model
-                        if (!is.null(model)) {
-                            predictions_class <- predict(model, test_data, type = "class")
-                            predictions_prob_matrix <- predict(model, test_data, type = "prob")
-                            predictions_prob <- predictions_prob_matrix[, 2]  # Probability of positive class
-                        }
-                    } else {
-                        # C5.0 parameters
-                        trials <- self$options$c50_trials %||% 1
-                        winnow <- self$options$c50_winnow %||% FALSE
-
-                        # Train C5.0 model
-                        model <- C50::C5.0(
-                            model_formula,
-                            data = train_data,
-                            trials = trials,
-                            winnow = winnow,
-                            control = C50::C5.0Control(
-                                minCases = self$options$min_n %||% 20,
-                                CF = 1 - (self$options$cost_complexity %||% 0.01)  # Convert CP to confidence factor
-                            )
-                        )
-
-                        # Make predictions
-                        predictions_class <- predict(model, test_data, type = "class")
-                        predictions_prob_matrix <- predict(model, test_data, type = "prob")
-                        predictions_prob <- predictions_prob_matrix[, 2]  # Probability of positive class
-                    }
-
-                    message("[DEBUG] C5.0 model training completed")
-
-                } else if (algorithm == "ctree") {
-                    message("[DEBUG] Training conditional inference tree")
-
-                    if (!requireNamespace("partykit", quietly = TRUE)) {
-                        stop("partykit package required but not installed. Please install with: install.packages('partykit')")
-                    }
-
-                    # ctree parameters
-                    mincriterion <- self$options$ctree_mincriterion %||% 0.95
-                    minsplit <- self$options$min_n %||% 20
-                    maxdepth <- self$options$tree_depth %||% 6
-
-                    # Train ctree model
-                    model <- partykit::ctree(
-                        model_formula,
-                        data = train_data,
-                        control = partykit::ctree_control(
-                            mincriterion = mincriterion,
-                            minsplit = minsplit,
-                            maxdepth = maxdepth
-                        )
-                    )
-
-                    # Make predictions
-                    predictions_class <- predict(model, test_data, type = "response")
-                    predictions_prob <- predict(model, test_data, type = "prob")[, 2]
-
-                    message("[DEBUG] ctree model training completed")
-
-                } else if (algorithm == "mob") {
-                    message("[DEBUG] Training model-based tree")
-
-                    if (!requireNamespace("partykit", quietly = TRUE)) {
-                        stop("partykit package required but not installed. Please install with: install.packages('partykit')")
-                    }
-
-                    # For mob, we need to specify a parametric model for the nodes
-                    # Using logistic regression as default for classification
-                    mob_formula <- as.formula(paste(target_var, "~ 1 |", paste(c(self$options$vars, self$options$facs), collapse = " + ")))
-
-                    model <- partykit::mob(
-                        mob_formula,
-                        data = train_data,
-                        fit = partykit::glmfit,
-                        family = binomial(),
-                        control = partykit::mob_control(
-                            minsize = self$options$min_n %||% 20,
-                            maxdepth = self$options$tree_depth %||% 6
-                        )
-                    )
-
-                    # Make predictions
-                    predictions_prob <- predict(model, test_data, type = "response")
-                    predictions_class <- factor(
-                        ifelse(predictions_prob > 0.5, positive_level, negative_class),
-                        levels = c(negative_class, positive_level)
-                    )
-
-                    message("[DEBUG] MOB model training completed")
-
-                } else if (algorithm == "randomforest") {
-                    message("[DEBUG] Training Random Forest model")
-
-                    if (!requireNamespace("randomForest", quietly = TRUE)) {
-                        stop("randomForest package required but not installed. Please install with: install.packages('randomForest')")
-                    }
-
-                    # Determine if hyperparameter tuning is enabled
-                    if (self$options$hyperparameter_tuning) {
-                        message("[DEBUG] Performing hyperparameter tuning for Random Forest")
-                        model <- private$.tune_hyperparameters(model_formula, train_data, test_data, algorithm)
-                    } else {
-                        # Random Forest parameters
-                        ntree <- self$options$rf_ntree
-                        mtry <- self$options$rf_mtry
-
-                        # Auto-select mtry if not specified (0 = automatic)
-                        if (mtry == 0) {
-                            n_predictors <- length(c(self$options$vars, self$options$facs))
-                            mtry <- if (tree_mode == "classification") {
-                                max(1, floor(sqrt(n_predictors)))
-                            } else {
-                                max(1, floor(n_predictors / 3))
-                            }
-                        }
-
-                        # Train Random Forest model
-                        model <- randomForest::randomForest(
-                            model_formula,
-                            data = train_data,
-                            ntree = ntree,
-                            mtry = mtry,
-                            na.action = na.roughfix,
-                            importance = TRUE,  # For feature importance
-                            keep.forest = TRUE
-                        )
-                    }
-
-                    # Make predictions
-                    if (tree_mode == "classification") {
-                        predictions_prob <- predict(model, test_data, type = "prob")
-                        if (ncol(predictions_prob) == 2) {
-                            # Binary classification - get probability of positive class
-                            target_level_idx <- which(colnames(predictions_prob) == target_level)
-                            if (length(target_level_idx) > 0) {
-                                predictions_prob <- predictions_prob[, target_level_idx]
-                            } else {
-                                predictions_prob <- predictions_prob[, 2]
-                            }
-                        } else {
-                            # Multi-class - use first class probability as default
-                            predictions_prob <- predictions_prob[, 1]
-                        }
-                        predictions_class <- predict(model, test_data, type = "class")
-                    } else {
-                        # Regression mode
-                        predictions_prob <- predict(model, test_data)
-                        predictions_class <- predictions_prob
-                    }
-
-                    message("[DEBUG] Random Forest model training completed")
-
-                } else if (algorithm == "xgboost") {
-                    message("[DEBUG] Training XGBoost model")
-
-                    if (!requireNamespace("xgboost", quietly = TRUE)) {
-                        stop("xgboost package required but not installed. Please install with: install.packages('xgboost')")
-                    }
-
-                    # Determine if hyperparameter tuning is enabled
-                    if (self$options$hyperparameter_tuning) {
-                        message("[DEBUG] Performing hyperparameter tuning for XGBoost")
-                        model <- private$.tune_hyperparameters(model_formula, train_data, test_data, algorithm)
-
-                        # For tuned XGBoost, predictions are handled differently
-                        if (!is.null(model)) {
-                            # Prepare test data for XGBoost predictions
-                            test_prepared <- private$.prepare_data_for_xgboost(test_data, target_var)
-                            test_matrix <- xgboost::xgb.DMatrix(test_prepared$X, label = test_prepared$y)
-
-                            predictions_prob <- predict(model, test_matrix)
-                            predictions_class <- factor(
-                                ifelse(predictions_prob > 0.5, target_level,
-                                       levels(test_data[[target_var]])[levels(test_data[[target_var]]) != target_level]),
-                                levels = levels(test_data[[target_var]])
-                            )
-                        }
-                    } else {
-                        # XGBoost parameters
-                        nrounds <- self$options$xgb_nrounds
-                        eta <- self$options$xgb_eta
-                        max_depth <- self$options$tree_depth
-
-                        # Prepare data for XGBoost
-                        tryCatch({
-                            # Get predictor columns
-                            pred_vars <- c(self$options$vars, self$options$facs)
-
-                            # Prepare training data
-                            train_x <- train_data[pred_vars]
-                            train_y <- train_data[[target_var]]
-                            test_x <- test_data[pred_vars]
-
-                            # Convert categorical variables to numeric
-                            for (var in self$options$facs) {
-                                if (var %in% names(train_x)) {
-                                    # Convert to numeric codes
-                                    if (is.factor(train_x[[var]])) {
-                                        # Ensure both train and test have same levels
-                                        all_levels <- unique(c(levels(train_x[[var]]), levels(test_x[[var]])))
-                                        train_x[[var]] <- factor(train_x[[var]], levels = all_levels)
-                                        test_x[[var]] <- factor(test_x[[var]], levels = all_levels)
-
-                                        train_x[[var]] <- as.numeric(train_x[[var]]) - 1
-                                        test_x[[var]] <- as.numeric(test_x[[var]]) - 1
-                                    } else {
-                                        train_x[[var]] <- as.numeric(as.factor(train_x[[var]])) - 1
-                                        test_x[[var]] <- as.numeric(as.factor(test_x[[var]])) - 1
-                                    }
-                                }
-                            }
-
-                            # Convert to matrix
-                            train_matrix <- as.matrix(train_x)
-                            test_matrix <- as.matrix(test_x)
-
-                            if (tree_mode == "classification") {
-                                # Binary classification
-                                train_label <- as.numeric(train_y == target_level)
-
-                                # Create DMatrix
-                                dtrain <- xgboost::xgb.DMatrix(data = train_matrix, label = train_label)
-                                dtest <- xgboost::xgb.DMatrix(data = test_matrix)
-
-                                # Train model
-                                model <- xgboost::xgboost(
-                                    data = dtrain,
-                                    nrounds = nrounds,
-                                    eta = eta,
-                                    max_depth = max_depth,
-                                    objective = "binary:logistic",
-                                    eval_metric = "auc",
-                                    verbose = 0,
-                                    nthread = 1  # For reproducibility
-                                )
-
-                                # Make predictions
-                                predictions_prob <- predict(model, dtest)
-                                predictions_class <- factor(
-                                    ifelse(predictions_prob > 0.5, target_level,
-                                           setdiff(levels(train_y), target_level)[1]),
-                                    levels = levels(train_y)
-                                )
-                            } else {
-                                # Regression mode
-                                train_label <- as.numeric(train_y)
-
-                                dtrain <- xgboost::xgb.DMatrix(data = train_matrix, label = train_label)
-                                dtest <- xgboost::xgb.DMatrix(data = test_matrix)
-
-                                model <- xgboost::xgboost(
-                                    data = dtrain,
-                                    nrounds = nrounds,
-                                    eta = eta,
-                                    max_depth = max_depth,
-                                    objective = "reg:squarederror",
-                                    eval_metric = "rmse",
-                                    verbose = 0,
-                                    nthread = 1
-                                )
-
-                                predictions_prob <- predict(model, dtest)
-                                predictions_class <- predictions_prob
-                            }
-
-                            # Store additional information for XGBoost
-                            model$feature_names <- colnames(train_matrix)
-                            model$xgb_train_matrix <- train_matrix
-                            model$target_levels <- levels(train_y)
-
-                        }, error = function(e) {
-                            stop(paste("XGBoost training error:", e$message))
-                        })
-
-                        message("[DEBUG] XGBoost model training completed")
-                    }
-                }
-
-                # Handle different analysis modes
-                if (tree_mode == "survival") {
-                    message("[DEBUG] Survival analysis mode - adapting predictions")
-
-                    # For survival analysis, we need time and status variables
-                    # This would require additional UI elements for time/status specification
-                    # For now, provide warning that this is experimental
-                    warning("Survival analysis mode is experimental. Ensure proper time/status variables.")
-
-                } else if (tree_mode == "regression") {
-                    message("[DEBUG] Regression mode - continuous outcome prediction")
-
-                    # For regression, predictions_prob should be the predicted values
-                    # and predictions_class should be discretized for evaluation
-                    if (algorithm %in% c("rpart", "ctree", "mob")) {
-                        # Already handled by predict() methods above
-                        if (exists("predictions_class") && is.factor(predictions_class)) {
-                            # Convert back to numeric if needed
-                            predictions_prob <- as.numeric(predictions_prob)
-                        }
-                    }
-                }
-
-                # Calculate feature importance
-                importance_data <- private$.calculate_importance(model, algorithm)
-
-                # Perform cross-validation if requested
-                validation_results <- NULL
-                if (validation_method == "cv") {
-                    validation_results <- private$.perform_cv(model_formula, data, algorithm)
-                }
-
-                # Store results
-                results <- list(
-                    model = model,
-                    predictions = predictions_prob,
-                    predictions_class = predictions_class,
-                    actual = test_data[[target_var]],
-                    importance = importance_data,
-                    validation_results = validation_results,
-                    algorithm = algorithm,
-                    formula = model_formula
-                )
-
-                return(results)
-
-            }, error = function(e) {
-                error_type <- "Unknown"
-                specific_help <- ""
-
-                # Provide specific guidance based on error type
-                if (grepl("contrasts can be applied only to factors", e$message)) {
-                    error_type <- "Variable Type Error"
-                    specific_help <- "<p><strong>Solution:</strong> Some predictor variables appear to be coded as text but contain numeric values. Convert them to proper numeric or factor variables in your data preparation.</p>"
-                } else if (grepl("sample size", e$message)) {
-                    error_type <- "Sample Size Error"
-                    specific_help <- "<p><strong>Solutions:</strong><ul><li>Collect more data</li><li>Reduce number of predictor variables</li><li>Use simpler statistical methods</li></ul></p>"
-                } else if (grepl("singularities", e$message) || grepl("rank-deficient", e$message)) {
-                    error_type <- "Multicollinearity Error"
-                    specific_help <- "<p><strong>Solutions:</strong><ul><li>Remove highly correlated predictor variables</li><li>Use feature selection</li><li>Check for duplicate or derived variables</li></ul></p>"
-                } else if (grepl("levels", e$message) || grepl("factor", e$message)) {
-                    error_type <- "Factor Level Error"
-                    specific_help <- "<p><strong>Solutions:</strong><ul><li>Check that categorical variables have valid levels</li><li>Ensure target level exists in the target variable</li><li>Remove unused factor levels</li></ul></p>"
-                } else if (grepl("memory", e$message) || grepl("cannot allocate", e$message)) {
-                    error_type <- "Memory Error"
-                    specific_help <- "<p><strong>Solutions:</strong><ul><li>Reduce dataset size</li><li>Use fewer predictor variables</li><li>Increase system memory</li></ul></p>"
-                }
-
-                message("[DEBUG] train_model ERROR: ", e$message)
-                message("[DEBUG] Stack trace: ", deparse(sys.calls()))
-
-                error_msg <- paste0("
-                <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
-                <h4>", error_type, "</h4>
-                <p><strong>Error Details:</strong> ", e$message, "</p>
-                ", specific_help, "
-                <p><strong>General Troubleshooting:</strong></p>
-                <ul>
-                <li>Verify data quality and variable types</li>
-                <li>Check for sufficient sample size in each group</li>
-                <li>Ensure predictor variables have variation</li>
-                <li>Consider data preprocessing options</li>
-                </ul>
-                </div>")
-                self$results$model_summary$setContent(error_msg)
-                return(NULL)
-            })
-        },
-
 
         # Enhanced importance calculation using caret's varImp
         .calculate_varimportance = function(model, algorithm, method) {
@@ -4085,6 +3515,10 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
         .get_tree_plot_params = function(style, show_node_stats) {
             params <- list()
 
+            # Get user-specified branch style and margin
+            branch_style <- self$options$plot_branch_style %||% 0.2
+            plot_margin <- self$options$plot_margin %||% 0.1
+
             switch(style,
                 "standard" = {
                     params$type <- 4  # All four coordinates
@@ -4118,6 +3552,44 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                     params$faclen <- 0  # Full factor level names
                     params$digits <- 3  # More decimal precision
                     params$roundint <- FALSE
+                },
+                "uniform" = {
+                    params$type <- 4  # All coordinates
+                    params$extra <- if(show_node_stats) 101 else 2
+                    params$fallen.leaves <- TRUE
+                    params$uniform <- TRUE  # Equal branch lengths
+                    params$branch <- branch_style
+                    params$margin <- plot_margin
+                    params$cex <- 0.9
+                    params$varlen <- 0
+                    params$faclen <- 0
+                },
+                "compressed" = {
+                    params$type <- 4
+                    params$extra <- if(show_node_stats) 101 else 2
+                    params$fallen.leaves <- TRUE
+                    params$uniform <- TRUE
+                    params$compress <- TRUE  # Compress tree layout
+                    params$branch <- branch_style
+                    params$margin <- plot_margin
+                    params$cex <- 0.8  # Smaller text for compressed layout
+                    params$varlen <- 8   # Truncate for space efficiency
+                    params$faclen <- 4
+                },
+                "fancy" = {
+                    params$type <- 4
+                    params$extra <- if(show_node_stats) 104 else 101  # Enhanced information
+                    params$fallen.leaves <- TRUE
+                    params$uniform <- TRUE
+                    params$compress <- TRUE
+                    params$branch <- branch_style
+                    params$margin <- plot_margin
+                    params$cex <- 0.9
+                    params$varlen <- 0  # Full names for publication
+                    params$faclen <- 0
+                    params$digits <- 3
+                    params$all <- TRUE  # Show all node information
+                    params$fancy <- TRUE  # Enable fancy formatting if available
                 }
             )
 
@@ -4130,6 +3602,9 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 "standard" = c("#E1F5FE", "#B3E5FC", "#81D4FA", "#4FC3F7"),  # Blue gradient
                 "medical" = c("#E8F5E8", "#A5D6A7", "#66BB6A", "#43A047"),    # Green gradient (medical)
                 "clinical" = c("#FFF3E0", "#FFCC80", "#FF9800", "#F57C00"),   # Orange gradient (research)
+                "uniform" = c("#F3E5F5", "#CE93D8", "#BA68C8", "#9C27B0"),    # Purple gradient (uniform)
+                "compressed" = c("#E0F2F1", "#80CBC4", "#4DB6AC", "#26A69A"), # Teal gradient (compressed)
+                "fancy" = c("#FCE4EC", "#F48FB1", "#EC407A", "#E91E63"),      # Pink gradient (fancy/publication)
                 c("#E3F2FD", "#BBDEFB", "#90CAF9", "#64B5F6")  # Default blue
             )
         },
@@ -5752,6 +5227,1952 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             details <- paste0("Currently evaluating: ", algorithm_name, " (", current_algo, " of ", total_algos, ")")
 
             private$.update_progress("model_comparison", message, percent, details)
+        },
+
+        # Generate competing splits analysis
+        .generate_competing_splits_analysis = function(model_results) {
+            if (is.null(model_results) || is.null(model_results$model)) {
+                return(NULL)
+            }
+
+            model <- model_results$model
+            if (!inherits(model, "rpart")) {
+                return(NULL)
+            }
+
+            tryCatch({
+                # Get competing splits information
+                if (is.null(model$splits) || nrow(model$splits) == 0) {
+                    return("<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;'>
+                    <p><strong>No competing splits information available.</strong></p>
+                    <p>Increase 'maxcompete' parameter to save competing split information.</p>
+                    </div>")
+                }
+
+                splits_df <- as.data.frame(model$splits)
+                splits_df$node <- row.names(splits_df)
+
+                # Create HTML table
+                html <- paste0("
+                <div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;'>
+                <h4 style='color: #2c5aa0; margin-top: 0;'>Competing Splits Analysis</h4>
+                <p>Shows alternative splitting criteria at each node and their relative quality.</p>
+
+                <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
+                <tr style='background-color: #e9ecef; border: 1px solid #ddd;'>
+                <th style='padding: 8px; border: 1px solid #ddd;'>Node</th>
+                <th style='padding: 8px; border: 1px solid #ddd;'>Variable</th>
+                <th style='padding: 8px; border: 1px solid #ddd;'>Split Point</th>
+                <th style='padding: 8px; border: 1px solid #ddd;'>Count</th>
+                <th style='padding: 8px; border: 1px solid #ddd;'>Improvement</th>
+                </tr>")
+
+                for (i in 1:min(nrow(splits_df), 20)) {  # Limit to 20 rows for display
+                    html <- paste0(html, "
+                    <tr style='border: 1px solid #ddd;'>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>", splits_df$node[i], "</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>", row.names(splits_df)[i], "</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>", round(splits_df$index[i], 3), "</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>", splits_df$count[i], "</td>
+                    <td style='padding: 8px; border: 1px solid #ddd;'>", round(splits_df$improve[i], 4), "</td>
+                    </tr>")
+                }
+
+                html <- paste0(html, "
+                </table>
+
+                <h5 style='color: #2c5aa0;'>Interpretation:</h5>
+                <ul>
+                <li><strong>Improvement:</strong> Higher values indicate better splitting criteria</li>
+                <li><strong>Count:</strong> Number of observations at the split</li>
+                <li><strong>Split Point:</strong> Threshold value for the split</li>
+                </ul>
+                </div>")
+
+                return(html)
+
+            }, error = function(e) {
+                return(paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px;'>
+                <p><strong>Error generating competing splits analysis:</strong></p>
+                <p>", e$message, "</p>
+                </div>"))
+            })
+        },
+
+        # Generate surrogate splits analysis
+        .generate_surrogate_splits_analysis = function(model_results) {
+            if (is.null(model_results) || is.null(model_results$model)) {
+                return(NULL)
+            }
+
+            model <- model_results$model
+            if (!inherits(model, "rpart")) {
+                return(NULL)
+            }
+
+            tryCatch({
+                # Get surrogate splits information
+                if (is.null(model$splits) || nrow(model$splits) == 0) {
+                    return("<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;'>
+                    <p><strong>No surrogate splits information available.</strong></p>
+                    <p>Increase 'maxsurrogate' parameter to save surrogate split information.</p>
+                    </div>")
+                }
+
+                # Extract surrogate information from model
+                frame <- model$frame
+                if (is.null(frame)) {
+                    return(NULL)
+                }
+
+                # Create HTML content
+                html <- paste0("
+                <div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;'>
+                <h4 style='color: #2c5aa0; margin-top: 0;'>Surrogate Splits Analysis</h4>
+                <p>Shows backup splitting rules used when primary variables have missing values.</p>
+
+                <h5 style='color: #2c5aa0;'>Model Configuration:</h5>
+                <ul>
+                <li><strong>Use surrogates:</strong> ", ifelse(model$control$usesurrogate > 0, "Yes", "No"), "</li>
+                <li><strong>Max surrogates:</strong> ", model$control$maxsurrogate, "</li>
+                <li><strong>Surrogate usage rule:</strong> ",
+                switch(as.character(model$control$usesurrogate),
+                       "0" = "Only if helpful",
+                       "1" = "Always when available",
+                       "2" = "If better than majority rule",
+                       "Unknown"), "</li>
+                </ul>")
+
+                # Check for missing data handling
+                if (any(is.na(model$model))) {
+                    html <- paste0(html, "
+                    <h5 style='color: #2c5aa0;'>Missing Data Handling:</h5>
+                    <p>✓ Missing values detected - surrogate splits are being used for robust predictions.</p>")
+                } else {
+                    html <- paste0(html, "
+                    <h5 style='color: #2c5aa0;'>Missing Data Handling:</h5>
+                    <p>ℹ No missing values in training data - surrogates available for future predictions.</p>")
+                }
+
+                html <- paste0(html, "
+                <h5 style='color: #2c5aa0;'>Clinical Benefits:</h5>
+                <ul>
+                <li><strong>Robust Predictions:</strong> Tree can still make predictions when key variables are missing</li>
+                <li><strong>Clinical Flexibility:</strong> Alternative pathways when primary tests unavailable</li>
+                <li><strong>Missing Data Tolerance:</strong> Maintains performance with incomplete records</li>
+                </ul>
+                </div>")
+
+                return(html)
+
+            }, error = function(e) {
+                return(paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px;'>
+                <p><strong>Error generating surrogate splits analysis:</strong></p>
+                <p>", e$message, "</p>
+                </div>"))
+            })
+        },
+
+        # Generate CP sequence analysis
+        .generate_cp_sequence_analysis = function(model_results) {
+            if (is.null(model_results) || is.null(model_results$model)) {
+                return(NULL)
+            }
+
+            model <- model_results$model
+            if (!inherits(model, "rpart")) {
+                return(NULL)
+            }
+
+            tryCatch({
+                cp_table <- model$cptable
+                if (is.null(cp_table) || nrow(cp_table) == 0) {
+                    return(NULL)
+                }
+
+                # Apply automatic CP selection based on user preference
+                cp_selection_method <- self$options$cp_auto_selection %||% "one_se_rule"
+
+                if (cp_selection_method == "min_xerror") {
+                    optimal_idx <- which.min(cp_table[, "xerror"])
+                    selection_method_desc <- "Minimum cross-validation error"
+                } else if (cp_selection_method == "one_se_rule") {
+                    min_xerror <- min(cp_table[, "xerror"])
+                    min_se <- cp_table[which.min(cp_table[, "xerror"]), "xstd"]
+                    optimal_idx <- which(cp_table[, "xerror"] <= min_xerror + min_se)[1]
+                    selection_method_desc <- "1-SE rule (most parsimonious)"
+                } else {
+                    # Manual selection
+                    manual_cp <- self$options$cost_complexity %||% 0.01
+                    optimal_idx <- which.min(abs(cp_table[, "CP"] - manual_cp))
+                    selection_method_desc <- paste("Manual CP =", manual_cp)
+                }
+
+                optimal_cp <- cp_table[optimal_idx, "CP"]
+                optimal_xerror <- cp_table[optimal_idx, "xerror"]
+                optimal_size <- cp_table[optimal_idx, "nsplit"] + 1
+
+                html <- paste0("
+                <div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;'>
+                <h4 style='color: #2c5aa0; margin-top: 0;'>Cost-Complexity Sequence Analysis</h4>
+                <p>Shows the complete sequence of nested subtrees generated by cost-complexity pruning.</p>
+
+                <h5 style='color: #2c5aa0;'>Optimal Tree Selection:</h5>
+                <ul>
+                <li><strong>Method:</strong> ", selection_method_desc, "</li>
+                <li><strong>Selected CP:</strong> ", round(optimal_cp, 6), "</li>
+                <li><strong>Cross-validation error:</strong> ", round(optimal_xerror, 4), "</li>
+                <li><strong>Tree size:</strong> ", optimal_size, " terminal nodes</li>
+                </ul>
+
+                <h5 style='color: #2c5aa0;'>Complete CP Sequence:</h5>
+                <table style='border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 12px;'>
+                <tr style='background-color: #e9ecef; border: 1px solid #ddd;'>
+                <th style='padding: 6px; border: 1px solid #ddd;'>CP</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>Splits</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>Rel Error</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>Xerror</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>Xstd</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>Selection</th>
+                </tr>")
+
+                for (i in 1:nrow(cp_table)) {
+                    is_optimal <- (i == optimal_idx)
+                    row_style <- if (is_optimal) {
+                        "background-color: #e3f2fd; border: 1px solid #ddd; font-weight: bold;"
+                    } else {
+                        "border: 1px solid #ddd;"
+                    }
+
+                    selection_status <- if (is_optimal) {
+                        "<span style='color: #4caf50;'>★ OPTIMAL</span>"
+                    } else {
+                        ""
+                    }
+
+                    html <- paste0(html, "
+                    <tr style='", row_style, "'>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", sprintf("%.6f", cp_table[i, "CP"]), "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", cp_table[i, "nsplit"], "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", sprintf("%.4f", cp_table[i, "rel error"]), "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", sprintf("%.4f", cp_table[i, "xerror"]), "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", sprintf("%.4f", cp_table[i, "xstd"]), "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", selection_status, "</td>
+                    </tr>")
+                }
+
+                html <- paste0(html, "
+                </table>
+
+                <h5 style='color: #2c5aa0;'>Clinical Interpretation:</h5>
+                <ul>
+                <li><strong>CP (Complexity Parameter):</strong> Controls trade-off between model complexity and fit</li>
+                <li><strong>Rel Error:</strong> Training error relative to root node</li>
+                <li><strong>Xerror:</strong> Cross-validation error (key for pruning decisions)</li>
+                <li><strong>1-SE Rule:</strong> Selects simplest model within 1 standard error of minimum xerror</li>
+                </ul>
+                </div>")
+
+                return(html)
+
+            }, error = function(e) {
+                return(paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px;'>
+                <p><strong>Error generating CP sequence analysis:</strong></p>
+                <p>", e$message, "</p>
+                </div>"))
+            })
+        },
+
+        # Generate detailed xerror analysis
+        .generate_xerror_detailed_analysis = function(model_results) {
+            if (is.null(model_results) || is.null(model_results$model)) {
+                return(NULL)
+            }
+
+            model <- model_results$model
+            if (!inherits(model, "rpart")) {
+                return(NULL)
+            }
+
+            tryCatch({
+                cp_table <- model$cptable
+                if (is.null(cp_table) || nrow(cp_table) == 0) {
+                    return(NULL)
+                }
+
+                # Calculate confidence intervals for xerror
+                xerror <- cp_table[, "xerror"]
+                xstd <- cp_table[, "xstd"]
+                lower_ci <- xerror - 1.96 * xstd  # 95% CI
+                upper_ci <- xerror + 1.96 * xstd
+
+                # Find optimal points
+                min_xerror_idx <- which.min(xerror)
+                min_xerror <- xerror[min_xerror_idx]
+                se_threshold <- min_xerror + xstd[min_xerror_idx]
+                one_se_idx <- which(xerror <= se_threshold)[1]
+
+                html <- paste0("
+                <div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;'>
+                <h4 style='color: #2c5aa0; margin-top: 0;'>Detailed Cross-validation Error Analysis</h4>
+                <p>Comprehensive analysis of cross-validation errors with confidence intervals and pruning recommendations.</p>
+
+                <h5 style='color: #2c5aa0;'>Key Statistics:</h5>
+                <ul>
+                <li><strong>Minimum xerror:</strong> ", round(min_xerror, 4), " (Row ", min_xerror_idx, ")</li>
+                <li><strong>1-SE threshold:</strong> ", round(se_threshold, 4), "</li>
+                <li><strong>1-SE rule selection:</strong> Row ", one_se_idx, " (CP = ", round(cp_table[one_se_idx, "CP"], 6), ")</li>
+                <li><strong>Cross-validation folds:</strong> ", model$control$xval, "</li>
+                </ul>
+
+                <h5 style='color: #2c5aa0;'>Xerror with 95% Confidence Intervals:</h5>
+                <table style='border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 12px;'>
+                <tr style='background-color: #e9ecef; border: 1px solid #ddd;'>
+                <th style='padding: 6px; border: 1px solid #ddd;'>Row</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>CP</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>Xerror</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>Std Error</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>95% CI Lower</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>95% CI Upper</th>
+                <th style='padding: 6px; border: 1px solid #ddd;'>Selection</th>
+                </tr>")
+
+                for (i in 1:nrow(cp_table)) {
+                    is_min_xerror <- (i == min_xerror_idx)
+                    is_one_se <- (i == one_se_idx)
+
+                    row_style <- if (is_one_se) {
+                        "background-color: #e3f2fd; border: 1px solid #ddd; font-weight: bold;"
+                    } else if (is_min_xerror) {
+                        "background-color: #fff3cd; border: 1px solid #ddd;"
+                    } else {
+                        "border: 1px solid #ddd;"
+                    }
+
+                    selection_status <- ""
+                    if (is_one_se) selection_status <- "<span style='color: #4caf50;'>★ 1-SE</span>"
+                    if (is_min_xerror) selection_status <- paste(selection_status, "<span style='color: #ff9800;'>Min</span>")
+
+                    html <- paste0(html, "
+                    <tr style='", row_style, "'>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", i, "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", sprintf("%.6f", cp_table[i, "CP"]), "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", sprintf("%.4f", xerror[i]), "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", sprintf("%.4f", xstd[i]), "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", sprintf("%.4f", lower_ci[i]), "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", sprintf("%.4f", upper_ci[i]), "</td>
+                    <td style='padding: 6px; border: 1px solid #ddd;'>", selection_status, "</td>
+                    </tr>")
+                }
+
+                html <- paste0(html, "
+                </table>
+
+                <h5 style='color: #2c5aa0;'>Pruning Recommendations:</h5>
+                <div style='background-color: #e8f5e8; padding: 10px; border-left: 4px solid #4caf50; margin: 10px 0;'>
+                <p><strong>Recommended:</strong> Use 1-SE rule (Row ", one_se_idx, ") for clinical applications</p>
+                <p><strong>Rationale:</strong> Provides good generalization with simpler, more interpretable tree</p>
+                </div>
+
+                <div style='background-color: #fff3e0; padding: 10px; border-left: 4px solid #ff9800; margin: 10px 0;'>
+                <p><strong>Alternative:</strong> Minimum xerror (Row ", min_xerror_idx, ") for maximum accuracy</p>
+                <p><strong>Trade-off:</strong> May overfit and be less robust to new data</p>
+                </div>
+                </div>")
+
+                return(html)
+
+            }, error = function(e) {
+                return(paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px;'>
+                <p><strong>Error generating xerror analysis:</strong></p>
+                <p>", e$message, "</p>
+                </div>"))
+            })
+        },
+
+        # Generate impurity analysis
+        .generate_impurity_analysis = function(model_results) {
+            if (is.null(model_results) || is.null(model_results$model)) {
+                return(NULL)
+            }
+
+            model <- model_results$model
+            if (!inherits(model, "rpart")) {
+                return(NULL)
+            }
+
+            tryCatch({
+                # Get current splitting method
+                current_split <- self$options$rpart_split %||% "gini"
+
+                # Create comparison models with different splitting criteria
+                train_data <- private$.training_data
+                target_var <- self$options$target
+
+                if (is.null(train_data) || is.null(target_var)) {
+                    return(NULL)
+                }
+
+                # Get formula
+                continuous_vars <- self$options$vars
+                categorical_vars <- self$options$facs
+                all_vars <- c(continuous_vars, categorical_vars)
+
+                if (length(all_vars) == 0) {
+                    return(NULL)
+                }
+
+                model_formula <- as.formula(paste(target_var, "~", paste(all_vars, collapse = "+")))
+
+                # Train models with both splitting criteria
+                gini_model <- rpart::rpart(
+                    model_formula,
+                    data = train_data,
+                    method = ifelse(self$options$tree_mode == "regression", "anova", "class"),
+                    parms = list(split = "gini"),
+                    control = rpart::rpart.control(cp = 0.001, maxdepth = 5)  # Shallow for comparison
+                )
+
+                info_model <- rpart::rpart(
+                    model_formula,
+                    data = train_data,
+                    method = ifelse(self$options$tree_mode == "regression", "anova", "class"),
+                    parms = list(split = "information"),
+                    control = rpart::rpart.control(cp = 0.001, maxdepth = 5)
+                )
+
+                # Compare models
+                gini_nodes <- nrow(gini_model$frame)
+                info_nodes <- nrow(info_model$frame)
+
+                html <- paste0("
+                <div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;'>
+                <h4 style='color: #2c5aa0; margin-top: 0;'>Splitting Impurity Analysis</h4>
+                <p>Comparison between Gini index and Information gain splitting criteria.</p>
+
+                <h5 style='color: #2c5aa0;'>Current Model:</h5>
+                <ul>
+                <li><strong>Splitting method:</strong> ", tools::toTitleCase(current_split), "</li>
+                <li><strong>Tree complexity:</strong> ", nrow(model$frame), " nodes</li>
+                </ul>
+
+                <h5 style='color: #2c5aa0;'>Splitting Criteria Comparison:</h5>
+                <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
+                <tr style='background-color: #e9ecef; border: 1px solid #ddd;'>
+                <th style='padding: 8px; border: 1px solid #ddd;'>Criterion</th>
+                <th style='padding: 8px; border: 1px solid #ddd;'>Tree Size</th>
+                <th style='padding: 8px; border: 1px solid #ddd;'>Formula</th>
+                <th style='padding: 8px; border: 1px solid #ddd;'>Best for</th>
+                </tr>
+                <tr style='", ifelse(current_split == "gini", "background-color: #e3f2fd; font-weight: bold;", ""), "border: 1px solid #ddd;'>
+                <td style='padding: 8px; border: 1px solid #ddd;'>Gini Index", ifelse(current_split == "gini", " ★", ""), "</td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>", gini_nodes, " nodes</td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>1 - Σ(pi²)</td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>Binary classification, speed</td>
+                </tr>
+                <tr style='", ifelse(current_split == "information", "background-color: #e3f2fd; font-weight: bold;", ""), "border: 1px solid #ddd;'>
+                <td style='padding: 8px; border: 1px solid #ddd;'>Information Gain", ifelse(current_split == "information", " ★", ""), "</td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>", info_nodes, " nodes</td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>-Σ(pi × log2(pi))</td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>Multi-class, theoretical optimality</td>
+                </tr>
+                </table>
+
+                <h5 style='color: #2c5aa0;'>Impurity Measures Explained:</h5>
+                <div style='background-color: #e8f4f8; padding: 10px; border-left: 4px solid #17a2b8; margin: 10px 0;'>
+                <p><strong>Gini Index:</strong> Measures probability of misclassification. Faster to compute, tends to isolate most frequent class.</p>
+                </div>
+
+                <div style='background-color: #f0f8f0; padding: 10px; border-left: 4px solid #28a745; margin: 10px 0;'>
+                <p><strong>Information Gain:</strong> Based on entropy reduction. Theoretically optimal, better for multi-class problems.</p>
+                </div>
+
+                <h5 style='color: #2c5aa0;'>Clinical Recommendations:</h5>
+                <ul>
+                <li><strong>Binary diagnosis:</strong> Gini often performs similarly with faster computation</li>
+                <li><strong>Multi-class staging:</strong> Information gain may provide better discrimination</li>
+                <li><strong>Large datasets:</strong> Gini recommended for computational efficiency</li>
+                <li><strong>Interpretation:</strong> Both provide equivalent decision trees for clinical use</li>
+                </ul>
+                </div>")
+
+                return(html)
+
+            }, error = function(e) {
+                return(paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px;'>
+                <p><strong>Error generating impurity analysis:</strong></p>
+                <p>", e$message, "</p>
+                </div>"))
+            })
+        },
+
+        # Generate recursive partitioning trace
+        .generate_recursive_partitioning_trace = function(model_results) {
+            if (is.null(model_results) || is.null(model_results$model)) {
+                return(NULL)
+            }
+
+            model <- model_results$model
+            if (!inherits(model, "rpart")) {
+                return(NULL)
+            }
+
+            tryCatch({
+                frame <- model$frame
+                if (is.null(frame)) {
+                    return(NULL)
+                }
+
+                # Get splitting information
+                splits <- model$splits
+                where <- model$where
+
+                html <- paste0("
+                <div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;'>
+                <h4 style='color: #2c5aa0; margin-top: 0;'>Recursive Partitioning Trace</h4>
+                <p>Step-by-step construction of the decision tree showing the recursive splitting process.</p>
+
+                <h5 style='color: #2c5aa0;'>Tree Construction Summary:</h5>
+                <ul>
+                <li><strong>Total nodes:</strong> ", nrow(frame), "</li>
+                <li><strong>Terminal nodes:</strong> ", sum(frame$var == '<leaf>'), "</li>
+                <li><strong>Internal nodes:</strong> ", sum(frame$var != '<leaf>'), "</li>
+                <li><strong>Maximum depth:</strong> ", max(as.numeric(row.names(frame)) %/% 2) + 1, "</li>
+                </ul>
+
+                <h5 style='color: #2c5aa0;'>Node-by-Node Construction:</h5>
+                <div style='font-family: monospace; background-color: white; padding: 10px; border: 1px solid #ddd; max-height: 400px; overflow-y: auto;'>")
+
+                # Process each node in the frame
+                node_names <- as.numeric(row.names(frame))
+                for (i in 1:nrow(frame)) {
+                    node_num <- node_names[i]
+                    depth <- floor(log2(node_num + 1))
+                    indent <- paste(rep("  ", depth), collapse = "")
+
+                    var_name <- frame$var[i]
+                    n_obs <- frame$n[i]
+
+                    if (var_name == "<leaf>") {
+                        # Terminal node
+                        if (self$options$tree_mode == "classification") {
+                            pred_class <- levels(model$model[[1]])[frame$yval[i]]
+                            html <- paste0(html, indent, "Node ", node_num, ": TERMINAL → Predict: ", pred_class, " (n=", n_obs, ")<br>")
+                        } else {
+                            pred_value <- round(frame$yval[i], 3)
+                            html <- paste0(html, indent, "Node ", node_num, ": TERMINAL → Predict: ", pred_value, " (n=", n_obs, ")<br>")
+                        }
+                    } else {
+                        # Internal node with split
+                        split_point <- model$splits[var_name, "index"]
+                        if (!is.na(split_point)) {
+                            html <- paste0(html, indent, "Node ", node_num, ": Split on ", var_name, " < ", round(split_point, 3), " (n=", n_obs, ")<br>")
+                        } else {
+                            html <- paste0(html, indent, "Node ", node_num, ": Split on ", var_name, " (n=", n_obs, ")<br>")
+                        }
+                    }
+                }
+
+                html <- paste0(html, "
+                </div>
+
+                <h5 style='color: #2c5aa0;'>Recursive Partitioning Process:</h5>
+                <ol>
+                <li><strong>Start:</strong> Entire dataset at root node</li>
+                <li><strong>Find best split:</strong> Evaluate all variables and thresholds</li>
+                <li><strong>Split criterion:</strong> ", tools::toTitleCase(self$options$rpart_split %||% "gini"), " impurity reduction</li>
+                <li><strong>Create children:</strong> Split dataset into left and right subsets</li>
+                <li><strong>Recurse:</strong> Repeat process on each child node</li>
+                <li><strong>Stopping criteria:</strong> Min observations (", model$control$minsplit, "), max depth (", model$control$maxdepth, "), or complexity (CP = ", model$control$cp, ")</li>
+                </ol>
+
+                <h5 style='color: #2c5aa0;'>Clinical Interpretation:</h5>
+                <div style='background-color: #e8f5e8; padding: 10px; border-left: 4px solid #4caf50; margin: 10px 0;'>
+                <p><strong>Tree structure:</strong> Each split represents a clinical decision point</p>
+                <p><strong>Terminal nodes:</strong> Final diagnostic/prognostic categories</p>
+                <p><strong>Path to prediction:</strong> Follow splits from root to terminal node for any patient</p>
+                </div>
+                </div>")
+
+                return(html)
+
+            }, error = function(e) {
+                return(paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px;'>
+                <p><strong>Error generating recursive partitioning trace:</strong></p>
+                <p>", e$message, "</p>
+                </div>"))
+            })
+        },
+
+        # User-defined splitting functions (based on rpart vignette)
+        .get_custom_splitting_functions = function(method_type) {
+            # Based on usercode.R from rpart vignette
+            switch(method_type,
+                "custom_anova" = {
+                    # Custom anova-like method (from vignette usercode.R)
+                    itemp <- function(y, offset, parms, wt) {
+                        if (is.matrix(y) && ncol(y) > 1)
+                           stop("Matrix response not allowed")
+                        if (!missing(parms) && length(parms) > 0)
+                            warning("parameter argument ignored")
+                        if (length(offset)) y <- y - offset
+                        sfun <- function(yval, dev, wt, ylevel, digits ) {
+                            paste("  mean=", format(signif(yval, digits)),
+                                  ", MSE=" , format(signif(dev/wt, digits)),
+                                  sep = '')
+                        }
+                        environment(sfun) <- .GlobalEnv
+                        list(y = c(y), parms = NULL, numresp = 1, numy = 1, summary = sfun)
+                    }
+
+                    etemp <- function(y, wt, parms) {
+                        wmean <- sum(y*wt)/sum(wt)
+                        rss <- sum(wt*(y-wmean)^2)
+                        list(label = wmean, deviance = rss)
+                    }
+
+                    stemp <- function(y, wt, x, parms, continuous) {
+                        # Center y
+                        n <- length(y)
+                        y <- y- sum(y*wt)/sum(wt)
+
+                        if (continuous) {
+                            # continuous x variable
+                            temp <- cumsum(y*wt)[-n]
+                            left.wt  <- cumsum(wt)[-n]
+                            right.wt <- sum(wt) - left.wt
+                            lmean <- temp/left.wt
+                            rmean <- -temp/right.wt
+                            goodness <- (left.wt*lmean^2 + right.wt*rmean^2)/sum(wt*y^2)
+                            list(goodness = goodness, direction = sign(lmean))
+                        } else {
+                            # Categorical X variable
+                            ux <- sort(unique(x))
+                            wtsum <- tapply(wt, x, sum)
+                            ysum  <- tapply(y*wt, x, sum)
+                            means <- ysum/wtsum
+
+                            # For anova splits, we can order the categories by their means
+                            #  then use the same code as for a non-categorical
+                            ord <- order(means)
+                            n <- length(ord)
+                            temp <- cumsum(ysum[ord])[-n]
+                            left.wt  <- cumsum(wtsum[ord])[-n]
+                            right.wt <- sum(wt) - left.wt
+                            lmean <- temp/left.wt
+                            rmean <- -temp/right.wt
+                            list(goodness= (left.wt*lmean^2 + right.wt*rmean^2)/sum(wt*y^2),
+                                 direction = ux[ord])
+                        }
+                    }
+
+                    return(list(eval = etemp, split = stemp, init = itemp))
+                },
+                "custom_logistic" = {
+                    # Custom logistic regression method (from vignette usercode.R)
+                    loginit <- function(y, offset, parms, wt) {
+                        if (is.null(offset)) offset <- 0
+                        if (any(y != 0 & y != 1)) stop ('response must be 0/1')
+
+                        sfun <- function(yval, dev, wt, ylevel, digits ) {
+                            paste("events=",  round(yval[,1]),
+                                  ", coef= ", format(signif(yval[,2], digits)),
+                                  ", deviance=" , format(signif(dev, digits)),
+                                  sep = '')}
+                        environment(sfun) <- .GlobalEnv
+                        list(y = cbind(y, offset), parms = 0, numresp = 2, numy = 2,
+                             summary = sfun)
+                    }
+
+                    logeval <- function(y, wt, parms) {
+                        if (requireNamespace("stats", quietly = TRUE)) {
+                            tfit <- glm(y[,1] ~ offset(y[,2]), binomial, weight = wt)
+                            list(label= c(sum(y[,1]), tfit$coef), deviance = tfit$deviance)
+                        } else {
+                            # Fallback if glm not available
+                            list(label = c(sum(y[,1]), 0), deviance = sum(wt))
+                        }
+                    }
+
+                    logsplit <- function(y, wt, x, parms, continuous) {
+                        if (continuous) {
+                            # continuous x variable: do all the logistic regressions
+                            n <- nrow(y)
+                            goodness <- double(n-1)
+                            direction <- goodness
+                            temp <- rep(0, n)
+                            for (i in 1:(n-1)) {
+                                temp[i] <- 1
+                                if (x[i] != x[i+1]) {
+                                    if (requireNamespace("stats", quietly = TRUE)) {
+                                        tfit <- glm(y[,1] ~ temp + offset(y[,2]), binomial, weight = wt)
+                                        goodness[i] <- tfit$null.deviance - tfit$deviance
+                                        direction[i] <- sign(tfit$coef[2])
+                                    }
+                                }
+                            }
+                        } else {
+                            # Categorical X variable
+                            if (requireNamespace("stats", quietly = TRUE)) {
+                                tfit <- glm(y[,1] ~ factor(x) + offset(y[,2]) - 1, binomial, weight = wt)
+                                ngrp <- length(tfit$coef)
+                                direction <- rank(rank(tfit$coef) + runif(ngrp, 0, 0.1)) #break ties
+                                xx <- direction[match(x, sort(unique(x)))] #relabel from small to large
+                                goodness <- double(length(direction) - 1)
+                                for (i in 1:length(goodness)) {
+                                    tfit <- glm(y[,1] ~ I(xx > i) + offset(y[,2]), binomial, weight = wt)
+                                    goodness[i] <- tfit$null.deviance - tfit$deviance
+                                }
+                            } else {
+                                # Fallback
+                                goodness <- rep(0, length(unique(x)) - 1)
+                                direction <- 1:length(unique(x))
+                            }
+                        }
+                        list(goodness=goodness, direction=direction)
+                    }
+
+                    return(list(eval = logeval, split = logsplit, init = loginit))
+                },
+                {
+                    # Default: return NULL for unsupported methods
+                    return(NULL)
+                }
+            )
+        },
+
+        # Method-specific parameter validation and guidance
+        .validate_method_parameters = function() {
+            tree_mode <- self$options$tree_mode %||% "classification"
+            algorithm <- self$options$algorithm %||% "rpart"
+
+            warnings <- c()
+            recommendations <- c()
+
+            # Algorithm-specific validations
+            if (algorithm == "rpart") {
+                # rpart-specific validations
+                cp_value <- self$options$cost_complexity %||% 0.01
+                if (cp_value < 0.001) {
+                    warnings <- c(warnings, "Very low complexity parameter (CP < 0.001) may lead to overfitting")
+                    recommendations <- c(recommendations, "Consider using cross-validation to select optimal CP value")
+                }
+
+                if (tree_mode == "classification") {
+                    # Classification specific
+                    max_depth <- self$options$tree_depth %||% 6
+                    if (max_depth > 10) {
+                        warnings <- c(warnings, "Deep trees (depth > 10) may overfit clinical data")
+                        recommendations <- c(recommendations, "Consider pruning or reducing max_depth for better generalization")
+                    }
+
+                    # Loss matrix guidance
+                    loss_preset <- self$options$clinical_loss_preset %||% "equal"
+                    if (loss_preset == "equal") {
+                        recommendations <- c(recommendations, "Consider using clinical loss matrices (screening/diagnosis presets) for medical applications")
+                    }
+                } else if (tree_mode == "regression") {
+                    # Regression specific
+                    min_split <- self$options$min_n %||% 20
+                    if (min_split < 10) {
+                        warnings <- c(warnings, "Low minimum split size may cause instability in regression trees")
+                        recommendations <- c(recommendations, "Consider min_n >= 10 for stable regression splits")
+                    }
+                } else if (tree_mode == "survival") {
+                    # Survival analysis specific
+                    recommendations <- c(recommendations, "Ensure survival data has proper censoring indicators and time variables")
+                } else if (tree_mode == "poisson") {
+                    # Poisson specific
+                    recommendations <- c(recommendations, "Poisson trees are designed for count data - ensure response variable contains non-negative integers")
+                }
+
+                # Cross-validation guidance
+                xval_folds <- self$options$rpart_xval %||% 10
+                if (xval_folds == 0) {
+                    warnings <- c(warnings, "Cross-validation disabled (xval=0) - pruning may be suboptimal")
+                    recommendations <- c(recommendations, "Enable cross-validation for better tree pruning")
+                }
+
+            } else if (algorithm == "fftrees") {
+                # FFTrees-specific validations
+                if (tree_mode != "classification") {
+                    warnings <- c(warnings, "FFTrees algorithm is designed for binary classification only")
+                    recommendations <- c(recommendations, "Use rpart or other algorithms for non-classification problems")
+                }
+
+                # FFTrees works best with binary outcomes
+                target_var <- self$options$target
+                if (!is.null(target_var) && !is.null(self$data)) {
+                    target_levels <- unique(self$data[[target_var]])
+                    if (length(target_levels) > 2) {
+                        warnings <- c(warnings, "FFTrees works best with binary classification problems")
+                        recommendations <- c(recommendations, "Consider binary encoding of target variable or use multi-class algorithms")
+                    }
+                }
+
+            } else if (algorithm == "randomforest") {
+                # Random Forest specific
+                n_trees <- self$options$rf_ntree %||% 500
+                if (n_trees < 100) {
+                    warnings <- c(warnings, "Low number of trees may reduce Random Forest performance")
+                    recommendations <- c(recommendations, "Consider using at least 100 trees for stable results")
+                }
+
+                mtry <- self$options$rf_mtry %||% 0
+                if (mtry == 0) {
+                    recommendations <- c(recommendations, "mtry=0 uses automatic selection - consider tuning for optimal performance")
+                }
+
+            } else if (algorithm == "xgboost") {
+                # XGBoost specific
+                learning_rate <- self$options$xgb_eta %||% 0.3
+                n_rounds <- self$options$xgb_nrounds %||% 100
+
+                if (learning_rate > 0.5) {
+                    warnings <- c(warnings, "High learning rate may cause instability in XGBoost")
+                    recommendations <- c(recommendations, "Consider eta <= 0.3 with more rounds for better convergence")
+                }
+
+                if (n_rounds < 50) {
+                    warnings <- c(warnings, "Low number of rounds may underfit the data")
+                    recommendations <- c(recommendations, "Consider increasing nrounds or using early stopping")
+                }
+            }
+
+            # General data size guidance
+            if (!is.null(self$data)) {
+                n_samples <- nrow(self$data)
+                n_vars <- length(c(self$options$vars, self$options$facs))
+
+                if (n_samples < 100) {
+                    warnings <- c(warnings, paste("Small sample size (n =", n_samples, ") may lead to unstable results"))
+                    recommendations <- c(recommendations, "Consider bootstrap validation or cross-validation for reliability assessment")
+                }
+
+                if (n_vars > n_samples / 10) {
+                    warnings <- c(warnings, "High-dimensional data (many variables relative to samples)")
+                    recommendations <- c(recommendations, "Consider feature selection or regularization methods")
+                }
+            }
+
+            return(list(
+                warnings = warnings,
+                recommendations = recommendations,
+                algorithm = algorithm,
+                tree_mode = tree_mode
+            ))
+        },
+
+        # Enhanced cross-validation analysis with xpred.rpart
+        .perform_xpred_analysis = function(model, train_data, target_var) {
+            tryCatch({
+                if (!requireNamespace("rpart", quietly = TRUE)) {
+                    return(NULL)
+                }
+
+                # Get the number of cross-validation folds from the model
+                xval_folds <- model$control$xval
+                if (is.null(xval_folds) || xval_folds <= 1) {
+                    return(NULL)
+                }
+
+                # Create cross-validation groups
+                n_samples <- nrow(train_data)
+                xgroup <- rep(1:xval_folds, length.out = n_samples)
+
+                # Perform cross-validation predictions using xpred.rpart
+                xpred_matrix <- rpart::xpred.rpart(model, xgroup)
+
+                # Get actual values
+                actual_values <- train_data[[target_var]]
+
+                # Analysis depends on the type of model
+                tree_mode <- self$options$tree_mode %||% "classification"
+
+                if (tree_mode %in% c("classification", "class")) {
+                    # Classification analysis
+                    if (is.matrix(xpred_matrix)) {
+                        # Convert probability matrix to class predictions
+                        if (ncol(xpred_matrix) == 2) {
+                            # Binary classification
+                            predicted_probs <- xpred_matrix[, 2]
+                            predicted_classes <- factor(ifelse(predicted_probs > 0.5,
+                                                             levels(actual_values)[2],
+                                                             levels(actual_values)[1]),
+                                                       levels = levels(actual_values))
+
+                            # Calculate cross-validation performance metrics
+                            xval_accuracy <- mean(predicted_classes == actual_values, na.rm = TRUE)
+
+                            # Calculate AUC if possible
+                            xval_auc <- NULL
+                            if (requireNamespace("pROC", quietly = TRUE)) {
+                                xval_auc <- pROC::auc(actual_values, predicted_probs, quiet = TRUE)
+                            }
+
+                            return(list(
+                                type = "classification",
+                                predictions = predicted_classes,
+                                probabilities = predicted_probs,
+                                actual = actual_values,
+                                accuracy = xval_accuracy,
+                                auc = xval_auc,
+                                xval_folds = xval_folds,
+                                method = "xpred.rpart"
+                            ))
+                        }
+                    }
+                } else if (tree_mode %in% c("regression", "anova")) {
+                    # Regression analysis
+                    predicted_values <- as.numeric(xpred_matrix)
+
+                    # Calculate cross-validation error metrics
+                    mse <- mean((predicted_values - actual_values)^2, na.rm = TRUE)
+                    rmse <- sqrt(mse)
+                    mae <- mean(abs(predicted_values - actual_values), na.rm = TRUE)
+
+                    # Calculate relative error as in the rpart vignette
+                    baseline_error <- mean((actual_values - mean(actual_values, na.rm = TRUE))^2, na.rm = TRUE)
+                    relative_error <- mse / baseline_error
+
+                    # R-squared
+                    ss_res <- sum((actual_values - predicted_values)^2, na.rm = TRUE)
+                    ss_tot <- sum((actual_values - mean(actual_values, na.rm = TRUE))^2, na.rm = TRUE)
+                    r_squared <- 1 - (ss_res / ss_tot)
+
+                    return(list(
+                        type = "regression",
+                        predictions = predicted_values,
+                        actual = actual_values,
+                        mse = mse,
+                        rmse = rmse,
+                        mae = mae,
+                        relative_error = relative_error,
+                        r_squared = r_squared,
+                        xval_folds = xval_folds,
+                        method = "xpred.rpart"
+                    ))
+                }
+
+                # Default return for unsupported modes
+                return(list(
+                    type = "unsupported",
+                    method = "xpred.rpart",
+                    xval_folds = xval_folds
+                ))
+
+            }, error = function(e) {
+                warning("xpred.rpart analysis failed: ", e$message)
+                return(NULL)
+            })
+        },
+
+        # Comprehensive model training function
+        .train_model = function(data) {
+            algorithm <- self$options$algorithm
+            target_var <- self$options$target
+
+            message("[DEBUG] Algorithm selected: ", algorithm)
+            message("[DEBUG] Target variable: ", target_var)
+            message("[DEBUG] Data dimensions before split: ", nrow(data), " x ", ncol(data))
+
+            # Prepare formula
+            predictors <- setdiff(names(data), target_var)
+            formula_str <- paste(target_var, "~", paste(predictors, collapse = " + "))
+            model_formula <- as.formula(formula_str)
+
+            message("[DEBUG] Predictors: ", paste(predictors, collapse = ", "))
+            message("[DEBUG] Formula created: ", formula_str)
+
+            # Split data for validation
+            validation_method <- self$options$validation
+            message("[DEBUG] Validation method: ", validation_method)
+
+            if (validation_method == "holdout") {
+                set.seed(123)
+                message("[DEBUG] Creating holdout split with test_split = ", self$options$test_split)
+                train_idx <- caret::createDataPartition(data[[target_var]],
+                                                        p = 1 - self$options$test_split,
+                                                        list = FALSE)
+                train_data <- data[train_idx, ]
+                test_data <- data[-train_idx, ]
+                message("[DEBUG] Train set size: ", nrow(train_data))
+                message("[DEBUG] Test set size: ", nrow(test_data))
+            } else {
+                message("[DEBUG] Using full data for both train and test")
+                train_data <- data
+                test_data <- data
+            }
+
+            private$.training_data <- train_data
+            private$.test_data <- test_data
+
+            # Define positive and negative classes
+            positive_level <- self$options$targetLevel
+            target_levels <- levels(as.factor(train_data[[target_var]]))
+            negative_class <- setdiff(target_levels, positive_level)[1]
+            target_level <- positive_level  # Alias for consistency
+
+            return(tryCatch({
+                # Train model based on algorithm
+                if (algorithm == "fftrees") {
+                    # FFTrees algorithm implementation
+                    message("[DEBUG] Starting FFTrees algorithm")
+
+                    # Check target variable levels for FFTrees (requires binary)
+                    if (length(target_levels) != 2) {
+                        message("[DEBUG] FFTrees requires binary classification. Converting to binary...")
+                        train_data[[target_var]] <- factor(
+                            ifelse(train_data[[target_var]] == positive_level, positive_level, "Other"),
+                            levels = c("Other", positive_level)
+                        )
+                        test_data[[target_var]] <- factor(
+                            ifelse(test_data[[target_var]] == positive_level, positive_level, "Other"),
+                            levels = c("Other", positive_level)
+                        )
+                        negative_class <- "Other"
+                    }
+
+                    # Create logical version of target variable
+                    train_data[[paste0(target_var, "_logical")]] <- as.logical(train_data[[target_var]] == positive_level)
+                    test_data[[paste0(target_var, "_logical")]] <- as.logical(test_data[[target_var]] == positive_level)
+
+                    logical_target <- paste0(target_var, "_logical")
+                    predictors <- setdiff(names(train_data), c(target_var, logical_target))
+                    model_formula_logical <- as.formula(paste(logical_target, "~", paste(predictors, collapse = " + ")))
+
+                    # Train FFTrees model
+                    model <- FFTrees::FFTrees(
+                        formula = model_formula_logical,
+                        data = train_data,
+                        data.test = test_data,
+                        main = "Medical Decision Tree",
+                        quiet = list(ini = TRUE, fin = FALSE, mis = FALSE, set = TRUE)
+                    )
+
+                    # Get predictions
+                    test_pred <- predict(model, newdata = test_data)
+                    predictions_logical <- as.logical(test_pred)
+                    predictions_class <- factor(
+                        ifelse(predictions_logical, positive_level, negative_class),
+                        levels = c(negative_class, positive_level)
+                    )
+                    predictions_prob <- as.numeric(predictions_logical)
+
+                } else if (algorithm == "rpart") {
+                    message("[DEBUG] Training enhanced CART model")
+
+                    # Determine if hyperparameter tuning is enabled
+                    if (self$options$hyperparameter_tuning) {
+                        model <- private$.tune_hyperparameters(model_formula, train_data, test_data, algorithm)
+                        predictions_prob <- predict(model, test_data, type = "prob")[, 2]
+                        predictions_class <- predict(model, test_data, type = "class")
+                    } else {
+                        # Enhanced rpart training with user-specified parameters
+                        model <- private$.train_rpart_model(model_formula, train_data, test_data, target_var)
+                        pred_results <- private$.make_rpart_predictions(model, test_data)
+                        predictions_prob <- pred_results$prob
+                        predictions_class <- pred_results$class
+                    }
+
+                } else if (algorithm == "c50") {
+                    message("[DEBUG] Training C5.0 classification model")
+
+                    if (!requireNamespace("C50", quietly = TRUE)) {
+                        stop("C50 package required but not installed. Please install with: install.packages('C50')")
+                    }
+
+                    if (self$options$hyperparameter_tuning) {
+                        model <- private$.tune_hyperparameters(model_formula, train_data, test_data, algorithm)
+                        predictions_class <- predict(model, test_data, type = "class")
+                        predictions_prob_matrix <- predict(model, test_data, type = "prob")
+                        predictions_prob <- predictions_prob_matrix[, 2]
+                    } else {
+                        trials <- self$options$c50_trials %||% 1
+                        winnow <- self$options$c50_winnow %||% FALSE
+
+                        model <- C50::C5.0(
+                            model_formula,
+                            data = train_data,
+                            trials = trials,
+                            winnow = winnow,
+                            control = C50::C5.0Control(
+                                minCases = self$options$min_n %||% 20,
+                                CF = 1 - (self$options$cost_complexity %||% 0.01)
+                            )
+                        )
+
+                        predictions_class <- predict(model, test_data, type = "class")
+                        predictions_prob_matrix <- predict(model, test_data, type = "prob")
+                        predictions_prob <- predictions_prob_matrix[, 2]
+                    }
+
+                } else if (algorithm == "randomforest") {
+                    message("[DEBUG] Training Random Forest model")
+
+                    if (!requireNamespace("randomForest", quietly = TRUE)) {
+                        stop("randomForest package required but not installed")
+                    }
+
+                    if (self$options$hyperparameter_tuning) {
+                        model <- private$.tune_hyperparameters(model_formula, train_data, test_data, algorithm)
+                    } else {
+                        ntree <- self$options$rf_ntree %||% 500
+                        mtry <- self$options$rf_mtry %||% 0
+
+                        if (mtry == 0) {
+                            n_predictors <- length(predictors)
+                            mtry <- max(1, floor(sqrt(n_predictors)))
+                        }
+
+                        model <- randomForest::randomForest(
+                            model_formula,
+                            data = train_data,
+                            ntree = ntree,
+                            mtry = mtry,
+                            na.action = na.roughfix,
+                            importance = TRUE
+                        )
+                    }
+
+                    predictions_prob_matrix <- predict(model, test_data, type = "prob")
+                    if (ncol(predictions_prob_matrix) >= 2) {
+                        predictions_prob <- predictions_prob_matrix[, 2]
+                    } else {
+                        predictions_prob <- predictions_prob_matrix[, 1]
+                    }
+                    predictions_class <- predict(model, test_data, type = "class")
+
+                } else if (algorithm == "xgboost") {
+                    message("[DEBUG] Training XGBoost model")
+
+                    if (!requireNamespace("xgboost", quietly = TRUE)) {
+                        stop("xgboost package required but not installed")
+                    }
+
+                    if (self$options$hyperparameter_tuning) {
+                        model <- private$.tune_hyperparameters(model_formula, train_data, test_data, algorithm)
+
+                        # XGBoost predictions for tuned model
+                        test_prepared <- private$.prepare_data_for_xgboost(test_data, target_var)
+                        test_matrix <- xgboost::xgb.DMatrix(test_prepared$X, label = test_prepared$y)
+                        predictions_prob <- predict(model, test_matrix)
+                        predictions_class <- factor(
+                            ifelse(predictions_prob > 0.5, target_level,
+                                   setdiff(target_levels, target_level)[1]),
+                            levels = target_levels
+                        )
+                    } else {
+                        # Manual XGBoost training - simplified version
+                        pred_vars <- c(self$options$vars, self$options$facs)
+                        train_x <- train_data[pred_vars]
+                        train_y <- train_data[[target_var]]
+                        test_x <- test_data[pred_vars]
+
+                        # Convert categorical variables to numeric
+                        for (var in self$options$facs) {
+                            if (var %in% names(train_x)) {
+                                if (is.factor(train_x[[var]])) {
+                                    all_levels <- unique(c(levels(train_x[[var]]), levels(test_x[[var]])))
+                                    train_x[[var]] <- factor(train_x[[var]], levels = all_levels)
+                                    test_x[[var]] <- factor(test_x[[var]], levels = all_levels)
+                                    train_x[[var]] <- as.numeric(train_x[[var]]) - 1
+                                    test_x[[var]] <- as.numeric(test_x[[var]]) - 1
+                                }
+                            }
+                        }
+
+                        train_matrix <- as.matrix(train_x)
+                        test_matrix <- as.matrix(test_x)
+                        train_label <- as.numeric(train_y == target_level)
+
+                        dtrain <- xgboost::xgb.DMatrix(data = train_matrix, label = train_label)
+                        dtest <- xgboost::xgb.DMatrix(data = test_matrix)
+
+                        model <- xgboost::xgboost(
+                            data = dtrain,
+                            nrounds = self$options$xgb_nrounds %||% 100,
+                            eta = self$options$xgb_eta %||% 0.3,
+                            max_depth = self$options$tree_depth %||% 6,
+                            objective = "binary:logistic",
+                            eval_metric = "auc",
+                            verbose = 0,
+                            nthread = 1
+                        )
+
+                        predictions_prob <- predict(model, dtest)
+                        predictions_class <- factor(
+                            ifelse(predictions_prob > 0.5, target_level,
+                                   setdiff(target_levels, target_level)[1]),
+                            levels = target_levels
+                        )
+                    }
+                } else if (algorithm == "ensemble") {
+                    message("[DEBUG] Training Ensemble model")
+                    ensemble_results <- private$.train_ensemble_model(model_formula, train_data, test_data, target_var)
+                    model <- ensemble_results$model
+                    predictions_prob <- ensemble_results$predictions_prob
+                    predictions_class <- ensemble_results$predictions_class
+                } else if (algorithm == "consensus") {
+                    message("[DEBUG] Training Consensus Trees model")
+                    consensus_results <- private$.train_consensus_model(model_formula, train_data, test_data, target_var)
+                    model <- consensus_results$model
+                    predictions_prob <- consensus_results$predictions_prob
+                    predictions_class <- consensus_results$predictions_class
+                } else {
+                    stop("Unsupported algorithm: ", algorithm)
+                }
+
+                # Calculate feature importance
+                importance_data <- private$.calculate_importance(model, algorithm)
+
+                # Perform cross-validation if requested
+                validation_results <- NULL
+                if (validation_method == "cv") {
+                    validation_results <- private$.perform_cv(model_formula, data, algorithm)
+                }
+
+                # Return results
+                list(
+                    model = model,
+                    predictions = predictions_prob,
+                    predictions_class = predictions_class,
+                    actual = test_data[[target_var]],
+                    importance = importance_data,
+                    validation_results = validation_results,
+                    algorithm = algorithm,
+                    formula = model_formula
+                )
+
+            }, error = function(e) {
+                message("[DEBUG] Model training error: ", e$message)
+
+                # Provide specific error guidance
+                error_msg <- private$.generate_error_message(e, algorithm)
+                self$results$model_summary$setContent(error_msg)
+                return(NULL)
+            }))
+        },
+
+        # Ensemble training function
+        .train_ensemble_model = function(model_formula, train_data, test_data, target_var) {
+            message("[DEBUG] Creating ensemble model")
+
+            ensemble_size <- min(10, self$options$ensemble_size %||% 10)
+            available_algorithms <- c("rpart")
+
+            # Add available algorithms
+            if (requireNamespace("randomForest", quietly = TRUE)) {
+                available_algorithms <- c(available_algorithms, "randomforest")
+            }
+            if (requireNamespace("C50", quietly = TRUE)) {
+                available_algorithms <- c(available_algorithms, "c50")
+            }
+
+            ensemble_models <- list()
+            all_predictions_prob <- list()
+            all_predictions_class <- list()
+
+            target_level <- self$options$targetLevel
+            target_levels <- levels(train_data[[target_var]])
+
+            # Train multiple models
+            for (i in 1:ensemble_size) {
+                algo <- sample(available_algorithms, 1)
+
+                # Add diversity through bootstrap sampling if requested
+                if (self$options$ensemble_diversity) {
+                    boot_indices <- sample(nrow(train_data), replace = TRUE)
+                    boot_data <- train_data[boot_indices, ]
+                } else {
+                    boot_data <- train_data
+                }
+
+                tryCatch({
+                    if (algo == "rpart") {
+                        model_i <- rpart::rpart(
+                            model_formula, data = boot_data, method = "class",
+                            control = rpart::rpart.control(
+                                cp = runif(1, 0.001, 0.05),
+                                maxdepth = sample(3:7, 1)
+                            )
+                        )
+                    } else if (algo == "randomforest") {
+                        model_i <- randomForest::randomForest(
+                            model_formula, data = boot_data,
+                            ntree = sample(c(100, 300, 500), 1)
+                        )
+                    } else if (algo == "c50") {
+                        model_i <- C50::C5.0(model_formula, data = boot_data)
+                    }
+
+                    pred_prob_i <- predict(model_i, test_data, type = "prob")[, 2]
+                    pred_class_i <- predict(model_i, test_data, type = "class")
+
+                    ensemble_models[[i]] <- list(model = model_i, algorithm = algo)
+                    all_predictions_prob[[i]] <- pred_prob_i
+                    all_predictions_class[[i]] <- pred_class_i
+
+                }, error = function(e) {
+                    message("[DEBUG] Failed to train ensemble model ", i, ": ", e$message)
+                })
+            }
+
+            # Combine predictions
+            if (length(all_predictions_prob) > 0) {
+                # Average probability predictions
+                prob_matrix <- do.call(cbind, all_predictions_prob)
+                ensemble_prob <- rowMeans(prob_matrix, na.rm = TRUE)
+
+                # Majority voting for class predictions
+                class_votes <- do.call(cbind, lapply(all_predictions_class, as.character))
+                ensemble_class <- factor(
+                    apply(class_votes, 1, function(x) {
+                        tbl <- table(x)
+                        names(tbl)[which.max(tbl)]
+                    }),
+                    levels = target_levels
+                )
+
+                ensemble_model <- list(
+                    models = ensemble_models,
+                    ensemble_size = length(ensemble_models)
+                )
+                class(ensemble_model) <- "ensemble_tree"
+
+                return(list(
+                    model = ensemble_model,
+                    predictions_prob = ensemble_prob,
+                    predictions_class = ensemble_class
+                ))
+            } else {
+                stop("No ensemble models were successfully trained")
+            }
+        },
+
+        # Consensus training function
+        .train_consensus_model = function(model_formula, train_data, test_data, target_var) {
+            message("[DEBUG] Creating consensus model using multiple validation methods")
+
+            consensus_threshold <- self$options$consensus_threshold %||% 0.6
+            target_level <- self$options$targetLevel
+            target_levels <- levels(train_data[[target_var]])
+
+            # Use CV for consensus
+            cv_predictions <- private$.get_cv_consensus_predictions(model_formula, train_data, test_data)
+
+            # Apply consensus threshold
+            consensus_class <- factor(
+                ifelse(cv_predictions > consensus_threshold, target_level,
+                       setdiff(target_levels, target_level)[1]),
+                levels = target_levels
+            )
+
+            consensus_model <- list(
+                cv_predictions = cv_predictions,
+                threshold = consensus_threshold
+            )
+            class(consensus_model) <- "consensus_tree"
+
+            return(list(
+                model = consensus_model,
+                predictions_prob = cv_predictions,
+                predictions_class = consensus_class
+            ))
+        },
+
+        .get_cv_consensus_predictions = function(model_formula, train_data, test_data) {
+            k <- 5
+            folds <- sample(rep(1:k, length.out = nrow(train_data)))
+            cv_predictions <- numeric(nrow(test_data))
+
+            for (fold in 1:k) {
+                train_fold <- train_data[folds != fold, ]
+                fold_model <- rpart::rpart(model_formula, data = train_fold, method = "class")
+                fold_pred <- predict(fold_model, test_data, type = "prob")[, 2]
+                cv_predictions <- cv_predictions + fold_pred / k
+            }
+            return(cv_predictions)
+        },
+
+        # Specialized rpart training function
+        .train_rpart_model = function(model_formula, train_data, test_data, target_var) {
+            # Handle missing data
+            missing_method <- self$options$missing_data_method %||% "native"
+            if (missing_method == "clinical_impute") {
+                train_data <- private$.clinical_imputation(train_data, target_var)
+                test_data <- private$.clinical_imputation(test_data, target_var)
+            } else if (missing_method == "exclude") {
+                complete_vars <- c(self$options$vars, self$options$facs, target_var)
+                train_data <- train_data[complete.cases(train_data[complete_vars]), ]
+                test_data <- test_data[complete.cases(test_data[complete_vars]), ]
+            }
+
+            # Enhanced rpart parameters
+            n_classes <- length(levels(train_data[[target_var]]))
+
+            # Prior probabilities
+            prior_probs <- NULL
+            prior_setting <- self$options$enhanced_prior_probs %||% "data"
+            if (prior_setting == "population" && !is.null(self$options$population_prevalence)) {
+                if (n_classes == 2) {
+                    prev <- self$options$population_prevalence
+                    prior_probs <- c(1 - prev, prev)
+                }
+            } else if (prior_setting == "balanced") {
+                prior_probs <- rep(1/n_classes, n_classes)
+            } else if (prior_setting == "custom" && !is.null(self$options$custom_prior_values) && self$options$custom_prior_values != "") {
+                custom_priors <- as.numeric(strsplit(self$options$custom_prior_values, ",")[[1]])
+                if (length(custom_priors) == n_classes && abs(sum(custom_priors) - 1) < 0.001) {
+                    prior_probs <- custom_priors
+                }
+            }
+
+            # Loss matrix
+            loss_matrix <- NULL
+            loss_preset <- self$options$clinical_loss_preset %||% "equal"
+            if (loss_preset == "screening" && n_classes == 2) {
+                loss_matrix <- matrix(c(0, 1, 5, 0), nrow = 2, ncol = 2)
+            } else if (loss_preset == "diagnosis" && n_classes == 2) {
+                loss_matrix <- matrix(c(0, 3, 1, 0), nrow = 2, ncol = 2)
+            } else if (loss_preset == "custom" && !is.null(self$options$rpart_loss_matrix) && self$options$rpart_loss_matrix != "") {
+                loss_vals <- as.numeric(strsplit(self$options$rpart_loss_matrix, ",")[[1]])
+                if (length(loss_vals) == n_classes^2) {
+                    loss_matrix <- matrix(loss_vals, nrow = n_classes, ncol = n_classes)
+                }
+            }
+
+            # Method selection
+            tree_mode <- self$options$tree_mode %||% "classification"
+            use_custom <- self$options$use_custom_splitting %||% FALSE
+
+            if (use_custom) {
+                custom_method_type <- self$options$custom_splitting_method %||% "custom_anova"
+                custom_method <- private$.get_custom_splitting_functions(custom_method_type)
+                if (is.null(custom_method)) {
+                    warning("Custom splitting method not found. Using standard rpart method.")
+                    use_custom <- FALSE
+                }
+            }
+
+            rpart_method <- if (use_custom) {
+                custom_method
+            } else {
+                switch(tree_mode,
+                       "classification" = "class",
+                       "regression" = "anova",
+                       "survival" = "exp",
+                       "poisson" = "poisson",
+                       "exponential" = "exp",
+                       "class")
+            }
+
+            # Create rpart control
+            rpart_control <- rpart::rpart.control(
+                maxdepth = self$options$tree_depth %||% self$options$max_depth %||% 6,
+                minsplit = self$options$min_n %||% self$options$min_samples_split %||% 20,
+                minbucket = self$options$min_samples_leaf %||% 10,
+                cp = self$options$cost_complexity %||% 0.01,
+                surrogate = if (!is.null(self$options$rpart_surrogate)) self$options$rpart_surrogate else TRUE,
+                usesurrogate = as.numeric(self$options$rpart_usesurrogate %||% "2"),
+                maxsurrogate = self$options$rpart_maxsurrogate %||% 5,
+                xval = self$options$rpart_xval %||% 10,
+                maxcompete = self$options$rpart_maxcompete %||% 4
+            )
+
+            # Train model
+            if (use_custom) {
+                model <- rpart::rpart(model_formula, data = train_data, method = rpart_method, control = rpart_control)
+            } else {
+                model <- rpart::rpart(
+                    model_formula,
+                    data = train_data,
+                    method = rpart_method,
+                    parms = list(
+                        split = self$options$rpart_split %||% "gini",
+                        prior = prior_probs,
+                        loss = loss_matrix
+                    ),
+                    control = rpart_control
+                )
+            }
+
+            # Enhanced cross-validation analysis with xpred.rpart
+            if (self$options$rpart_xval > 0) {
+                xpred_analysis <- private$.perform_xpred_analysis(model, train_data, target_var)
+                if (!is.null(xpred_analysis)) {
+                    model$xpred_results <- xpred_analysis
+                }
+            }
+
+            return(model)
+        },
+
+        # Make rpart predictions
+        .make_rpart_predictions = function(model, test_data) {
+            prediction_type <- self$options$rpart_prediction_type %||% "class"
+
+            if (prediction_type == "prob") {
+                pred_result <- predict(model, test_data, type = "prob")
+                if (self$options$tree_mode == "classification" && ncol(pred_result) >= 2) {
+                    predictions_prob <- pred_result[, 2]
+                    predictions_class <- predict(model, test_data, type = "class")
+                } else {
+                    predictions_prob <- pred_result
+                    predictions_class <- predict(model, test_data, type = "class")
+                }
+            } else if (prediction_type == "vector") {
+                predictions_vector <- predict(model, test_data, type = "vector")
+                predictions_prob <- predict(model, test_data, type = "prob")[, 2]
+                predictions_class <- predict(model, test_data, type = "class")
+                private$.vector_predictions <- predictions_vector
+            } else if (prediction_type == "matrix") {
+                predictions_matrix <- predict(model, test_data, type = "matrix")
+                predictions_prob <- predict(model, test_data, type = "prob")[, 2]
+                predictions_class <- predict(model, test_data, type = "class")
+                private$.matrix_predictions <- predictions_matrix
+            } else {
+                predictions_prob <- predict(model, test_data, type = "prob")[, 2]
+                predictions_class <- predict(model, test_data, type = "class")
+            }
+
+            return(list(prob = predictions_prob, class = predictions_class))
+        },
+
+        # Generate error messages
+        .generate_error_message = function(e, algorithm) {
+            error_type <- "Unknown"
+            specific_help <- ""
+
+            if (grepl("contrasts can be applied only to factors", e$message)) {
+                error_type <- "Variable Type Error"
+                specific_help <- "<p><strong>Solution:</strong> Some predictor variables appear to be coded as text but contain numeric values. Convert them to proper numeric or factor variables in your data preparation.</p>"
+            } else if (grepl("sample size", e$message)) {
+                error_type <- "Sample Size Error"
+                specific_help <- "<p><strong>Solutions:</strong><ul><li>Collect more data</li><li>Reduce number of predictor variables</li><li>Use simpler statistical methods</li></ul></p>"
+            } else if (grepl("singularities|rank-deficient", e$message)) {
+                error_type <- "Multicollinearity Error"
+                specific_help <- "<p><strong>Solutions:</strong><ul><li>Remove highly correlated predictor variables</li><li>Use feature selection</li><li>Check for duplicate or derived variables</li></ul></p>"
+            } else if (grepl("levels|factor", e$message)) {
+                error_type <- "Factor Level Error"
+                specific_help <- "<p><strong>Solutions:</strong><ul><li>Check that categorical variables have valid levels</li><li>Ensure target level exists in the target variable</li><li>Remove unused factor levels</li></ul></p>"
+            }
+
+            return(paste0("
+            <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
+            <h4>", error_type, "</h4>
+            <p><strong>Error Details:</strong> ", e$message, "</p>
+            ", specific_help, "
+            <p><strong>General Troubleshooting:</strong></p>
+            <ul>
+            <li>Verify data quality and variable types</li>
+            <li>Check for sufficient sample size in each group</li>
+            <li>Ensure predictor variables have variation</li>
+            <li>Consider data preprocessing options</li>
+            </ul>
+            </div>"))
+        },
+
+        # Fancy plot generation using rattle-style visualization
+        .generate_fancy_plot = function(model) {
+            if (is.null(model)) return(NULL)
+
+            tryCatch({
+                message("[DEBUG] Generating fancy tree plot")
+
+                # Create enhanced tree visualization
+                plot_data <- list(
+                    nodes = data.frame(
+                        node_id = as.numeric(rownames(model$frame)),
+                        splits = ifelse(model$frame$var == "<leaf>",
+                                      paste("Node", rownames(model$frame)),
+                                      as.character(model$frame$var)),
+                        n = model$frame$n,
+                        dev = model$frame$dev,
+                        yval = model$frame$yval,
+                        complexity = model$frame$complexity %||% 0
+                    ),
+                    edges = data.frame(
+                        from = integer(0),
+                        to = integer(0),
+                        condition = character(0)
+                    )
+                )
+
+                # Enhanced plot with colors and improved layout
+                if (requireNamespace("rattle", quietly = TRUE)) {
+                    # Use rattle for fancy plotting if available
+                    rattle::fancyRpartPlot(model,
+                                         main = "Enhanced Decision Tree",
+                                         sub = paste("Complexity Parameter:", format(model$control$cp, digits = 4)))
+                } else {
+                    # Fallback to enhanced rpart plot
+                    plot(model, uniform = TRUE, branch = 0.4, compress = TRUE, margin = 0.1)
+                    text(model, all = TRUE, use.n = TRUE, fancy = TRUE, cex = 0.8)
+                    title(main = "Enhanced Decision Tree Visualization")
+                }
+
+                return(plot_data)
+
+            }, error = function(e) {
+                message("[DEBUG] Fancy plot generation failed: ", e$message)
+                # Fallback to standard plot
+                plot(model)
+                text(model)
+                return(NULL)
+            })
+        },
+
+        # F1 score analysis with detailed metrics
+        .generate_f1_analysis = function(predictions, actual, model) {
+            if (is.null(predictions) || is.null(actual)) return(NULL)
+
+            tryCatch({
+                message("[DEBUG] Generating F1 score analysis")
+
+                # Ensure factors have same levels
+                if (is.factor(predictions) && is.factor(actual)) {
+                    all_levels <- union(levels(predictions), levels(actual))
+                    predictions <- factor(predictions, levels = all_levels)
+                    actual <- factor(actual, levels = all_levels)
+                }
+
+                # Calculate confusion matrix
+                cm <- table(Predicted = predictions, Actual = actual)
+
+                # Multi-class F1 calculation
+                classes <- levels(actual)
+                f1_scores <- numeric(length(classes))
+                precision_scores <- numeric(length(classes))
+                recall_scores <- numeric(length(classes))
+
+                for (i in seq_along(classes)) {
+                    class_name <- classes[i]
+
+                    # True positives, false positives, false negatives
+                    tp <- cm[class_name, class_name] %||% 0
+                    fp <- sum(cm[class_name, ]) - tp
+                    fn <- sum(cm[, class_name]) - tp
+
+                    # Calculate precision and recall
+                    precision <- if (tp + fp > 0) tp / (tp + fp) else 0
+                    recall <- if (tp + fn > 0) tp / (tp + fn) else 0
+
+                    # Calculate F1 score
+                    f1 <- if (precision + recall > 0) 2 * (precision * recall) / (precision + recall) else 0
+
+                    f1_scores[i] <- f1
+                    precision_scores[i] <- precision
+                    recall_scores[i] <- recall
+                }
+
+                # Overall metrics
+                macro_f1 <- mean(f1_scores, na.rm = TRUE)
+                weighted_f1 <- sum(f1_scores * table(actual)) / length(actual)
+
+                # Create summary table
+                f1_analysis <- data.frame(
+                    Class = classes,
+                    Precision = round(precision_scores, 4),
+                    Recall = round(recall_scores, 4),
+                    F1_Score = round(f1_scores, 4),
+                    Support = as.numeric(table(actual)[classes])
+                )
+
+                # Add overall metrics
+                overall_metrics <- data.frame(
+                    Metric = c("Macro Avg F1", "Weighted Avg F1", "Accuracy"),
+                    Value = round(c(macro_f1, weighted_f1, sum(diag(cm))/sum(cm)), 4)
+                )
+
+                return(list(
+                    class_metrics = f1_analysis,
+                    overall_metrics = overall_metrics,
+                    confusion_matrix = cm
+                ))
+
+            }, error = function(e) {
+                message("[DEBUG] F1 analysis failed: ", e$message)
+                return(NULL)
+            })
+        },
+
+        # Learning curve generation
+        .generate_learning_curve = function(model_formula, data, target_var) {
+            tryCatch({
+                message("[DEBUG] Generating learning curve")
+
+                # Define training set sizes
+                n_total <- nrow(data)
+                train_sizes <- unique(round(seq(0.1, 1.0, by = 0.1) * n_total))
+                train_sizes <- train_sizes[train_sizes >= 10] # Minimum 10 samples
+
+                learning_results <- data.frame(
+                    TrainSize = integer(0),
+                    TrainScore = numeric(0),
+                    ValidationScore = numeric(0)
+                )
+
+                # Cross-validation folds
+                n_folds <- min(5, nrow(data) %/% 10)
+                if (n_folds < 2) n_folds <- 2
+
+                # Create folds
+                fold_indices <- sample(rep(1:n_folds, length.out = nrow(data)))
+
+                for (size in train_sizes) {
+                    fold_train_scores <- numeric(n_folds)
+                    fold_val_scores <- numeric(n_folds)
+
+                    for (fold in 1:n_folds) {
+                        # Create train/validation split
+                        val_indices <- which(fold_indices == fold)
+                        train_indices <- which(fold_indices != fold)
+
+                        # Subsample training data to desired size
+                        if (length(train_indices) > size) {
+                            train_indices <- sample(train_indices, size)
+                        }
+
+                        train_data <- data[train_indices, ]
+                        val_data <- data[val_indices, ]
+
+                        # Train model
+                        fold_model <- tryCatch({
+                            rpart::rpart(model_formula, data = train_data, method = "class")
+                        }, error = function(e) NULL)
+
+                        if (!is.null(fold_model)) {
+                            # Calculate accuracies
+                            train_pred <- predict(fold_model, train_data, type = "class")
+                            val_pred <- predict(fold_model, val_data, type = "class")
+
+                            fold_train_scores[fold] <- mean(train_pred == train_data[[target_var]], na.rm = TRUE)
+                            fold_val_scores[fold] <- mean(val_pred == val_data[[target_var]], na.rm = TRUE)
+                        } else {
+                            fold_train_scores[fold] <- NA
+                            fold_val_scores[fold] <- NA
+                        }
+                    }
+
+                    # Average across folds
+                    learning_results <- rbind(learning_results, data.frame(
+                        TrainSize = size,
+                        TrainScore = mean(fold_train_scores, na.rm = TRUE),
+                        ValidationScore = mean(fold_val_scores, na.rm = TRUE)
+                    ))
+                }
+
+                return(learning_results)
+
+            }, error = function(e) {
+                message("[DEBUG] Learning curve generation failed: ", e$message)
+                return(NULL)
+            })
+        },
+
+        # Grid search with cross-validation
+        .perform_grid_search_cv = function(model_formula, data, target_var) {
+            tryCatch({
+                message("[DEBUG] Performing grid search CV")
+
+                # Define parameter grid
+                param_grid <- expand.grid(
+                    cp = c(0.001, 0.01, 0.05, 0.1),
+                    maxdepth = c(3, 5, 10, 15),
+                    minsplit = c(2, 5, 10, 20),
+                    minbucket = c(1, 3, 5, 10)
+                )
+
+                # Limit grid size if too large
+                if (nrow(param_grid) > 50) {
+                    param_grid <- param_grid[sample(nrow(param_grid), 50), ]
+                }
+
+                # Cross-validation setup
+                n_folds <- min(5, nrow(data) %/% 10)
+                if (n_folds < 2) n_folds <- 2
+                fold_indices <- sample(rep(1:n_folds, length.out = nrow(data)))
+
+                # Store results
+                grid_results <- data.frame(
+                    param_grid,
+                    mean_cv_score = numeric(nrow(param_grid)),
+                    std_cv_score = numeric(nrow(param_grid))
+                )
+
+                for (i in 1:nrow(param_grid)) {
+                    params <- param_grid[i, ]
+                    cv_scores <- numeric(n_folds)
+
+                    for (fold in 1:n_folds) {
+                        train_indices <- which(fold_indices != fold)
+                        val_indices <- which(fold_indices == fold)
+
+                        train_data <- data[train_indices, ]
+                        val_data <- data[val_indices, ]
+
+                        # Train model with current parameters
+                        model <- tryCatch({
+                            rpart::rpart(
+                                model_formula,
+                                data = train_data,
+                                method = "class",
+                                control = rpart::rpart.control(
+                                    cp = params$cp,
+                                    maxdepth = params$maxdepth,
+                                    minsplit = params$minsplit,
+                                    minbucket = params$minbucket
+                                )
+                            )
+                        }, error = function(e) NULL)
+
+                        if (!is.null(model)) {
+                            val_pred <- predict(model, val_data, type = "class")
+                            cv_scores[fold] <- mean(val_pred == val_data[[target_var]], na.rm = TRUE)
+                        } else {
+                            cv_scores[fold] <- 0
+                        }
+                    }
+
+                    grid_results$mean_cv_score[i] <- mean(cv_scores, na.rm = TRUE)
+                    grid_results$std_cv_score[i] <- sd(cv_scores, na.rm = TRUE)
+                }
+
+                # Find best parameters
+                best_idx <- which.max(grid_results$mean_cv_score)
+                best_params <- grid_results[best_idx, ]
+
+                # Sort by performance
+                grid_results <- grid_results[order(grid_results$mean_cv_score, decreasing = TRUE), ]
+
+                return(list(
+                    best_params = best_params,
+                    all_results = grid_results,
+                    best_score = grid_results$mean_cv_score[1]
+                ))
+
+            }, error = function(e) {
+                message("[DEBUG] Grid search failed: ", e$message)
+                return(NULL)
+            })
+        },
+
+        # Surrogate split analysis
+        .analyze_surrogate_splits = function(model) {
+            if (is.null(model)) return(NULL)
+
+            tryCatch({
+                message("[DEBUG] Analyzing surrogate splits")
+
+                # Extract surrogate information from model
+                surrogate_info <- list()
+
+                if (!is.null(model$splits)) {
+                    splits_df <- as.data.frame(model$splits)
+
+                    # Process each split
+                    for (i in 1:nrow(splits_df)) {
+                        split_info <- splits_df[i, ]
+
+                        surrogate_info[[i]] <- list(
+                            variable = rownames(splits_df)[i],
+                            count = split_info$count %||% 0,
+                            ncat = split_info$ncat %||% 0,
+                            improve = split_info$improve %||% 0,
+                            index = split_info$index %||% 0
+                        )
+                    }
+
+                    # Create summary table
+                    surrogate_summary <- data.frame(
+                        Variable = sapply(surrogate_info, function(x) x$variable),
+                        Count = sapply(surrogate_info, function(x) x$count),
+                        Categories = sapply(surrogate_info, function(x) x$ncat),
+                        Improvement = round(sapply(surrogate_info, function(x) x$improve), 4)
+                    )
+
+                    return(list(
+                        surrogate_splits = surrogate_info,
+                        summary_table = surrogate_summary
+                    ))
+                } else {
+                    return(list(
+                        surrogate_splits = list(),
+                        summary_table = data.frame(
+                            Variable = character(0),
+                            Count = numeric(0),
+                            Categories = numeric(0),
+                            Improvement = numeric(0)
+                        )
+                    ))
+                }
+
+            }, error = function(e) {
+                message("[DEBUG] Surrogate split analysis failed: ", e$message)
+                return(NULL)
+            })
+        },
+
+        # Missing pattern analysis
+        .analyze_missing_patterns = function(data) {
+            tryCatch({
+                message("[DEBUG] Analyzing missing patterns")
+
+                # Calculate missing data statistics
+                missing_stats <- data.frame(
+                    Variable = names(data),
+                    Missing_Count = sapply(data, function(x) sum(is.na(x))),
+                    Missing_Percent = round(sapply(data, function(x) mean(is.na(x)) * 100), 2),
+                    Data_Type = sapply(data, class)
+                )
+
+                # Create missing pattern matrix
+                if (any(missing_stats$Missing_Count > 0)) {
+                    # Find combinations of missing patterns
+                    missing_matrix <- is.na(data)
+                    pattern_combinations <- unique(missing_matrix)
+
+                    pattern_summary <- data.frame(
+                        Pattern_ID = seq_len(nrow(pattern_combinations)),
+                        Count = sapply(1:nrow(pattern_combinations), function(i) {
+                            sum(apply(missing_matrix, 1, function(x) all(x == pattern_combinations[i, ])))
+                        })
+                    )
+
+                    # Add pattern descriptions
+                    pattern_summary$Description <- sapply(1:nrow(pattern_combinations), function(i) {
+                        missing_vars <- names(data)[pattern_combinations[i, ]]
+                        if (length(missing_vars) == 0) {
+                            "Complete cases"
+                        } else {
+                            paste("Missing:", paste(missing_vars, collapse = ", "))
+                        }
+                    })
+
+                    return(list(
+                        variable_stats = missing_stats,
+                        pattern_summary = pattern_summary,
+                        total_missing = sum(missing_stats$Missing_Count),
+                        complete_cases = sum(complete.cases(data))
+                    ))
+                } else {
+                    return(list(
+                        variable_stats = missing_stats,
+                        pattern_summary = data.frame(
+                            Pattern_ID = 1,
+                            Count = nrow(data),
+                            Description = "Complete cases"
+                        ),
+                        total_missing = 0,
+                        complete_cases = nrow(data)
+                    ))
+                }
+
+            }, error = function(e) {
+                message("[DEBUG] Missing pattern analysis failed: ", e$message)
+                return(NULL)
+            })
         }
     )
 )

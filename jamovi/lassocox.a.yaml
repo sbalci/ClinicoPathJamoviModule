@@ -1,7 +1,7 @@
 ---
 name: lassocox
 title: Lasso-Cox Regression
-menuGroup: SurvivalT
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Variable Selection with Lasso Regularization'
 version: '0.0.3'

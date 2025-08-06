@@ -15,6 +15,9 @@ tree(
   train = NULL,
   trainLevel,
   validation = "cohort",
+  consensus_validation = FALSE,
+  bootstrap_samples = 100,
+  model_averaging = FALSE,
   cv_folds = 5,
   cv_repeats = 3,
   stratified_sampling = TRUE,
@@ -28,10 +31,24 @@ tree(
   tree_depth = 6,
   hyperparameter_tuning = FALSE,
   tuning_metric = "bacc",
+  kappa_analysis = TRUE,
+  advanced_metrics = FALSE,
   use_1se_rule = TRUE,
   xerror_pruning = FALSE,
   auto_prune = FALSE,
   prune_method = "one_se",
+  rpart_prior = "",
+  rpart_loss_matrix = "",
+  clinical_loss_preset = "equal",
+  enhanced_prior_probs = "data",
+  population_prevalence = 0.1,
+  custom_prior_values = "",
+  rpart_split = "gini",
+  rpart_surrogate = TRUE,
+  rpart_usesurrogate = "2",
+  rpart_maxsurrogate = 5,
+  rpart_xval = 10,
+  rpart_maxcompete = 4,
   c50_trials = 1,
   c50_winnow = FALSE,
   ctree_mincriterion = 0.95,
@@ -60,7 +77,11 @@ tree(
   showPartitionPlot = FALSE,
   show_cp_plot = FALSE,
   tree_plot_style = "standard",
+  plot_branch_style = 0.2,
+  plot_margin = 0.1,
   show_node_statistics = FALSE,
+  probability_display = TRUE,
+  enhanced_node_info = "clinical",
   interpretability = FALSE,
   shap_analysis = FALSE,
   partial_dependence = FALSE,
@@ -81,8 +102,57 @@ tree(
   learning_curves = FALSE,
   outlier_analysis = FALSE,
   prediction_intervals = FALSE,
+  rpart_prediction_type = "class",
+  show_rsq_plot = FALSE,
+  competing_splits = FALSE,
+  surrogate_splits = FALSE,
   advanced_pruning = "cp",
-  pruning_validation_split = 0.2
+  pruning_validation_split = 0.2,
+  cp_auto_selection = "one_se_rule",
+  cp_sequence_analysis = FALSE,
+  xerror_detailed_analysis = FALSE,
+  impurity_analysis = FALSE,
+  recursive_partitioning_trace = FALSE,
+  use_custom_splitting = FALSE,
+  custom_splitting_method = "custom_anova",
+  custom_splitting_validation = TRUE,
+  ensemble_diversity = FALSE,
+  ensemble_size = 10,
+  weighted_voting = FALSE,
+  uncertainty_quantification = FALSE,
+  calibration_analysis = FALSE,
+  clinical_thresholds = FALSE,
+  threshold_optimization = "youden",
+  multi_threshold_analysis = FALSE,
+  consensus_threshold = 0.6,
+  stability_threshold = 0.8,
+  advanced_pruning_method = "cost_complexity",
+  pre_pruning_threshold = 0.01,
+  post_pruning_validation_split = 0.2,
+  rf_feature_selection_method = "importance_ranking",
+  rf_proximity_analysis = FALSE,
+  rf_oob_detailed_analysis = TRUE,
+  algorithm_benchmarking = FALSE,
+  benchmark_algorithms = "trees_only",
+  performance_profiling = FALSE,
+  adaptive_complexity_parameter = FALSE,
+  dynamic_splitting_criteria = FALSE,
+  tree_regularization_method = "none",
+  regularization_strength = 0.1,
+  automated_feature_engineering = FALSE,
+  interaction_depth = 2,
+  polynomial_degree = 2,
+  fancy_tree_plot = FALSE,
+  tree_structure_analysis = FALSE,
+  cp_selection_visualization = FALSE,
+  f1_score_analysis = FALSE,
+  learning_curve_analysis = FALSE,
+  residual_diagnostics = FALSE,
+  hyperparameter_grid_search = FALSE,
+  cross_validation_optimization = FALSE,
+  ensemble_optimization = FALSE,
+  surrogate_split_analysis = FALSE,
+  missing_pattern_analysis = FALSE
 )
 }
 \arguments{
@@ -110,7 +180,8 @@ boosting for complex patterns.}
 
 \item{tree_mode}{Type of prediction problem: classification for disease
 presence/absence, regression for continuous biomarkers, survival for
-time-to-event analysis.}
+time-to-event analysis, Poisson for count/rate data, exponential for
+survival with constant hazard.}
 
 \item{train}{Variable indicating training vs validation cohorts.  If not
 provided, data will be split automatically.}
@@ -121,6 +192,17 @@ provided, data will be split automatically.}
 provided, otherwise performs automatic splitting with selected method.
 Stratified CV maintains class proportions, Repeated CV averages multiple
 runs.}
+
+\item{consensus_validation}{Use multiple validation methods and consensus
+results. Combines cross-validation, bootstrap, and holdout for robust
+estimates.}
+
+\item{bootstrap_samples}{Number of bootstrap samples for bootstrap
+validation. More samples provide better estimates but increase computation
+time.}
+
+\item{model_averaging}{Average predictions from multiple models for
+improved accuracy. Combines different algorithms or parameter settings.}
 
 \item{cv_folds}{Number of folds for cross-validation. 5-fold provides good
 balance between bias and variance for clinical datasets.}
@@ -166,6 +248,14 @@ best performance.}
 \item{tuning_metric}{Metric to optimize during hyperparameter tuning.
 Choose based on clinical priorities (e.g., sensitivity for screening).}
 
+\item{kappa_analysis}{Calculate Cohen's kappa statistic for agreement
+beyond chance. Essential clinical metric for inter-rater reliability
+assessment.}
+
+\item{advanced_metrics}{Calculate advanced metrics: Matthews correlation
+coefficient,  Youden's J statistic, diagnostic odds ratio, and clinical
+utility index.}
+
 \item{use_1se_rule}{Apply 1-standard-error rule for selecting simpler
 models. Chooses most parsimonious tree within 1 SE of optimal performance.}
 
@@ -179,6 +269,47 @@ performance.}
 \item{prune_method}{Method for selecting optimal tree size after
 cross-validation. 1-SE rule provides good balance between accuracy and
 simplicity.}
+
+\item{rpart_prior}{Prior probabilities for each class (comma-separated).
+E.g., "0.3,0.7" for binary classification. Leave empty for data
+proportions.}
+
+\item{rpart_loss_matrix}{Loss matrix for misclassification costs
+(comma-separated by rows). E.g., "0,1,5,0" for 2x2 matrix. Leave empty for
+equal costs.}
+
+\item{clinical_loss_preset}{Pre-configured loss matrices for common
+clinical scenarios. Screening: False negatives cost 5x more than false
+positives. Diagnosis: False positives cost 3x more than false negatives.}
+
+\item{enhanced_prior_probs}{Prior probability settings for different
+clinical contexts. Population: Use external disease prevalence estimates.
+Balanced: Equal priors regardless of sample sizes.}
+
+\item{population_prevalence}{Expected disease prevalence in target
+population (0-1). Used when enhanced_prior_probs = "population".}
+
+\item{custom_prior_values}{Custom prior probabilities (comma-separated,
+must sum to 1). E.g., "0.2,0.3,0.5" for three-class problem.}
+
+\item{rpart_split}{Splitting criterion for classification trees. Gini often
+works well; Information gain may be better for multi-class.}
+
+\item{rpart_surrogate}{Use surrogate splits to handle missing values. Finds
+backup splits that mimic primary split when data is missing.}
+
+\item{rpart_usesurrogate}{How to use surrogate splits: 0=only if helpful,
+1=always, 2=if better than majority.}
+
+\item{rpart_maxsurrogate}{Maximum number of surrogate splits to retain at
+each node. More surrogates provide better missing data handling but
+increase complexity.}
+
+\item{rpart_xval}{Number of cross-validation folds for CP table generation.
+Set to 0 to skip cross-validation (faster but less reliable pruning).}
+
+\item{rpart_maxcompete}{Number of competing splits to save for each node.
+Useful for understanding alternative splitting strategies.}
 
 \item{c50_trials}{Number of boosting iterations for C5.0 algorithm. More
 trials improve accuracy but reduce interpretability.}
@@ -271,10 +402,24 @@ complexity. Essential for understanding optimal pruning levels.}
 
 \item{tree_plot_style}{Visualization style optimized for different clinical
 audiences. Medical: simplified for clinical staff; Clinical: detailed for
-researchers.}
+researchers. Uniform: equal branch lengths; Compressed: space-efficient;
+Fancy: publication-ready.}
+
+\item{plot_branch_style}{Branch drawing style (0-1). 0=angled branches,
+1=straight lines. Based on rpart vignette examples for publication-quality
+plots.}
+
+\item{plot_margin}{White space margin around the tree plot. Useful for
+fitting node labels and avoiding clipping.}
 
 \item{show_node_statistics}{Display detailed statistics for each node
 including sample sizes, purity measures, and class distributions.}
+
+\item{probability_display}{Display class probabilities in tree nodes for
+clinical interpretation. Shows certainty levels for each prediction.}
+
+\item{enhanced_node_info}{Level of information displayed in tree nodes.
+Clinical mode optimized for medical decision making.}
 
 \item{interpretability}{Perform advanced interpretability analysis
 including SHAP values, partial dependence plots, and interaction effects.}
@@ -343,12 +488,174 @@ may disproportionately affect tree structure and predictions.}
 \item{prediction_intervals}{Calculate confidence intervals for individual
 predictions using bootstrap or cross-validation methods.}
 
+\item{rpart_prediction_type}{Type of prediction output from rpart model.
+Class: predicted category; Prob: class probabilities; Vector: node IDs.}
+
+\item{show_rsq_plot}{Show rsq.rpart() plot displaying R-squared vs tree
+size. Useful for regression trees to assess explained variance.}
+
+\item{competing_splits}{Display competing splits at each node showing
+alternative  splitting criteria and their relative quality.}
+
+\item{surrogate_splits}{Display surrogate splits used for missing data
+handling. Shows backup splitting rules when primary variable is missing.}
+
 \item{advanced_pruning}{Pruning method: CP uses cross-validation error, REP
 uses holdout validation, MEP considers both error and tree size for optimal
 clinical interpretability.}
 
 \item{pruning_validation_split}{Proportion of data reserved for pruning
 validation (REP/MEP methods). This is separate from the main test set.}
+
+\item{cp_auto_selection}{Automatic selection of optimal complexity
+parameter from CV results. 1-SE rule selects simplest tree within one
+standard error of minimum.}
+
+\item{cp_sequence_analysis}{Show detailed analysis of CP sequence with
+error rates and tree sizes. Helps understand cost-complexity trade-offs.}
+
+\item{xerror_detailed_analysis}{Show comprehensive xerror analysis with
+standard errors and confidence intervals. Essential for understanding
+pruning decisions.}
+
+\item{impurity_analysis}{Compare Gini index vs Information gain splitting
+criteria. Shows impurity reduction at each split for method comparison.}
+
+\item{recursive_partitioning_trace}{Display step-by-step tree construction
+process. Shows how the algorithm selects splits recursively.}
+
+\item{use_custom_splitting}{Enable user-defined splitting functions for
+advanced customization. Allows definition of custom init, eval, and split
+functions.}
+
+\item{custom_splitting_method}{Pre-defined custom splitting methods based
+on rpart vignette examples. Custom methods provide enhanced splitting
+criteria for specific domains.}
+
+\item{custom_splitting_validation}{Validate custom splitting functions
+before use. Ensures functions meet rpart requirements (init, eval, split
+components).}
+
+\item{ensemble_diversity}{Enhance ensemble diversity through parameter
+variation. Creates diverse base learners for improved ensemble performance.}
+
+\item{ensemble_size}{Number of base models in ensemble methods. More models
+generally improve performance but increase computation.}
+
+\item{weighted_voting}{Use performance-weighted voting in ensemble methods.
+Better models get higher weights in final predictions.}
+
+\item{uncertainty_quantification}{Quantify prediction uncertainty for
+clinical decision support. Provides confidence intervals and uncertainty
+estimates.}
+
+\item{calibration_analysis}{Analyze and display probability calibration for
+clinical reliability. Essential for models providing probability estimates.}
+
+\item{clinical_thresholds}{Optimize decision thresholds for clinical
+contexts. Balances sensitivity and specificity based on clinical
+priorities.}
+
+\item{threshold_optimization}{Method for optimizing classification
+thresholds. Youden's J maximizes sensitivity + specificity - 1.}
+
+\item{multi_threshold_analysis}{Analyze performance across multiple
+decision thresholds. Shows trade-offs between sensitivity and specificity.}
+
+\item{consensus_threshold}{Minimum agreement threshold for consensus
+predictions. Higher values require more model agreement for final
+decisions.}
+
+\item{stability_threshold}{Minimum stability coefficient for model
+acceptance. Higher values indicate more consistent models across samples.}
+
+\item{advanced_pruning_method}{Advanced pruning method for optimal tree
+size. Pre-pruning stops early, post-pruning removes branches afterward.}
+
+\item{pre_pruning_threshold}{Minimum improvement threshold for pre-pruning.
+Higher values create simpler, more conservative trees.}
+
+\item{post_pruning_validation_split}{Proportion of training data reserved
+for post-pruning validation. Used in reduced error pruning methods.}
+
+\item{rf_feature_selection_method}{Method for selecting important features
+in Random Forest. Boruta finds all-relevant features using statistical
+tests.}
+
+\item{rf_proximity_analysis}{Calculate proximity matrix for outlier
+detection and clustering. Useful for understanding data structure in RF
+models.}
+
+\item{rf_oob_detailed_analysis}{Comprehensive out-of-bag error analysis
+with confidence intervals. Provides unbiased performance estimates.}
+
+\item{algorithm_benchmarking}{Compare tree performance against linear
+models and clustering. Provides comprehensive algorithm comparison.}
+
+\item{benchmark_algorithms}{Scope of algorithm comparison analysis.
+Comprehensive includes logistic regression and k-means.}
+
+\item{performance_profiling}{Profile algorithm performance including timing
+and memory usage. Useful for production deployment decisions.}
+
+\item{adaptive_complexity_parameter}{Automatically adapt CP based on data
+characteristics. Uses data-driven approach for optimal tree complexity.}
+
+\item{dynamic_splitting_criteria}{Use different splitting criteria at
+different tree levels. Combines Gini and information gain adaptively.}
+
+\item{tree_regularization_method}{Regularization method to prevent
+overfitting. Different methods penalize complexity differently.}
+
+\item{regularization_strength}{Strength of regularization penalty. Higher
+values create simpler trees.}
+
+\item{automated_feature_engineering}{Automatically create interaction terms
+and transformations. Can improve tree performance for complex
+relationships.}
+
+\item{interaction_depth}{Maximum depth for automatic interaction terms. 2 =
+pairwise, 3 = three-way interactions.}
+
+\item{polynomial_degree}{Degree of polynomial features to create. Higher
+degrees capture more complex non-linearities.}
+
+\item{fancy_tree_plot}{Use rattle's fancyRpartPlot for enhanced tree
+visualization. Provides publication-quality tree diagrams.}
+
+\item{tree_structure_analysis}{Detailed analysis of tree structure
+including node statistics, split quality measures, and branch complexity
+metrics.}
+
+\item{cp_selection_visualization}{Visualize complexity parameter selection
+with xerror plots. Shows cross-validation error vs tree complexity.}
+
+\item{f1_score_analysis}{Calculate F1 scores for all classes with
+macro/micro averaging. Essential for imbalanced classification problems.}
+
+\item{learning_curve_analysis}{Generate learning curves showing performance
+vs sample size. Identifies optimal training size and overfitting patterns.}
+
+\item{residual_diagnostics}{Comprehensive residual analysis for regression
+trees. Includes normality tests and homoscedasticity checks.}
+
+\item{hyperparameter_grid_search}{Systematic grid search over cp, maxdepth,
+minsplit, minbucket. Finds optimal parameter combinations through
+exhaustive search.}
+
+\item{cross_validation_optimization}{Use cross-validation for robust
+hyperparameter selection. Prevents overfitting to specific train-test
+splits.}
+
+\item{ensemble_optimization}{Optimize ensemble parameters for improved
+performance. Includes optimal ensemble size and diversity measures.}
+
+\item{surrogate_split_analysis}{Detailed analysis of surrogate splits for
+missing data handling. Shows backup splitting rules and their
+effectiveness.}
+
+\item{missing_pattern_analysis}{Analyze patterns of missingness in the
+dataset. Identifies MCAR, MAR, and MNAR mechanisms.}
 }
 \value{
 A results object containing:
@@ -386,7 +693,10 @@ A results object containing:
 \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$cp_table_analysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$cp_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$rsq_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$detailed_importance_analysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$competing_splits_analysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$surrogate_splits_analysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$model_export} \tab \tab \tab \tab \tab a html \cr
 \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$stability_analysis} \tab \tab \tab \tab \tab a html \cr
@@ -398,6 +708,11 @@ A results object containing:
 \code{results$pruning_analysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$enhanced_cv_results} \tab \tab \tab \tab \tab a html \cr
 \code{results$enhanced_cv_table} \tab \tab \tab \tab \tab a table \cr
+\code{results$cp_sequence_analysis_results} \tab \tab \tab \tab \tab a html \cr
+\code{results$xerror_detailed_analysis_results} \tab \tab \tab \tab \tab a html \cr
+\code{results$impurity_analysis_results} \tab \tab \tab \tab \tab a html \cr
+\code{results$recursive_partitioning_trace_results} \tab \tab \tab \tab \tab a html \cr
+\code{results$xerror_confidence_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$enhanced_confusion_matrix} \tab \tab \tab \tab \tab a html \cr
 }
 

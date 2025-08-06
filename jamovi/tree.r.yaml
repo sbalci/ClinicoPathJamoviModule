@@ -499,11 +499,48 @@ items:
         - targetLevel
         - algorithm
 
+    - name: rsq_plot
+      title: R-squared Plot
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot_rsq
+      visible: (show_rsq_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
     # Detailed variable importance
     - name: detailed_importance_analysis
       title: Detailed Variable Importance
       type: Html
       visible: (show_variable_importance_detailed)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    # Enhanced rpart analysis
+    - name: competing_splits_analysis
+      title: Competing Splits Analysis
+      type: Html
+      visible: (competing_splits)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: surrogate_splits_analysis
+      title: Surrogate Splits Analysis
+      type: Html
+      visible: (surrogate_splits)
       clearWith:
         - vars
         - facs
@@ -701,6 +738,65 @@ items:
         - targetLevel
         - algorithm
         - validation
+
+    # Advanced rpart analysis sections
+    - name: cp_sequence_analysis_results
+      title: CP Sequence Analysis
+      type: Html
+      visible: (cp_sequence_analysis)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: xerror_detailed_analysis_results
+      title: Detailed Cross-validation Error Analysis
+      type: Html
+      visible: (xerror_detailed_analysis)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: impurity_analysis_results
+      title: Splitting Impurity Analysis
+      type: Html
+      visible: (impurity_analysis)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: recursive_partitioning_trace_results
+      title: Recursive Partitioning Trace
+      type: Html
+      visible: (recursive_partitioning_trace)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: xerror_confidence_plot
+      title: Cross-validation Error with Confidence Bands
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plot_xerror_confidence
+      visible: (xerror_detailed_analysis)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
 
     # Enhanced confusion matrix results
     - name: enhanced_confusion_matrix

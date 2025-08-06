@@ -1,7 +1,7 @@
 ---
 name: tree
 title: Medical Decision Tree Analysis
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Advanced Clinical Decision Trees
 version: '0.0.3'
@@ -96,6 +96,10 @@ options:
           name: randomforest
         - title: "XGBoost"
           name: xgboost
+        - title: "Ensemble (Multiple Methods)"
+          name: ensemble
+        - title: "Consensus Trees"
+          name: consensus
       default: rpart
       description: >
                   Algorithm to use: rpart provides traditional CART with pruning;
@@ -115,10 +119,15 @@ options:
           name: regression
         - title: "Survival Analysis (censored regression)"
           name: survival
+        - title: "Poisson (count data)"
+          name: poisson
+        - title: "Exponential Survival"
+          name: exponential
       default: classification
       description: >
                   Type of prediction problem: classification for disease presence/absence,
-                  regression for continuous biomarkers, survival for time-to-event analysis.
+                  regression for continuous biomarkers, survival for time-to-event analysis,
+                  Poisson for count/rate data, exponential for survival with constant hazard.
 
     # Training/Validation setup
     - name: train
@@ -161,6 +170,32 @@ options:
                   Validation approach: cohort uses train variable if provided,
                   otherwise performs automatic splitting with selected method.
                   Stratified CV maintains class proportions, Repeated CV averages multiple runs.
+
+    - name: consensus_validation
+      title: Consensus Validation Approach
+      type: Bool
+      default: false
+      description: >
+                  Use multiple validation methods and consensus results.
+                  Combines cross-validation, bootstrap, and holdout for robust estimates.
+
+    - name: bootstrap_samples
+      title: Bootstrap Sample Size
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description: >
+                  Number of bootstrap samples for bootstrap validation.
+                  More samples provide better estimates but increase computation time.
+
+    - name: model_averaging
+      title: Model Averaging
+      type: Bool
+      default: false
+      description: >
+                  Average predictions from multiple models for improved accuracy.
+                  Combines different algorithms or parameter settings.
 
     - name: cv_folds
       title: Number of CV Folds
@@ -307,6 +342,22 @@ options:
                   Metric to optimize during hyperparameter tuning.
                   Choose based on clinical priorities (e.g., sensitivity for screening).
 
+    - name: kappa_analysis
+      title: Cohen's Kappa Analysis
+      type: Bool
+      default: true
+      description: >
+                  Calculate Cohen's kappa statistic for agreement beyond chance.
+                  Essential clinical metric for inter-rater reliability assessment.
+
+    - name: advanced_metrics
+      title: Advanced Clinical Metrics
+      type: Bool
+      default: false
+      description: >
+                  Calculate advanced metrics: Matthews correlation coefficient, 
+                  Youden's J statistic, diagnostic odds ratio, and clinical utility index.
+
     - name: use_1se_rule
       title: Use 1-SE Rule for Tree Selection
       type: Bool
@@ -345,6 +396,142 @@ options:
       description: >
                   Method for selecting optimal tree size after cross-validation.
                   1-SE rule provides good balance between accuracy and simplicity.
+
+    # Advanced rpart.control options
+    - name: rpart_prior
+      title: Prior Probabilities
+      type: String
+      default: ""
+      description: >
+                  Prior probabilities for each class (comma-separated). 
+                  E.g., "0.3,0.7" for binary classification. Leave empty for data proportions.
+
+    - name: rpart_loss_matrix
+      title: Loss Matrix
+      type: String
+      default: ""
+      description: >
+                  Loss matrix for misclassification costs (comma-separated by rows).
+                  E.g., "0,1,5,0" for 2x2 matrix. Leave empty for equal costs.
+
+    - name: clinical_loss_preset
+      title: Clinical Loss Matrix Presets
+      type: List
+      options:
+        - title: "Equal costs (default)"
+          name: equal
+        - title: "Conservative screening (avoid false negatives)"
+          name: screening
+        - title: "Conservative diagnosis (avoid false positives)" 
+          name: diagnosis
+        - title: "Custom matrix"
+          name: custom
+      default: equal
+      description: >
+                  Pre-configured loss matrices for common clinical scenarios.
+                  Screening: False negatives cost 5x more than false positives.
+                  Diagnosis: False positives cost 3x more than false negatives.
+
+    - name: enhanced_prior_probs
+      title: Enhanced Prior Probabilities
+      type: List
+      options:
+        - title: "Data proportions (default)"
+          name: data
+        - title: "Population prevalence"
+          name: population
+        - title: "Balanced classes"
+          name: balanced
+        - title: "Custom proportions"
+          name: custom
+      default: data
+      description: >
+                  Prior probability settings for different clinical contexts.
+                  Population: Use external disease prevalence estimates.
+                  Balanced: Equal priors regardless of sample sizes.
+
+    - name: population_prevalence
+      title: Population Disease Prevalence
+      type: Number
+      default: 0.1
+      min: 0.001
+      max: 0.999
+      description: >
+                  Expected disease prevalence in target population (0-1).
+                  Used when enhanced_prior_probs = "population".
+
+    - name: custom_prior_values
+      title: Custom Prior Values
+      type: String
+      default: ""
+      description: >
+                  Custom prior probabilities (comma-separated, must sum to 1).
+                  E.g., "0.2,0.3,0.5" for three-class problem.
+
+    - name: rpart_split
+      title: Splitting Criterion
+      type: List
+      options:
+        - title: "Gini Index (default)"
+          name: gini
+        - title: "Information Gain"
+          name: information
+      default: gini
+      description: >
+                  Splitting criterion for classification trees.
+                  Gini often works well; Information gain may be better for multi-class.
+
+    - name: rpart_surrogate
+      title: Use Surrogate Splits
+      type: Bool
+      default: true
+      description: >
+                  Use surrogate splits to handle missing values.
+                  Finds backup splits that mimic primary split when data is missing.
+
+    - name: rpart_usesurrogate
+      title: Surrogate Usage Strategy
+      type: List
+      options:
+        - title: "If helpful (0)"
+          name: "0"
+        - title: "Always when available (1)"
+          name: "1"
+        - title: "If majority is better (2)"
+          name: "2"
+      default: "2"
+      description: >
+                  How to use surrogate splits: 0=only if helpful, 1=always, 2=if better than majority.
+
+    - name: rpart_maxsurrogate
+      title: Maximum Surrogate Splits
+      type: Integer
+      default: 5
+      min: 0
+      max: 20
+      description: >
+                  Maximum number of surrogate splits to retain at each node.
+                  More surrogates provide better missing data handling but increase complexity.
+
+    - name: rpart_xval
+      title: Cross-validation Folds
+      type: Integer
+      default: 10
+      min: 0
+      max: 20
+      description: >
+                  Number of cross-validation folds for CP table generation.
+                  Set to 0 to skip cross-validation (faster but less reliable pruning).
+
+    - name: rpart_maxcompete
+      title: Maximum Competing Splits
+      type: Integer
+      default: 4
+      min: 0
+      max: 10
+      description: >
+                  Number of competing splits to save for each node.
+                  Useful for understanding alternative splitting strategies.
 
     # Engine-specific options
     - name: c50_trials
@@ -625,10 +812,37 @@ options:
           name: medical
         - title: "Detailed clinical style"
           name: clinical
+        - title: "Uniform branch lengths"
+          name: uniform
+        - title: "Compressed layout"
+          name: compressed
+        - title: "Fancy presentation"
+          name: fancy
       default: standard
       description: >
                   Visualization style optimized for different clinical audiences.
                   Medical: simplified for clinical staff; Clinical: detailed for researchers.
+                  Uniform: equal branch lengths; Compressed: space-efficient; Fancy: publication-ready.
+
+    - name: plot_branch_style
+      title: Branch Style
+      type: Number
+      default: 0.2
+      min: 0
+      max: 1
+      description: >
+                  Branch drawing style (0-1). 0=angled branches, 1=straight lines.
+                  Based on rpart vignette examples for publication-quality plots.
+
+    - name: plot_margin
+      title: Plot Margin
+      type: Number
+      default: 0.1
+      min: 0
+      max: 0.5
+      description: >
+                  White space margin around the tree plot.
+                  Useful for fitting node labels and avoiding clipping.
 
     - name: show_node_statistics
       title: Show Node Statistics
@@ -637,6 +851,31 @@ options:
       description: >
                   Display detailed statistics for each node including sample sizes,
                   purity measures, and class distributions.
+
+    - name: probability_display
+      title: Show Node Probabilities
+      type: Bool
+      default: true
+      description: >
+                  Display class probabilities in tree nodes for clinical interpretation.
+                  Shows certainty levels for each prediction.
+
+    - name: enhanced_node_info
+      title: Enhanced Node Information
+      type: List
+      options:
+        - title: "Basic (class only)"
+          name: basic
+        - title: "Standard (class + percentage)"
+          name: standard
+        - title: "Clinical (probabilities + confidence)"
+          name: clinical
+        - title: "Detailed (full statistics)"
+          name: detailed
+      default: clinical
+      description: >
+                  Level of information displayed in tree nodes.
+                  Clinical mode optimized for medical decision making.
 
     # Interpretability options
     - name: interpretability
@@ -835,6 +1074,48 @@ options:
                   Calculate confidence intervals for individual predictions
                   using bootstrap or cross-validation methods.
 
+    # Enhanced rpart prediction options
+    - name: rpart_prediction_type
+      title: Prediction Output Type
+      type: List
+      options:
+        - title: "Class (default)"
+          name: class
+        - title: "Probabilities" 
+          name: prob
+        - title: "Vector (terminal node number)"
+          name: vector
+        - title: "Matrix (all prediction info)"
+          name: matrix
+      default: class
+      description: >
+                  Type of prediction output from rpart model.
+                  Class: predicted category; Prob: class probabilities; Vector: node IDs.
+
+    - name: show_rsq_plot
+      title: R-squared Plot (Regression Trees)
+      type: Bool
+      default: false
+      description: >
+                  Show rsq.rpart() plot displaying R-squared vs tree size.
+                  Useful for regression trees to assess explained variance.
+
+    - name: competing_splits
+      title: Show Competing Splits
+      type: Bool
+      default: false
+      description: >
+                  Display competing splits at each node showing alternative 
+                  splitting criteria and their relative quality.
+
+    - name: surrogate_splits
+      title: Show Surrogate Splits
+      type: Bool
+      default: false
+      description: >
+                  Display surrogate splits used for missing data handling.
+                  Shows backup splitting rules when primary variable is missing.
+
     - name: advanced_pruning
       title: Advanced Pruning Method
       type: List
@@ -859,5 +1140,457 @@ options:
       description: >
                   Proportion of data reserved for pruning validation (REP/MEP methods).
                   This is separate from the main test set.
+
+    # Advanced Cost Complexity Pruning Options
+    - name: cp_auto_selection
+      title: Automatic CP Selection
+      type: List
+      options:
+        - title: "Minimum xerror rule"
+          name: min_xerror
+        - title: "1-SE rule (recommended)"
+          name: one_se_rule
+        - title: "Manual CP value"
+          name: manual
+      default: one_se_rule
+      description: >
+                  Automatic selection of optimal complexity parameter from CV results.
+                  1-SE rule selects simplest tree within one standard error of minimum.
+
+    - name: cp_sequence_analysis
+      title: Show CP Sequence Analysis
+      type: Bool
+      default: false
+      description: >
+                  Show detailed analysis of CP sequence with error rates and tree sizes.
+                  Helps understand cost-complexity trade-offs.
+
+    - name: xerror_detailed_analysis
+      title: Detailed Cross-validation Error Analysis
+      type: Bool
+      default: false
+      description: >
+                  Show comprehensive xerror analysis with standard errors and confidence intervals.
+                  Essential for understanding pruning decisions.
+
+    - name: impurity_analysis
+      title: Splitting Impurity Analysis
+      type: Bool
+      default: false
+      description: >
+                  Compare Gini index vs Information gain splitting criteria.
+                  Shows impurity reduction at each split for method comparison.
+
+    - name: recursive_partitioning_trace
+      title: Show Recursive Partitioning Trace
+      type: Bool
+      default: false
+      description: >
+                  Display step-by-step tree construction process.
+                  Shows how the algorithm selects splits recursively.
+
+    # User-defined splitting functions (advanced)
+    - name: use_custom_splitting
+      title: Use Custom Splitting Functions
+      type: Bool
+      default: false
+      description: >
+                  Enable user-defined splitting functions for advanced customization.
+                  Allows definition of custom init, eval, and split functions.
+
+    - name: custom_splitting_method
+      title: Custom Splitting Method
+      type: List
+      options:
+        - title: "Custom Regression (anova-like)"
+          name: custom_anova
+        - title: "Custom Classification (class-like)"
+          name: custom_class
+        - title: "Custom Logistic Regression"
+          name: custom_logistic
+        - title: "User-defined Method"
+          name: user_defined
+      default: custom_anova
+      description: >
+                  Pre-defined custom splitting methods based on rpart vignette examples.
+                  Custom methods provide enhanced splitting criteria for specific domains.
+
+    - name: custom_splitting_validation
+      title: Validate Custom Splitting Functions
+      type: Bool
+      default: true
+      description: >
+                  Validate custom splitting functions before use.
+                  Ensures functions meet rpart requirements (init, eval, split components).
+
+    # Ensemble and Advanced Modeling Options
+    - name: ensemble_diversity
+      title: Ensemble Diversity Enhancement
+      type: Bool
+      default: false
+      description: >
+                  Enhance ensemble diversity through parameter variation.
+                  Creates diverse base learners for improved ensemble performance.
+
+    - name: ensemble_size
+      title: Ensemble Size
+      type: Integer
+      default: 10
+      min: 3
+      max: 50
+      description: >
+                  Number of base models in ensemble methods.
+                  More models generally improve performance but increase computation.
+
+    - name: weighted_voting
+      title: Weighted Voting
+      type: Bool
+      default: false
+      description: >
+                  Use performance-weighted voting in ensemble methods.
+                  Better models get higher weights in final predictions.
+
+    - name: uncertainty_quantification
+      title: Uncertainty Quantification
+      type: Bool
+      default: false
+      description: >
+                  Quantify prediction uncertainty for clinical decision support.
+                  Provides confidence intervals and uncertainty estimates.
+
+    # Performance Evaluation Enhancements
+    - name: calibration_analysis
+      title: Probability Calibration Analysis
+      type: Bool
+      default: false
+      description: >
+                  Analyze and display probability calibration for clinical reliability.
+                  Essential for models providing probability estimates.
+
+    - name: clinical_thresholds
+      title: Clinical Decision Thresholds
+      type: Bool
+      default: false
+      description: >
+                  Optimize decision thresholds for clinical contexts.
+                  Balances sensitivity and specificity based on clinical priorities.
+
+    - name: threshold_optimization
+      title: Threshold Optimization Method
+      type: List
+      options:
+        - title: "Youden's J Statistic"
+          name: youden
+        - title: "F1 Score Optimization"
+          name: f1
+        - title: "Clinical Cost Minimization"
+          name: cost
+        - title: "Balanced Accuracy"
+          name: balanced
+      default: youden
+      description: >
+                  Method for optimizing classification thresholds.
+                  Youden's J maximizes sensitivity + specificity - 1.
+
+    - name: multi_threshold_analysis
+      title: Multiple Threshold Analysis
+      type: Bool
+      default: false
+      description: >
+                  Analyze performance across multiple decision thresholds.
+                  Shows trade-offs between sensitivity and specificity.
+
+    - name: consensus_threshold
+      title: Consensus Decision Threshold
+      type: Number
+      default: 0.6
+      min: 0.5
+      max: 1.0
+      description: >
+                  Minimum agreement threshold for consensus predictions.
+                  Higher values require more model agreement for final decisions.
+
+    - name: stability_threshold
+      title: Stability Threshold
+      type: Number
+      default: 0.8
+      min: 0.5
+      max: 1.0
+      description: >
+                  Minimum stability coefficient for model acceptance.
+                  Higher values indicate more consistent models across samples.
+
+    # Advanced CART Pruning Methods
+    - name: advanced_pruning_method
+      title: Advanced Pruning Strategy
+      type: List
+      options:
+        - title: "Standard Cost-Complexity Pruning"
+          name: cost_complexity
+        - title: "Pre-pruning (Early Stopping)"
+          name: pre_pruning
+        - title: "Post-pruning (Reduced Error)"
+          name: post_pruning
+        - title: "Pessimistic Error Pruning"
+          name: pessimistic
+        - title: "Critical Value Pruning"
+          name: critical_value
+      default: cost_complexity
+      description: >
+                  Advanced pruning method for optimal tree size.
+                  Pre-pruning stops early, post-pruning removes branches afterward.
+
+    - name: pre_pruning_threshold
+      title: Pre-pruning Threshold
+      type: Number
+      default: 0.01
+      min: 0.001
+      max: 0.1
+      description: >
+                  Minimum improvement threshold for pre-pruning.
+                  Higher values create simpler, more conservative trees.
+
+    - name: post_pruning_validation_split
+      title: Post-pruning Validation Split
+      type: Number
+      default: 0.2
+      min: 0.1
+      max: 0.4
+      description: >
+                  Proportion of training data reserved for post-pruning validation.
+                  Used in reduced error pruning methods.
+
+    # Random Forest Advanced Features
+    - name: rf_feature_selection_method
+      title: RF Feature Selection Method
+      type: List
+      options:
+        - title: "Variable Importance Ranking"
+          name: importance_ranking
+        - title: "Permutation Importance"
+          name: permutation
+        - title: "Out-of-Bag Selection"
+          name: oob_selection
+        - title: "Boruta Algorithm"
+          name: boruta
+      default: importance_ranking
+      description: >
+                  Method for selecting important features in Random Forest.
+                  Boruta finds all-relevant features using statistical tests.
+
+    - name: rf_proximity_analysis
+      title: RF Proximity Analysis
+      type: Bool
+      default: false
+      description: >
+                  Calculate proximity matrix for outlier detection and clustering.
+                  Useful for understanding data structure in RF models.
+
+    - name: rf_oob_detailed_analysis
+      title: Detailed OOB Analysis
+      type: Bool
+      default: true
+      description: >
+                  Comprehensive out-of-bag error analysis with confidence intervals.
+                  Provides unbiased performance estimates.
+
+    # Algorithm Comparison and Benchmarking
+    - name: algorithm_benchmarking
+      title: Algorithm Benchmarking
+      type: Bool
+      default: false
+      description: >
+                  Compare tree performance against linear models and clustering.
+                  Provides comprehensive algorithm comparison.
+
+    - name: benchmark_algorithms
+      title: Algorithms to Benchmark
+      type: List
+      options:
+        - title: "Tree Algorithms Only"
+          name: trees_only
+        - title: "Trees vs Linear Models"
+          name: trees_vs_linear
+        - title: "Trees vs Clustering"
+          name: trees_vs_clustering
+        - title: "All Algorithm Types"
+          name: comprehensive
+      default: trees_only
+      description: >
+                  Scope of algorithm comparison analysis.
+                  Comprehensive includes logistic regression and k-means.
+
+    - name: performance_profiling
+      title: Performance Profiling
+      type: Bool
+      default: false
+      description: >
+                  Profile algorithm performance including timing and memory usage.
+                  Useful for production deployment decisions.
+
+    # Advanced Tree Optimization
+    - name: adaptive_complexity_parameter
+      title: Adaptive Complexity Parameter
+      type: Bool
+      default: false
+      description: >
+                  Automatically adapt CP based on data characteristics.
+                  Uses data-driven approach for optimal tree complexity.
+
+    - name: dynamic_splitting_criteria
+      title: Dynamic Splitting Criteria
+      type: Bool
+      default: false
+      description: >
+                  Use different splitting criteria at different tree levels.
+                  Combines Gini and information gain adaptively.
+
+    - name: tree_regularization_method
+      title: Tree Regularization
+      type: List
+      options:
+        - title: "No Regularization"
+          name: none
+        - title: "L1 Regularization (Lasso-style)"
+          name: l1
+        - title: "L2 Regularization (Ridge-style)"
+          name: l2
+        - title: "Minimum Description Length"
+          name: mdl
+      default: none
+      description: >
+                  Regularization method to prevent overfitting.
+                  Different methods penalize complexity differently.
+
+    - name: regularization_strength
+      title: Regularization Strength
+      type: Number
+      default: 0.1
+      min: 0.01
+      max: 1.0
+      description: >
+                  Strength of regularization penalty.
+                  Higher values create simpler trees.
+
+    # Feature Engineering for Trees
+    - name: automated_feature_engineering
+      title: Automated Feature Engineering
+      type: Bool
+      default: false
+      description: >
+                  Automatically create interaction terms and transformations.
+                  Can improve tree performance for complex relationships.
+
+    - name: interaction_depth
+      title: Interaction Term Depth
+      type: Integer
+      default: 2
+      min: 2
+      max: 3
+      description: >
+                  Maximum depth for automatic interaction terms.
+                  2 = pairwise, 3 = three-way interactions.
+
+    - name: polynomial_degree
+      title: Polynomial Feature Degree
+      type: Integer
+      default: 2
+      min: 2
+      max: 3
+      description: >
+                  Degree of polynomial features to create.
+                  Higher degrees capture more complex non-linearities.
+
+    # Enhanced Tree Visualization (from rpart articles)
+    - name: fancy_tree_plot
+      title: Fancy Tree Visualization
+      type: Bool
+      default: false
+      description: >
+                  Use rattle's fancyRpartPlot for enhanced tree visualization.
+                  Provides publication-quality tree diagrams.
+
+    - name: tree_structure_analysis
+      title: Tree Structure Analysis
+      type: Bool
+      default: false
+      description: >
+                  Detailed analysis of tree structure including node statistics,
+                  split quality measures, and branch complexity metrics.
+
+    - name: cp_selection_visualization
+      title: CP Selection Visualization
+      type: Bool
+      default: false
+      description: >
+                  Visualize complexity parameter selection with xerror plots.
+                  Shows cross-validation error vs tree complexity.
+
+    # Advanced Evaluation Metrics (from articles)
+    - name: f1_score_analysis
+      title: F1 Score Analysis
+      type: Bool
+      default: false
+      description: >
+                  Calculate F1 scores for all classes with macro/micro averaging.
+                  Essential for imbalanced classification problems.
+
+    - name: learning_curve_analysis
+      title: Learning Curve Analysis
+      type: Bool
+      default: false
+      description: >
+                  Generate learning curves showing performance vs sample size.
+                  Identifies optimal training size and overfitting patterns.
+
+    - name: residual_diagnostics
+      title: Residual Diagnostics (Regression)
+      type: Bool
+      default: false
+      description: >
+                  Comprehensive residual analysis for regression trees.
+                  Includes normality tests and homoscedasticity checks.
+
+    # Tree Optimization (from articles)
+    - name: hyperparameter_grid_search
+      title: Hyperparameter Grid Search
+      type: Bool
+      default: false
+      description: >
+                  Systematic grid search over cp, maxdepth, minsplit, minbucket.
+                  Finds optimal parameter combinations through exhaustive search.
+
+    - name: cross_validation_optimization
+      title: CV-based Optimization
+      type: Bool
+      default: false
+      description: >
+                  Use cross-validation for robust hyperparameter selection.
+                  Prevents overfitting to specific train-test splits.
+
+    - name: ensemble_optimization
+      title: Ensemble Optimization
+      type: Bool
+      default: false
+      description: >
+                  Optimize ensemble parameters for improved performance.
+                  Includes optimal ensemble size and diversity measures.
+
+    # Missing Data Enhancement (from articles)
+    - name: surrogate_split_analysis
+      title: Surrogate Split Analysis
+      type: Bool
+      default: false
+      description: >
+                  Detailed analysis of surrogate splits for missing data handling.
+                  Shows backup splitting rules and their effectiveness.
+
+    - name: missing_pattern_analysis
+      title: Missing Pattern Analysis
+      type: Bool
+      default: false
+      description: >
+                  Analyze patterns of missingness in the dataset.
+                  Identifies MCAR, MAR, and MNAR mechanisms.
 
 ...

@@ -15,6 +15,9 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             train = NULL,
             trainLevel = NULL,
             validation = "cohort",
+            consensus_validation = FALSE,
+            bootstrap_samples = 100,
+            model_averaging = FALSE,
             cv_folds = 5,
             cv_repeats = 3,
             stratified_sampling = TRUE,
@@ -28,10 +31,24 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             tree_depth = 6,
             hyperparameter_tuning = FALSE,
             tuning_metric = "bacc",
+            kappa_analysis = TRUE,
+            advanced_metrics = FALSE,
             use_1se_rule = TRUE,
             xerror_pruning = FALSE,
             auto_prune = FALSE,
             prune_method = "one_se",
+            rpart_prior = "",
+            rpart_loss_matrix = "",
+            clinical_loss_preset = "equal",
+            enhanced_prior_probs = "data",
+            population_prevalence = 0.1,
+            custom_prior_values = "",
+            rpart_split = "gini",
+            rpart_surrogate = TRUE,
+            rpart_usesurrogate = "2",
+            rpart_maxsurrogate = 5,
+            rpart_xval = 10,
+            rpart_maxcompete = 4,
             c50_trials = 1,
             c50_winnow = FALSE,
             ctree_mincriterion = 0.95,
@@ -60,7 +77,11 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showPartitionPlot = FALSE,
             show_cp_plot = FALSE,
             tree_plot_style = "standard",
+            plot_branch_style = 0.2,
+            plot_margin = 0.1,
             show_node_statistics = FALSE,
+            probability_display = TRUE,
+            enhanced_node_info = "clinical",
             interpretability = FALSE,
             shap_analysis = FALSE,
             partial_dependence = FALSE,
@@ -81,8 +102,57 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             learning_curves = FALSE,
             outlier_analysis = FALSE,
             prediction_intervals = FALSE,
+            rpart_prediction_type = "class",
+            show_rsq_plot = FALSE,
+            competing_splits = FALSE,
+            surrogate_splits = FALSE,
             advanced_pruning = "cp",
-            pruning_validation_split = 0.2, ...) {
+            pruning_validation_split = 0.2,
+            cp_auto_selection = "one_se_rule",
+            cp_sequence_analysis = FALSE,
+            xerror_detailed_analysis = FALSE,
+            impurity_analysis = FALSE,
+            recursive_partitioning_trace = FALSE,
+            use_custom_splitting = FALSE,
+            custom_splitting_method = "custom_anova",
+            custom_splitting_validation = TRUE,
+            ensemble_diversity = FALSE,
+            ensemble_size = 10,
+            weighted_voting = FALSE,
+            uncertainty_quantification = FALSE,
+            calibration_analysis = FALSE,
+            clinical_thresholds = FALSE,
+            threshold_optimization = "youden",
+            multi_threshold_analysis = FALSE,
+            consensus_threshold = 0.6,
+            stability_threshold = 0.8,
+            advanced_pruning_method = "cost_complexity",
+            pre_pruning_threshold = 0.01,
+            post_pruning_validation_split = 0.2,
+            rf_feature_selection_method = "importance_ranking",
+            rf_proximity_analysis = FALSE,
+            rf_oob_detailed_analysis = TRUE,
+            algorithm_benchmarking = FALSE,
+            benchmark_algorithms = "trees_only",
+            performance_profiling = FALSE,
+            adaptive_complexity_parameter = FALSE,
+            dynamic_splitting_criteria = FALSE,
+            tree_regularization_method = "none",
+            regularization_strength = 0.1,
+            automated_feature_engineering = FALSE,
+            interaction_depth = 2,
+            polynomial_degree = 2,
+            fancy_tree_plot = FALSE,
+            tree_structure_analysis = FALSE,
+            cp_selection_visualization = FALSE,
+            f1_score_analysis = FALSE,
+            learning_curve_analysis = FALSE,
+            residual_diagnostics = FALSE,
+            hyperparameter_grid_search = FALSE,
+            cross_validation_optimization = FALSE,
+            ensemble_optimization = FALSE,
+            surrogate_split_analysis = FALSE,
+            missing_pattern_analysis = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -129,7 +199,9 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ctree",
                     "mob",
                     "randomforest",
-                    "xgboost"),
+                    "xgboost",
+                    "ensemble",
+                    "consensus"),
                 default="rpart")
             private$..tree_mode <- jmvcore::OptionList$new(
                 "tree_mode",
@@ -137,7 +209,9 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "classification",
                     "regression",
-                    "survival"),
+                    "survival",
+                    "poisson",
+                    "exponential"),
                 default="classification")
             private$..train <- jmvcore::OptionVariable$new(
                 "train",
@@ -164,6 +238,20 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "stratified_cv",
                     "repeated_cv"),
                 default="cohort")
+            private$..consensus_validation <- jmvcore::OptionBool$new(
+                "consensus_validation",
+                consensus_validation,
+                default=FALSE)
+            private$..bootstrap_samples <- jmvcore::OptionInteger$new(
+                "bootstrap_samples",
+                bootstrap_samples,
+                default=100,
+                min=50,
+                max=1000)
+            private$..model_averaging <- jmvcore::OptionBool$new(
+                "model_averaging",
+                model_averaging,
+                default=FALSE)
             private$..cv_folds <- jmvcore::OptionInteger$new(
                 "cv_folds",
                 cv_folds,
@@ -246,6 +334,14 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "f1",
                     "prec"),
                 default="bacc")
+            private$..kappa_analysis <- jmvcore::OptionBool$new(
+                "kappa_analysis",
+                kappa_analysis,
+                default=TRUE)
+            private$..advanced_metrics <- jmvcore::OptionBool$new(
+                "advanced_metrics",
+                advanced_metrics,
+                default=FALSE)
             private$..use_1se_rule <- jmvcore::OptionBool$new(
                 "use_1se_rule",
                 use_1se_rule,
@@ -266,6 +362,79 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "one_se",
                     "custom_cp"),
                 default="one_se")
+            private$..rpart_prior <- jmvcore::OptionString$new(
+                "rpart_prior",
+                rpart_prior,
+                default="")
+            private$..rpart_loss_matrix <- jmvcore::OptionString$new(
+                "rpart_loss_matrix",
+                rpart_loss_matrix,
+                default="")
+            private$..clinical_loss_preset <- jmvcore::OptionList$new(
+                "clinical_loss_preset",
+                clinical_loss_preset,
+                options=list(
+                    "equal",
+                    "screening",
+                    "diagnosis",
+                    "custom"),
+                default="equal")
+            private$..enhanced_prior_probs <- jmvcore::OptionList$new(
+                "enhanced_prior_probs",
+                enhanced_prior_probs,
+                options=list(
+                    "data",
+                    "population",
+                    "balanced",
+                    "custom"),
+                default="data")
+            private$..population_prevalence <- jmvcore::OptionNumber$new(
+                "population_prevalence",
+                population_prevalence,
+                default=0.1,
+                min=0.001,
+                max=0.999)
+            private$..custom_prior_values <- jmvcore::OptionString$new(
+                "custom_prior_values",
+                custom_prior_values,
+                default="")
+            private$..rpart_split <- jmvcore::OptionList$new(
+                "rpart_split",
+                rpart_split,
+                options=list(
+                    "gini",
+                    "information"),
+                default="gini")
+            private$..rpart_surrogate <- jmvcore::OptionBool$new(
+                "rpart_surrogate",
+                rpart_surrogate,
+                default=TRUE)
+            private$..rpart_usesurrogate <- jmvcore::OptionList$new(
+                "rpart_usesurrogate",
+                rpart_usesurrogate,
+                options=list(
+                    "0",
+                    "1",
+                    "2"),
+                default="2")
+            private$..rpart_maxsurrogate <- jmvcore::OptionInteger$new(
+                "rpart_maxsurrogate",
+                rpart_maxsurrogate,
+                default=5,
+                min=0,
+                max=20)
+            private$..rpart_xval <- jmvcore::OptionInteger$new(
+                "rpart_xval",
+                rpart_xval,
+                default=10,
+                min=0,
+                max=20)
+            private$..rpart_maxcompete <- jmvcore::OptionInteger$new(
+                "rpart_maxcompete",
+                rpart_maxcompete,
+                default=4,
+                min=0,
+                max=10)
             private$..c50_trials <- jmvcore::OptionInteger$new(
                 "c50_trials",
                 c50_trials,
@@ -413,12 +582,40 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "standard",
                     "medical",
-                    "clinical"),
+                    "clinical",
+                    "uniform",
+                    "compressed",
+                    "fancy"),
                 default="standard")
+            private$..plot_branch_style <- jmvcore::OptionNumber$new(
+                "plot_branch_style",
+                plot_branch_style,
+                default=0.2,
+                min=0,
+                max=1)
+            private$..plot_margin <- jmvcore::OptionNumber$new(
+                "plot_margin",
+                plot_margin,
+                default=0.1,
+                min=0,
+                max=0.5)
             private$..show_node_statistics <- jmvcore::OptionBool$new(
                 "show_node_statistics",
                 show_node_statistics,
                 default=FALSE)
+            private$..probability_display <- jmvcore::OptionBool$new(
+                "probability_display",
+                probability_display,
+                default=TRUE)
+            private$..enhanced_node_info <- jmvcore::OptionList$new(
+                "enhanced_node_info",
+                enhanced_node_info,
+                options=list(
+                    "basic",
+                    "standard",
+                    "clinical",
+                    "detailed"),
+                default="clinical")
             private$..interpretability <- jmvcore::OptionBool$new(
                 "interpretability",
                 interpretability,
@@ -519,6 +716,27 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "prediction_intervals",
                 prediction_intervals,
                 default=FALSE)
+            private$..rpart_prediction_type <- jmvcore::OptionList$new(
+                "rpart_prediction_type",
+                rpart_prediction_type,
+                options=list(
+                    "class",
+                    "prob",
+                    "vector",
+                    "matrix"),
+                default="class")
+            private$..show_rsq_plot <- jmvcore::OptionBool$new(
+                "show_rsq_plot",
+                show_rsq_plot,
+                default=FALSE)
+            private$..competing_splits <- jmvcore::OptionBool$new(
+                "competing_splits",
+                competing_splits,
+                default=FALSE)
+            private$..surrogate_splits <- jmvcore::OptionBool$new(
+                "surrogate_splits",
+                surrogate_splits,
+                default=FALSE)
             private$..advanced_pruning <- jmvcore::OptionList$new(
                 "advanced_pruning",
                 advanced_pruning,
@@ -533,6 +751,237 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0.2,
                 min=0.1,
                 max=0.4)
+            private$..cp_auto_selection <- jmvcore::OptionList$new(
+                "cp_auto_selection",
+                cp_auto_selection,
+                options=list(
+                    "min_xerror",
+                    "one_se_rule",
+                    "manual"),
+                default="one_se_rule")
+            private$..cp_sequence_analysis <- jmvcore::OptionBool$new(
+                "cp_sequence_analysis",
+                cp_sequence_analysis,
+                default=FALSE)
+            private$..xerror_detailed_analysis <- jmvcore::OptionBool$new(
+                "xerror_detailed_analysis",
+                xerror_detailed_analysis,
+                default=FALSE)
+            private$..impurity_analysis <- jmvcore::OptionBool$new(
+                "impurity_analysis",
+                impurity_analysis,
+                default=FALSE)
+            private$..recursive_partitioning_trace <- jmvcore::OptionBool$new(
+                "recursive_partitioning_trace",
+                recursive_partitioning_trace,
+                default=FALSE)
+            private$..use_custom_splitting <- jmvcore::OptionBool$new(
+                "use_custom_splitting",
+                use_custom_splitting,
+                default=FALSE)
+            private$..custom_splitting_method <- jmvcore::OptionList$new(
+                "custom_splitting_method",
+                custom_splitting_method,
+                options=list(
+                    "custom_anova",
+                    "custom_class",
+                    "custom_logistic",
+                    "user_defined"),
+                default="custom_anova")
+            private$..custom_splitting_validation <- jmvcore::OptionBool$new(
+                "custom_splitting_validation",
+                custom_splitting_validation,
+                default=TRUE)
+            private$..ensemble_diversity <- jmvcore::OptionBool$new(
+                "ensemble_diversity",
+                ensemble_diversity,
+                default=FALSE)
+            private$..ensemble_size <- jmvcore::OptionInteger$new(
+                "ensemble_size",
+                ensemble_size,
+                default=10,
+                min=3,
+                max=50)
+            private$..weighted_voting <- jmvcore::OptionBool$new(
+                "weighted_voting",
+                weighted_voting,
+                default=FALSE)
+            private$..uncertainty_quantification <- jmvcore::OptionBool$new(
+                "uncertainty_quantification",
+                uncertainty_quantification,
+                default=FALSE)
+            private$..calibration_analysis <- jmvcore::OptionBool$new(
+                "calibration_analysis",
+                calibration_analysis,
+                default=FALSE)
+            private$..clinical_thresholds <- jmvcore::OptionBool$new(
+                "clinical_thresholds",
+                clinical_thresholds,
+                default=FALSE)
+            private$..threshold_optimization <- jmvcore::OptionList$new(
+                "threshold_optimization",
+                threshold_optimization,
+                options=list(
+                    "youden",
+                    "f1",
+                    "cost",
+                    "balanced"),
+                default="youden")
+            private$..multi_threshold_analysis <- jmvcore::OptionBool$new(
+                "multi_threshold_analysis",
+                multi_threshold_analysis,
+                default=FALSE)
+            private$..consensus_threshold <- jmvcore::OptionNumber$new(
+                "consensus_threshold",
+                consensus_threshold,
+                default=0.6,
+                min=0.5,
+                max=1)
+            private$..stability_threshold <- jmvcore::OptionNumber$new(
+                "stability_threshold",
+                stability_threshold,
+                default=0.8,
+                min=0.5,
+                max=1)
+            private$..advanced_pruning_method <- jmvcore::OptionList$new(
+                "advanced_pruning_method",
+                advanced_pruning_method,
+                options=list(
+                    "cost_complexity",
+                    "pre_pruning",
+                    "post_pruning",
+                    "pessimistic",
+                    "critical_value"),
+                default="cost_complexity")
+            private$..pre_pruning_threshold <- jmvcore::OptionNumber$new(
+                "pre_pruning_threshold",
+                pre_pruning_threshold,
+                default=0.01,
+                min=0.001,
+                max=0.1)
+            private$..post_pruning_validation_split <- jmvcore::OptionNumber$new(
+                "post_pruning_validation_split",
+                post_pruning_validation_split,
+                default=0.2,
+                min=0.1,
+                max=0.4)
+            private$..rf_feature_selection_method <- jmvcore::OptionList$new(
+                "rf_feature_selection_method",
+                rf_feature_selection_method,
+                options=list(
+                    "importance_ranking",
+                    "permutation",
+                    "oob_selection",
+                    "boruta"),
+                default="importance_ranking")
+            private$..rf_proximity_analysis <- jmvcore::OptionBool$new(
+                "rf_proximity_analysis",
+                rf_proximity_analysis,
+                default=FALSE)
+            private$..rf_oob_detailed_analysis <- jmvcore::OptionBool$new(
+                "rf_oob_detailed_analysis",
+                rf_oob_detailed_analysis,
+                default=TRUE)
+            private$..algorithm_benchmarking <- jmvcore::OptionBool$new(
+                "algorithm_benchmarking",
+                algorithm_benchmarking,
+                default=FALSE)
+            private$..benchmark_algorithms <- jmvcore::OptionList$new(
+                "benchmark_algorithms",
+                benchmark_algorithms,
+                options=list(
+                    "trees_only",
+                    "trees_vs_linear",
+                    "trees_vs_clustering",
+                    "comprehensive"),
+                default="trees_only")
+            private$..performance_profiling <- jmvcore::OptionBool$new(
+                "performance_profiling",
+                performance_profiling,
+                default=FALSE)
+            private$..adaptive_complexity_parameter <- jmvcore::OptionBool$new(
+                "adaptive_complexity_parameter",
+                adaptive_complexity_parameter,
+                default=FALSE)
+            private$..dynamic_splitting_criteria <- jmvcore::OptionBool$new(
+                "dynamic_splitting_criteria",
+                dynamic_splitting_criteria,
+                default=FALSE)
+            private$..tree_regularization_method <- jmvcore::OptionList$new(
+                "tree_regularization_method",
+                tree_regularization_method,
+                options=list(
+                    "none",
+                    "l1",
+                    "l2",
+                    "mdl"),
+                default="none")
+            private$..regularization_strength <- jmvcore::OptionNumber$new(
+                "regularization_strength",
+                regularization_strength,
+                default=0.1,
+                min=0.01,
+                max=1)
+            private$..automated_feature_engineering <- jmvcore::OptionBool$new(
+                "automated_feature_engineering",
+                automated_feature_engineering,
+                default=FALSE)
+            private$..interaction_depth <- jmvcore::OptionInteger$new(
+                "interaction_depth",
+                interaction_depth,
+                default=2,
+                min=2,
+                max=3)
+            private$..polynomial_degree <- jmvcore::OptionInteger$new(
+                "polynomial_degree",
+                polynomial_degree,
+                default=2,
+                min=2,
+                max=3)
+            private$..fancy_tree_plot <- jmvcore::OptionBool$new(
+                "fancy_tree_plot",
+                fancy_tree_plot,
+                default=FALSE)
+            private$..tree_structure_analysis <- jmvcore::OptionBool$new(
+                "tree_structure_analysis",
+                tree_structure_analysis,
+                default=FALSE)
+            private$..cp_selection_visualization <- jmvcore::OptionBool$new(
+                "cp_selection_visualization",
+                cp_selection_visualization,
+                default=FALSE)
+            private$..f1_score_analysis <- jmvcore::OptionBool$new(
+                "f1_score_analysis",
+                f1_score_analysis,
+                default=FALSE)
+            private$..learning_curve_analysis <- jmvcore::OptionBool$new(
+                "learning_curve_analysis",
+                learning_curve_analysis,
+                default=FALSE)
+            private$..residual_diagnostics <- jmvcore::OptionBool$new(
+                "residual_diagnostics",
+                residual_diagnostics,
+                default=FALSE)
+            private$..hyperparameter_grid_search <- jmvcore::OptionBool$new(
+                "hyperparameter_grid_search",
+                hyperparameter_grid_search,
+                default=FALSE)
+            private$..cross_validation_optimization <- jmvcore::OptionBool$new(
+                "cross_validation_optimization",
+                cross_validation_optimization,
+                default=FALSE)
+            private$..ensemble_optimization <- jmvcore::OptionBool$new(
+                "ensemble_optimization",
+                ensemble_optimization,
+                default=FALSE)
+            private$..surrogate_split_analysis <- jmvcore::OptionBool$new(
+                "surrogate_split_analysis",
+                surrogate_split_analysis,
+                default=FALSE)
+            private$..missing_pattern_analysis <- jmvcore::OptionBool$new(
+                "missing_pattern_analysis",
+                missing_pattern_analysis,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..facs)
@@ -543,6 +992,9 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..train)
             self$.addOption(private$..trainLevel)
             self$.addOption(private$..validation)
+            self$.addOption(private$..consensus_validation)
+            self$.addOption(private$..bootstrap_samples)
+            self$.addOption(private$..model_averaging)
             self$.addOption(private$..cv_folds)
             self$.addOption(private$..cv_repeats)
             self$.addOption(private$..stratified_sampling)
@@ -556,10 +1008,24 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..tree_depth)
             self$.addOption(private$..hyperparameter_tuning)
             self$.addOption(private$..tuning_metric)
+            self$.addOption(private$..kappa_analysis)
+            self$.addOption(private$..advanced_metrics)
             self$.addOption(private$..use_1se_rule)
             self$.addOption(private$..xerror_pruning)
             self$.addOption(private$..auto_prune)
             self$.addOption(private$..prune_method)
+            self$.addOption(private$..rpart_prior)
+            self$.addOption(private$..rpart_loss_matrix)
+            self$.addOption(private$..clinical_loss_preset)
+            self$.addOption(private$..enhanced_prior_probs)
+            self$.addOption(private$..population_prevalence)
+            self$.addOption(private$..custom_prior_values)
+            self$.addOption(private$..rpart_split)
+            self$.addOption(private$..rpart_surrogate)
+            self$.addOption(private$..rpart_usesurrogate)
+            self$.addOption(private$..rpart_maxsurrogate)
+            self$.addOption(private$..rpart_xval)
+            self$.addOption(private$..rpart_maxcompete)
             self$.addOption(private$..c50_trials)
             self$.addOption(private$..c50_winnow)
             self$.addOption(private$..ctree_mincriterion)
@@ -588,7 +1054,11 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showPartitionPlot)
             self$.addOption(private$..show_cp_plot)
             self$.addOption(private$..tree_plot_style)
+            self$.addOption(private$..plot_branch_style)
+            self$.addOption(private$..plot_margin)
             self$.addOption(private$..show_node_statistics)
+            self$.addOption(private$..probability_display)
+            self$.addOption(private$..enhanced_node_info)
             self$.addOption(private$..interpretability)
             self$.addOption(private$..shap_analysis)
             self$.addOption(private$..partial_dependence)
@@ -609,8 +1079,57 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..learning_curves)
             self$.addOption(private$..outlier_analysis)
             self$.addOption(private$..prediction_intervals)
+            self$.addOption(private$..rpart_prediction_type)
+            self$.addOption(private$..show_rsq_plot)
+            self$.addOption(private$..competing_splits)
+            self$.addOption(private$..surrogate_splits)
             self$.addOption(private$..advanced_pruning)
             self$.addOption(private$..pruning_validation_split)
+            self$.addOption(private$..cp_auto_selection)
+            self$.addOption(private$..cp_sequence_analysis)
+            self$.addOption(private$..xerror_detailed_analysis)
+            self$.addOption(private$..impurity_analysis)
+            self$.addOption(private$..recursive_partitioning_trace)
+            self$.addOption(private$..use_custom_splitting)
+            self$.addOption(private$..custom_splitting_method)
+            self$.addOption(private$..custom_splitting_validation)
+            self$.addOption(private$..ensemble_diversity)
+            self$.addOption(private$..ensemble_size)
+            self$.addOption(private$..weighted_voting)
+            self$.addOption(private$..uncertainty_quantification)
+            self$.addOption(private$..calibration_analysis)
+            self$.addOption(private$..clinical_thresholds)
+            self$.addOption(private$..threshold_optimization)
+            self$.addOption(private$..multi_threshold_analysis)
+            self$.addOption(private$..consensus_threshold)
+            self$.addOption(private$..stability_threshold)
+            self$.addOption(private$..advanced_pruning_method)
+            self$.addOption(private$..pre_pruning_threshold)
+            self$.addOption(private$..post_pruning_validation_split)
+            self$.addOption(private$..rf_feature_selection_method)
+            self$.addOption(private$..rf_proximity_analysis)
+            self$.addOption(private$..rf_oob_detailed_analysis)
+            self$.addOption(private$..algorithm_benchmarking)
+            self$.addOption(private$..benchmark_algorithms)
+            self$.addOption(private$..performance_profiling)
+            self$.addOption(private$..adaptive_complexity_parameter)
+            self$.addOption(private$..dynamic_splitting_criteria)
+            self$.addOption(private$..tree_regularization_method)
+            self$.addOption(private$..regularization_strength)
+            self$.addOption(private$..automated_feature_engineering)
+            self$.addOption(private$..interaction_depth)
+            self$.addOption(private$..polynomial_degree)
+            self$.addOption(private$..fancy_tree_plot)
+            self$.addOption(private$..tree_structure_analysis)
+            self$.addOption(private$..cp_selection_visualization)
+            self$.addOption(private$..f1_score_analysis)
+            self$.addOption(private$..learning_curve_analysis)
+            self$.addOption(private$..residual_diagnostics)
+            self$.addOption(private$..hyperparameter_grid_search)
+            self$.addOption(private$..cross_validation_optimization)
+            self$.addOption(private$..ensemble_optimization)
+            self$.addOption(private$..surrogate_split_analysis)
+            self$.addOption(private$..missing_pattern_analysis)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -622,6 +1141,9 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         train = function() private$..train$value,
         trainLevel = function() private$..trainLevel$value,
         validation = function() private$..validation$value,
+        consensus_validation = function() private$..consensus_validation$value,
+        bootstrap_samples = function() private$..bootstrap_samples$value,
+        model_averaging = function() private$..model_averaging$value,
         cv_folds = function() private$..cv_folds$value,
         cv_repeats = function() private$..cv_repeats$value,
         stratified_sampling = function() private$..stratified_sampling$value,
@@ -635,10 +1157,24 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tree_depth = function() private$..tree_depth$value,
         hyperparameter_tuning = function() private$..hyperparameter_tuning$value,
         tuning_metric = function() private$..tuning_metric$value,
+        kappa_analysis = function() private$..kappa_analysis$value,
+        advanced_metrics = function() private$..advanced_metrics$value,
         use_1se_rule = function() private$..use_1se_rule$value,
         xerror_pruning = function() private$..xerror_pruning$value,
         auto_prune = function() private$..auto_prune$value,
         prune_method = function() private$..prune_method$value,
+        rpart_prior = function() private$..rpart_prior$value,
+        rpart_loss_matrix = function() private$..rpart_loss_matrix$value,
+        clinical_loss_preset = function() private$..clinical_loss_preset$value,
+        enhanced_prior_probs = function() private$..enhanced_prior_probs$value,
+        population_prevalence = function() private$..population_prevalence$value,
+        custom_prior_values = function() private$..custom_prior_values$value,
+        rpart_split = function() private$..rpart_split$value,
+        rpart_surrogate = function() private$..rpart_surrogate$value,
+        rpart_usesurrogate = function() private$..rpart_usesurrogate$value,
+        rpart_maxsurrogate = function() private$..rpart_maxsurrogate$value,
+        rpart_xval = function() private$..rpart_xval$value,
+        rpart_maxcompete = function() private$..rpart_maxcompete$value,
         c50_trials = function() private$..c50_trials$value,
         c50_winnow = function() private$..c50_winnow$value,
         ctree_mincriterion = function() private$..ctree_mincriterion$value,
@@ -667,7 +1203,11 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showPartitionPlot = function() private$..showPartitionPlot$value,
         show_cp_plot = function() private$..show_cp_plot$value,
         tree_plot_style = function() private$..tree_plot_style$value,
+        plot_branch_style = function() private$..plot_branch_style$value,
+        plot_margin = function() private$..plot_margin$value,
         show_node_statistics = function() private$..show_node_statistics$value,
+        probability_display = function() private$..probability_display$value,
+        enhanced_node_info = function() private$..enhanced_node_info$value,
         interpretability = function() private$..interpretability$value,
         shap_analysis = function() private$..shap_analysis$value,
         partial_dependence = function() private$..partial_dependence$value,
@@ -688,8 +1228,57 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         learning_curves = function() private$..learning_curves$value,
         outlier_analysis = function() private$..outlier_analysis$value,
         prediction_intervals = function() private$..prediction_intervals$value,
+        rpart_prediction_type = function() private$..rpart_prediction_type$value,
+        show_rsq_plot = function() private$..show_rsq_plot$value,
+        competing_splits = function() private$..competing_splits$value,
+        surrogate_splits = function() private$..surrogate_splits$value,
         advanced_pruning = function() private$..advanced_pruning$value,
-        pruning_validation_split = function() private$..pruning_validation_split$value),
+        pruning_validation_split = function() private$..pruning_validation_split$value,
+        cp_auto_selection = function() private$..cp_auto_selection$value,
+        cp_sequence_analysis = function() private$..cp_sequence_analysis$value,
+        xerror_detailed_analysis = function() private$..xerror_detailed_analysis$value,
+        impurity_analysis = function() private$..impurity_analysis$value,
+        recursive_partitioning_trace = function() private$..recursive_partitioning_trace$value,
+        use_custom_splitting = function() private$..use_custom_splitting$value,
+        custom_splitting_method = function() private$..custom_splitting_method$value,
+        custom_splitting_validation = function() private$..custom_splitting_validation$value,
+        ensemble_diversity = function() private$..ensemble_diversity$value,
+        ensemble_size = function() private$..ensemble_size$value,
+        weighted_voting = function() private$..weighted_voting$value,
+        uncertainty_quantification = function() private$..uncertainty_quantification$value,
+        calibration_analysis = function() private$..calibration_analysis$value,
+        clinical_thresholds = function() private$..clinical_thresholds$value,
+        threshold_optimization = function() private$..threshold_optimization$value,
+        multi_threshold_analysis = function() private$..multi_threshold_analysis$value,
+        consensus_threshold = function() private$..consensus_threshold$value,
+        stability_threshold = function() private$..stability_threshold$value,
+        advanced_pruning_method = function() private$..advanced_pruning_method$value,
+        pre_pruning_threshold = function() private$..pre_pruning_threshold$value,
+        post_pruning_validation_split = function() private$..post_pruning_validation_split$value,
+        rf_feature_selection_method = function() private$..rf_feature_selection_method$value,
+        rf_proximity_analysis = function() private$..rf_proximity_analysis$value,
+        rf_oob_detailed_analysis = function() private$..rf_oob_detailed_analysis$value,
+        algorithm_benchmarking = function() private$..algorithm_benchmarking$value,
+        benchmark_algorithms = function() private$..benchmark_algorithms$value,
+        performance_profiling = function() private$..performance_profiling$value,
+        adaptive_complexity_parameter = function() private$..adaptive_complexity_parameter$value,
+        dynamic_splitting_criteria = function() private$..dynamic_splitting_criteria$value,
+        tree_regularization_method = function() private$..tree_regularization_method$value,
+        regularization_strength = function() private$..regularization_strength$value,
+        automated_feature_engineering = function() private$..automated_feature_engineering$value,
+        interaction_depth = function() private$..interaction_depth$value,
+        polynomial_degree = function() private$..polynomial_degree$value,
+        fancy_tree_plot = function() private$..fancy_tree_plot$value,
+        tree_structure_analysis = function() private$..tree_structure_analysis$value,
+        cp_selection_visualization = function() private$..cp_selection_visualization$value,
+        f1_score_analysis = function() private$..f1_score_analysis$value,
+        learning_curve_analysis = function() private$..learning_curve_analysis$value,
+        residual_diagnostics = function() private$..residual_diagnostics$value,
+        hyperparameter_grid_search = function() private$..hyperparameter_grid_search$value,
+        cross_validation_optimization = function() private$..cross_validation_optimization$value,
+        ensemble_optimization = function() private$..ensemble_optimization$value,
+        surrogate_split_analysis = function() private$..surrogate_split_analysis$value,
+        missing_pattern_analysis = function() private$..missing_pattern_analysis$value),
     private = list(
         ..vars = NA,
         ..facs = NA,
@@ -700,6 +1289,9 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..train = NA,
         ..trainLevel = NA,
         ..validation = NA,
+        ..consensus_validation = NA,
+        ..bootstrap_samples = NA,
+        ..model_averaging = NA,
         ..cv_folds = NA,
         ..cv_repeats = NA,
         ..stratified_sampling = NA,
@@ -713,10 +1305,24 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..tree_depth = NA,
         ..hyperparameter_tuning = NA,
         ..tuning_metric = NA,
+        ..kappa_analysis = NA,
+        ..advanced_metrics = NA,
         ..use_1se_rule = NA,
         ..xerror_pruning = NA,
         ..auto_prune = NA,
         ..prune_method = NA,
+        ..rpart_prior = NA,
+        ..rpart_loss_matrix = NA,
+        ..clinical_loss_preset = NA,
+        ..enhanced_prior_probs = NA,
+        ..population_prevalence = NA,
+        ..custom_prior_values = NA,
+        ..rpart_split = NA,
+        ..rpart_surrogate = NA,
+        ..rpart_usesurrogate = NA,
+        ..rpart_maxsurrogate = NA,
+        ..rpart_xval = NA,
+        ..rpart_maxcompete = NA,
         ..c50_trials = NA,
         ..c50_winnow = NA,
         ..ctree_mincriterion = NA,
@@ -745,7 +1351,11 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showPartitionPlot = NA,
         ..show_cp_plot = NA,
         ..tree_plot_style = NA,
+        ..plot_branch_style = NA,
+        ..plot_margin = NA,
         ..show_node_statistics = NA,
+        ..probability_display = NA,
+        ..enhanced_node_info = NA,
         ..interpretability = NA,
         ..shap_analysis = NA,
         ..partial_dependence = NA,
@@ -766,8 +1376,57 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..learning_curves = NA,
         ..outlier_analysis = NA,
         ..prediction_intervals = NA,
+        ..rpart_prediction_type = NA,
+        ..show_rsq_plot = NA,
+        ..competing_splits = NA,
+        ..surrogate_splits = NA,
         ..advanced_pruning = NA,
-        ..pruning_validation_split = NA)
+        ..pruning_validation_split = NA,
+        ..cp_auto_selection = NA,
+        ..cp_sequence_analysis = NA,
+        ..xerror_detailed_analysis = NA,
+        ..impurity_analysis = NA,
+        ..recursive_partitioning_trace = NA,
+        ..use_custom_splitting = NA,
+        ..custom_splitting_method = NA,
+        ..custom_splitting_validation = NA,
+        ..ensemble_diversity = NA,
+        ..ensemble_size = NA,
+        ..weighted_voting = NA,
+        ..uncertainty_quantification = NA,
+        ..calibration_analysis = NA,
+        ..clinical_thresholds = NA,
+        ..threshold_optimization = NA,
+        ..multi_threshold_analysis = NA,
+        ..consensus_threshold = NA,
+        ..stability_threshold = NA,
+        ..advanced_pruning_method = NA,
+        ..pre_pruning_threshold = NA,
+        ..post_pruning_validation_split = NA,
+        ..rf_feature_selection_method = NA,
+        ..rf_proximity_analysis = NA,
+        ..rf_oob_detailed_analysis = NA,
+        ..algorithm_benchmarking = NA,
+        ..benchmark_algorithms = NA,
+        ..performance_profiling = NA,
+        ..adaptive_complexity_parameter = NA,
+        ..dynamic_splitting_criteria = NA,
+        ..tree_regularization_method = NA,
+        ..regularization_strength = NA,
+        ..automated_feature_engineering = NA,
+        ..interaction_depth = NA,
+        ..polynomial_degree = NA,
+        ..fancy_tree_plot = NA,
+        ..tree_structure_analysis = NA,
+        ..cp_selection_visualization = NA,
+        ..f1_score_analysis = NA,
+        ..learning_curve_analysis = NA,
+        ..residual_diagnostics = NA,
+        ..hyperparameter_grid_search = NA,
+        ..cross_validation_optimization = NA,
+        ..ensemble_optimization = NA,
+        ..surrogate_split_analysis = NA,
+        ..missing_pattern_analysis = NA)
 )
 
 treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -807,7 +1466,10 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         modelComparison = function() private$.items[["modelComparison"]],
         cp_table_analysis = function() private$.items[["cp_table_analysis"]],
         cp_plot = function() private$.items[["cp_plot"]],
+        rsq_plot = function() private$.items[["rsq_plot"]],
         detailed_importance_analysis = function() private$.items[["detailed_importance_analysis"]],
+        competing_splits_analysis = function() private$.items[["competing_splits_analysis"]],
+        surrogate_splits_analysis = function() private$.items[["surrogate_splits_analysis"]],
         model_export = function() private$.items[["model_export"]],
         exportInfo = function() private$.items[["exportInfo"]],
         stability_analysis = function() private$.items[["stability_analysis"]],
@@ -819,6 +1481,11 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pruning_analysis = function() private$.items[["pruning_analysis"]],
         enhanced_cv_results = function() private$.items[["enhanced_cv_results"]],
         enhanced_cv_table = function() private$.items[["enhanced_cv_table"]],
+        cp_sequence_analysis_results = function() private$.items[["cp_sequence_analysis_results"]],
+        xerror_detailed_analysis_results = function() private$.items[["xerror_detailed_analysis_results"]],
+        impurity_analysis_results = function() private$.items[["impurity_analysis_results"]],
+        recursive_partitioning_trace_results = function() private$.items[["recursive_partitioning_trace_results"]],
+        xerror_confidence_plot = function() private$.items[["xerror_confidence_plot"]],
         enhanced_confusion_matrix = function() private$.items[["enhanced_confusion_matrix"]]),
     private = list(),
     public=list(
@@ -1335,11 +2002,47 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "target",
                     "targetLevel",
                     "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="rsq_plot",
+                title="R-squared Plot",
+                width=600,
+                height=400,
+                renderFun=".plot_rsq",
+                visible="(show_rsq_plot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="detailed_importance_analysis",
                 title="Detailed Variable Importance",
                 visible="(show_variable_importance_detailed)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="competing_splits_analysis",
+                title="Competing Splits Analysis",
+                visible="(competing_splits)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="surrogate_splits_analysis",
+                title="Surrogate Splits Analysis",
+                visible="(surrogate_splits)",
                 clearWith=list(
                     "vars",
                     "facs",
@@ -1548,6 +2251,64 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "validation")))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="cp_sequence_analysis_results",
+                title="CP Sequence Analysis",
+                visible="(cp_sequence_analysis)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="xerror_detailed_analysis_results",
+                title="Detailed Cross-validation Error Analysis",
+                visible="(xerror_detailed_analysis)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="impurity_analysis_results",
+                title="Splitting Impurity Analysis",
+                visible="(impurity_analysis)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="recursive_partitioning_trace_results",
+                title="Recursive Partitioning Trace",
+                visible="(recursive_partitioning_trace)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="xerror_confidence_plot",
+                title="Cross-validation Error with Confidence Bands",
+                width=700,
+                height=500,
+                renderFun=".plot_xerror_confidence",
+                visible="(xerror_detailed_analysis)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="enhanced_confusion_matrix",
                 title="Clinical Confusion Matrix Analysis",
                 visible="(show_confusion_matrix)",
@@ -1624,7 +2385,8 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   boosting for complex patterns.
 #' @param tree_mode Type of prediction problem: classification for disease
 #'   presence/absence, regression for continuous biomarkers, survival for
-#'   time-to-event analysis.
+#'   time-to-event analysis, Poisson for count/rate data, exponential for
+#'   survival with constant hazard.
 #' @param train Variable indicating training vs validation cohorts.  If not
 #'   provided, data will be split automatically.
 #' @param trainLevel Level indicating the training/discovery cohort.
@@ -1632,6 +2394,14 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   provided, otherwise performs automatic splitting with selected method.
 #'   Stratified CV maintains class proportions, Repeated CV averages multiple
 #'   runs.
+#' @param consensus_validation Use multiple validation methods and consensus
+#'   results. Combines cross-validation, bootstrap, and holdout for robust
+#'   estimates.
+#' @param bootstrap_samples Number of bootstrap samples for bootstrap
+#'   validation. More samples provide better estimates but increase computation
+#'   time.
+#' @param model_averaging Average predictions from multiple models for
+#'   improved accuracy. Combines different algorithms or parameter settings.
 #' @param cv_folds Number of folds for cross-validation. 5-fold provides good
 #'   balance between bias and variance for clinical datasets.
 #' @param cv_repeats Number of times to repeat cross-validation (for repeated
@@ -1663,6 +2433,12 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   best performance.
 #' @param tuning_metric Metric to optimize during hyperparameter tuning.
 #'   Choose based on clinical priorities (e.g., sensitivity for screening).
+#' @param kappa_analysis Calculate Cohen's kappa statistic for agreement
+#'   beyond chance. Essential clinical metric for inter-rater reliability
+#'   assessment.
+#' @param advanced_metrics Calculate advanced metrics: Matthews correlation
+#'   coefficient,  Youden's J statistic, diagnostic odds ratio, and clinical
+#'   utility index.
 #' @param use_1se_rule Apply 1-standard-error rule for selecting simpler
 #'   models. Chooses most parsimonious tree within 1 SE of optimal performance.
 #' @param xerror_pruning Use cross-validation error (xerror) from CP table for
@@ -1673,6 +2449,35 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param prune_method Method for selecting optimal tree size after
 #'   cross-validation. 1-SE rule provides good balance between accuracy and
 #'   simplicity.
+#' @param rpart_prior Prior probabilities for each class (comma-separated).
+#'   E.g., "0.3,0.7" for binary classification. Leave empty for data
+#'   proportions.
+#' @param rpart_loss_matrix Loss matrix for misclassification costs
+#'   (comma-separated by rows). E.g., "0,1,5,0" for 2x2 matrix. Leave empty for
+#'   equal costs.
+#' @param clinical_loss_preset Pre-configured loss matrices for common
+#'   clinical scenarios. Screening: False negatives cost 5x more than false
+#'   positives. Diagnosis: False positives cost 3x more than false negatives.
+#' @param enhanced_prior_probs Prior probability settings for different
+#'   clinical contexts. Population: Use external disease prevalence estimates.
+#'   Balanced: Equal priors regardless of sample sizes.
+#' @param population_prevalence Expected disease prevalence in target
+#'   population (0-1). Used when enhanced_prior_probs = "population".
+#' @param custom_prior_values Custom prior probabilities (comma-separated,
+#'   must sum to 1). E.g., "0.2,0.3,0.5" for three-class problem.
+#' @param rpart_split Splitting criterion for classification trees. Gini often
+#'   works well; Information gain may be better for multi-class.
+#' @param rpart_surrogate Use surrogate splits to handle missing values. Finds
+#'   backup splits that mimic primary split when data is missing.
+#' @param rpart_usesurrogate How to use surrogate splits: 0=only if helpful,
+#'   1=always, 2=if better than majority.
+#' @param rpart_maxsurrogate Maximum number of surrogate splits to retain at
+#'   each node. More surrogates provide better missing data handling but
+#'   increase complexity.
+#' @param rpart_xval Number of cross-validation folds for CP table generation.
+#'   Set to 0 to skip cross-validation (faster but less reliable pruning).
+#' @param rpart_maxcompete Number of competing splits to save for each node.
+#'   Useful for understanding alternative splitting strategies.
 #' @param c50_trials Number of boosting iterations for C5.0 algorithm. More
 #'   trials improve accuracy but reduce interpretability.
 #' @param c50_winnow Enable winnowing in C5.0 to remove irrelevant attributes.
@@ -1737,9 +2542,19 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   complexity. Essential for understanding optimal pruning levels.
 #' @param tree_plot_style Visualization style optimized for different clinical
 #'   audiences. Medical: simplified for clinical staff; Clinical: detailed for
-#'   researchers.
+#'   researchers. Uniform: equal branch lengths; Compressed: space-efficient;
+#'   Fancy: publication-ready.
+#' @param plot_branch_style Branch drawing style (0-1). 0=angled branches,
+#'   1=straight lines. Based on rpart vignette examples for publication-quality
+#'   plots.
+#' @param plot_margin White space margin around the tree plot. Useful for
+#'   fitting node labels and avoiding clipping.
 #' @param show_node_statistics Display detailed statistics for each node
 #'   including sample sizes, purity measures, and class distributions.
+#' @param probability_display Display class probabilities in tree nodes for
+#'   clinical interpretation. Shows certainty levels for each prediction.
+#' @param enhanced_node_info Level of information displayed in tree nodes.
+#'   Clinical mode optimized for medical decision making.
 #' @param interpretability Perform advanced interpretability analysis
 #'   including SHAP values, partial dependence plots, and interaction effects.
 #' @param shap_analysis Calculate SHAP (SHapley Additive exPlanations) values
@@ -1787,11 +2602,124 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   may disproportionately affect tree structure and predictions.
 #' @param prediction_intervals Calculate confidence intervals for individual
 #'   predictions using bootstrap or cross-validation methods.
+#' @param rpart_prediction_type Type of prediction output from rpart model.
+#'   Class: predicted category; Prob: class probabilities; Vector: node IDs.
+#' @param show_rsq_plot Show rsq.rpart() plot displaying R-squared vs tree
+#'   size. Useful for regression trees to assess explained variance.
+#' @param competing_splits Display competing splits at each node showing
+#'   alternative  splitting criteria and their relative quality.
+#' @param surrogate_splits Display surrogate splits used for missing data
+#'   handling. Shows backup splitting rules when primary variable is missing.
 #' @param advanced_pruning Pruning method: CP uses cross-validation error, REP
 #'   uses holdout validation, MEP considers both error and tree size for optimal
 #'   clinical interpretability.
 #' @param pruning_validation_split Proportion of data reserved for pruning
 #'   validation (REP/MEP methods). This is separate from the main test set.
+#' @param cp_auto_selection Automatic selection of optimal complexity
+#'   parameter from CV results. 1-SE rule selects simplest tree within one
+#'   standard error of minimum.
+#' @param cp_sequence_analysis Show detailed analysis of CP sequence with
+#'   error rates and tree sizes. Helps understand cost-complexity trade-offs.
+#' @param xerror_detailed_analysis Show comprehensive xerror analysis with
+#'   standard errors and confidence intervals. Essential for understanding
+#'   pruning decisions.
+#' @param impurity_analysis Compare Gini index vs Information gain splitting
+#'   criteria. Shows impurity reduction at each split for method comparison.
+#' @param recursive_partitioning_trace Display step-by-step tree construction
+#'   process. Shows how the algorithm selects splits recursively.
+#' @param use_custom_splitting Enable user-defined splitting functions for
+#'   advanced customization. Allows definition of custom init, eval, and split
+#'   functions.
+#' @param custom_splitting_method Pre-defined custom splitting methods based
+#'   on rpart vignette examples. Custom methods provide enhanced splitting
+#'   criteria for specific domains.
+#' @param custom_splitting_validation Validate custom splitting functions
+#'   before use. Ensures functions meet rpart requirements (init, eval, split
+#'   components).
+#' @param ensemble_diversity Enhance ensemble diversity through parameter
+#'   variation. Creates diverse base learners for improved ensemble performance.
+#' @param ensemble_size Number of base models in ensemble methods. More models
+#'   generally improve performance but increase computation.
+#' @param weighted_voting Use performance-weighted voting in ensemble methods.
+#'   Better models get higher weights in final predictions.
+#' @param uncertainty_quantification Quantify prediction uncertainty for
+#'   clinical decision support. Provides confidence intervals and uncertainty
+#'   estimates.
+#' @param calibration_analysis Analyze and display probability calibration for
+#'   clinical reliability. Essential for models providing probability estimates.
+#' @param clinical_thresholds Optimize decision thresholds for clinical
+#'   contexts. Balances sensitivity and specificity based on clinical
+#'   priorities.
+#' @param threshold_optimization Method for optimizing classification
+#'   thresholds. Youden's J maximizes sensitivity + specificity - 1.
+#' @param multi_threshold_analysis Analyze performance across multiple
+#'   decision thresholds. Shows trade-offs between sensitivity and specificity.
+#' @param consensus_threshold Minimum agreement threshold for consensus
+#'   predictions. Higher values require more model agreement for final
+#'   decisions.
+#' @param stability_threshold Minimum stability coefficient for model
+#'   acceptance. Higher values indicate more consistent models across samples.
+#' @param advanced_pruning_method Advanced pruning method for optimal tree
+#'   size. Pre-pruning stops early, post-pruning removes branches afterward.
+#' @param pre_pruning_threshold Minimum improvement threshold for pre-pruning.
+#'   Higher values create simpler, more conservative trees.
+#' @param post_pruning_validation_split Proportion of training data reserved
+#'   for post-pruning validation. Used in reduced error pruning methods.
+#' @param rf_feature_selection_method Method for selecting important features
+#'   in Random Forest. Boruta finds all-relevant features using statistical
+#'   tests.
+#' @param rf_proximity_analysis Calculate proximity matrix for outlier
+#'   detection and clustering. Useful for understanding data structure in RF
+#'   models.
+#' @param rf_oob_detailed_analysis Comprehensive out-of-bag error analysis
+#'   with confidence intervals. Provides unbiased performance estimates.
+#' @param algorithm_benchmarking Compare tree performance against linear
+#'   models and clustering. Provides comprehensive algorithm comparison.
+#' @param benchmark_algorithms Scope of algorithm comparison analysis.
+#'   Comprehensive includes logistic regression and k-means.
+#' @param performance_profiling Profile algorithm performance including timing
+#'   and memory usage. Useful for production deployment decisions.
+#' @param adaptive_complexity_parameter Automatically adapt CP based on data
+#'   characteristics. Uses data-driven approach for optimal tree complexity.
+#' @param dynamic_splitting_criteria Use different splitting criteria at
+#'   different tree levels. Combines Gini and information gain adaptively.
+#' @param tree_regularization_method Regularization method to prevent
+#'   overfitting. Different methods penalize complexity differently.
+#' @param regularization_strength Strength of regularization penalty. Higher
+#'   values create simpler trees.
+#' @param automated_feature_engineering Automatically create interaction terms
+#'   and transformations. Can improve tree performance for complex
+#'   relationships.
+#' @param interaction_depth Maximum depth for automatic interaction terms. 2 =
+#'   pairwise, 3 = three-way interactions.
+#' @param polynomial_degree Degree of polynomial features to create. Higher
+#'   degrees capture more complex non-linearities.
+#' @param fancy_tree_plot Use rattle's fancyRpartPlot for enhanced tree
+#'   visualization. Provides publication-quality tree diagrams.
+#' @param tree_structure_analysis Detailed analysis of tree structure
+#'   including node statistics, split quality measures, and branch complexity
+#'   metrics.
+#' @param cp_selection_visualization Visualize complexity parameter selection
+#'   with xerror plots. Shows cross-validation error vs tree complexity.
+#' @param f1_score_analysis Calculate F1 scores for all classes with
+#'   macro/micro averaging. Essential for imbalanced classification problems.
+#' @param learning_curve_analysis Generate learning curves showing performance
+#'   vs sample size. Identifies optimal training size and overfitting patterns.
+#' @param residual_diagnostics Comprehensive residual analysis for regression
+#'   trees. Includes normality tests and homoscedasticity checks.
+#' @param hyperparameter_grid_search Systematic grid search over cp, maxdepth,
+#'   minsplit, minbucket. Finds optimal parameter combinations through
+#'   exhaustive search.
+#' @param cross_validation_optimization Use cross-validation for robust
+#'   hyperparameter selection. Prevents overfitting to specific train-test
+#'   splits.
+#' @param ensemble_optimization Optimize ensemble parameters for improved
+#'   performance. Includes optimal ensemble size and diversity measures.
+#' @param surrogate_split_analysis Detailed analysis of surrogate splits for
+#'   missing data handling. Shows backup splitting rules and their
+#'   effectiveness.
+#' @param missing_pattern_analysis Analyze patterns of missingness in the
+#'   dataset. Identifies MCAR, MAR, and MNAR mechanisms.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1827,7 +2755,10 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cp_table_analysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cp_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$rsq_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$detailed_importance_analysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$competing_splits_analysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$surrogate_splits_analysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$model_export} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$stability_analysis} \tab \tab \tab \tab \tab a html \cr
@@ -1839,6 +2770,11 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$pruning_analysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$enhanced_cv_results} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$enhanced_cv_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cp_sequence_analysis_results} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$xerror_detailed_analysis_results} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$impurity_analysis_results} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$recursive_partitioning_trace_results} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$xerror_confidence_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$enhanced_confusion_matrix} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
@@ -1860,6 +2796,9 @@ tree <- function(
     train = NULL,
     trainLevel,
     validation = "cohort",
+    consensus_validation = FALSE,
+    bootstrap_samples = 100,
+    model_averaging = FALSE,
     cv_folds = 5,
     cv_repeats = 3,
     stratified_sampling = TRUE,
@@ -1873,10 +2812,24 @@ tree <- function(
     tree_depth = 6,
     hyperparameter_tuning = FALSE,
     tuning_metric = "bacc",
+    kappa_analysis = TRUE,
+    advanced_metrics = FALSE,
     use_1se_rule = TRUE,
     xerror_pruning = FALSE,
     auto_prune = FALSE,
     prune_method = "one_se",
+    rpart_prior = "",
+    rpart_loss_matrix = "",
+    clinical_loss_preset = "equal",
+    enhanced_prior_probs = "data",
+    population_prevalence = 0.1,
+    custom_prior_values = "",
+    rpart_split = "gini",
+    rpart_surrogate = TRUE,
+    rpart_usesurrogate = "2",
+    rpart_maxsurrogate = 5,
+    rpart_xval = 10,
+    rpart_maxcompete = 4,
     c50_trials = 1,
     c50_winnow = FALSE,
     ctree_mincriterion = 0.95,
@@ -1905,7 +2858,11 @@ tree <- function(
     showPartitionPlot = FALSE,
     show_cp_plot = FALSE,
     tree_plot_style = "standard",
+    plot_branch_style = 0.2,
+    plot_margin = 0.1,
     show_node_statistics = FALSE,
+    probability_display = TRUE,
+    enhanced_node_info = "clinical",
     interpretability = FALSE,
     shap_analysis = FALSE,
     partial_dependence = FALSE,
@@ -1926,8 +2883,57 @@ tree <- function(
     learning_curves = FALSE,
     outlier_analysis = FALSE,
     prediction_intervals = FALSE,
+    rpart_prediction_type = "class",
+    show_rsq_plot = FALSE,
+    competing_splits = FALSE,
+    surrogate_splits = FALSE,
     advanced_pruning = "cp",
-    pruning_validation_split = 0.2) {
+    pruning_validation_split = 0.2,
+    cp_auto_selection = "one_se_rule",
+    cp_sequence_analysis = FALSE,
+    xerror_detailed_analysis = FALSE,
+    impurity_analysis = FALSE,
+    recursive_partitioning_trace = FALSE,
+    use_custom_splitting = FALSE,
+    custom_splitting_method = "custom_anova",
+    custom_splitting_validation = TRUE,
+    ensemble_diversity = FALSE,
+    ensemble_size = 10,
+    weighted_voting = FALSE,
+    uncertainty_quantification = FALSE,
+    calibration_analysis = FALSE,
+    clinical_thresholds = FALSE,
+    threshold_optimization = "youden",
+    multi_threshold_analysis = FALSE,
+    consensus_threshold = 0.6,
+    stability_threshold = 0.8,
+    advanced_pruning_method = "cost_complexity",
+    pre_pruning_threshold = 0.01,
+    post_pruning_validation_split = 0.2,
+    rf_feature_selection_method = "importance_ranking",
+    rf_proximity_analysis = FALSE,
+    rf_oob_detailed_analysis = TRUE,
+    algorithm_benchmarking = FALSE,
+    benchmark_algorithms = "trees_only",
+    performance_profiling = FALSE,
+    adaptive_complexity_parameter = FALSE,
+    dynamic_splitting_criteria = FALSE,
+    tree_regularization_method = "none",
+    regularization_strength = 0.1,
+    automated_feature_engineering = FALSE,
+    interaction_depth = 2,
+    polynomial_degree = 2,
+    fancy_tree_plot = FALSE,
+    tree_structure_analysis = FALSE,
+    cp_selection_visualization = FALSE,
+    f1_score_analysis = FALSE,
+    learning_curve_analysis = FALSE,
+    residual_diagnostics = FALSE,
+    hyperparameter_grid_search = FALSE,
+    cross_validation_optimization = FALSE,
+    ensemble_optimization = FALSE,
+    surrogate_split_analysis = FALSE,
+    missing_pattern_analysis = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tree requires jmvcore to be installed (restart may be required)")
@@ -1958,6 +2964,9 @@ tree <- function(
         train = train,
         trainLevel = trainLevel,
         validation = validation,
+        consensus_validation = consensus_validation,
+        bootstrap_samples = bootstrap_samples,
+        model_averaging = model_averaging,
         cv_folds = cv_folds,
         cv_repeats = cv_repeats,
         stratified_sampling = stratified_sampling,
@@ -1971,10 +2980,24 @@ tree <- function(
         tree_depth = tree_depth,
         hyperparameter_tuning = hyperparameter_tuning,
         tuning_metric = tuning_metric,
+        kappa_analysis = kappa_analysis,
+        advanced_metrics = advanced_metrics,
         use_1se_rule = use_1se_rule,
         xerror_pruning = xerror_pruning,
         auto_prune = auto_prune,
         prune_method = prune_method,
+        rpart_prior = rpart_prior,
+        rpart_loss_matrix = rpart_loss_matrix,
+        clinical_loss_preset = clinical_loss_preset,
+        enhanced_prior_probs = enhanced_prior_probs,
+        population_prevalence = population_prevalence,
+        custom_prior_values = custom_prior_values,
+        rpart_split = rpart_split,
+        rpart_surrogate = rpart_surrogate,
+        rpart_usesurrogate = rpart_usesurrogate,
+        rpart_maxsurrogate = rpart_maxsurrogate,
+        rpart_xval = rpart_xval,
+        rpart_maxcompete = rpart_maxcompete,
         c50_trials = c50_trials,
         c50_winnow = c50_winnow,
         ctree_mincriterion = ctree_mincriterion,
@@ -2003,7 +3026,11 @@ tree <- function(
         showPartitionPlot = showPartitionPlot,
         show_cp_plot = show_cp_plot,
         tree_plot_style = tree_plot_style,
+        plot_branch_style = plot_branch_style,
+        plot_margin = plot_margin,
         show_node_statistics = show_node_statistics,
+        probability_display = probability_display,
+        enhanced_node_info = enhanced_node_info,
         interpretability = interpretability,
         shap_analysis = shap_analysis,
         partial_dependence = partial_dependence,
@@ -2024,8 +3051,57 @@ tree <- function(
         learning_curves = learning_curves,
         outlier_analysis = outlier_analysis,
         prediction_intervals = prediction_intervals,
+        rpart_prediction_type = rpart_prediction_type,
+        show_rsq_plot = show_rsq_plot,
+        competing_splits = competing_splits,
+        surrogate_splits = surrogate_splits,
         advanced_pruning = advanced_pruning,
-        pruning_validation_split = pruning_validation_split)
+        pruning_validation_split = pruning_validation_split,
+        cp_auto_selection = cp_auto_selection,
+        cp_sequence_analysis = cp_sequence_analysis,
+        xerror_detailed_analysis = xerror_detailed_analysis,
+        impurity_analysis = impurity_analysis,
+        recursive_partitioning_trace = recursive_partitioning_trace,
+        use_custom_splitting = use_custom_splitting,
+        custom_splitting_method = custom_splitting_method,
+        custom_splitting_validation = custom_splitting_validation,
+        ensemble_diversity = ensemble_diversity,
+        ensemble_size = ensemble_size,
+        weighted_voting = weighted_voting,
+        uncertainty_quantification = uncertainty_quantification,
+        calibration_analysis = calibration_analysis,
+        clinical_thresholds = clinical_thresholds,
+        threshold_optimization = threshold_optimization,
+        multi_threshold_analysis = multi_threshold_analysis,
+        consensus_threshold = consensus_threshold,
+        stability_threshold = stability_threshold,
+        advanced_pruning_method = advanced_pruning_method,
+        pre_pruning_threshold = pre_pruning_threshold,
+        post_pruning_validation_split = post_pruning_validation_split,
+        rf_feature_selection_method = rf_feature_selection_method,
+        rf_proximity_analysis = rf_proximity_analysis,
+        rf_oob_detailed_analysis = rf_oob_detailed_analysis,
+        algorithm_benchmarking = algorithm_benchmarking,
+        benchmark_algorithms = benchmark_algorithms,
+        performance_profiling = performance_profiling,
+        adaptive_complexity_parameter = adaptive_complexity_parameter,
+        dynamic_splitting_criteria = dynamic_splitting_criteria,
+        tree_regularization_method = tree_regularization_method,
+        regularization_strength = regularization_strength,
+        automated_feature_engineering = automated_feature_engineering,
+        interaction_depth = interaction_depth,
+        polynomial_degree = polynomial_degree,
+        fancy_tree_plot = fancy_tree_plot,
+        tree_structure_analysis = tree_structure_analysis,
+        cp_selection_visualization = cp_selection_visualization,
+        f1_score_analysis = f1_score_analysis,
+        learning_curve_analysis = learning_curve_analysis,
+        residual_diagnostics = residual_diagnostics,
+        hyperparameter_grid_search = hyperparameter_grid_search,
+        cross_validation_optimization = cross_validation_optimization,
+        ensemble_optimization = ensemble_optimization,
+        surrogate_split_analysis = surrogate_split_analysis,
+        missing_pattern_analysis = missing_pattern_analysis)
 
     analysis <- treeClass$new(
         options = options,

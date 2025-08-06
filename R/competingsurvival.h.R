@@ -131,12 +131,12 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="summary",
                 title="Analysis Summary",
-                visible="(explanatory && outcome && overalltime)"))
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="survivalTable",
                 title="Survival Analysis Results",
-                visible="(explanatory && outcome && overalltime)",
+                visible=TRUE,
                 rows=1,
                 columns=list(
                     list(
@@ -164,7 +164,7 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="cuminc",
                 title="Cumulative Incidence Function",
-                visible="(explanatory && outcome && overalltime && analysistype:compete)",
+                visible="(analysistype:compete)",
                 rows=1,
                 columns=list(
                     list(
@@ -194,7 +194,7 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 width=700,
                 height=400,
                 renderFun=".plotCompetingRisks",
-                visible="(explanatory && outcome && overalltime && analysistype:compete)",
+                visible="(analysistype:compete)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -204,7 +204,7 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation",
-                visible="(explanatory && outcome && overalltime)"))}))
+                visible=TRUE))}))
 
 competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "competingsurvivalBase",

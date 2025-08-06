@@ -33,10 +33,29 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             tornado = FALSE,
             decisionComparison = TRUE,
             incrementalAnalysis = TRUE,
+            dominanceAnalysis = TRUE,
+            icer_confidence_intervals = FALSE,
             probabilisticAnalysis = FALSE,
+            psa_advanced_outputs = FALSE,
             numSimulations = 1000,
+            markovAdvanced = FALSE,
+            tunnelStates = NULL,
+            timeVaryingTransitions = FALSE,
+            ageSpecificTransitions = NULL,
             chanceNodeMethod = "simple",
-            riskAdjustment = FALSE, ...) {
+            riskAdjustment = FALSE,
+            cycleCorrection = TRUE,
+            cohortTrace = FALSE,
+            cohortSize = 1000,
+            valueOfInformation = FALSE,
+            evpi_parameters = NULL,
+            budgetImpactAnalysis = FALSE,
+            targetPopulationSize = 10000,
+            marketPenetration = 0.5,
+            ceacThresholds = "0,100000,5000",
+            psa_distributions = "normal",
+            correlatedParameters = FALSE,
+            correlationMatrix = NULL, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -194,9 +213,21 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "incrementalAnalysis",
                 incrementalAnalysis,
                 default=TRUE)
+            private$..dominanceAnalysis <- jmvcore::OptionBool$new(
+                "dominanceAnalysis",
+                dominanceAnalysis,
+                default=TRUE)
+            private$..icer_confidence_intervals <- jmvcore::OptionBool$new(
+                "icer_confidence_intervals",
+                icer_confidence_intervals,
+                default=FALSE)
             private$..probabilisticAnalysis <- jmvcore::OptionBool$new(
                 "probabilisticAnalysis",
                 probabilisticAnalysis,
+                default=FALSE)
+            private$..psa_advanced_outputs <- jmvcore::OptionBool$new(
+                "psa_advanced_outputs",
+                psa_advanced_outputs,
                 default=FALSE)
             private$..numSimulations <- jmvcore::OptionInteger$new(
                 "numSimulations",
@@ -204,6 +235,28 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default=1000,
                 min=100,
                 max=10000)
+            private$..markovAdvanced <- jmvcore::OptionBool$new(
+                "markovAdvanced",
+                markovAdvanced,
+                default=FALSE)
+            private$..tunnelStates <- jmvcore::OptionVariables$new(
+                "tunnelStates",
+                tunnelStates,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
+            private$..timeVaryingTransitions <- jmvcore::OptionBool$new(
+                "timeVaryingTransitions",
+                timeVaryingTransitions,
+                default=FALSE)
+            private$..ageSpecificTransitions <- jmvcore::OptionVariables$new(
+                "ageSpecificTransitions",
+                ageSpecificTransitions,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..chanceNodeMethod <- jmvcore::OptionList$new(
                 "chanceNodeMethod",
                 chanceNodeMethod,
@@ -216,6 +269,72 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "riskAdjustment",
                 riskAdjustment,
                 default=FALSE)
+            private$..cycleCorrection <- jmvcore::OptionBool$new(
+                "cycleCorrection",
+                cycleCorrection,
+                default=TRUE)
+            private$..cohortTrace <- jmvcore::OptionBool$new(
+                "cohortTrace",
+                cohortTrace,
+                default=FALSE)
+            private$..cohortSize <- jmvcore::OptionInteger$new(
+                "cohortSize",
+                cohortSize,
+                default=1000,
+                min=100,
+                max=1000000)
+            private$..valueOfInformation <- jmvcore::OptionBool$new(
+                "valueOfInformation",
+                valueOfInformation,
+                default=FALSE)
+            private$..evpi_parameters <- jmvcore::OptionVariables$new(
+                "evpi_parameters",
+                evpi_parameters,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..budgetImpactAnalysis <- jmvcore::OptionBool$new(
+                "budgetImpactAnalysis",
+                budgetImpactAnalysis,
+                default=FALSE)
+            private$..targetPopulationSize <- jmvcore::OptionInteger$new(
+                "targetPopulationSize",
+                targetPopulationSize,
+                default=10000,
+                min=1000,
+                max=10000000)
+            private$..marketPenetration <- jmvcore::OptionNumber$new(
+                "marketPenetration",
+                marketPenetration,
+                default=0.5,
+                min=0,
+                max=1)
+            private$..ceacThresholds <- jmvcore::OptionString$new(
+                "ceacThresholds",
+                ceacThresholds,
+                default="0,100000,5000")
+            private$..psa_distributions <- jmvcore::OptionList$new(
+                "psa_distributions",
+                psa_distributions,
+                options=list(
+                    "normal",
+                    "lognormal",
+                    "beta",
+                    "gamma",
+                    "dirichlet"),
+                default="normal")
+            private$..correlatedParameters <- jmvcore::OptionBool$new(
+                "correlatedParameters",
+                correlatedParameters,
+                default=FALSE)
+            private$..correlationMatrix <- jmvcore::OptionVariables$new(
+                "correlationMatrix",
+                correlationMatrix,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
 
             self$.addOption(private$..treeType)
             self$.addOption(private$..decisions)
@@ -244,10 +363,29 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..tornado)
             self$.addOption(private$..decisionComparison)
             self$.addOption(private$..incrementalAnalysis)
+            self$.addOption(private$..dominanceAnalysis)
+            self$.addOption(private$..icer_confidence_intervals)
             self$.addOption(private$..probabilisticAnalysis)
+            self$.addOption(private$..psa_advanced_outputs)
             self$.addOption(private$..numSimulations)
+            self$.addOption(private$..markovAdvanced)
+            self$.addOption(private$..tunnelStates)
+            self$.addOption(private$..timeVaryingTransitions)
+            self$.addOption(private$..ageSpecificTransitions)
             self$.addOption(private$..chanceNodeMethod)
             self$.addOption(private$..riskAdjustment)
+            self$.addOption(private$..cycleCorrection)
+            self$.addOption(private$..cohortTrace)
+            self$.addOption(private$..cohortSize)
+            self$.addOption(private$..valueOfInformation)
+            self$.addOption(private$..evpi_parameters)
+            self$.addOption(private$..budgetImpactAnalysis)
+            self$.addOption(private$..targetPopulationSize)
+            self$.addOption(private$..marketPenetration)
+            self$.addOption(private$..ceacThresholds)
+            self$.addOption(private$..psa_distributions)
+            self$.addOption(private$..correlatedParameters)
+            self$.addOption(private$..correlationMatrix)
         }),
     active = list(
         treeType = function() private$..treeType$value,
@@ -277,10 +415,29 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         tornado = function() private$..tornado$value,
         decisionComparison = function() private$..decisionComparison$value,
         incrementalAnalysis = function() private$..incrementalAnalysis$value,
+        dominanceAnalysis = function() private$..dominanceAnalysis$value,
+        icer_confidence_intervals = function() private$..icer_confidence_intervals$value,
         probabilisticAnalysis = function() private$..probabilisticAnalysis$value,
+        psa_advanced_outputs = function() private$..psa_advanced_outputs$value,
         numSimulations = function() private$..numSimulations$value,
+        markovAdvanced = function() private$..markovAdvanced$value,
+        tunnelStates = function() private$..tunnelStates$value,
+        timeVaryingTransitions = function() private$..timeVaryingTransitions$value,
+        ageSpecificTransitions = function() private$..ageSpecificTransitions$value,
         chanceNodeMethod = function() private$..chanceNodeMethod$value,
-        riskAdjustment = function() private$..riskAdjustment$value),
+        riskAdjustment = function() private$..riskAdjustment$value,
+        cycleCorrection = function() private$..cycleCorrection$value,
+        cohortTrace = function() private$..cohortTrace$value,
+        cohortSize = function() private$..cohortSize$value,
+        valueOfInformation = function() private$..valueOfInformation$value,
+        evpi_parameters = function() private$..evpi_parameters$value,
+        budgetImpactAnalysis = function() private$..budgetImpactAnalysis$value,
+        targetPopulationSize = function() private$..targetPopulationSize$value,
+        marketPenetration = function() private$..marketPenetration$value,
+        ceacThresholds = function() private$..ceacThresholds$value,
+        psa_distributions = function() private$..psa_distributions$value,
+        correlatedParameters = function() private$..correlatedParameters$value,
+        correlationMatrix = function() private$..correlationMatrix$value),
     private = list(
         ..treeType = NA,
         ..decisions = NA,
@@ -309,10 +466,29 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..tornado = NA,
         ..decisionComparison = NA,
         ..incrementalAnalysis = NA,
+        ..dominanceAnalysis = NA,
+        ..icer_confidence_intervals = NA,
         ..probabilisticAnalysis = NA,
+        ..psa_advanced_outputs = NA,
         ..numSimulations = NA,
+        ..markovAdvanced = NA,
+        ..tunnelStates = NA,
+        ..timeVaryingTransitions = NA,
+        ..ageSpecificTransitions = NA,
         ..chanceNodeMethod = NA,
-        ..riskAdjustment = NA)
+        ..riskAdjustment = NA,
+        ..cycleCorrection = NA,
+        ..cohortTrace = NA,
+        ..cohortSize = NA,
+        ..valueOfInformation = NA,
+        ..evpi_parameters = NA,
+        ..budgetImpactAnalysis = NA,
+        ..targetPopulationSize = NA,
+        ..marketPenetration = NA,
+        ..ceacThresholds = NA,
+        ..psa_distributions = NA,
+        ..correlatedParameters = NA,
+        ..correlationMatrix = NA)
 )
 
 decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -725,14 +901,49 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   decision paths.
 #' @param incrementalAnalysis Perform incremental cost-effectiveness ratio
 #'   (ICER) calculations.
+#' @param dominanceAnalysis Identify dominated and extendedly dominated
+#'   strategies in ICER analysis.
+#' @param icer_confidence_intervals Calculate confidence intervals for ICERs
+#'   using bootstrap or PSA results.
 #' @param probabilisticAnalysis Perform probabilistic sensitivity analysis
 #'   using Monte Carlo simulation.
+#' @param psa_advanced_outputs Generate advanced PSA outputs (CEAC, EVPI, net
+#'   benefit distributions).
 #' @param numSimulations Number of Monte Carlo simulations for probabilistic
 #'   analysis.
+#' @param markovAdvanced Enable advanced Markov modeling features.
+#' @param tunnelStates Define tunnel states for temporary health states.
+#' @param timeVaryingTransitions Allow transition probabilities to change over
+#'   time.
+#' @param ageSpecificTransitions Variables defining age-specific transition
+#'   rates.
 #' @param chanceNodeMethod Method for calculating probabilities at chance
 #'   nodes.
 #' @param riskAdjustment Apply risk adjustment to probabilities based on
 #'   patient characteristics.
+#' @param cycleCorrection Apply half-cycle correction for more accurate
+#'   discounting in Markov models.
+#' @param cohortTrace Generate cohort trace showing population distribution
+#'   across health states over time.
+#' @param cohortSize Size of hypothetical cohort for trace analysis and budget
+#'   impact modeling.
+#' @param valueOfInformation Perform Expected Value of Perfect Information
+#'   (EVPI) and partial EVPI analysis.
+#' @param evpi_parameters Parameters for partial EVPI analysis.
+#' @param budgetImpactAnalysis Perform budget impact analysis comparing total
+#'   costs of alternative strategies.
+#' @param targetPopulationSize Size of target population for budget impact
+#'   calculations.
+#' @param marketPenetration Expected market penetration rate for new
+#'   intervention.
+#' @param ceacThresholds Cost-effectiveness acceptability curve thresholds
+#'   (min,max,step).
+#' @param psa_distributions Default probability distribution for uncertain
+#'   parameters in PSA.
+#' @param correlatedParameters Account for correlations between uncertain
+#'   parameters in PSA.
+#' @param correlationMatrix Variables defining correlation structure between
+#'   uncertain parameters.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$treeplot} \tab \tab \tab \tab \tab Decision tree visualization with nodes and branches \cr
@@ -789,10 +1000,29 @@ decisiongraph <- function(
     tornado = FALSE,
     decisionComparison = TRUE,
     incrementalAnalysis = TRUE,
+    dominanceAnalysis = TRUE,
+    icer_confidence_intervals = FALSE,
     probabilisticAnalysis = FALSE,
+    psa_advanced_outputs = FALSE,
     numSimulations = 1000,
+    markovAdvanced = FALSE,
+    tunnelStates,
+    timeVaryingTransitions = FALSE,
+    ageSpecificTransitions,
     chanceNodeMethod = "simple",
-    riskAdjustment = FALSE) {
+    riskAdjustment = FALSE,
+    cycleCorrection = TRUE,
+    cohortTrace = FALSE,
+    cohortSize = 1000,
+    valueOfInformation = FALSE,
+    evpi_parameters,
+    budgetImpactAnalysis = FALSE,
+    targetPopulationSize = 10000,
+    marketPenetration = 0.5,
+    ceacThresholds = "0,100000,5000",
+    psa_distributions = "normal",
+    correlatedParameters = FALSE,
+    correlationMatrix) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisiongraph requires jmvcore to be installed (restart may be required)")
@@ -804,6 +1034,10 @@ decisiongraph <- function(
     if ( ! missing(costs)) costs <- jmvcore::resolveQuo(jmvcore::enquo(costs))
     if ( ! missing(utilities)) utilities <- jmvcore::resolveQuo(jmvcore::enquo(utilities))
     if ( ! missing(outcomes)) outcomes <- jmvcore::resolveQuo(jmvcore::enquo(outcomes))
+    if ( ! missing(tunnelStates)) tunnelStates <- jmvcore::resolveQuo(jmvcore::enquo(tunnelStates))
+    if ( ! missing(ageSpecificTransitions)) ageSpecificTransitions <- jmvcore::resolveQuo(jmvcore::enquo(ageSpecificTransitions))
+    if ( ! missing(evpi_parameters)) evpi_parameters <- jmvcore::resolveQuo(jmvcore::enquo(evpi_parameters))
+    if ( ! missing(correlationMatrix)) correlationMatrix <- jmvcore::resolveQuo(jmvcore::enquo(correlationMatrix))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -813,11 +1047,16 @@ decisiongraph <- function(
             `if`( ! missing(probabilities), probabilities, NULL),
             `if`( ! missing(costs), costs, NULL),
             `if`( ! missing(utilities), utilities, NULL),
-            `if`( ! missing(outcomes), outcomes, NULL))
+            `if`( ! missing(outcomes), outcomes, NULL),
+            `if`( ! missing(tunnelStates), tunnelStates, NULL),
+            `if`( ! missing(ageSpecificTransitions), ageSpecificTransitions, NULL),
+            `if`( ! missing(evpi_parameters), evpi_parameters, NULL),
+            `if`( ! missing(correlationMatrix), correlationMatrix, NULL))
 
     for (v in decisions) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in healthStates) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in outcomes) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in tunnelStates) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- decisiongraphOptions$new(
         treeType = treeType,
@@ -847,10 +1086,29 @@ decisiongraph <- function(
         tornado = tornado,
         decisionComparison = decisionComparison,
         incrementalAnalysis = incrementalAnalysis,
+        dominanceAnalysis = dominanceAnalysis,
+        icer_confidence_intervals = icer_confidence_intervals,
         probabilisticAnalysis = probabilisticAnalysis,
+        psa_advanced_outputs = psa_advanced_outputs,
         numSimulations = numSimulations,
+        markovAdvanced = markovAdvanced,
+        tunnelStates = tunnelStates,
+        timeVaryingTransitions = timeVaryingTransitions,
+        ageSpecificTransitions = ageSpecificTransitions,
         chanceNodeMethod = chanceNodeMethod,
-        riskAdjustment = riskAdjustment)
+        riskAdjustment = riskAdjustment,
+        cycleCorrection = cycleCorrection,
+        cohortTrace = cohortTrace,
+        cohortSize = cohortSize,
+        valueOfInformation = valueOfInformation,
+        evpi_parameters = evpi_parameters,
+        budgetImpactAnalysis = budgetImpactAnalysis,
+        targetPopulationSize = targetPopulationSize,
+        marketPenetration = marketPenetration,
+        ceacThresholds = ceacThresholds,
+        psa_distributions = psa_distributions,
+        correlatedParameters = correlatedParameters,
+        correlationMatrix = correlationMatrix)
 
     analysis <- decisiongraphClass$new(
         options = options,
