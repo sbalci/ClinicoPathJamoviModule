@@ -1,7 +1,7 @@
 ---
 name: lassocox
 title: Lasso-Cox Regression
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Variable Selection with Lasso Regularization'
 version: '0.0.3'
@@ -115,5 +115,51 @@ options:
       description:
         R: >
           If true, adds calculated risk scores to the dataset.
+
+    # Explanatory Output Options
+    - name: showExplanations
+      title: Show Method Explanations
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display detailed explanations of LASSO Cox regression methodology,
+          including regularization concepts and interpretation guidance.
+
+    - name: showMethodologyNotes
+      title: Detailed Methodology Notes
+      type: Bool
+      default: false
+      description:
+        R: >
+          Show comprehensive technical notes about LASSO regularization,
+          cross-validation, and variable selection process.
+
+    - name: includeClinicalGuidance
+      title: Clinical Interpretation Guidance
+      type: Bool
+      default: false
+      description:
+        R: >
+          Include guidance for clinical interpretation of LASSO Cox regression
+          results, risk scores, and variable selection outcomes.
+
+    - name: showVariableImportance
+      title: Variable Importance Analysis
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display analysis of variable importance rankings and selection
+          patterns across different lambda values.
+
+    - name: showModelComparison
+      title: Model Comparison Analysis
+      type: Bool
+      default: false
+      description:
+        R: >
+          Compare LASSO Cox results with standard Cox regression to demonstrate
+          the benefits of regularization and variable selection.
 
 ...

@@ -2,9 +2,14 @@
 % Please edit documentation in R/tree.b.R
 \name{treeClass}
 \alias{treeClass}
-\title{Medical Decision Tree}
+\title{Comprehensive Medical Decision Tree Analysis}
+\value{
+Combined decision tree analysis using FFTrees and enhanced CART for clinical research
+}
 \description{
-Enhanced decision tree analysis for medical research, pathology and oncology
+Comprehensive Medical Decision Tree Analysis
+
+Comprehensive Medical Decision Tree Analysis
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::treeBase} -> \code{treeClass}

@@ -21,6 +21,8 @@ decisiongraph(
   showCosts = TRUE,
   showUtilities = TRUE,
   calculateExpectedValues = TRUE,
+  calculateNMB = TRUE,
+  willingnessToPay = 50000,
   sensitivityAnalysis = FALSE,
   discountRate = 0.03,
   timeHorizon = 10,
@@ -28,7 +30,13 @@ decisiongraph(
   branchLabels = TRUE,
   colorScheme = "medical",
   summaryTable = TRUE,
-  tornado = FALSE
+  tornado = FALSE,
+  decisionComparison = TRUE,
+  incrementalAnalysis = TRUE,
+  probabilisticAnalysis = FALSE,
+  numSimulations = 1000,
+  chanceNodeMethod = "simple",
+  riskAdjustment = FALSE
 )
 }
 \arguments{
@@ -67,6 +75,12 @@ nodes.}
 \item{calculateExpectedValues}{Calculate and display expected costs and
 utilities.}
 
+\item{calculateNMB}{Calculate net monetary benefit (NMB) for decision paths
+using threshold analysis.}
+
+\item{willingnessToPay}{Willingness to pay threshold (cost per QALY) for
+NMB calculations.}
+
 \item{sensitivityAnalysis}{Perform one-way sensitivity analysis on key
 parameters.}
 
@@ -84,6 +98,24 @@ parameters.}
 cost-effectiveness ratios.}
 
 \item{tornado}{Create tornado diagram for sensitivity analysis.}
+
+\item{decisionComparison}{Show comparison table with NMB scores for all
+decision paths.}
+
+\item{incrementalAnalysis}{Perform incremental cost-effectiveness ratio
+(ICER) calculations.}
+
+\item{probabilisticAnalysis}{Perform probabilistic sensitivity analysis
+using Monte Carlo simulation.}
+
+\item{numSimulations}{Number of Monte Carlo simulations for probabilistic
+analysis.}
+
+\item{chanceNodeMethod}{Method for calculating probabilities at chance
+nodes.}
+
+\item{riskAdjustment}{Apply risk adjustment to probabilities based on
+patient characteristics.}
 }
 \value{
 A results object containing:
@@ -98,6 +130,12 @@ A results object containing:
 \code{results$markovTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$markovCohortTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$markovPlot} \tab \tab \tab \tab \tab Markov state transition diagram \cr
+\code{results$decisionComparisonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$nmbAnalysis} \tab \tab \tab \tab \tab Net monetary benefit calculation details \cr
+\code{results$icerTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$psaResults} \tab \tab \tab \tab \tab Monte Carlo simulation results \cr
+\code{results$ceacPlot} \tab \tab \tab \tab \tab CEAC showing probability of cost-effectiveness \cr
+\code{results$scatterPlot} \tab \tab \tab \tab \tab Cost-effectiveness plane scatter plot \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

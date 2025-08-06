@@ -10,44 +10,79 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             facs = NULL,
             target = NULL,
             targetLevel = NULL,
+            algorithm = "rpart",
+            tree_mode = "classification",
             train = NULL,
             trainLevel = NULL,
-            imputeMissing = FALSE,
+            validation = "cohort",
+            cv_folds = 5,
+            cv_repeats = 3,
+            stratified_sampling = TRUE,
+            data_split_method = "stratified",
+            test_split = 0.25,
+            max_depth = 6,
+            min_samples_split = 20,
+            min_samples_leaf = 10,
+            cost_complexity = 0.01,
+            min_n = 20,
+            tree_depth = 6,
+            hyperparameter_tuning = FALSE,
+            tuning_metric = "bacc",
+            use_1se_rule = TRUE,
+            xerror_pruning = FALSE,
+            auto_prune = FALSE,
+            prune_method = "one_se",
+            c50_trials = 1,
+            c50_winnow = FALSE,
+            ctree_mincriterion = 0.95,
+            rf_ntree = 500,
+            rf_mtry = 0,
+            xgb_nrounds = 100,
+            xgb_eta = 0.3,
+            set_seed = TRUE,
+            seed_value = 42,
+            show_cp_table = FALSE,
+            show_variable_importance_detailed = FALSE,
+            missing_data_method = "native",
             balanceClasses = FALSE,
-            scaleFeatures = FALSE,
-            clinicalMetrics = FALSE,
-            featureImportance = FALSE,
-            showInterpretation = FALSE,
-            showPlot = FALSE,
+            ensemble_method = "none",
+            n_trees = 100,
+            feature_selection = FALSE,
+            feature_selection_method = "tree_importance",
+            importance_method = "gini",
+            show_tree_plot = TRUE,
+            show_importance_plot = TRUE,
+            show_performance_metrics = TRUE,
+            show_confusion_matrix = TRUE,
+            show_roc_curve = TRUE,
+            show_validation_curves = FALSE,
+            show_calibration_plot = FALSE,
             showPartitionPlot = FALSE,
-            minCases = 10,
-            maxDepth = 4,
-            confidenceInterval = FALSE,
-            riskStratification = FALSE,
-            exportPredictions = FALSE,
-            clinicalContext = "diagnosis",
-            costRatio = 1,
+            show_cp_plot = FALSE,
+            tree_plot_style = "standard",
+            show_node_statistics = FALSE,
+            interpretability = FALSE,
+            shap_analysis = FALSE,
+            partial_dependence = FALSE,
+            interaction_analysis = FALSE,
+            clinical_context = "diagnosis",
+            cost_sensitive_thresholds = FALSE,
+            fn_fp_ratio = 1,
             prevalenceAdjustment = FALSE,
             expectedPrevalence = 10,
-            crossValidation = FALSE,
-            cvFolds = 5,
-            bootstrapValidation = FALSE,
-            bootstrapSamples = 1000,
-            showROCCurve = FALSE,
-            showCalibrationPlot = FALSE,
-            showClinicalUtility = FALSE,
-            variableImportanceMethod = "frequency",
-            customThresholds = FALSE,
-            sensitivityThreshold = 0.8,
-            specificityThreshold = 0.8,
-            treeVisualization = "standard",
-            showNodeStatistics = FALSE,
-            compareModels = FALSE,
-            spatialCoords = NULL,
-            useAutocart = FALSE,
-            spatialAlpha = 0.5,
-            spatialBeta = 0.5,
-            modelComparisonMetric = "bacc", ...) {
+            bootstrap_confidence = FALSE,
+            n_bootstrap = 1000,
+            model_comparison = FALSE,
+            modelComparisonMetric = "bacc",
+            export_model = FALSE,
+            exportPredictions = FALSE,
+            show_clinical_interpretation = TRUE,
+            model_stability_analysis = FALSE,
+            learning_curves = FALSE,
+            outlier_analysis = FALSE,
+            prediction_intervals = FALSE,
+            advanced_pruning = "cp",
+            pruning_validation_split = 0.2, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -61,7 +96,8 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..facs <- jmvcore::OptionVariables$new(
                 "facs",
                 facs,
@@ -69,7 +105,8 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..target <- jmvcore::OptionVariable$new(
                 "target",
                 target,
@@ -82,6 +119,26 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "targetLevel",
                 targetLevel,
                 variable="(target)")
+            private$..algorithm <- jmvcore::OptionList$new(
+                "algorithm",
+                algorithm,
+                options=list(
+                    "rpart",
+                    "fftrees",
+                    "c50",
+                    "ctree",
+                    "mob",
+                    "randomforest",
+                    "xgboost"),
+                default="rpart")
+            private$..tree_mode <- jmvcore::OptionList$new(
+                "tree_mode",
+                tree_mode,
+                options=list(
+                    "classification",
+                    "regression",
+                    "survival"),
+                default="classification")
             private$..train <- jmvcore::OptionVariable$new(
                 "train",
                 train,
@@ -89,81 +146,314 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..trainLevel <- jmvcore::OptionLevel$new(
                 "trainLevel",
                 trainLevel,
                 variable="(train)")
-            private$..imputeMissing <- jmvcore::OptionBool$new(
-                "imputeMissing",
-                imputeMissing,
+            private$..validation <- jmvcore::OptionList$new(
+                "validation",
+                validation,
+                options=list(
+                    "cohort",
+                    "cv",
+                    "bootstrap",
+                    "holdout",
+                    "temporal",
+                    "stratified_cv",
+                    "repeated_cv"),
+                default="cohort")
+            private$..cv_folds <- jmvcore::OptionInteger$new(
+                "cv_folds",
+                cv_folds,
+                default=5,
+                min=3,
+                max=10)
+            private$..cv_repeats <- jmvcore::OptionInteger$new(
+                "cv_repeats",
+                cv_repeats,
+                default=3,
+                min=1,
+                max=10)
+            private$..stratified_sampling <- jmvcore::OptionBool$new(
+                "stratified_sampling",
+                stratified_sampling,
+                default=TRUE)
+            private$..data_split_method <- jmvcore::OptionList$new(
+                "data_split_method",
+                data_split_method,
+                options=list(
+                    "random",
+                    "stratified",
+                    "temporal",
+                    "balanced"),
+                default="stratified")
+            private$..test_split <- jmvcore::OptionNumber$new(
+                "test_split",
+                test_split,
+                default=0.25,
+                min=0.1,
+                max=0.5)
+            private$..max_depth <- jmvcore::OptionInteger$new(
+                "max_depth",
+                max_depth,
+                default=6,
+                min=2,
+                max=15)
+            private$..min_samples_split <- jmvcore::OptionInteger$new(
+                "min_samples_split",
+                min_samples_split,
+                default=20,
+                min=2,
+                max=100)
+            private$..min_samples_leaf <- jmvcore::OptionInteger$new(
+                "min_samples_leaf",
+                min_samples_leaf,
+                default=10,
+                min=1,
+                max=50)
+            private$..cost_complexity <- jmvcore::OptionNumber$new(
+                "cost_complexity",
+                cost_complexity,
+                default=0.01,
+                min=0.0001,
+                max=0.5)
+            private$..min_n <- jmvcore::OptionInteger$new(
+                "min_n",
+                min_n,
+                default=20,
+                min=1,
+                max=100)
+            private$..tree_depth <- jmvcore::OptionInteger$new(
+                "tree_depth",
+                tree_depth,
+                default=6,
+                min=1,
+                max=20)
+            private$..hyperparameter_tuning <- jmvcore::OptionBool$new(
+                "hyperparameter_tuning",
+                hyperparameter_tuning,
                 default=FALSE)
+            private$..tuning_metric <- jmvcore::OptionList$new(
+                "tuning_metric",
+                tuning_metric,
+                options=list(
+                    "bacc",
+                    "auc",
+                    "sens",
+                    "spec",
+                    "f1",
+                    "prec"),
+                default="bacc")
+            private$..use_1se_rule <- jmvcore::OptionBool$new(
+                "use_1se_rule",
+                use_1se_rule,
+                default=TRUE)
+            private$..xerror_pruning <- jmvcore::OptionBool$new(
+                "xerror_pruning",
+                xerror_pruning,
+                default=FALSE)
+            private$..auto_prune <- jmvcore::OptionBool$new(
+                "auto_prune",
+                auto_prune,
+                default=FALSE)
+            private$..prune_method <- jmvcore::OptionList$new(
+                "prune_method",
+                prune_method,
+                options=list(
+                    "min_xerror",
+                    "one_se",
+                    "custom_cp"),
+                default="one_se")
+            private$..c50_trials <- jmvcore::OptionInteger$new(
+                "c50_trials",
+                c50_trials,
+                default=1,
+                min=1,
+                max=100)
+            private$..c50_winnow <- jmvcore::OptionBool$new(
+                "c50_winnow",
+                c50_winnow,
+                default=FALSE)
+            private$..ctree_mincriterion <- jmvcore::OptionNumber$new(
+                "ctree_mincriterion",
+                ctree_mincriterion,
+                default=0.95,
+                min=0.5,
+                max=0.999)
+            private$..rf_ntree <- jmvcore::OptionInteger$new(
+                "rf_ntree",
+                rf_ntree,
+                default=500,
+                min=50,
+                max=2000)
+            private$..rf_mtry <- jmvcore::OptionInteger$new(
+                "rf_mtry",
+                rf_mtry,
+                default=0,
+                min=0,
+                max=50)
+            private$..xgb_nrounds <- jmvcore::OptionInteger$new(
+                "xgb_nrounds",
+                xgb_nrounds,
+                default=100,
+                min=10,
+                max=1000)
+            private$..xgb_eta <- jmvcore::OptionNumber$new(
+                "xgb_eta",
+                xgb_eta,
+                default=0.3,
+                min=0.01,
+                max=1)
+            private$..set_seed <- jmvcore::OptionBool$new(
+                "set_seed",
+                set_seed,
+                default=TRUE)
+            private$..seed_value <- jmvcore::OptionInteger$new(
+                "seed_value",
+                seed_value,
+                default=42,
+                min=1,
+                max=999999)
+            private$..show_cp_table <- jmvcore::OptionBool$new(
+                "show_cp_table",
+                show_cp_table,
+                default=FALSE)
+            private$..show_variable_importance_detailed <- jmvcore::OptionBool$new(
+                "show_variable_importance_detailed",
+                show_variable_importance_detailed,
+                default=FALSE)
+            private$..missing_data_method <- jmvcore::OptionList$new(
+                "missing_data_method",
+                missing_data_method,
+                options=list(
+                    "native",
+                    "clinical_impute",
+                    "multiple_impute",
+                    "exclude"),
+                default="native")
             private$..balanceClasses <- jmvcore::OptionBool$new(
                 "balanceClasses",
                 balanceClasses,
                 default=FALSE)
-            private$..scaleFeatures <- jmvcore::OptionBool$new(
-                "scaleFeatures",
-                scaleFeatures,
+            private$..ensemble_method <- jmvcore::OptionList$new(
+                "ensemble_method",
+                ensemble_method,
+                options=list(
+                    "none",
+                    "bagging",
+                    "random_forest"),
+                default="none")
+            private$..n_trees <- jmvcore::OptionInteger$new(
+                "n_trees",
+                n_trees,
+                default=100,
+                min=10,
+                max=1000)
+            private$..feature_selection <- jmvcore::OptionBool$new(
+                "feature_selection",
+                feature_selection,
                 default=FALSE)
-            private$..clinicalMetrics <- jmvcore::OptionBool$new(
-                "clinicalMetrics",
-                clinicalMetrics,
+            private$..feature_selection_method <- jmvcore::OptionList$new(
+                "feature_selection_method",
+                feature_selection_method,
+                options=list(
+                    "tree_importance",
+                    "boruta",
+                    "var_imp"),
+                default="tree_importance")
+            private$..importance_method <- jmvcore::OptionList$new(
+                "importance_method",
+                importance_method,
+                options=list(
+                    "gini",
+                    "permutation",
+                    "shap"),
+                default="gini")
+            private$..show_tree_plot <- jmvcore::OptionBool$new(
+                "show_tree_plot",
+                show_tree_plot,
+                default=TRUE)
+            private$..show_importance_plot <- jmvcore::OptionBool$new(
+                "show_importance_plot",
+                show_importance_plot,
+                default=TRUE)
+            private$..show_performance_metrics <- jmvcore::OptionBool$new(
+                "show_performance_metrics",
+                show_performance_metrics,
+                default=TRUE)
+            private$..show_confusion_matrix <- jmvcore::OptionBool$new(
+                "show_confusion_matrix",
+                show_confusion_matrix,
+                default=TRUE)
+            private$..show_roc_curve <- jmvcore::OptionBool$new(
+                "show_roc_curve",
+                show_roc_curve,
+                default=TRUE)
+            private$..show_validation_curves <- jmvcore::OptionBool$new(
+                "show_validation_curves",
+                show_validation_curves,
                 default=FALSE)
-            private$..featureImportance <- jmvcore::OptionBool$new(
-                "featureImportance",
-                featureImportance,
-                default=FALSE)
-            private$..showInterpretation <- jmvcore::OptionBool$new(
-                "showInterpretation",
-                showInterpretation,
-                default=FALSE)
-            private$..showPlot <- jmvcore::OptionBool$new(
-                "showPlot",
-                showPlot,
+            private$..show_calibration_plot <- jmvcore::OptionBool$new(
+                "show_calibration_plot",
+                show_calibration_plot,
                 default=FALSE)
             private$..showPartitionPlot <- jmvcore::OptionBool$new(
                 "showPartitionPlot",
                 showPartitionPlot,
                 default=FALSE)
-            private$..minCases <- jmvcore::OptionInteger$new(
-                "minCases",
-                minCases,
-                default=10,
-                min=5,
-                max=50)
-            private$..maxDepth <- jmvcore::OptionInteger$new(
-                "maxDepth",
-                maxDepth,
-                default=4,
-                min=2,
-                max=8)
-            private$..confidenceInterval <- jmvcore::OptionBool$new(
-                "confidenceInterval",
-                confidenceInterval,
+            private$..show_cp_plot <- jmvcore::OptionBool$new(
+                "show_cp_plot",
+                show_cp_plot,
                 default=FALSE)
-            private$..riskStratification <- jmvcore::OptionBool$new(
-                "riskStratification",
-                riskStratification,
+            private$..tree_plot_style <- jmvcore::OptionList$new(
+                "tree_plot_style",
+                tree_plot_style,
+                options=list(
+                    "standard",
+                    "medical",
+                    "clinical"),
+                default="standard")
+            private$..show_node_statistics <- jmvcore::OptionBool$new(
+                "show_node_statistics",
+                show_node_statistics,
                 default=FALSE)
-            private$..exportPredictions <- jmvcore::OptionBool$new(
-                "exportPredictions",
-                exportPredictions,
+            private$..interpretability <- jmvcore::OptionBool$new(
+                "interpretability",
+                interpretability,
                 default=FALSE)
-            private$..clinicalContext <- jmvcore::OptionList$new(
-                "clinicalContext",
-                clinicalContext,
+            private$..shap_analysis <- jmvcore::OptionBool$new(
+                "shap_analysis",
+                shap_analysis,
+                default=FALSE)
+            private$..partial_dependence <- jmvcore::OptionBool$new(
+                "partial_dependence",
+                partial_dependence,
+                default=FALSE)
+            private$..interaction_analysis <- jmvcore::OptionBool$new(
+                "interaction_analysis",
+                interaction_analysis,
+                default=FALSE)
+            private$..clinical_context <- jmvcore::OptionList$new(
+                "clinical_context",
+                clinical_context,
                 options=list(
                     "diagnosis",
                     "screening",
                     "staging",
                     "prognosis",
                     "treatment",
-                    "biomarker"),
+                    "biomarker",
+                    "risk"),
                 default="diagnosis")
-            private$..costRatio <- jmvcore::OptionNumber$new(
-                "costRatio",
-                costRatio,
+            private$..cost_sensitive_thresholds <- jmvcore::OptionBool$new(
+                "cost_sensitive_thresholds",
+                cost_sensitive_thresholds,
+                default=FALSE)
+            private$..fn_fp_ratio <- jmvcore::OptionNumber$new(
+                "fn_fp_ratio",
+                fn_fp_ratio,
                 default=1,
                 min=0.1,
                 max=10)
@@ -177,101 +467,20 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=10,
                 min=0.1,
                 max=50)
-            private$..crossValidation <- jmvcore::OptionBool$new(
-                "crossValidation",
-                crossValidation,
+            private$..bootstrap_confidence <- jmvcore::OptionBool$new(
+                "bootstrap_confidence",
+                bootstrap_confidence,
                 default=FALSE)
-            private$..cvFolds <- jmvcore::OptionInteger$new(
-                "cvFolds",
-                cvFolds,
-                default=5,
-                min=3,
-                max=10)
-            private$..bootstrapValidation <- jmvcore::OptionBool$new(
-                "bootstrapValidation",
-                bootstrapValidation,
-                default=FALSE)
-            private$..bootstrapSamples <- jmvcore::OptionInteger$new(
-                "bootstrapSamples",
-                bootstrapSamples,
+            private$..n_bootstrap <- jmvcore::OptionInteger$new(
+                "n_bootstrap",
+                n_bootstrap,
                 default=1000,
                 min=100,
                 max=5000)
-            private$..showROCCurve <- jmvcore::OptionBool$new(
-                "showROCCurve",
-                showROCCurve,
+            private$..model_comparison <- jmvcore::OptionBool$new(
+                "model_comparison",
+                model_comparison,
                 default=FALSE)
-            private$..showCalibrationPlot <- jmvcore::OptionBool$new(
-                "showCalibrationPlot",
-                showCalibrationPlot,
-                default=FALSE)
-            private$..showClinicalUtility <- jmvcore::OptionBool$new(
-                "showClinicalUtility",
-                showClinicalUtility,
-                default=FALSE)
-            private$..variableImportanceMethod <- jmvcore::OptionList$new(
-                "variableImportanceMethod",
-                variableImportanceMethod,
-                options=list(
-                    "frequency",
-                    "permutation",
-                    "gini"),
-                default="frequency")
-            private$..customThresholds <- jmvcore::OptionBool$new(
-                "customThresholds",
-                customThresholds,
-                default=FALSE)
-            private$..sensitivityThreshold <- jmvcore::OptionNumber$new(
-                "sensitivityThreshold",
-                sensitivityThreshold,
-                default=0.8,
-                min=0.5,
-                max=1)
-            private$..specificityThreshold <- jmvcore::OptionNumber$new(
-                "specificityThreshold",
-                specificityThreshold,
-                default=0.8,
-                min=0.5,
-                max=1)
-            private$..treeVisualization <- jmvcore::OptionList$new(
-                "treeVisualization",
-                treeVisualization,
-                options=list(
-                    "standard",
-                    "detailed",
-                    "compact"),
-                default="standard")
-            private$..showNodeStatistics <- jmvcore::OptionBool$new(
-                "showNodeStatistics",
-                showNodeStatistics,
-                default=FALSE)
-            private$..compareModels <- jmvcore::OptionBool$new(
-                "compareModels",
-                compareModels,
-                default=FALSE)
-            private$..spatialCoords <- jmvcore::OptionVariables$new(
-                "spatialCoords",
-                spatialCoords,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"))
-            private$..useAutocart <- jmvcore::OptionBool$new(
-                "useAutocart",
-                useAutocart,
-                default=FALSE)
-            private$..spatialAlpha <- jmvcore::OptionNumber$new(
-                "spatialAlpha",
-                spatialAlpha,
-                default=0.5,
-                min=0,
-                max=1)
-            private$..spatialBeta <- jmvcore::OptionNumber$new(
-                "spatialBeta",
-                spatialBeta,
-                default=0.5,
-                min=0,
-                max=1)
             private$..modelComparisonMetric <- jmvcore::OptionList$new(
                 "modelComparisonMetric",
                 modelComparisonMetric,
@@ -282,136 +491,283 @@ treeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "spec",
                     "f1"),
                 default="bacc")
+            private$..export_model <- jmvcore::OptionBool$new(
+                "export_model",
+                export_model,
+                default=FALSE)
+            private$..exportPredictions <- jmvcore::OptionBool$new(
+                "exportPredictions",
+                exportPredictions,
+                default=FALSE)
+            private$..show_clinical_interpretation <- jmvcore::OptionBool$new(
+                "show_clinical_interpretation",
+                show_clinical_interpretation,
+                default=TRUE)
+            private$..model_stability_analysis <- jmvcore::OptionBool$new(
+                "model_stability_analysis",
+                model_stability_analysis,
+                default=FALSE)
+            private$..learning_curves <- jmvcore::OptionBool$new(
+                "learning_curves",
+                learning_curves,
+                default=FALSE)
+            private$..outlier_analysis <- jmvcore::OptionBool$new(
+                "outlier_analysis",
+                outlier_analysis,
+                default=FALSE)
+            private$..prediction_intervals <- jmvcore::OptionBool$new(
+                "prediction_intervals",
+                prediction_intervals,
+                default=FALSE)
+            private$..advanced_pruning <- jmvcore::OptionList$new(
+                "advanced_pruning",
+                advanced_pruning,
+                options=list(
+                    "cp",
+                    "rep",
+                    "mep"),
+                default="cp")
+            private$..pruning_validation_split <- jmvcore::OptionNumber$new(
+                "pruning_validation_split",
+                pruning_validation_split,
+                default=0.2,
+                min=0.1,
+                max=0.4)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..facs)
             self$.addOption(private$..target)
             self$.addOption(private$..targetLevel)
+            self$.addOption(private$..algorithm)
+            self$.addOption(private$..tree_mode)
             self$.addOption(private$..train)
             self$.addOption(private$..trainLevel)
-            self$.addOption(private$..imputeMissing)
+            self$.addOption(private$..validation)
+            self$.addOption(private$..cv_folds)
+            self$.addOption(private$..cv_repeats)
+            self$.addOption(private$..stratified_sampling)
+            self$.addOption(private$..data_split_method)
+            self$.addOption(private$..test_split)
+            self$.addOption(private$..max_depth)
+            self$.addOption(private$..min_samples_split)
+            self$.addOption(private$..min_samples_leaf)
+            self$.addOption(private$..cost_complexity)
+            self$.addOption(private$..min_n)
+            self$.addOption(private$..tree_depth)
+            self$.addOption(private$..hyperparameter_tuning)
+            self$.addOption(private$..tuning_metric)
+            self$.addOption(private$..use_1se_rule)
+            self$.addOption(private$..xerror_pruning)
+            self$.addOption(private$..auto_prune)
+            self$.addOption(private$..prune_method)
+            self$.addOption(private$..c50_trials)
+            self$.addOption(private$..c50_winnow)
+            self$.addOption(private$..ctree_mincriterion)
+            self$.addOption(private$..rf_ntree)
+            self$.addOption(private$..rf_mtry)
+            self$.addOption(private$..xgb_nrounds)
+            self$.addOption(private$..xgb_eta)
+            self$.addOption(private$..set_seed)
+            self$.addOption(private$..seed_value)
+            self$.addOption(private$..show_cp_table)
+            self$.addOption(private$..show_variable_importance_detailed)
+            self$.addOption(private$..missing_data_method)
             self$.addOption(private$..balanceClasses)
-            self$.addOption(private$..scaleFeatures)
-            self$.addOption(private$..clinicalMetrics)
-            self$.addOption(private$..featureImportance)
-            self$.addOption(private$..showInterpretation)
-            self$.addOption(private$..showPlot)
+            self$.addOption(private$..ensemble_method)
+            self$.addOption(private$..n_trees)
+            self$.addOption(private$..feature_selection)
+            self$.addOption(private$..feature_selection_method)
+            self$.addOption(private$..importance_method)
+            self$.addOption(private$..show_tree_plot)
+            self$.addOption(private$..show_importance_plot)
+            self$.addOption(private$..show_performance_metrics)
+            self$.addOption(private$..show_confusion_matrix)
+            self$.addOption(private$..show_roc_curve)
+            self$.addOption(private$..show_validation_curves)
+            self$.addOption(private$..show_calibration_plot)
             self$.addOption(private$..showPartitionPlot)
-            self$.addOption(private$..minCases)
-            self$.addOption(private$..maxDepth)
-            self$.addOption(private$..confidenceInterval)
-            self$.addOption(private$..riskStratification)
-            self$.addOption(private$..exportPredictions)
-            self$.addOption(private$..clinicalContext)
-            self$.addOption(private$..costRatio)
+            self$.addOption(private$..show_cp_plot)
+            self$.addOption(private$..tree_plot_style)
+            self$.addOption(private$..show_node_statistics)
+            self$.addOption(private$..interpretability)
+            self$.addOption(private$..shap_analysis)
+            self$.addOption(private$..partial_dependence)
+            self$.addOption(private$..interaction_analysis)
+            self$.addOption(private$..clinical_context)
+            self$.addOption(private$..cost_sensitive_thresholds)
+            self$.addOption(private$..fn_fp_ratio)
             self$.addOption(private$..prevalenceAdjustment)
             self$.addOption(private$..expectedPrevalence)
-            self$.addOption(private$..crossValidation)
-            self$.addOption(private$..cvFolds)
-            self$.addOption(private$..bootstrapValidation)
-            self$.addOption(private$..bootstrapSamples)
-            self$.addOption(private$..showROCCurve)
-            self$.addOption(private$..showCalibrationPlot)
-            self$.addOption(private$..showClinicalUtility)
-            self$.addOption(private$..variableImportanceMethod)
-            self$.addOption(private$..customThresholds)
-            self$.addOption(private$..sensitivityThreshold)
-            self$.addOption(private$..specificityThreshold)
-            self$.addOption(private$..treeVisualization)
-            self$.addOption(private$..showNodeStatistics)
-            self$.addOption(private$..compareModels)
-            self$.addOption(private$..spatialCoords)
-            self$.addOption(private$..useAutocart)
-            self$.addOption(private$..spatialAlpha)
-            self$.addOption(private$..spatialBeta)
+            self$.addOption(private$..bootstrap_confidence)
+            self$.addOption(private$..n_bootstrap)
+            self$.addOption(private$..model_comparison)
             self$.addOption(private$..modelComparisonMetric)
+            self$.addOption(private$..export_model)
+            self$.addOption(private$..exportPredictions)
+            self$.addOption(private$..show_clinical_interpretation)
+            self$.addOption(private$..model_stability_analysis)
+            self$.addOption(private$..learning_curves)
+            self$.addOption(private$..outlier_analysis)
+            self$.addOption(private$..prediction_intervals)
+            self$.addOption(private$..advanced_pruning)
+            self$.addOption(private$..pruning_validation_split)
         }),
     active = list(
         vars = function() private$..vars$value,
         facs = function() private$..facs$value,
         target = function() private$..target$value,
         targetLevel = function() private$..targetLevel$value,
+        algorithm = function() private$..algorithm$value,
+        tree_mode = function() private$..tree_mode$value,
         train = function() private$..train$value,
         trainLevel = function() private$..trainLevel$value,
-        imputeMissing = function() private$..imputeMissing$value,
+        validation = function() private$..validation$value,
+        cv_folds = function() private$..cv_folds$value,
+        cv_repeats = function() private$..cv_repeats$value,
+        stratified_sampling = function() private$..stratified_sampling$value,
+        data_split_method = function() private$..data_split_method$value,
+        test_split = function() private$..test_split$value,
+        max_depth = function() private$..max_depth$value,
+        min_samples_split = function() private$..min_samples_split$value,
+        min_samples_leaf = function() private$..min_samples_leaf$value,
+        cost_complexity = function() private$..cost_complexity$value,
+        min_n = function() private$..min_n$value,
+        tree_depth = function() private$..tree_depth$value,
+        hyperparameter_tuning = function() private$..hyperparameter_tuning$value,
+        tuning_metric = function() private$..tuning_metric$value,
+        use_1se_rule = function() private$..use_1se_rule$value,
+        xerror_pruning = function() private$..xerror_pruning$value,
+        auto_prune = function() private$..auto_prune$value,
+        prune_method = function() private$..prune_method$value,
+        c50_trials = function() private$..c50_trials$value,
+        c50_winnow = function() private$..c50_winnow$value,
+        ctree_mincriterion = function() private$..ctree_mincriterion$value,
+        rf_ntree = function() private$..rf_ntree$value,
+        rf_mtry = function() private$..rf_mtry$value,
+        xgb_nrounds = function() private$..xgb_nrounds$value,
+        xgb_eta = function() private$..xgb_eta$value,
+        set_seed = function() private$..set_seed$value,
+        seed_value = function() private$..seed_value$value,
+        show_cp_table = function() private$..show_cp_table$value,
+        show_variable_importance_detailed = function() private$..show_variable_importance_detailed$value,
+        missing_data_method = function() private$..missing_data_method$value,
         balanceClasses = function() private$..balanceClasses$value,
-        scaleFeatures = function() private$..scaleFeatures$value,
-        clinicalMetrics = function() private$..clinicalMetrics$value,
-        featureImportance = function() private$..featureImportance$value,
-        showInterpretation = function() private$..showInterpretation$value,
-        showPlot = function() private$..showPlot$value,
+        ensemble_method = function() private$..ensemble_method$value,
+        n_trees = function() private$..n_trees$value,
+        feature_selection = function() private$..feature_selection$value,
+        feature_selection_method = function() private$..feature_selection_method$value,
+        importance_method = function() private$..importance_method$value,
+        show_tree_plot = function() private$..show_tree_plot$value,
+        show_importance_plot = function() private$..show_importance_plot$value,
+        show_performance_metrics = function() private$..show_performance_metrics$value,
+        show_confusion_matrix = function() private$..show_confusion_matrix$value,
+        show_roc_curve = function() private$..show_roc_curve$value,
+        show_validation_curves = function() private$..show_validation_curves$value,
+        show_calibration_plot = function() private$..show_calibration_plot$value,
         showPartitionPlot = function() private$..showPartitionPlot$value,
-        minCases = function() private$..minCases$value,
-        maxDepth = function() private$..maxDepth$value,
-        confidenceInterval = function() private$..confidenceInterval$value,
-        riskStratification = function() private$..riskStratification$value,
-        exportPredictions = function() private$..exportPredictions$value,
-        clinicalContext = function() private$..clinicalContext$value,
-        costRatio = function() private$..costRatio$value,
+        show_cp_plot = function() private$..show_cp_plot$value,
+        tree_plot_style = function() private$..tree_plot_style$value,
+        show_node_statistics = function() private$..show_node_statistics$value,
+        interpretability = function() private$..interpretability$value,
+        shap_analysis = function() private$..shap_analysis$value,
+        partial_dependence = function() private$..partial_dependence$value,
+        interaction_analysis = function() private$..interaction_analysis$value,
+        clinical_context = function() private$..clinical_context$value,
+        cost_sensitive_thresholds = function() private$..cost_sensitive_thresholds$value,
+        fn_fp_ratio = function() private$..fn_fp_ratio$value,
         prevalenceAdjustment = function() private$..prevalenceAdjustment$value,
         expectedPrevalence = function() private$..expectedPrevalence$value,
-        crossValidation = function() private$..crossValidation$value,
-        cvFolds = function() private$..cvFolds$value,
-        bootstrapValidation = function() private$..bootstrapValidation$value,
-        bootstrapSamples = function() private$..bootstrapSamples$value,
-        showROCCurve = function() private$..showROCCurve$value,
-        showCalibrationPlot = function() private$..showCalibrationPlot$value,
-        showClinicalUtility = function() private$..showClinicalUtility$value,
-        variableImportanceMethod = function() private$..variableImportanceMethod$value,
-        customThresholds = function() private$..customThresholds$value,
-        sensitivityThreshold = function() private$..sensitivityThreshold$value,
-        specificityThreshold = function() private$..specificityThreshold$value,
-        treeVisualization = function() private$..treeVisualization$value,
-        showNodeStatistics = function() private$..showNodeStatistics$value,
-        compareModels = function() private$..compareModels$value,
-        spatialCoords = function() private$..spatialCoords$value,
-        useAutocart = function() private$..useAutocart$value,
-        spatialAlpha = function() private$..spatialAlpha$value,
-        spatialBeta = function() private$..spatialBeta$value,
-        modelComparisonMetric = function() private$..modelComparisonMetric$value),
+        bootstrap_confidence = function() private$..bootstrap_confidence$value,
+        n_bootstrap = function() private$..n_bootstrap$value,
+        model_comparison = function() private$..model_comparison$value,
+        modelComparisonMetric = function() private$..modelComparisonMetric$value,
+        export_model = function() private$..export_model$value,
+        exportPredictions = function() private$..exportPredictions$value,
+        show_clinical_interpretation = function() private$..show_clinical_interpretation$value,
+        model_stability_analysis = function() private$..model_stability_analysis$value,
+        learning_curves = function() private$..learning_curves$value,
+        outlier_analysis = function() private$..outlier_analysis$value,
+        prediction_intervals = function() private$..prediction_intervals$value,
+        advanced_pruning = function() private$..advanced_pruning$value,
+        pruning_validation_split = function() private$..pruning_validation_split$value),
     private = list(
         ..vars = NA,
         ..facs = NA,
         ..target = NA,
         ..targetLevel = NA,
+        ..algorithm = NA,
+        ..tree_mode = NA,
         ..train = NA,
         ..trainLevel = NA,
-        ..imputeMissing = NA,
+        ..validation = NA,
+        ..cv_folds = NA,
+        ..cv_repeats = NA,
+        ..stratified_sampling = NA,
+        ..data_split_method = NA,
+        ..test_split = NA,
+        ..max_depth = NA,
+        ..min_samples_split = NA,
+        ..min_samples_leaf = NA,
+        ..cost_complexity = NA,
+        ..min_n = NA,
+        ..tree_depth = NA,
+        ..hyperparameter_tuning = NA,
+        ..tuning_metric = NA,
+        ..use_1se_rule = NA,
+        ..xerror_pruning = NA,
+        ..auto_prune = NA,
+        ..prune_method = NA,
+        ..c50_trials = NA,
+        ..c50_winnow = NA,
+        ..ctree_mincriterion = NA,
+        ..rf_ntree = NA,
+        ..rf_mtry = NA,
+        ..xgb_nrounds = NA,
+        ..xgb_eta = NA,
+        ..set_seed = NA,
+        ..seed_value = NA,
+        ..show_cp_table = NA,
+        ..show_variable_importance_detailed = NA,
+        ..missing_data_method = NA,
         ..balanceClasses = NA,
-        ..scaleFeatures = NA,
-        ..clinicalMetrics = NA,
-        ..featureImportance = NA,
-        ..showInterpretation = NA,
-        ..showPlot = NA,
+        ..ensemble_method = NA,
+        ..n_trees = NA,
+        ..feature_selection = NA,
+        ..feature_selection_method = NA,
+        ..importance_method = NA,
+        ..show_tree_plot = NA,
+        ..show_importance_plot = NA,
+        ..show_performance_metrics = NA,
+        ..show_confusion_matrix = NA,
+        ..show_roc_curve = NA,
+        ..show_validation_curves = NA,
+        ..show_calibration_plot = NA,
         ..showPartitionPlot = NA,
-        ..minCases = NA,
-        ..maxDepth = NA,
-        ..confidenceInterval = NA,
-        ..riskStratification = NA,
-        ..exportPredictions = NA,
-        ..clinicalContext = NA,
-        ..costRatio = NA,
+        ..show_cp_plot = NA,
+        ..tree_plot_style = NA,
+        ..show_node_statistics = NA,
+        ..interpretability = NA,
+        ..shap_analysis = NA,
+        ..partial_dependence = NA,
+        ..interaction_analysis = NA,
+        ..clinical_context = NA,
+        ..cost_sensitive_thresholds = NA,
+        ..fn_fp_ratio = NA,
         ..prevalenceAdjustment = NA,
         ..expectedPrevalence = NA,
-        ..crossValidation = NA,
-        ..cvFolds = NA,
-        ..bootstrapValidation = NA,
-        ..bootstrapSamples = NA,
-        ..showROCCurve = NA,
-        ..showCalibrationPlot = NA,
-        ..showClinicalUtility = NA,
-        ..variableImportanceMethod = NA,
-        ..customThresholds = NA,
-        ..sensitivityThreshold = NA,
-        ..specificityThreshold = NA,
-        ..treeVisualization = NA,
-        ..showNodeStatistics = NA,
-        ..compareModels = NA,
-        ..spatialCoords = NA,
-        ..useAutocart = NA,
-        ..spatialAlpha = NA,
-        ..spatialBeta = NA,
-        ..modelComparisonMetric = NA)
+        ..bootstrap_confidence = NA,
+        ..n_bootstrap = NA,
+        ..model_comparison = NA,
+        ..modelComparisonMetric = NA,
+        ..export_model = NA,
+        ..exportPredictions = NA,
+        ..show_clinical_interpretation = NA,
+        ..model_stability_analysis = NA,
+        ..learning_curves = NA,
+        ..outlier_analysis = NA,
+        ..prediction_intervals = NA,
+        ..advanced_pruning = NA,
+        ..pruning_validation_split = NA)
 )
 
 treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -420,183 +776,139 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
-        text2a = function() private$.items[["text2a"]],
-        text2b = function() private$.items[["text2b"]],
-        text3 = function() private$.items[["text3"]],
-        text4 = function() private$.items[["text4"]],
-        dataQuality = function() private$.items[["dataQuality"]],
-        missingDataReport = function() private$.items[["missingDataReport"]],
-        modelSummary = function() private$.items[["modelSummary"]],
-        clinicalMetrics = function() private$.items[["clinicalMetrics"]],
-        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
-        featureImportance = function() private$.items[["featureImportance"]],
-        riskStratification = function() private$.items[["riskStratification"]],
-        confusionMatrix = function() private$.items[["confusionMatrix"]],
-        adjustedMetrics = function() private$.items[["adjustedMetrics"]],
-        crossValidationResults = function() private$.items[["crossValidationResults"]],
-        bootstrapResults = function() private$.items[["bootstrapResults"]],
-        modelComparison = function() private$.items[["modelComparison"]],
-        spatialAnalysis = function() private$.items[["spatialAnalysis"]],
-        spatialInterpretation = function() private$.items[["spatialInterpretation"]],
-        plot = function() private$.items[["plot"]],
+        progress_feedback = function() private$.items[["progress_feedback"]],
+        model_summary = function() private$.items[["model_summary"]],
+        performance_table = function() private$.items[["performance_table"]],
+        clinicalMetricsTable = function() private$.items[["clinicalMetricsTable"]],
+        performance_table_explanation = function() private$.items[["performance_table_explanation"]],
+        confusion_matrix = function() private$.items[["confusion_matrix"]],
+        confusion_matrix_explanation = function() private$.items[["confusion_matrix_explanation"]],
+        confusion_matrix_plot = function() private$.items[["confusion_matrix_plot"]],
+        tree_plot = function() private$.items[["tree_plot"]],
+        tree_plot_explanation = function() private$.items[["tree_plot_explanation"]],
         partitionPlot = function() private$.items[["partitionPlot"]],
-        rocPlot = function() private$.items[["rocPlot"]],
-        calibrationPlot = function() private$.items[["calibrationPlot"]],
-        clinicalUtilityPlot = function() private$.items[["clinicalUtilityPlot"]],
-        deploymentGuidelines = function() private$.items[["deploymentGuidelines"]],
-        predictions = function() private$.items[["predictions"]],
-        probabilities = function() private$.items[["probabilities"]]),
+        importance_plot = function() private$.items[["importance_plot"]],
+        importance_plot_explanation = function() private$.items[["importance_plot_explanation"]],
+        featureImportanceTable = function() private$.items[["featureImportanceTable"]],
+        roc_plot = function() private$.items[["roc_plot"]],
+        roc_plot_explanation = function() private$.items[["roc_plot_explanation"]],
+        validation_curves = function() private$.items[["validation_curves"]],
+        calibration_plot = function() private$.items[["calibration_plot"]],
+        shap_plot = function() private$.items[["shap_plot"]],
+        partial_dependence_plot = function() private$.items[["partial_dependence_plot"]],
+        interaction_plot = function() private$.items[["interaction_plot"]],
+        clinical_interpretation = function() private$.items[["clinical_interpretation"]],
+        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
+        riskStratification = function() private$.items[["riskStratification"]],
+        feature_selection_results = function() private$.items[["feature_selection_results"]],
+        bootstrap_intervals = function() private$.items[["bootstrap_intervals"]],
+        crossValidationTable = function() private$.items[["crossValidationTable"]],
+        bootstrapTable = function() private$.items[["bootstrapTable"]],
+        modelComparison = function() private$.items[["modelComparison"]],
+        cp_table_analysis = function() private$.items[["cp_table_analysis"]],
+        cp_plot = function() private$.items[["cp_plot"]],
+        detailed_importance_analysis = function() private$.items[["detailed_importance_analysis"]],
+        model_export = function() private$.items[["model_export"]],
+        exportInfo = function() private$.items[["exportInfo"]],
+        stability_analysis = function() private$.items[["stability_analysis"]],
+        stability_plot = function() private$.items[["stability_plot"]],
+        learning_curves_plot = function() private$.items[["learning_curves_plot"]],
+        outlier_analysis_results = function() private$.items[["outlier_analysis_results"]],
+        outlier_plot = function() private$.items[["outlier_plot"]],
+        prediction_intervals_table = function() private$.items[["prediction_intervals_table"]],
+        pruning_analysis = function() private$.items[["pruning_analysis"]],
+        enhanced_cv_results = function() private$.items[["enhanced_cv_results"]],
+        enhanced_cv_table = function() private$.items[["enhanced_cv_table"]],
+        enhanced_confusion_matrix = function() private$.items[["enhanced_confusion_matrix"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Medical Decision Tree Analysis",
-                refs=list(
-                    "FFTrees",
-                    "pROC",
-                    "caret",
-                    "rpart",
-                    "rpart.plot",
-                    "parttree",
-                    "autocart",
-                    "ClinicoPathJamoviModule",
-                    "whoisinthisstudy",
-                    "recist",
-                    "DiagnosticTests",
-                    "PathologyKappa"))
+                title="Medical Decision Tree Analysis")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="Instructions",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "train",
-                    "trainLevel")))
-            self$add(jmvcore::Preformatted$new(
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
-                title="Model Progress",
+                title="Analysis Status",
+                visible=TRUE,
                 clearWith=list(
                     "vars",
                     "facs",
                     "target",
                     "targetLevel",
-                    "train",
-                    "trainLevel")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2",
-                title="Data Summary",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "train",
-                    "trainLevel")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2a",
-                title="Training Data View",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "train",
-                    "trainLevel")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text2b",
-                title="Test Data View",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "train",
-                    "trainLevel")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text3",
-                title="Model Status",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "train",
-                    "trainLevel")))
+                    "algorithm",
+                    "validation",
+                    "hyperparameter_tuning",
+                    "model_comparison")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="text4",
-                title="Model Output",
+                name="progress_feedback",
+                title="Analysis Progress",
+                visible=TRUE,
                 clearWith=list(
                     "vars",
                     "facs",
                     "target",
                     "targetLevel",
-                    "train",
-                    "trainLevel")))
-            self$add(jmvcore::Preformatted$new(
+                    "algorithm",
+                    "validation",
+                    "hyperparameter_tuning",
+                    "model_comparison")))
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="dataQuality",
-                title="Data Quality Report",
+                name="model_summary",
+                title="Model Summary",
+                visible="(show_performance_metrics)",
                 clearWith=list(
                     "vars",
                     "facs",
                     "target",
-                    "imputeMissing",
-                    "balanceClasses")))
+                    "targetLevel",
+                    "algorithm",
+                    "validation")))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="missingDataReport",
-                title="Missing Data Analysis",
-                rows=0,
+                name="performance_table",
+                title="Performance Metrics",
+                visible="(show_performance_metrics)",
                 columns=list(
                     list(
-                        `name`="variable", 
-                        `title`="Variable", 
+                        `name`="metric", 
+                        `title`="Metric", 
                         `type`="text"),
                     list(
-                        `name`="missing_count", 
-                        `title`="Missing Count", 
-                        `type`="integer"),
-                    list(
-                        `name`="missing_percent", 
-                        `title`="Missing %", 
+                        `name`="value", 
+                        `title`="Value", 
                         `type`="number", 
-                        `format`="dp:1"),
+                        `format`="dp:3"),
                     list(
-                        `name`="complete_cases", 
-                        `title`="Complete Cases", 
-                        `type`="integer")),
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="dp:3")),
                 clearWith=list(
                     "vars",
                     "facs",
                     "target",
-                    "imputeMissing")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="modelSummary",
-                title="Decision Tree Model Summary",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "minCases",
-                    "maxDepth")))
+                    "targetLevel",
+                    "algorithm",
+                    "validation")))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="clinicalMetrics",
+                name="clinicalMetricsTable",
                 title="Clinical Performance Metrics",
-                rows=0,
+                visible="(show_performance_metrics)",
                 columns=list(
                     list(
                         `name`="metric", 
@@ -605,7 +917,8 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="text"),
+                        `type`="number", 
+                        `format`="dp:3"),
                     list(
                         `name`="interpretation", 
                         `title`="Clinical Interpretation", 
@@ -615,21 +928,110 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "facs",
                     "target",
                     "targetLevel",
-                    "train",
-                    "trainLevel",
-                    "balanceClasses")))
+                    "algorithm")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="clinicalInterpretation",
-                title="Clinical Interpretation & Recommendations",
+                name="performance_table_explanation",
+                title="Interpreting Performance Metrics",
+                visible="(show_performance_metrics)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="confusion_matrix",
+                title="Confusion Matrix",
+                visible="(show_confusion_matrix)",
                 clearWith=list(
-                    "clinicalContext",
-                    "costRatio")))
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "validation")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="confusion_matrix_explanation",
+                title="Reading the Confusion Matrix",
+                visible="(show_confusion_matrix)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="confusion_matrix_plot",
+                title="Confusion Matrix Heatmap",
+                width=500,
+                height=400,
+                renderFun=".plot_confusion_matrix",
+                visible="(show_confusion_matrix)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "validation")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="tree_plot",
+                title="Decision Tree Visualization",
+                width=800,
+                height=600,
+                renderFun=".plot_tree",
+                visible="(show_tree_plot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "max_depth",
+                    "min_samples_split",
+                    "min_samples_leaf")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="tree_plot_explanation",
+                title="How to Read the Decision Tree",
+                visible="(show_tree_plot)",
+                clearWith=list(
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="partitionPlot",
+                title="Decision Boundary Visualization",
+                width=600,
+                height=500,
+                renderFun=".plot_partition",
+                visible="(showPartitionPlot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="importance_plot",
+                title="Feature Importance",
+                width=700,
+                height=500,
+                renderFun=".plot_importance",
+                visible="(show_importance_plot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "importance_method")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="importance_plot_explanation",
+                title="Understanding Feature Importance",
+                visible="(show_importance_plot)",
+                clearWith=list(
+                    "algorithm",
+                    "importance_method")))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="featureImportance",
-                title="Clinical Variable Importance",
-                rows=0,
+                name="featureImportanceTable",
+                title="Feature Importance Rankings",
+                visible="(show_importance_plot)",
                 columns=list(
                     list(
                         `name`="feature", 
@@ -643,97 +1045,173 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="rank", 
                         `title`="Rank", 
-                        `type`="integer"),
-                    list(
-                        `name`="clinical_relevance", 
-                        `title`="Clinical Relevance", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
+                        `type`="integer")),
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="roc_plot",
+                title="ROC Curve Analysis",
+                width=600,
+                height=500,
+                renderFun=".plot_roc",
+                visible="(show_roc_curve)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "validation")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="roc_plot_explanation",
+                title="Understanding the ROC Curve",
+                visible="(show_roc_curve)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="validation_curves",
+                title="Validation Performance",
+                width=800,
+                height=500,
+                renderFun=".plot_validation",
+                visible="(show_validation_curves)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "validation",
+                    "cv_folds")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="calibration_plot",
+                title="Probability Calibration",
+                width=600,
+                height=500,
+                renderFun=".plot_calibration",
+                visible="(show_calibration_plot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "validation")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="shap_plot",
+                title="SHAP Value Analysis",
+                width=800,
+                height=600,
+                renderFun=".plot_shap",
+                visible="(shap_analysis && interpretability)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="partial_dependence_plot",
+                title="Partial Dependence Plots",
+                width=900,
+                height=700,
+                renderFun=".plot_partial_dependence",
+                visible="(partial_dependence && interpretability)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="interaction_plot",
+                title="Feature Interactions",
+                width=700,
+                height=600,
+                renderFun=".plot_interactions",
+                visible="(interaction_analysis && interpretability)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_interpretation",
+                title="Clinical Interpretation Guide",
+                visible="(show_clinical_interpretation)",
+                clearWith=list(
+                    "clinical_context",
+                    "algorithm",
+                    "target")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalInterpretation",
+                title="Medical Decision Support",
+                visible="(show_clinical_interpretation)",
+                clearWith=list(
+                    "clinical_context",
+                    "target",
+                    "targetLevel")))
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="riskStratification",
-                title="Risk Stratification Performance",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="risk_group", 
-                        `title`="Risk Group", 
-                        `type`="text"),
-                    list(
-                        `name`="n_patients", 
-                        `title`="N Patients", 
-                        `type`="integer"),
-                    list(
-                        `name`="event_rate", 
-                        `title`="Event Rate (%)", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="relative_risk", 
-                        `title`="Relative Risk", 
-                        `type`="number", 
-                        `format`="dp:2"),
-                    list(
-                        `name`="clinical_action", 
-                        `title`="Recommended Clinical Action", 
-                        `type`="text"))))
+                title="Risk Stratification Analysis",
+                visible="(clinical_context:risk || clinical_context:prognosis)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="feature_selection_results",
+                title="Feature Selection Results",
+                visible="(feature_selection)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="bootstrap_intervals",
+                title="Bootstrap Confidence Intervals",
+                visible="(bootstrap_confidence)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "n_bootstrap")))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="confusionMatrix",
-                title="Confusion Matrix & Clinical Outcomes",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="predicted", 
-                        `title`="Predicted", 
-                        `type`="text"),
-                    list(
-                        `name`="actual_disease", 
-                        `title`="Actual Disease", 
-                        `type`="integer"),
-                    list(
-                        `name`="actual_control", 
-                        `title`="Actual Control", 
-                        `type`="integer"),
-                    list(
-                        `name`="clinical_consequence", 
-                        `title`="Clinical Consequence", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="adjustedMetrics",
-                title="Population-Adjusted Performance",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="study_value", 
-                        `title`="Study Population", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="adjusted_value", 
-                        `title`="Target Population", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="difference", 
-                        `title`="Difference", 
-                        `type`="number", 
-                        `format`="dp:3"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="crossValidationResults",
-                title="Cross-Validation Performance",
-                visible="(crossValidation)",
-                rows=0,
+                name="crossValidationTable",
+                title="Cross-Validation Results",
+                visible="(validation:cv)",
                 columns=list(
                     list(
                         `name`="fold", 
-                        `title`="CV Fold", 
+                        `title`="Fold", 
                         `type`="integer"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="dp:3"),
                     list(
                         `name`="sensitivity", 
                         `title`="Sensitivity", 
@@ -745,21 +1223,287 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `format`="dp:3"),
                     list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number", 
+                        `format`="dp:3")),
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "cv_folds")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="bootstrapTable",
+                title="Bootstrap Validation Results",
+                visible="(validation:bootstrap)",
+                columns=list(
+                    list(
+                        `name`="iteration", 
+                        `title`="Bootstrap Sample", 
+                        `type`="integer"),
+                    list(
                         `name`="accuracy", 
                         `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
                         `type`="number", 
                         `format`="dp:3"),
                     list(
                         `name`="auc", 
                         `title`="AUC", 
                         `type`="number", 
-                        `format`="dp:3"))))
+                        `format`="dp:3")),
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="bootstrapResults",
-                title="Bootstrap Validation Summary",
-                visible="(bootstrapValidation)",
-                rows=0,
+                name="modelComparison",
+                title="Algorithm Comparison",
+                visible="(model_comparison)",
+                columns=list(
+                    list(
+                        `name`="algorithm", 
+                        `title`="Algorithm", 
+                        `type`="text"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer")),
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "modelComparisonMetric")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="cp_table_analysis",
+                title="Complexity Parameter Analysis",
+                visible="(show_cp_table)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="cp_plot",
+                title="Complexity Parameter Plot",
+                width=600,
+                height=400,
+                renderFun=".plot_cp",
+                visible="(show_cp_plot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="detailed_importance_analysis",
+                title="Detailed Variable Importance",
+                visible="(show_variable_importance_detailed)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="model_export",
+                title="Model Export Information",
+                visible="(export_model)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="exportInfo",
+                title="Data Export Information",
+                visible="(exportPredictions)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="stability_analysis",
+                title="Model Stability Analysis",
+                visible="(model_stability_analysis)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="stability_plot",
+                title="Model Stability Visualization",
+                width=800,
+                height=600,
+                renderFun=".plot_stability",
+                visible="(model_stability_analysis)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="learning_curves_plot",
+                title="Learning Curves",
+                width=800,
+                height=500,
+                renderFun=".plot_learning_curves",
+                visible="(learning_curves)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "cv_folds")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="outlier_analysis_results",
+                title="Outlier Analysis Results",
+                visible="(outlier_analysis)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="outlier_plot",
+                title="Influential Observations Plot",
+                width=700,
+                height=500,
+                renderFun=".plot_outliers",
+                visible="(outlier_analysis)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="prediction_intervals_table",
+                title="Prediction Confidence Intervals",
+                visible="(prediction_intervals)",
+                columns=list(
+                    list(
+                        `name`="observation", 
+                        `title`="Case ID", 
+                        `type`="integer"),
+                    list(
+                        `name`="prediction", 
+                        `title`="Prediction", 
+                        `type`="text"),
+                    list(
+                        `name`="probability", 
+                        `title`="Probability", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="interval_width", 
+                        `title`="Interval Width", 
+                        `type`="number", 
+                        `format`="dp:3")),
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="pruning_analysis",
+                title="Advanced Pruning Analysis",
+                visible="(advanced_pruning:rep || advanced_pruning:mep)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "advanced_pruning")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="enhanced_cv_results",
+                title="Enhanced Cross-Validation Analysis",
+                visible="(validation:stratified_cv || validation:repeated_cv)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "validation",
+                    "cv_folds",
+                    "cv_repeats")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="enhanced_cv_table",
+                title="Detailed Cross-Validation Results",
+                visible="(validation:stratified_cv || validation:repeated_cv)",
                 columns=list(
                     list(
                         `name`="metric", 
@@ -771,6 +1515,21 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `format`="dp:3"),
                     list(
+                        `name`="sd", 
+                        `title`="Standard Deviation", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="min", 
+                        `title`="Minimum", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="max", 
+                        `title`="Maximum", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
                         `name`="ci_lower", 
                         `title`="95% CI Lower", 
                         `type`="number", 
@@ -779,182 +1538,25 @@ treeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="ci_upper", 
                         `title`="95% CI Upper", 
                         `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="bias", 
-                        `title`="Bias", 
-                        `type`="number", 
-                        `format`="dp:3"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="modelComparison",
-                title="Model Performance Comparison",
-                visible="(compareModels)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="model", 
-                        `title`="Model Type", 
-                        `type`="text"),
-                    list(
-                        `name`="primary_metric", 
-                        `title`="Primary Metric", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="sensitivity", 
-                        `title`="Sensitivity", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="specificity", 
-                        `title`="Specificity", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="auc", 
-                        `title`="AUC", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="spatial_metric", 
-                        `title`="Spatial Fit", 
-                        `type`="text"),
-                    list(
-                        `name`="best_model", 
-                        `title`="Best Model", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="spatialAnalysis",
-                title="Spatial Autocart Analysis",
-                visible="(useAutocart)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="parameter", 
-                        `title`="Spatial Parameter", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"))))
+                        `format`="dp:3")),
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "algorithm",
+                    "validation")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="spatialInterpretation",
-                title="Spatial Analysis Interpretation",
-                visible="(useAutocart)"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot",
-                title="Clinical Decision Tree",
-                width=800,
-                height=600,
-                renderFun=".plot",
-                requiresData=TRUE,
+                name="enhanced_confusion_matrix",
+                title="Clinical Confusion Matrix Analysis",
+                visible="(show_confusion_matrix)",
                 clearWith=list(
                     "vars",
                     "facs",
                     "target",
                     "targetLevel",
-                    "train",
-                    "trainLevel",
-                    "minCases",
-                    "maxDepth",
-                    "treeVisualization",
-                    "showNodeStatistics")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="partitionPlot",
-                title="Decision Partition Visualization",
-                width=800,
-                height=600,
-                renderFun=".plotPartition",
-                visible="(showPartitionPlot)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "train",
-                    "trainLevel")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="rocPlot",
-                title="ROC Curve Analysis",
-                width=600,
-                height=600,
-                renderFun=".plotROC",
-                visible="(showROCCurve)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "train",
-                    "trainLevel")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="calibrationPlot",
-                title="Probability Calibration",
-                width=600,
-                height=600,
-                renderFun=".plotCalibration",
-                visible="(showCalibrationPlot)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "train",
-                    "trainLevel")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="clinicalUtilityPlot",
-                title="Clinical Utility Analysis",
-                width=600,
-                height=600,
-                renderFun=".plotClinicalUtility",
-                visible="(showClinicalUtility)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target",
-                    "targetLevel",
-                    "costRatio")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="deploymentGuidelines",
-                title="Clinical Implementation Guidelines"))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="predictions",
-                title="Patient Predictions",
-                varTitle="`Predicted Risk Category`",
-                varDescription="Predicted risk category based on clinical decision tree model\n",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="probabilities",
-                title="Disease Probabilities",
-                varTitle="`Disease Probability`",
-                varDescription="Predicted probability of disease based on clinical variables\n",
-                clearWith=list(
-                    "vars",
-                    "facs",
-                    "target")))}))
+                    "algorithm")))}))
 
 treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "treeBase",
@@ -977,15 +1579,19 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Medical Decision Tree
+#' Medical Decision Tree Analysis
 #'
-#' Enhanced decision tree analysis for medical research, pathology and 
-#' oncology. Provides clinical performance metrics, handles missing data 
-#' appropriately, and offers interpretations relevant to medical 
-#' decision-making.
+#' Comprehensive decision tree analysis for medical research, pathology and 
+#' oncology.
+#' Combines FFTrees (Fast-and-Frugal Trees) and enhanced CART algorithms for 
+#' robust
+#' clinical decision support. Provides extensive validation, performance 
+#' metrics,
+#' interpretability analysis, and clinical interpretation guidelines.
+#' 
 #'
 #' @examples
-#' # Example for cancer diagnosis
+#' # Example for cancer diagnosis with comprehensive analysis
 #' data(cancer_biomarkers)
 #' tree(
 #'     data = cancer_biomarkers,
@@ -993,14 +1599,15 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     facs = c("grade", "stage"),
 #'     target = "diagnosis",
 #'     targetLevel = "cancer",
-#'     train = "cohort",
-#'     trainLevel = "discovery",
-#'     imputeMissing = TRUE,
-#'     balanceClasses = TRUE
+#'     algorithm = "fftrees",
+#'     validation = "cv",
+#'     show_performance_metrics = TRUE,
+#'     show_tree_plot = TRUE,
+#'     interpretability = TRUE
 #' )
 #'
 #' @param data The data as a data frame containing clinical variables,
-#'   biomarkers,  and patient outcomes.
+#'   biomarkers,  and patient outcomes for decision tree analysis.
 #' @param vars Continuous variables such as biomarker levels, age,  laboratory
 #'   values, or quantitative pathological measurements.
 #' @param facs Categorical variables such as tumor grade, stage,  histological
@@ -1008,167 +1615,319 @@ treeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param target Primary outcome variable: disease status, treatment response,
 #'   survival status, or diagnostic category.
 #' @param targetLevel Level representing disease presence, positive outcome,
-#'   or event of interest.
+#'   or event of interest for binary classification.
+#' @param algorithm Algorithm to use: rpart provides traditional CART with
+#'   pruning; FFTrees creates simple, interpretable trees for medical decisions;
+#'   C5.0 offers advanced classification with boosting; ctree uses statistical
+#'   tests for splits; mob combines trees with parametric models; Random Forest
+#'   uses ensemble of trees for high accuracy; XGBoost provides gradient
+#'   boosting for complex patterns.
+#' @param tree_mode Type of prediction problem: classification for disease
+#'   presence/absence, regression for continuous biomarkers, survival for
+#'   time-to-event analysis.
 #' @param train Variable indicating training vs validation cohorts.  If not
 #'   provided, data will be split automatically.
 #' @param trainLevel Level indicating the training/discovery cohort.
-#' @param imputeMissing Impute missing values using medically appropriate
-#'   methods  (median within disease groups for continuous, mode for
-#'   categorical).
+#' @param validation Validation approach: cohort uses train variable if
+#'   provided, otherwise performs automatic splitting with selected method.
+#'   Stratified CV maintains class proportions, Repeated CV averages multiple
+#'   runs.
+#' @param cv_folds Number of folds for cross-validation. 5-fold provides good
+#'   balance between bias and variance for clinical datasets.
+#' @param cv_repeats Number of times to repeat cross-validation (for repeated
+#'   CV). More repeats provide more stable estimates but increase computation
+#'   time.
+#' @param stratified_sampling Maintain class proportions in train/test splits.
+#'   Recommended for imbalanced medical datasets.
+#' @param data_split_method Method for splitting data into train/test sets.
+#'   Stratified maintains original class proportions for clinical validity.
+#' @param test_split Proportion of data reserved for testing (holdout
+#'   validation). Optimal ratio is 25\% test / 75\% train as recommended for
+#'   decision trees.
+#' @param max_depth Maximum depth of decision tree. Deeper trees capture more
+#'   interactions but may overfit. Clinical trees typically 2-8 levels.
+#' @param min_samples_split Minimum number of samples required to split a
+#'   node. Higher values prevent overfitting in clinical data.
+#' @param min_samples_leaf Minimum number of samples in leaf nodes. Important
+#'   for clinical validity - too few samples reduce reliability.
+#' @param cost_complexity Cost complexity parameter (tidymodels:
+#'   cost_complexity). Controls pruning -  lower values create more complex
+#'   trees. Corresponds to CP in rpart.
+#' @param min_n Minimum number of data points in a node (tidymodels: min_n).
+#'   Higher values prevent overfitting in clinical data.
+#' @param tree_depth Maximum tree depth (tidymodels: tree_depth). Deeper trees
+#'   capture  more interactions but may overfit. Clinical trees typically 2-8
+#'   levels.
+#' @param hyperparameter_tuning Automatically optimize tree parameters using
+#'   cross-validation. Finds optimal complexity parameter and tree structure for
+#'   best performance.
+#' @param tuning_metric Metric to optimize during hyperparameter tuning.
+#'   Choose based on clinical priorities (e.g., sensitivity for screening).
+#' @param use_1se_rule Apply 1-standard-error rule for selecting simpler
+#'   models. Chooses most parsimonious tree within 1 SE of optimal performance.
+#' @param xerror_pruning Use cross-validation error (xerror) from CP table for
+#'   optimal pruning. Automatically selects CP value that minimizes xerror.
+#' @param auto_prune Automatically prune tree to optimal size based on
+#'   cross-validation. Prevents overfitting while maintaining predictive
+#'   performance.
+#' @param prune_method Method for selecting optimal tree size after
+#'   cross-validation. 1-SE rule provides good balance between accuracy and
+#'   simplicity.
+#' @param c50_trials Number of boosting iterations for C5.0 algorithm. More
+#'   trials improve accuracy but reduce interpretability.
+#' @param c50_winnow Enable winnowing in C5.0 to remove irrelevant attributes.
+#'   Useful for high-dimensional clinical data.
+#' @param ctree_mincriterion Statistical criterion for ctree splits (1 -
+#'   p-value threshold). Higher values create simpler, more conservative trees.
+#' @param rf_ntree Number of trees in random forest. More trees generally
+#'   improve performance but increase computation time.
+#' @param rf_mtry Number of variables randomly sampled at each split. 0 =
+#'   automatic selection (sqrt for classification, p/3 for regression).
+#' @param xgb_nrounds Number of boosting rounds for XGBoost. More rounds can
+#'   improve performance but risk overfitting.
+#' @param xgb_eta Learning rate for XGBoost. Lower values require more rounds
+#'   but can lead to better performance.
+#' @param set_seed Set random seed for reproducible results across runs.
+#'   Essential for clinical research reproducibility.
+#' @param seed_value Specific seed value for random number generation. Use
+#'   same value to reproduce exact results.
+#' @param show_cp_table Display CP table showing tree complexity vs
+#'   performance. Helps understand pruning decisions and model selection.
+#' @param show_variable_importance_detailed Display comprehensive variable
+#'   importance analysis including surrogate splits and interaction effects.
+#' @param missing_data_method Method for handling missing clinical data.
+#'   Native rpart handling  uses surrogate splits, which is often optimal for
+#'   clinical data.
 #' @param balanceClasses Balance classes to handle rare diseases or imbalanced
 #'   outcomes.  Recommended for disease prevalence <20\%.
-#' @param scaleFeatures Standardize continuous variables (useful when
-#'   combining  biomarkers with different scales/units).
-#' @param clinicalMetrics Display sensitivity, specificity, predictive values,
-#'   likelihood ratios, and other clinical metrics.
-#' @param featureImportance Identify most important clinical variables and
-#'   biomarkers  for the decision tree.
-#' @param showInterpretation Provide clinical interpretation of results
-#'   including  diagnostic utility and clinical recommendations.
-#' @param showPlot Display visual representation of the decision tree.
+#' @param ensemble_method Ensemble method to improve prediction accuracy and
+#'   robustness. Single trees are most interpretable; ensembles offer better
+#'   performance.
+#' @param n_trees Number of trees in ensemble methods. More trees generally
+#'   improve  performance but increase computation time.
+#' @param feature_selection Perform automated feature selection using advanced
+#'   algorithms. Helps identify most relevant clinical variables and biomarkers.
+#' @param feature_selection_method Method for feature selection: Tree-based
+#'   uses rpart importance; Boruta identifies all-relevant features using
+#'   permutation tests; Variable Importance uses advanced metrics from caret
+#'   package.
+#' @param importance_method Method for calculating feature importance.
+#'   Permutation and SHAP provide more reliable importance for clinical
+#'   interpretation.
+#' @param show_tree_plot Display visual representation of the decision tree.
+#'   Shows decision paths and node information.
+#' @param show_importance_plot Display feature importance rankings. Critical
+#'   for understanding which clinical variables drive predictions.
+#' @param show_performance_metrics Display comprehensive performance
+#'   evaluation including accuracy, sensitivity, specificity, AUC, and clinical
+#'   metrics.
+#' @param show_confusion_matrix Display detailed confusion matrix with
+#'   clinical interpretations. Shows actual vs predicted classifications.
+#' @param show_roc_curve Display ROC curve analysis for binary classification.
+#'   Essential for clinical decision making and threshold selection.
+#' @param show_validation_curves Display learning curves and validation
+#'   performance. Helps assess overfitting and training adequacy.
+#' @param show_calibration_plot Display probability calibration plot.
+#'   Important for clinical applications requiring reliable probability
+#'   estimates.
 #' @param showPartitionPlot Display 2D decision boundary visualization using
 #'   parttree.  Requires exactly 2 continuous variables for optimal
 #'   visualization.
-#' @param minCases Minimum number of cases required in each terminal node
-#'   (higher values prevent overfitting).
-#' @param maxDepth Maximum depth of decision tree (deeper trees may overfit).
-#' @param confidenceInterval Display confidence intervals for performance
-#'   metrics.
-#' @param riskStratification Analyze risk stratification performance and
-#'   create  risk categories based on tree predictions.
-#' @param exportPredictions Add predicted classifications and probabilities to
-#'   the dataset.
-#' @param clinicalContext Clinical context affects interpretation thresholds
-#'   and  recommendations (e.g., screening requires high sensitivity).
-#' @param costRatio Relative cost of missing a case vs false alarm.  Higher
-#'   values favor sensitivity over specificity.
+#' @param show_cp_plot Display CP plot showing cross-validation error vs tree
+#'   complexity. Essential for understanding optimal pruning levels.
+#' @param tree_plot_style Visualization style optimized for different clinical
+#'   audiences. Medical: simplified for clinical staff; Clinical: detailed for
+#'   researchers.
+#' @param show_node_statistics Display detailed statistics for each node
+#'   including sample sizes, purity measures, and class distributions.
+#' @param interpretability Perform advanced interpretability analysis
+#'   including SHAP values, partial dependence plots, and interaction effects.
+#' @param shap_analysis Calculate SHAP (SHapley Additive exPlanations) values
+#'   for individual prediction explanations. Powerful for clinical decision
+#'   support.
+#' @param partial_dependence Show how individual features affect predictions
+#'   across their value ranges. Helps understand clinical relationships.
+#' @param interaction_analysis Analyze interactions between clinical
+#'   variables. Important for understanding combined effects of biomarkers.
+#' @param clinical_context Clinical application context. Affects performance
+#'   thresholds, interpretation guidelines, and visualization emphasis.
+#' @param cost_sensitive_thresholds Optimize decision thresholds considering
+#'   clinical costs of false positives vs false negatives.
+#' @param fn_fp_ratio Relative cost of missing a positive case vs false alarm.
+#'   Screening (high ratio), confirmation tests (low ratio).
 #' @param prevalenceAdjustment Adjust predictive values for expected disease
 #'   prevalence  in target population (different from study sample).
 #' @param expectedPrevalence Expected disease prevalence in target population
 #'   for  adjusted predictive value calculations.
-#' @param crossValidation Perform k-fold cross-validation for robust
-#'   performance estimation.
-#' @param cvFolds Number of folds for cross-validation (typically 5 or 10).
-#' @param bootstrapValidation Perform bootstrap validation for confidence
-#'   intervals on performance metrics.
-#' @param bootstrapSamples Number of bootstrap samples for confidence interval
-#'   calculation.
-#' @param showROCCurve Display ROC curve with AUC for model discrimination
-#'   assessment.
-#' @param showCalibrationPlot Display probability calibration plot to assess
-#'   prediction reliability.
-#' @param showClinicalUtility Display clinical utility curve for threshold
-#'   optimization.
-#' @param variableImportanceMethod Method for calculating variable importance
-#'   in decision trees.
-#' @param customThresholds Set custom thresholds for clinical performance
-#'   interpretation.
-#' @param sensitivityThreshold Minimum sensitivity threshold for clinical
-#'   acceptability.
-#' @param specificityThreshold Minimum specificity threshold for clinical
-#'   acceptability.
-#' @param treeVisualization Style of decision tree visualization display.
-#' @param showNodeStatistics Display detailed statistics at each decision tree
-#'   node.
-#' @param compareModels Compare FFTrees performance with logistic regression,
-#'   CART, and autocart (if spatial coordinates provided).
-#' @param spatialCoords X and Y coordinates for spatial analysis. Required for
-#'   autocart spatial regression trees. Typically longitude/latitude or tissue
-#'   microarray coordinates.
-#' @param useAutocart Enable spatial-aware regression trees using autocart
-#'   methodology. Requires spatial coordinates (X, Y variables).
-#' @param spatialAlpha Weight for spatial autocorrelation in autocart
-#'   splitting (0.0-1.0). Higher values emphasize spatial clustering in decision
-#'   tree splits.
-#' @param spatialBeta Weight for spatial compactness in autocart splitting
-#'   (0.0-1.0). Higher values favor spatially compact regions in tree
-#'   partitions.
-#' @param modelComparisonMetric Primary metric for comparing model
-#'   performance.
+#' @param bootstrap_confidence Calculate bootstrap confidence intervals for
+#'   performance metrics. Provides uncertainty quantification for clinical
+#'   reporting.
+#' @param n_bootstrap Number of bootstrap samples for confidence interval
+#'   calculation. More samples provide better estimates but increase computation
+#'   time.
+#' @param model_comparison Compare performance of multiple algorithms
+#'   (FFTrees, CART, Logistic Regression). Useful for selecting the best
+#'   approach for your data.
+#' @param modelComparisonMetric Primary metric for comparing algorithms.
+#'   Choose based on clinical priorities (sensitivity for screening, specificity
+#'   for confirmation).
+#' @param export_model Export the trained model for external use or
+#'   deployment. Useful for clinical decision support system integration.
+#' @param exportPredictions Add predicted classifications and probabilities to
+#'   the dataset for further analysis or reporting.
+#' @param show_clinical_interpretation Display comprehensive clinical
+#'   interpretation guidelines specific to the selected clinical context and
+#'   results.
+#' @param model_stability_analysis Analyze model stability across bootstrap
+#'   samples by examining consistency of splits, variable selection, and
+#'   predictions.
+#' @param learning_curves Display learning curves showing performance vs
+#'   training size. Helps determine optimal sample size and detect overfitting.
+#' @param outlier_analysis Identify influential observations and outliers that
+#'   may disproportionately affect tree structure and predictions.
+#' @param prediction_intervals Calculate confidence intervals for individual
+#'   predictions using bootstrap or cross-validation methods.
+#' @param advanced_pruning Pruning method: CP uses cross-validation error, REP
+#'   uses holdout validation, MEP considers both error and tree size for optimal
+#'   clinical interpretability.
+#' @param pruning_validation_split Proportion of data reserved for pruning
+#'   validation (REP/MEP methods). This is separate from the main test set.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2a} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2b} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text4} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$dataQuality} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$missingDataReport} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$featureImportance} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$riskStratification} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$confusionMatrix} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$adjustedMetrics} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$spatialAnalysis} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$spatialInterpretation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$progress_feedback} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$model_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$performance_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalMetricsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$performance_table_explanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$confusion_matrix} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$confusion_matrix_explanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$confusion_matrix_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$tree_plot_explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$partitionPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$rocPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$calibrationPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$clinicalUtilityPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$deploymentGuidelines} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$predictions} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$probabilities} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$importance_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$importance_plot_explanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$featureImportanceTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$roc_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$roc_plot_explanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$validation_curves} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calibration_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$shap_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$partial_dependence_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$interaction_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clinical_interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$riskStratification} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$feature_selection_results} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$bootstrap_intervals} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$crossValidationTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cp_table_analysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$cp_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$detailed_importance_analysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$model_export} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$stability_analysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$stability_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$learning_curves_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$outlier_analysis_results} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$outlier_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$prediction_intervals_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pruning_analysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$enhanced_cv_results} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$enhanced_cv_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$enhanced_confusion_matrix} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$missingDataReport$asDF}
+#' \code{results$performance_table$asDF}
 #'
-#' \code{as.data.frame(results$missingDataReport)}
+#' \code{as.data.frame(results$performance_table)}
 #'
 #' @export
 tree <- function(
     data,
-    vars,
-    facs,
+    vars = NULL,
+    facs = NULL,
     target,
     targetLevel,
-    train,
+    algorithm = "rpart",
+    tree_mode = "classification",
+    train = NULL,
     trainLevel,
-    imputeMissing = FALSE,
+    validation = "cohort",
+    cv_folds = 5,
+    cv_repeats = 3,
+    stratified_sampling = TRUE,
+    data_split_method = "stratified",
+    test_split = 0.25,
+    max_depth = 6,
+    min_samples_split = 20,
+    min_samples_leaf = 10,
+    cost_complexity = 0.01,
+    min_n = 20,
+    tree_depth = 6,
+    hyperparameter_tuning = FALSE,
+    tuning_metric = "bacc",
+    use_1se_rule = TRUE,
+    xerror_pruning = FALSE,
+    auto_prune = FALSE,
+    prune_method = "one_se",
+    c50_trials = 1,
+    c50_winnow = FALSE,
+    ctree_mincriterion = 0.95,
+    rf_ntree = 500,
+    rf_mtry = 0,
+    xgb_nrounds = 100,
+    xgb_eta = 0.3,
+    set_seed = TRUE,
+    seed_value = 42,
+    show_cp_table = FALSE,
+    show_variable_importance_detailed = FALSE,
+    missing_data_method = "native",
     balanceClasses = FALSE,
-    scaleFeatures = FALSE,
-    clinicalMetrics = FALSE,
-    featureImportance = FALSE,
-    showInterpretation = FALSE,
-    showPlot = FALSE,
+    ensemble_method = "none",
+    n_trees = 100,
+    feature_selection = FALSE,
+    feature_selection_method = "tree_importance",
+    importance_method = "gini",
+    show_tree_plot = TRUE,
+    show_importance_plot = TRUE,
+    show_performance_metrics = TRUE,
+    show_confusion_matrix = TRUE,
+    show_roc_curve = TRUE,
+    show_validation_curves = FALSE,
+    show_calibration_plot = FALSE,
     showPartitionPlot = FALSE,
-    minCases = 10,
-    maxDepth = 4,
-    confidenceInterval = FALSE,
-    riskStratification = FALSE,
-    exportPredictions = FALSE,
-    clinicalContext = "diagnosis",
-    costRatio = 1,
+    show_cp_plot = FALSE,
+    tree_plot_style = "standard",
+    show_node_statistics = FALSE,
+    interpretability = FALSE,
+    shap_analysis = FALSE,
+    partial_dependence = FALSE,
+    interaction_analysis = FALSE,
+    clinical_context = "diagnosis",
+    cost_sensitive_thresholds = FALSE,
+    fn_fp_ratio = 1,
     prevalenceAdjustment = FALSE,
     expectedPrevalence = 10,
-    crossValidation = FALSE,
-    cvFolds = 5,
-    bootstrapValidation = FALSE,
-    bootstrapSamples = 1000,
-    showROCCurve = FALSE,
-    showCalibrationPlot = FALSE,
-    showClinicalUtility = FALSE,
-    variableImportanceMethod = "frequency",
-    customThresholds = FALSE,
-    sensitivityThreshold = 0.8,
-    specificityThreshold = 0.8,
-    treeVisualization = "standard",
-    showNodeStatistics = FALSE,
-    compareModels = FALSE,
-    spatialCoords,
-    useAutocart = FALSE,
-    spatialAlpha = 0.5,
-    spatialBeta = 0.5,
-    modelComparisonMetric = "bacc") {
+    bootstrap_confidence = FALSE,
+    n_bootstrap = 1000,
+    model_comparison = FALSE,
+    modelComparisonMetric = "bacc",
+    export_model = FALSE,
+    exportPredictions = FALSE,
+    show_clinical_interpretation = TRUE,
+    model_stability_analysis = FALSE,
+    learning_curves = FALSE,
+    outlier_analysis = FALSE,
+    prediction_intervals = FALSE,
+    advanced_pruning = "cp",
+    pruning_validation_split = 0.2) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("tree requires jmvcore to be installed (restart may be required)")
@@ -1177,15 +1936,13 @@ tree <- function(
     if ( ! missing(facs)) facs <- jmvcore::resolveQuo(jmvcore::enquo(facs))
     if ( ! missing(target)) target <- jmvcore::resolveQuo(jmvcore::enquo(target))
     if ( ! missing(train)) train <- jmvcore::resolveQuo(jmvcore::enquo(train))
-    if ( ! missing(spatialCoords)) spatialCoords <- jmvcore::resolveQuo(jmvcore::enquo(spatialCoords))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(facs), facs, NULL),
             `if`( ! missing(target), target, NULL),
-            `if`( ! missing(train), train, NULL),
-            `if`( ! missing(spatialCoords), spatialCoords, NULL))
+            `if`( ! missing(train), train, NULL))
 
     for (v in facs) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in target) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -1196,44 +1953,79 @@ tree <- function(
         facs = facs,
         target = target,
         targetLevel = targetLevel,
+        algorithm = algorithm,
+        tree_mode = tree_mode,
         train = train,
         trainLevel = trainLevel,
-        imputeMissing = imputeMissing,
+        validation = validation,
+        cv_folds = cv_folds,
+        cv_repeats = cv_repeats,
+        stratified_sampling = stratified_sampling,
+        data_split_method = data_split_method,
+        test_split = test_split,
+        max_depth = max_depth,
+        min_samples_split = min_samples_split,
+        min_samples_leaf = min_samples_leaf,
+        cost_complexity = cost_complexity,
+        min_n = min_n,
+        tree_depth = tree_depth,
+        hyperparameter_tuning = hyperparameter_tuning,
+        tuning_metric = tuning_metric,
+        use_1se_rule = use_1se_rule,
+        xerror_pruning = xerror_pruning,
+        auto_prune = auto_prune,
+        prune_method = prune_method,
+        c50_trials = c50_trials,
+        c50_winnow = c50_winnow,
+        ctree_mincriterion = ctree_mincriterion,
+        rf_ntree = rf_ntree,
+        rf_mtry = rf_mtry,
+        xgb_nrounds = xgb_nrounds,
+        xgb_eta = xgb_eta,
+        set_seed = set_seed,
+        seed_value = seed_value,
+        show_cp_table = show_cp_table,
+        show_variable_importance_detailed = show_variable_importance_detailed,
+        missing_data_method = missing_data_method,
         balanceClasses = balanceClasses,
-        scaleFeatures = scaleFeatures,
-        clinicalMetrics = clinicalMetrics,
-        featureImportance = featureImportance,
-        showInterpretation = showInterpretation,
-        showPlot = showPlot,
+        ensemble_method = ensemble_method,
+        n_trees = n_trees,
+        feature_selection = feature_selection,
+        feature_selection_method = feature_selection_method,
+        importance_method = importance_method,
+        show_tree_plot = show_tree_plot,
+        show_importance_plot = show_importance_plot,
+        show_performance_metrics = show_performance_metrics,
+        show_confusion_matrix = show_confusion_matrix,
+        show_roc_curve = show_roc_curve,
+        show_validation_curves = show_validation_curves,
+        show_calibration_plot = show_calibration_plot,
         showPartitionPlot = showPartitionPlot,
-        minCases = minCases,
-        maxDepth = maxDepth,
-        confidenceInterval = confidenceInterval,
-        riskStratification = riskStratification,
-        exportPredictions = exportPredictions,
-        clinicalContext = clinicalContext,
-        costRatio = costRatio,
+        show_cp_plot = show_cp_plot,
+        tree_plot_style = tree_plot_style,
+        show_node_statistics = show_node_statistics,
+        interpretability = interpretability,
+        shap_analysis = shap_analysis,
+        partial_dependence = partial_dependence,
+        interaction_analysis = interaction_analysis,
+        clinical_context = clinical_context,
+        cost_sensitive_thresholds = cost_sensitive_thresholds,
+        fn_fp_ratio = fn_fp_ratio,
         prevalenceAdjustment = prevalenceAdjustment,
         expectedPrevalence = expectedPrevalence,
-        crossValidation = crossValidation,
-        cvFolds = cvFolds,
-        bootstrapValidation = bootstrapValidation,
-        bootstrapSamples = bootstrapSamples,
-        showROCCurve = showROCCurve,
-        showCalibrationPlot = showCalibrationPlot,
-        showClinicalUtility = showClinicalUtility,
-        variableImportanceMethod = variableImportanceMethod,
-        customThresholds = customThresholds,
-        sensitivityThreshold = sensitivityThreshold,
-        specificityThreshold = specificityThreshold,
-        treeVisualization = treeVisualization,
-        showNodeStatistics = showNodeStatistics,
-        compareModels = compareModels,
-        spatialCoords = spatialCoords,
-        useAutocart = useAutocart,
-        spatialAlpha = spatialAlpha,
-        spatialBeta = spatialBeta,
-        modelComparisonMetric = modelComparisonMetric)
+        bootstrap_confidence = bootstrap_confidence,
+        n_bootstrap = n_bootstrap,
+        model_comparison = model_comparison,
+        modelComparisonMetric = modelComparisonMetric,
+        export_model = export_model,
+        exportPredictions = exportPredictions,
+        show_clinical_interpretation = show_clinical_interpretation,
+        model_stability_analysis = model_stability_analysis,
+        learning_curves = learning_curves,
+        outlier_analysis = outlier_analysis,
+        prediction_intervals = prediction_intervals,
+        advanced_pruning = advanced_pruning,
+        pruning_validation_split = pruning_validation_split)
 
     analysis <- treeClass$new(
         options = options,

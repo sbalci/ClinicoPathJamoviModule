@@ -422,3 +422,11 @@ options:
       description:
         R: Whether to optimize plot for high-quality export.
         jamovi: Optimize plot for publication/presentation export.
+
+    - name: show_comparison
+      title: "Show 5 Approaches Comparison"
+      type: Bool
+      default: false
+      description:
+        R: Whether to show comparison grid of all 5 visualization approaches.
+        jamovi: Display side-by-side comparison of different chart approaches.

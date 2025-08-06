@@ -795,10 +795,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         ## run Cox function .fitModelWithSelection ----
 
-        if (self$options$use_modelSelection) {
-          private$.checkpoint()
-          private$.final_fit2()
-        }
+        # if (self$options$use_modelSelection) {
+        #   private$.checkpoint()
+        #   private$.final_fit2()
+        # }
 
 
 

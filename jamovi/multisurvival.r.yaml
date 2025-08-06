@@ -19,7 +19,7 @@ items:
           - dxdate
           - tint
           - multievent
-          - use_modelSelection
+          # - use_modelSelection
 
     # - name:  mydataview
     #   title: mydataview
@@ -43,7 +43,7 @@ items:
           - dxdate
           - tint
           - multievent
-          - use_modelSelection
+          # - use_modelSelection
       
 
     - name:  text2
@@ -60,7 +60,7 @@ items:
           - dxdate
           - tint
           - multievent
-          - use_modelSelection
+          # - use_modelSelection
       
 
 
@@ -114,7 +114,7 @@ items:
         - dxdate
         - tint
         - multievent
-        - use_modelSelection
+        # - use_modelSelection
         - person_time
 
     - name: personTimeSummary
@@ -135,7 +135,7 @@ items:
         - dxdate
         - tint
         - multievent
-        - use_modelSelection
+        # - use_modelSelection
         - person_time
 
 
@@ -164,7 +164,7 @@ items:
           - dxdate
           - tint
           - multievent
-          - use_modelSelection
+          # - use_modelSelection
 
 
 
@@ -207,7 +207,7 @@ items:
           - dxdate
           - tint
           - multievent
-          - use_modelSelection
+          # - use_modelSelection
 
 
     - name: cox_ph
@@ -224,7 +224,7 @@ items:
           - tint
           - multievent
           - contexpl
-          - use_modelSelection
+          # - use_modelSelection
 
 
     - name: plot8
@@ -248,7 +248,7 @@ items:
           - tint
           - multievent
           - contexpl
-          - use_modelSelection
+          # - use_modelSelection
 
 
 
@@ -303,7 +303,7 @@ items:
           - pplot
           - censored
           - medianline
-          - use_modelSelection
+          # - use_modelSelection
 
 
 
@@ -348,7 +348,7 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
-          - use_modelSelection
+          # - use_modelSelection
 
 
     - name: risk_score_analysis2
@@ -362,7 +362,7 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
-          - use_modelSelection
+          # - use_modelSelection
 
 
     - name: riskScoreTable
@@ -393,7 +393,7 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
-          - use_modelSelection
+          # - use_modelSelection
 
 
     - name: riskScoreMetrics
@@ -407,7 +407,7 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
-          - use_modelSelection
+          # - use_modelSelection
 
 
 
@@ -426,7 +426,7 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
-          - use_modelSelection
+          # - use_modelSelection
 
 
 # Startification
@@ -442,7 +442,7 @@ items:
           - explanatory
           - contexpl
           - numRiskGroups
-          - use_modelSelection
+          # - use_modelSelection
 
 
 # Outputs
@@ -551,7 +551,7 @@ items:
           - pplot
           - censored
           - medianline
-          - use_modelSelection
+          # - use_modelSelection
 
 
 # Nomogram
@@ -649,69 +649,69 @@ items:
     #   type:  Preformatted
 
 
-    - name:  text_model_selection
-      title: Multivariable Survival with Model Selection
-      type:  Html
-      refs: finalfit
-      visible: (use_modelSelection)
-      clearWith:
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - explanatory
-          - contexpl
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - use_modelSelection
-          - modelSelection
-          - selectionCriteria
-          - pEntry
-          - pRemoval
+    # - name:  text_model_selection
+    #   title: Multivariable Survival with Model Selection
+    #   type:  Html
+    #   refs: finalfit
+    #   visible: (use_modelSelection)
+    #   clearWith:
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - explanatory
+    #       - contexpl
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+    #       # - use_modelSelection
+    #       - modelSelection
+    #       - selectionCriteria
+    #       - pEntry
+    #       - pRemoval
 
-    - name:  selection_method
-      title: ''
-      type:  Html
-      refs: finalfit
-      visible: (use_modelSelection)          
-      clearWith:
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - explanatory
-          - contexpl
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - use_modelSelection
-          - modelSelection
-          - selectionCriteria
-          - pEntry
-          - pRemoval
+    # - name:  selection_method
+    #   title: ''
+    #   type:  Html
+    #   refs: finalfit
+    #   visible: (use_modelSelection)          
+    #   clearWith:
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - explanatory
+    #       - contexpl
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+    #       # - use_modelSelection
+    #       - modelSelection
+    #       - selectionCriteria
+    #       - pEntry
+    #       - pRemoval
 
 
-    - name:  text2_model_selection
-      title: ''
-      type:  Html
-      refs: finalfit
-      visible: (use_modelSelection)
-      clearWith:
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - explanatory
-          - contexpl
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - use_modelSelection
-          - modelSelection
-          - selectionCriteria
-          - pEntry
-          - pRemoval
+    # - name:  text2_model_selection
+    #   title: ''
+    #   type:  Html
+    #   refs: finalfit
+    #   visible: (use_modelSelection)
+    #   clearWith:
+    #       - outcome
+    #       - outcomeLevel
+    #       - overalltime
+    #       - explanatory
+    #       - contexpl
+    #       - fudate
+    #       - dxdate
+    #       - tint
+    #       - multievent
+    #       # - use_modelSelection
+    #       - modelSelection
+    #       - selectionCriteria
+    #       - pEntry
+    #       - pRemoval
 
 
 
@@ -730,7 +730,7 @@ items:
     #       - dxdate
     #       - tint
     #       - multievent
-    #       - use_modelSelection
+    #       # - use_modelSelection
     #       - modelSelection
     #       - selectionCriteria
     #       - pEntry

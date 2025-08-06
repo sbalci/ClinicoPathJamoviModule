@@ -1,10 +1,15 @@
 # Configuration file for _updateModules.R
 # This file defines module settings, file mappings, and deployment parameters
 
+# Usage: Rscript _updateModules.R [config_file]
+
+# run  /Applications/jamovi.app/Contents/MacOS/jamovi
+
+
 # Global settings
 global:
-  new_version: "0.0.3.93"  # New version number for the modules
-  new_date: "2025-08-04" # New date for the modules
+  new_version: "0.0.3.95"  # New version number for the modules
+  new_date: "2025-08-06" # New date for the modules
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 # Operation modes

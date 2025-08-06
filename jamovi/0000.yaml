@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.93
+version: 0.0.3.95
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-04'
+date: '2025-08-06'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -64,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationD
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -664,7 +664,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -770,8 +770,8 @@ analyses:
   - title: Advanced Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
-    menuSubgroup: ClinicoPath Descriptive Plots
+    menuGroup: JJStatsPlot
+    menuSubgroup: Categorical vs Continuous
     menuTitle: Advanced Raincloud Plot
     menuSubtitle: Longitudinal & Likert Support with ggrain
     description: >
@@ -868,7 +868,7 @@ analyses:
   - title: Comparing Survival Outcomes
     name: comparingSurvival
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuTitle: Comparing Survival Outcomes
     menuSubgroup: Drafts
     menuSubtitle: SimpleSurvival
@@ -877,7 +877,7 @@ analyses:
   - title: Overall, Cause Specific, and Competing Survival
     name: competingsurvival
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Drafts
     menuTitle: Overall, Cause Specific, and Competing Survival
     menuSubtitle: Survival for Different Outcomes
@@ -896,7 +896,7 @@ analyses:
   - title: Lasso-Cox Regression
     name: lassocox
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Lasso-Cox Regression
     menuSubtitle: Variable Selection with Lasso Regularization
@@ -1048,18 +1048,24 @@ analyses:
       cutpoint determination.
     ribbon: analyses
     category: analyses
-  - title: Medical Decision Tree
+  - title: Medical Decision Tree Analysis
     name: tree
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
-    menuTitle: Medical Decision Tree
-    description: >-
-      Enhanced decision tree analysis for medical research, pathology and
-      oncology. Provides clinical performance metrics, handles missing data
-      appropriately, and offers interpretations relevant to medical
-      decision-making.
-    menuSubtitle: Diagnosis & Prognosis
+    menuTitle: Medical Decision Tree Analysis
+    description: >
+      Comprehensive decision tree analysis for medical research, pathology and
+      oncology.
+
+      Combines FFTrees (Fast-and-Frugal Trees) and enhanced CART algorithms for
+      robust
+
+      clinical decision support. Provides extensive validation, performance
+      metrics,
+
+      interpretability analysis, and clinical interpretation guidelines.
+    menuSubtitle: Advanced Clinical Decision Trees
     ribbon: analyses
     category: analyses
   - title: Combine Medical Decision Tests
@@ -1183,7 +1189,7 @@ analyses:
   - title: Decision Tree Graph
     name: decisiongraph
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Decision Tree Graph
     menuSubgroup: DecisionD
     menuSubtitle: Cost-Effectiveness Decision Tree Visualization
@@ -1205,29 +1211,6 @@ analyses:
       strategies including parallel testing (cotest), sequential testing, and
       repeated tests. Creates decision trees to minimize cost while maximizing
       accuracy.
-    ribbon: analyses
-    category: analyses
-  - title: Advanced Decision Tree Analysis
-    name: advancedtree
-    ns: ClinicoPath
-    menuGroup: meddecideT
-    menuSubgroup: Clinical Decision Support
-    menuTitle: Advanced Decision Tree Analysis
-    menuSubtitle: Modern Tree Algorithms for Clinical Research
-    description: >
-      Advanced decision tree analysis using modern algorithms for clinical
-      research and medical decision making.
-
-      Extends basic decision tree functionality with gradient boosting,
-      conditional inference trees, 
-
-      ensemble methods, and enhanced interpretability. Provides comprehensive
-      performance evaluation,
-
-      feature importance analysis, and clinical-focused visualizations.
-      Complements existing
-
-      ClinicoPath decision tree modules with state-of-the-art algorithms.
     ribbon: analyses
     category: analyses
   - title: Decision tree
@@ -1898,21 +1881,35 @@ analyses:
     name: simonmakuch
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Simon-Makuch Time-Dependent Survival Analysis
     menuSubtitle: Time-Dependent Variables, Simon-Makuch Plots, Landmark Analysis
     description: >-
-      Performs survival analysis with time-dependent variables using the
-      Simon-Makuch method. This analysis is specifically designed for situations
-      where patient characteristics or treatments change during follow-up, such
-      as biomarker changes, treatment switches, or progression events. The
-      Simon-Makuch approach properly accounts for these time-varying exposures
-      in survival estimation and comparison.
+      Performs comprehensive survival analysis with time-dependent variables
+      using the Simon-Makuch method. This specialized analysis addresses the
+      critical challenge of immortal time bias when studying treatments,
+      biomarkers, or exposures that change during patient follow-up.
 
-      Key features include Simon-Makuch plots (modified Kaplan-Meier curves),
-      landmark analysis, time-dependent Cox regression, and proper handling of
-      immortal time bias.
+      **Clinical Applications:** - Treatment effectiveness when therapy timing
+      varies (e.g., adjuvant therapy, targeted agents) - Biomarker evolution
+      studies (e.g., mutation status, protein expression changes) - Disease
+      progression impact on outcomes (e.g., metastasis development, grade
+      progression) - Healthcare intervention timing effects (e.g., surgery,
+      radiation, supportive care)
+
+      **Key Statistical Methods:** - Simon-Makuch plots: Modified Kaplan-Meier
+      curves for time-dependent exposures - Landmark analysis: Conditional
+      survival from fixed time points - Time-dependent Cox regression: Hazard
+      ratios accounting for exposure timing - Immortal time bias assessment:
+      Comparison of naive vs. proper methods - Mantel-Byar testing: Specialized
+      tests for time-dependent comparisons
+
+      **Why Use Simon-Makuch Analysis:** Standard survival analysis assumes
+      fixed baseline characteristics, leading to immortal time bias when
+      exposures change during follow-up. Simon-Makuch methods properly account
+      for the timing of exposure changes, providing unbiased survival estimates
+      and valid statistical comparisons.
   - title: Continuous Variable Relationship Analysis
     name: continuousrelationship
     ns: ClinicoPath
@@ -1925,6 +1922,25 @@ analyses:
       Analyzes relationships between continuous variables in clinical research
       using  evidence-based approaches from BMJ best practices. Avoids common
       pitfalls like  arbitrary categorization and linear assumptions.
+  - title: Medical Decision Tree Analysis
+    name: combinedtree
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Medical Decision Tree Analysis
+    menuSubtitle: Advanced Clinical Decision Trees
+    description: >
+      Comprehensive decision tree analysis for medical research, pathology and
+      oncology.
+
+      Combines FFTrees (Fast-and-Frugal Trees) and enhanced CART algorithms for
+      robust
+
+      clinical decision support. Provides extensive validation, performance
+      metrics,
+
+      interpretability analysis, and clinical interpretation guidelines.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

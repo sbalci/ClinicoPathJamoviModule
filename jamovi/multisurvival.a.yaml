@@ -1,7 +1,7 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '0.0.3'
@@ -78,19 +78,19 @@ description:
             )
             
             # Example 5: Stepwise model selection
-            multisurvival(
-                data = colon,
-                elapsedtime = "time",
-                outcome = "status",
-                outcomeLevel = "1",
-                explanatory = c("sex", "obstruct", "perfor", "adhere"),
-                contexpl = c("age", "nodes"),
-                use_modelSelection = TRUE,
-                modelSelection = "both",  # Stepwise selection
-                selectionCriteria = "aic",
-                pEntry = 0.05,
-                pRemoval = 0.10
-            )
+            # multisurvival(
+            #     data = colon,
+            #     elapsedtime = "time",
+            #     outcome = "status",
+            #     outcomeLevel = "1",
+            #     explanatory = c("sex", "obstruct", "perfor", "adhere"),
+            #     contexpl = c("age", "nodes"),
+            #     use_modelSelection = TRUE,
+            #     modelSelection = "both",  # Stepwise selection
+            #     selectionCriteria = "aic",
+            #     pEntry = 0.05,
+            #     pRemoval = 0.10
+            # )
             
             # Example 6: Person-time analysis
             multisurvival(
@@ -653,70 +653,70 @@ options:
 
 # Model Selection ----
 
-    - name: use_modelSelection
-      title: Use Models
-      type: Bool
-      default: false
-      description:
-        R: >
-          If true, applies a variable selection procedure to find the best-fitting model based on
-          criteria like AIC or likelihood ratio tests.
+    # - name: use_modelSelection
+    #   title: Use Models
+    #   type: Bool
+    #   default: false
+    #   description:
+    #     R: >
+    #       If true, applies a variable selection procedure to find the best-fitting model based on
+    #       criteria like AIC or likelihood ratio tests.
 
-    - name: modelSelection
-      title: Model Selection Method
-      type: List
-      options:
-        - title: Enter (No Selection)
-          name: enter
-        - title: Forward Selection
-          name: forward
-        - title: Backward Selection
-          name: backward
-        - title: Stepwise (Both)
-          name: both
-      default: enter
-      description:
-        R: >
-          The method used to select variables:
-          - enter: Includes all variables (no selection)
-          - forward: Adds variables one at a time if they improve the model
-          - backward: Removes variables that do not significantly contribute
-          - both: Combination of forward and backward steps
+    # - name: modelSelection
+    #   title: Model Selection Method
+    #   type: List
+    #   options:
+    #     - title: Enter (No Selection)
+    #       name: enter
+    #     - title: Forward Selection
+    #       name: forward
+    #     - title: Backward Selection
+    #       name: backward
+    #     - title: Stepwise (Both)
+    #       name: both
+    #   default: enter
+    #   description:
+    #     R: >
+    #       The method used to select variables:
+    #       - enter: Includes all variables (no selection)
+    #       - forward: Adds variables one at a time if they improve the model
+    #       - backward: Removes variables that do not significantly contribute
+    #       - both: Combination of forward and backward steps
 
-    - name: selectionCriteria
-      title: Selection Criteria
-      type: List
-      options:
-        - title: AIC (Akaike Information Criterion)
-          name: aic
-        - title: Likelihood Ratio Test
-          name: lrt
-      default: aic
-      description:
-        R: >
-          The criterion used for adding or removing variables in model selection:
-          - aic: Balances model fit and complexity
-          - lrt: Uses likelihood ratio tests to decide inclusion/removal
+    # - name: selectionCriteria
+    #   title: Selection Criteria
+    #   type: List
+    #   options:
+    #     - title: AIC (Akaike Information Criterion)
+    #       name: aic
+    #     - title: Likelihood Ratio Test
+    #       name: lrt
+    #   default: aic
+    #   description:
+    #     R: >
+    #       The criterion used for adding or removing variables in model selection:
+    #       - aic: Balances model fit and complexity
+    #       - lrt: Uses likelihood ratio tests to decide inclusion/removal
 
-    - name: pEntry
-      title: Entry Significance
-      type: Number
-      min: 0
-      max: 1
-      default: 0.05
-      description:
-        R: >
-          Significance level at which a variable enters the model during forward or stepwise selection.
+    # - name: pEntry
+    #   title: Entry Significance
+    #   type: Number
+    #   min: 0
+    #   max: 1
+    #   default: 0.05
+    #   description:
+    #     R: >
+    #       Significance level at which a variable enters the model during forward or stepwise selection.
 
-    - name: pRemoval
-      title: Removal Significance
-      type: Number
-      min: 0
-      max: 1
-      default: 0.10
-      description:
-        R: >
-          Significance level at which a variable is removed from the model during backward or stepwise selection.
+    # - name: pRemoval
+    #   title: Removal Significance
+    #   type: Number
+    #   min: 0
+    #   max: 1
+    #   default: 0.10
+    #   description:
+    #     R: >
+    #       Significance level at which a variable is removed from the model during backward or stepwise selection.
 
 
 

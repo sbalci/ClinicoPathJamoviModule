@@ -32,7 +32,8 @@ advancedbarplot(
   add_trend_line = FALSE,
   highlight_bars = "",
   transparency = 0.9,
-  export_options = TRUE
+  export_options = TRUE,
+  show_comparison = FALSE
 )
 }
 \arguments{
@@ -94,6 +95,9 @@ Prism themes.}
 \item{transparency}{Transparency level for bars (alpha value).}
 
 \item{export_options}{Whether to optimize plot for high-quality export.}
+
+\item{show_comparison}{Whether to show comparison grid of all 5
+visualization approaches.}
 }
 \value{
 A results object containing:

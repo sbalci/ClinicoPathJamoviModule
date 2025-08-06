@@ -2,205 +2,330 @@ title: Simon-Makuch Time-Dependent Survival Analysis
 name: simonmakuch
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
+  # Data Input Section
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Survival Time
+        label: Core Survival Variables
         children:
           - type: VariablesListBox
             name: survivalTime
             maxItemCount: 1
             isTarget: true
-      - type: TargetLayoutBox
-        label: Event Indicator
-        children:
+            label: Survival Time
           - type: VariablesListBox
             name: event
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: eventLevel
-  - type: VariableSupplier
-    persistentItems: false
+            label: Event Indicator
+          - type: LevelSelector
+            name: eventLevel
+            enable: (event)
+            label: Event Level
+
+  # Time-Dependent Variables Configuration
+  - type: CollapseBox
+    label: Time-Dependent Variables
+    collapsed: false
     stretchFactor: 1
     children:
-      - type: TargetLayoutBox
-        label: Time-Dependent Variable
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
         children:
-          - type: VariablesListBox
-            name: timeDepVariable
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Time-Dependent Change Time
+          - type: TargetLayoutBox
+            label: Primary Time-Dependent Variable
+            children:
+              - type: VariablesListBox
+                name: timeDepVariable
+                maxItemCount: 1
+                isTarget: true
+                label: Variable Name
+              - type: VariablesListBox
+                name: timeDepTime
+                maxItemCount: 1
+                isTarget: true
+                label: Change Time
+              - type: VariablesListBox
+                name: timeDepStatus
+                maxItemCount: 1
+                isTarget: true
+                label: Status Variable
+              - type: LevelSelector
+                name: exposedLevel
+                enable: (timeDepStatus)
+                label: Exposed Level
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: timeDepTime
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Time-Dependent Status
+          - type: CheckBox
+            name: enableMultipleTimeDep
+            label: Enable Multiple Time-Dependent Variables
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
         children:
-          - type: VariablesListBox
-            name: timeDepStatus
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: exposedLevel
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: enableMultipleTimeDep
-  - type: VariableSupplier
-    persistentItems: false
+          - type: TargetLayoutBox
+            label: Additional Time-Dependent Variables
+            children:
+              - type: VariablesListBox
+                name: additionalTimeDepVars
+                isTarget: true
+                enable: (enableMultipleTimeDep)
+
+  # Analysis Configuration
+  - type: CollapseBox
+    label: Analysis Configuration
+    collapsed: true
     stretchFactor: 1
     children:
-      - type: TargetLayoutBox
-        label: Additional Time-Dependent Variables
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: additionalTimeDepVars
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: analysisType
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: confidenceLevel
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: performLandmarkAnalysis
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: landmarkTimes
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: landmarkWindow
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: performTimeDependentCox
-  - type: VariableSupplier
-    persistentItems: false
+          - type: Label
+            label: Analysis Type & Settings
+            children:
+              - type: ComboBox
+                name: analysisType
+                label: Analysis Type
+              - type: TextBox
+                name: confidenceLevel
+                format: number
+                label: Confidence Level
+                suffix: (0.80-0.99)
+
+  # Landmark Analysis Options
+  - type: CollapseBox
+    label: Landmark Analysis
+    collapsed: true
     stretchFactor: 1
     children:
-      - type: TargetLayoutBox
-        label: Additional Covariates
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: timeDependentCovariates
-            isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: testTimeVaryingEffect
-      - type: CheckBox
-        name: assessImmortalTimeBias
-      - type: CheckBox
-        name: naiveComparison
-      - type: CheckBox
-        name: showSimonMakuchPlot
-      - type: CheckBox
-        name: showLandmarkPlots
-      - type: CheckBox
-        name: showCumulativeIncidencePlot
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: plotTimeRange
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: showConfidenceIntervals
-      - type: CheckBox
-        name: showRiskTables
-      - type: CheckBox
-        name: plotExposureStatus
-      - type: CheckBox
-        name: performLogRankTest
-      - type: CheckBox
-        name: performMantelByarTest
-      - type: CheckBox
-        name: performTimeDepLRTest
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: handleTieBreaking
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: robustVariance
-  - type: VariableSupplier
-    persistentItems: false
+          - type: CheckBox
+            name: performLandmarkAnalysis
+            label: Perform Landmark Analysis
+          - type: TextBox
+            name: landmarkTimes
+            format: string
+            enable: (performLandmarkAnalysis)
+            label: Landmark Time Points
+            suffix: (comma-separated)
+          - type: TextBox
+            name: landmarkWindow
+            format: number
+            enable: (performLandmarkAnalysis)
+            label: Landmark Window Size
+            suffix: (time units)
+
+  # Time-Dependent Cox Regression
+  - type: CollapseBox
+    label: Time-Dependent Cox Regression
+    collapsed: true
     stretchFactor: 1
     children:
-      - type: TargetLayoutBox
-        label: Cluster Variable
+      - type: LayoutBox
+        margin: large
         children:
-          - type: VariablesListBox
-            name: clusterVariable
-            maxItemCount: 1
-            isTarget: true
-  - type: LayoutBox
-    margin: large
+          - type: CheckBox
+            name: performTimeDependentCox
+            label: Perform Time-Dependent Cox Regression
+          - type: CheckBox
+            name: testTimeVaryingEffect
+            enable: (performTimeDependentCox)
+            label: Test Time-Varying Effects
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Additional Covariates
+            children:
+              - type: VariablesListBox
+                name: timeDependentCovariates
+                isTarget: true
+                enable: (performTimeDependentCox)
+
+  # Bias Assessment & Advanced Methods
+  - type: CollapseBox
+    label: Bias Assessment & Advanced Methods
+    collapsed: true
+    stretchFactor: 1
     children:
-      - type: CheckBox
-        name: showSurvivalEstimates
-      - type: CheckBox
-        name: showHazardRatios
-      - type: CheckBox
-        name: showLandmarkResults
-      - type: CheckBox
-        name: showExposurePatterns
-      - type: CheckBox
-        name: showModelDiagnostics
-      - type: CheckBox
-        name: performBootstrapValidation
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Immortal Time Bias Assessment
+            children:
+              - type: CheckBox
+                name: assessImmortalTimeBias
+                label: Assess Immortal Time Bias
+              - type: CheckBox
+                name: naiveComparison
+                label: Include Naive Comparison
+          - type: Label
+            label: Variance & Clustering
+            children:
+              - type: CheckBox
+                name: robustVariance
+                label: Robust Variance Estimation
+              - type: ComboBox
+                name: handleTieBreaking
+                label: Tie-Breaking Method
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Cluster Variable (Optional)
+            children:
+              - type: VariablesListBox
+                name: clusterVariable
+                maxItemCount: 1
+                isTarget: true
+                enable: (robustVariance)
+
+  # Statistical Testing
+  - type: CollapseBox
+    label: Statistical Testing
+    collapsed: true
+    stretchFactor: 1
     children:
-      - type: TextBox
-        name: bootstrapSamples
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Statistical Tests
+            children:
+              - type: CheckBox
+                name: performLogRankTest
+                label: Log-Rank Test
+              - type: CheckBox
+                name: performMantelByarTest
+                label: Mantel-Byar Test
+              - type: CheckBox
+                name: performTimeDepLRTest
+                label: Time-Dependent Log-Rank Test
+
+  # Visualization Options
+  - type: CollapseBox
+    label: Plots & Visualization
+    collapsed: true
+    stretchFactor: 1
     children:
-      - type: CheckBox
-        name: performSensitivityAnalysis
-      - type: CheckBox
-        name: showExplanations
-      - type: CheckBox
-        name: showMethodologyNotes
-      - type: CheckBox
-        name: includeClinicalGuidance
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Survival Plots
+            children:
+              - type: CheckBox
+                name: showSimonMakuchPlot
+                label: Simon-Makuch Plot
+              - type: CheckBox
+                name: showLandmarkPlots
+                label: Landmark Survival Plots
+              - type: CheckBox
+                name: showCumulativeIncidencePlot
+                label: Cumulative Incidence Plot
+              - type: CheckBox
+                name: plotExposureStatus
+                label: Exposure Status Over Time
+          - type: Label
+            label: Plot Formatting
+            children:
+              - type: TextBox
+                name: plotTimeRange
+                format: string
+                label: Plot Time Range
+                suffix: (months or 'auto')
+              - type: CheckBox
+                name: showConfidenceIntervals
+                label: Show Confidence Intervals
+              - type: CheckBox
+                name: showRiskTables
+                label: Show Risk Tables
+
+  # Output Tables & Results
+  - type: CollapseBox
+    label: Output Tables & Results
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Results Tables
+            children:
+              - type: CheckBox
+                name: showSurvivalEstimates
+                label: Survival Estimates Table
+              - type: CheckBox
+                name: showHazardRatios
+                label: Hazard Ratios Table
+              - type: CheckBox
+                name: showLandmarkResults
+                label: Landmark Analysis Results
+              - type: CheckBox
+                name: showExposurePatterns
+                label: Exposure Pattern Summary
+              - type: CheckBox
+                name: showModelDiagnostics
+                label: Model Diagnostics
+
+  # Validation & Sensitivity Analysis
+  - type: CollapseBox
+    label: Validation & Sensitivity Analysis
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Bootstrap Validation
+            children:
+              - type: CheckBox
+                name: performBootstrapValidation
+                label: Perform Bootstrap Validation
+              - type: TextBox
+                name: bootstrapSamples
+                format: number
+                enable: (performBootstrapValidation)
+                label: Bootstrap Samples
+                suffix: (100-2000)
+          - type: Label
+            label: Sensitivity Analysis
+            children:
+              - type: CheckBox
+                name: performSensitivityAnalysis
+                label: Perform Sensitivity Analysis
+
+  # Explanatory Output & Guidance
+  - type: CollapseBox
+    label: Explanations & Clinical Guidance
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Educational Content
+            children:
+              - type: CheckBox
+                name: showExplanations
+                label: Show Method Explanations
+              - type: CheckBox
+                name: showMethodologyNotes
+                label: Detailed Methodology Notes
+              - type: CheckBox
+                name: includeClinicalGuidance
+                label: Clinical Interpretation Guidance

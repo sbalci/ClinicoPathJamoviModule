@@ -32,7 +32,8 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             add_trend_line = FALSE,
             highlight_bars = "",
             transparency = 0.9,
-            export_options = TRUE, ...) {
+            export_options = TRUE,
+            show_comparison = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -260,6 +261,10 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "export_options",
                 export_options,
                 default=TRUE)
+            private$..show_comparison <- jmvcore::OptionBool$new(
+                "show_comparison",
+                show_comparison,
+                default=FALSE)
 
             self$.addOption(private$..x_var)
             self$.addOption(private$..y_var)
@@ -288,6 +293,7 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..highlight_bars)
             self$.addOption(private$..transparency)
             self$.addOption(private$..export_options)
+            self$.addOption(private$..show_comparison)
         }),
     active = list(
         x_var = function() private$..x_var$value,
@@ -316,7 +322,8 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         add_trend_line = function() private$..add_trend_line$value,
         highlight_bars = function() private$..highlight_bars$value,
         transparency = function() private$..transparency$value,
-        export_options = function() private$..export_options$value),
+        export_options = function() private$..export_options$value,
+        show_comparison = function() private$..show_comparison$value),
     private = list(
         ..x_var = NA,
         ..y_var = NA,
@@ -344,7 +351,8 @@ advancedbarplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..add_trend_line = NA,
         ..highlight_bars = NA,
         ..transparency = NA,
-        ..export_options = NA)
+        ..export_options = NA,
+        ..show_comparison = NA)
 )
 
 advancedbarplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -439,11 +447,12 @@ advancedbarplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=1200,
                 height=900,
                 renderFun=".plot_comparison",
-                visible=FALSE,
+                visible="(show_comparison)",
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "fill_var")))
+                    "fill_var",
+                    "show_comparison")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="code_example",
@@ -533,6 +542,8 @@ advancedbarplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param highlight_bars Comma-separated list of categories to highlight.
 #' @param transparency Transparency level for bars (alpha value).
 #' @param export_options Whether to optimize plot for high-quality export.
+#' @param show_comparison Whether to show comparison grid of all 5
+#'   visualization approaches.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -575,7 +586,8 @@ advancedbarplot <- function(
     add_trend_line = FALSE,
     highlight_bars = "",
     transparency = 0.9,
-    export_options = TRUE) {
+    export_options = TRUE,
+    show_comparison = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("advancedbarplot requires jmvcore to be installed (restart may be required)")
@@ -623,7 +635,8 @@ advancedbarplot <- function(
         add_trend_line = add_trend_line,
         highlight_bars = highlight_bars,
         transparency = transparency,
-        export_options = export_options)
+        export_options = export_options,
+        show_comparison = show_comparison)
 
     analysis <- advancedbarplotClass$new(
         options = options,

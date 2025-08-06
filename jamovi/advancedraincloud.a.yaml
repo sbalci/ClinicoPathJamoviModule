@@ -1,8 +1,8 @@
 ---
 name: advancedraincloud
 title: Advanced Raincloud Plot
-menuGroup: JJStatsPlotD
-menuSubgroup: ClinicoPath Descriptive Plots
+menuGroup: JJStatsPlot
+menuSubgroup: Categorical vs Continuous
 version: '0.0.3'
 jas: '1.2'
 
@@ -243,6 +243,7 @@ options:
     - name: clinical_cutoff
       title: Clinical Cutoff Value
       type: Number
+      default: 0
       description:
         R: >
           Add horizontal line for clinical threshold or decision boundary.
@@ -250,6 +251,7 @@ options:
     - name: reference_range_min
       title: Reference Range Minimum
       type: Number
+      default: 0
       description:
         R: >
           Lower bound of normal reference range (shaded area).
@@ -257,6 +259,7 @@ options:
     - name: reference_range_max
       title: Reference Range Maximum
       type: Number
+      default: 0
       description:
         R: >
           Upper bound of normal reference range (shaded area).
@@ -272,6 +275,7 @@ options:
     - name: mcid_value
       title: MCID Value
       type: Number
+      default: 0
       description:
         R: >
           Size of the Minimal Clinically Important Difference.
@@ -409,6 +413,26 @@ options:
       description:
         R: >
           Display coefficient of variation bands for assay variability.
+          
+    - name: cv_band_1
+      title: CV Band 1 Percentage
+      type: Number
+      min: 1
+      max: 50
+      default: 15
+      description:
+        R: >
+          First CV band percentage (typically 15% for analytical variability).
+          
+    - name: cv_band_2
+      title: CV Band 2 Percentage
+      type: Number
+      min: 1
+      max: 50
+      default: 20
+      description:
+        R: >
+          Second CV band percentage (typically 20% for biological variability).
 
     # Publication Options
     - name: p_value_position

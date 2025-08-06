@@ -2,57 +2,92 @@
 % Please edit documentation in R/tree.h.R
 \name{tree}
 \alias{tree}
-\title{Medical Decision Tree}
+\title{Medical Decision Tree Analysis}
 \usage{
 tree(
   data,
-  vars,
-  facs,
+  vars = NULL,
+  facs = NULL,
   target,
   targetLevel,
-  train,
+  algorithm = "rpart",
+  tree_mode = "classification",
+  train = NULL,
   trainLevel,
-  imputeMissing = FALSE,
+  validation = "cohort",
+  cv_folds = 5,
+  cv_repeats = 3,
+  stratified_sampling = TRUE,
+  data_split_method = "stratified",
+  test_split = 0.25,
+  max_depth = 6,
+  min_samples_split = 20,
+  min_samples_leaf = 10,
+  cost_complexity = 0.01,
+  min_n = 20,
+  tree_depth = 6,
+  hyperparameter_tuning = FALSE,
+  tuning_metric = "bacc",
+  use_1se_rule = TRUE,
+  xerror_pruning = FALSE,
+  auto_prune = FALSE,
+  prune_method = "one_se",
+  c50_trials = 1,
+  c50_winnow = FALSE,
+  ctree_mincriterion = 0.95,
+  rf_ntree = 500,
+  rf_mtry = 0,
+  xgb_nrounds = 100,
+  xgb_eta = 0.3,
+  set_seed = TRUE,
+  seed_value = 42,
+  show_cp_table = FALSE,
+  show_variable_importance_detailed = FALSE,
+  missing_data_method = "native",
   balanceClasses = FALSE,
-  scaleFeatures = FALSE,
-  clinicalMetrics = FALSE,
-  featureImportance = FALSE,
-  showInterpretation = FALSE,
-  showPlot = FALSE,
+  ensemble_method = "none",
+  n_trees = 100,
+  feature_selection = FALSE,
+  feature_selection_method = "tree_importance",
+  importance_method = "gini",
+  show_tree_plot = TRUE,
+  show_importance_plot = TRUE,
+  show_performance_metrics = TRUE,
+  show_confusion_matrix = TRUE,
+  show_roc_curve = TRUE,
+  show_validation_curves = FALSE,
+  show_calibration_plot = FALSE,
   showPartitionPlot = FALSE,
-  minCases = 10,
-  maxDepth = 4,
-  confidenceInterval = FALSE,
-  riskStratification = FALSE,
-  exportPredictions = FALSE,
-  clinicalContext = "diagnosis",
-  costRatio = 1,
+  show_cp_plot = FALSE,
+  tree_plot_style = "standard",
+  show_node_statistics = FALSE,
+  interpretability = FALSE,
+  shap_analysis = FALSE,
+  partial_dependence = FALSE,
+  interaction_analysis = FALSE,
+  clinical_context = "diagnosis",
+  cost_sensitive_thresholds = FALSE,
+  fn_fp_ratio = 1,
   prevalenceAdjustment = FALSE,
   expectedPrevalence = 10,
-  crossValidation = FALSE,
-  cvFolds = 5,
-  bootstrapValidation = FALSE,
-  bootstrapSamples = 1000,
-  showROCCurve = FALSE,
-  showCalibrationPlot = FALSE,
-  showClinicalUtility = FALSE,
-  variableImportanceMethod = "frequency",
-  customThresholds = FALSE,
-  sensitivityThreshold = 0.8,
-  specificityThreshold = 0.8,
-  treeVisualization = "standard",
-  showNodeStatistics = FALSE,
-  compareModels = FALSE,
-  spatialCoords,
-  useAutocart = FALSE,
-  spatialAlpha = 0.5,
-  spatialBeta = 0.5,
-  modelComparisonMetric = "bacc"
+  bootstrap_confidence = FALSE,
+  n_bootstrap = 1000,
+  model_comparison = FALSE,
+  modelComparisonMetric = "bacc",
+  export_model = FALSE,
+  exportPredictions = FALSE,
+  show_clinical_interpretation = TRUE,
+  model_stability_analysis = FALSE,
+  learning_curves = FALSE,
+  outlier_analysis = FALSE,
+  prediction_intervals = FALSE,
+  advanced_pruning = "cp",
+  pruning_validation_split = 0.2
 )
 }
 \arguments{
 \item{data}{The data as a data frame containing clinical variables,
-biomarkers,  and patient outcomes.}
+biomarkers,  and patient outcomes for decision tree analysis.}
 
 \item{vars}{Continuous variables such as biomarker levels, age,  laboratory
 values, or quantitative pathological measurements.}
@@ -64,57 +99,204 @@ type, or patient demographics.}
 survival status, or diagnostic category.}
 
 \item{targetLevel}{Level representing disease presence, positive outcome,
-or event of interest.}
+or event of interest for binary classification.}
+
+\item{algorithm}{Algorithm to use: rpart provides traditional CART with
+pruning; FFTrees creates simple, interpretable trees for medical decisions;
+C5.0 offers advanced classification with boosting; ctree uses statistical
+tests for splits; mob combines trees with parametric models; Random Forest
+uses ensemble of trees for high accuracy; XGBoost provides gradient
+boosting for complex patterns.}
+
+\item{tree_mode}{Type of prediction problem: classification for disease
+presence/absence, regression for continuous biomarkers, survival for
+time-to-event analysis.}
 
 \item{train}{Variable indicating training vs validation cohorts.  If not
 provided, data will be split automatically.}
 
 \item{trainLevel}{Level indicating the training/discovery cohort.}
 
-\item{imputeMissing}{Impute missing values using medically appropriate
-methods  (median within disease groups for continuous, mode for
-categorical).}
+\item{validation}{Validation approach: cohort uses train variable if
+provided, otherwise performs automatic splitting with selected method.
+Stratified CV maintains class proportions, Repeated CV averages multiple
+runs.}
+
+\item{cv_folds}{Number of folds for cross-validation. 5-fold provides good
+balance between bias and variance for clinical datasets.}
+
+\item{cv_repeats}{Number of times to repeat cross-validation (for repeated
+CV). More repeats provide more stable estimates but increase computation
+time.}
+
+\item{stratified_sampling}{Maintain class proportions in train/test splits.
+Recommended for imbalanced medical datasets.}
+
+\item{data_split_method}{Method for splitting data into train/test sets.
+Stratified maintains original class proportions for clinical validity.}
+
+\item{test_split}{Proportion of data reserved for testing (holdout
+validation). Optimal ratio is 25\\% test / 75\\% train as recommended for
+decision trees.}
+
+\item{max_depth}{Maximum depth of decision tree. Deeper trees capture more
+interactions but may overfit. Clinical trees typically 2-8 levels.}
+
+\item{min_samples_split}{Minimum number of samples required to split a
+node. Higher values prevent overfitting in clinical data.}
+
+\item{min_samples_leaf}{Minimum number of samples in leaf nodes. Important
+for clinical validity - too few samples reduce reliability.}
+
+\item{cost_complexity}{Cost complexity parameter (tidymodels:
+cost_complexity). Controls pruning -  lower values create more complex
+trees. Corresponds to CP in rpart.}
+
+\item{min_n}{Minimum number of data points in a node (tidymodels: min_n).
+Higher values prevent overfitting in clinical data.}
+
+\item{tree_depth}{Maximum tree depth (tidymodels: tree_depth). Deeper trees
+capture  more interactions but may overfit. Clinical trees typically 2-8
+levels.}
+
+\item{hyperparameter_tuning}{Automatically optimize tree parameters using
+cross-validation. Finds optimal complexity parameter and tree structure for
+best performance.}
+
+\item{tuning_metric}{Metric to optimize during hyperparameter tuning.
+Choose based on clinical priorities (e.g., sensitivity for screening).}
+
+\item{use_1se_rule}{Apply 1-standard-error rule for selecting simpler
+models. Chooses most parsimonious tree within 1 SE of optimal performance.}
+
+\item{xerror_pruning}{Use cross-validation error (xerror) from CP table for
+optimal pruning. Automatically selects CP value that minimizes xerror.}
+
+\item{auto_prune}{Automatically prune tree to optimal size based on
+cross-validation. Prevents overfitting while maintaining predictive
+performance.}
+
+\item{prune_method}{Method for selecting optimal tree size after
+cross-validation. 1-SE rule provides good balance between accuracy and
+simplicity.}
+
+\item{c50_trials}{Number of boosting iterations for C5.0 algorithm. More
+trials improve accuracy but reduce interpretability.}
+
+\item{c50_winnow}{Enable winnowing in C5.0 to remove irrelevant attributes.
+Useful for high-dimensional clinical data.}
+
+\item{ctree_mincriterion}{Statistical criterion for ctree splits (1 -
+p-value threshold). Higher values create simpler, more conservative trees.}
+
+\item{rf_ntree}{Number of trees in random forest. More trees generally
+improve performance but increase computation time.}
+
+\item{rf_mtry}{Number of variables randomly sampled at each split. 0 =
+automatic selection (sqrt for classification, p/3 for regression).}
+
+\item{xgb_nrounds}{Number of boosting rounds for XGBoost. More rounds can
+improve performance but risk overfitting.}
+
+\item{xgb_eta}{Learning rate for XGBoost. Lower values require more rounds
+but can lead to better performance.}
+
+\item{set_seed}{Set random seed for reproducible results across runs.
+Essential for clinical research reproducibility.}
+
+\item{seed_value}{Specific seed value for random number generation. Use
+same value to reproduce exact results.}
+
+\item{show_cp_table}{Display CP table showing tree complexity vs
+performance. Helps understand pruning decisions and model selection.}
+
+\item{show_variable_importance_detailed}{Display comprehensive variable
+importance analysis including surrogate splits and interaction effects.}
+
+\item{missing_data_method}{Method for handling missing clinical data.
+Native rpart handling  uses surrogate splits, which is often optimal for
+clinical data.}
 
 \item{balanceClasses}{Balance classes to handle rare diseases or imbalanced
 outcomes.  Recommended for disease prevalence <20\\%.}
 
-\item{scaleFeatures}{Standardize continuous variables (useful when
-combining  biomarkers with different scales/units).}
+\item{ensemble_method}{Ensemble method to improve prediction accuracy and
+robustness. Single trees are most interpretable; ensembles offer better
+performance.}
 
-\item{clinicalMetrics}{Display sensitivity, specificity, predictive values,
-likelihood ratios, and other clinical metrics.}
+\item{n_trees}{Number of trees in ensemble methods. More trees generally
+improve  performance but increase computation time.}
 
-\item{featureImportance}{Identify most important clinical variables and
-biomarkers  for the decision tree.}
+\item{feature_selection}{Perform automated feature selection using advanced
+algorithms. Helps identify most relevant clinical variables and biomarkers.}
 
-\item{showInterpretation}{Provide clinical interpretation of results
-including  diagnostic utility and clinical recommendations.}
+\item{feature_selection_method}{Method for feature selection: Tree-based
+uses rpart importance; Boruta identifies all-relevant features using
+permutation tests; Variable Importance uses advanced metrics from caret
+package.}
 
-\item{showPlot}{Display visual representation of the decision tree.}
+\item{importance_method}{Method for calculating feature importance.
+Permutation and SHAP provide more reliable importance for clinical
+interpretation.}
+
+\item{show_tree_plot}{Display visual representation of the decision tree.
+Shows decision paths and node information.}
+
+\item{show_importance_plot}{Display feature importance rankings. Critical
+for understanding which clinical variables drive predictions.}
+
+\item{show_performance_metrics}{Display comprehensive performance
+evaluation including accuracy, sensitivity, specificity, AUC, and clinical
+metrics.}
+
+\item{show_confusion_matrix}{Display detailed confusion matrix with
+clinical interpretations. Shows actual vs predicted classifications.}
+
+\item{show_roc_curve}{Display ROC curve analysis for binary classification.
+Essential for clinical decision making and threshold selection.}
+
+\item{show_validation_curves}{Display learning curves and validation
+performance. Helps assess overfitting and training adequacy.}
+
+\item{show_calibration_plot}{Display probability calibration plot.
+Important for clinical applications requiring reliable probability
+estimates.}
 
 \item{showPartitionPlot}{Display 2D decision boundary visualization using
 parttree.  Requires exactly 2 continuous variables for optimal
 visualization.}
 
-\item{minCases}{Minimum number of cases required in each terminal node
-(higher values prevent overfitting).}
+\item{show_cp_plot}{Display CP plot showing cross-validation error vs tree
+complexity. Essential for understanding optimal pruning levels.}
 
-\item{maxDepth}{Maximum depth of decision tree (deeper trees may overfit).}
+\item{tree_plot_style}{Visualization style optimized for different clinical
+audiences. Medical: simplified for clinical staff; Clinical: detailed for
+researchers.}
 
-\item{confidenceInterval}{Display confidence intervals for performance
-metrics.}
+\item{show_node_statistics}{Display detailed statistics for each node
+including sample sizes, purity measures, and class distributions.}
 
-\item{riskStratification}{Analyze risk stratification performance and
-create  risk categories based on tree predictions.}
+\item{interpretability}{Perform advanced interpretability analysis
+including SHAP values, partial dependence plots, and interaction effects.}
 
-\item{exportPredictions}{Add predicted classifications and probabilities to
-the dataset.}
+\item{shap_analysis}{Calculate SHAP (SHapley Additive exPlanations) values
+for individual prediction explanations. Powerful for clinical decision
+support.}
 
-\item{clinicalContext}{Clinical context affects interpretation thresholds
-and  recommendations (e.g., screening requires high sensitivity).}
+\item{partial_dependence}{Show how individual features affect predictions
+across their value ranges. Helps understand clinical relationships.}
 
-\item{costRatio}{Relative cost of missing a case vs false alarm.  Higher
-values favor sensitivity over specificity.}
+\item{interaction_analysis}{Analyze interactions between clinical
+variables. Important for understanding combined effects of biomarkers.}
+
+\item{clinical_context}{Clinical application context. Affects performance
+thresholds, interpretation guidelines, and visualization emphasis.}
+
+\item{cost_sensitive_thresholds}{Optimize decision thresholds considering
+clinical costs of false positives vs false negatives.}
+
+\item{fn_fp_ratio}{Relative cost of missing a positive case vs false alarm.
+Screening (high ratio), confirmation tests (low ratio).}
 
 \item{prevalenceAdjustment}{Adjust predictive values for expected disease
 prevalence  in target population (different from study sample).}
@@ -122,112 +304,120 @@ prevalence  in target population (different from study sample).}
 \item{expectedPrevalence}{Expected disease prevalence in target population
 for  adjusted predictive value calculations.}
 
-\item{crossValidation}{Perform k-fold cross-validation for robust
-performance estimation.}
+\item{bootstrap_confidence}{Calculate bootstrap confidence intervals for
+performance metrics. Provides uncertainty quantification for clinical
+reporting.}
 
-\item{cvFolds}{Number of folds for cross-validation (typically 5 or 10).}
+\item{n_bootstrap}{Number of bootstrap samples for confidence interval
+calculation. More samples provide better estimates but increase computation
+time.}
 
-\item{bootstrapValidation}{Perform bootstrap validation for confidence
-intervals on performance metrics.}
+\item{model_comparison}{Compare performance of multiple algorithms
+(FFTrees, CART, Logistic Regression). Useful for selecting the best
+approach for your data.}
 
-\item{bootstrapSamples}{Number of bootstrap samples for confidence interval
-calculation.}
+\item{modelComparisonMetric}{Primary metric for comparing algorithms.
+Choose based on clinical priorities (sensitivity for screening, specificity
+for confirmation).}
 
-\item{showROCCurve}{Display ROC curve with AUC for model discrimination
-assessment.}
+\item{export_model}{Export the trained model for external use or
+deployment. Useful for clinical decision support system integration.}
 
-\item{showCalibrationPlot}{Display probability calibration plot to assess
-prediction reliability.}
+\item{exportPredictions}{Add predicted classifications and probabilities to
+the dataset for further analysis or reporting.}
 
-\item{showClinicalUtility}{Display clinical utility curve for threshold
-optimization.}
+\item{show_clinical_interpretation}{Display comprehensive clinical
+interpretation guidelines specific to the selected clinical context and
+results.}
 
-\item{variableImportanceMethod}{Method for calculating variable importance
-in decision trees.}
+\item{model_stability_analysis}{Analyze model stability across bootstrap
+samples by examining consistency of splits, variable selection, and
+predictions.}
 
-\item{customThresholds}{Set custom thresholds for clinical performance
-interpretation.}
+\item{learning_curves}{Display learning curves showing performance vs
+training size. Helps determine optimal sample size and detect overfitting.}
 
-\item{sensitivityThreshold}{Minimum sensitivity threshold for clinical
-acceptability.}
+\item{outlier_analysis}{Identify influential observations and outliers that
+may disproportionately affect tree structure and predictions.}
 
-\item{specificityThreshold}{Minimum specificity threshold for clinical
-acceptability.}
+\item{prediction_intervals}{Calculate confidence intervals for individual
+predictions using bootstrap or cross-validation methods.}
 
-\item{treeVisualization}{Style of decision tree visualization display.}
+\item{advanced_pruning}{Pruning method: CP uses cross-validation error, REP
+uses holdout validation, MEP considers both error and tree size for optimal
+clinical interpretability.}
 
-\item{showNodeStatistics}{Display detailed statistics at each decision tree
-node.}
-
-\item{compareModels}{Compare FFTrees performance with logistic regression,
-CART, and autocart (if spatial coordinates provided).}
-
-\item{spatialCoords}{X and Y coordinates for spatial analysis. Required for
-autocart spatial regression trees. Typically longitude/latitude or tissue
-microarray coordinates.}
-
-\item{useAutocart}{Enable spatial-aware regression trees using autocart
-methodology. Requires spatial coordinates (X, Y variables).}
-
-\item{spatialAlpha}{Weight for spatial autocorrelation in autocart
-splitting (0.0-1.0). Higher values emphasize spatial clustering in decision
-tree splits.}
-
-\item{spatialBeta}{Weight for spatial compactness in autocart splitting
-(0.0-1.0). Higher values favor spatially compact regions in tree
-partitions.}
-
-\item{modelComparisonMetric}{Primary metric for comparing model
-performance.}
+\item{pruning_validation_split}{Proportion of data reserved for pruning
+validation (REP/MEP methods). This is separate from the main test set.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text2a} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text2b} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text3} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text4} \tab \tab \tab \tab \tab a html \cr
-\code{results$dataQuality} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$missingDataReport} \tab \tab \tab \tab \tab a table \cr
-\code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$clinicalMetrics} \tab \tab \tab \tab \tab a table \cr
-\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
-\code{results$featureImportance} \tab \tab \tab \tab \tab a table \cr
-\code{results$riskStratification} \tab \tab \tab \tab \tab a table \cr
-\code{results$confusionMatrix} \tab \tab \tab \tab \tab a table \cr
-\code{results$adjustedMetrics} \tab \tab \tab \tab \tab a table \cr
-\code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr
-\code{results$bootstrapResults} \tab \tab \tab \tab \tab a table \cr
-\code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
-\code{results$spatialAnalysis} \tab \tab \tab \tab \tab a table \cr
-\code{results$spatialInterpretation} \tab \tab \tab \tab \tab a html \cr
-\code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$text1} \tab \tab \tab \tab \tab a html \cr
+\code{results$progress_feedback} \tab \tab \tab \tab \tab a html \cr
+\code{results$model_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$performance_table} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalMetricsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$performance_table_explanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$confusion_matrix} \tab \tab \tab \tab \tab a html \cr
+\code{results$confusion_matrix_explanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$confusion_matrix_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$tree_plot_explanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$partitionPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$rocPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$calibrationPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$clinicalUtilityPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$deploymentGuidelines} \tab \tab \tab \tab \tab a html \cr
-\code{results$predictions} \tab \tab \tab \tab \tab an output \cr
-\code{results$probabilities} \tab \tab \tab \tab \tab an output \cr
+\code{results$importance_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$importance_plot_explanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$featureImportanceTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$roc_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$roc_plot_explanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$validation_curves} \tab \tab \tab \tab \tab an image \cr
+\code{results$calibration_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$shap_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$partial_dependence_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$interaction_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$clinical_interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$riskStratification} \tab \tab \tab \tab \tab a html \cr
+\code{results$feature_selection_results} \tab \tab \tab \tab \tab a html \cr
+\code{results$bootstrap_intervals} \tab \tab \tab \tab \tab a html \cr
+\code{results$crossValidationTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$cp_table_analysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$cp_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$detailed_importance_analysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$model_export} \tab \tab \tab \tab \tab a html \cr
+\code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$stability_analysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$stability_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$learning_curves_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$outlier_analysis_results} \tab \tab \tab \tab \tab a html \cr
+\code{results$outlier_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$prediction_intervals_table} \tab \tab \tab \tab \tab a table \cr
+\code{results$pruning_analysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$enhanced_cv_results} \tab \tab \tab \tab \tab a html \cr
+\code{results$enhanced_cv_table} \tab \tab \tab \tab \tab a table \cr
+\code{results$enhanced_confusion_matrix} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$missingDataReport$asDF}
+\code{results$performance_table$asDF}
 
-\code{as.data.frame(results$missingDataReport)}
+\code{as.data.frame(results$performance_table)}
 }
 \description{
-Enhanced decision tree analysis for medical research, pathology and
-oncology. Provides clinical performance metrics, handles missing data
-appropriately, and offers interpretations relevant to medical
-decision-making.
+Comprehensive decision tree analysis for medical research, pathology and
+oncology.
+Combines FFTrees (Fast-and-Frugal Trees) and enhanced CART algorithms for
+robust
+clinical decision support. Provides extensive validation, performance
+metrics,
+interpretability analysis, and clinical interpretation guidelines.
 }
 \examples{
-# Example for cancer diagnosis
+# Example for cancer diagnosis with comprehensive analysis
 data(cancer_biomarkers)
 tree(
     data = cancer_biomarkers,
@@ -235,10 +425,11 @@ tree(
     facs = c("grade", "stage"),
     target = "diagnosis",
     targetLevel = "cancer",
-    train = "cohort",
-    trainLevel = "discovery",
-    imputeMissing = TRUE,
-    balanceClasses = TRUE
+    algorithm = "fftrees",
+    validation = "cv",
+    show_performance_metrics = TRUE,
+    show_tree_plot = TRUE,
+    interpretability = TRUE
 )
 
 }

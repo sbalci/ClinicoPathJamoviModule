@@ -25,11 +25,11 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             show_statistics = TRUE,
             show_comparisons = FALSE,
             show_interpretation = TRUE,
-            clinical_cutoff = NULL,
-            reference_range_min = NULL,
-            reference_range_max = NULL,
+            clinical_cutoff = 0,
+            reference_range_min = 0,
+            reference_range_max = 0,
             show_mcid = FALSE,
-            mcid_value = NULL,
+            mcid_value = 0,
             show_effect_size = FALSE,
             effect_size_type = "cohens_d",
             show_change_scores = FALSE,
@@ -43,6 +43,8 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             log_transform = FALSE,
             outlier_method = "none",
             show_cv_bands = FALSE,
+            cv_band_1 = 15,
+            cv_band_2 = 20,
             p_value_position = "above",
             journal_style = "default",
             generate_report = FALSE,
@@ -179,20 +181,24 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 default=TRUE)
             private$..clinical_cutoff <- jmvcore::OptionNumber$new(
                 "clinical_cutoff",
-                clinical_cutoff)
+                clinical_cutoff,
+                default=0)
             private$..reference_range_min <- jmvcore::OptionNumber$new(
                 "reference_range_min",
-                reference_range_min)
+                reference_range_min,
+                default=0)
             private$..reference_range_max <- jmvcore::OptionNumber$new(
                 "reference_range_max",
-                reference_range_max)
+                reference_range_max,
+                default=0)
             private$..show_mcid <- jmvcore::OptionBool$new(
                 "show_mcid",
                 show_mcid,
                 default=FALSE)
             private$..mcid_value <- jmvcore::OptionNumber$new(
                 "mcid_value",
-                mcid_value)
+                mcid_value,
+                default=0)
             private$..show_effect_size <- jmvcore::OptionBool$new(
                 "show_effect_size",
                 show_effect_size,
@@ -259,6 +265,18 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "show_cv_bands",
                 show_cv_bands,
                 default=FALSE)
+            private$..cv_band_1 <- jmvcore::OptionNumber$new(
+                "cv_band_1",
+                cv_band_1,
+                min=1,
+                max=50,
+                default=15)
+            private$..cv_band_2 <- jmvcore::OptionNumber$new(
+                "cv_band_2",
+                cv_band_2,
+                min=1,
+                max=50,
+                default=20)
             private$..p_value_position <- jmvcore::OptionList$new(
                 "p_value_position",
                 p_value_position,
@@ -324,6 +342,8 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..log_transform)
             self$.addOption(private$..outlier_method)
             self$.addOption(private$..show_cv_bands)
+            self$.addOption(private$..cv_band_1)
+            self$.addOption(private$..cv_band_2)
             self$.addOption(private$..p_value_position)
             self$.addOption(private$..journal_style)
             self$.addOption(private$..generate_report)
@@ -367,6 +387,8 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         log_transform = function() private$..log_transform$value,
         outlier_method = function() private$..outlier_method$value,
         show_cv_bands = function() private$..show_cv_bands$value,
+        cv_band_1 = function() private$..cv_band_1$value,
+        cv_band_2 = function() private$..cv_band_2$value,
         p_value_position = function() private$..p_value_position$value,
         journal_style = function() private$..journal_style$value,
         generate_report = function() private$..generate_report$value,
@@ -409,6 +431,8 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..log_transform = NA,
         ..outlier_method = NA,
         ..show_cv_bands = NA,
+        ..cv_band_1 = NA,
+        ..cv_band_2 = NA,
         ..p_value_position = NA,
         ..journal_style = NA,
         ..generate_report = NA,
@@ -439,7 +463,7 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="todo",
                 title="Instructions",
-                visible=FALSE))
+                visible="(y_var:null || x_var:null)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -577,6 +601,10 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param outlier_method Method for handling outliers in the data.
 #' @param show_cv_bands Display coefficient of variation bands for assay
 #'   variability.
+#' @param cv_band_1 First CV band percentage (typically 15\% for analytical
+#'   variability).
+#' @param cv_band_2 Second CV band percentage (typically 20\% for biological
+#'   variability).
 #' @param p_value_position Where to display p-values from group comparisons.
 #' @param journal_style Apply journal-specific formatting guidelines.
 #' @param generate_report Generate comprehensive clinical analysis report.
@@ -616,11 +644,11 @@ advancedraincloud <- function(
     show_statistics = TRUE,
     show_comparisons = FALSE,
     show_interpretation = TRUE,
-    clinical_cutoff,
-    reference_range_min,
-    reference_range_max,
+    clinical_cutoff = 0,
+    reference_range_min = 0,
+    reference_range_max = 0,
     show_mcid = FALSE,
-    mcid_value,
+    mcid_value = 0,
     show_effect_size = FALSE,
     effect_size_type = "cohens_d",
     show_change_scores = FALSE,
@@ -634,6 +662,8 @@ advancedraincloud <- function(
     log_transform = FALSE,
     outlier_method = "none",
     show_cv_bands = FALSE,
+    cv_band_1 = 15,
+    cv_band_2 = 20,
     p_value_position = "above",
     journal_style = "default",
     generate_report = FALSE,
@@ -695,6 +725,8 @@ advancedraincloud <- function(
         log_transform = log_transform,
         outlier_method = outlier_method,
         show_cv_bands = show_cv_bands,
+        cv_band_1 = cv_band_1,
+        cv_band_2 = cv_band_2,
         p_value_position = p_value_position,
         journal_style = journal_style,
         generate_report = generate_report,
