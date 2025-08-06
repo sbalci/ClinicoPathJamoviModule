@@ -1,3 +1,22 @@
+# ClinicoPath 0.0.3.95
+
+## Bug Fixes
+
+### Tree Module Syntax Corrections
+- **Fixed Critical Syntax Errors**: Resolved multiple syntax errors in tree.b.R that were preventing module compilation
+- **Restored .train_model Function**: Corrected and fully restored the .train_model function (lines 1351-2121) with proper syntax
+- **Variable Initialization Fixes**: Fixed variable scoping issues including proper initialization of positive_level, negative_class, and target_level variables
+- **Algorithm Support**: Ensured proper support for all tree algorithms (fftrees, rpart, c50, ctree, mob, randomforest, xgboost)
+- **Error Handling**: Improved error handling with informative error messages for better user experience
+- **Documentation Compilation**: Fixed all parse errors to ensure successful devtools::document() execution
+
+### Enhanced Decision Analysis Framework
+- **Health Economics Integration**: Enhanced decisiongraph module with health economics features from Jacob Smith's cost-effectiveness analysis framework
+- **Net Monetary Benefit (NMB)**: Added NMB calculations with willingness-to-pay threshold support for health technology assessment
+- **ICER Analysis**: Implemented incremental cost-effectiveness ratio calculations for comparative analysis
+- **Probabilistic Sensitivity Analysis**: Added Monte Carlo simulation capabilities for parameter uncertainty assessment
+- **Cost-Effectiveness Acceptability Curves**: Enhanced visualization with CEAC plots for decision-making support
+
 # ClinicoPath 0.0.3.90
 
 ## Documentation Updates

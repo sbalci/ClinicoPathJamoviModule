@@ -664,7 +664,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -868,7 +868,7 @@ analyses:
   - title: Comparing Survival Outcomes
     name: comparingSurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuTitle: Comparing Survival Outcomes
     menuSubgroup: Drafts
     menuSubtitle: SimpleSurvival
@@ -877,7 +877,7 @@ analyses:
   - title: Overall, Cause Specific, and Competing Survival
     name: competingsurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: Drafts
     menuTitle: Overall, Cause Specific, and Competing Survival
     menuSubtitle: Survival for Different Outcomes
@@ -896,7 +896,7 @@ analyses:
   - title: Lasso-Cox Regression
     name: lassocox
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Lasso-Cox Regression
     menuSubtitle: Variable Selection with Lasso Regularization
@@ -1051,7 +1051,7 @@ analyses:
   - title: Medical Decision Tree Analysis
     name: tree
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Medical Decision Tree Analysis
     description: >
@@ -1189,7 +1189,7 @@ analyses:
   - title: Decision Tree Graph
     name: decisiongraph
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Decision Tree Graph
     menuSubgroup: DecisionD
     menuSubtitle: Cost-Effectiveness Decision Tree Visualization
@@ -1881,7 +1881,7 @@ analyses:
     name: simonmakuch
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Simon-Makuch Time-Dependent Survival Analysis
     menuSubtitle: Time-Dependent Variables, Simon-Makuch Plots, Landmark Analysis
@@ -1922,25 +1922,6 @@ analyses:
       Analyzes relationships between continuous variables in clinical research
       using  evidence-based approaches from BMJ best practices. Avoids common
       pitfalls like  arbitrary categorization and linear assumptions.
-  - title: Medical Decision Tree Analysis
-    name: combinedtree
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: meddecideT
-    menuSubgroup: Clinical Decision Support
-    menuTitle: Medical Decision Tree Analysis
-    menuSubtitle: Advanced Clinical Decision Trees
-    description: >
-      Comprehensive decision tree analysis for medical research, pathology and
-      oncology.
-
-      Combines FFTrees (Fast-and-Frugal Trees) and enhanced CART algorithms for
-      robust
-
-      clinical decision support. Provides extensive validation, performance
-      metrics,
-
-      interpretability analysis, and clinical interpretation guidelines.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

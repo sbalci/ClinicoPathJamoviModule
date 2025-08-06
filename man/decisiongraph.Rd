@@ -33,10 +33,29 @@ decisiongraph(
   tornado = FALSE,
   decisionComparison = TRUE,
   incrementalAnalysis = TRUE,
+  dominanceAnalysis = TRUE,
+  icer_confidence_intervals = FALSE,
   probabilisticAnalysis = FALSE,
+  psa_advanced_outputs = FALSE,
   numSimulations = 1000,
+  markovAdvanced = FALSE,
+  tunnelStates,
+  timeVaryingTransitions = FALSE,
+  ageSpecificTransitions,
   chanceNodeMethod = "simple",
-  riskAdjustment = FALSE
+  riskAdjustment = FALSE,
+  cycleCorrection = TRUE,
+  cohortTrace = FALSE,
+  cohortSize = 1000,
+  valueOfInformation = FALSE,
+  evpi_parameters,
+  budgetImpactAnalysis = FALSE,
+  targetPopulationSize = 10000,
+  marketPenetration = 0.5,
+  ceacThresholds = "0,100000,5000",
+  psa_distributions = "normal",
+  correlatedParameters = FALSE,
+  correlationMatrix
 )
 }
 \arguments{
@@ -105,17 +124,71 @@ decision paths.}
 \item{incrementalAnalysis}{Perform incremental cost-effectiveness ratio
 (ICER) calculations.}
 
+\item{dominanceAnalysis}{Identify dominated and extendedly dominated
+strategies in ICER analysis.}
+
+\item{icer_confidence_intervals}{Calculate confidence intervals for ICERs
+using bootstrap or PSA results.}
+
 \item{probabilisticAnalysis}{Perform probabilistic sensitivity analysis
 using Monte Carlo simulation.}
 
+\item{psa_advanced_outputs}{Generate advanced PSA outputs (CEAC, EVPI, net
+benefit distributions).}
+
 \item{numSimulations}{Number of Monte Carlo simulations for probabilistic
 analysis.}
+
+\item{markovAdvanced}{Enable advanced Markov modeling features.}
+
+\item{tunnelStates}{Define tunnel states for temporary health states.}
+
+\item{timeVaryingTransitions}{Allow transition probabilities to change over
+time.}
+
+\item{ageSpecificTransitions}{Variables defining age-specific transition
+rates.}
 
 \item{chanceNodeMethod}{Method for calculating probabilities at chance
 nodes.}
 
 \item{riskAdjustment}{Apply risk adjustment to probabilities based on
 patient characteristics.}
+
+\item{cycleCorrection}{Apply half-cycle correction for more accurate
+discounting in Markov models.}
+
+\item{cohortTrace}{Generate cohort trace showing population distribution
+across health states over time.}
+
+\item{cohortSize}{Size of hypothetical cohort for trace analysis and budget
+impact modeling.}
+
+\item{valueOfInformation}{Perform Expected Value of Perfect Information
+(EVPI) and partial EVPI analysis.}
+
+\item{evpi_parameters}{Parameters for partial EVPI analysis.}
+
+\item{budgetImpactAnalysis}{Perform budget impact analysis comparing total
+costs of alternative strategies.}
+
+\item{targetPopulationSize}{Size of target population for budget impact
+calculations.}
+
+\item{marketPenetration}{Expected market penetration rate for new
+intervention.}
+
+\item{ceacThresholds}{Cost-effectiveness acceptability curve thresholds
+(min,max,step).}
+
+\item{psa_distributions}{Default probability distribution for uncertain
+parameters in PSA.}
+
+\item{correlatedParameters}{Account for correlations between uncertain
+parameters in PSA.}
+
+\item{correlationMatrix}{Variables defining correlation structure between
+uncertain parameters.}
 }
 \value{
 A results object containing:
