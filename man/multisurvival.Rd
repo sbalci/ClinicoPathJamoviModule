@@ -43,11 +43,6 @@ multisurvival(
   adjexplanatory,
   ac_method = "average",
   showNomogram = FALSE,
-  use_modelSelection = FALSE,
-  modelSelection = "enter",
-  selectionCriteria = "aic",
-  pEntry = 0.05,
-  pRemoval = 0.1,
   use_stratify = FALSE,
   stratvar,
   person_time = FALSE,
@@ -196,25 +191,6 @@ based on their calculated risk scores and plots their survival curves.}
 
 \item{showNomogram}{.}
 
-\item{use_modelSelection}{If true, applies a variable selection procedure
-to find the best-fitting model based on criteria like AIC or likelihood
-ratio tests.}
-
-\item{modelSelection}{The method used to select variables: - enter:
-Includes all variables (no selection) - forward: Adds variables one at a
-time if they improve the model - backward: Removes variables that do not
-significantly contribute - both: Combination of forward and backward steps}
-
-\item{selectionCriteria}{The criterion used for adding or removing
-variables in model selection: - aic: Balances model fit and complexity -
-lrt: Uses likelihood ratio tests to decide inclusion/removal}
-
-\item{pEntry}{Significance level at which a variable enters the model
-during forward or stepwise selection.}
-
-\item{pRemoval}{Significance level at which a variable is removed from the
-model during backward or stepwise selection.}
-
 \item{use_stratify}{If true, uses stratification to handle variables that
 violate the proportional hazards assumption. Stratification creates
 separate baseline hazard functions for different groups.}
@@ -343,9 +319,6 @@ A results object containing:
 \code{results$tree_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$node_survival_plots} \tab \tab \tab \tab \tab an image \cr
-\code{results$text_model_selection} \tab \tab \tab \tab \tab a html \cr
-\code{results$selection_method} \tab \tab \tab \tab \tab a html \cr
-\code{results$text2_model_selection} \tab \tab \tab \tab \tab a html \cr
 \code{results$multivariableCoxExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$adjustedSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskScoreExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -430,19 +403,19 @@ multisurvival(
 )
 
 # Example 5: Stepwise model selection
-multisurvival(
-    data = colon,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    explanatory = c("sex", "obstruct", "perfor", "adhere"),
-    contexpl = c("age", "nodes"),
-    use_modelSelection = TRUE,
-    modelSelection = "both",  # Stepwise selection
-    selectionCriteria = "aic",
-    pEntry = 0.05,
-    pRemoval = 0.10
-)
+# multisurvival(
+#     data = colon,
+#     elapsedtime = "time",
+#     outcome = "status",
+#     outcomeLevel = "1",
+#     explanatory = c("sex", "obstruct", "perfor", "adhere"),
+#     contexpl = c("age", "nodes"),
+#     use_modelSelection = TRUE,
+#     modelSelection = "both",  # Stepwise selection
+#     selectionCriteria = "aic",
+#     pEntry = 0.05,
+#     pRemoval = 0.10
+# )
 
 # Example 6: Person-time analysis
 multisurvival(

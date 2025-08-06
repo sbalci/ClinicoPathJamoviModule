@@ -1,7 +1,7 @@
 ---
 name: decisiongraph
 title: Decision Tree Graph
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: DecisionD
 menuSubtitle: Cost-Effectiveness Decision Tree Visualization
 version: '0.0.3'
@@ -201,6 +201,28 @@ options:
           R: >
             Calculate and display expected costs and utilities.
 
+    - name: calculateNMB
+      title: Calculate Net Monetary Benefit
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate net monetary benefit (NMB) for decision paths using threshold analysis.
+          R: >
+            Calculate net monetary benefit (NMB) for decision paths using threshold analysis.
+
+    - name: willingnessToPay
+      title: Willingness to Pay Threshold
+      type: Number
+      default: 50000
+      min: 0
+      max: 500000
+      description:
+          ui: >
+            Willingness to pay threshold (cost per QALY) for NMB calculations.
+          R: >
+            Willingness to pay threshold (cost per QALY) for NMB calculations.
+
     - name: sensitivityAnalysis
       title: Sensitivity Analysis
       type: Bool
@@ -295,5 +317,75 @@ options:
             Create tornado diagram for sensitivity analysis.
           R: >
             Create tornado diagram for sensitivity analysis.
+
+    - name: decisionComparison
+      title: Decision Comparison Table
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Show comparison table with NMB scores for all decision paths.
+          R: >
+            Show comparison table with NMB scores for all decision paths.
+
+    - name: incrementalAnalysis
+      title: Incremental Cost-Effectiveness Analysis
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform incremental cost-effectiveness ratio (ICER) calculations.
+          R: >
+            Perform incremental cost-effectiveness ratio (ICER) calculations.
+
+    - name: probabilisticAnalysis
+      title: Probabilistic Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform probabilistic sensitivity analysis using Monte Carlo simulation.
+          R: >
+            Perform probabilistic sensitivity analysis using Monte Carlo simulation.
+
+    - name: numSimulations
+      title: Number of Simulations
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          ui: >
+            Number of Monte Carlo simulations for probabilistic analysis.
+          R: >
+            Number of Monte Carlo simulations for probabilistic analysis.
+
+    # Chance Node Options
+    - name: chanceNodeMethod
+      title: Chance Node Calculation Method
+      type: List
+      options:
+        - name: simple
+          title: Simple Probabilities
+        - name: conditional
+          title: Conditional Probabilities
+        - name: bayesian
+          title: Bayesian Update
+      default: simple
+      description:
+          ui: >
+            Method for calculating probabilities at chance nodes.
+          R: >
+            Method for calculating probabilities at chance nodes.
+
+    - name: riskAdjustment
+      title: Risk Adjustment
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Apply risk adjustment to probabilities based on patient characteristics.
+          R: >
+            Apply risk adjustment to probabilities based on patient characteristics.
 
 ...

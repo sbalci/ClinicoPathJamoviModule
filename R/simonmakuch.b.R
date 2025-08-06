@@ -282,8 +282,28 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li>Any situation where exposure status is not fixed at baseline</li>
             </ul>
             
+            <h4>Clinical Examples:</h4>
+            <ul>
+                <li><strong>Oncology:</strong> Analyzing survival benefit of treatments started after initial therapy failure</li>
+                <li><strong>Cardiology:</strong> Evaluating impact of interventions initiated after symptom onset</li>
+                <li><strong>Transplantation:</strong> Studying outcomes when organ transplant occurs during follow-up</li>
+                <li><strong>Biomarkers:</strong> Assessing prognostic value of markers that change during disease course</li>
+            </ul>
+            
             <p><strong>Important:</strong> Simon-Makuch analysis helps avoid immortal time bias and provides 
             unbiased estimates of the effect of time-dependent exposures on survival.</p>
+            
+            <div class='alert alert-info'>
+                <h5>Quick Start Guide:</h5>
+                <ol>
+                    <li><strong>Survival Time:</strong> Time from study entry to event/censoring</li>
+                    <li><strong>Event Indicator:</strong> Binary variable indicating event occurrence</li>
+                    <li><strong>Time-Dependent Variable:</strong> The exposure that changes over time</li>
+                    <li><strong>Change Time:</strong> When the exposure status changes (0 = baseline)</li>
+                    <li><strong>Status Variable:</strong> Current exposure status at each time point</li>
+                    <li><strong>Exposed Level:</strong> Which level represents 'exposed' state</li>
+                </ol>
+            </div>
             "
             
             self$results$simonMakuchExplanation$setContent(simon_makuch_html)
@@ -384,6 +404,114 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "
                 
                 self$results$timeDependentCoxExplanation$setContent(cox_html)
+            }
+            
+            # Clinical interpretation guidance
+            if (self$options$includeClinicalGuidance) {
+                clinical_html <- "
+                <h3>Clinical Interpretation of Time-Dependent Survival Analysis</h3>
+                
+                <div class='alert alert-success'>
+                    <h4>📊 Interpreting Hazard Ratios:</h4>
+                    <ul>
+                        <li><strong>HR > 1:</strong> Increased hazard (higher risk) in exposed group
+                            <ul><li><em>Example:</em> HR = 1.5 means 50% higher risk of event</li></ul>
+                        </li>
+                        <li><strong>HR < 1:</strong> Decreased hazard (lower risk) in exposed group
+                            <ul><li><em>Example:</em> HR = 0.7 means 30% lower risk of event</li></ul>
+                        </li>
+                        <li><strong>HR = 1:</strong> No difference between groups</li>
+                    </ul>
+                </div>
+                
+                <div class='alert alert-warning'>
+                    <h4>⚕️ Clinical Decision Making:</h4>
+                    <ul>
+                        <li><strong>Treatment Timing:</strong> Consider optimal timing for intervention initiation</li>
+                        <li><strong>Risk-Benefit Assessment:</strong> Weigh treatment benefits against potential harms</li>
+                        <li><strong>Patient Selection:</strong> Identify subgroups most likely to benefit</li>
+                        <li><strong>Monitoring Strategy:</strong> Plan appropriate follow-up intervals</li>
+                    </ul>
+                </div>
+                
+                <h4>🔍 Clinical Significance Assessment:</h4>
+                <ul>
+                    <li><strong>Statistical vs Clinical Significance:</strong> Small p-values don't guarantee clinical relevance</li>
+                    <li><strong>Confidence Intervals:</strong> Wide intervals suggest uncertainty in effect size</li>
+                    <li><strong>Effect Size:</strong> Consider magnitude of hazard ratio for clinical meaningfulness</li>
+                    <li><strong>Number Needed to Treat:</strong> Can be derived from survival differences at specific timepoints</li>
+                </ul>
+                
+                <h4>⚠️ Important Limitations:</h4>
+                <ul>
+                    <li><strong>Temporal Generalizability:</strong> Results specific to timing patterns in your study population</li>
+                    <li><strong>Confounding by Indication:</strong> Exposure timing may be related to prognosis</li>
+                    <li><strong>Selection Bias:</strong> Patients must survive to receive time-dependent exposure</li>
+                    <li><strong>Informative Censoring:</strong> Ensure censoring is independent of exposure timing</li>
+                </ul>
+                
+                <div class='alert alert-info'>
+                    <h4>📋 Reporting Recommendations:</h4>
+                    <ul>
+                        <li>Report both crude and adjusted hazard ratios</li>
+                        <li>Describe exposure ascertainment and timing</li>
+                        <li>Specify landmark times if landmark analysis performed</li>
+                        <li>Discuss potential for residual confounding</li>
+                        <li>Consider sensitivity analyses with different assumptions</li>
+                    </ul>
+                </div>
+                "
+                
+                self$results$clinicalGuidance$setContent(clinical_html)
+            }
+            
+            # Methodology notes
+            if (self$options$showMethodologyNotes) {
+                methodology_html <- "
+                <h3>Simon-Makuch Methodology Detailed Notes</h3>
+                
+                <h4>🔬 Statistical Foundation:</h4>
+                <p>The Simon-Makuch method addresses the fundamental challenge in time-to-event analysis where 
+                exposure status changes during follow-up. The method was developed by Richard Simon and 
+                Robert J. Makuch in 1984 to provide unbiased survival estimates when dealing with 
+                time-dependent exposures.</p>
+                
+                <h4>📊 Technical Implementation:</h4>
+                <ul>
+                    <li><strong>Counting Process Notation:</strong> Uses (tstart, tstop] intervals for each observation period</li>
+                    <li><strong>Left-Truncation:</strong> Proper handling of delayed entry into exposure groups</li>
+                    <li><strong>Time-Varying Coefficients:</strong> Allows exposure effects to change over time</li>
+                    <li><strong>Partial Likelihood:</strong> Cox regression adapted for time-dependent covariates</li>
+                </ul>
+                
+                <h4>🎯 Key Assumptions:</h4>
+                <ul>
+                    <li><strong>Non-Informative Censoring:</strong> Censoring unrelated to exposure timing</li>
+                    <li><strong>Exposure Ascertainment:</strong> Timing of exposure changes is accurately known</li>
+                    <li><strong>Proportional Hazards:</strong> Hazard ratios constant over time (testable)</li>
+                    <li><strong>Independent Observations:</strong> No clustering unless accounted for</li>
+                </ul>
+                
+                <h4>🔍 Model Diagnostics:</h4>
+                <ul>
+                    <li><strong>Proportional Hazards Test:</strong> Schoenfeld residuals analysis</li>
+                    <li><strong>Functional Form:</strong> Martingale residuals for continuous variables</li>
+                    <li><strong>Outlier Detection:</strong> Deviance residuals examination</li>
+                    <li><strong>Influential Observations:</strong> DfBeta statistics</li>
+                </ul>
+                
+                <div class='alert alert-primary'>
+                    <h5>💡 Advanced Considerations:</h5>
+                    <ul>
+                        <li><strong>Competing Risks:</strong> Consider Fine-Gray subdistribution hazard models</li>
+                        <li><strong>Recurrent Events:</strong> Use robust variance or frailty models</li>
+                        <li><strong>Multiple Time Scales:</strong> Calendar time vs. disease duration</li>
+                        <li><strong>Causal Inference:</strong> Consider marginal structural models for causal effects</li>
+                    </ul>
+                </div>
+                "
+                
+                self$results$methodologyNotes$setContent(methodology_html)
             }
         },
         

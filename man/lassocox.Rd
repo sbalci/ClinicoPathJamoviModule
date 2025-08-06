@@ -15,7 +15,12 @@ lassocox(
   standardize = TRUE,
   cv_plot = TRUE,
   coef_plot = TRUE,
-  survival_plot = TRUE
+  survival_plot = TRUE,
+  showExplanations = FALSE,
+  showMethodologyNotes = FALSE,
+  includeClinicalGuidance = FALSE,
+  showVariableImportance = FALSE,
+  showModelComparison = FALSE
 )
 }
 \arguments{
@@ -45,6 +50,24 @@ fitting.}
 \item{coef_plot}{Whether to show the coefficient path plot.}
 
 \item{survival_plot}{Whether to show survival curves by risk groups.}
+
+\item{showExplanations}{Display detailed explanations of LASSO Cox
+regression methodology, including regularization concepts and
+interpretation guidance.}
+
+\item{showMethodologyNotes}{Show comprehensive technical notes about LASSO
+regularization, cross-validation, and variable selection process.}
+
+\item{includeClinicalGuidance}{Include guidance for clinical interpretation
+of LASSO Cox regression results, risk scores, and variable selection
+outcomes.}
+
+\item{showVariableImportance}{Display analysis of variable importance
+rankings and selection patterns across different lambda values.}
+
+\item{showModelComparison}{Compare LASSO Cox results with standard Cox
+regression to demonstrate the benefits of regularization and variable
+selection.}
 }
 \value{
 A results object containing:
@@ -57,6 +80,14 @@ A results object containing:
 \code{results$coef_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$survival_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$riskScore} \tab \tab \tab \tab \tab an output \cr
+\code{results$lassoExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$methodologyNotes} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalGuidance} \tab \tab \tab \tab \tab a html \cr
+\code{results$variableImportance} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$regularizationPathExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$crossValidationExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$riskScoreExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

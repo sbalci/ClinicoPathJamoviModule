@@ -79,6 +79,7 @@ children:
           - type: TextBox
             name: mcid_value
             format: number
+            enable: show_mcid
 
   - type: CollapseBox
     label: Effect Size & Comparisons
@@ -91,14 +92,17 @@ children:
             name: show_effect_size
           - type: ComboBox
             name: effect_size_type
+            enable: show_effect_size
           - type: CheckBox
             name: show_change_scores
           - type: TextBox
             name: baseline_group
             format: string
+            enable: show_change_scores
           - type: TextBox
             name: responder_threshold
             format: number
+            enable: show_change_scores
 
   - type: CollapseBox
     label: Sample Size & Data Info
@@ -141,6 +145,14 @@ children:
             name: outlier_method
           - type: CheckBox
             name: show_cv_bands
+          - type: TextBox
+            name: cv_band_1
+            format: number
+            enable: show_cv_bands
+          - type: TextBox
+            name: cv_band_2
+            format: number  
+            enable: show_cv_bands
 
   - type: CollapseBox
     label: Visual Appearance

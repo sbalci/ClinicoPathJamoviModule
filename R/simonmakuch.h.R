@@ -1029,28 +1029,87 @@ simonmakuchBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Simon-Makuch Time-Dependent Survival Analysis
 #'
-#' Performs survival analysis with time-dependent variables using the 
-#' Simon-Makuch method. This analysis is specifically designed for situations 
-#' where patient characteristics or treatments change during follow-up, such 
-#' as biomarker changes, treatment switches, or progression events. The 
-#' Simon-Makuch approach properly accounts for these time-varying exposures in 
-#' survival estimation and comparison.
-#' Key features include Simon-Makuch plots (modified Kaplan-Meier curves), 
-#' landmark analysis, time-dependent Cox regression, and proper handling of 
-#' immortal time bias.
+#' Performs comprehensive survival analysis with time-dependent variables 
+#' using the Simon-Makuch method. This specialized analysis addresses the 
+#' critical challenge of immortal time bias when studying treatments, 
+#' biomarkers, or exposures that change during patient follow-up.
+#' **Clinical Applications:** - Treatment effectiveness when therapy timing 
+#' varies (e.g., adjuvant therapy, targeted agents) - Biomarker evolution 
+#' studies (e.g., mutation status, protein expression changes) - Disease 
+#' progression impact on outcomes (e.g., metastasis development, grade 
+#' progression) - Healthcare intervention timing effects (e.g., surgery, 
+#' radiation, supportive care)
+#' **Key Statistical Methods:** - Simon-Makuch plots: Modified Kaplan-Meier 
+#' curves for time-dependent exposures - Landmark analysis: Conditional 
+#' survival from fixed time points - Time-dependent Cox regression: Hazard 
+#' ratios accounting for exposure timing - Immortal time bias assessment: 
+#' Comparison of naive vs. proper methods - Mantel-Byar testing: Specialized 
+#' tests for time-dependent comparisons
+#' **Why Use Simon-Makuch Analysis:** Standard survival analysis assumes fixed 
+#' baseline characteristics, leading to immortal time bias when exposures 
+#' change during follow-up. Simon-Makuch methods properly account for the 
+#' timing of exposure changes, providing unbiased survival estimates and valid 
+#' statistical comparisons.
 #'
 #' @examples
-#' # Example: Analyzing survival with time-dependent treatment status
-#' # simonmakuch(
-#' #   data = patient_data,
-#' #   survivalTime = "follow_up_months",
-#' #   event = "death_status",
-#' #   eventLevel = "Dead",
-#' #   timeDepVariable = "treatment_received",
-#' #   timeDepTime = "treatment_start_time",
-#' #   timeDepStatus = "treatment_status",
-#' #   analysisType = "comprehensive"
-#' # )
+#' # Load example data
+#' data("simon_makuch_simple")
+#'
+#' # Example 1: Basic Simon-Makuch Analysis
+#' # Analyzing survival with time-dependent treatment
+#' simonmakuch(
+#'     data = simon_makuch_simple,
+#'     survivalTime = "follow_up_months",
+#'     event = "death_status",
+#'     eventLevel = 1,
+#'     timeDepVariable = "treatment_exposure",
+#'     timeDepTime = "treatment_start_time_clean",
+#'     timeDepStatus = "baseline_treatment_status",
+#'     exposedLevel = "On-treatment",
+#'     showSimonMakuchPlot = TRUE,
+#'     showExplanations = TRUE
+#' )
+#'
+#' # Example 2: Comprehensive Analysis with Landmark
+#' simonmakuch(
+#'     data = simon_makuch_simple,
+#'     survivalTime = "follow_up_months",
+#'     event = "death_status_factor",
+#'     eventLevel = "Dead",
+#'     timeDepVariable = "treatment_exposure",
+#'     timeDepTime = "treatment_start_time_clean",
+#'     timeDepStatus = "baseline_treatment_status",
+#'     exposedLevel = "Eventually",
+#'     analysisType = "comprehensive",
+#'     performLandmarkAnalysis = TRUE,
+#'     landmarkTimes = "6, 12, 24",
+#'     performTimeDependentCox = TRUE,
+#'     assessImmortalTimeBias = TRUE,
+#'     showLandmarkPlots = TRUE,
+#'     includeClinicalGuidance = TRUE
+#' )
+#'
+#' # Example 3: Publication-Ready Analysis
+#' simonmakuch(
+#'     data = simon_makuch_simple,
+#'     survivalTime = "follow_up_months",
+#'     event = "death_status",
+#'     eventLevel = 1,
+#'     timeDepVariable = "treatment_received",
+#'     timeDepTime = "treatment_start_time_clean",
+#'     timeDepStatus = "baseline_treatment_status",
+#'     exposedLevel = "Yes",
+#'     analysisType = "publication",
+#'     showSimonMakuchPlot = TRUE,
+#'     showConfidenceIntervals = TRUE,
+#'     showRiskTables = TRUE,
+#'     performLogRankTest = TRUE,
+#'     performMantelByarTest = TRUE,
+#'     showSurvivalEstimates = TRUE,
+#'     showHazardRatios = TRUE,
+#'     performBootstrapValidation = TRUE,
+#'     showMethodologyNotes = TRUE
+#' )
 #'
 #' @param data The dataset containing survival and time-dependent variable
 #'   information.

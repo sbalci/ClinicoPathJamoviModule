@@ -24,7 +24,31 @@ advancedraincloud(
   y_label = "",
   show_statistics = TRUE,
   show_comparisons = FALSE,
-  show_interpretation = TRUE
+  show_interpretation = TRUE,
+  clinical_cutoff = 0,
+  reference_range_min = 0,
+  reference_range_max = 0,
+  show_mcid = FALSE,
+  mcid_value = 0,
+  show_effect_size = FALSE,
+  effect_size_type = "cohens_d",
+  show_change_scores = FALSE,
+  baseline_group = "",
+  responder_threshold = 20,
+  show_sample_size = TRUE,
+  show_missing_info = FALSE,
+  trial_arms = "",
+  time_labels = "",
+  population_type = "itt",
+  log_transform = FALSE,
+  outlier_method = "none",
+  show_cv_bands = FALSE,
+  cv_band_1 = 15,
+  cv_band_2 = 20,
+  p_value_position = "above",
+  journal_style = "default",
+  generate_report = FALSE,
+  include_methods = FALSE
 )
 }
 \arguments{
@@ -72,6 +96,63 @@ ID variable.}
 
 \item{show_interpretation}{If TRUE, displays interpretation and feature
 guide.}
+
+\item{clinical_cutoff}{Add horizontal line for clinical threshold or
+decision boundary.}
+
+\item{reference_range_min}{Lower bound of normal reference range (shaded
+area).}
+
+\item{reference_range_max}{Upper bound of normal reference range (shaded
+area).}
+
+\item{show_mcid}{Display Minimal Clinically Important Difference band.}
+
+\item{mcid_value}{Size of the Minimal Clinically Important Difference.}
+
+\item{show_effect_size}{Show effect size calculations between groups.}
+
+\item{effect_size_type}{Method for calculating effect size.}
+
+\item{show_change_scores}{Display change from baseline analysis for
+longitudinal data.}
+
+\item{baseline_group}{Name or level of the baseline/reference group.}
+
+\item{responder_threshold}{Percentage change threshold for responder
+classification.}
+
+\item{show_sample_size}{Show sample size (N) for each group on the plot.}
+
+\item{show_missing_info}{Display information about missing data and
+exclusions.}
+
+\item{trial_arms}{Custom labels for treatment arms (comma-separated).}
+
+\item{time_labels}{Custom labels for time points (comma-separated).}
+
+\item{population_type}{Type of analysis population for clinical trials.}
+
+\item{log_transform}{Apply log transformation to Y-axis values.}
+
+\item{outlier_method}{Method for handling outliers in the data.}
+
+\item{show_cv_bands}{Display coefficient of variation bands for assay
+variability.}
+
+\item{cv_band_1}{First CV band percentage (typically 15\\% for analytical
+variability).}
+
+\item{cv_band_2}{Second CV band percentage (typically 20\\% for biological
+variability).}
+
+\item{p_value_position}{Where to display p-values from group comparisons.}
+
+\item{journal_style}{Apply journal-specific formatting guidelines.}
+
+\item{generate_report}{Generate comprehensive clinical analysis report.}
+
+\item{include_methods}{Include methods section text for publications.}
 }
 \value{
 A results object containing:
@@ -81,6 +162,10 @@ A results object containing:
 \code{results$statistics} \tab \tab \tab \tab \tab a html \cr
 \code{results$comparisons} \tab \tab \tab \tab \tab a html \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$effect_sizes} \tab \tab \tab \tab \tab a html \cr
+\code{results$change_analysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinical_report} \tab \tab \tab \tab \tab a html \cr
+\code{results$methods_text} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

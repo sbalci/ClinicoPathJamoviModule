@@ -3,7 +3,6 @@ name: lassocox
 jus: '3.0'
 stage: 0
 compilerMode: tame
-
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -32,7 +31,6 @@ children:
           - type: VariablesListBox
             name: explanatory
             isTarget: true
-            
   - type: CollapseBox
     label: Model Options
     collapsed: true
@@ -51,7 +49,6 @@ children:
             format: number
       - type: CheckBox
         name: standardize
-        
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -59,18 +56,30 @@ children:
     children:
       - type: CheckBox
         name: cv_plot
-      - type: CheckBox  
+      - type: CheckBox
         name: coef_plot
       - type: CheckBox
         name: survival_plot
-        
   - type: CollapseBox
     label: Output Options
     collapsed: true
-    stretchFactor: 1  
+    stretchFactor: 1
     children:
       - type: Label
         label: Save Variables
         children:
           - type: Output
             name: riskScore
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showExplanations
+      - type: CheckBox
+        name: showMethodologyNotes
+      - type: CheckBox
+        name: includeClinicalGuidance
+      - type: CheckBox
+        name: showVariableImportance
+      - type: CheckBox
+        name: showModelComparison

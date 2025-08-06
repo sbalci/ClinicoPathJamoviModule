@@ -21,6 +21,8 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showCosts = TRUE,
             showUtilities = TRUE,
             calculateExpectedValues = TRUE,
+            calculateNMB = TRUE,
+            willingnessToPay = 50000,
             sensitivityAnalysis = FALSE,
             discountRate = 0.03,
             timeHorizon = 10,
@@ -28,7 +30,13 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             branchLabels = TRUE,
             colorScheme = "medical",
             summaryTable = TRUE,
-            tornado = FALSE, ...) {
+            tornado = FALSE,
+            decisionComparison = TRUE,
+            incrementalAnalysis = TRUE,
+            probabilisticAnalysis = FALSE,
+            numSimulations = 1000,
+            chanceNodeMethod = "simple",
+            riskAdjustment = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -127,6 +135,16 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "calculateExpectedValues",
                 calculateExpectedValues,
                 default=TRUE)
+            private$..calculateNMB <- jmvcore::OptionBool$new(
+                "calculateNMB",
+                calculateNMB,
+                default=TRUE)
+            private$..willingnessToPay <- jmvcore::OptionNumber$new(
+                "willingnessToPay",
+                willingnessToPay,
+                default=50000,
+                min=0,
+                max=500000)
             private$..sensitivityAnalysis <- jmvcore::OptionBool$new(
                 "sensitivityAnalysis",
                 sensitivityAnalysis,
@@ -168,6 +186,36 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "tornado",
                 tornado,
                 default=FALSE)
+            private$..decisionComparison <- jmvcore::OptionBool$new(
+                "decisionComparison",
+                decisionComparison,
+                default=TRUE)
+            private$..incrementalAnalysis <- jmvcore::OptionBool$new(
+                "incrementalAnalysis",
+                incrementalAnalysis,
+                default=TRUE)
+            private$..probabilisticAnalysis <- jmvcore::OptionBool$new(
+                "probabilisticAnalysis",
+                probabilisticAnalysis,
+                default=FALSE)
+            private$..numSimulations <- jmvcore::OptionInteger$new(
+                "numSimulations",
+                numSimulations,
+                default=1000,
+                min=100,
+                max=10000)
+            private$..chanceNodeMethod <- jmvcore::OptionList$new(
+                "chanceNodeMethod",
+                chanceNodeMethod,
+                options=list(
+                    "simple",
+                    "conditional",
+                    "bayesian"),
+                default="simple")
+            private$..riskAdjustment <- jmvcore::OptionBool$new(
+                "riskAdjustment",
+                riskAdjustment,
+                default=FALSE)
 
             self$.addOption(private$..treeType)
             self$.addOption(private$..decisions)
@@ -184,6 +232,8 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showCosts)
             self$.addOption(private$..showUtilities)
             self$.addOption(private$..calculateExpectedValues)
+            self$.addOption(private$..calculateNMB)
+            self$.addOption(private$..willingnessToPay)
             self$.addOption(private$..sensitivityAnalysis)
             self$.addOption(private$..discountRate)
             self$.addOption(private$..timeHorizon)
@@ -192,6 +242,12 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..colorScheme)
             self$.addOption(private$..summaryTable)
             self$.addOption(private$..tornado)
+            self$.addOption(private$..decisionComparison)
+            self$.addOption(private$..incrementalAnalysis)
+            self$.addOption(private$..probabilisticAnalysis)
+            self$.addOption(private$..numSimulations)
+            self$.addOption(private$..chanceNodeMethod)
+            self$.addOption(private$..riskAdjustment)
         }),
     active = list(
         treeType = function() private$..treeType$value,
@@ -209,6 +265,8 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showCosts = function() private$..showCosts$value,
         showUtilities = function() private$..showUtilities$value,
         calculateExpectedValues = function() private$..calculateExpectedValues$value,
+        calculateNMB = function() private$..calculateNMB$value,
+        willingnessToPay = function() private$..willingnessToPay$value,
         sensitivityAnalysis = function() private$..sensitivityAnalysis$value,
         discountRate = function() private$..discountRate$value,
         timeHorizon = function() private$..timeHorizon$value,
@@ -216,7 +274,13 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         branchLabels = function() private$..branchLabels$value,
         colorScheme = function() private$..colorScheme$value,
         summaryTable = function() private$..summaryTable$value,
-        tornado = function() private$..tornado$value),
+        tornado = function() private$..tornado$value,
+        decisionComparison = function() private$..decisionComparison$value,
+        incrementalAnalysis = function() private$..incrementalAnalysis$value,
+        probabilisticAnalysis = function() private$..probabilisticAnalysis$value,
+        numSimulations = function() private$..numSimulations$value,
+        chanceNodeMethod = function() private$..chanceNodeMethod$value,
+        riskAdjustment = function() private$..riskAdjustment$value),
     private = list(
         ..treeType = NA,
         ..decisions = NA,
@@ -233,6 +297,8 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showCosts = NA,
         ..showUtilities = NA,
         ..calculateExpectedValues = NA,
+        ..calculateNMB = NA,
+        ..willingnessToPay = NA,
         ..sensitivityAnalysis = NA,
         ..discountRate = NA,
         ..timeHorizon = NA,
@@ -240,7 +306,13 @@ decisiongraphOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..branchLabels = NA,
         ..colorScheme = NA,
         ..summaryTable = NA,
-        ..tornado = NA)
+        ..tornado = NA,
+        ..decisionComparison = NA,
+        ..incrementalAnalysis = NA,
+        ..probabilisticAnalysis = NA,
+        ..numSimulations = NA,
+        ..chanceNodeMethod = NA,
+        ..riskAdjustment = NA)
 )
 
 decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -256,7 +328,13 @@ decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         text2 = function() private$.items[["text2"]],
         markovTable = function() private$.items[["markovTable"]],
         markovCohortTable = function() private$.items[["markovCohortTable"]],
-        markovPlot = function() private$.items[["markovPlot"]]),
+        markovPlot = function() private$.items[["markovPlot"]],
+        decisionComparisonTable = function() private$.items[["decisionComparisonTable"]],
+        nmbAnalysis = function() private$.items[["nmbAnalysis"]],
+        icerTable = function() private$.items[["icerTable"]],
+        psaResults = function() private$.items[["psaResults"]],
+        ceacPlot = function() private$.items[["ceacPlot"]],
+        scatterPlot = function() private$.items[["scatterPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -467,7 +545,116 @@ decisiongraphResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=600,
                 height=400,
                 renderFun=".markovPlot",
-                visible="(treeType:markov)"))}))
+                visible="(treeType:markov)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="decisionComparisonTable",
+                title="Decision Comparison",
+                visible="(decisionComparison)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="strategy", 
+                        `title`="Strategy", 
+                        `type`="text"),
+                    list(
+                        `name`="expectedCost", 
+                        `title`="Expected Cost", 
+                        `type`="number", 
+                        `format`="currency"),
+                    list(
+                        `name`="expectedUtility", 
+                        `title`="Expected Utility", 
+                        `type`="number", 
+                        `format`="zto3"),
+                    list(
+                        `name`="nmb", 
+                        `title`="Net Monetary Benefit", 
+                        `type`="number", 
+                        `format`="currency"),
+                    list(
+                        `name`="icer", 
+                        `title`="ICER", 
+                        `type`="number", 
+                        `format`="sf3"),
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer"),
+                    list(
+                        `name`="status", 
+                        `title`="Dominance Status", 
+                        `type`="text"),
+                    list(
+                        `name`="optimal", 
+                        `title`="Optimal", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nmbAnalysis",
+                title="Net Monetary Benefit Analysis",
+                visible="(calculateNMB)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="icerTable",
+                title="Incremental Cost-Effectiveness Analysis",
+                visible="(incrementalAnalysis)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="strategy", 
+                        `title`="Strategy", 
+                        `type`="text"),
+                    list(
+                        `name`="cost", 
+                        `title`="Cost", 
+                        `type`="number", 
+                        `format`="currency"),
+                    list(
+                        `name`="utility", 
+                        `title`="Utility", 
+                        `type`="number", 
+                        `format`="zto3"),
+                    list(
+                        `name`="incrementalCost", 
+                        `title`="Incremental Cost", 
+                        `type`="number", 
+                        `format`="currency"),
+                    list(
+                        `name`="incrementalUtility", 
+                        `title`="Incremental Utility", 
+                        `type`="number", 
+                        `format`="zto3"),
+                    list(
+                        `name`="icer", 
+                        `title`="ICER", 
+                        `type`="number", 
+                        `format`="sf3"),
+                    list(
+                        `name`="dominated", 
+                        `title`="Dominated", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="psaResults",
+                title="Probabilistic Sensitivity Analysis",
+                visible="(probabilisticAnalysis)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="ceacPlot",
+                title="Cost-Effectiveness Acceptability Curve",
+                width=600,
+                height=400,
+                renderFun=".ceacPlot",
+                visible="(probabilisticAnalysis)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="scatterPlot",
+                title="Cost-Effectiveness Scatter Plot",
+                width=600,
+                height=400,
+                renderFun=".scatterPlot",
+                visible="(probabilisticAnalysis)"))}))
 
 decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisiongraphBase",
@@ -520,6 +707,10 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showUtilities Display utility/effectiveness values.
 #' @param calculateExpectedValues Calculate and display expected costs and
 #'   utilities.
+#' @param calculateNMB Calculate net monetary benefit (NMB) for decision paths
+#'   using threshold analysis.
+#' @param willingnessToPay Willingness to pay threshold (cost per QALY) for
+#'   NMB calculations.
 #' @param sensitivityAnalysis Perform one-way sensitivity analysis on key
 #'   parameters.
 #' @param discountRate Annual discount rate for future costs and benefits.
@@ -530,6 +721,18 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param summaryTable Show summary table with expected values and
 #'   cost-effectiveness ratios.
 #' @param tornado Create tornado diagram for sensitivity analysis.
+#' @param decisionComparison Show comparison table with NMB scores for all
+#'   decision paths.
+#' @param incrementalAnalysis Perform incremental cost-effectiveness ratio
+#'   (ICER) calculations.
+#' @param probabilisticAnalysis Perform probabilistic sensitivity analysis
+#'   using Monte Carlo simulation.
+#' @param numSimulations Number of Monte Carlo simulations for probabilistic
+#'   analysis.
+#' @param chanceNodeMethod Method for calculating probabilities at chance
+#'   nodes.
+#' @param riskAdjustment Apply risk adjustment to probabilities based on
+#'   patient characteristics.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$treeplot} \tab \tab \tab \tab \tab Decision tree visualization with nodes and branches \cr
@@ -542,6 +745,12 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$markovTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$markovCohortTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$markovPlot} \tab \tab \tab \tab \tab Markov state transition diagram \cr
+#'   \code{results$decisionComparisonTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$nmbAnalysis} \tab \tab \tab \tab \tab Net monetary benefit calculation details \cr
+#'   \code{results$icerTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$psaResults} \tab \tab \tab \tab \tab Monte Carlo simulation results \cr
+#'   \code{results$ceacPlot} \tab \tab \tab \tab \tab CEAC showing probability of cost-effectiveness \cr
+#'   \code{results$scatterPlot} \tab \tab \tab \tab \tab Cost-effectiveness plane scatter plot \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -568,6 +777,8 @@ decisiongraph <- function(
     showCosts = TRUE,
     showUtilities = TRUE,
     calculateExpectedValues = TRUE,
+    calculateNMB = TRUE,
+    willingnessToPay = 50000,
     sensitivityAnalysis = FALSE,
     discountRate = 0.03,
     timeHorizon = 10,
@@ -575,7 +786,13 @@ decisiongraph <- function(
     branchLabels = TRUE,
     colorScheme = "medical",
     summaryTable = TRUE,
-    tornado = FALSE) {
+    tornado = FALSE,
+    decisionComparison = TRUE,
+    incrementalAnalysis = TRUE,
+    probabilisticAnalysis = FALSE,
+    numSimulations = 1000,
+    chanceNodeMethod = "simple",
+    riskAdjustment = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisiongraph requires jmvcore to be installed (restart may be required)")
@@ -618,6 +835,8 @@ decisiongraph <- function(
         showCosts = showCosts,
         showUtilities = showUtilities,
         calculateExpectedValues = calculateExpectedValues,
+        calculateNMB = calculateNMB,
+        willingnessToPay = willingnessToPay,
         sensitivityAnalysis = sensitivityAnalysis,
         discountRate = discountRate,
         timeHorizon = timeHorizon,
@@ -625,7 +844,13 @@ decisiongraph <- function(
         branchLabels = branchLabels,
         colorScheme = colorScheme,
         summaryTable = summaryTable,
-        tornado = tornado)
+        tornado = tornado,
+        decisionComparison = decisionComparison,
+        incrementalAnalysis = incrementalAnalysis,
+        probabilisticAnalysis = probabilisticAnalysis,
+        numSimulations = numSimulations,
+        chanceNodeMethod = chanceNodeMethod,
+        riskAdjustment = riskAdjustment)
 
     analysis <- decisiongraphClass$new(
         options = options,

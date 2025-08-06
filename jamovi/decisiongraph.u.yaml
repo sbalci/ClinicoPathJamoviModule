@@ -22,7 +22,6 @@ children:
             maxItemCount: 10
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -30,7 +29,6 @@ children:
             maxItemCount: 20
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -38,7 +36,6 @@ children:
             maxItemCount: 20
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -46,7 +43,6 @@ children:
             maxItemCount: 20
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -54,7 +50,6 @@ children:
             maxItemCount: 20
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -62,7 +57,6 @@ children:
             maxItemCount: 10
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -70,7 +64,6 @@ children:
             maxItemCount: 50
             isTarget: true
             itemDropBehaviour: overwrite
-
   - type: LayoutBox
     margin: large
     stretchFactor: 1
@@ -80,13 +73,11 @@ children:
         children:
           - type: ComboBox
             name: treeType
-
       - type: Label
         label: Tree Layout
         children:
           - type: ComboBox
             name: layout
-
       - type: Label
         label: Markov Options
         children:
@@ -94,7 +85,6 @@ children:
             name: cycleLength
             format: number
             suffix: ' years'
-
   - type: CollapseBox
     label: Display Options
     collapsed: true
@@ -105,28 +95,21 @@ children:
         children:
           - type: CheckBox
             name: nodeShapes
-
           - type: CheckBox
             name: showProbabilities
-
           - type: CheckBox
             name: showCosts
-
           - type: CheckBox
             name: showUtilities
-
           - type: CheckBox
             name: nodeLabels
-
           - type: CheckBox
             name: branchLabels
-
           - type: Label
             label: Color Scheme
             children:
               - type: ComboBox
                 name: colorScheme
-
   - type: CollapseBox
     label: Analysis Options
     collapsed: true
@@ -137,20 +120,18 @@ children:
         children:
           - type: CheckBox
             name: calculateExpectedValues
-
           - type: CheckBox
             name: sensitivityAnalysis
-
+          - type: CheckBox
+            name: calculateNMB
           - type: TextBox
             name: discountRate
             format: number
             suffix: '%'
-
           - type: TextBox
             name: timeHorizon
             format: number
             suffix: ' years'
-
   - type: CollapseBox
     label: Output Options
     collapsed: true
@@ -161,6 +142,33 @@ children:
         children:
           - type: CheckBox
             name: summaryTable
-
           - type: CheckBox
             name: tornado
+          - type: CheckBox
+            name: decisionComparison
+          - type: CheckBox
+            name: incrementalAnalysis
+          - type: CheckBox
+            name: probabilisticAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: willingnessToPay
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: numSimulations
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: chanceNodeMethod
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: riskAdjustment

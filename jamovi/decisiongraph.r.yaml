@@ -181,3 +181,101 @@ items:
       renderFun: .markovPlot
       visible: (treeType:markov)
       description: Markov state transition diagram
+
+    - name: decisionComparisonTable
+      title: Decision Comparison
+      type: Table
+      visible: (decisionComparison)
+      rows: 0
+      columns:
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: expectedCost
+          title: Expected Cost
+          type: number
+          format: currency
+        - name: expectedUtility
+          title: Expected Utility
+          type: number
+          format: zto3
+        - name: nmb
+          title: Net Monetary Benefit
+          type: number
+          format: currency
+        - name: icer
+          title: ICER
+          type: number
+          format: sf3
+        - name: rank
+          title: Rank
+          type: integer
+        - name: status
+          title: Dominance Status
+          type: text
+        - name: optimal
+          title: Optimal
+          type: text
+
+    - name: nmbAnalysis
+      title: Net Monetary Benefit Analysis
+      type: Html
+      visible: (calculateNMB)
+      description: Net monetary benefit calculation details
+
+    - name: icerTable
+      title: Incremental Cost-Effectiveness Analysis
+      type: Table
+      visible: (incrementalAnalysis)
+      rows: 0
+      columns:
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: cost
+          title: Cost
+          type: number
+          format: currency
+        - name: utility
+          title: Utility
+          type: number
+          format: zto3
+        - name: incrementalCost
+          title: Incremental Cost
+          type: number
+          format: currency
+        - name: incrementalUtility
+          title: Incremental Utility
+          type: number
+          format: zto3
+        - name: icer
+          title: ICER
+          type: number
+          format: sf3
+        - name: dominated
+          title: Dominated
+          type: text
+
+    - name: psaResults
+      title: Probabilistic Sensitivity Analysis
+      type: Html
+      visible: (probabilisticAnalysis)
+      description: Monte Carlo simulation results
+
+    - name: ceacPlot
+      title: Cost-Effectiveness Acceptability Curve
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .ceacPlot
+      visible: (probabilisticAnalysis)
+      description: CEAC showing probability of cost-effectiveness
+
+    - name: scatterPlot
+      title: Cost-Effectiveness Scatter Plot
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .scatterPlot
+      visible: (probabilisticAnalysis)
+      description: Cost-effectiveness plane scatter plot

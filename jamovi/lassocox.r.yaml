@@ -44,6 +44,12 @@ items:
         - name: coefficient
           title: "Coefficient"
           type: number
+        - name: hazardRatio
+          title: "Hazard Ratio"
+          type: number
+        - name: importance
+          title: "Importance"
+          type: number
       clearWith:
           - outcome
           - outcomeLevel
@@ -63,7 +69,10 @@ items:
           type: text
         - name: value
           title: "Value"
-          type: number
+          type: text
+        - name: interpretation
+          title: "Interpretation"
+          type: text
       clearWith:
           - outcome
           - outcomeLevel
@@ -143,6 +152,110 @@ items:
           - lambda
           - nfolds
           - standardize
+
+    # Explanatory Output Items
+    - name: lassoExplanation
+      title: Understanding LASSO Cox Regression
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - showExplanations
+
+    - name: methodologyNotes
+      title: LASSO Cox Methodology Notes
+      type: Html
+      visible: (showMethodologyNotes)
+      clearWith:
+          - showMethodologyNotes
+
+    - name: clinicalGuidance
+      title: Clinical Interpretation Guidance
+      type: Html
+      visible: (includeClinicalGuidance)
+      clearWith:
+          - includeClinicalGuidance
+
+    - name: variableImportance
+      title: Variable Importance Analysis
+      type: Table
+      visible: (showVariableImportance)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: importance_score
+          title: "Importance Score"
+          type: number
+          format: zto
+        - name: selection_frequency
+          title: "Selection Frequency"
+          type: number
+          format: pc
+        - name: stability_rank
+          title: "Stability Rank"
+          type: integer
+      clearWith:
+          - showVariableImportance
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+
+    - name: modelComparison
+      title: LASSO vs Standard Cox Regression
+      type: Table
+      visible: (showModelComparison)
+      rows: 0
+      columns:
+        - name: model_type
+          title: "Model Type"
+          type: text
+        - name: n_variables
+          title: "N Variables"
+          type: integer
+        - name: cindex
+          title: "C-index"
+          type: number
+          format: zto
+        - name: aic
+          title: "AIC"
+          type: number
+          format: zto
+        - name: log_likelihood
+          title: "Log-Likelihood"
+          type: number
+          format: zto
+      clearWith:
+          - showModelComparison
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+
+    - name: regularizationPathExplanation
+      title: Understanding Regularization Path
+      type: Html
+      visible: (showExplanations && coef_plot)
+      clearWith:
+          - showExplanations
+          - coef_plot
+
+    - name: crossValidationExplanation
+      title: Understanding Cross-Validation Plot
+      type: Html
+      visible: (showExplanations && cv_plot)
+      clearWith:
+          - showExplanations
+          - cv_plot
+
+    - name: riskScoreExplanation
+      title: Understanding Risk Scores and Survival Curves
+      type: Html
+      visible: (showExplanations && survival_plot)
+      clearWith:
+          - showExplanations
+          - survival_plot
 
 refs:
     - glmnet

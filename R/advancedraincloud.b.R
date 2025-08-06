@@ -18,6 +18,42 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
     private = list(
         
         .analysis_data = NULL,
+        
+        .init = function() {
+            # Validate numeric ranges for alpha values
+            if (!is.null(self$options$point_alpha)) {
+                if (self$options$point_alpha < 0 || self$options$point_alpha > 1) {
+                    jmvcore::reject("Point transparency must be between 0 and 1", code = "")
+                }
+            }
+            
+            if (!is.null(self$options$violin_alpha)) {
+                if (self$options$violin_alpha < 0 || self$options$violin_alpha > 1) {
+                    jmvcore::reject("Violin transparency must be between 0 and 1", code = "")
+                }
+            }
+            
+            # Validate point size
+            if (!is.null(self$options$point_size)) {
+                if (self$options$point_size < 0.1 || self$options$point_size > 5) {
+                    jmvcore::reject("Point size must be between 0.1 and 5", code = "")
+                }
+            }
+            
+            # Validate boxplot width
+            if (!is.null(self$options$boxplot_width)) {
+                if (self$options$boxplot_width < 0.1 || self$options$boxplot_width > 1) {
+                    jmvcore::reject("Boxplot width must be between 0.1 and 1", code = "")
+                }
+            }
+            
+            # Validate responder threshold
+            if (!is.null(self$options$responder_threshold)) {
+                if (self$options$responder_threshold < 0 || self$options$responder_threshold > 100) {
+                    jmvcore::reject("Responder threshold must be between 0 and 100 percent", code = "")
+                }
+            }
+        },
 
         .run = function() {
 
@@ -220,10 +256,10 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             }
             
             # Create base plot
-            p <- ggplot2::ggplot(analysis_data, ggplot2::aes_string(
-                x = x_var, 
-                y = y_var, 
-                fill = fill_mapping
+            p <- ggplot2::ggplot(analysis_data, ggplot2::aes(
+                x = .data[[x_var]], 
+                y = .data[[y_var]], 
+                fill = .data[[fill_mapping]]
             ))
             
             # Add covariate mapping if specified
@@ -279,7 +315,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             }
             
             # Add clinical cutoff line if specified
-            if (!is.null(self$options$clinical_cutoff) && is.numeric(self$options$clinical_cutoff)) {
+            if (!is.null(self$options$clinical_cutoff) && is.numeric(self$options$clinical_cutoff) && self$options$clinical_cutoff != 0) {
                 p <- p + ggplot2::geom_hline(
                     yintercept = self$options$clinical_cutoff,
                     linetype = "dashed",
@@ -300,7 +336,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Add reference range shading if specified
             if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max) &&
-                is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max)) {
+                is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max) &&
+                self$options$reference_range_min != 0 && self$options$reference_range_max != 0) {
                 p <- p + ggplot2::annotate(
                     "rect",
                     xmin = -Inf, xmax = Inf,
@@ -322,7 +359,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             }
             
             # Add MCID band if requested
-            if (self$options$show_mcid && !is.null(self$options$mcid_value) && is.numeric(self$options$mcid_value)) {
+            if (self$options$show_mcid && !is.null(self$options$mcid_value) && is.numeric(self$options$mcid_value) && self$options$mcid_value != 0) {
                 # Calculate group means for MCID display
                 group_means <- aggregate(analysis_data[[y_var]], 
                                        by = list(analysis_data[[x_var]]), 
@@ -363,40 +400,82 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Add CV bands if requested for biomarker analysis
             if (self$options$show_cv_bands) {
-                # Calculate CV bands (typically 15% and 20%)
+                # Get configurable CV percentages
+                cv_1_pct <- self$options$cv_band_1 / 100  # Convert percentage to decimal
+                cv_2_pct <- self$options$cv_band_2 / 100  # Convert percentage to decimal
+                
+                # Calculate CV bands using configurable percentages
                 group_stats <- aggregate(analysis_data[[y_var]], 
                                        by = list(analysis_data[[x_var]]), 
                                        FUN = function(x) c(mean = mean(x), sd = sd(x)))
                 
                 for (i in 1:nrow(group_stats)) {
                     mean_val <- group_stats$x[i, "mean"]
-                    cv_15 <- mean_val * 0.15
-                    cv_20 <- mean_val * 0.20
+                    cv_1 <- mean_val * cv_1_pct
+                    cv_2 <- mean_val * cv_2_pct
                     
-                    # 15% CV band
+                    # First CV band (typically analytical variability)
                     p <- p + ggplot2::annotate(
                         "rect",
                         xmin = i - 0.3, xmax = i + 0.3,
-                        ymin = mean_val - cv_15,
-                        ymax = mean_val + cv_15,
+                        ymin = mean_val - cv_1,
+                        ymax = mean_val + cv_1,
                         alpha = 0.1,
                         fill = "orange"
                     )
                     
-                    # 20% CV band
+                    # Second CV band (typically biological variability)
                     p <- p + ggplot2::annotate(
                         "rect",
                         xmin = i - 0.3, xmax = i + 0.3,
-                        ymin = mean_val - cv_20,
-                        ymax = mean_val + cv_20,
+                        ymin = mean_val - cv_2,
+                        ymax = mean_val + cv_2,
                         alpha = 0.05,
                         fill = "red"
+                    )
+                    
+                    # Add CV band labels
+                    p <- p + ggplot2::annotate(
+                        "text",
+                        x = i + 0.35,
+                        y = mean_val + cv_1,
+                        label = paste0("CV ", self$options$cv_band_1, "%"),
+                        size = 2.5,
+                        color = "orange",
+                        hjust = 0
+                    )
+                    
+                    p <- p + ggplot2::annotate(
+                        "text",
+                        x = i + 0.35,
+                        y = mean_val + cv_2,
+                        label = paste0("CV ", self$options$cv_band_2, "%"),
+                        size = 2.5,
+                        color = "red",
+                        hjust = 0
                     )
                 }
             }
             
+            # Apply custom trial arm labels if provided
+            if (!is.null(self$options$trial_arms) && self$options$trial_arms != "") {
+                arm_labels <- trimws(strsplit(self$options$trial_arms, ",")[[1]])
+                x_levels <- levels(analysis_data[[x_var]])
+                
+                # Check if number of labels matches number of groups
+                if (length(arm_labels) == length(x_levels)) {
+                    # Create a named vector for scale_x_discrete
+                    names(arm_labels) <- x_levels
+                    p <- p + ggplot2::scale_x_discrete(labels = arm_labels)
+                } else {
+                    warning(paste("Number of trial arm labels (", length(arm_labels), 
+                                ") does not match number of groups (", length(x_levels), 
+                                "). Using default labels."))
+                }
+            }
+            
             # Apply journal-specific theme
-            p <- p + private$.apply_journal_theme(p, self$options$journal_style)
+            p <- private$.apply_journal_theme(p, self$options$journal_style)
             
             # Add p-values if requested and comparisons were made
             if (self$options$p_value_position != "none" && self$options$show_comparisons) {

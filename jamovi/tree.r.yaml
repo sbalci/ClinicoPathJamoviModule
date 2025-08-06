@@ -4,484 +4,714 @@ title: Medical Decision Tree Analysis
 jrs: '1.1'
 
 items:
-    # Welcome and instructions
+    # Instructions and status
     - name: todo
       title: Instructions
       type: Html
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
+      visible: false
 
-    # Progress indicator and data views (matching .b.R references)
     - name: text1
-      title: Model Progress
-      type: Preformatted
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
-
-    - name: text2
-      title: Data Summary
-      type: Preformatted
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
-
-    - name: text2a
-      title: Training Data View
-      type: Preformatted
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
-
-    - name: text2b
-      title: Test Data View
-      type: Preformatted
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
-
-    - name: text3
-      title: Model Status
-      type: Preformatted
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
-
-    - name: text4
-      title: Model Output
+      title: Analysis Status
       type: Html
+      visible: true
       clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
-
-    # Data quality and preprocessing
-    - name: dataQuality
-      title: Data Quality Report
-      type: Preformatted
-      clearWith:
-          - vars
-          - facs
-          - target
-          - imputeMissing
-          - balanceClasses
-
-    - name: missingDataReport
-      title: Missing Data Analysis
-      type: Table
-      rows: 0
-      columns:
-        - name: variable
-          title: "Variable"
-          type: text
-        - name: missing_count
-          title: "Missing Count"
-          type: integer
-        - name: missing_percent
-          title: "Missing %"
-          type: number
-          format: dp:1
-        - name: complete_cases
-          title: "Complete Cases"
-          type: integer
-      clearWith:
-          - vars
-          - facs
-          - target
-          - imputeMissing
-
-    - name: modelSummary
-      title: Decision Tree Model Summary
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+        - hyperparameter_tuning
+        - model_comparison
+        
+    - name: progress_feedback
+      title: Analysis Progress
       type: Html
+      visible: true
       clearWith:
-          - vars
-          - facs
-          - target
-          - minCases
-          - maxDepth
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+        - hyperparameter_tuning
+        - model_comparison
 
-    # Clinical performance metrics
-    - name: clinicalMetrics
-      title: Clinical Performance Metrics
+    # Main model results
+    - name: model_summary
+      title: Model Summary
+      type: Html
+      visible: (show_performance_metrics)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+
+
+    # Performance tables and metrics
+    - name: performance_table
+      title: Performance Metrics
       type: Table
-      rows: 0
+      visible: (show_performance_metrics)
       columns:
         - name: metric
-          title: "Clinical Metric"
+          title: Metric
           type: text
         - name: value
-          title: "Value"
-          type: text
-        - name: interpretation
-          title: "Clinical Interpretation"
-          type: text
-      clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
-          - balanceClasses
-
-    # Clinical interpretation
-    - name: clinicalInterpretation
-      title: Clinical Interpretation & Recommendations
-      type: Html
-      clearWith:
-          - clinicalContext
-          - costRatio
-
-    # Feature importance for biomarker selection
-    - name: featureImportance
-      title: Clinical Variable Importance
-      type: Table
-      rows: 0
-      columns:
-        - name: feature
-          title: "Clinical Variable"
-          type: text
-        - name: importance
-          title: "Importance Score"
-          type: number
-          format: dp:3
-        - name: rank
-          title: "Rank"
-          type: integer
-        - name: clinical_relevance
-          title: "Clinical Relevance"
-          type: text
-
-    # Risk stratification analysis
-    - name: riskStratification
-      title: Risk Stratification Performance
-      type: Table
-      rows: 0
-      columns:
-        - name: risk_group
-          title: "Risk Group"
-          type: text
-        - name: n_patients
-          title: "N Patients"
-          type: integer
-        - name: event_rate
-          title: "Event Rate (%)"
-          type: number
-          format: dp:1
-        - name: relative_risk
-          title: "Relative Risk"
-          type: number
-          format: dp:2
-        - name: clinical_action
-          title: "Recommended Clinical Action"
-          type: text
-
-    # Confusion matrix with clinical context
-    - name: confusionMatrix
-      title: Confusion Matrix & Clinical Outcomes
-      type: Table
-      rows: 0
-      columns:
-        - name: predicted
-          title: "Predicted"
-          type: text
-        - name: actual_disease
-          title: "Actual Disease"
-          type: integer
-        - name: actual_control
-          title: "Actual Control"
-          type: integer
-        - name: clinical_consequence
-          title: "Clinical Consequence"
-          type: text
-
-    # Prevalence-adjusted metrics
-    - name: adjustedMetrics
-      title: Population-Adjusted Performance
-      type: Table
-      rows: 0
-      columns:
-        - name: metric
-          title: "Metric"
-          type: text
-        - name: study_value
-          title: "Study Population"
-          type: number
-          format: dp:3
-        - name: adjusted_value
-          title: "Target Population"
-          type: number
-          format: dp:3
-        - name: difference
-          title: "Difference"
-          type: number
-          format: dp:3
-
-    # Cross-validation results (Issue #12 enhancement)
-    - name: crossValidationResults
-      title: Cross-Validation Performance
-      type: Table
-      visible: (crossValidation)
-      rows: 0
-      columns:
-        - name: fold
-          title: "CV Fold"
-          type: integer
-        - name: sensitivity
-          title: "Sensitivity"
-          type: number
-          format: dp:3
-        - name: specificity
-          title: "Specificity"
-          type: number
-          format: dp:3
-        - name: accuracy
-          title: "Accuracy"
-          type: number
-          format: dp:3
-        - name: auc
-          title: "AUC"
-          type: number
-          format: dp:3
-
-    # Bootstrap validation results (Issue #12 enhancement)
-    - name: bootstrapResults
-      title: Bootstrap Validation Summary
-      type: Table
-      visible: (bootstrapValidation)
-      rows: 0
-      columns:
-        - name: metric
-          title: "Performance Metric"
-          type: text
-        - name: mean
-          title: "Mean"
+          title: Value
           type: number
           format: dp:3
         - name: ci_lower
-          title: "95% CI Lower"
+          title: CI Lower
           type: number
           format: dp:3
         - name: ci_upper
-          title: "95% CI Upper"
+          title: CI Upper
           type: number
           format: dp:3
-        - name: bias
-          title: "Bias"
-          type: number
-          format: dp:3
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
 
-    # Model comparison results (Issue #12 enhancement)
-    - name: modelComparison
-      title: Model Performance Comparison
+    - name: clinicalMetricsTable
+      title: Clinical Performance Metrics
       type: Table
-      visible: (compareModels)
-      rows: 0
+      visible: (show_performance_metrics)
       columns:
-        - name: model
-          title: "Model Type"
-          type: text
-        - name: primary_metric
-          title: "Primary Metric"
-          type: number
-          format: dp:3
-        - name: sensitivity
-          title: "Sensitivity"
-          type: number
-          format: dp:3
-        - name: specificity
-          title: "Specificity"
-          type: number
-          format: dp:3
-        - name: auc
-          title: "AUC"
-          type: number
-          format: dp:3
-        - name: spatial_metric
-          title: "Spatial Fit"
-          type: text
-        - name: best_model
-          title: "Best Model"
-          type: text
-
-    # Spatial autocart analysis results
-    - name: spatialAnalysis
-      title: Spatial Autocart Analysis
-      type: Table
-      visible: (useAutocart)
-      rows: 0
-      columns:
-        - name: parameter
-          title: "Spatial Parameter"
+        - name: metric
+          title: Clinical Metric
           type: text
         - name: value
-          title: "Value"
+          title: Value
           type: number
           format: dp:3
         - name: interpretation
-          title: "Clinical Interpretation"
+          title: Clinical Interpretation
           type: text
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
 
-    - name: spatialInterpretation
-      title: Spatial Analysis Interpretation
+    - name: performance_table_explanation
+      title: Interpreting Performance Metrics
       type: Html
-      visible: (useAutocart)
+      visible: (show_performance_metrics)
 
-    # Clinical decision tree visualization
-    - name: plot
-      title: Clinical Decision Tree
+    # Confusion matrix
+    - name: confusion_matrix
+      title: Confusion Matrix
+      type: Html
+      visible: (show_confusion_matrix)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+
+    - name: confusion_matrix_explanation
+      title: Reading the Confusion Matrix
+      type: Html
+      visible: (show_confusion_matrix)
+      
+    - name: confusion_matrix_plot
+      title: Confusion Matrix Heatmap
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot_confusion_matrix
+      visible: (show_confusion_matrix)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+
+    # Visualizations - Tree plots
+    - name: tree_plot
+      title: Decision Tree Visualization
       type: Image
       width: 800
       height: 600
-      renderFun: .plot
-      requiresData: true
+      renderFun: .plot_tree
+      visible: (show_tree_plot)
       clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
-          - minCases
-          - maxDepth
-          - treeVisualization
-          - showNodeStatistics
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - max_depth
+        - min_samples_split
+        - min_samples_leaf
 
-    # Partition Plot (parttree visualization)
+    - name: tree_plot_explanation
+      title: How to Read the Decision Tree
+      type: Html
+      visible: (show_tree_plot)
+      clearWith:
+        - algorithm
+
     - name: partitionPlot
-      title: Decision Partition Visualization
+      title: Decision Boundary Visualization
       type: Image
-      width: 800
-      height: 600
-      renderFun: .plotPartition
+      width: 600
+      height: 500
+      renderFun: .plot_partition
       visible: (showPartitionPlot)
-      requiresData: true
       clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
 
-    # ROC Curve (Issue #12 enhancement)
-    - name: rocPlot
+    # Feature importance
+    - name: importance_plot
+      title: Feature Importance
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plot_importance
+      visible: (show_importance_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - importance_method
+
+    - name: importance_plot_explanation
+      title: Understanding Feature Importance
+      type: Html
+      visible: (show_importance_plot)
+      clearWith:
+        - algorithm
+        - importance_method
+
+    - name: featureImportanceTable
+      title: Feature Importance Rankings
+      type: Table
+      visible: (show_importance_plot)
+      columns:
+        - name: feature
+          title: Clinical Variable
+          type: text
+        - name: importance
+          title: Importance Score
+          type: number
+          format: dp:3
+        - name: rank
+          title: Rank
+          type: integer
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    # Performance visualizations
+    - name: roc_plot
       title: ROC Curve Analysis
       type: Image
       width: 600
-      height: 600
-      renderFun: .plotROC
-      visible: (showROCCurve)
-      requiresData: true
+      height: 500
+      renderFun: .plot_roc
+      visible: (show_roc_curve)
       clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
 
-    # Calibration Plot (Issue #12 enhancement)
-    - name: calibrationPlot
+    - name: roc_plot_explanation
+      title: Understanding the ROC Curve
+      type: Html
+      visible: (show_roc_curve)
+
+    - name: validation_curves
+      title: Validation Performance
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .plot_validation
+      visible: (show_validation_curves)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+        - cv_folds
+
+    - name: calibration_plot
       title: Probability Calibration
       type: Image
       width: 600
-      height: 600
-      renderFun: .plotCalibration
-      visible: (showCalibrationPlot)
-      requiresData: true
+      height: 500
+      renderFun: .plot_calibration
+      visible: (show_calibration_plot)
       clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - train
-          - trainLevel
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
 
-    # Clinical Utility Curve (Issue #12 enhancement)
-    - name: clinicalUtilityPlot
-      title: Clinical Utility Analysis
+    # Interpretability analysis
+    - name: shap_plot
+      title: SHAP Value Analysis
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_shap
+      visible: (shap_analysis && interpretability)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: partial_dependence_plot
+      title: Partial Dependence Plots
+      type: Image
+      width: 900
+      height: 700
+      renderFun: .plot_partial_dependence
+      visible: (partial_dependence && interpretability)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: interaction_plot
+      title: Feature Interactions
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plot_interactions
+      visible: (interaction_analysis && interpretability)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    # Clinical interpretation and reporting
+    - name: clinical_interpretation
+      title: Clinical Interpretation Guide
+      type: Html
+      visible: (show_clinical_interpretation)
+      clearWith:
+        - clinical_context
+        - algorithm
+        - target
+
+    - name: clinicalInterpretation
+      title: Medical Decision Support
+      type: Html
+      visible: (show_clinical_interpretation)
+      clearWith:
+        - clinical_context
+        - target
+        - targetLevel
+
+    - name: riskStratification
+      title: Risk Stratification Analysis
+      type: Html
+      visible: (clinical_context:risk || clinical_context:prognosis)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    # Advanced analysis results
+    - name: feature_selection_results
+      title: Feature Selection Results
+      type: Html
+      visible: (feature_selection)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: bootstrap_intervals
+      title: Bootstrap Confidence Intervals
+      type: Html
+      visible: (bootstrap_confidence)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - n_bootstrap
+
+    - name: crossValidationTable
+      title: Cross-Validation Results
+      type: Table
+      visible: (validation:cv)
+      columns:
+        - name: fold
+          title: Fold
+          type: integer
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: dp:3
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: dp:3
+        - name: specificity
+          title: Specificity
+          type: number
+          format: dp:3
+        - name: auc
+          title: AUC
+          type: number
+          format: dp:3
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - cv_folds
+
+    - name: bootstrapTable
+      title: Bootstrap Validation Results
+      type: Table
+      visible: (validation:bootstrap)
+      columns:
+        - name: iteration
+          title: Bootstrap Sample
+          type: integer
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: dp:3
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: dp:3
+        - name: specificity
+          title: Specificity
+          type: number
+          format: dp:3
+        - name: auc
+          title: AUC
+          type: number
+          format: dp:3
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    # Model comparison
+    - name: modelComparison
+      title: Algorithm Comparison
+      type: Table
+      visible: (model_comparison)
+      columns:
+        - name: algorithm
+          title: Algorithm
+          type: text
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: dp:3
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: dp:3
+        - name: specificity
+          title: Specificity
+          type: number
+          format: dp:3
+        - name: auc
+          title: AUC
+          type: number
+          format: dp:3
+        - name: rank
+          title: Rank
+          type: integer
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - modelComparisonMetric
+
+    # Complexity parameter analysis
+    - name: cp_table_analysis
+      title: Complexity Parameter Analysis
+      type: Html
+      visible: (show_cp_table)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: cp_plot
+      title: Complexity Parameter Plot
       type: Image
       width: 600
-      height: 600
-      renderFun: .plotClinicalUtility
-      visible: (showClinicalUtility)
-      requiresData: true
+      height: 400
+      renderFun: .plot_cp
+      visible: (show_cp_plot)
       clearWith:
-          - vars
-          - facs
-          - target
-          - targetLevel
-          - costRatio
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
 
-    # Model deployment guidelines
-    - name: deploymentGuidelines
-      title: Clinical Implementation Guidelines
+    # Detailed variable importance
+    - name: detailed_importance_analysis
+      title: Detailed Variable Importance
       type: Html
-
-    # Export options
-    - name: predictions
-      title: Patient Predictions
-      type: Output
-      varTitle: '`Predicted Risk Category`'
-      varDescription: >
-        Predicted risk category based on clinical decision tree model
+      visible: (show_variable_importance_detailed)
       clearWith:
-          - vars
-          - facs
-          - target
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
 
-    - name: probabilities
-      title: Disease Probabilities
-      type: Output
-      varTitle: '`Disease Probability`'
-      varDescription: >
-        Predicted probability of disease based on clinical variables
+    # Export information
+    - name: model_export
+      title: Model Export Information
+      type: Html
+      visible: (export_model)
       clearWith:
-          - vars
-          - facs
-          - target
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
 
-refs:
-    - FFTrees
-    - pROC
-    - caret
-    - rpart
-    - rpart.plot
-    - parttree
-    - autocart
-    - ClinicoPathJamoviModule
-    - whoisinthisstudy
-    - recist
-    - DiagnosticTests
-    - PathologyKappa
+    - name: exportInfo
+      title: Data Export Information
+      type: Html
+      visible: (exportPredictions)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    # Model stability and robustness results
+    - name: stability_analysis
+      title: Model Stability Analysis
+      type: Html
+      visible: (model_stability_analysis)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: stability_plot
+      title: Model Stability Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_stability
+      visible: (model_stability_analysis)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: learning_curves_plot
+      title: Learning Curves
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .plot_learning_curves
+      visible: (learning_curves)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - cv_folds
+
+    - name: outlier_analysis_results
+      title: Outlier Analysis Results
+      type: Html
+      visible: (outlier_analysis)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: outlier_plot
+      title: Influential Observations Plot
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plot_outliers
+      visible: (outlier_analysis)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    - name: prediction_intervals_table
+      title: Prediction Confidence Intervals
+      type: Table
+      visible: (prediction_intervals)
+      columns:
+        - name: observation
+          title: Case ID
+          type: integer
+        - name: prediction
+          title: Prediction
+          type: text
+        - name: probability
+          title: Probability
+          type: number
+          format: dp:3
+        - name: ci_lower
+          title: CI Lower
+          type: number
+          format: dp:3
+        - name: ci_upper
+          title: CI Upper
+          type: number
+          format: dp:3
+        - name: interval_width
+          title: Interval Width
+          type: number
+          format: dp:3
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+
+    # Advanced pruning analysis
+    - name: pruning_analysis
+      title: Advanced Pruning Analysis
+      type: Html
+      visible: (advanced_pruning:rep || advanced_pruning:mep)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - advanced_pruning
+
+    # Enhanced cross-validation results
+    - name: enhanced_cv_results
+      title: Enhanced Cross-Validation Analysis
+      type: Html
+      visible: (validation:stratified_cv || validation:repeated_cv)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+        - cv_folds
+        - cv_repeats
+
+    - name: enhanced_cv_table
+      title: Detailed Cross-Validation Results
+      type: Table
+      visible: (validation:stratified_cv || validation:repeated_cv)
+      columns:
+        - name: metric
+          title: Performance Metric
+          type: text
+        - name: mean
+          title: Mean
+          type: number
+          format: dp:3
+        - name: sd
+          title: Standard Deviation
+          type: number
+          format: dp:3
+        - name: min
+          title: Minimum
+          type: number
+          format: dp:3
+        - name: max
+          title: Maximum
+          type: number
+          format: dp:3
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+          format: dp:3
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+          format: dp:3
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
+        - validation
+
+    # Enhanced confusion matrix results
+    - name: enhanced_confusion_matrix
+      title: Clinical Confusion Matrix Analysis
+      type: Html
+      visible: (show_confusion_matrix)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - algorithm
 
 ...

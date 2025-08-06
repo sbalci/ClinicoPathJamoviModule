@@ -7,7 +7,7 @@ items:
     - name: todo
       title: Instructions
       type: Html
-      visible: false
+      visible: (y_var:null || x_var:null)
 
     - name: plot
       title: Advanced Raincloud Plot

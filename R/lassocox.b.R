@@ -134,6 +134,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$coef_plot$setVisible(FALSE)
                 self$results$survival_plot$setVisible(FALSE)
             }
+            
+            # Initialize explanatory content
+            private$.initializeExplanations()
         },
 
         .run = function() {
@@ -721,41 +724,150 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             results <- image$state
             if (is.null(results)) return()
             
-            # Create risk groups based on median risk score
-            risk_groups <- cut(results$risk_scores,
-                             breaks = c(-Inf, median(results$risk_scores), Inf),
-                             labels = c("Low Risk", "High Risk"))
-            
-            # Create survival object
-            surv_obj <- survival::Surv(results$data$time, results$data$status)
-            
-            # Fit survival curves
-            fit <- survival::survfit(surv_obj ~ risk_groups)
-            
-            # Create enhanced survival plot
-            if (requireNamespace("survminer", quietly = TRUE)) {
-                p <- survminer::ggsurvplot(
-                    fit,
-                    data = data.frame(risk_groups = risk_groups),
-                    risk.table = TRUE,
-                    pval = TRUE,
-                    conf.int = TRUE,
-                    ggtheme = ggtheme,
-                    title = "Survival Curves by Risk Groups",
-                    xlab = "Time",
-                    ylab = "Survival Probability",
-                    legend.title = "Risk Group",
-                    palette = c("blue", "red")
+            # Check if risk scores are available and valid
+            if (is.null(results$risk_scores) || length(results$risk_scores) == 0) {
+                text_warning <- "No risk scores available.\nLASSO selected no variables.\n\nConsider using:\n• lambda.min instead of lambda.1se\n• Less regularization (lower lambda)\n• More explanatory variables"
+                
+                # Create a new page with proper formatting
+                grid::grid.newpage()
+                # Create a viewport with margins for better readability
+                vp <- grid::viewport(
+                  width = 0.9,    # Wider viewport for left-aligned text
+                  height = 0.9,   # Keep reasonable margins
+                  x = 0.5,        # Center the viewport
+                  y = 0.5         # Center the viewport
                 )
-                print(p)
-            } else {
-                # Fallback to base plot
-                plot(fit, col = c("blue", "red"), lwd = 2,
-                     xlab = "Time", ylab = "Survival Probability",
-                     main = "Survival Curves by Risk Groups")
-                legend("topright", legend = c("Low Risk", "High Risk"),
-                       col = c("blue", "red"), lwd = 2)
+                grid::pushViewport(vp)
+                # Add the text with left alignment
+                grid::grid.text(
+                  text_warning,
+                  x = 0.05,           # Move text to the left (5% margin)
+                  y = 0.95,           # Start from top (5% margin)
+                  just = c("left", "top"),  # Left align and top justify
+                  gp = grid::gpar(
+                    fontsize = 11,        # Maintain readable size
+                    fontface = "plain",   # Regular font
+                    lineheight = 1.3,     # Slightly increased line spacing for readability
+                    col = "red"           # Red color for warning
+                  )
+                )
+                # Reset viewport
+                grid::popViewport()
+                return(TRUE)
             }
+            
+            # Check if all risk scores are the same (no discrimination)
+            if (length(unique(results$risk_scores)) <= 1) {
+                text_warning <- "Risk scores are uniform.\nNo discrimination possible.\n\nThis can happen when:\n• All selected variables have very small coefficients\n• The model overfits to noise\n• Lambda value is inappropriate"
+                
+                grid::grid.newpage()
+                vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
+                grid::pushViewport(vp)
+                grid::grid.text(
+                  text_warning,
+                  x = 0.05, y = 0.95,
+                  just = c("left", "top"),
+                  gp = grid::gpar(fontsize = 11, fontface = "plain", lineheight = 1.3, col = "orange")
+                )
+                grid::popViewport()
+                return(TRUE)
+            }
+            
+            # Create risk groups based on median risk score
+            tryCatch({
+                risk_groups <- cut(results$risk_scores,
+                                 breaks = c(-Inf, median(results$risk_scores), Inf),
+                                 labels = c("Low Risk", "High Risk"))
+                
+                # Check if we have valid data
+                if (is.null(results$data$time) || is.null(results$data$status)) {
+                    text_warning <- "Survival data not available.\n\nPlease check that:\n• Time and outcome variables are properly selected\n• Data contains valid survival information"
+                    
+                    grid::grid.newpage()
+                    vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
+                    grid::pushViewport(vp)
+                    grid::grid.text(
+                      text_warning,
+                      x = 0.05, y = 0.95,
+                      just = c("left", "top"),
+                      gp = grid::gpar(fontsize = 11, fontface = "plain", lineheight = 1.3, col = "red")
+                    )
+                    grid::popViewport()
+                    return(TRUE)
+                }
+                
+                # Create complete data frame for survminer
+                plot_data <- data.frame(
+                    time = results$data$time,
+                    status = results$data$status,
+                    risk_groups = risk_groups
+                )
+                
+                # Remove any rows with missing data
+                plot_data <- plot_data[complete.cases(plot_data), ]
+                
+                if (nrow(plot_data) == 0) {
+                    text_warning <- "No complete survival data available.\n\nThis can occur when:\n• There are missing values in time or outcome variables\n• Risk score calculation failed\n• Data filtering removed all observations"
+                    
+                    grid::grid.newpage()
+                    vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
+                    grid::pushViewport(vp)
+                    grid::grid.text(
+                      text_warning,
+                      x = 0.05, y = 0.95,
+                      just = c("left", "top"),
+                      gp = grid::gpar(fontsize = 11, fontface = "plain", lineheight = 1.3, col = "red")
+                    )
+                    grid::popViewport()
+                    return(TRUE)
+                }
+                
+                # Create survival object
+                surv_obj <- survival::Surv(plot_data$time, plot_data$status)
+                
+                # Fit survival curves
+                fit <- survival::survfit(surv_obj ~ risk_groups, data = plot_data)
+                
+                # Create enhanced survival plot
+                if (requireNamespace("survminer", quietly = TRUE)) {
+                    p <- survminer::ggsurvplot(
+                        fit,
+                        data = plot_data,
+                        risk.table = TRUE,
+                        pval = TRUE,
+                        conf.int = TRUE,
+                        ggtheme = ggtheme,
+                        title = "Survival Curves by Risk Groups",
+                        xlab = "Time",
+                        ylab = "Survival Probability",
+                        legend.title = "Risk Group",
+                        palette = c("blue", "red")
+                    )
+                    print(p)
+                } else {
+                    # Fallback to base plot
+                    plot(fit, col = c("blue", "red"), lwd = 2,
+                         xlab = "Time", ylab = "Survival Probability",
+                         main = "Survival Curves by Risk Groups")
+                    legend("topright", legend = c("Low Risk", "High Risk"),
+                           col = c("blue", "red"), lwd = 2)
+                }
+                
+            }, error = function(e) {
+                # Handle any errors gracefully using grid graphics
+                text_warning <- paste("Error creating survival plot:\n", e$message, "\n\nPlease check your data and model parameters.")
+                
+                grid::grid.newpage()
+                vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
+                grid::pushViewport(vp)
+                grid::grid.text(
+                  text_warning,
+                  x = 0.05, y = 0.95,
+                  just = c("left", "top"),
+                  gp = grid::gpar(fontsize = 11, fontface = "plain", lineheight = 1.3, col = "red")
+                )
+                grid::popViewport()
+            })
             
             TRUE
         },
@@ -764,14 +876,35 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Save data for plot rendering
             if (self$options$cv_plot) {
                 self$results$cv_plot$setState(results)
+                # Add CV plot explanation
+                if (self$options$showExplanations) {
+                    private$.populateCrossValidationExplanation()
+                }
             }
             
             if (self$options$coef_plot && length(results$selected_vars) > 0) {
                 self$results$coef_plot$setState(results)
+                # Add regularization path explanation
+                if (self$options$showExplanations) {
+                    private$.populateRegularizationPathExplanation()
+                }
             }
             
             if (self$options$survival_plot) {
                 self$results$survival_plot$setState(results)
+                # Add risk score explanation
+                if (self$options$showExplanations) {
+                    private$.populateRiskScoreExplanation()
+                }
+            }
+            
+            # Populate additional analysis tables
+            if (self$options$showVariableImportance) {
+                private$.populateVariableImportance(results)
+            }
+            
+            if (self$options$showModelComparison) {
+                private$.populateModelComparison(results)
             }
             
             # Add risk scores to dataset if requested
@@ -781,6 +914,399 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 full_risk_scores[results$data$complete_cases] <- results$risk_scores
                 self$results$riskScore$setValues(full_risk_scores)
             }
+        },
+
+        # Explanatory Functions
+        .initializeExplanations = function() {
+            # Main LASSO Cox explanation
+            if (self$options$showExplanations) {
+                private$.populateLassoExplanation()
+            }
+            
+            # Methodology notes
+            if (self$options$showMethodologyNotes) {
+                private$.populateMethodologyNotes()
+            }
+            
+            # Clinical guidance
+            if (self$options$includeClinicalGuidance) {
+                private$.populateClinicalGuidance()
+            }
+        },
+
+        .populateLassoExplanation = function() {
+            html_content <- "
+            <h3>Understanding LASSO Cox Regression</h3>
+            
+            <div class='alert alert-info'>
+                <h4>🎯 What is LASSO Cox Regression?</h4>
+                <p>LASSO (Least Absolute Shrinkage and Selection Operator) Cox regression combines the Cox proportional hazards model with LASSO regularization for automatic variable selection in survival analysis.</p>
+            </div>
+            
+            <h4>🔑 Key Concepts:</h4>
+            <ul>
+                <li><strong>Regularization (λ):</strong> A penalty parameter that controls the strength of variable selection
+                    <ul>
+                        <li>Higher λ → More variables excluded (simpler model)</li>
+                        <li>Lower λ → More variables included (complex model)</li>
+                        <li>λ = 0 → Standard Cox regression (no penalty)</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Variable Selection:</strong> LASSO automatically sets coefficients of unimportant variables to exactly zero</li>
+                
+                <li><strong>Cross-Validation:</strong> K-fold CV determines optimal λ that minimizes prediction error</li>
+                
+                <li><strong>Shrinkage:</strong> Coefficients of selected variables are shrunk toward zero, reducing overfitting</li>
+            </ul>
+            
+            <h4>📊 How to Interpret Results:</h4>
+            <ul>
+                <li><strong>Selected Variables:</strong> Variables with non-zero coefficients at optimal λ</li>
+                <li><strong>Coefficients:</strong> Log hazard ratios (positive = increased risk, negative = decreased risk)</li>
+                <li><strong>Risk Scores:</strong> Linear combination of selected variables weighted by their coefficients</li>
+                <li><strong>C-index:</strong> Discrimination ability (0.5 = no discrimination, 1.0 = perfect discrimination)</li>
+            </ul>
+            
+            <div class='alert alert-success'>
+                <h4>✅ Advantages of LASSO Cox:</h4>
+                <ul>
+                    <li>Automatic variable selection eliminates manual stepwise procedures</li>
+                    <li>Reduces overfitting in high-dimensional data</li>
+                    <li>Handles multicollinearity by selecting one variable from correlated groups</li>
+                    <li>Provides parsimonious models suitable for clinical prediction</li>
+                    <li>Objective, reproducible variable selection process</li>
+                </ul>
+            </div>
+            
+            <div class='alert alert-warning'>
+                <h4>⚠️ Important Considerations:</h4>
+                <ul>
+                    <li>Variable selection depends on the specific dataset and may vary with new data</li>
+                    <li>Standardization is typically required for fair penalization across variables</li>
+                    <li>Results should be validated in independent datasets</li>
+                    <li>Clinical expertise should guide final model interpretation</li>
+                </ul>
+            </div>
+            "
+            
+            self$results$lassoExplanation$setContent(html_content)
+        },
+
+        .populateMethodologyNotes = function() {
+            html_content <- "
+            <h3>LASSO Cox Methodology Notes</h3>
+            
+            <h4>🔬 Technical Details:</h4>
+            
+            <div class='alert alert-primary'>
+                <h5>Mathematical Foundation</h5>
+                <p>LASSO Cox regression minimizes the negative partial log-likelihood with an L1 penalty:</p>
+                <p><strong>Objective Function:</strong> -ℓ(β) + λ Σ|βⱼ|</p>
+                <ul>
+                    <li>ℓ(β): Partial log-likelihood from Cox model</li>
+                    <li>λ: Regularization parameter</li>
+                    <li>Σ|βⱼ|: L1 penalty (sum of absolute coefficients)</li>
+                </ul>
+            </div>
+            
+            <h4>📋 Algorithm Steps:</h4>
+            <ol>
+                <li><strong>Data Preprocessing:</strong>
+                    <ul>
+                        <li>Handle missing values (complete case analysis or imputation)</li>
+                        <li>Standardize continuous variables (mean=0, SD=1)</li>
+                        <li>Create dummy variables for categorical predictors</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Cross-Validation:</strong>
+                    <ul>
+                        <li>Divide data into K folds (typically K=10)</li>
+                        <li>For each λ value, train on K-1 folds and validate on remaining fold</li>
+                        <li>Calculate cross-validated partial likelihood deviance</li>
+                        <li>Select λ that minimizes CV error</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Final Model:</strong>
+                    <ul>
+                        <li>Fit LASSO Cox model on full data using optimal λ</li>
+                        <li>Extract non-zero coefficients (selected variables)</li>
+                        <li>Calculate risk scores: Σ(βⱼ × xⱼ)</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Performance Assessment:</strong>
+                    <ul>
+                        <li>Calculate C-index (concordance probability)</li>
+                        <li>Perform log-rank test between risk groups</li>
+                        <li>Generate survival curves for risk stratification</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <h4>🎛️ Hyperparameter Selection:</h4>
+            <ul>
+                <li><strong>λ.min:</strong> Lambda that minimizes CV error</li>
+                <li><strong>λ.1se:</strong> Largest lambda within 1 SE of minimum (more parsimonious)</li>
+                <li><strong>Choice:</strong> λ.1se often preferred for better generalizability</li>
+            </ul>
+            
+            <h4>📈 Variable Importance Metrics:</h4>
+            <ul>
+                <li><strong>Coefficient Magnitude:</strong> Larger |β| indicates stronger effect</li>
+                <li><strong>Selection Frequency:</strong> How often variable is selected across CV folds</li>
+                <li><strong>Stability:</strong> Consistency of coefficient estimates across folds</li>
+                <li><strong>Path Entry:</strong> Lambda value at which variable first enters the model</li>
+            </ul>
+            
+            <div class='alert alert-info'>
+                <h5>💡 Implementation Notes</h5>
+                <ul>
+                    <li>Uses coordinate descent algorithm for optimization</li>
+                    <li>Handles ties in survival times using Efron approximation</li>
+                    <li>Standardization applied to predictors but not survival times</li>
+                    <li>Results are unstandardized for interpretability</li>
+                </ul>
+            </div>
+            "
+            
+            self$results$methodologyNotes$setContent(html_content)
+        },
+
+        .populateClinicalGuidance = function() {
+            html_content <- "
+            <h3>Clinical Interpretation Guidance</h3>
+            
+            <div class='alert alert-success'>
+                <h4>🏥 Clinical Applications</h4>
+                <ul>
+                    <li><strong>Prognostic Models:</strong> Identify key factors affecting patient survival</li>
+                    <li><strong>Risk Stratification:</strong> Classify patients into risk groups for treatment planning</li>
+                    <li><strong>Biomarker Discovery:</strong> Screen large sets of potential biomarkers</li>
+                    <li><strong>Clinical Decision Support:</strong> Develop tools for personalized medicine</li>
+                </ul>
+            </div>
+            
+            <h4>📊 Interpreting Model Results:</h4>
+            
+            <div class='row'>
+                <div class='col-md-6'>
+                    <h5>🔢 Coefficients & Hazard Ratios</h5>
+                    <ul>
+                        <li><strong>Positive coefficient:</strong> Higher values increase hazard (worse prognosis)</li>
+                        <li><strong>Negative coefficient:</strong> Higher values decrease hazard (better prognosis)</li>
+                        <li><strong>Hazard Ratio = exp(coefficient)</strong></li>
+                        <li><strong>Example:</strong> Coefficient = 0.693 → HR = 2.0 (doubled risk)</li>
+                    </ul>
+                </div>
+                
+                <div class='col-md-6'>
+                    <h5>📈 Risk Scores</h5>
+                    <ul>
+                        <li><strong>Higher risk score:</strong> Worse expected survival</li>
+                        <li><strong>Lower risk score:</strong> Better expected survival</li>
+                        <li><strong>Threshold:</strong> Often use median to split low/high risk</li>
+                        <li><strong>Validation:</strong> Test in independent cohorts</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h4>⚕️ Clinical Decision Making:</h4>
+            <ul>
+                <li><strong>Treatment Selection:</strong> High-risk patients may benefit from aggressive therapy</li>
+                <li><strong>Follow-up Intensity:</strong> Adjust monitoring frequency based on risk</li>
+                <li><strong>Patient Counseling:</strong> Inform patients about prognosis and options</li>
+                <li><strong>Clinical Trial Stratification:</strong> Balance risk factors between treatment arms</li>
+            </ul>
+            
+            <h4>🎯 Model Performance Assessment:</h4>
+            <table class='table table-sm'>
+                <thead>
+                    <tr><th>C-index Range</th><th>Discrimination</th><th>Clinical Utility</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>0.50 - 0.60</td><td>Poor</td><td>Limited clinical value</td></tr>
+                    <tr><td>0.60 - 0.70</td><td>Acceptable</td><td>May inform decisions</td></tr>
+                    <tr><td>0.70 - 0.80</td><td>Good</td><td>Useful for risk stratification</td></tr>
+                    <tr><td>0.80 - 0.90</td><td>Excellent</td><td>Strong clinical utility</td></tr>
+                    <tr><td>> 0.90</td><td>Outstanding</td><td>May indicate overfitting</td></tr>
+                </tbody>
+            </table>
+            
+            <div class='alert alert-warning'>
+                <h4>⚠️ Clinical Validation Requirements:</h4>
+                <ul>
+                    <li><strong>External Validation:</strong> Test model in different populations</li>
+                    <li><strong>Temporal Validation:</strong> Verify performance over time</li>
+                    <li><strong>Clinical Impact:</strong> Demonstrate improved patient outcomes</li>
+                    <li><strong>Implementation:</strong> Consider practical feasibility in clinical workflow</li>
+                </ul>
+            </div>
+            
+            <div class='alert alert-info'>
+                <h4>📋 Reporting Recommendations:</h4>
+                <ul>
+                    <li>Report both λ.min and λ.1se results</li>
+                    <li>Describe variable selection process and stability</li>
+                    <li>Provide confidence intervals for C-index</li>
+                    <li>Include calibration assessment when possible</li>
+                    <li>Discuss clinical context and limitations</li>
+                    <li>Share code and data for reproducibility</li>
+                </ul>
+            </div>
+            
+            <h4>🔄 Model Updating and Maintenance:</h4>
+            <ul>
+                <li><strong>Regular Validation:</strong> Monitor performance with new data</li>
+                <li><strong>Model Recalibration:</strong> Update when performance degrades</li>
+                <li><strong>Variable Drift:</strong> Check for changes in predictor distributions</li>
+                <li><strong>Outcome Definition:</strong> Ensure consistent endpoint definitions</li>
+            </ul>
+            "
+            
+            self$results$clinicalGuidance$setContent(html_content)
+        },
+
+        .populateCrossValidationExplanation = function() {
+            html_content <- "
+            <h4>📊 Understanding the Cross-Validation Plot</h4>
+            
+            <div class='alert alert-info'>
+                <p>The cross-validation plot shows how model performance varies with different levels of regularization (λ values).</p>
+            </div>
+            
+            <ul>
+                <li><strong>X-axis:</strong> Log(λ) - Regularization strength (left = weak, right = strong)</li>
+                <li><strong>Y-axis:</strong> Partial likelihood deviance (lower = better fit)</li>
+                <li><strong>Error bars:</strong> Standard errors across CV folds</li>
+                <li><strong>Vertical lines:</strong> 
+                    <ul>
+                        <li>Left line: λ.min (minimum CV error)</li>
+                        <li>Right line: λ.1se (most regularization within 1 SE)</li>
+                    </ul>
+                </li>
+                <li><strong>Numbers at top:</strong> Number of non-zero variables at each λ</li>
+            </ul>
+            
+            <p><strong>Interpretation:</strong> Choose λ.1se (right line) for more robust, generalizable models with fewer variables.</p>
+            "
+            
+            self$results$crossValidationExplanation$setContent(html_content)
+        },
+
+        .populateRegularizationPathExplanation = function() {
+            html_content <- "
+            <h4>🛤️ Understanding the Regularization Path</h4>
+            
+            <div class='alert alert-info'>
+                <p>The coefficient plot shows how variable coefficients change as regularization increases.</p>
+            </div>
+            
+            <ul>
+                <li><strong>X-axis:</strong> Log(λ) - Regularization strength</li>
+                <li><strong>Y-axis:</strong> Coefficient values</li>
+                <li><strong>Each line:</strong> One variable's coefficient path</li>
+                <li><strong>Line behavior:</strong>
+                    <ul>
+                        <li>Coefficients shrink toward zero as λ increases</li>
+                        <li>Less important variables reach zero first</li>
+                        <li>Most important variables persist longest</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <p><strong>Variable Selection:</strong> Variables with non-zero coefficients at the chosen λ are included in the final model.</p>
+            "
+            
+            self$results$regularizationPathExplanation$setContent(html_content)
+        },
+
+        .populateRiskScoreExplanation = function() {
+            html_content <- "
+            <h4>📈 Understanding Risk Scores and Survival Curves</h4>
+            
+            <div class='alert alert-info'>
+                <p>Risk scores combine selected variables to predict individual patient risk. Survival curves show outcomes for different risk groups.</p>
+            </div>
+            
+            <h5>Risk Score Calculation:</h5>
+            <ul>
+                <li><strong>Formula:</strong> Risk Score = β₁×X₁ + β₂×X₂ + ... + βₖ×Xₖ</li>
+                <li><strong>Higher scores:</strong> Increased risk (worse prognosis)</li>
+                <li><strong>Lower scores:</strong> Decreased risk (better prognosis)</li>
+                <li><strong>Risk groups:</strong> Often split at median (low vs high risk)</li>
+            </ul>
+            
+            <h5>Survival Curve Interpretation:</h5>
+            <ul>
+                <li><strong>Y-axis:</strong> Survival probability (1.0 = 100% survival)</li>
+                <li><strong>X-axis:</strong> Time (same units as input data)</li>
+                <li><strong>Curve separation:</strong> Better separation indicates stronger risk prediction</li>
+                <li><strong>P-value:</strong> Statistical significance of risk group differences</li>
+                <li><strong>Risk table:</strong> Number of patients at risk at each time point</li>
+            </ul>
+            "
+            
+            self$results$riskScoreExplanation$setContent(html_content)
+        },
+
+        .populateVariableImportance = function(results) {
+            table <- self$results$variableImportance
+            table$deleteRows()
+            
+            if (length(results$selected_vars) == 0) {
+                table$addRow(rowKey = 1, values = list(
+                    variable = "No variables selected",
+                    importance_score = NA,
+                    selection_frequency = NA,
+                    stability_rank = NA
+                ))
+                return()
+            }
+            
+            # Calculate importance metrics
+            for (i in seq_along(results$selected_vars)) {
+                var_idx <- results$selected_vars[i]
+                var_name <- results$data$variable_names[var_idx]
+                coef_val <- abs(results$coef_matrix[var_idx, 1])
+                
+                # Simple importance based on absolute coefficient
+                importance <- coef_val
+                # Placeholder for selection frequency (would need bootstrap analysis)
+                freq <- 1.0
+                
+                table$addRow(rowKey = i, values = list(
+                    variable = var_name,
+                    importance_score = importance,
+                    selection_frequency = freq,
+                    stability_rank = i
+                ))
+            }
+        },
+
+        .populateModelComparison = function(results) {
+            table <- self$results$modelComparison
+            table$deleteRows()
+            
+            # LASSO model performance
+            table$addRow(rowKey = 1, values = list(
+                model_type = "LASSO Cox",
+                n_variables = length(results$selected_vars),
+                cindex = results$performance_metrics$cindex,
+                aic = NA,  # Would need to calculate
+                log_likelihood = NA  # Would need to calculate
+            ))
+            
+            # Standard Cox comparison (placeholder)
+            table$addRow(rowKey = 2, values = list(
+                model_type = "Standard Cox (all variables)",
+                n_variables = ncol(results$data$X),
+                cindex = NA,  # Would need to fit standard Cox
+                aic = NA,
+                log_likelihood = NA
+            ))
         }
     )
 )

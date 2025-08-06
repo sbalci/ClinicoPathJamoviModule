@@ -530,3 +530,7 @@ Language: c\n
 ### Warnings and File Management
 
 - **do not change these files: .Rd, .h.R, 00jmv.R. They are auto-generated during documentation and installation.**
+
+# Custom slash commands for Claude CLI
+
+use <https://docs.anthropic.com/en/docs/claude-code/slash-commands> to generate custom slash commands

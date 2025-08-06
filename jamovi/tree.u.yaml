@@ -1,4 +1,4 @@
-title: Medical Decision Tree
+title: Medical Decision Tree Analysis
 name: tree
 jus: '3.0'
 stage: 0
@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Primary Outcome
+        label: Target Variable
         children:
           - type: VariablesListBox
             name: target
@@ -17,19 +17,22 @@ children:
             isTarget: true
           - type: LevelSelector
             name: targetLevel
-            enable: (target)
+            label: Disease/Positive Class
+            variable: (target)
       - type: TargetLayoutBox
         label: Continuous Clinical Variables
         children:
           - type: VariablesListBox
             name: vars
             isTarget: true
+            height: small
       - type: TargetLayoutBox
         label: Categorical Clinical Variables
         children:
           - type: VariablesListBox
             name: facs
             isTarget: true
+            height: small
       - type: TargetLayoutBox
         label: Training/Validation Cohort (Optional)
         children:
@@ -37,227 +40,418 @@ children:
             name: train
             maxItemCount: 1
             isTarget: true
+            height: small
+  - type: CollapseBox
+    label: Algorithm & Validation
+    collapsed: false
+    children:
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: algorithm
+            label: Decision Tree Algorithm
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: tree_mode
+            label: Analysis Mode
+      - type: LayoutBox
+        children:
           - type: LevelSelector
             name: trainLevel
-            enable: (train)
-  - type: CollapseBox
-    label: Clinical Context & Data Processing
-    collapsed: false
-    stretchFactor: 1
-    children:
+            label: Training Cohort Level
       - type: LayoutBox
-        margin: large
         children:
-          - type: Label
-            label: Clinical Context
-            children:
-              - type: ComboBox
-                name: clinicalContext
-              - type: TextBox
-                name: costRatio
-                format: number
-                suffix: ':1 (FN:FP cost ratio)'
-          - type: Label
-            label: Data Processing
-            children:
-              - type: CheckBox
-                name: imputeMissing
-              - type: CheckBox
-                name: balanceClasses
-              - type: CheckBox
-                name: scaleFeatures
+          - type: ComboBox
+            name: validation
+            label: Validation Method
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: test_split
+            label: Test Split (%)
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: cv_folds
+            label: Number of Folds
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: cv_repeats
+            label: CV Repeats
+            format: number
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: stratified_sampling
+            label: Stratified Sampling
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: data_split_method
+            label: Data Splitting Strategy
   - type: CollapseBox
-    label: Model Parameters
+    label: Tree Parameters
     collapsed: true
-    stretchFactor: 1
     children:
       - type: LayoutBox
-        margin: large
         children:
-          - type: Label
-            label: Tree Structure
-            children:
-              - type: TextBox
-                name: minCases
-                format: number
-                suffix: cases per node
-              - type: TextBox
-                name: maxDepth
-                format: number
-                suffix: maximum depth
-          - type: Label
-            label: Validation
-            children: []
+          - type: TextBox
+            name: max_depth
+            label: Maximum Depth
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: min_samples_split
+            label: Min Samples to Split
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: min_samples_leaf
+            label: Min Samples per Leaf
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: cost_complexity
+            label: Cost Complexity (CP)
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: min_n
+            label: Min Node Size (min_n)
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: tree_depth
+            label: Tree Depth
+            format: number
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: hyperparameter_tuning
+            label: Hyperparameter Tuning
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: tuning_metric
+            label: Tuning Metric
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: use_1se_rule
+            label: Use 1-SE Rule
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: xerror_pruning
+            label: Cross-validation Error Pruning
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: auto_prune
+            label: Automatic Tree Pruning
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: prune_method
+            label: Pruning Method
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: advanced_pruning
+            label: Advanced Pruning Method
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: pruning_validation_split
+            label: Pruning Validation Split (%)
+            format: number
   - type: CollapseBox
-    label: Clinical Analysis
-    collapsed: false
-    stretchFactor: 1
+    label: Engine-Specific Options
+    collapsed: true
     children:
       - type: LayoutBox
-        margin: large
         children:
-          - type: Label
+          - type: TextBox
+            name: c50_trials
+            label: C5.0 Boosting Trials
+            format: number
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: c50_winnow
+            label: C5.0 Winnowing
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: ctree_mincriterion
+            label: ctree Statistical Criterion
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: rf_ntree
+            label: Random Forest Trees
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: rf_mtry
+            label: RF Variables per Split
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: xgb_nrounds
+            label: XGBoost Rounds
+            format: number
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: xgb_eta
+            label: XGBoost Learning Rate
+            format: number
+  - type: CollapseBox
+    label: Reproducibility & Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: set_seed
+            label: Set Random Seed
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: seed_value
+            label: Seed Value
+            format: number
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: show_cp_table
+            label: Show CP Table
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: show_variable_importance_detailed
+            label: Detailed Variable Importance
+  - type: CollapseBox
+    label: Data Preprocessing
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: missing_data_method
+            label: Missing Data Method
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: balanceClasses
+            label: Balance Disease Classes
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: ensemble_method
+            label: Ensemble Method
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: n_trees
+            label: Number of Trees
+            format: number
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    children:
+      - type: Label
+        label: Basic Outputs
+        children:
+          - type: CheckBox
+            name: show_tree_plot
+            label: Decision Tree Plot
+          - type: CheckBox
+            name: show_importance_plot
+            label: Feature Importance
+          - type: CheckBox
+            name: show_performance_metrics
             label: Performance Metrics
-            children:
-              - type: CheckBox
-                name: clinicalMetrics
-              - type: CheckBox
-                name: confidenceInterval
-              - type: CheckBox
-                name: featureImportance
-          - type: Label
-            label: Clinical Interpretation
-            children:
-              - type: CheckBox
-                name: showInterpretation
-              - type: CheckBox
-                name: riskStratification
+          - type: CheckBox
+            name: show_confusion_matrix
+            label: Confusion Matrix
+      - type: Label
+        label: Advanced Outputs
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_roc_curve
+            label: ROC Curve
+          - type: CheckBox
+            name: show_validation_curves
+            label: Validation Curves
+          - type: CheckBox
+            name: show_calibration_plot
+            label: Calibration Plot
+          - type: CheckBox
+            name: showPartitionPlot
+            label: Partition Plot (2D Only)
+          - type: CheckBox
+            name: show_cp_plot
+            label: Complexity Parameter Plot
+          - type: ComboBox
+            name: tree_plot_style
+            label: Tree Plot Style
+          - type: CheckBox
+            name: show_node_statistics
+            label: Show Node Statistics
   - type: CollapseBox
-    label: Population Prevalence Adjustment
+    label: Feature Analysis
     collapsed: true
-    stretchFactor: 1
     children:
       - type: LayoutBox
-        margin: large
+        children:
+          - type: CheckBox
+            name: feature_selection
+            label: Automated Feature Selection
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: feature_selection_method
+            label: Feature Selection Method
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: importance_method
+            label: Importance Method
+  - type: CollapseBox
+    label: Interpretability Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: interpretability
+            label: Enable Interpretability Analysis
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: shap_analysis
+            label: SHAP Values
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: partial_dependence
+            label: Partial Dependence Plots
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: interaction_analysis
+            label: Feature Interactions
+  - type: CollapseBox
+    label: Clinical Settings
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: clinical_context
+            label: Clinical Context
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: cost_sensitive_thresholds
+            label: Cost-Sensitive Analysis
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: fn_fp_ratio
+            label: False Negative/Positive Cost Ratio
+            format: number
+      - type: LayoutBox
         children:
           - type: CheckBox
             name: prevalenceAdjustment
+            label: Adjust for Population Prevalence
+      - type: LayoutBox
+        children:
           - type: TextBox
             name: expectedPrevalence
+            label: Expected Population Prevalence (%)
             format: number
-            suffix: '% expected prevalence'
-            enable: (prevalenceAdjustment)
   - type: CollapseBox
-    label: Model Validation (Issue
+    label: Advanced Validation
     collapsed: true
-    stretchFactor: 1
     children:
       - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Cross-Validation
-            children:
-              - type: CheckBox
-                name: crossValidation
-              - type: TextBox
-                name: cvFolds
-                format: number
-                suffix: folds
-                enable: (crossValidation)
-          - type: Label
-            label: Bootstrap Validation
-            children:
-              - type: CheckBox
-                name: bootstrapValidation
-              - type: TextBox
-                name: bootstrapSamples
-                format: number
-                suffix: samples
-                enable: (bootstrapValidation)
-          - type: Label
-            label: Model Comparison
-            children:
-              - type: CheckBox
-                name: compareModels
-              - type: ComboBox
-                name: modelComparisonMetric
-                enable: (compareModels)
-  - type: CollapseBox
-    label: Performance Thresholds (Issue
-    collapsed: true
-    stretchFactor: 1
-    children:
-      - type: LayoutBox
-        margin: large
         children:
           - type: CheckBox
-            name: customThresholds
-          - type: TextBox
-            name: sensitivityThreshold
-            format: number
-            suffix: minimum sensitivity
-            enable: (customThresholds)
-          - type: TextBox
-            name: specificityThreshold
-            format: number
-            suffix: minimum specificity
-            enable: (customThresholds)
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
-      - type: TargetLayoutBox
-        label: Spatial Coordinates (X, Y)
-        children:
-          - type: VariablesListBox
-            name: spatialCoords
-            isTarget: true
-  - type: CollapseBox
-    label: Variable Importance (Issue
-    collapsed: true
-    stretchFactor: 1
-    children:
+            name: bootstrap_confidence
+            label: Bootstrap Confidence Intervals
       - type: LayoutBox
-        margin: large
+        children:
+          - type: TextBox
+            name: n_bootstrap
+            label: Bootstrap Samples
+            format: number
+      - type: LayoutBox
         children:
           - type: CheckBox
-            name: featureImportance
+            name: model_comparison
+            label: Compare Multiple Algorithms
+      - type: LayoutBox
+        children:
           - type: ComboBox
-            name: variableImportanceMethod
-            enable: (featureImportance)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: useAutocart
+            name: modelComparisonMetric
+            label: Comparison Metric
   - type: CollapseBox
-    label: Visualization & Output
+    label: Export & Reporting
     collapsed: true
-    stretchFactor: 1
     children:
       - type: LayoutBox
-        margin: large
         children:
-          - type: Label
-            label: Decision Tree Plots
-            children:
-              - type: CheckBox
-                name: showPlot
-              - type: ComboBox
-                name: treeVisualization
-                enable: (showPlot)
-              - type: CheckBox
-                name: showNodeStatistics
-                enable: (showPlot)
-          - type: Label
-            label: Performance Plots (Issue
-            children:
-              - type: CheckBox
-                name: showROCCurve
-              - type: CheckBox
-                name: showCalibrationPlot
-              - type: CheckBox
-                name: showClinicalUtility
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: showPartitionPlot
-          - type: Label
-            label: Export Results
-            children:
-              - type: CheckBox
-                name: exportPredictions
-  - type: LayoutBox
-    margin: large
+          - type: CheckBox
+            name: show_clinical_interpretation
+            label: Clinical Interpretation Guide
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: export_model
+            label: Export Model
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: exportPredictions
+            label: Export Predictions
+  - type: CollapseBox
+    label: Model Robustness Analysis
+    collapsed: true
     children:
-      - type: TextBox
-        name: spatialAlpha
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: spatialBeta
-        format: number
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: model_stability_analysis
+            label: Model Stability Analysis
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: learning_curves
+            label: Learning Curves
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: outlier_analysis
+            label: Outlier Detection
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: prediction_intervals
+            label: Prediction Intervals

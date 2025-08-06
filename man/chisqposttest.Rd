@@ -8,6 +8,7 @@ chisqposttest(
   data,
   rows,
   cols,
+  counts,
   posthoc = "bonferroni",
   sig = 0.05,
   excl = FALSE,
@@ -26,6 +27,10 @@ chisqposttest(
 \item{rows}{variable in the rows}
 
 \item{cols}{variable in the columns}
+
+\item{counts}{Frequency/weight variable for contingency table data. When
+specified, the data is treated as already summarized with counts per
+combination.}
 
 \item{posthoc}{Method for p-value adjustment in post-hoc tests}
 
@@ -57,12 +62,13 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
+\code{results$weightedDataInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualsAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
-\code{results$plotOutput} \tab \tab \tab \tab \tab an image \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

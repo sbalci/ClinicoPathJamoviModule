@@ -70,11 +70,12 @@ items:
       width: 1200
       height: 900
       renderFun: .plot_comparison
-      visible: false
+      visible: (show_comparison)
       clearWith:
         - x_var
         - y_var
         - fill_var
+        - show_comparison
 
     - name: code_example
       title: "R Code Example"

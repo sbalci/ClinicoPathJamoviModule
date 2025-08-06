@@ -15,7 +15,12 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             standardize = TRUE,
             cv_plot = TRUE,
             coef_plot = TRUE,
-            survival_plot = TRUE, ...) {
+            survival_plot = TRUE,
+            showExplanations = FALSE,
+            showMethodologyNotes = FALSE,
+            includeClinicalGuidance = FALSE,
+            showVariableImportance = FALSE,
+            showModelComparison = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -84,6 +89,26 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=TRUE)
             private$..riskScore <- jmvcore::OptionOutput$new(
                 "riskScore")
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
+            private$..showMethodologyNotes <- jmvcore::OptionBool$new(
+                "showMethodologyNotes",
+                showMethodologyNotes,
+                default=FALSE)
+            private$..includeClinicalGuidance <- jmvcore::OptionBool$new(
+                "includeClinicalGuidance",
+                includeClinicalGuidance,
+                default=FALSE)
+            private$..showVariableImportance <- jmvcore::OptionBool$new(
+                "showVariableImportance",
+                showVariableImportance,
+                default=FALSE)
+            private$..showModelComparison <- jmvcore::OptionBool$new(
+                "showModelComparison",
+                showModelComparison,
+                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..outcome)
@@ -96,6 +121,11 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..coef_plot)
             self$.addOption(private$..survival_plot)
             self$.addOption(private$..riskScore)
+            self$.addOption(private$..showExplanations)
+            self$.addOption(private$..showMethodologyNotes)
+            self$.addOption(private$..includeClinicalGuidance)
+            self$.addOption(private$..showVariableImportance)
+            self$.addOption(private$..showModelComparison)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -108,7 +138,12 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cv_plot = function() private$..cv_plot$value,
         coef_plot = function() private$..coef_plot$value,
         survival_plot = function() private$..survival_plot$value,
-        riskScore = function() private$..riskScore$value),
+        riskScore = function() private$..riskScore$value,
+        showExplanations = function() private$..showExplanations$value,
+        showMethodologyNotes = function() private$..showMethodologyNotes$value,
+        includeClinicalGuidance = function() private$..includeClinicalGuidance$value,
+        showVariableImportance = function() private$..showVariableImportance$value,
+        showModelComparison = function() private$..showModelComparison$value),
     private = list(
         ..elapsedtime = NA,
         ..outcome = NA,
@@ -120,7 +155,12 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..cv_plot = NA,
         ..coef_plot = NA,
         ..survival_plot = NA,
-        ..riskScore = NA)
+        ..riskScore = NA,
+        ..showExplanations = NA,
+        ..showMethodologyNotes = NA,
+        ..includeClinicalGuidance = NA,
+        ..showVariableImportance = NA,
+        ..showModelComparison = NA)
 )
 
 lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -134,7 +174,15 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cv_plot = function() private$.items[["cv_plot"]],
         coef_plot = function() private$.items[["coef_plot"]],
         survival_plot = function() private$.items[["survival_plot"]],
-        riskScore = function() private$.items[["riskScore"]]),
+        riskScore = function() private$.items[["riskScore"]],
+        lassoExplanation = function() private$.items[["lassoExplanation"]],
+        methodologyNotes = function() private$.items[["methodologyNotes"]],
+        clinicalGuidance = function() private$.items[["clinicalGuidance"]],
+        variableImportance = function() private$.items[["variableImportance"]],
+        modelComparison = function() private$.items[["modelComparison"]],
+        regularizationPathExplanation = function() private$.items[["regularizationPathExplanation"]],
+        crossValidationExplanation = function() private$.items[["crossValidationExplanation"]],
+        riskScoreExplanation = function() private$.items[["riskScoreExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -190,6 +238,14 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="coefficient", 
                         `title`="Coefficient", 
+                        `type`="number"),
+                    list(
+                        `name`="hazardRatio", 
+                        `title`="Hazard Ratio", 
+                        `type`="number"),
+                    list(
+                        `name`="importance", 
+                        `title`="Importance", 
                         `type`="number")),
                 clearWith=list(
                     "outcome",
@@ -212,7 +268,11 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="number")),
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -291,7 +351,119 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "lambda",
                     "nfolds",
-                    "standardize")))}))
+                    "standardize")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="lassoExplanation",
+                title="Understanding LASSO Cox Regression",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "showExplanations")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="methodologyNotes",
+                title="LASSO Cox Methodology Notes",
+                visible="(showMethodologyNotes)",
+                clearWith=list(
+                    "showMethodologyNotes")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalGuidance",
+                title="Clinical Interpretation Guidance",
+                visible="(includeClinicalGuidance)",
+                clearWith=list(
+                    "includeClinicalGuidance")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="variableImportance",
+                title="Variable Importance Analysis",
+                visible="(showVariableImportance)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="importance_score", 
+                        `title`="Importance Score", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="selection_frequency", 
+                        `title`="Selection Frequency", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="stability_rank", 
+                        `title`="Stability Rank", 
+                        `type`="integer")),
+                clearWith=list(
+                    "showVariableImportance",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelComparison",
+                title="LASSO vs Standard Cox Regression",
+                visible="(showModelComparison)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="model_type", 
+                        `title`="Model Type", 
+                        `type`="text"),
+                    list(
+                        `name`="n_variables", 
+                        `title`="N Variables", 
+                        `type`="integer"),
+                    list(
+                        `name`="cindex", 
+                        `title`="C-index", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="aic", 
+                        `title`="AIC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="log_likelihood", 
+                        `title`="Log-Likelihood", 
+                        `type`="number", 
+                        `format`="zto")),
+                clearWith=list(
+                    "showModelComparison",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="regularizationPathExplanation",
+                title="Understanding Regularization Path",
+                visible="(showExplanations && coef_plot)",
+                clearWith=list(
+                    "showExplanations",
+                    "coef_plot")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="crossValidationExplanation",
+                title="Understanding Cross-Validation Plot",
+                visible="(showExplanations && cv_plot)",
+                clearWith=list(
+                    "showExplanations",
+                    "cv_plot")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="riskScoreExplanation",
+                title="Understanding Risk Scores and Survival Curves",
+                visible="(showExplanations && survival_plot)",
+                clearWith=list(
+                    "showExplanations",
+                    "survival_plot")))}))
 
 lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lassocoxBase",
@@ -339,6 +511,19 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param cv_plot Whether to show the cross-validation plot.
 #' @param coef_plot Whether to show the coefficient path plot.
 #' @param survival_plot Whether to show survival curves by risk groups.
+#' @param showExplanations Display detailed explanations of LASSO Cox
+#'   regression methodology, including regularization concepts and
+#'   interpretation guidance.
+#' @param showMethodologyNotes Show comprehensive technical notes about LASSO
+#'   regularization, cross-validation, and variable selection process.
+#' @param includeClinicalGuidance Include guidance for clinical interpretation
+#'   of LASSO Cox regression results, risk scores, and variable selection
+#'   outcomes.
+#' @param showVariableImportance Display analysis of variable importance
+#'   rankings and selection patterns across different lambda values.
+#' @param showModelComparison Compare LASSO Cox results with standard Cox
+#'   regression to demonstrate the benefits of regularization and variable
+#'   selection.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -349,6 +534,14 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$coef_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survival_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$riskScore} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$lassoExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$methodologyNotes} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalGuidance} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$variableImportance} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$regularizationPathExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$crossValidationExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$riskScoreExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -369,7 +562,12 @@ lassocox <- function(
     standardize = TRUE,
     cv_plot = TRUE,
     coef_plot = TRUE,
-    survival_plot = TRUE) {
+    survival_plot = TRUE,
+    showExplanations = FALSE,
+    showMethodologyNotes = FALSE,
+    includeClinicalGuidance = FALSE,
+    showVariableImportance = FALSE,
+    showModelComparison = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("lassocox requires jmvcore to be installed (restart may be required)")
@@ -395,7 +593,12 @@ lassocox <- function(
         standardize = standardize,
         cv_plot = cv_plot,
         coef_plot = coef_plot,
-        survival_plot = survival_plot)
+        survival_plot = survival_plot,
+        showExplanations = showExplanations,
+        showMethodologyNotes = showMethodologyNotes,
+        includeClinicalGuidance = includeClinicalGuidance,
+        showVariableImportance = showVariableImportance,
+        showModelComparison = showModelComparison)
 
     analysis <- lassocoxClass$new(
         options = options,
