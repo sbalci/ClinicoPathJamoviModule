@@ -4,10 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  # ==========================================
-  # VARIABLES SECTION
-  # ==========================================
-
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -22,9 +18,10 @@ children:
           - type: TextBox
             name: testLevels
             format: string
-            label: Positive Test Levels (Blank for auto-detect, Specify Positive,Yes,1)
+            label: >-
+              Positive Test Levels (Blank for auto-detect, Specify
+              Positive,Yes,1)
             enable: (tests)
-
       - type: TargetLayoutBox
         label: Gold Standard
         children:
@@ -36,13 +33,6 @@ children:
             name: goldPositive
             label: Disease Present
             enable: (gold)
-
-
-
-
-  # ==========================================
-  # TESTING STRATEGIES
-  # ==========================================
   - type: CollapseBox
     label: Testing Strategies
     margin: normal
@@ -58,7 +48,6 @@ children:
             name: maxTests
             format: number
             label: Max Tests in Combination
-          
       - type: LayoutBox
         margin: large
         children:
@@ -73,7 +62,6 @@ children:
                 format: number
                 label: Custom Threshold
                 enable: (parallelRules:custom)
-                
       - type: LayoutBox
         margin: large
         children:
@@ -83,10 +71,6 @@ children:
               - type: ComboBox
                 name: sequentialStop
                 label: Stop Rule
-
-  # ==========================================
-  # OPTIMIZATION SETTINGS
-  # ==========================================
   - type: CollapseBox
     label: Optimization Settings
     margin: normal
@@ -106,10 +90,6 @@ children:
             name: minSpecificity
             format: number
             label: Minimum Specificity
-
-  # ==========================================
-  # COST ANALYSIS
-  # ==========================================
   - type: CollapseBox
     label: Cost Analysis
     margin: normal
@@ -139,10 +119,11 @@ children:
             format: number
             label: False Negative Cost
             enable: (useCosts)
-
-  # ==========================================
-  # DECISION TREE OPTIONS
-  # ==========================================
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: panelOptimization
   - type: CollapseBox
     label: Decision Tree
     margin: normal
@@ -168,10 +149,12 @@ children:
             format: number
             label: Min Node Size for Split
             enable: (createTree)
-
-  # ==========================================
-  # OUTPUT OPTIONS
-  # ==========================================
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: minImprovement
+        format: number
   - type: CollapseBox
     label: Output Options
     margin: normal
@@ -190,7 +173,6 @@ children:
           - type: CheckBox
             name: compareStrategies
             label: Compare testing strategies
-            
       - type: LayoutBox
         margin: large
         children:
@@ -213,10 +195,12 @@ children:
                 format: number
                 label: Number of folds
                 enable: (crossValidate)
-
-  # ==========================================
-  # VISUALIZATION OPTIONS
-  # ==========================================
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: redundancyThreshold
+        format: number
   - type: CollapseBox
     label: Visualization
     margin: normal
@@ -239,10 +223,6 @@ children:
           - type: CheckBox
             name: plotROC
             label: Plot ROC curves
-
-  # ==========================================
-  # ADDITIONAL OPTIONS
-  # ==========================================
   - type: CollapseBox
     label: Additional Options
     margin: normal

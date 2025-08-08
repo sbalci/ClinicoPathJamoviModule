@@ -1,0 +1,452 @@
+---
+name: timedependent
+title: Time-Dependent Covariates & ROC Analysis
+menuGroup: SurvivalD
+menuSubgroup: Advanced Survival
+menuSubtitle: 'Dynamic Effects and Time-Varying Predictions'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Analysis of time-dependent covariates and time-varying ROC curves for survival data.
+        Handles covariates that change over time, landmark analysis, and dynamic prediction
+        accuracy assessment through time-dependent AUC and optimal cutpoint selection.
+    R:
+        dontrun: true
+        usage: |
+            # Example: Time-varying biomarker effects
+            timedependent(
+                data = biomarker_data,
+                id = patient_id,
+                start_time = tstart,
+                stop_time = tstop,
+                event = status,
+                time_dependent_vars = c("biomarker_level", "treatment_status"),
+                baseline_vars = c("age", "sex"),
+                landmark_times = c(6, 12, 24),
+                roc_times = c(1, 2, 3, 5)
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (can be in counting process format).
+
+    # Essential Variables
+    - name: id
+      title: 'Patient ID'
+      type: Variable
+      suggested: [ id ]
+      permitted: [ id, factor, numeric ]
+      description:
+          ui: >
+            Unique patient identifier for linking multiple time intervals
+          R: >
+            Patient ID variable
+
+    - name: start_time
+      title: 'Start Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Start time for each interval (use 0 for single interval data)
+          R: >
+            Beginning of time interval (tstart)
+
+    - name: stop_time
+      title: 'Stop Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Stop time for each interval (survival time)
+          R: >
+            End of time interval (tstop)
+
+    - name: event
+      title: 'Event Status'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Event indicator at stop time (0 = censored, 1 = event)
+          R: >
+            Event status variable
+
+    - name: time_dependent_vars
+      title: 'Time-Dependent Covariates'
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Covariates that change over time
+          R: >
+            Time-varying predictors
+
+    - name: baseline_vars
+      title: 'Baseline Covariates'
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Fixed covariates measured at baseline
+          R: >
+            Time-fixed predictors
+
+    # Landmark Analysis Options
+    - name: perform_landmark
+      title: 'Perform Landmark Analysis'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Conduct landmark analysis at specified time points
+          R: >
+            Enable landmark analysis
+
+    - name: landmark_times
+      title: 'Landmark Times'
+      type: String
+      default: "6,12,24"
+      description:
+          ui: >
+            Time points for landmark analysis (comma-separated)
+          R: >
+            Landmark time points
+
+    - name: prediction_window
+      title: 'Prediction Window'
+      type: Number
+      default: 12
+      min: 1
+      description:
+          ui: >
+            Window for predictions from landmark time (months)
+          R: >
+            Prediction horizon from landmark
+
+    # ROC Analysis Options
+    - name: time_dependent_roc
+      title: 'Time-Dependent ROC Analysis'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate time-dependent ROC curves and AUC
+          R: >
+            Enable TD-ROC analysis
+
+    - name: roc_times
+      title: 'ROC Evaluation Times'
+      type: String
+      default: "1,2,3,5"
+      description:
+          ui: >
+            Time points for ROC evaluation (comma-separated)
+          R: >
+            ROC assessment times
+
+    - name: roc_method
+      title: 'ROC Method'
+      type: List
+      options:
+        - title: Incident/Dynamic (I/D)
+          name: incident_dynamic
+        - title: Cumulative/Dynamic (C/D)
+          name: cumulative_dynamic
+        - title: Incident/Static (I/S)
+          name: incident_static
+        - title: Cumulative/Static (C/S)
+          name: cumulative_static
+      default: incident_dynamic
+      description:
+          ui: >
+            Method for time-dependent ROC calculation
+          R: >
+            TD-ROC approach
+
+    - name: optimal_cutpoint
+      title: 'Find Optimal Cutpoints'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Identify optimal cutpoints at each time point
+          R: >
+            Optimal threshold selection
+
+    - name: cutpoint_method
+      title: 'Cutpoint Method'
+      type: List
+      options:
+        - title: Youden Index
+          name: youden
+        - title: Closest to (0,1)
+          name: closest
+        - title: Liu Method
+          name: liu
+        - title: Concordance Probability
+          name: concordance
+      default: youden
+      description:
+          ui: >
+            Method for optimal cutpoint selection
+          R: >
+            Cutpoint optimization approach
+
+    # Model Options
+    - name: model_type
+      title: 'Model Type'
+      type: List
+      options:
+        - title: Cox Proportional Hazards
+          name: cox
+        - title: Extended Cox (Time-Varying Coefficients)
+          name: extended_cox
+        - title: Landmark Cox Model
+          name: landmark_cox
+        - title: Joint Model
+          name: joint
+      default: extended_cox
+      description:
+          ui: >
+            Type of survival model for time-dependent analysis
+          R: >
+            Model specification
+
+    - name: time_transform
+      title: 'Time Transformation'
+      type: List
+      options:
+        - title: None (Linear Time)
+          name: none
+        - title: Log Time
+          name: log
+        - title: Square Root Time
+          name: sqrt
+        - title: Polynomial
+          name: poly
+      default: none
+      description:
+          ui: >
+            Transformation for time-dependent effects
+          R: >
+            Time function transformation
+
+    - name: test_proportional_hazards
+      title: 'Test Proportional Hazards'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Test proportional hazards assumption using Schoenfeld residuals
+          R: >
+            PH assumption testing
+
+    - name: schoenfeld_transform
+      title: 'Schoenfeld Transform'
+      type: List
+      options:
+        - title: Identity
+          name: identity
+        - title: Kaplan-Meier
+          name: km
+        - title: Rank
+          name: rank
+      default: km
+      description:
+          ui: >
+            Transformation for Schoenfeld residual test
+          R: >
+            Residual test transformation
+
+    # Validation Options
+    - name: internal_validation
+      title: 'Internal Validation'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform cross-validation of time-dependent predictions
+          R: >
+            Cross-validation assessment
+
+    - name: cv_folds
+      title: 'Cross-Validation Folds'
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+      description:
+          ui: >
+            Number of folds for cross-validation
+          R: >
+            CV fold specification
+
+    - name: bootstrap_validation
+      title: 'Bootstrap Validation'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform bootstrap validation (computationally intensive)
+          R: >
+            Bootstrap assessment
+
+    - name: n_bootstrap
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description:
+          ui: >
+            Number of bootstrap samples
+          R: >
+            Bootstrap iterations
+
+    # Comparison Options
+    - name: compare_models
+      title: 'Compare Models'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Compare time-fixed vs time-varying models
+          R: >
+            Model comparison
+
+    - name: comparison_metric
+      title: 'Comparison Metric'
+      type: List
+      options:
+        - title: C-index
+          name: cindex
+        - title: Integrated AUC
+          name: iauc
+        - title: Net Reclassification Index
+          name: nri
+        - title: Integrated Discrimination Index
+          name: idi
+      default: iauc
+      description:
+          ui: >
+            Metric for model comparison
+          R: >
+            Comparison measure
+
+    # Visualization Options
+    - name: plot_time_varying_effects
+      title: 'Plot Time-Varying Effects'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display how covariate effects change over time
+          R: >
+            Time-varying coefficient plots
+
+    - name: plot_roc_curves
+      title: 'Plot ROC Curves'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display time-dependent ROC curves
+          R: >
+            TD-ROC visualization
+
+    - name: plot_auc_trajectory
+      title: 'Plot AUC Trajectory'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Show AUC values over time
+          R: >
+            AUC evolution plot
+
+    - name: plot_cutpoint_stability
+      title: 'Plot Cutpoint Stability'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display optimal cutpoints over time
+          R: >
+            Cutpoint trajectory plot
+
+    - name: plot_landmark_predictions
+      title: 'Plot Landmark Predictions'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Show predictions from landmark times
+          R: >
+            Landmark prediction plots
+
+    - name: plot_schoenfeld_residuals
+      title: 'Plot Schoenfeld Residuals'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display Schoenfeld residual plots for PH testing
+          R: >
+            Residual diagnostic plots
+
+    # Output Options
+    - name: confidence_level
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          ui: >
+            Confidence level for intervals
+          R: >
+            CI level
+
+    - name: decimals
+      title: 'Decimal Places'
+      type: Integer
+      default: 3
+      min: 1
+      max: 5
+      description:
+          ui: >
+            Number of decimal places in output
+          R: >
+            Output precision
+
+    - name: export_predictions
+      title: 'Export Predictions'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Export time-dependent predictions to dataset
+          R: >
+            Save predictions
+
+    - name: export_roc_data
+      title: 'Export ROC Data'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Export ROC curve data for external plotting
+          R: >
+            Save ROC results
+
+...

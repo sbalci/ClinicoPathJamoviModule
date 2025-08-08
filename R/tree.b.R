@@ -13,6 +13,45 @@
 #' @importFrom dplyr summarise group_by mutate select
 #' @importFrom htmltools HTML
 
+# Progress bar helper function for tree analysis
+treeProgressBar <- function(current, total = 100, message = '', width = 520, height = 40) {
+    # Ensure current is within bounds
+    current <- max(0, min(current, total))
+    
+    # Calculate progress percentage
+    progress_width <- (width - 20) * current / total + 10
+    
+    # Create outer border points
+    outer_points <- paste(
+        "10,10", "10,35", paste0(width - 10, ",35"), paste0(width - 10, ",10"), "10,10",
+        sep = " "
+    )
+    
+    # Create inner progress bar points  
+    inner_points <- paste(
+        "10,10", "10,35", paste0(progress_width, ",35"), paste0(progress_width, ",10"), "10,10",
+        sep = " "
+    )
+    
+    # Determine color based on progress
+    bar_color <- if (current < 30) "#FF9800" else if (current < 70) "#2196F3" else "#4CAF50"
+    
+    # Create HTML output with enhanced styling
+    html_output <- paste0(
+        '<div style="margin: 10px auto; text-align: center;">',
+        '<svg width="', width, '" height="', height, '" style="background-color: transparent; margin: auto; padding: 0;" xmlns="http://www.w3.org/2000/svg">',
+        '<polyline points="', outer_points, '" fill="#FFFFFF" stroke="#333333" fill-opacity="1" stroke-width="1.5" stroke-opacity="1" />',
+        '<polyline points="', inner_points, '" fill="', bar_color, '" stroke="', bar_color, '" fill-opacity="0.7" stroke-width="1" stroke-opacity="1" />',
+        '<text x="', width/2, '" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333333">',
+        round(current/total * 100, 1), '%',
+        '</text>',
+        '</svg>',
+        '</div>'
+    )
+    
+    return(html_output)
+}
+
 treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
     inherit = treeBase,
     private = list(
@@ -110,7 +149,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 self$results$todo$setContent("")
 
                 # Initialize progress feedback
-                private$.update_progress("initializing", "Initializing analysis...")
+                private$.update_progress("initializing", "Initializing analysis...", 10)
 
                 # Display analysis introduction
                 intro_msg <- private$.generate_analysis_introduction()
@@ -153,7 +192,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             # Wrap main analysis in error handling
             tryCatch({
                 # Prepare data and build model
-                private$.update_progress("data_prep", "Preparing and validating data...")
+                private$.update_progress("data_prep", "Preparing and validating data...", 20)
                 message("[DEBUG] Preparing data...")
                 data_prepared <- private$.prepare_data()
                 if (is.null(data_prepared)) {
@@ -166,7 +205,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 private$.update_algorithm_progress(self$options$algorithm, "training")
                 message("[DEBUG] Training model with algorithm: ", self$options$algorithm)
                 message("[DEBUG] Analysis mode: ", tree_mode)
-                model_results <- private$.train_model(data_prepared, tree_mode)
+                private$.checkpoint()  # Add checkpoint before expensive model training
+                model_results <- private$.train_model(data_prepared)
                 private$.model_results <- model_results
 
                 message("[DEBUG] Model training completed: ", !is.null(model_results))
@@ -297,7 +337,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
 
                 # Model comparison
                 if (self$options$model_comparison) {
-                    private$.update_progress("model_comparison", "Comparing multiple algorithms...")
+                    private$.update_progress("model_comparison", "Comparing multiple algorithms...", 85)
+                    private$.checkpoint()  # Add checkpoint before expensive model comparison
                     private$.generate_model_comparison(data_prepared)
                 }
 
@@ -333,6 +374,9 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 }
 
                 # Mark analysis as completed
+                # Generate final results
+                private$.update_progress("generating_results", "Generating final results and visualizations...", 95)
+                
                 private$.update_progress("completed", "Analysis completed successfully!", 100,
                                        paste0("Algorithm: ", toupper(gsub("_", " ", self$options$algorithm)),
                                              " | Mode: ", self$options$tree_mode))
@@ -1213,10 +1257,12 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 analysis_data <- self$data[c(all_vars, target_var)]
 
                 # Handle missing data with medical-appropriate methods
-                missing_strategy <- "complete"  # Default for now
+                missing_strategy <- self$options$missing_data_method %||% "native"
 
-                if (self$options$imputeMissing) {
+                if (missing_strategy == "clinical_impute") {
                     missing_strategy <- "simple"
+                } else if (missing_strategy == "exclude") {
+                    missing_strategy <- "complete"
                 }
 
                 if (missing_strategy == "complete") {
@@ -1407,6 +1453,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
 
             # Run Boruta algorithm
             set.seed(self$options$seed_value %||% 123)
+            private$.checkpoint()  # Add checkpoint before expensive Boruta feature selection
             boruta_result <- Boruta::Boruta(temp_formula, data = data,
                                           maxRuns = 100, # Limit runs for performance
                                           doTrace = 0)   # Suppress verbose output
@@ -1745,6 +1792,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 )
 
                 for (i in 1:n_folds) {
+                    private$.checkpoint()  # Add checkpoint before expensive CV fold processing
+                    
                     train_idx <- unlist(folds[-i])
                     test_idx <- folds[[i]]
 
@@ -2411,6 +2460,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 )
 
                 for (i in seq_along(algorithms)) {
+                    private$.checkpoint()  # Add checkpoint before expensive algorithm comparison
+                    
                     algo <- algorithms[i]
                     algo_display <- algo_names[[algo]] %||% algo
 
@@ -3766,6 +3817,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             set.seed(self$options$seed_value)
 
             for (i in 1:n_bootstrap) {
+                private$.checkpoint()  # Add checkpoint before expensive bootstrap operation
+                
                 # Bootstrap sample
                 boot_indices <- sample(nrow(data), replace = TRUE)
                 boot_data <- data[boot_indices, ]
@@ -3893,6 +3946,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
 
             for (size in sample_sizes) {
                 for (rep in 1:10) {  # 10 repetitions for each size
+                    private$.checkpoint()  # Add checkpoint before expensive learning curve iteration
+                    
                     # Create train/test split
                     train_indices <- sample(n_total, size)
                     test_indices <- setdiff(1:n_total, train_indices)
@@ -4158,6 +4213,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 predictions_matrix <- matrix(NA, nrow = n_obs, ncol = n_bootstrap)
 
                 for (i in 1:n_bootstrap) {
+                    private$.checkpoint()  # Add checkpoint before expensive bootstrap confidence interval
+                    
                     # Bootstrap sample indices
                     boot_indices <- sample(nrow(data), replace = TRUE)
                     boot_data <- data[boot_indices, ]
@@ -4443,6 +4500,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 fold_results <- data.frame()
 
                 for (i in 1:k_folds) {
+                    private$.checkpoint()  # Add checkpoint before expensive repeated CV fold
+                    
                     test_indices <- folds[[i]]
                     train_indices <- setdiff(1:nrow(data), test_indices)
 
@@ -5133,11 +5192,14 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             # Build progress bar HTML if percent is provided
             progress_bar <- ""
             if (!is.null(percent)) {
-                progress_bar <- paste0("
-                <div style='width: 100%; background-color: #f5f5f5; border-radius: 10px; margin: 10px 0;'>
-                    <div style='width: ", percent, "%; background-color: ", info$color, "; height: 20px; border-radius: 10px; transition: width 0.3s ease;'></div>
-                </div>
-                <div style='text-align: center; font-size: 12px; color: #666; margin-top: 5px;'>", percent, "% Complete</div>")
+                # Use enhanced SVG progress bar with consistent styling
+                progress_bar <- treeProgressBar(
+                    current = percent,
+                    total = 100,
+                    message = paste0("Progress: ", round(percent, 1), "%"),
+                    width = 520,
+                    height = 40
+                )
             }
 
             # Build details section if provided
@@ -5163,8 +5225,9 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 ", details_html, "
             </div>")
 
-            # Update the progress feedback result
+            # Update the progress feedback result and trigger UI update
             self$results$progress_feedback$setContent(progress_html)
+            private$.checkpoint()  # Ensure real-time UI updates for progress
 
             # For error messages, also update the main status
             if (stage == "error") {
@@ -5195,6 +5258,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             if (stage == "training") {
                 message <- paste0("Training ", display_name, " model...")
                 details <- paste0("Algorithm: ", display_name, " | Mode: ", self$options$tree_mode)
+                percent <- 50  # Training is roughly halfway through the process
             } else if (stage == "hyperparameter_tuning") {
                 percent <- if (!is.null(step_current) && !is.null(step_total)) {
                     round((step_current / step_total) * 100)
@@ -5212,12 +5276,14 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             } else if (stage == "validation") {
                 message <- paste0("Validating ", display_name, " performance...")
                 details <- paste0("Method: ", toupper(gsub("_", " ", self$options$validation)))
+                percent <- 75  # Validation is about 3/4 through the process
             } else {
                 message <- paste0("Processing ", display_name, "...")
                 details <- NULL
+                percent <- NULL
             }
 
-            private$.update_progress(stage, message, details = details)
+            private$.update_progress(stage, message, percent, details)
         },
 
         # Update progress for model comparison
@@ -6478,6 +6544,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
 
             # Train multiple models
             for (i in 1:ensemble_size) {
+                private$.checkpoint()  # Add checkpoint before expensive ensemble training
+                
                 algo <- sample(available_algorithms, 1)
 
                 # Add diversity through bootstrap sampling if requested
@@ -6587,6 +6655,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             cv_predictions <- numeric(nrow(test_data))
 
             for (fold in 1:k) {
+                private$.checkpoint()  # Add checkpoint before expensive CV consensus operation
+                
                 train_fold <- train_data[folds != fold, ]
                 fold_model <- rpart::rpart(model_formula, data = train_fold, method = "class")
                 fold_pred <- predict(fold_model, test_data, type = "prob")[, 2]

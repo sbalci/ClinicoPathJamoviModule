@@ -1,0 +1,216 @@
+---
+name:  multistatesurvival
+title: Multistate Survival Models
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - id
+          - time_start
+          - time_stop
+          - state_from
+          - state_to
+
+    - name:  summary
+      title: Analysis Summary
+      type:  Html
+      visible: true
+
+    - name:  transitionMatrix
+      title: Transition Matrix
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: from_state
+            title: 'From State'
+            type: text
+          - name: to_state
+            title: 'To State'
+            type: text
+          - name: transitions
+            title: 'N Transitions'
+            type: integer
+          - name: rate
+            title: 'Transition Rate'
+            type: number
+          - name: rate_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: rate_ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  stateTable
+      title: State Occupation Probabilities
+      type:  Table
+      visible: (state_probabilities)
+      rows: 1
+      columns:
+          - name: time
+            title: 'Time'
+            type: number
+          - name: state
+            title: 'State'
+            type: text
+          - name: probability
+            title: 'Probability'
+            type: number
+          - name: prob_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: prob_ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  hazardTable
+      title: Transition Hazard Ratios
+      type:  Table
+      visible: (hazard_ratios)
+      rows: 1
+      columns:
+          - name: transition
+            title: 'Transition'
+            type: text
+          - name: variable
+            title: 'Variable'
+            type: text
+          - name: hazard_ratio
+            title: 'HR'
+            type: number
+          - name: hr_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: hr_ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name:  sojournTable
+      title: Expected Sojourn Times
+      type:  Table
+      visible: (sojourn_times)
+      rows: 1
+      columns:
+          - name: state
+            title: 'State'
+            type: text
+          - name: mean_time
+            title: 'Mean Time'
+            type: number
+          - name: median_time
+            title: 'Median Time'
+            type: number
+          - name: sojourn_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: sojourn_ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  transitionPlot
+      title: Transition Diagram
+      type:  Image
+      width:  800
+      height: 600
+      renderFun: .plotTransitions
+      visible: (plot_transitions)
+      clearWith:
+          - id
+          - state_from
+          - state_to
+          - state_names
+
+    - name:  probabilityPlot
+      title: State Occupation Probabilities
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotProbabilities
+      visible: (plot_probabilities)
+      clearWith:
+          - id
+          - time_start
+          - time_stop
+          - state_from
+          - state_to
+          - prediction_times
+
+    - name:  cumhazardPlot
+      title: Cumulative Hazard Functions
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotCumHazard
+      visible: (plot_cumhazard)
+      clearWith:
+          - id
+          - time_start
+          - time_stop
+          - state_from
+          - state_to
+
+    - name:  individualPredictions
+      title: Individual Predictions
+      type:  Table
+      visible: (plot_individual)
+      rows: 1
+      columns:
+          - name: patient_id
+            title: 'Patient ID'
+            type: text
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: predicted_state
+            title: 'Most Likely State'
+            type: text
+          - name: state_1_prob
+            title: 'State 1 Prob'
+            type: number
+          - name: state_2_prob
+            title: 'State 2 Prob'
+            type: number
+          - name: state_3_prob
+            title: 'State 3 Prob'
+            type: number
+
+    - name:  modelFit
+      title: Model Fit Statistics
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+          - name: description
+            title: 'Description'
+            type: text
+
+    - name:  stratifiedResults
+      title: Stratified Analysis Results
+      type:  Html
+      visible: (stratified)
+      clearWith:
+          - stratified
+          - id
+          - state_from
+          - state_to
+
+    - name:  interpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: true
+
+...

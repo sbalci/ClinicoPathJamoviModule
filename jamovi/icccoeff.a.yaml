@@ -3,7 +3,7 @@ name: icccoeff
 title: Intraclass Correlation Coefficient
 menuGroup: meddecideD
 menuSubgroup: Agreement
-version: '1.0.0'
+version: '0.0.3'
 jas: '1.2'
 description:
     main: |

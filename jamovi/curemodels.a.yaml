@@ -1,0 +1,191 @@
+---
+name: curemodels
+title: Cure Models for Long-term Survivors
+menuGroup: SurvivalD
+menuSubgroup: Advanced Survival
+menuSubtitle: 'Mixture and Non-mixture Cure Models'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Cure models for analyzing survival data with a cured fraction of long-term survivors.
+        Implements mixture cure models and non-mixture cure models for oncology research.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage
+            curemodels(
+                data = cancer_data,
+                time = followup_time,
+                status = death_status,
+                predictors = c(age, stage, treatment),
+                model_type = "mixture"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: 'Survival Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Follow-up time variable (in months or years)
+          R: >
+            Follow-up time variable
+
+    - name: status
+      title: 'Event Status'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Event status (0 = censored, 1 = event)
+          R: >
+            Event status variable
+
+    - name: predictors
+      title: 'Predictor Variables'
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Variables to include in the cure model
+          R: >
+            Predictor variables for the model
+
+    - name: model_type
+      title: 'Cure Model Type'
+      type: List
+      options:
+        - title: Mixture Cure Model
+          name: mixture
+        - title: Non-mixture Cure Model
+          name: nonmixture
+        - title: Both Models
+          name: both
+      default: mixture
+      description:
+          ui: >
+            Type of cure model to fit
+          R: >
+            Type of cure model: mixture, non-mixture, or both
+
+    - name: cure_link
+      title: 'Link Function for Cure Probability'
+      type: List
+      options:
+        - title: Logit
+          name: logit
+        - title: Probit
+          name: probit
+        - title: Complementary log-log
+          name: cloglog
+      default: logit
+      description:
+          ui: >
+            Link function for modeling cure probability
+          R: >
+            Link function for the cure probability model
+
+    - name: survival_dist
+      title: 'Survival Distribution'
+      type: List
+      options:
+        - title: Weibull
+          name: weibull
+        - title: Exponential
+          name: exponential
+        - title: Log-normal
+          name: lognormal
+        - title: Log-logistic
+          name: loglogistic
+      default: weibull
+      description:
+          ui: >
+            Distribution for the survival time of uncured patients
+          R: >
+            Distribution for modeling survival of uncured patients
+
+    - name: bootstrap_ci
+      title: 'Bootstrap Confidence Intervals'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Calculate bootstrap confidence intervals for cure fraction
+          R: >
+            Use bootstrap for confidence interval estimation
+
+    - name: n_bootstrap
+      title: 'Number of Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          ui: >
+            Number of bootstrap samples for CI estimation
+          R: >
+            Number of bootstrap samples
+
+    - name: cure_threshold
+      title: 'Cure Threshold Time'
+      type: Number
+      default: 60
+      min: 0
+      description:
+          ui: >
+            Time point (months) to define long-term survivors
+          R: >
+            Time threshold for defining cured patients
+
+    - name: plot_cure_fraction
+      title: 'Plot Cure Fraction'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display plot of cure fraction by covariates
+          R: >
+            Generate cure fraction plot
+
+    - name: plot_survival
+      title: 'Plot Survival Curves'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display survival curves for cured and uncured groups
+          R: >
+            Generate survival curve plots
+
+    - name: goodness_of_fit
+      title: 'Goodness of Fit Tests'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform goodness of fit tests for the cure model
+          R: >
+            Conduct goodness of fit assessment
+
+    - name: sensitivity_analysis
+      title: 'Sensitivity Analysis'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform sensitivity analysis for cure threshold
+          R: >
+            Conduct sensitivity analysis
+
+...

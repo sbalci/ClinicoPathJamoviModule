@@ -9,20 +9,19 @@ jas: '1.2'
 
 description:
     main: |
-        Combines multiple medical diagnostic tests and evaluates their collective 
-        performance using different combination rules. This function is essential 
-        for optimizing diagnostic accuracy when multiple tests are available for 
-        the same condition. Supports OR logic (positive if any test is positive), 
-        AND logic (positive only if all tests are positive), and majority rule 
-        (positive if more than half of tests are positive). Calculates comprehensive 
-        diagnostic performance metrics including sensitivity, specificity, positive 
-        and negative predictive values, likelihood ratios, and post-test probabilities 
-        for the combined test strategy. Useful for developing optimal test panels 
-        and understanding how multiple diagnostic tests perform together.
+        Analyzes and compares multiple medical diagnostic tests by examining all 
+        possible test result combinations. This function evaluates how different 
+        patterns of positive and negative test results perform against a gold 
+        standard, helping clinicians understand which test combinations are most 
+        informative. Shows individual test performance and comprehensive analysis 
+        of all possible test result patterns (e.g., +/+, +/-, -/+, -/-) with 
+        their respective positive predictive values and clinical interpretation. 
+        Essential for understanding test interactions and optimizing diagnostic 
+        strategies when multiple tests are available for the same condition.
     R:
         dontrun: false
         usage: |
-            # Basic two-test combination with OR rule
+            # Analyze two-test combinations
             result1 <- decisioncombine(
               data = histopathology,
               gold = "Golden Standart",
@@ -31,12 +30,10 @@ description:
               test1Positive = "1",
               test2 = "Rater 1",
               test2Positive = "1",
-              test3 = NULL,
-              test3Positive = NULL,
-              combRule = "any"
+              showCombinations = TRUE
             )
             
-            # Three-test combination with AND rule
+            # Analyze three-test combinations
             result2 <- decisioncombine(
               data = histopathology,
               gold = "Golden Standart",
@@ -47,8 +44,8 @@ description:
               test2Positive = "1",
               test3 = "Rater 2",
               test3Positive = "1",
-              combRule = "all",
-              ci = TRUE, fagan = TRUE
+              showIndividual = TRUE,
+              showCombinations = TRUE
             )
 
 options:
@@ -104,41 +101,7 @@ options:
       type: Level
       variable: (test3)
 
-    - name: combRule
-      title: Combination Rule
-      type: List
-      options:
-        - title: Any Positive (OR)
-          name: any
-        - title: All Positive (AND)
-          name: all
-        - title: Majority Positive
-          name: majority
-      default: any
-      description:
-          R: >
-            Rule for combining test results. "any" means positive if any test is positive (OR),
-            "all" means positive only if all tests are positive (AND), and "majority" means
-            positive if more than half of tests are positive.
 
-    - name: pp
-      title: Prior Probability (prevalence)
-      type: Bool
-      default: false
-
-    - name: pprob
-      title: Prior Probability (prevalence)
-      type: Number
-      default: 0.300
-      min: 0.001
-      max: 0.999
-      description:
-          ui: >
-            Prior probability (disease prevalence in the community).
-            Requires a value between 0.001 and 0.999, default 0.300.
-          R: >
-            Prior probability (disease prevalence in the community).
-            Requires a value between 0.001 and 0.999, default 0.300.
 
     - name: od
       title: Original Data
@@ -148,23 +111,11 @@ options:
           R: >
             Boolean selection whether to show frequency tables. Default is 'false'.
 
-    - name: fnote
-      title: Footnotes
-      type: Bool
-      default: false
 
-    - name: ci
-      title: '95% CI'
-      type: Bool
-      default: false
-
-    - name: fagan
-      title: 'Fagan Nomogram'
-      type: Bool
-      default: false
 
     - name: showIndividual
       title: 'Show Individual Test Results'
       type: Bool
       default: true
+
 ...

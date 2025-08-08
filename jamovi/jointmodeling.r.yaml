@@ -1,0 +1,131 @@
+---
+name: jointmodeling
+title: Joint Longitudinal-Survival Models
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+
+    - name: progress
+      title: Analysis Progress
+      type: Html
+      visible: true
+
+    - name: errors
+      title: Error Messages
+      type: Html
+      visible: false
+
+    - name: warnings
+      title: Warning Messages
+      type: Html
+      visible: false
+
+    - name: dataSummary
+      title: Data Summary
+      type: Html
+      visible: true
+
+    - name: longitudinalResults
+      title: Longitudinal Model Results
+      type: Html
+      visible: true
+
+    - name: survivalResults
+      title: Survival Model Results
+      type: Html
+      visible: true
+
+    - name: jointModelResults
+      title: Joint Model Results
+      type: Html
+      visible: true
+
+    - name: diagnostics
+      title: Model Diagnostics
+      type: Html
+      visible: true
+
+    - name: dynamicPredictions
+      title: Dynamic Risk Predictions
+      type: Html
+      visible: true
+
+    - name: validation
+      title: Model Validation
+      type: Html
+      visible: true
+
+    - name: finalResults
+      title: Final Results Summary
+      type: Html
+      visible: true
+
+    # Plot Results
+    - name: trajectoryPlot
+      title: Individual Trajectory Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .trajectoryPlot
+      requiresData: true
+      clearWith:
+        - id
+        - time_longitudinal
+        - biomarker
+        - plot_trajectories
+
+    - name: meanTrajectoryPlot
+      title: Population Trajectory Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .meanTrajectoryPlot
+      requiresData: true
+      clearWith:
+        - id
+        - time_longitudinal
+        - biomarker
+        - plot_mean_trajectory
+
+    - name: survivalPlot
+      title: Survival Curves by Biomarker
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .survivalPlot
+      requiresData: true
+      clearWith:
+        - survival_time
+        - survival_status
+        - plot_survival_curves
+
+    - name: dynamicAUCPlot
+      title: Dynamic AUC over Time
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .dynamicAUCPlot
+      requiresData: true
+      clearWith:
+        - survival_time
+        - survival_status
+        - plot_dynamic_auc
+
+    - name: residualPlot
+      title: Model Residuals
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .residualPlot
+      requiresData: true
+      clearWith:
+        - id
+        - time_longitudinal
+        - biomarker
+        - plot_residuals
+
+...

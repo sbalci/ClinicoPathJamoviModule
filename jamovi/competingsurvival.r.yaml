@@ -22,7 +22,7 @@ items:
       title: Survival Analysis Results
       type:  Table
       visible: true
-      rows: 1
+      rows: 0
       columns:
           - name: term
             title: 'Variable'

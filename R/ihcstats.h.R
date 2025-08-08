@@ -7,6 +7,7 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             markers = NULL,
+            id = NULL,
             computeHScore = FALSE,
             clusterMethod = "hierarchical",
             distanceMetric = "gower",
@@ -18,6 +19,7 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             standardizeData = TRUE,
             showPCAPlot = FALSE,
             showClusterValidation = FALSE,
+            silhouetteAnalysis = FALSE,
             optimalKMethod = "elbow",
             iterativeClustering = FALSE,
             linkageMethod = "average",
@@ -42,7 +44,10 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             immuneSignatureFocus = FALSE,
             tilAnalysisMode = "combined_til",
             multipleTesting = "bonferroni",
-            significanceThreshold = 0.000055, ...) {
+            significanceThreshold = 0.05,
+            maxSamples = 1000,
+            useParallel = FALSE,
+            ihcScaleMax = 3, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -58,6 +63,15 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..id <- jmvcore::OptionVariable$new(
+                "id",
+                id,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"),
+                default=NULL)
             private$..computeHScore <- jmvcore::OptionBool$new(
                 "computeHScore",
                 computeHScore,
@@ -111,6 +125,10 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showClusterValidation <- jmvcore::OptionBool$new(
                 "showClusterValidation",
                 showClusterValidation,
+                default=FALSE)
+            private$..silhouetteAnalysis <- jmvcore::OptionBool$new(
+                "silhouetteAnalysis",
+                silhouetteAnalysis,
                 default=FALSE)
             private$..optimalKMethod <- jmvcore::OptionList$new(
                 "optimalKMethod",
@@ -266,9 +284,26 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 significanceThreshold,
                 min=0.001,
                 max=0.05,
-                default=0.000055)
+                default=0.05)
+            private$..maxSamples <- jmvcore::OptionInteger$new(
+                "maxSamples",
+                maxSamples,
+                min=100,
+                max=5000,
+                default=1000)
+            private$..useParallel <- jmvcore::OptionBool$new(
+                "useParallel",
+                useParallel,
+                default=FALSE)
+            private$..ihcScaleMax <- jmvcore::OptionNumber$new(
+                "ihcScaleMax",
+                ihcScaleMax,
+                min=1,
+                max=300,
+                default=3)
 
             self$.addOption(private$..markers)
+            self$.addOption(private$..id)
             self$.addOption(private$..computeHScore)
             self$.addOption(private$..clusterMethod)
             self$.addOption(private$..distanceMetric)
@@ -280,6 +315,7 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..standardizeData)
             self$.addOption(private$..showPCAPlot)
             self$.addOption(private$..showClusterValidation)
+            self$.addOption(private$..silhouetteAnalysis)
             self$.addOption(private$..optimalKMethod)
             self$.addOption(private$..iterativeClustering)
             self$.addOption(private$..linkageMethod)
@@ -305,9 +341,13 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..tilAnalysisMode)
             self$.addOption(private$..multipleTesting)
             self$.addOption(private$..significanceThreshold)
+            self$.addOption(private$..maxSamples)
+            self$.addOption(private$..useParallel)
+            self$.addOption(private$..ihcScaleMax)
         }),
     active = list(
         markers = function() private$..markers$value,
+        id = function() private$..id$value,
         computeHScore = function() private$..computeHScore$value,
         clusterMethod = function() private$..clusterMethod$value,
         distanceMetric = function() private$..distanceMetric$value,
@@ -319,6 +359,7 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         standardizeData = function() private$..standardizeData$value,
         showPCAPlot = function() private$..showPCAPlot$value,
         showClusterValidation = function() private$..showClusterValidation$value,
+        silhouetteAnalysis = function() private$..silhouetteAnalysis$value,
         optimalKMethod = function() private$..optimalKMethod$value,
         iterativeClustering = function() private$..iterativeClustering$value,
         linkageMethod = function() private$..linkageMethod$value,
@@ -343,9 +384,13 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         immuneSignatureFocus = function() private$..immuneSignatureFocus$value,
         tilAnalysisMode = function() private$..tilAnalysisMode$value,
         multipleTesting = function() private$..multipleTesting$value,
-        significanceThreshold = function() private$..significanceThreshold$value),
+        significanceThreshold = function() private$..significanceThreshold$value,
+        maxSamples = function() private$..maxSamples$value,
+        useParallel = function() private$..useParallel$value,
+        ihcScaleMax = function() private$..ihcScaleMax$value),
     private = list(
         ..markers = NA,
+        ..id = NA,
         ..computeHScore = NA,
         ..clusterMethod = NA,
         ..distanceMetric = NA,
@@ -357,6 +402,7 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..standardizeData = NA,
         ..showPCAPlot = NA,
         ..showClusterValidation = NA,
+        ..silhouetteAnalysis = NA,
         ..optimalKMethod = NA,
         ..iterativeClustering = NA,
         ..linkageMethod = NA,
@@ -381,7 +427,10 @@ ihcstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..immuneSignatureFocus = NA,
         ..tilAnalysisMode = NA,
         ..multipleTesting = NA,
-        ..significanceThreshold = NA)
+        ..significanceThreshold = NA,
+        ..maxSamples = NA,
+        ..useParallel = NA,
+        ..ihcScaleMax = NA)
 )
 
 ihcstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -927,6 +976,7 @@ ihcstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' @param data The data as a data frame.
 #' @param markers IHC marker variables with categorical expression scores
+#' @param id Optional variable to identify cases/samples in results
 #' @param computeHScore .
 #' @param clusterMethod .
 #' @param distanceMetric .
@@ -938,6 +988,7 @@ ihcstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param standardizeData .
 #' @param showPCAPlot .
 #' @param showClusterValidation .
+#' @param silhouetteAnalysis .
 #' @param optimalKMethod .
 #' @param iterativeClustering .
 #' @param linkageMethod .
@@ -963,6 +1014,12 @@ ihcstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param tilAnalysisMode .
 #' @param multipleTesting .
 #' @param significanceThreshold .
+#' @param maxSamples Maximum number of samples for full analysis. Larger
+#'   datasets may use sampling.
+#' @param useParallel Enable parallel processing for distance calculations
+#'   (requires parallel package).
+#' @param ihcScaleMax Maximum value in IHC scoring scale (e.g., 3 for 0-3
+#'   scale, 300 for H-score).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -999,6 +1056,7 @@ ihcstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 ihcstats <- function(
     data,
     markers,
+    id = NULL,
     computeHScore = FALSE,
     clusterMethod = "hierarchical",
     distanceMetric = "gower",
@@ -1010,6 +1068,7 @@ ihcstats <- function(
     standardizeData = TRUE,
     showPCAPlot = FALSE,
     showClusterValidation = FALSE,
+    silhouetteAnalysis = FALSE,
     optimalKMethod = "elbow",
     iterativeClustering = FALSE,
     linkageMethod = "average",
@@ -1034,12 +1093,16 @@ ihcstats <- function(
     immuneSignatureFocus = FALSE,
     tilAnalysisMode = "combined_til",
     multipleTesting = "bonferroni",
-    significanceThreshold = 0.000055) {
+    significanceThreshold = 0.05,
+    maxSamples = 1000,
+    useParallel = FALSE,
+    ihcScaleMax = 3) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcstats requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(markers)) markers <- jmvcore::resolveQuo(jmvcore::enquo(markers))
+    if ( ! missing(id)) id <- jmvcore::resolveQuo(jmvcore::enquo(id))
     if ( ! missing(groupVariable)) groupVariable <- jmvcore::resolveQuo(jmvcore::enquo(groupVariable))
     if ( ! missing(centralRegionVar)) centralRegionVar <- jmvcore::resolveQuo(jmvcore::enquo(centralRegionVar))
     if ( ! missing(invasiveRegionVar)) invasiveRegionVar <- jmvcore::resolveQuo(jmvcore::enquo(invasiveRegionVar))
@@ -1050,6 +1113,7 @@ ihcstats <- function(
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(markers), markers, NULL),
+            `if`( ! missing(id), id, NULL),
             `if`( ! missing(groupVariable), groupVariable, NULL),
             `if`( ! missing(centralRegionVar), centralRegionVar, NULL),
             `if`( ! missing(invasiveRegionVar), invasiveRegionVar, NULL),
@@ -1065,6 +1129,7 @@ ihcstats <- function(
 
     options <- ihcstatsOptions$new(
         markers = markers,
+        id = id,
         computeHScore = computeHScore,
         clusterMethod = clusterMethod,
         distanceMetric = distanceMetric,
@@ -1076,6 +1141,7 @@ ihcstats <- function(
         standardizeData = standardizeData,
         showPCAPlot = showPCAPlot,
         showClusterValidation = showClusterValidation,
+        silhouetteAnalysis = silhouetteAnalysis,
         optimalKMethod = optimalKMethod,
         iterativeClustering = iterativeClustering,
         linkageMethod = linkageMethod,
@@ -1100,7 +1166,10 @@ ihcstats <- function(
         immuneSignatureFocus = immuneSignatureFocus,
         tilAnalysisMode = tilAnalysisMode,
         multipleTesting = multipleTesting,
-        significanceThreshold = significanceThreshold)
+        significanceThreshold = significanceThreshold,
+        maxSamples = maxSamples,
+        useParallel = useParallel,
+        ihcScaleMax = ihcScaleMax)
 
     analysis <- ihcstatsClass$new(
         options = options,

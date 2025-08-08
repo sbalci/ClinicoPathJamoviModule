@@ -1,0 +1,165 @@
+title: Time-Dependent Covariates & ROC Analysis
+name: timedependent
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    name: variablesupplier
+    suggested:
+      - continuous
+      - nominal
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Patient ID
+        children:
+          - type: VariablesListBox
+            name: id
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Start Time
+        children:
+          - type: VariablesListBox
+            name: start_time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stop Time
+        children:
+          - type: VariablesListBox
+            name: stop_time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Status
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time-Dependent Covariates
+        children:
+          - type: VariablesListBox
+            name: time_dependent_vars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Baseline Covariates
+        children:
+          - type: VariablesListBox
+            name: baseline_vars
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: CheckBox
+            name: perform_landmark
+          - type: CheckBox
+            name: time_dependent_roc
+          - type: CheckBox
+            name: test_proportional_hazards
+          - type: ComboBox
+            name: model_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Landmark Analysis
+        children:
+          - type: TextBox
+            name: prediction_window
+            format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: roc_times
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: landmark_times
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: ROC Analysis
+        children:
+          - type: ComboBox
+            name: roc_method
+          - type: CheckBox
+            name: optimal_cutpoint
+          - type: ComboBox
+            name: cutpoint_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Options
+        children:
+          - type: ComboBox
+            name: time_transform
+          - type: ComboBox
+            name: schoenfeld_transform
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Validation
+        children:
+          - type: CheckBox
+            name: internal_validation
+          - type: TextBox
+            name: cv_folds
+            format: number
+          - type: CheckBox
+            name: bootstrap_validation
+          - type: TextBox
+            name: n_bootstrap
+            format: number
+          - type: CheckBox
+            name: compare_models
+          - type: ComboBox
+            name: comparison_metric
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Plots
+        children:
+          - type: CheckBox
+            name: plot_time_varying_effects
+          - type: CheckBox
+            name: plot_roc_curves
+          - type: CheckBox
+            name: plot_auc_trajectory
+          - type: CheckBox
+            name: plot_cutpoint_stability
+          - type: CheckBox
+            name: plot_landmark_predictions
+          - type: CheckBox
+            name: plot_schoenfeld_residuals
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: TextBox
+            name: confidence_level
+            format: number
+          - type: TextBox
+            name: decimals
+            format: number
+          - type: CheckBox
+            name: export_predictions
+          - type: CheckBox
+            name: export_roc_data

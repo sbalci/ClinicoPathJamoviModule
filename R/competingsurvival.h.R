@@ -13,7 +13,12 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             dooc = NULL,
             awd = NULL,
             awod = NULL,
-            analysistype = "overall", ...) {
+            analysistype = "overall",
+            graystest = TRUE,
+            subdistribution = TRUE,
+            timepoints = "12,24,36,60",
+            confidencelevel = 0.95,
+            showrisksets = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -72,6 +77,28 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "cause",
                     "compete"),
                 default="overall")
+            private$..graystest <- jmvcore::OptionBool$new(
+                "graystest",
+                graystest,
+                default=TRUE)
+            private$..subdistribution <- jmvcore::OptionBool$new(
+                "subdistribution",
+                subdistribution,
+                default=TRUE)
+            private$..timepoints <- jmvcore::OptionString$new(
+                "timepoints",
+                timepoints,
+                default="12,24,36,60")
+            private$..confidencelevel <- jmvcore::OptionNumber$new(
+                "confidencelevel",
+                confidencelevel,
+                default=0.95,
+                min=0.5,
+                max=0.99)
+            private$..showrisksets <- jmvcore::OptionBool$new(
+                "showrisksets",
+                showrisksets,
+                default=TRUE)
 
             self$.addOption(private$..explanatory)
             self$.addOption(private$..overalltime)
@@ -81,6 +108,11 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..awd)
             self$.addOption(private$..awod)
             self$.addOption(private$..analysistype)
+            self$.addOption(private$..graystest)
+            self$.addOption(private$..subdistribution)
+            self$.addOption(private$..timepoints)
+            self$.addOption(private$..confidencelevel)
+            self$.addOption(private$..showrisksets)
         }),
     active = list(
         explanatory = function() private$..explanatory$value,
@@ -90,7 +122,12 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         dooc = function() private$..dooc$value,
         awd = function() private$..awd$value,
         awod = function() private$..awod$value,
-        analysistype = function() private$..analysistype$value),
+        analysistype = function() private$..analysistype$value,
+        graystest = function() private$..graystest$value,
+        subdistribution = function() private$..subdistribution$value,
+        timepoints = function() private$..timepoints$value,
+        confidencelevel = function() private$..confidencelevel$value,
+        showrisksets = function() private$..showrisksets$value),
     private = list(
         ..explanatory = NA,
         ..overalltime = NA,
@@ -99,7 +136,12 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..dooc = NA,
         ..awd = NA,
         ..awod = NA,
-        ..analysistype = NA)
+        ..analysistype = NA,
+        ..graystest = NA,
+        ..subdistribution = NA,
+        ..timepoints = NA,
+        ..confidencelevel = NA,
+        ..showrisksets = NA)
 )
 
 competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -137,7 +179,7 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="survivalTable",
                 title="Survival Analysis Results",
                 visible=TRUE,
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="term", 
@@ -244,6 +286,16 @@ competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param awd .
 #' @param awod .
 #' @param analysistype .
+#' @param graystest Perform Gray's test to compare cumulative incidence
+#'   functions between groups
+#' @param subdistribution Use Fine-Gray subdistribution hazard model for
+#'   competing risks regression
+#' @param timepoints Comma-separated time points (in months) for cumulative
+#'   incidence estimates
+#' @param confidencelevel Confidence level for hazard ratio confidence
+#'   intervals
+#' @param showrisksets Display number at risk table below cumulative incidence
+#'   plot
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -270,7 +322,12 @@ competingsurvival <- function(
     dooc,
     awd,
     awod,
-    analysistype = "overall") {
+    analysistype = "overall",
+    graystest = TRUE,
+    subdistribution = TRUE,
+    timepoints = "12,24,36,60",
+    confidencelevel = 0.95,
+    showrisksets = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("competingsurvival requires jmvcore to be installed (restart may be required)")
@@ -296,7 +353,12 @@ competingsurvival <- function(
         dooc = dooc,
         awd = awd,
         awod = awod,
-        analysistype = analysistype)
+        analysistype = analysistype,
+        graystest = graystest,
+        subdistribution = subdistribution,
+        timepoints = timepoints,
+        confidencelevel = confidencelevel,
+        showrisksets = showrisksets)
 
     analysis <- competingsurvivalClass$new(
         options = options,

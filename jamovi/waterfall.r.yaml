@@ -112,13 +112,16 @@ items:
       visible: (showWaterfallPlot)
       clearWith:
         - patientID
-        - response
+        - responseVar
         - sortBy
         - showThresholds
         - labelOutliers
+        - colorBy
         - colorScheme
         - showMedian
         - showCI
+        - groupVar
+        - inputType
 
     - name: spiderplot
       title: 'Spider Plot - Response Over Time'
@@ -130,10 +133,19 @@ items:
       visible: (showSpiderPlot)
       clearWith:
         - patientID
-        - response
+        - responseVar
         - timeVar
         - inputType
         - sortBy
+        - groupVar
+        - showThresholds
+        - labelOutliers
+        - colorBy
+        - colorScheme
+        - spiderColorBy
+        - spiderColorScheme
+        - showMedian
+        - showCI
 
     - name: addResponseCategory
       title: Add Response Category to Data

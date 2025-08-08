@@ -200,8 +200,61 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     test_costs
                 )
 
-                # Populate individual tests table
+                # Populate individual tests table with ranking
                 private$.populateIndividualTestsTable(individual_results)
+
+                # ============================================================================
+                # PANEL OPTIMIZATION ANALYSIS
+                # ============================================================================
+                
+                # Perform forward/backward selection
+                panel_optimization <- private$.performPanelOptimization(
+                    mydata, testVariables, goldVariable,
+                    goldPositive, testPositiveLevels,
+                    test_costs, individual_results
+                )
+                
+                # Perform redundancy analysis
+                redundancy_analysis <- private$.analyzeTestRedundancy(
+                    mydata, testVariables, testPositiveLevels
+                )
+                
+                # Calculate incremental diagnostic value
+                incremental_value <- private$.calculateIncrementalValue(
+                    mydata, testVariables, goldVariable,
+                    goldPositive, testPositiveLevels,
+                    individual_results
+                )
+                
+                # Analyze result importance
+                result_importance <- private$.analyzeResultImportance(
+                    mydata, testVariables, goldVariable,
+                    goldPositive, testPositiveLevels
+                )
+                
+                # Find optimal panels by size
+                optimal_by_size <- private$.findOptimalPanelsBySize(
+                    mydata, testVariables, goldVariable,
+                    goldPositive, testPositiveLevels,
+                    test_costs
+                )
+                
+                # Populate new optimization tables
+                if (!is.null(panel_optimization)) {
+                    private$.populatePanelBuildingTable(panel_optimization)
+                }
+                if (!is.null(redundancy_analysis)) {
+                    private$.populateRedundancyTable(redundancy_analysis)
+                }
+                if (!is.null(incremental_value)) {
+                    private$.populateIncrementalValueTable(incremental_value)
+                }
+                if (!is.null(result_importance)) {
+                    private$.populateResultImportanceTable(result_importance)
+                }
+                if (!is.null(optimal_by_size)) {
+                    private$.populateOptimalBySizeTable(optimal_by_size)
+                }
 
                 # ============================================================================
                 # EVALUATE TEST COMBINATIONS
@@ -767,11 +820,18 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
 
             .populateIndividualTestsTable = function(results) {
                 table <- self$results$individualTests
-
+                
+                # Calculate additional metrics and rank tests
+                test_list <- list()
                 for (test_name in names(results)) {
                     result <- results[[test_name]]
-
-                    table$addRow(rowKey = test_name, values = list(
+                    
+                    # Calculate Youden's J and AUC approximation
+                    youden <- result$sensitivity + result$specificity - 1
+                    # Simple AUC approximation using sensitivity and specificity
+                    auc <- (result$sensitivity + result$specificity) / 2
+                    
+                    test_list[[test_name]] <- list(
                         test = test_name,
                         sensitivity = result$sensitivity,
                         specificity = result$specificity,
@@ -780,8 +840,22 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                         npv = result$npv,
                         plr = result$plr,
                         nlr = result$nlr,
+                        auc = auc,
+                        youden = youden,
                         cost = result$cost
-                    ))
+                    )
+                }
+                
+                # Rank tests by Youden's J (or other criterion)
+                ranked_tests <- test_list[order(sapply(test_list, function(x) x$youden), decreasing = TRUE)]
+                
+                # Add to table with ranks
+                rank <- 1
+                for (test_name in names(ranked_tests)) {
+                    result <- ranked_tests[[test_name]]
+                    
+                    table$addRow(rowKey = test_name, values = c(list(rank = rank), result))
+                    rank <- rank + 1
                 }
             },
 
@@ -1028,6 +1102,569 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 html <- paste0(html, "</ul>")
 
                 self$results$recommendations$setContent(html)
+            },
+
+            # ============================================================================
+            # PANEL OPTIMIZATION METHODS
+            # ============================================================================
+            
+            .performPanelOptimization = function(mydata, testVariables, goldVariable,
+                                                goldPositive, testPositiveLevels,
+                                                test_costs, individual_results) {
+                
+                optimization_method <- self$options$panelOptimization
+                min_improvement <- self$options$minImprovement
+                optimization_criterion <- self$options$optimizationCriteria
+                
+                results <- list()
+                
+                if (optimization_method %in% c("forward", "both")) {
+                    # Forward Selection
+                    selected_tests <- character(0)
+                    remaining_tests <- testVariables
+                    step <- 0
+                    
+                    while (length(remaining_tests) > 0) {
+                        step <- step + 1
+                        best_test <- NULL
+                        best_improvement <- 0
+                        best_accuracy <- 0
+                        baseline_accuracy <- 0
+                        
+                        # Calculate baseline performance with current panel
+                        if (length(selected_tests) > 0) {
+                            baseline_perf <- private$.evaluatePanelPerformance(
+                                mydata, selected_tests, goldVariable, goldPositive, testPositiveLevels
+                            )
+                            baseline_accuracy <- baseline_perf[[optimization_criterion]]
+                        }
+                        
+                        # Test each remaining test
+                        for (test in remaining_tests) {
+                            test_panel <- c(selected_tests, test)
+                            perf <- private$.evaluatePanelPerformance(
+                                mydata, test_panel, goldVariable, goldPositive, testPositiveLevels
+                            )
+                            
+                            improvement <- perf[[optimization_criterion]] - baseline_accuracy
+                            
+                            if (improvement > best_improvement) {
+                                best_improvement <- improvement
+                                best_test <- test
+                                best_accuracy <- perf[[optimization_criterion]]
+                            }
+                        }
+                        
+                        # Check if improvement meets threshold
+                        if (!is.null(best_test) && best_improvement >= min_improvement) {
+                            selected_tests <- c(selected_tests, best_test)
+                            remaining_tests <- setdiff(remaining_tests, best_test)
+                            
+                            # Calculate p-value for improvement
+                            p_value <- private$.testImprovement(
+                                mydata, selected_tests, setdiff(selected_tests, best_test),
+                                goldVariable, goldPositive, testPositiveLevels
+                            )
+                            
+                            results[[step]] <- list(
+                                step = step,
+                                testAdded = best_test,
+                                panelComposition = paste(selected_tests, collapse = " + "),
+                                baselineAccuracy = baseline_accuracy,
+                                newAccuracy = best_accuracy,
+                                improvementPercent = best_improvement,
+                                pValue = p_value,
+                                keep = ifelse(p_value < 0.05, "Yes", "No")
+                            )
+                        } else {
+                            break
+                        }
+                    }
+                }
+                
+                return(results)
+            },
+            
+            .analyzeTestRedundancy = function(mydata, testVariables, testPositiveLevels) {
+                redundancy_threshold <- self$options$redundancyThreshold
+                results <- list()
+                result_index <- 0
+                
+                # Calculate pairwise correlations
+                for (i in 1:(length(testVariables) - 1)) {
+                    for (j in (i + 1):length(testVariables)) {
+                        test1 <- testVariables[i]
+                        test2 <- testVariables[j]
+                        
+                        # Get binary versions
+                        test1_bin <- paste0(test1, "_binary")
+                        test2_bin <- paste0(test2, "_binary")
+                        
+                        # Calculate correlation
+                        correlation <- cor(mydata[[test1_bin]], mydata[[test2_bin]], use = "complete.obs")
+                        
+                        # Calculate overlap (both tests agree)
+                        agreement <- mean(mydata[[test1_bin]] == mydata[[test2_bin]], na.rm = TRUE)
+                        
+                        # Determine redundancy level
+                        if (abs(correlation) > redundancy_threshold) {
+                            redundancy_level <- "High"
+                            recommendation <- "Consider removing one test"
+                        } else if (abs(correlation) > 0.5) {
+                            redundancy_level <- "Moderate"
+                            recommendation <- "Tests provide some unique information"
+                        } else {
+                            redundancy_level <- "Low"
+                            recommendation <- "Tests are complementary"
+                        }
+                        
+                        result_index <- result_index + 1
+                        results[[result_index]] <- list(
+                            testPair = paste(test1, "-", test2),
+                            correlation = correlation,
+                            overlap = agreement,
+                            redundancyLevel = redundancy_level,
+                            recommendation = recommendation
+                        )
+                    }
+                }
+                
+                return(results)
+            },
+            
+            .calculateIncrementalValue = function(mydata, testVariables, goldVariable,
+                                                 goldPositive, testPositiveLevels,
+                                                 individual_results) {
+                results <- list()
+                
+                for (test in testVariables) {
+                    # Performance alone
+                    alone_perf <- individual_results[[test]]
+                    
+                    # Performance with all other tests
+                    other_tests <- setdiff(testVariables, test)
+                    if (length(other_tests) > 0) {
+                        without_test <- private$.evaluatePanelPerformance(
+                            mydata, other_tests, goldVariable, goldPositive, testPositiveLevels
+                        )
+                        with_test <- private$.evaluatePanelPerformance(
+                            mydata, testVariables, goldVariable, goldPositive, testPositiveLevels
+                        )
+                        
+                        incremental_acc <- with_test$accuracy - without_test$accuracy
+                        
+                        # Calculate NRI (Net Reclassification Improvement)
+                        nri <- private$.calculateNRI(
+                            mydata, other_tests, testVariables,
+                            goldVariable, goldPositive, testPositiveLevels
+                        )
+                        
+                        # Test significance
+                        p_value <- private$.testImprovement(
+                            mydata, testVariables, other_tests,
+                            goldVariable, goldPositive, testPositiveLevels
+                        )
+                        
+                        essential <- ifelse(p_value < 0.05 && incremental_acc > 0.01, "Yes", "No")
+                    } else {
+                        incremental_acc <- alone_perf$accuracy
+                        nri <- NA
+                        p_value <- NA
+                        essential <- "Yes"
+                    }
+                    
+                    results[[test]] <- list(
+                        test = test,
+                        aloneAccuracy = alone_perf$accuracy,
+                        withOthersAccuracy = ifelse(length(other_tests) > 0, with_test$accuracy, alone_perf$accuracy),
+                        incrementalAccuracy = incremental_acc,
+                        nri = nri,
+                        pValueImprovement = p_value,
+                        essential = essential
+                    )
+                }
+                
+                return(results)
+            },
+            
+            .analyzeResultImportance = function(mydata, testVariables, goldVariable,
+                                              goldPositive, testPositiveLevels) {
+                results <- list()
+                result_index <- 0
+                
+                for (i in seq_along(testVariables)) {
+                    test <- testVariables[i]
+                    positive_level <- testPositiveLevels[i]
+                    
+                    # Get test results
+                    test_binary <- paste0(test, "_binary")
+                    
+                    # Calculate frequencies
+                    freq_positive <- mean(mydata[[test_binary]] == 1, na.rm = TRUE)
+                    freq_negative <- mean(mydata[[test_binary]] == 0, na.rm = TRUE)
+                    
+                    # Calculate likelihood ratios for each result
+                    conf_matrix <- table(
+                        Test = mydata[[test_binary]],
+                        Gold = mydata$gold_binary
+                    )
+                    
+                    # For positive result
+                    if (sum(conf_matrix[2, ]) > 0) {
+                        sens_pos <- conf_matrix[2, 2] / sum(conf_matrix[, 2])
+                        spec_pos <- conf_matrix[1, 1] / sum(conf_matrix[, 1])
+                        plr <- sens_pos / (1 - spec_pos)
+                        
+                        # Information gain
+                        info_gain_pos <- private$.calculateInformationGain(
+                            mydata[[test_binary]], mydata$gold_binary, 1
+                        )
+                        
+                        impact_pos <- ifelse(plr > 10, "Very High",
+                                           ifelse(plr > 5, "High",
+                                                ifelse(plr > 2, "Moderate", "Low")))
+                        
+                        result_index <- result_index + 1
+                        results[[result_index]] <- list(
+                            test = test,
+                            resultType = "Positive",
+                            frequency = freq_positive,
+                            positiveLR = plr,
+                            negativeLR = NA,
+                            informationGain = info_gain_pos,
+                            diagnosticImpact = impact_pos
+                        )
+                    }
+                    
+                    # For negative result
+                    if (sum(conf_matrix[1, ]) > 0) {
+                        sens_neg <- conf_matrix[2, 2] / sum(conf_matrix[, 2])
+                        spec_neg <- conf_matrix[1, 1] / sum(conf_matrix[, 1])
+                        nlr <- (1 - sens_neg) / spec_neg
+                        
+                        # Information gain
+                        info_gain_neg <- private$.calculateInformationGain(
+                            mydata[[test_binary]], mydata$gold_binary, 0
+                        )
+                        
+                        impact_neg <- ifelse(nlr < 0.1, "Very High",
+                                           ifelse(nlr < 0.2, "High",
+                                                ifelse(nlr < 0.5, "Moderate", "Low")))
+                        
+                        result_index <- result_index + 1
+                        results[[result_index]] <- list(
+                            test = test,
+                            resultType = "Negative",
+                            frequency = freq_negative,
+                            positiveLR = NA,
+                            negativeLR = nlr,
+                            informationGain = info_gain_neg,
+                            diagnosticImpact = impact_neg
+                        )
+                    }
+                }
+                
+                return(results)
+            },
+            
+            .findOptimalPanelsBySize = function(mydata, testVariables, goldVariable,
+                                              goldPositive, testPositiveLevels,
+                                              test_costs) {
+                results <- list()
+                
+                for (panel_size in 1:min(length(testVariables), self$options$maxTests)) {
+                    # Get all combinations of this size
+                    combinations <- combn(testVariables, panel_size, simplify = FALSE)
+                    
+                    best_combo <- NULL
+                    best_performance <- -Inf
+                    
+                    for (combo in combinations) {
+                        # Evaluate each strategy
+                        strategies <- c("parallel_any", "parallel_all", "sequential")
+                        
+                        for (strategy in strategies) {
+                            perf <- private$.evaluatePanelPerformance(
+                                mydata, combo, goldVariable, goldPositive, testPositiveLevels,
+                                strategy = strategy
+                            )
+                            
+                            # Calculate optimization metric
+                            if (self$options$optimizationCriteria == "youden") {
+                                metric_value <- perf$sensitivity + perf$specificity - 1
+                            } else {
+                                metric_value <- perf[[self$options$optimizationCriteria]]
+                            }
+                            
+                            if (metric_value > best_performance) {
+                                best_performance <- metric_value
+                                best_combo <- list(
+                                    tests = combo,
+                                    strategy = strategy,
+                                    performance = perf
+                                )
+                            }
+                        }
+                    }
+                    
+                    if (!is.null(best_combo)) {
+                        # Calculate cost-effectiveness if applicable
+                        cost_effectiveness <- NA
+                        if (self$options$useCosts && !is.null(test_costs)) {
+                            total_cost <- sum(test_costs[best_combo$tests])
+                            cost_effectiveness <- best_combo$performance$accuracy / total_cost
+                        }
+                        
+                        # Determine recommendation
+                        if (panel_size == 1) {
+                            recommendation <- "Good for screening"
+                        } else if (panel_size == 2) {
+                            recommendation <- "Balanced approach"
+                        } else if (panel_size >= 3) {
+                            recommendation <- "Comprehensive but costly"
+                        }
+                        
+                        results[[panel_size]] <- list(
+                            panelSize = panel_size,
+                            testCombination = paste(best_combo$tests, collapse = " + "),
+                            strategy = best_combo$strategy,
+                            sensitivity = best_combo$performance$sensitivity,
+                            specificity = best_combo$performance$specificity,
+                            accuracy = best_combo$performance$accuracy,
+                            youden = best_combo$performance$sensitivity + best_combo$performance$specificity - 1,
+                            costEffectiveness = cost_effectiveness,
+                            recommendation = recommendation
+                        )
+                    }
+                }
+                
+                return(results)
+            },
+            
+            # Helper function to evaluate panel performance
+            .evaluatePanelPerformance = function(mydata, tests, goldVariable, goldPositive, 
+                                                testPositiveLevels, strategy = "parallel_any") {
+                
+                if (length(tests) == 0) {
+                    return(list(sensitivity = 0, specificity = 0, accuracy = 0, ppv = 0, npv = 0))
+                }
+                
+                # Get binary columns for tests
+                test_binaries <- paste0(tests, "_binary")
+                
+                # Combine tests based on strategy
+                if (strategy == "parallel_any") {
+                    # Any positive = panel positive
+                    panel_result <- apply(mydata[test_binaries], 1, function(x) any(x == 1, na.rm = TRUE))
+                } else if (strategy == "parallel_all") {
+                    # All positive = panel positive
+                    panel_result <- apply(mydata[test_binaries], 1, function(x) all(x == 1, na.rm = TRUE))
+                } else if (strategy == "sequential") {
+                    # Sequential: stop on first positive
+                    panel_result <- mydata[[test_binaries[1]]]
+                    for (i in seq_along(test_binaries)) {
+                        if (i == 1) next
+                        panel_result <- ifelse(panel_result == 0, mydata[[test_binaries[i]]], panel_result)
+                    }
+                } else {
+                    # Default to any positive
+                    panel_result <- apply(mydata[test_binaries], 1, function(x) any(x == 1, na.rm = TRUE))
+                }
+                
+                # Create confusion matrix
+                conf_matrix <- table(
+                    Predicted = as.numeric(panel_result),
+                    Actual = mydata$gold_binary
+                )
+                
+                # Handle case where confusion matrix might not be 2x2
+                if (nrow(conf_matrix) < 2 || ncol(conf_matrix) < 2) {
+                    return(list(sensitivity = 0, specificity = 0, accuracy = 0, ppv = 0, npv = 0))
+                }
+                
+                # Calculate metrics
+                TP <- conf_matrix[2, 2]
+                FP <- conf_matrix[2, 1]
+                FN <- conf_matrix[1, 2]
+                TN <- conf_matrix[1, 1]
+                
+                sensitivity <- if ((TP + FN) > 0) TP / (TP + FN) else 0
+                specificity <- if ((TN + FP) > 0) TN / (TN + FP) else 0
+                accuracy <- if (sum(conf_matrix) > 0) (TP + TN) / sum(conf_matrix) else 0
+                ppv <- if ((TP + FP) > 0) TP / (TP + FP) else 0
+                npv <- if ((TN + FN) > 0) TN / (TN + FN) else 0
+                
+                return(list(
+                    sensitivity = sensitivity,
+                    specificity = specificity,
+                    accuracy = accuracy,
+                    ppv = ppv,
+                    npv = npv
+                ))
+            },
+            
+            # Calculate Net Reclassification Improvement
+            .calculateNRI = function(mydata, tests_without, tests_with,
+                                    goldVariable, goldPositive, testPositiveLevels) {
+                
+                # Get predictions without and with the additional test
+                pred_without <- private$.getPanelPredictions(
+                    mydata, tests_without, testPositiveLevels
+                )
+                pred_with <- private$.getPanelPredictions(
+                    mydata, tests_with, testPositiveLevels
+                )
+                
+                # Calculate NRI components
+                diseased <- mydata$gold_binary == 1
+                healthy <- mydata$gold_binary == 0
+                
+                # Events (diseased) correctly reclassified
+                events_up <- sum(pred_with[diseased] > pred_without[diseased], na.rm = TRUE)
+                events_down <- sum(pred_with[diseased] < pred_without[diseased], na.rm = TRUE)
+                nri_events <- (events_up - events_down) / sum(diseased, na.rm = TRUE)
+                
+                # Non-events (healthy) correctly reclassified
+                nonevents_down <- sum(pred_with[healthy] < pred_without[healthy], na.rm = TRUE)
+                nonevents_up <- sum(pred_with[healthy] > pred_without[healthy], na.rm = TRUE)
+                nri_nonevents <- (nonevents_down - nonevents_up) / sum(healthy, na.rm = TRUE)
+                
+                nri <- nri_events + nri_nonevents
+                
+                return(nri)
+            },
+            
+            # Get panel predictions
+            .getPanelPredictions = function(mydata, tests, testPositiveLevels) {
+                if (length(tests) == 0) {
+                    return(rep(0, nrow(mydata)))
+                }
+                
+                test_binaries <- paste0(tests, "_binary")
+                predictions <- rowMeans(mydata[test_binaries], na.rm = TRUE)
+                
+                return(predictions)
+            },
+            
+            # Test statistical improvement
+            .testImprovement = function(mydata, tests_new, tests_old,
+                                      goldVariable, goldPositive, testPositiveLevels) {
+                
+                # Use McNemar's test for paired binary outcomes
+                if (length(tests_old) == 0) {
+                    return(NA)
+                }
+                
+                pred_old <- private$.getPanelPredictions(mydata, tests_old, testPositiveLevels) > 0.5
+                pred_new <- private$.getPanelPredictions(mydata, tests_new, testPositiveLevels) > 0.5
+                
+                gold <- mydata$gold_binary
+                
+                # Create 2x2 table for McNemar's test
+                correct_old_wrong_new <- sum(pred_old == gold & pred_new != gold, na.rm = TRUE)
+                wrong_old_correct_new <- sum(pred_old != gold & pred_new == gold, na.rm = TRUE)
+                
+                if ((correct_old_wrong_new + wrong_old_correct_new) > 0) {
+                    test_result <- stats::mcnemar.test(
+                        matrix(c(correct_old_wrong_new, wrong_old_correct_new,
+                                wrong_old_correct_new, correct_old_wrong_new), 2, 2)
+                    )
+                    return(test_result$p.value)
+                }
+                
+                return(1.0)
+            },
+            
+            # Calculate information gain
+            .calculateInformationGain = function(test_results, gold_results, test_value) {
+                # Calculate entropy before split
+                p_pos <- mean(gold_results == 1, na.rm = TRUE)
+                p_neg <- 1 - p_pos
+                
+                if (p_pos == 0 || p_neg == 0) {
+                    entropy_before <- 0
+                } else {
+                    entropy_before <- -p_pos * log2(p_pos) - p_neg * log2(p_neg)
+                }
+                
+                # Calculate entropy after split
+                test_mask <- test_results == test_value
+                n_test <- sum(test_mask, na.rm = TRUE)
+                n_total <- length(test_results)
+                
+                if (n_test == 0 || n_test == n_total) {
+                    return(0)
+                }
+                
+                # Entropy for test = test_value
+                p_pos_test <- mean(gold_results[test_mask] == 1, na.rm = TRUE)
+                p_neg_test <- 1 - p_pos_test
+                
+                if (p_pos_test == 0 || p_neg_test == 0) {
+                    entropy_test <- 0
+                } else {
+                    entropy_test <- -p_pos_test * log2(p_pos_test) - p_neg_test * log2(p_neg_test)
+                }
+                
+                # Entropy for test != test_value
+                p_pos_not <- mean(gold_results[!test_mask] == 1, na.rm = TRUE)
+                p_neg_not <- 1 - p_pos_not
+                
+                if (p_pos_not == 0 || p_neg_not == 0) {
+                    entropy_not <- 0
+                } else {
+                    entropy_not <- -p_pos_not * log2(p_pos_not) - p_neg_not * log2(p_neg_not)
+                }
+                
+                # Weighted average entropy after split
+                entropy_after <- (n_test / n_total) * entropy_test + 
+                               ((n_total - n_test) / n_total) * entropy_not
+                
+                # Information gain
+                info_gain <- entropy_before - entropy_after
+                
+                return(info_gain)
+            },
+            
+            # Populate new optimization tables
+            .populatePanelBuildingTable = function(panel_optimization) {
+                table <- self$results$panelBuilding
+                
+                for (result in panel_optimization) {
+                    table$addRow(rowKey = result$step, values = result)
+                }
+            },
+            
+            .populateRedundancyTable = function(redundancy_analysis) {
+                table <- self$results$testRedundancy
+                
+                for (i in seq_along(redundancy_analysis)) {
+                    table$addRow(rowKey = i, values = redundancy_analysis[[i]])
+                }
+            },
+            
+            .populateIncrementalValueTable = function(incremental_value) {
+                table <- self$results$incrementalValue
+                
+                for (test in names(incremental_value)) {
+                    table$addRow(rowKey = test, values = incremental_value[[test]])
+                }
+            },
+            
+            .populateResultImportanceTable = function(result_importance) {
+                table <- self$results$resultImportance
+                
+                for (i in seq_along(result_importance)) {
+                    table$addRow(rowKey = i, values = result_importance[[i]])
+                }
+            },
+            
+            .populateOptimalBySizeTable = function(optimal_by_size) {
+                table <- self$results$optimalPanelsBySize
+                
+                for (size in names(optimal_by_size)) {
+                    table$addRow(rowKey = size, values = optimal_by_size[[size]])
+                }
             },
 
             # ============================================================================

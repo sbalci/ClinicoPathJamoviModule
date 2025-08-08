@@ -112,10 +112,13 @@ items:
     # ==========================================
     
     - name: individualTests
-      title: Individual Test Performance
+      title: Individual Test Performance (Ranked by Diagnostic Value)
       type: Table
       visible: true
       columns:
+        - name: rank
+          title: Rank
+          type: integer
         - name: test
           title: Test
           type: text
@@ -147,11 +150,181 @@ items:
           title: -LR
           type: number
           format: zto
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: youden
+          title: "Youden's J"
+          type: number
+          format: zto
         - name: cost
           title: Cost
           type: number
           format: zto
           visible: (useCosts)
+
+    # ==========================================
+    # PANEL OPTIMIZATION RESULTS
+    # ==========================================
+    
+    - name: panelBuilding
+      title: Panel Building Analysis (Forward Selection)
+      type: Table
+      visible: true
+      columns:
+        - name: step
+          title: Step
+          type: integer
+        - name: testAdded
+          title: Test Added
+          type: text
+        - name: panelComposition
+          title: Panel Composition
+          type: text
+        - name: baselineAccuracy
+          title: Baseline Accuracy
+          type: number
+          format: pc
+        - name: newAccuracy
+          title: New Accuracy
+          type: number
+          format: pc
+        - name: improvementPercent
+          title: Improvement
+          type: number
+          format: pc
+        - name: pValue
+          title: P-value
+          type: number
+          format: zto
+        - name: keep
+          title: Include?
+          type: text
+        
+    - name: optimalPanelsBySize
+      title: Optimal Panels by Size
+      type: Table
+      visible: true
+      columns:
+        - name: panelSize
+          title: Panel Size
+          type: integer
+        - name: testCombination
+          title: Test Combination
+          type: text
+        - name: strategy
+          title: Strategy
+          type: text
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: specificity
+          title: Specificity
+          type: number
+          format: pc
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: pc
+        - name: youden
+          title: "Youden's J"
+          type: number
+          format: zto
+        - name: costEffectiveness
+          title: Cost-Effectiveness
+          type: number
+          format: zto
+          visible: (useCosts)
+        - name: recommendation
+          title: Recommendation
+          type: text
+
+    - name: testRedundancy
+      title: Test Redundancy Analysis
+      type: Table
+      visible: true
+      columns:
+        - name: testPair
+          title: Test Pair
+          type: text
+        - name: correlation
+          title: Correlation
+          type: number
+          format: zto
+        - name: overlap
+          title: Result Overlap
+          type: number
+          format: pc
+        - name: redundancyLevel
+          title: Redundancy
+          type: text
+        - name: recommendation
+          title: Recommendation
+          type: text
+
+    - name: incrementalValue
+      title: Incremental Diagnostic Value
+      type: Table
+      visible: true
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: aloneAccuracy
+          title: Alone
+          type: number
+          format: pc
+        - name: withOthersAccuracy
+          title: With Others
+          type: number
+          format: pc
+        - name: incrementalAccuracy
+          title: Incremental Value
+          type: number
+          format: pc
+        - name: nri
+          title: NRI
+          type: number
+          format: zto
+        - name: pValueImprovement
+          title: P-value
+          type: number
+          format: zto
+        - name: essential
+          title: Essential?
+          type: text
+
+    - name: resultImportance
+      title: Test Result Importance Analysis
+      type: Table
+      visible: true
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: resultType
+          title: Result
+          type: text
+        - name: frequency
+          title: Frequency
+          type: number
+        - name: positiveLR
+          title: +LR
+          type: number
+          format: zto
+        - name: negativeLR
+          title: -LR
+          type: number
+          format: zto
+        - name: informationGain
+          title: Info Gain
+          type: number
+          format: zto
+        - name: diagnosticImpact
+          title: Diagnostic Impact
+          type: text
 
     # ==========================================
     # ALL COMBINATIONS TABLE

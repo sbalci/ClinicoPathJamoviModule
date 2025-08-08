@@ -360,40 +360,6 @@ children:
           - type: TextBox
             name: rate_multiplier
             format: number
-  # - type: CollapseBox
-  #   label: Model Selection (will be implemented later)
-  #   collapsed: true
-  #   children:
-  #     - type: Label
-  #       label: >-
-  #         These features are being tested and will be activated in further
-  #         releases
-  #     - type: Label
-  #       label: Variable Selection Method
-  #       children:
-  #         - type: CheckBox
-  #           name: use_modelSelection
-  #           fitToGrid: true
-  #           enable: (false)
-  #         - type: LayoutBox
-  #           margin: large
-  #           children:
-  #             - type: ComboBox
-  #               name: modelSelection
-  #               enable: (use_modelSelection)
-  #             - type: ComboBox
-  #               name: selectionCriteria
-  #               enable: (use_modelSelection)
-  #             - type: TextBox
-  #               name: pEntry
-  #               format: number
-  #               label: Entry Significance (p-value)
-  #               enable: (use_modelSelection)
-  #             - type: TextBox
-  #               name: pRemoval
-  #               format: number
-  #               label: Removal Significance (p-value)
-  #               enable: (use_modelSelection)
   - type: CollapseBox
     label: Survival Decision Tree (will be implemented later)
     collapsed: true
@@ -592,3 +558,40 @@ children:
     children:
       - type: CheckBox
         name: showExplanations
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ml_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ml_validation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ml_cv_folds
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: ml_feature_selection
+      - type: CheckBox
+        name: ml_importance
+      - type: CheckBox
+        name: ml_calibration
+      - type: CheckBox
+        name: ml_performance
+      - type: CheckBox
+        name: ml_shap
+      - type: CheckBox
+        name: ml_hyperparameter_tuning
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ml_ensemble_weights
+        format: string

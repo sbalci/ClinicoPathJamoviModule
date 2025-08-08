@@ -1,0 +1,493 @@
+---
+title: "Joint Modeling Tutorial: Step-by-Step Analysis Guide"
+author: "ClinicoPath"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    theme: bootstrap
+    code-folding: show
+    fig-width: 8
+    fig-height: 6
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center")
+```
+
+# Quick Start Guide
+
+This tutorial walks you through a complete joint modeling analysis using the ClinicoPath module. We'll use the simple cancer dataset to demonstrate all the key steps.
+
+## What You'll Learn
+
+- How to prepare data for joint modeling
+- Step-by-step analysis in jamovi
+- How to interpret results
+- Common troubleshooting tips
+
+## Prerequisites
+
+- Basic understanding of longitudinal data
+- Familiarity with survival analysis concepts
+- jamovi with ClinicoPath module installed
+
+# Data Preparation
+
+## Understanding the Data Format
+
+Joint models require **long-format** data where:
+- Each row represents one biomarker measurement
+- Multiple rows per patient (one per visit)
+- Survival information repeated for each patient
+
+```{r data-format}
+library(ClinicoPath)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+# Load the simple cancer dataset
+data(simple_cancer_data)
+
+# Show data structure
+head(simple_cancer_data, 12) %>%
+  kable(caption = "Example of Long-Format Data (first 12 rows)")
+
+# Data summary
+cat("Dataset Overview:\n")
+cat("- Patients:", length(unique(simple_cancer_data$patient_id)), "\n")
+cat("- Total observations:", nrow(simple_cancer_data), "\n")
+cat("- Average visits per patient:", round(nrow(simple_cancer_data) / length(unique(simple_cancer_data$patient_id)), 1), "\n")
+cat("- Follow-up range:", range(simple_cancer_data$visit_time), "months\n")
+cat("- Event rate:", round(mean(simple_cancer_data[!duplicated(simple_cancer_data$patient_id), "progression_status"]) * 100, 1), "%\n")
+```
+
+## Data Quality Checks
+
+Before analysis, always check your data quality:
+
+```{r data-checks}
+# 1. Check for missing values
+missing_summary <- simple_cancer_data %>%
+  summarise(
+    missing_id = sum(is.na(patient_id)),
+    missing_time = sum(is.na(visit_time)),
+    missing_marker = sum(is.na(tumor_marker)),
+    missing_surv_time = sum(is.na(survival_time)),
+    missing_status = sum(is.na(progression_status))
+  )
+
+kable(missing_summary, caption = "Missing Values Check")
+
+# 2. Check visit patterns
+visit_counts <- simple_cancer_data %>%
+  count(patient_id) %>%
+  count(n, name = "patients") %>%
+  mutate(proportion = round(patients / sum(patients) * 100, 1))
+
+kable(visit_counts, 
+      col.names = c("Visits per Patient", "Number of Patients", "Proportion (%)"),
+      caption = "Visit Distribution")
+
+# 3. Check time consistency
+time_issues <- simple_cancer_data %>%
+  group_by(patient_id) %>%
+  summarise(
+    max_visit_time = max(visit_time),
+    survival_time = first(survival_time),
+    time_consistent = max_visit_time <= survival_time,
+    .groups = 'drop'
+  ) %>%
+  filter(!time_consistent)
+
+if(nrow(time_issues) > 0) {
+  cat("⚠️ Warning: Some patients have visit times after survival time\n")
+  print(time_issues)
+} else {
+  cat("✅ Time consistency check passed\n")
+}
+```
+
+## Visualizing the Data
+
+Understanding your data visually is crucial:
+
+```{r data-visualization}
+# Individual trajectories (sample)
+set.seed(123)
+sample_patients <- sample(unique(simple_cancer_data$patient_id), 12)
+sample_data <- simple_cancer_data %>% filter(patient_id %in% sample_patients)
+
+p1 <- ggplot(sample_data, aes(x = visit_time, y = tumor_marker, color = treatment)) +
+  geom_line(aes(group = patient_id), alpha = 0.7) +
+  geom_point(size = 2) +
+  facet_wrap(~patient_id, scales = "free_y", ncol = 4) +
+  labs(title = "Individual Tumor Marker Trajectories (Sample of 12 Patients)",
+       x = "Time (months)", y = "Tumor Marker") +
+  theme_bw() +
+  theme(strip.text = element_text(size = 8))
+
+# Population-level trends
+p2 <- ggplot(simple_cancer_data, aes(x = visit_time, y = tumor_marker, color = treatment)) +
+  geom_smooth(method = "loess", se = TRUE, size = 1.2) +
+  labs(title = "Population-Level Tumor Marker Trajectories",
+       subtitle = "Loess smooth with 95% confidence intervals",
+       x = "Time (months)", y = "Tumor Marker") +
+  theme_bw()
+
+print(p1)
+print(p2)
+```
+
+# Step-by-Step jamovi Analysis
+
+## Step 1: Load Data into jamovi
+
+1. Open jamovi
+2. Import your dataset (File → Open)
+3. Ensure variables have correct data types:
+   - Patient ID: ID or Nominal
+   - Time variables: Continuous
+   - Biomarker: Continuous  
+   - Status: Nominal (0/1 coding)
+
+## Step 2: Access Joint Modeling Module
+
+1. Navigate to **Analyses** menu
+2. Find **SurvivalT** section
+3. Select **Advanced Longitudinal**
+4. Choose **Joint Longitudinal-Survival Models**
+
+## Step 3: Variable Selection
+
+```{r variable-setup, echo=FALSE}
+cat("Variable Selection Guide:\n\n")
+cat("REQUIRED VARIABLES:\n")
+cat("✓ Patient ID: patient_id\n")
+cat("✓ Longitudinal Time: visit_time\n") 
+cat("✓ Biomarker Variable: tumor_marker\n")
+cat("✓ Survival Time: survival_time\n")
+cat("✓ Survival Status: progression_status (0=censored, 1=event)\n\n")
+
+cat("OPTIONAL VARIABLES:\n")
+cat("• Covariates: age, treatment\n")
+cat("  (Variables that might affect biomarker trajectory or survival)\n\n")
+
+cat("IMPORTANT NOTES:\n")
+cat("• Use the SAME survival time and status for all rows of each patient\n")
+cat("• Biomarker measurements should vary across visits\n")
+cat("• Time should start at 0 (baseline) for each patient\n")
+```
+
+## Step 4: Model Configuration
+
+### Basic Settings (Recommended for First Analysis)
+
+```{r basic-settings, echo=FALSE}
+cat("LONGITUDINAL MODEL OPTIONS:\n")
+cat("• Biomarker Trajectory: Linear (start here)\n")
+cat("• Random Effects: Intercept + Slope (default)\n")
+cat("• Error Structure: Independent (default)\n\n")
+
+cat("SURVIVAL MODEL OPTIONS:\n")
+cat("• Survival Model Type: Cox Proportional Hazards (default)\n")
+cat("• Biomarker-Survival Association: Current Value (default)\n\n")
+
+cat("ANALYSIS OPTIONS:\n")
+cat("• Estimation Method: Bayesian (JMbayes2) - recommended\n")
+cat("• MCMC Chains: 3 (default)\n")
+cat("• MCMC Iterations: 12000 (default)\n")
+cat("• Burn-in Period: 2000 (default)\n")
+```
+
+### Advanced Settings (After Initial Success)
+
+```{r advanced-settings, echo=FALSE}
+cat("ADVANCED TRAJECTORY OPTIONS:\n")
+cat("• Quadratic: If biomarker shows curved pattern\n")
+cat("• Splines: For very flexible, complex trajectories\n\n")
+
+cat("ADVANCED ASSOCIATION OPTIONS:\n")
+cat("• Current Slope: If rate of change matters more than level\n")
+cat("• Current Value + Slope: Both level and slope affect survival\n")
+cat("• Area Under Curve: Cumulative biomarker exposure\n\n")
+
+cat("VALIDATION OPTIONS:\n")
+cat("• Dynamic Risk Prediction: Enable for personalized predictions\n")
+cat("• Internal Validation: Enable cross-validation\n")
+cat("• Discrimination Metrics: Calculate C-index and time-dependent AUC\n")
+```
+
+## Step 5: Running the Analysis
+
+1. **Check Settings**: Review all variable selections and options
+2. **Run Analysis**: Click the ▶️ button or press Ctrl+R
+3. **Monitor Progress**: Watch the real-time progress indicators
+4. **Wait for Completion**: Bayesian analysis takes 2-10 minutes
+
+### Expected Analysis Timeline
+
+```{r timeline, echo=FALSE}
+cat("TYPICAL ANALYSIS TIMELINE:\n")
+cat("⏱️ Data Preparation: 30 seconds\n")
+cat("⏱️ Longitudinal Model: 1 minute\n") 
+cat("⏱️ Survival Model: 30 seconds\n")
+cat("⏱️ Joint Model (Bayesian): 5-8 minutes\n")
+cat("⏱️ Diagnostics & Validation: 1 minute\n")
+cat("⏱️ Total Time: 8-11 minutes\n\n")
+
+cat("FACTORS AFFECTING SPEED:\n")
+cat("• Sample size (more patients = longer time)\n")
+cat("• Number of visits per patient\n")
+cat("• MCMC iterations (more = longer but better)\n")
+cat("• Computer specifications\n")
+```
+
+# Interpreting Results
+
+## Understanding the Output Sections
+
+The joint modeling analysis produces several result sections:
+
+### 1. Data Summary
+- Number of patients and observations  
+- Visit patterns and missing data
+- Event rates and follow-up time
+- Basic data quality checks
+
+### 2. Longitudinal Model Results
+- **Fixed Effects**: Population-average trajectory parameters
+- **Random Effects**: Individual variation around population average
+- **Model Fit Statistics**: AIC, BIC for model comparison
+
+### 3. Survival Model Results  
+- **Covariate Effects**: Hazard ratios for baseline covariates
+- **Model Diagnostics**: Concordance index, likelihood ratio tests
+
+### 4. Joint Model Results
+- **Association Parameter**: Key parameter linking biomarker to survival
+- **Convergence Diagnostics**: MCMC chain quality assessment
+- **Model Fit**: Overall joint model performance
+
+## Key Parameters to Focus On
+
+```{r interpretation-focus, echo=FALSE}
+cat("🎯 MOST IMPORTANT RESULTS:\n\n")
+
+cat("1. ASSOCIATION PARAMETER (α)\n")
+cat("   • This is the key finding of joint modeling\n")
+cat("   • Measures how biomarker level affects survival hazard\n")
+cat("   • Positive α: Higher biomarker = Higher death risk\n")
+cat("   • Negative α: Higher biomarker = Lower death risk\n")
+cat("   • |α| > 0.5: Strong association\n")
+cat("   • |α| = 0.1-0.5: Moderate association\n")
+cat("   • |α| < 0.1: Weak association\n\n")
+
+cat("2. TRAJECTORY PARAMETERS\n")
+cat("   • Intercept: Average biomarker level at baseline\n")
+cat("   • Slope: Average rate of change over time\n")
+cat("   • Random effects SD: How much individuals vary\n\n")
+
+cat("3. MODEL VALIDATION\n")
+cat("   • C-index > 0.7: Good discriminative ability\n")
+cat("   • Time-dependent AUC: Classification accuracy over time\n")
+cat("   • Cross-validation results: Internal validity\n")
+```
+
+## Clinical Interpretation Examples
+
+```{r clinical-examples, echo=FALSE}
+cat("💡 CLINICAL INTERPRETATION EXAMPLES:\n\n")
+
+cat("EXAMPLE 1: Positive Association (α = 0.3)\n")
+cat("→ 'Each 1-unit increase in tumor marker is associated with \n")
+cat("   a 35% increase in hazard of progression (exp(0.3) = 1.35)'\n")
+cat("→ Clinical meaning: Rising marker levels indicate worse prognosis\n")
+cat("→ Action: Monitor patients with increasing markers more closely\n\n")
+
+cat("EXAMPLE 2: Negative Association (α = -0.2)\n") 
+cat("→ 'Each 1-unit increase in CD4 count is associated with\n")
+cat("   an 18% decrease in hazard of AIDS progression (exp(-0.2) = 0.82)'\n")
+cat("→ Clinical meaning: Higher CD4 counts are protective\n")
+cat("→ Action: Focus interventions on patients with declining CD4\n\n")
+
+cat("EXAMPLE 3: Weak Association (α = 0.05)\n")
+cat("→ 'Biomarker level shows weak association with survival'\n") 
+cat("→ Clinical meaning: Biomarker may not be clinically useful\n")
+cat("→ Action: Consider other biomarkers or longer follow-up\n")
+```
+
+# Dynamic Predictions
+
+One of the most powerful features of joint models is dynamic prediction - updating individual risk estimates as new biomarker values become available.
+
+## Understanding Dynamic Predictions
+
+```{r dynamic-predictions, echo=FALSE}
+cat("🎯 DYNAMIC PREDICTION CONCEPT:\n\n")
+
+cat("Traditional Survival Analysis:\n")
+cat("• Uses only baseline information\n")
+cat("• Risk estimate stays constant over time\n")
+cat("• Cannot incorporate new biomarker data\n\n")
+
+cat("Joint Model Dynamic Predictions:\n")
+cat("• Uses ALL biomarker measurements up to current time\n")
+cat("• Risk estimates update with each new measurement\n")
+cat("• Accounts for individual biomarker trajectory\n")
+cat("• Provides personalized, time-updated predictions\n\n")
+
+cat("CLINICAL APPLICATIONS:\n")
+cat("• Personalized treatment timing\n")
+cat("• Dynamic monitoring schedules\n") 
+cat("• Real-time clinical decision support\n")
+cat("• Patient counseling with updated prognosis\n")
+```
+
+## Interpreting Dynamic Predictions
+
+When dynamic predictions are enabled, you'll see:
+
+1. **Prediction Horizons**: Risk estimates at 6 months, 1 year, 2 years, etc.
+2. **Individual Profiles**: Risk trajectories for sample patients
+3. **Uncertainty Intervals**: Confidence bounds around predictions
+4. **Risk Stratification**: Classifications based on predicted risk
+
+# Troubleshooting Common Issues
+
+## Issue 1: Analysis Won't Start
+
+**Problem**: Error message appears immediately
+
+**Solutions**:
+```{r trouble1, echo=FALSE}
+cat("✅ SOLUTIONS:\n")
+cat("1. Check variable types:\n")
+cat("   • Patient ID: Should be ID, Factor, or Numeric\n")
+cat("   • Time variables: Must be Continuous/Numeric\n")
+cat("   • Biomarker: Must be Continuous/Numeric\n")
+cat("   • Status: Should be Nominal (0/1) or Numeric\n\n")
+
+cat("2. Check data format:\n")
+cat("   • Must be in long format (multiple rows per patient)\n")
+cat("   • Each patient needs at least 2 biomarker measurements\n")
+cat("   • Survival time and status should be identical for all rows of same patient\n\n")
+
+cat("3. Check for missing data:\n")
+cat("   • Complete case analysis - remove rows with missing biomarker\n")
+cat("   • At least 20 patients with events recommended\n")
+```
+
+## Issue 2: Long Computation Time
+
+**Problem**: Analysis takes too long or appears stuck
+
+**Solutions**:
+```{r trouble2, echo=FALSE}
+cat("✅ SOLUTIONS:\n")
+cat("1. Reduce MCMC settings for initial run:\n")
+cat("   • Iterations: 5000 (instead of 12000)\n")
+cat("   • Chains: 2 (instead of 3)\n")
+cat("   • Burn-in: 1000 (instead of 2000)\n\n")
+
+cat("2. Try simpler model:\n")
+cat("   • Linear trajectory (instead of splines)\n")
+cat("   • Current Value association (default)\n")
+cat("   • Remove some covariates initially\n\n")
+
+cat("3. Alternative estimation:\n")
+cat("   • Switch to Two-stage method (joineR)\n")
+cat("   • Faster but less accurate than Bayesian\n")
+```
+
+## Issue 3: Convergence Problems
+
+**Problem**: Warning about convergence or poor mixing
+
+**Solutions**:
+```{r trouble3, echo=FALSE}
+cat("✅ SOLUTIONS:\n")
+cat("1. Increase MCMC iterations:\n")
+cat("   • Try 20000 iterations\n")
+cat("   • Increase burn-in to 4000\n\n")
+
+cat("2. Check data quality:\n")
+cat("   • Remove outliers in biomarker values\n")
+cat("   • Check for data entry errors\n")
+cat("   • Ensure adequate sample size\n\n")
+
+cat("3. Simplify model:\n")
+cat("   • Start with linear trajectory\n")
+cat("   • Use fewer covariates\n")
+cat("   • Try different association structure\n")
+```
+
+## Issue 4: Unexpected Results
+
+**Problem**: Results don't match clinical expectations
+
+**Solutions**:
+```{r trouble4, echo=FALSE}
+cat("✅ SOLUTIONS:\n")
+cat("1. Check data coding:\n")
+cat("   • Event status: 1 = event, 0 = censored\n")
+cat("   • Time units consistent (all in months or years)\n")
+cat("   • Biomarker units and scaling\n\n")
+
+cat("2. Examine data patterns:\n")
+cat("   • Plot individual trajectories\n")
+cat("   • Check for data quality issues\n")
+cat("   • Verify biological plausibility\n\n")
+
+cat("3. Model diagnostics:\n")
+cat("   • Check convergence diagnostics\n")
+cat("   • Examine residual plots\n")
+cat("   • Compare with separate analyses\n")
+```
+
+# Best Practices Summary
+
+## Before Analysis
+- ✅ Verify data is in long format
+- ✅ Check for missing values and outliers  
+- ✅ Visualize biomarker trajectories
+- ✅ Ensure adequate sample size (≥50 patients, ≥20 events)
+- ✅ Plan analysis with clinical collaborators
+
+## During Analysis
+- ✅ Start with simple models (linear trajectory)
+- ✅ Monitor progress indicators
+- ✅ Be patient with Bayesian estimation
+- ✅ Save intermediate results
+- ✅ Check convergence diagnostics
+
+## After Analysis  
+- ✅ Interpret association parameter clinically
+- ✅ Examine individual predicted trajectories
+- ✅ Validate results with cross-validation
+- ✅ Compare with separate longitudinal/survival analyses
+- ✅ Discuss implications with clinical team
+
+## Reporting Results
+- ✅ Report association parameter with confidence interval
+- ✅ Describe model specifications clearly
+- ✅ Include convergence diagnostics
+- ✅ Show example dynamic predictions
+- ✅ Discuss clinical implications and limitations
+
+---
+
+## Next Steps
+
+After mastering basic joint modeling:
+
+1. **Try More Complex Trajectories**: Experiment with quadratic or spline models
+2. **Multiple Biomarkers**: Analyze correlated longitudinal outcomes
+3. **Competing Risks**: Handle multiple types of events  
+4. **Time-Varying Effects**: Allow association to change over time
+5. **External Validation**: Test model performance on new datasets
+
+The joint modeling framework in ClinicoPath provides a powerful platform for longitudinal biomarker analysis. Start simple, build complexity gradually, and always prioritize clinical interpretability over statistical sophistication.

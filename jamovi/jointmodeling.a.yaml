@@ -1,0 +1,493 @@
+---
+name: jointmodeling
+title: Joint Longitudinal-Survival Models
+menuGroup: SurvivalD
+menuSubgroup: Advanced Longitudinal
+menuSubtitle: 'Dynamic Biomarker-Survival Integration'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Joint modeling of longitudinal biomarker trajectories and survival outcomes.
+        Links repeated measurements over time to survival endpoints for dynamic risk
+        prediction and personalized medicine applications.
+        
+        Note: This analysis can be computationally intensive. Expected runtime: 2-10 minutes
+        depending on data size and model complexity.
+    R:
+        dontrun: true
+        usage: |
+            # Example: PSA trajectory and prostate cancer survival
+            jointmodeling(
+                data = psa_data,
+                id = patient_id,
+                time_longitudinal = visit_time,
+                biomarker = psa_level,
+                survival_time = followup_time,
+                survival_status = death_status,
+                covariates = c("age", "stage"),
+                functional_form = "linear"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame in long format (multiple rows per patient).
+
+    - name: id
+      title: 'Patient ID'
+      type: Variable
+      suggested: [ id ]
+      permitted: [ id, factor, numeric ]
+      description:
+          ui: >
+            Unique patient identifier variable
+          R: >
+            Patient ID for linking longitudinal measurements
+
+    - name: time_longitudinal
+      title: 'Longitudinal Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Time variable for longitudinal measurements (e.g., visit time, months since baseline)
+          R: >
+            Time axis for biomarker trajectory
+
+    - name: biomarker
+      title: 'Biomarker Variable'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Biomarker or outcome measured repeatedly over time
+          R: >
+            Longitudinal biomarker variable
+
+    - name: survival_time
+      title: 'Survival Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Time to event or censoring
+          R: >
+            Survival time variable
+
+    - name: survival_status
+      title: 'Survival Status'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Event status (0 = censored, 1 = event)
+          R: >
+            Survival event indicator
+
+    - name: covariates
+      title: 'Covariates'
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Baseline or time-varying covariates
+          R: >
+            Additional predictive variables
+
+    # Longitudinal Model Options
+    - name: functional_form
+      title: 'Biomarker Trajectory'
+      type: List
+      options:
+        - title: Linear
+          name: linear
+        - title: Quadratic
+          name: quadratic
+        - title: Cubic
+          name: cubic
+        - title: Linear Splines
+          name: splines
+        - title: Natural Splines
+          name: ns
+        - title: B-Splines
+          name: bs
+      default: linear
+      description:
+          ui: >
+            Functional form for biomarker trajectory over time
+          R: >
+            Longitudinal model specification
+
+    - name: random_effects
+      title: 'Random Effects'
+      type: List
+      options:
+        - title: Intercept Only
+          name: intercept
+        - title: Intercept + Slope
+          name: intercept_slope
+        - title: Intercept + Slope + Quadratic
+          name: full_quadratic
+        - title: Custom
+          name: custom
+      default: intercept_slope
+      description:
+          ui: >
+            Random effects structure for individual trajectories
+          R: >
+            Random effects specification
+
+    - name: error_structure
+      title: 'Error Structure'
+      type: List
+      options:
+        - title: Independent
+          name: independent
+        - title: AR(1) Autoregressive
+          name: ar1
+        - title: Compound Symmetry
+          name: compound
+        - title: Unstructured
+          name: unstructured
+      default: independent
+      description:
+          ui: >
+            Correlation structure for longitudinal errors
+          R: >
+            Within-subject error correlation
+
+    # Survival Model Options
+    - name: survival_model
+      title: 'Survival Model Type'
+      type: List
+      options:
+        - title: Cox Proportional Hazards
+          name: cox
+        - title: Weibull
+          name: weibull
+        - title: Exponential
+          name: exponential
+        - title: Log-normal
+          name: lognormal
+        - title: Gompertz
+          name: gompertz
+      default: cox
+      description:
+          ui: >
+            Survival model for the event time
+          R: >
+            Survival distribution choice
+
+    - name: association_structure
+      title: 'Biomarker-Survival Association'
+      type: List
+      options:
+        - title: Current Value
+          name: current_value
+        - title: Current Slope
+          name: current_slope
+        - title: Current Value + Slope
+          name: value_slope
+        - title: Area Under Curve
+          name: auc
+        - title: Cumulative Effects
+          name: cumulative
+        - title: Shared Random Effects
+          name: shared_re
+      default: current_value
+      description:
+          ui: >
+            How biomarker trajectory links to survival risk
+          R: >
+            Association structure specification
+
+    # Analysis Options
+    - name: estimation_method
+      title: 'Estimation Method'
+      type: List
+      options:
+        - title: Maximum Likelihood (JMbayes2)
+          name: bayesian
+        - title: Two-Stage (joineR)
+          name: twostage
+        - title: Joint Maximum Likelihood
+          name: joint_ml
+      default: bayesian
+      description:
+          ui: >
+            Statistical method for parameter estimation
+          R: >
+            Estimation approach
+
+    - name: mcmc_chains
+      title: 'MCMC Chains'
+      type: Integer
+      default: 3
+      min: 1
+      max: 8
+      description:
+          ui: >
+            Number of MCMC chains for Bayesian estimation
+          R: >
+            Parallel MCMC chains
+
+    - name: mcmc_iterations
+      title: 'MCMC Iterations'
+      type: Integer
+      default: 12000
+      min: 5000
+      max: 50000
+      description:
+          ui: >
+            Number of MCMC iterations per chain
+          R: >
+            MCMC sampling iterations
+
+    - name: mcmc_burnin
+      title: 'Burn-in Period'
+      type: Integer
+      default: 2000
+      min: 1000
+      max: 20000
+      description:
+          ui: >
+            Number of burn-in iterations to discard
+          R: >
+            MCMC warm-up period
+
+    - name: mcmc_thin
+      title: 'Thinning Interval'
+      type: Integer
+      default: 5
+      min: 1
+      max: 20
+      description:
+          ui: >
+            Keep every nth sample to reduce autocorrelation
+          R: >
+            MCMC thinning parameter
+
+    # Dynamic Prediction Options
+    - name: dynamic_prediction
+      title: 'Dynamic Risk Prediction'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Generate individual risk predictions that update with new biomarker values
+          R: >
+            Enable dynamic prediction
+
+    - name: prediction_horizon
+      title: 'Prediction Horizon'
+      type: String
+      default: "0.5,1,2,3"
+      description:
+          ui: >
+            Time horizons for risk prediction (comma-separated)
+          R: >
+            Prediction time windows
+
+    - name: prediction_window
+      title: 'Prediction Window'
+      type: Number
+      default: 2
+      min: 0.1
+      max: 10
+      description:
+          ui: >
+            Time window for dynamic predictions (how far ahead to predict)
+          R: >
+            Prediction look-ahead window
+
+    # Validation Options
+    - name: internal_validation
+      title: 'Internal Validation'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform internal validation using cross-validation
+          R: >
+            Cross-validation assessment
+
+    - name: cv_folds
+      title: 'CV Folds'
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+      description:
+          ui: >
+            Number of cross-validation folds
+          R: >
+            Cross-validation partitions
+
+    - name: discrimination_metrics
+      title: 'Discrimination Metrics'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate time-dependent AUC and C-index for dynamic predictions
+          R: >
+            Compute discrimination measures
+
+    # Visualization Options
+    - name: plot_trajectories
+      title: 'Plot Individual Trajectories'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display individual biomarker trajectories with model fits
+          R: >
+            Generate trajectory plots
+
+    - name: plot_mean_trajectory
+      title: 'Plot Population Trajectory'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display population-level biomarker trajectory
+          R: >
+            Show mean trajectory
+
+    - name: plot_survival_curves
+      title: 'Plot Survival Curves'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display survival curves stratified by biomarker levels
+          R: >
+            Generate survival plots
+
+    - name: plot_dynamic_auc
+      title: 'Plot Dynamic AUC'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display time-dependent AUC for dynamic predictions
+          R: >
+            Show discrimination over time
+
+    - name: plot_residuals
+      title: 'Plot Residuals'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display residual plots for model diagnostics
+          R: >
+            Generate diagnostic plots
+
+    # Advanced Options
+    - name: competing_risks
+      title: 'Competing Risks'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Account for competing risks in survival model
+          R: >
+            Include competing events
+
+    - name: left_truncation
+      title: 'Left Truncation'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Account for left truncation (delayed entry)
+          R: >
+            Handle delayed study entry
+
+    - name: time_varying_effects
+      title: 'Time-Varying Association'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Allow biomarker-survival association to change over time
+          R: >
+            Time-dependent association parameters
+
+    - name: multiple_biomarkers
+      title: 'Multiple Biomarkers'
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Additional biomarkers for multivariate joint modeling
+          R: >
+            Multiple longitudinal outcomes
+
+    - name: baseline_hazard
+      title: 'Baseline Hazard'
+      type: List
+      options:
+        - title: Unspecified (Cox)
+          name: unspecified
+        - title: Piecewise Constant
+          name: piecewise
+        - title: Regression Splines
+          name: splines
+        - title: P-splines
+          name: psplines
+      default: unspecified
+      description:
+          ui: >
+            Specification for baseline hazard function
+          R: >
+            Baseline hazard modeling
+
+    - name: prior_specification
+      title: 'Prior Distributions'
+      type: List
+      options:
+        - title: Default (Weakly Informative)
+          name: default
+        - title: Non-informative
+          name: noninformative
+        - title: Custom
+          name: custom
+      default: default
+      description:
+          ui: >
+            Prior distribution specification for Bayesian estimation
+          R: >
+            Bayesian prior choice
+
+    - name: convergence_diagnostics
+      title: 'MCMC Diagnostics'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform MCMC convergence diagnostics (Rhat, effective sample size)
+          R: >
+            MCMC quality assessment
+
+    - name: parallel_computation
+      title: 'Parallel Processing'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Use multiple CPU cores for faster computation
+          R: >
+            Enable parallel processing
+
+...

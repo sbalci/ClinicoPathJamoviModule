@@ -206,33 +206,98 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-        # # Add checks for unrealistic values
-        # if (any(df$response > 1000 | df$response < -100, na.rm=TRUE)) {
-        #   validation_messages <- c(validation_messages,
-        #                            "Warning: Response values outside expected range detected")
-        # }
-        #
-        # # Add check for duplicate measurements
-        # duplicates <- df %>%
-        #   dplyr::group_by(!!rlang::sym(patientID), !!rlang::sym(timeVar)) %>%
-        #   dplyr::filter(n() > 1)
-        # if (nrow(duplicates) > 0) {
-        #   validation_messages <- c(validation_messages,
-        #                            "Warning: Duplicate measurements found for some time points")
-        # }
+        # Sample size validation warnings
+        unique_patients <- length(unique(df[[patientID]]))
+        if (unique_patients < 10) {
+          validation_messages <- c(validation_messages,
+            sprintf("<br>Warning: Very small sample size (n=%d). Results may not be reliable.", unique_patients))
+        } else if (unique_patients < 20) {
+          validation_messages <- c(validation_messages,
+            sprintf("<br>Note: Small sample size (n=%d). Interpret results with caution.", unique_patients))
+        }
+
+        # Add checks for unrealistic values if response data is available
+        if (responseVar %in% names(df)) {
+          response_values <- df[[responseVar]][!is.na(df[[responseVar]])]
+          if (length(response_values) > 0) {
+            if (inputType == "percentage") {
+              # For percentage data, check for extreme values
+              if (any(response_values > 500 | response_values < -100, na.rm = TRUE)) {
+                validation_messages <- c(validation_messages,
+                  "<br>Warning: Some percentage changes are outside typical range (-100% to +500%). Please verify data.")
+              }
+            } else {
+              # For raw measurements, check for negative values or zero
+              if (any(response_values <= 0, na.rm = TRUE)) {
+                validation_messages <- c(validation_messages,
+                  "<br>Warning: Some measurements are zero or negative. Please verify these values.")
+              }
+            }
+          }
+        }
+
+        # Add check for time variable if provided
+        if (!is.null(timeVar) && timeVar %in% names(df)) {
+          time_values <- df[[timeVar]][!is.na(df[[timeVar]])]
+          if (length(time_values) > 0) {
+            # Check if baseline (time = 0) measurements exist for raw data
+            if (inputType == "raw" && !any(time_values == 0)) {
+              validation_messages <- c(validation_messages,
+                "<br>Warning: No baseline measurements (time=0) found. Percentage changes may be incorrect.")
+            }
+            # Check for negative time values
+            if (any(time_values < 0, na.rm = TRUE)) {
+              validation_messages <- c(validation_messages,
+                "<br>Warning: Negative time values detected. Please verify time measurements.")
+            }
+          }
+        }
 
 
 
 
         # Return modified dataframe with validation attributes
         return(df)
+      },
+
+      .generateGroupColors = function(group_levels, color_scheme) {
+        # Generate colors for group-based coloring
+        # @param group_levels: unique levels/groups to assign colors
+        # @param color_scheme: "colorful", "jamovi", "classic", etc.
+        # @return: named vector of colors
+        
+        n_groups <- length(group_levels)
+        
+        if (color_scheme == "colorful") {
+          # Use rainbow colors for better distinction
+          colors <- rainbow(n_groups)
+        } else if (color_scheme == "jamovi") {
+          # Use jamovi-style colors (RColorBrewer Set2)
+          if (n_groups <= 8) {
+            colors <- RColorBrewer::brewer.pal(max(3, n_groups), "Set2")
+          } else {
+            colors <- rainbow(n_groups)
+          }
+        } else {
+          # Classic/default style (RColorBrewer Dark2 or Set2)
+          palette_name <- if (color_scheme == "classic") "Dark2" else "Set2"
+          if (n_groups <= 8) {
+            colors <- RColorBrewer::brewer.pal(max(3, n_groups), palette_name)
+          } else {
+            colors <- rainbow(n_groups)
+          }
+        }
+        
+        # Name the colors with group levels
+        names(colors) <- group_levels
+        return(colors)
       }
 
 
 
       ,
       # process validated data ----
-      .processData = function(df, patientID, inputType, responseVar, timeVar = NULL) {
+      .processData = function(df, patientID, inputType, responseVar, timeVar = NULL, groupVar = NULL) {
         # Validate input parameters first
         if (is.null(patientID) || is.null(responseVar)) {
           stop("Patient ID and response variables are required")
@@ -280,14 +345,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               dplyr::ungroup()
           }
           
-          # Debug: Check processed data
-          cat("Raw data processing completed. Sample data:\n")
-          if (nrow(processed_df) > 0) {
-            print(head(processed_df))
-            cat("Response range:", range(processed_df$response, na.rm = TRUE), "\n")
-            cat("Number of patients:", length(unique(processed_df[[patientID]])), "\n")
-          } else {
-            cat("ERROR: No data after processing!\n")
+          # Validate processed data
+          if (nrow(processed_df) == 0) {
+            stop("No data remaining after processing. Check baseline measurements and data format.")
           }
         } else {
           # Data is already in percentage format
@@ -299,7 +359,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         # Calculate RECIST categories - select best response (most negative for tumor shrinkage)
-        cat("Creating waterfall data - selecting best response per patient\n")
         df_waterfall <- processed_df %>%
           dplyr::group_by(!!rlang::sym(patientID)) %>%
           dplyr::filter(!is.na(response)) %>%  # Filter out NA responses first
@@ -307,9 +366,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           dplyr::slice(1) %>%  # Take first row if there are ties
           dplyr::ungroup()
         
-        cat("Waterfall data created. Number of patients:", nrow(df_waterfall), "\n")
-        if (nrow(df_waterfall) > 0) {
-          cat("Best response range:", range(df_waterfall$response, na.rm = TRUE), "\n")
+        # Validate waterfall data
+        if (nrow(df_waterfall) == 0) {
+          stop("No patients with valid response data found.")
         }
         
         df_waterfall <- df_waterfall %>%
@@ -333,9 +392,34 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               levels = c("CR", "PR", "SD", "PD", "Unknown")
             )
           )
+        
+        # Add group variable if specified
+        if (!is.null(groupVar) && groupVar %in% names(processed_df)) {
+          # Get group information for each patient (use first occurrence if multiple)
+          group_info <- processed_df %>%
+            dplyr::group_by(!!rlang::sym(patientID)) %>%
+            dplyr::slice(1) %>%
+            dplyr::ungroup() %>%
+            dplyr::select(!!rlang::sym(patientID), patient_group = !!rlang::sym(groupVar))
+          
+          # Join group information to waterfall data
+          df_waterfall <- df_waterfall %>%
+            dplyr::left_join(group_info, by = patientID) %>%
+            dplyr::mutate(
+              patient_group = factor(patient_group)
+            )
+        }
 
         # Prepare spider plot data
         df_spider <- processed_df
+        
+        # Add group information to spider data if specified
+        if (!is.null(groupVar) && groupVar %in% names(df_spider)) {
+          df_spider <- df_spider %>%
+            dplyr::mutate(
+              patient_group = factor(!!rlang::sym(groupVar))
+            )
+        }
 
         # Add informative attributes about the processing
         attr(df_waterfall, "input_type") <- inputType
@@ -433,20 +517,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
 
         # Debug: Check what columns are available
-        cat("Available columns in person-time data:", paste(names(df), collapse = ", "), "\n")
-        
         # Determine which column to use for response calculations
         response_col <- NULL
         if ("percentage_change" %in% names(df)) {
           response_col <- "percentage_change"
-          cat("Using percentage_change column for person-time analysis\n")
         } else if ("response" %in% names(df)) {
           response_col <- "response" 
-          cat("Using response column for person-time analysis\n")
         } else {
           # For raw data, we can't do proper person-time analysis without percentage changes
-          cat("Warning: Person-time analysis requires percentage change data, not raw measurements\n")
-          cat("Available columns:", paste(names(df), collapse = ", "), "\n")
           return(NULL)
         }
 
@@ -607,6 +685,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         ## Validate data ----
+        private$.checkpoint()  # Checkpoint before data validation
         validated_data <- private$.validateData(
           self$data,
           self$options$patientID,
@@ -642,22 +721,25 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           self$results$todo2$setContent("")
 
           # Process data and create visualizations
-
+          private$.checkpoint()  # Checkpoint before data processing
           processed_data <- private$.processData(
             validated_data,
             self$options$patientID,
             self$options$inputType,
             self$options$responseVar,
-            self$options$timeVar
+            self$options$timeVar,
+            self$options$groupVar
           )
         }
 
 
 
         ## Calculate metrics ----
+        private$.checkpoint()  # Checkpoint before metrics calculation
         metrics <- private$.calculateMetrics(processed_data$waterfall)
 
         ## Update results tables ----
+        private$.checkpoint()  # Checkpoint before summary table population
         for(i in seq_len(nrow(metrics$summary))) {
           self$results$summaryTable$addRow(rowKey = i, values = list(
             category = metrics$summary$category[i],
@@ -703,21 +785,31 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           value = paste0(metrics$DCR, "%")
         ))
 
-        # Calculate and add person-time metrics if time variable is available
-        person_time_metrics <- tryCatch({
-          private$.calculatePersonTimeMetrics(
-            processed_data$spider,
-            self$options$patientID,
-            self$options$timeVar,
-            self$options$responseVar
-          )
-        }, error = function(e) {
-          cat("Error in person-time analysis:", e$message, "\n")
-          return(NULL)
-        })
+        # Control visibility of personTimeTable based on conditions
+        personTimeVisible <- !is.null(self$options$timeVar) && self$options$inputType == "raw"
+        if (!is.null(self$results$personTimeTable)) {
+          self$results$personTimeTable$setVisible(personTimeVisible)
+        }
+        
+        # Calculate and add person-time metrics if time variable is available and input is raw
+        person_time_metrics <- NULL
+        if (personTimeVisible) {
+          private$.checkpoint()  # Checkpoint before person-time calculations
+          person_time_metrics <- tryCatch({
+            private$.calculatePersonTimeMetrics(
+              processed_data$spider,
+              self$options$patientID,
+              self$options$timeVar,
+              self$options$responseVar
+            )
+          }, error = function(e) {
+            warning("Person-time analysis failed: ", e$message)
+            return(NULL)
+          })
+        }
 
         # Add person-time metrics to the results if available
-        if (!is.null(person_time_metrics)) {
+        if (!is.null(person_time_metrics) && personTimeVisible) {
           # Add response duration metrics to clinical metrics table
           self$results$clinicalMetrics$addRow(rowKey = 3, values = list(
             metric = "Median Time to Response",
@@ -744,6 +836,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           # Add person-time table if it exists
           if (!is.null(self$results$personTimeTable)) {
+            private$.checkpoint()  # Checkpoint before person-time table population
             for (i in seq_len(nrow(person_time_metrics$by_category))) {
               self$results$personTimeTable$addRow(rowKey = i, values = list(
                 category = as.character(person_time_metrics$by_category$response_cat[i]),
@@ -767,17 +860,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               median_duration = ""
             ))
           }
-        } else {
-          # Add informative message when person-time analysis is not available
-          self$results$personTimeTable$addRow(rowKey = 1, values = list(
-            category = "Person-Time Analysis Not Available",
-            patients = "",
-            patient_pct = "",
-            person_time = "",
-            time_pct = "",
-            median_time = "Requires Time Variable",
-            median_duration = "Use longitudinal data with timeVar"
-          ))
         }
 
         # mydataview ----
@@ -842,6 +924,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             "showThresholds" = self$options$showThresholds,
             "labelOutliers" = self$options$labelOutliers,
             "colorScheme" = self$options$colorScheme,
+            "colorBy" = self$options$colorBy,
+            "groupVar" = self$options$groupVar,
             "barWidth" = self$options$barWidth,
             "barAlpha" = self$options$barAlpha,
             "showMedian" = self$options$showMedian,
@@ -852,6 +936,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         )
 
         ### Update plots ----
+        private$.checkpoint()  # Checkpoint before plot generation
 
         #### Waterfall plot ----
         if (self$options$showWaterfallPlot) {
@@ -863,6 +948,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #### Spider plot ----
         if (self$options$showSpiderPlot && !is.null(self$options$timeVar)) {
           plotData$timeVar <- self$options$timeVar
+          # Add spider-specific color options
+          plotData$options$spiderColorBy <- self$options$spiderColorBy
+          plotData$options$spiderColorScheme <- self$options$spiderColorScheme
           imagespider <- self$results$spiderplot
           imagespider$setState(plotData)
         }
@@ -875,6 +963,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       .waterfallplot = function(imageWaterfall, ggtheme, theme, ...) {
         if (!self$options$showWaterfallPlot) return()
 
+        private$.checkpoint()  # Checkpoint before plot generation
+        
         plotData <- imageWaterfall$state
         options <- plotData$options
 
@@ -910,8 +1000,24 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "NA" = "#808080"
         )
 
-        colors <- if (plotData$options$colorScheme == "simple")
-          simpleColors else recistColors
+        # Check if group-based coloring is requested and group variable exists
+        useGroupColoring <- !is.null(plotData$options$colorBy) && 
+                           plotData$options$colorBy == "group" && 
+                           "patient_group" %in% names(df)
+
+        if (useGroupColoring) {
+          # Generate distinct colors for groups using reusable method
+          group_levels <- unique(df$patient_group)
+          colors <- private$.generateGroupColors(group_levels, plotData$options$colorScheme)
+          fill_var <- "patient_group"
+          legend_name <- "Patient Group"
+        } else {
+          # Use RECIST coloring
+          colors <- if (plotData$options$colorScheme == "simple")
+            simpleColors else recistColors
+          fill_var <- "recist_category"
+          legend_name <- "RECIST Response"
+        }
 
         # Create base plot
         p <- ggplot2::ggplot(df, ggplot2::aes(
@@ -920,12 +1026,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         )) +
           ggplot2::geom_bar(
             stat = "identity",
-            ggplot2::aes(fill = recist_category),
+            ggplot2::aes(fill = !!rlang::sym(fill_var)),
             width = plotData$options$barWidth,
             alpha = plotData$options$barAlpha
           ) +
           ggplot2::scale_fill_manual(
-            name = "RECIST Response",
+            name = legend_name,
             values = colors,
             na.value = "#808080",
             drop = FALSE
@@ -1047,7 +1153,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       ,
       # spider plot ----
       .spiderplot = function(imagespider, ggtheme, theme, ...) {
-
+        private$.checkpoint()  # Checkpoint before spider plot generation
 
         # Check conditions for showing the information message
         if (is.null(self$options$timeVar) || !self$options$showSpiderPlot) {
@@ -1181,36 +1287,98 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Sort data by patient and time
         df <- df[order(df[[options$patientID]], df$time), ]
-
-        # Create the spider plot
-        p <- ggplot2::ggplot(df) +
-          # Add lines connecting points for each patient
-          ggplot2::geom_line(
-            mapping = ggplot2::aes(
-              x = time,                              # Use processed time variable
-              y = response,                          # Use processed response
-              group = .data[[options$patientID]]    # Group by patient ID
-            ),
-            size = 1,
-            color = "gray50"  # Use neutral color for lines
-          ) +
-          # Add points at each measurement
-          ggplot2::geom_point(
-            mapping = ggplot2::aes(
-              x = time,
-              y = response,
-              fill = response <= -30    # Use fill instead of color
-            ),
-            size = 3,
-            shape = 21,  # Filled circle shape
-            color = "black"  # Border color
-          ) +
-          # Define colors for response categories
-          ggplot2::scale_fill_manual(
-            name = "Response",
-            values = c("FALSE" = "#CC0000", "TRUE" = "#0066CC"),
-            labels = c("Non-responder", "Responder")
-          ) +
+        
+        # Determine coloring method (backward compatible, defaults to response)
+        spiderColorBy <- options$spiderColorBy %||% "response"
+        spiderColorScheme <- options$spiderColorScheme %||% "classic"
+        useGroupColoring <- spiderColorBy == "group" && "patient_group" %in% names(df)
+        
+        # Set up color variables and schemes
+        if (useGroupColoring) {
+          # Group-based coloring using reusable method
+          group_levels <- unique(df$patient_group)
+          line_colors <- private$.generateGroupColors(group_levels, spiderColorScheme)
+          point_colors <- line_colors  # Use same colors for lines and points
+          
+          # Create the spider plot with group coloring
+          p <- ggplot2::ggplot(df) +
+            # Add lines connecting points for each patient, colored by group
+            ggplot2::geom_line(
+              mapping = ggplot2::aes(
+                x = time,
+                y = response,
+                group = .data[[options$patientID]],
+                color = patient_group
+              ),
+              size = 1,
+              alpha = 0.7
+            ) +
+            # Add points at each measurement, colored by group
+            ggplot2::geom_point(
+              mapping = ggplot2::aes(
+                x = time,
+                y = response,
+                fill = patient_group
+              ),
+              size = 3,
+              shape = 21,
+              color = "black",
+              alpha = 0.8
+            ) +
+            # Define colors
+            ggplot2::scale_color_manual(
+              name = "Patient Group",
+              values = line_colors,
+              na.value = "#808080"
+            ) +
+            ggplot2::scale_fill_manual(
+              name = "Patient Group",
+              values = point_colors,
+              na.value = "#808080"
+            )
+        } else {
+          # Response-based coloring (default for backward compatibility)
+          responder_colors <- if (spiderColorScheme == "classic") {
+            c("FALSE" = "#CC0000", "TRUE" = "#0066CC")
+          } else if (spiderColorScheme == "jamovi") {
+            c("FALSE" = "#E64B35", "TRUE" = "#4DBBD5")
+          } else {
+            c("FALSE" = "#FF6B6B", "TRUE" = "#4ECDC4")
+          }
+          
+          # Create the spider plot with response coloring
+          p <- ggplot2::ggplot(df) +
+            # Add lines connecting points for each patient
+            ggplot2::geom_line(
+              mapping = ggplot2::aes(
+                x = time,
+                y = response,
+                group = .data[[options$patientID]]
+              ),
+              size = 1,
+              color = "gray50"
+            ) +
+            # Add points at each measurement
+            ggplot2::geom_point(
+              mapping = ggplot2::aes(
+                x = time,
+                y = response,
+                fill = response <= -30
+              ),
+              size = 3,
+              shape = 21,
+              color = "black"
+            ) +
+            # Define colors for response categories
+            ggplot2::scale_fill_manual(
+              name = "Response",
+              values = responder_colors,
+              labels = c("Non-responder", "Responder")
+            )
+        }
+        
+        # Add common plot elements
+        p <- p +
           # Add RECIST threshold lines
           ggplot2::geom_hline(
             yintercept = c(-30, 20),
@@ -1220,7 +1388,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           ) +
           # Add labels
           ggplot2::labs(
-            x = paste("Time", "(", options$timeVar, ")"),  # Include time variable name
+            x = paste("Time", "(", options$timeVar, ")"),
             y = "Change in Tumor Size (%)",
             title = "Spider Plot of Tumor Response"
           )

@@ -67,7 +67,17 @@ multisurvival(
   spline_vars,
   spline_df = 3,
   spline_type = "pspline",
-  showExplanations = FALSE
+  showExplanations = FALSE,
+  ml_method = "none",
+  ml_validation = "cv",
+  ml_cv_folds = 5,
+  ml_feature_selection = TRUE,
+  ml_importance = TRUE,
+  ml_calibration = TRUE,
+  ml_performance = TRUE,
+  ml_shap = FALSE,
+  ml_hyperparameter_tuning = FALSE,
+  ml_ensemble_weights = "equal"
 )
 }
 \arguments{
@@ -288,6 +298,26 @@ constrained to be linear at the boundaries.}
 \item{showExplanations}{Display educational explanations for each analysis
 type to help interpret  multivariable survival analysis results, Cox
 regression, adjusted survival  curves, nomograms, and model diagnostics.}
+
+\item{ml_method}{Machine learning survival analysis method}
+
+\item{ml_validation}{Model validation approach}
+
+\item{ml_cv_folds}{CV fold count}
+
+\item{ml_feature_selection}{Enable feature selection}
+
+\item{ml_importance}{Show variable importance}
+
+\item{ml_calibration}{Generate calibration plot}
+
+\item{ml_performance}{Show performance metrics}
+
+\item{ml_shap}{Compute SHAP values}
+
+\item{ml_hyperparameter_tuning}{Enable hyperparameter tuning}
+
+\item{ml_ensemble_weights}{Ensemble model weights}
 }
 \value{
 A results object containing:

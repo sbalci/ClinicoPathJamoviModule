@@ -1,4 +1,4 @@
-title: Overall, Cause Specific, and Competing Survival
+title: Competing Risks Survival
 name: competingsurvival
 jus: '3.0'
 stage: 0
@@ -9,52 +9,96 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Explanatory Variable
-        children:
-          - type: VariablesListBox
-            name: explanatory
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Overall Time (in months)
+        label: Time Variable
         children:
           - type: VariablesListBox
             name: overalltime
             maxItemCount: 1
             isTarget: true
+            
       - type: TargetLayoutBox
-        label: Outcome
+        label: Outcome Variable
         children:
           - type: VariablesListBox
             name: outcome
-            fitToGrid: true
-            margin: none
             maxItemCount: 1
             isTarget: true
-          - type: Label
-            label: Outcome Levels
-            fitToGrid: true
-            margin: none
-            style: list-inline
-            children:
-              - type: LayoutBox
-                margin: none
-                fitToGrid: true
-                children:
-                  - type: LevelSelector
-                    name: dod
-                    enable: (outcome)
-                  - type: LevelSelector
-                    name: dooc
-                    enable: (outcome)
-                  - type: LevelSelector
-                    name: awd
-                    enable: (outcome)
-                  - type: LevelSelector
-                    name: awod
-                    enable: (outcome)
+            
+      - type: TargetLayoutBox
+        label: Group Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: explanatory
+            maxItemCount: 1
+            isTarget: true
+
   - type: LayoutBox
     margin: large
     children:
-      - type: ComboBox
-        name: analysistype
+      - type: Label
+        label: Event Levels
+        children:
+          - type: LayoutBox
+            children:
+              - type: Label
+                label: Primary Event
+                children:
+                  - type: LevelSelector
+                    name: dod
+                    label: (e.g., Death from Disease)
+                    enable: (outcome)
+              - type: Label
+                label: Competing Event
+                children:
+                  - type: LevelSelector
+                    name: dooc
+                    label: (e.g., Death from Other Causes)
+                    enable: (outcome)
+              - type: Label
+                label: Censored with Event
+                children:
+                  - type: LevelSelector
+                    name: awd
+                    label: (e.g., Alive with Disease)
+                    enable: (outcome)
+              - type: Label
+                label: Censored without Event
+                children:
+                  - type: LevelSelector
+                    name: awod
+                    label: (e.g., Alive without Disease)
+                    enable: (outcome)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: ComboBox
+            name: analysistype
+            label: Analysis Type
+          - type: CheckBox
+            name: graystest
+            label: Gray's Test for Competing Risks
+          - type: CheckBox
+            name: subdistribution
+            label: Subdistribution Hazard Model (Fine-Gray)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options
+        children:
+          - type: TextBox
+            name: timepoints
+            label: Time Points for Risk Estimates
+            format: string
+          - type: TextBox
+            name: confidencelevel
+            label: Confidence Level (0-1)
+            format: number
+          - type: CheckBox
+            name: showrisksets
+            label: Show Number at Risk

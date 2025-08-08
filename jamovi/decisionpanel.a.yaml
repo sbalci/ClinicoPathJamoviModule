@@ -297,6 +297,43 @@ options:
           R: >
             Primary criterion for optimizing test panels.
 
+    - name: panelOptimization
+      title: Panel Optimization Method
+      type: List
+      options:
+        - name: forward
+          title: Forward selection
+        - name: backward
+          title: Backward elimination
+        - name: both
+          title: Both methods
+        - name: exhaustive
+          title: Exhaustive search
+      default: forward
+      description:
+          R: >
+            Method for building optimal test panels.
+
+    - name: minImprovement
+      title: Minimum Improvement Threshold
+      type: Number
+      default: 0.01
+      min: 0.001
+      max: 0.1
+      description:
+          R: >
+            Minimum improvement in performance metric required to add a test to the panel.
+
+    - name: redundancyThreshold
+      title: Test Redundancy Threshold
+      type: Number
+      default: 0.7
+      min: 0.5
+      max: 0.95
+      description:
+          R: >
+            Correlation threshold above which tests are considered redundant.
+
     - name: minSensitivity
       title: Minimum Acceptable Sensitivity
       type: Number

@@ -14,13 +14,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             test2Positive = NULL,
             test3 = NULL,
             test3Positive = NULL,
-            combRule = "any",
-            pp = FALSE,
-            pprob = 0.3,
             od = FALSE,
-            fnote = FALSE,
-            ci = FALSE,
-            fagan = FALSE,
             showIndividual = TRUE, ...) {
 
             super$initialize(
@@ -73,39 +67,9 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "test3Positive",
                 test3Positive,
                 variable="(test3)")
-            private$..combRule <- jmvcore::OptionList$new(
-                "combRule",
-                combRule,
-                options=list(
-                    "any",
-                    "all",
-                    "majority"),
-                default="any")
-            private$..pp <- jmvcore::OptionBool$new(
-                "pp",
-                pp,
-                default=FALSE)
-            private$..pprob <- jmvcore::OptionNumber$new(
-                "pprob",
-                pprob,
-                default=0.3,
-                min=0.001,
-                max=0.999)
             private$..od <- jmvcore::OptionBool$new(
                 "od",
                 od,
-                default=FALSE)
-            private$..fnote <- jmvcore::OptionBool$new(
-                "fnote",
-                fnote,
-                default=FALSE)
-            private$..ci <- jmvcore::OptionBool$new(
-                "ci",
-                ci,
-                default=FALSE)
-            private$..fagan <- jmvcore::OptionBool$new(
-                "fagan",
-                fagan,
                 default=FALSE)
             private$..showIndividual <- jmvcore::OptionBool$new(
                 "showIndividual",
@@ -120,13 +84,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..test2Positive)
             self$.addOption(private$..test3)
             self$.addOption(private$..test3Positive)
-            self$.addOption(private$..combRule)
-            self$.addOption(private$..pp)
-            self$.addOption(private$..pprob)
             self$.addOption(private$..od)
-            self$.addOption(private$..fnote)
-            self$.addOption(private$..ci)
-            self$.addOption(private$..fagan)
             self$.addOption(private$..showIndividual)
         }),
     active = list(
@@ -138,13 +96,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         test2Positive = function() private$..test2Positive$value,
         test3 = function() private$..test3$value,
         test3Positive = function() private$..test3Positive$value,
-        combRule = function() private$..combRule$value,
-        pp = function() private$..pp$value,
-        pprob = function() private$..pprob$value,
         od = function() private$..od$value,
-        fnote = function() private$..fnote$value,
-        ci = function() private$..ci$value,
-        fagan = function() private$..fagan$value,
         showIndividual = function() private$..showIndividual$value),
     private = list(
         ..gold = NA,
@@ -155,13 +107,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..test2Positive = NA,
         ..test3 = NA,
         ..test3Positive = NA,
-        ..combRule = NA,
-        ..pp = NA,
-        ..pprob = NA,
         ..od = NA,
-        ..fnote = NA,
-        ..ci = NA,
-        ..fagan = NA,
         ..showIndividual = NA)
 )
 
@@ -171,15 +117,12 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     active = list(
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
-        cTable = function() private$.items[["cTable"]],
         indTable1 = function() private$.items[["indTable1"]],
         indTable2 = function() private$.items[["indTable2"]],
         indTable3 = function() private$.items[["indTable3"]],
-        nTable = function() private$.items[["nTable"]],
-        ratioTable = function() private$.items[["ratioTable"]],
-        epirTable_ratio = function() private$.items[["epirTable_ratio"]],
-        epirTable_number = function() private$.items[["epirTable_number"]],
-        plot1 = function() private$.items[["plot1"]]),
+        combinationsAnalysis = function() private$.items[["combinationsAnalysis"]],
+        combStatsTable = function() private$.items[["combStatsTable"]],
+        combStatsTableCI = function() private$.items[["combStatsTableCI"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -202,30 +145,9 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 visible="(od)"))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="cTable",
-                title="Recoded Data for Combined Test",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="newtest", 
-                        `title`="", 
-                        `type`="text"),
-                    list(
-                        `name`="GP", 
-                        `title`="Gold Positive", 
-                        `type`="number"),
-                    list(
-                        `name`="GN", 
-                        `title`="Gold Negative", 
-                        `type`="number"),
-                    list(
-                        `name`="Total", 
-                        `title`="Total", 
-                        `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
                 name="indTable1",
                 title="Test 1 Results",
+                visible="(showIndividual && !is.null(test1))",
                 rows=0,
                 columns=list(
                     list(
@@ -248,6 +170,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="indTable2",
                 title="Test 2 Results",
+                visible="(showIndividual && !is.null(test2))",
                 rows=0,
                 columns=list(
                     list(
@@ -270,6 +193,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="indTable3",
                 title="Test 3 Results",
+                visible="(showIndividual && !is.null(test3))",
                 rows=0,
                 columns=list(
                     list(
@@ -288,187 +212,79 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="Total", 
                         `title`="Total", 
                         `type`="number"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="combinationsAnalysis",
+                title="Test Combination Patterns Analysis",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="nTable",
-                title="",
-                swapRowsColumns=TRUE,
-                rows=1,
+                name="combStatsTable",
+                title="Combination Diagnostic Statistics",
+                visible=TRUE,
+                rows=0,
                 columns=list(
                     list(
-                        `name`="tablename", 
-                        `title`="", 
+                        `name`="combination", 
+                        `title`="Pattern", 
                         `type`="text"),
                     list(
-                        `name`="TotalPop", 
-                        `title`="Total", 
-                        `type`="number"),
-                    list(
-                        `name`="DiseaseP", 
-                        `title`="Diseased", 
-                        `type`="number"),
-                    list(
-                        `name`="DiseaseN", 
-                        `title`="Healthy", 
-                        `type`="number"),
-                    list(
-                        `name`="TestP", 
-                        `title`="Positive Tests", 
-                        `type`="number"),
-                    list(
-                        `name`="TestN", 
-                        `title`="Negative Tests", 
-                        `type`="number"),
-                    list(
-                        `name`="TestT", 
-                        `title`="True Test", 
-                        `type`="number"),
-                    list(
-                        `name`="TestW", 
-                        `title`="Wrong Test", 
-                        `type`="number")),
-                clearWith=list(
-                    "pp",
-                    "pprob")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="ratioTable",
-                title="",
-                swapRowsColumns=TRUE,
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="tablename", 
-                        `title`="", 
-                        `type`="text"),
-                    list(
-                        `name`="Sens", 
+                        `name`="sens", 
                         `title`="Sensitivity", 
                         `type`="number", 
                         `format`="pc"),
                     list(
-                        `name`="Spec", 
+                        `name`="spec", 
                         `title`="Specificity", 
                         `type`="number", 
                         `format`="pc"),
                     list(
-                        `name`="AccurT", 
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="acc", 
                         `title`="Accuracy", 
                         `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PrevalenceD", 
-                        `title`="Prevalence", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PPV", 
-                        `title`="Positive Predictive Value", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="NPV", 
-                        `title`="Negative Predictive Value", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PostTestProbDisease", 
-                        `title`="Post-test Disease Probability", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="PostTestProbHealthy", 
-                        `title`="Post-test Health Probability", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="LRP", 
-                        `title`="Positive Likelihood Ratio", 
-                        `type`="number"),
-                    list(
-                        `name`="LRN", 
-                        `title`="Negative Likelihood Ratio", 
-                        `type`="number")),
-                clearWith=list(
-                    "pp",
-                    "pprob")))
+                        `format`="pc"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="epirTable_ratio",
-                title="",
-                visible="(ci)",
+                name="combStatsTableCI",
+                title="Combination Diagnostic Statistics with 95% CI",
+                visible=TRUE,
                 rows=0,
                 columns=list(
                     list(
-                        `name`="statsnames", 
-                        `title`="Decision Statistics", 
+                        `name`="combination", 
+                        `title`="Pattern", 
                         `type`="text"),
                     list(
-                        `name`="est", 
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
                         `title`="Estimate", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="lower", 
                         `title`="Lower", 
-                        `superTitle`="95% Confidence Interval", 
+                        `superTitle`="95% CI", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="upper", 
                         `title`="Upper", 
-                        `superTitle`="95% Confidence Interval", 
+                        `superTitle`="95% CI", 
                         `type`="number", 
-                        `format`="pc")),
-                clearWith=list(
-                    "pp",
-                    "pprob"),
-                refs="epiR"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="epirTable_number",
-                title="",
-                visible="(ci)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="statsnames", 
-                        `title`="Decision Statistics", 
-                        `type`="text"),
-                    list(
-                        `name`="est", 
-                        `title`="Estimate", 
-                        `type`="number"),
-                    list(
-                        `name`="lower", 
-                        `title`="Lower", 
-                        `superTitle`="95% Confidence Interval", 
-                        `type`="number"),
-                    list(
-                        `name`="upper", 
-                        `title`="Upper", 
-                        `superTitle`="95% Confidence Interval", 
-                        `type`="number")),
-                clearWith=list(
-                    "pp",
-                    "pprob"),
-                refs="epiR"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot1",
-                title="Fagan nomogram",
-                width=600,
-                height=450,
-                renderFun=".plot1",
-                requiresData=TRUE,
-                visible="(fagan)",
-                clearWith=list(
-                    "pp",
-                    "pprob",
-                    "fagan"),
-                refs=list(
-                    "Fagan",
-                    "Fagan2")))}))
+                        `format`="pc"))))}))
 
 decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncombineBase",
@@ -493,22 +309,19 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 
 #' Combine Medical Decision Tests
 #'
-#' Combines multiple medical diagnostic tests and evaluates their collective 
-#' performance using different combination rules. This function is essential 
-#' for optimizing diagnostic accuracy when multiple tests are available for 
-#' the same condition. Supports OR logic (positive if any test is positive), 
-#' AND logic (positive only if all tests are positive), and majority rule 
-#' (positive if more than half of tests are positive). Calculates 
-#' comprehensive 
-#' diagnostic performance metrics including sensitivity, specificity, positive 
-#' and negative predictive values, likelihood ratios, and post-test 
-#' probabilities 
-#' for the combined test strategy. Useful for developing optimal test panels 
-#' and understanding how multiple diagnostic tests perform together.
+#' Analyzes and compares multiple medical diagnostic tests by examining all 
+#' possible test result combinations. This function evaluates how different 
+#' patterns of positive and negative test results perform against a gold 
+#' standard, helping clinicians understand which test combinations are most 
+#' informative. Shows individual test performance and comprehensive analysis 
+#' of all possible test result patterns (e.g., +/+, +/-, -/+, -/-) with 
+#' their respective positive predictive values and clinical interpretation. 
+#' Essential for understanding test interactions and optimizing diagnostic 
+#' strategies when multiple tests are available for the same condition.
 #' 
 #'
 #' @examples
-#' # Basic two-test combination with OR rule
+#' # Analyze two-test combinations
 #' result1 <- decisioncombine(
 #'   data = histopathology,
 #'   gold = "Golden Standart",
@@ -517,12 +330,10 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   test1Positive = "1",
 #'   test2 = "Rater 1",
 #'   test2Positive = "1",
-#'   test3 = NULL,
-#'   test3Positive = NULL,
-#'   combRule = "any"
+#'   showCombinations = TRUE
 #' )
 #'
-#' # Three-test combination with AND rule
+#' # Analyze three-test combinations
 #' result2 <- decisioncombine(
 #'   data = histopathology,
 #'   gold = "Golden Standart",
@@ -533,8 +344,8 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   test2Positive = "1",
 #'   test3 = "Rater 2",
 #'   test3Positive = "1",
-#'   combRule = "all",
-#'   ci = TRUE, fagan = TRUE
+#'   showIndividual = TRUE,
+#'   showCombinations = TRUE
 #' )
 #'
 #' @param data The data as a data frame.
@@ -546,39 +357,26 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param test2Positive .
 #' @param test3 .
 #' @param test3Positive .
-#' @param combRule Rule for combining test results. "any" means positive if
-#'   any test is positive (OR), "all" means positive only if all tests are
-#'   positive (AND), and "majority" means positive if more than half of tests
-#'   are positive.
-#' @param pp .
-#' @param pprob Prior probability (disease prevalence in the community).
-#'   Requires a value between 0.001 and 0.999, default 0.300.
 #' @param od Boolean selection whether to show frequency tables. Default is
 #'   'false'.
-#' @param fnote .
-#' @param ci .
-#' @param fagan .
 #' @param showIndividual .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$indTable1} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$indTable2} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$indTable3} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$combinationsAnalysis} \tab \tab \tab \tab \tab Comprehensive analysis of all possible test combinations \cr
+#'   \code{results$combStatsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$combStatsTableCI} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$cTable$asDF}
+#' \code{results$indTable1$asDF}
 #'
-#' \code{as.data.frame(results$cTable)}
+#' \code{as.data.frame(results$indTable1)}
 #'
 #' @export
 decisioncombine <- function(
@@ -591,13 +389,7 @@ decisioncombine <- function(
     test2Positive,
     test3,
     test3Positive,
-    combRule = "any",
-    pp = FALSE,
-    pprob = 0.3,
     od = FALSE,
-    fnote = FALSE,
-    ci = FALSE,
-    fagan = FALSE,
     showIndividual = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -629,13 +421,7 @@ decisioncombine <- function(
         test2Positive = test2Positive,
         test3 = test3,
         test3Positive = test3Positive,
-        combRule = combRule,
-        pp = pp,
-        pprob = pprob,
         od = od,
-        fnote = fnote,
-        ci = ci,
-        fagan = fagan,
         showIndividual = showIndividual)
 
     analysis <- decisioncombineClass$new(

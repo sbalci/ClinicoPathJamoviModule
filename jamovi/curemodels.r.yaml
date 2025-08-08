@@ -1,0 +1,154 @@
+---
+name:  curemodels
+title: Cure Models for Long-term Survivors
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - time
+          - status
+          - predictors
+
+    - name:  summary
+      title: Analysis Summary
+      type:  Html
+      visible: true
+
+    - name:  modelTable
+      title: Cure Model Results
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: estimate
+            title: 'Estimate'
+            type: number
+          - name: std_error
+            title: 'Std. Error'
+            type: number
+          - name: z_value
+            title: 'z value'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  cureTable
+      title: Cure Fraction Summary
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: group
+            title: 'Group'
+            type: text
+          - name: cure_fraction
+            title: 'Cure Fraction'
+            type: number
+          - name: cure_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: cure_ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: uncured_median
+            title: 'Median Survival (Uncured)'
+            type: number
+
+    - name:  cureFractionPlot
+      title: Cure Fraction Plot
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotCureFraction
+      visible: (plot_cure_fraction)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - model_type
+          - cure_link
+
+    - name:  survivalPlot
+      title: Survival Curves by Cure Status
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotSurvival
+      visible: (plot_survival)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - model_type
+          - survival_dist
+
+    - name:  goodnessOfFit
+      title: Goodness of Fit Tests
+      type:  Table
+      visible: (goodness_of_fit)
+      rows: 1
+      columns:
+          - name: test_name
+            title: 'Test'
+            type: text
+          - name: statistic
+            title: 'Statistic'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  sensitivityAnalysis
+      title: Sensitivity Analysis
+      type:  Html
+      visible: (sensitivity_analysis)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - cure_threshold
+
+    - name:  modelComparison
+      title: Model Comparison
+      type:  Table
+      visible: (model_type:both)
+      rows: 2
+      columns:
+          - name: model
+            title: 'Model Type'
+            type: text
+          - name: aic
+            title: 'AIC'
+            type: number
+          - name: bic
+            title: 'BIC'
+            type: number
+          - name: loglik
+            title: 'Log-Likelihood'
+            type: number
+
+    - name:  interpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: true
+
+...

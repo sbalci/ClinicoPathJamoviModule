@@ -921,7 +921,7 @@ menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier'  # Tooltip
 # Menu groups used in ClinicoPath:
 # - ExplorationD: Descriptive statistics
 # - SurvivalD: Survival analysis
-# - meddecideD: Medical decision making
+# - meddecideT: Medical decision making
 # - JJStatsPlotD: Statistical visualizations
 ```
 
@@ -1340,7 +1340,7 @@ When creating .a.yaml files for the ClinicoPath system:
 name: myanalysis          # Must match R/myanalysis.b.R
 
 # 2. Use consistent menu groups
-menuGroup: ExplorationD   # Or SurvivalD, meddecideD, JJStatsPlotD
+menuGroup: ExplorationD   # Or SurvivalD, meddecideT, JJStatsPlotD
 
 # 3. Version alignment
 version: '0.0.3'         # Match module version
@@ -3265,7 +3265,7 @@ Available MenuGroups in ClinicoPath:
 - `ExplorationD`: Descriptive analysis and data exploration
 - `SurvivalD`: Survival analysis and time-to-event modeling
 - `JJStatsPlotD`: Statistical plots and visualizations
-- `meddecideD`: Medical decision analysis and ROC curves
+- `meddecideT`: Medical decision analysis and ROC curves
 
 #### 2. **Version Management**
 ```yaml

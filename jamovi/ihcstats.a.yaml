@@ -1,7 +1,7 @@
 ---
 name: ihcstats
 title: IHC Expression Analysis
-menuGroup: ExplorationD
+menuGroup: ExplorationT
 menuSubgroup: IHC Analysis
 version: '0.0.3'
 jas: '1.2'
@@ -21,6 +21,16 @@ options:
       description:
           R: >
             IHC marker variables with categorical expression scores
+
+    - name: id
+      title: Case ID Variable (Optional)
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      default: NULL
+      description:
+          R: >
+            Optional variable to identify cases/samples in results
 
     - name: computeHScore
       title: Compute H-Score
@@ -90,6 +100,11 @@ options:
 
     - name: showClusterValidation
       title: Show Cluster Validation
+      type: Bool
+      default: false
+
+    - name: silhouetteAnalysis
+      title: Perform Silhouette Analysis
       type: Bool
       default: false
 
@@ -273,7 +288,36 @@ options:
       type: Number
       min: 0.001
       max: 0.05
-      default: 0.000055
+      default: 0.05
+
+    # Performance and optimization options
+    - name: maxSamples
+      title: Maximum Samples for Full Analysis
+      type: Integer
+      min: 100
+      max: 5000
+      default: 1000
+      description:
+          R: >
+            Maximum number of samples for full analysis. Larger datasets may use sampling.
+
+    - name: useParallel
+      title: Use Parallel Processing
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable parallel processing for distance calculations (requires parallel package).
+
+    - name: ihcScaleMax
+      title: IHC Scale Maximum
+      type: Number
+      min: 1
+      max: 300
+      default: 3
+      description:
+          R: >
+            Maximum value in IHC scoring scale (e.g., 3 for 0-3 scale, 300 for H-score).
 
 ...
 

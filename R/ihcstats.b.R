@@ -33,6 +33,153 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .supervised_clusters = NULL, # Stores supervised clustering results
         .til_signatures = NULL,     # Stores TIL signature characterization
         
+        # Package dependency checker
+        .checkPackageDependencies = function(required_packages) {
+            missing_packages <- character(0)
+            for (pkg in required_packages) {
+                if (!requireNamespace(pkg, quietly = TRUE)) {
+                    missing_packages <- c(missing_packages, pkg)
+                }
+            }
+            
+            if (length(missing_packages) > 0) {
+                error_msg <- paste("Required packages not available:", paste(missing_packages, collapse = ", "))
+                jmvcore::reject(error_msg)
+                return(FALSE)
+            }
+            return(TRUE)
+        },
+        
+        # Safe execution wrapper for error handling with progress reporting
+        .safeExecute = function(operation, operation_name = "Analysis", fallback = NULL, show_progress = TRUE) {
+            if (show_progress) {
+                message(paste("Starting", operation_name, "..."))
+            }
+            
+            tryCatch({
+                result <- operation()
+                if (show_progress) {
+                    message(paste(operation_name, "completed successfully"))
+                }
+                return(result)
+            }, error = function(e) {
+                error_msg <- paste(operation_name, "failed:", conditionMessage(e))
+                jmvcore::reject(error_msg)
+                return(fallback)
+            }, warning = function(w) {
+                warning_msg <- paste(operation_name, "warning:", conditionMessage(w))
+                # Log warning but continue
+                message(warning_msg)
+                return(operation())
+            })
+        },
+        
+        # Memory cleanup method
+        .cleanup = function() {
+            # Clear large temporary objects to free memory
+            private$.ihc_matrix <- NULL
+            private$.hc <- NULL
+            private$.pam <- NULL
+            private$.kmeans <- NULL
+            private$.pca <- NULL
+            private$.silhouette <- NULL
+            # Keep smaller result objects for display
+            gc(verbose = FALSE)  # Force garbage collection
+        },
+        
+        # Dataset size validation and performance optimization
+        .checkDatasetSize = function(data, max_samples = 1000) {
+            n_samples <- nrow(data)
+            n_markers <- ncol(data)
+            
+            if (n_samples > max_samples) {
+                warning_msg <- paste("Large dataset detected (", n_samples, "samples).", 
+                                   "Consider using sampling for better performance.")
+                message(warning_msg)
+                
+                # Suggest sampling for very large datasets
+                if (n_samples > max_samples * 2) {
+                    jmvcore::reject(paste("Dataset too large (", n_samples, "samples).", 
+                                        "Please consider sampling or increase maxSamples option."))
+                    return(FALSE)
+                }
+            }
+            
+            return(TRUE)
+        },
+        
+        # Consolidated validation helper functions
+        .validateBasicRequirements = function(markers, data) {
+            # Check if markers have been selected
+            if (is.null(markers) || length(markers) == 0) {
+                return(FALSE)
+            }
+
+            # Check if data has rows
+            if (nrow(data) == 0) {
+                stop('Data contains no (complete) rows')
+            }
+
+            # Validate marker data
+            for (marker in markers) {
+                if (!marker %in% names(data)) {
+                    stop(paste("Marker", marker, "not found in data"))
+                }
+                if (!is.factor(data[[marker]]) && !is.numeric(data[[marker]])) {
+                    stop(paste("Marker", marker, "must be factor or numeric"))
+                }
+            }
+            
+            return(TRUE)
+        },
+        
+        .validateVariableExists = function(var_name, var_value, data, required_type = NULL) {
+            if (is.null(var_value) || var_value == "") {
+                return(FALSE)
+            }
+            
+            if (!var_value %in% names(data)) {
+                stop(paste(var_name, "not found in data"))
+            }
+            
+            if (!is.null(required_type)) {
+                if (required_type == "numeric" && !is.numeric(data[[var_value]])) {
+                    stop(paste(var_name, "must be numeric"))
+                }
+            }
+            
+            return(TRUE)
+        },
+        
+        .validateAnalysisRequirements = function() {
+            # Multi-region analysis validation
+            if (self$options$tumorRegionAnalysis) {
+                if (!private$.validateVariableExists("Central region variable", self$options$centralRegionVar, self$data) ||
+                    !private$.validateVariableExists("Invasive region variable", self$options$invasiveRegionVar, self$data)) {
+                    stop("Multi-region analysis requires both central and invasive region variables")
+                }
+            }
+            
+            # Survival analysis validation  
+            if (self$options$prognosticClustering) {
+                if (!is.null(self$options$survivalTimeVar) && self$options$survivalTimeVar != "") {
+                    private$.validateVariableExists("Survival time variable", self$options$survivalTimeVar, self$data, "numeric")
+                }
+                if (!is.null(self$options$survivalEventVar) && self$options$survivalEventVar != "") {
+                    private$.validateVariableExists("Survival event variable", self$options$survivalEventVar, self$data)
+                }
+            }
+            
+            # Differential diagnosis validation
+            if (self$options$differentialDiagnosis || self$options$antibodyOptimization) {
+                if (!private$.validateVariableExists("Tumor type variable", self$options$tumorTypeVar, self$data)) {
+                    stop("Differential diagnosis/antibody optimization requires tumor type variable")
+                }
+            }
+            
+            return(TRUE)
+        },
+        
         # Initialization function - called when the analysis is created
         .init = function() {
             # Display welcome message when no data or markers selected
@@ -64,125 +211,218 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Main analysis function - called when the analysis is run
         .run = function() {
-            # Check if markers have been selected
-            if (is.null(self$options$markers))
-                return()
-
-            # Check if data has rows
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
             # Get the data for selected markers
             markers <- self$options$markers
+            
+            # Validate basic requirements
+            if (!private$.validateBasicRequirements(markers, self$data)) {
+                return()
+            }
+            
             data <- self$data[markers]
+            
+            # Check for minimum data requirements
+            data_complete <- na.omit(data)
+            if (nrow(data_complete) < 3) {
+                stop('Need at least 3 complete cases for analysis')
+            }
+            
+            # Check dataset size and performance considerations
+            max_samples <- ifelse(!is.null(self$options$maxSamples), self$options$maxSamples, 1000)
+            if (!private$.checkDatasetSize(data_complete, max_samples)) {
+                return()
+            }
+            
+            # Validate analysis-specific requirements
+            private$.validateAnalysisRequirements()
             
             # Compute H-scores if requested
             if (self$options$computeHScore) {
-                private$.computeHScores(data)
+                private$.safeExecute(function() private$.computeHScores(data), "H-score calculation")
             }
 
             # Perform clustering based on selected method
-            if (self$options$clusterMethod == "hierarchical") {
-                private$.performHierarchicalClustering(data)
-            } else if (self$options$clusterMethod == "pam") {
-                private$.performPAMClustering(data)
-            } else if (self$options$clusterMethod == "kmeans") {
-                private$.performKMeansClustering(data)
-            } else if (self$options$clusterMethod == "pca_kmeans") {
-                private$.performPCAKMeansClustering(data)
+            clustering_result <- private$.safeExecute(function() {
+                if (self$options$clusterMethod == "hierarchical") {
+                    private$.performHierarchicalClustering(data)
+                } else if (self$options$clusterMethod == "pam") {
+                    private$.performPAMClustering(data)
+                } else if (self$options$clusterMethod == "kmeans") {
+                    private$.performKMeansClustering(data)
+                } else if (self$options$clusterMethod == "pca_kmeans") {
+                    private$.performPCAKMeansClustering(data)
+                }
+            }, paste(self$options$clusterMethod, "clustering"))
+            
+            # Only proceed if clustering succeeded
+            if (is.null(clustering_result)) return()
+            
+            # Perform iterative marker selection if requested
+            if (self$options$iterativeClustering) {
+                private$.safeExecute(function() private$.performIterativeClustering(data), "Iterative marker selection")
             }
             
             # Perform multi-region tumor analysis if requested
             if (self$options$tumorRegionAnalysis) {
-                private$.performMultiRegionAnalysis(data)
+                private$.safeExecute(function() private$.performMultiRegionAnalysis(data), "Multi-region analysis")
             }
             
             # Perform prognostic clustering if requested
             if (self$options$prognosticClustering) {
-                private$.performPrognosticClustering(data)
+                private$.safeExecute(function() private$.performPrognosticClustering(data), "Prognostic clustering")
             }
             
             # Perform Olsen differential diagnosis if requested
             if (self$options$differentialDiagnosis) {
-                private$.performOlsenDifferentialDiagnosis(data)
+                private$.safeExecute(function() private$.performOlsenDifferentialDiagnosis(data), "Differential diagnosis")
             }
             
             # Perform antibody optimization if requested
             if (self$options$antibodyOptimization) {
-                private$.performAntibodyOptimization(data)
+                private$.safeExecute(function() private$.performAntibodyOptimization(data), "Antibody optimization")
             }
             
             # Perform Sterlacci TIL signature analysis if requested
             if (self$options$sterlacciAnalysis) {
-                private$.performSterlacciAnalysis(data)
+                private$.safeExecute(function() private$.performSterlacciAnalysis(data), "Sterlacci TIL analysis")
             }
             
             # Perform supervised clustering if requested
             if (self$options$supervisedClustering) {
-                private$.performSupervisedClustering(data)
+                private$.safeExecute(function() private$.performSupervisedClustering(data), "Supervised clustering")
             }
             
             # Perform reproducibility testing if requested
             if (self$options$reproductibilityTesting) {
-                private$.performReproducibilityTesting(data)
+                private$.safeExecute(function() private$.performReproducibilityTesting(data), "Reproducibility testing")
             }
+            
+            # Cleanup large objects at the end
+            private$.cleanup()
         },
 
-        # Calculate custom Jaccard distance for IHC data
+        # Calculate custom Jaccard distance for IHC data (Optimized O(n²) version)
         .calculateJaccardDistance = function(ihc_matrix) {
+            # Use vectorized approach for better performance
             n <- nrow(ihc_matrix)
-            dist_matrix <- matrix(0, n, n)
+            m <- ncol(ihc_matrix)
             
-            # Calculate distance between each pair of cases
+            # Pre-configure IHC-specific parameters
+            max_distance <- private$.getMaxIHCDistance(ihc_matrix)
+            
+            # Try proxy package for optimized distance calculation
+            if (requireNamespace("proxy", quietly = TRUE)) {
+                return(private$.calculateJaccardDistanceProxy(ihc_matrix, max_distance))
+            }
+            
+            # Fallback: optimized manual calculation
+            return(private$.calculateJaccardDistanceManual(ihc_matrix, max_distance))
+        },
+        
+        # Get maximum IHC distance based on configured scale or data range
+        .getMaxIHCDistance = function(ihc_matrix) {
+            # Use configured IHC scale maximum if available
+            if (!is.null(self$options$ihcScaleMax) && self$options$ihcScaleMax > 0) {
+                return(self$options$ihcScaleMax)
+            }
+            
+            # Fallback: determine from data range
+            max_vals <- apply(ihc_matrix, 2, max, na.rm = TRUE)
+            min_vals <- apply(ihc_matrix, 2, min, na.rm = TRUE)
+            return(max(max_vals - min_vals, na.rm = TRUE))
+        },
+        
+        # Optimized Jaccard distance using proxy package
+        .calculateJaccardDistanceProxy = function(ihc_matrix, max_distance) {
+            jaccard_ihc <- function(x, y) {
+                # Vectorized similarity calculation
+                valid_pairs <- !(is.na(x) & is.na(y))
+                if (sum(valid_pairs) == 0) return(1)
+                
+                x_valid <- x[valid_pairs]
+                y_valid <- y[valid_pairs]
+                
+                # Calculate weighted similarity
+                exact_matches <- (x_valid == y_valid)
+                shared_weights <- sum(exact_matches)
+                
+                # Add partial similarity for near matches
+                if (max_distance > 0) {
+                    partial_matches <- !exact_matches
+                    if (sum(partial_matches) > 0) {
+                        distances <- abs(x_valid[partial_matches] - y_valid[partial_matches])
+                        partial_similarities <- pmax(0, 1 - distances / max_distance)
+                        shared_weights <- shared_weights + sum(partial_similarities)
+                    }
+                }
+                
+                # Return Jaccard distance (1 - similarity)
+                similarity <- shared_weights / length(x_valid)
+                return(1 - similarity)
+            }
+            
+            return(proxy::dist(ihc_matrix, method = jaccard_ihc))
+        },
+        
+        # Manual optimized Jaccard distance calculation
+        .calculateJaccardDistanceManual = function(ihc_matrix, max_distance) {
+            n <- nrow(ihc_matrix)
+            
+            # Progress reporting for large datasets
+            if (n > 500) {
+                message(paste("Computing distance matrix for", n, "samples..."))
+            }
+            
+            # Use lower triangular approach for efficiency
+            distances <- numeric(n * (n - 1) / 2)
+            k <- 1
+            progress_step <- max(1, floor(n / 10))  # Report progress every 10%
+            
             for (i in 1:(n-1)) {
+                # Progress reporting
+                if (n > 500 && i %% progress_step == 0) {
+                    progress <- round(i / (n-1) * 100)
+                    message(paste("Distance calculation progress:", progress, "%"))
+                }
+                
+                # Vectorized calculation for row i against all subsequent rows
+                i_row <- ihc_matrix[i, ]
+                
                 for (j in (i+1):n) {
-                    # Calculate weighted Jaccard similarity
-                    shared_weights <- 0
-                    total_weights <- 0
+                    j_row <- ihc_matrix[j, ]
                     
-                    for (k in 1:ncol(ihc_matrix)) {
-                        val_i <- ihc_matrix[i, k]
-                        val_j <- ihc_matrix[j, k]
-                        
-                        # Skip if both are NA
-                        if (is.na(val_i) && is.na(val_j)) next
-                        
-                        # Handle missing values
-                        if (is.na(val_i) || is.na(val_j)) {
-                            total_weights <- total_weights + 1
-                            next
-                        }
-                        
-                        # Calculate similarity based on IHC ordinal values
-                        # For standard IHC (0-3 scale), closer values are more similar
-                        if (val_i == val_j) {
-                            # Exact match gets full weight (1.0)
-                            shared_weights <- shared_weights + 1
-                        } else {
-                            # Partial similarity based on distance between ordinal values
-                            max_distance <- 3  # Maximum possible distance in standard IHC
-                            actual_distance <- abs(val_i - val_j)
-                            
-                            # Linear scaling of similarity based on distance
-                            partial_similarity <- 1 - (actual_distance / max_distance)
-                            shared_weights <- shared_weights + partial_similarity
-                        }
-                        
-                        total_weights <- total_weights + 1
-                    }
-                    
-                    # Calculate Jaccard distance
-                    if (total_weights > 0) {
-                        jaccard_similarity <- shared_weights / total_weights
-                        dist_matrix[i, j] <- dist_matrix[j, i] <- 1 - jaccard_similarity
+                    # Vectorized operations
+                    valid_pairs <- !(is.na(i_row) & is.na(j_row))
+                    if (sum(valid_pairs) == 0) {
+                        distances[k] <- 1
                     } else {
-                        dist_matrix[i, j] <- dist_matrix[j, i] <- 1  # Maximum distance if no shared data
+                        i_valid <- i_row[valid_pairs]
+                        j_valid <- j_row[valid_pairs]
+                        
+                        # Exact matches
+                        exact_matches <- sum(i_valid == j_valid)
+                        
+                        # Partial matches (vectorized)
+                        if (max_distance > 0) {
+                            partial_indices <- i_valid != j_valid
+                            if (sum(partial_indices) > 0) {
+                                partial_similarities <- pmax(0, 1 - abs(i_valid[partial_indices] - j_valid[partial_indices]) / max_distance)
+                                shared_weights <- exact_matches + sum(partial_similarities)
+                            } else {
+                                shared_weights <- exact_matches
+                            }
+                        } else {
+                            shared_weights <- exact_matches
+                        }
+                        
+                        similarity <- shared_weights / length(i_valid)
+                        distances[k] <- 1 - similarity
                     }
+                    k <- k + 1
                 }
             }
             
-            # Convert to dist object
-            return(as.dist(dist_matrix))
+            return(as.dist(distances))
         },
         
         # Create text summary of expression patterns in a cluster
@@ -271,12 +511,9 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform hierarchical clustering
         .performHierarchicalClustering = function(data) {
             # Check required libraries
-            if (!requireNamespace("pheatmap", quietly = TRUE) || 
-                !requireNamespace("dendextend", quietly = TRUE) ||
-                !requireNamespace("RColorBrewer", quietly = TRUE) ||
-                !requireNamespace("cluster", quietly = TRUE)) {
-                jmvcore::reject("This analysis requires the 'pheatmap', 'dendextend', 'RColorBrewer', and 'cluster' packages")
-                return()
+            required_packages <- c("pheatmap", "dendextend", "RColorBrewer", "cluster")
+            if (!private$.checkPackageDependencies(required_packages)) {
+                return(NULL)
             }
             
             # Convert categorical IHC data to numeric matrix for analysis
@@ -314,9 +551,8 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform PAM (Partitioning Around Medoids) clustering
         .performPAMClustering = function(data) {
             # Check required library
-            if (!requireNamespace("cluster", quietly = TRUE)) {
-                jmvcore::reject("This analysis requires the 'cluster' package")
-                return()
+            if (!private$.checkPackageDependencies(c("cluster"))) {
+                return(NULL)
             }
             
             # Convert categorical IHC data to numeric matrix
@@ -474,7 +710,7 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             
             # Clear existing results
-            self$results$optimalMarkersTable$clear()
+            # self$results$optimalMarkersTable$clear()  # Method not available in jamovi tables
             
             # Get performance scores
             scores <- private$.marker_performance
@@ -502,7 +738,7 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate summaries for each cluster
         .generateClusterSummaries = function(data, clusters) {
             # Clear existing results
-            self$results$clusterSummary$clear()
+            # self$results$clusterSummary$clear()  # Method not available in jamovi tables
             
             # For each cluster
             for (i in 1:max(clusters)) {
@@ -528,7 +764,7 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform silhouette analysis to assess clustering quality
         .performSilhouetteAnalysis = function(dist_matrix, clusters) {
             # Clear existing results
-            self$results$silhouetteTable$clear()
+            # self$results$silhouetteTable$clear()  # Method not available in jamovi tables
             
             # Calculate silhouette values
             sil <- cluster::silhouette(clusters, dist_matrix)
@@ -555,7 +791,7 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Calculate H-scores from categorical IHC markers
         .computeHScores = function(data) {
             # Clear existing results
-            self$results$hscoreTable$clear()
+            # self$results$hscoreTable$clear()  # Method not available in jamovi tables
             
             # Process each marker
             for (marker in names(data)) {
@@ -643,7 +879,7 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform multi-region tumor analysis (Matsuoka method)
         .performMultiRegionAnalysis = function(data) {
             # Clear existing results
-            self$results$regionalTable$clear()
+            # self$results$regionalTable$clear()  # Method not available in jamovi tables
             
             # Check if region variables are provided
             central_var <- self$options$centralRegionVar
@@ -700,8 +936,8 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform prognostic clustering using Ward's method (Matsuoka)
         .performPrognosticClustering = function(data) {
             # Clear existing results
-            self$results$prognosticTable$clear()
-            self$results$survivalTable$clear()
+            # self$results$prognosticTable$clear()  # Method not available in jamovi tables
+            # self$results$survivalTable$clear()  # Method not available in jamovi tables
             
             # Convert IHC data to numeric matrix
             ihc_matrix <- private$.prepareIHCMatrix(data)
@@ -989,7 +1225,7 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate PCA summary table
         .generatePCATable = function(pca_result) {
             # Clear existing results
-            self$results$pcaTable$clear()
+            # self$results$pcaTable$clear()  # Method not available in jamovi tables
             
             # Get variance explained
             variance_explained <- (pca_result$sdev^2 / sum(pca_result$sdev^2)) * 100
@@ -1011,7 +1247,7 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform Olsen-style differential diagnosis clustering
         .performOlsenDifferentialDiagnosis = function(data) {
             # Clear existing results
-            self$results$differentialTable$clear()
+            # self$results$differentialTable$clear()  # Method not available in jamovi tables
             
             # Get tumor type data if provided
             tumor_type_var <- self$options$tumorTypeVar
@@ -1118,8 +1354,8 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform antibody optimization (Olsen method)
         .performAntibodyOptimization = function(data) {
             # Clear existing results
-            self$results$antibodyPerformanceTable$clear()
-            self$results$optimalPanelTable$clear()
+            # self$results$antibodyPerformanceTable$clear()  # Method not available in jamovi tables
+            # self$results$optimalPanelTable$clear()  # Method not available in jamovi tables
             
             # Check if we have tumor type data for validation
             if (is.null(private$.tumor_types)) {
@@ -1215,8 +1451,8 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform Sterlacci TIL signature analysis
         .performSterlacciAnalysis = function(data) {
             # Clear existing results
-            self$results$sterlacciTable$clear()
-            self$results$tilSignatureTable$clear()
+            # self$results$sterlacciTable$clear()  # Method not available in jamovi tables
+            # self$results$tilSignatureTable$clear()  # Method not available in jamovi tables
             
             # Convert IHC data to numeric matrix
             ihc_matrix <- private$.prepareIHCMatrix(data)
@@ -1461,7 +1697,7 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform supervised clustering (Sterlacci method)
         .performSupervisedClustering = function(data) {
             # Clear existing results
-            self$results$supervisedResultsTable$clear()
+            # self$results$supervisedResultsTable$clear()  # Method not available in jamovi tables
             
             # Get tumor type data for supervised clustering
             tumor_type_var <- self$options$tumorTypeVar
@@ -1550,7 +1786,7 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Perform reproducibility testing with Cohen's kappa
         .performReproducibilityTesting = function(data) {
             # Clear existing results
-            self$results$reproductibilityTable$clear()
+            # self$results$reproductibilityTable$clear()  # Method not available in jamovi tables
             
             # Convert IHC data to numeric matrix
             ihc_matrix <- private$.prepareIHCMatrix(data)
@@ -1906,6 +2142,103 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             return(TRUE)
+        },
+        # Missing iterative clustering method
+        .performIterativeClustering = function(data) {
+            if (!self$options$iterativeClustering) return()
+            
+            # Clear existing results
+            # self$results$optimalMarkersTable$clear()  # Method not available in jamovi tables
+            
+            markers <- self$options$markers
+            if (length(markers) < 2) return()
+            
+            # Convert to numeric matrix
+            data_matrix <- sapply(data, as.numeric)
+            
+            # Forward selection approach
+            selected_markers <- character(0)
+            remaining_markers <- markers
+            marker_scores <- list()
+            
+            while (length(remaining_markers) > 0) {
+                best_marker <- NULL
+                best_score <- -Inf
+                
+                for (marker in remaining_markers) {
+                    test_markers <- c(selected_markers, marker)
+                    test_data <- data_matrix[, test_markers, drop = FALSE]
+                    
+                    # Calculate clustering quality
+                    if (nrow(test_data) < 4) break
+                    
+                    tryCatch({
+                        if (self$options$distanceMetric == "gower") {
+                            if (requireNamespace("cluster", quietly = TRUE)) {
+                                dist_matrix <- cluster::daisy(test_data, metric = "gower")
+                            } else {
+                                dist_matrix <- dist(test_data)
+                            }
+                        } else {
+                            dist_matrix <- private$.calculateJaccardDistance(test_data)
+                        }
+                        
+                        hc <- hclust(dist_matrix, method = self$options$linkageMethod)
+                        clusters <- cutree(hc, k = self$options$nClusters)
+                        
+                        # Calculate separation score using silhouette
+                        if (requireNamespace("cluster", quietly = TRUE)) {
+                            sil <- cluster::silhouette(clusters, dist_matrix)
+                            separation_score <- mean(sil[, "sil_width"])
+                        } else {
+                            # Fallback: calculate within-cluster sum of squares
+                            separation_score <- -sum(sapply(1:self$options$nClusters, function(k) {
+                                cluster_members <- which(clusters == k)
+                                if (length(cluster_members) > 1) {
+                                    sum(dist_matrix[cluster_members, cluster_members]^2)
+                                } else {
+                                    0
+                                }
+                            }))
+                        }
+                        
+                        if (separation_score > best_score) {
+                            best_score <- separation_score
+                            best_marker <- marker
+                        }
+                    }, error = function(e) {
+                        # Skip markers that cause errors
+                    })
+                }
+                
+                if (!is.null(best_marker)) {
+                    selected_markers <- c(selected_markers, best_marker)
+                    remaining_markers <- setdiff(remaining_markers, best_marker)
+                    
+                    # Determine status
+                    status <- if (best_score > 0.3) {
+                        "Essential"
+                    } else if (best_score > 0.1) {
+                        "Helpful"
+                    } else {
+                        "Optional"
+                    }
+                    
+                    # Add to results table
+                    self$results$optimalMarkersTable$addRow(rowKey = best_marker, values = list(
+                        marker = best_marker,
+                        separation_score = round(best_score, 3),
+                        status = status
+                    ))
+                    
+                    # Stop if score improvement is minimal
+                    if (length(selected_markers) > 1 && best_score < 0.1) {
+                        break
+                    }
+                } else {
+                    break
+                }
+            }
         }
     )
 )
