@@ -1,7 +1,7 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '0.0.3'
@@ -1009,6 +1009,131 @@ options:
         Display educational explanations for each analysis type to help interpret 
         multivariable survival analysis results, Cox regression, adjusted survival 
         curves, nomograms, and model diagnostics.
+
+    # Machine Learning Survival Methods
+    - name: ml_method
+      title: 'Machine Learning Method'
+      type: List
+      options:
+        - title: None (Cox Only)
+          name: none
+        - title: Random Survival Forest
+          name: rsf
+        - title: Gradient Boosting (XGBoost)
+          name: xgboost
+        - title: Elastic Net Cox
+          name: glmnet
+        - title: Support Vector Survival
+          name: svm
+        - title: Deep Survival (Neural Network)
+          name: deepsurv
+        - title: Ensemble (Multiple Methods)
+          name: ensemble
+      default: none
+      description:
+          ui: >
+            Advanced machine learning methods for survival analysis
+          R: >
+            Machine learning survival analysis method
+
+    - name: ml_validation
+      title: 'Validation Method'
+      type: List
+      options:
+        - title: Cross-Validation
+          name: cv
+        - title: Bootstrap
+          name: bootstrap
+        - title: Train-Test Split
+          name: split
+      default: cv
+      description:
+          ui: >
+            Validation method for machine learning models
+          R: >
+            Model validation approach
+
+    - name: ml_cv_folds
+      title: 'Cross-Validation Folds'
+      type: Integer
+      default: 5
+      min: 3
+      max: 20
+      description:
+          ui: >
+            Number of folds for cross-validation
+          R: >
+            CV fold count
+
+    - name: ml_feature_selection
+      title: 'Feature Selection'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform automatic feature selection
+          R: >
+            Enable feature selection
+
+    - name: ml_importance
+      title: 'Variable Importance'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate and display variable importance scores
+          R: >
+            Show variable importance
+
+    - name: ml_calibration
+      title: 'Calibration Plot'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display calibration plot for predictions
+          R: >
+            Generate calibration plot
+
+    - name: ml_performance
+      title: 'Performance Metrics'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate C-index, IBS, and other performance metrics
+          R: >
+            Show performance metrics
+
+    - name: ml_shap
+      title: 'SHAP Values'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Calculate SHAP values for model interpretability
+          R: >
+            Compute SHAP values
+
+    - name: ml_hyperparameter_tuning
+      title: 'Hyperparameter Tuning'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform automatic hyperparameter optimization
+          R: >
+            Enable hyperparameter tuning
+
+    - name: ml_ensemble_weights
+      title: 'Ensemble Weights'
+      type: String
+      default: "equal"
+      description:
+          ui: >
+            Weights for ensemble methods (equal, optimized, or comma-separated values)
+          R: >
+            Ensemble model weights
 
 
 

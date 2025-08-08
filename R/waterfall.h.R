@@ -9,6 +9,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             patientID = NULL,
             responseVar = NULL,
             timeVar = NULL,
+            groupVar = NULL,
             inputType = "percentage",
             sortBy = "response",
             showThresholds = FALSE,
@@ -16,11 +17,14 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showMedian = FALSE,
             showCI = FALSE,
             minResponseForLabel = 50,
+            colorBy = "recist",
             colorScheme = "jamovi",
             barAlpha = 1,
             barWidth = 0.7,
             showWaterfallPlot = TRUE,
-            showSpiderPlot = TRUE, ...) {
+            showSpiderPlot = TRUE,
+            spiderColorBy = "response",
+            spiderColorScheme = "classic", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -50,6 +54,16 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
+                    "numeric"),
+                default=NULL)
+            private$..groupVar <- jmvcore::OptionVariable$new(
+                "groupVar",
+                groupVar,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
                     "numeric"),
                 default=NULL)
             private$..inputType <- jmvcore::OptionList$new(
@@ -88,13 +102,21 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=50,
                 min=0,
                 max=100)
+            private$..colorBy <- jmvcore::OptionList$new(
+                "colorBy",
+                colorBy,
+                options=list(
+                    "recist",
+                    "group"),
+                default="recist")
             private$..colorScheme <- jmvcore::OptionList$new(
                 "colorScheme",
                 colorScheme,
                 options=list(
                     "jamovi",
                     "recist",
-                    "simple"),
+                    "simple",
+                    "colorful"),
                 default="jamovi")
             private$..barAlpha <- jmvcore::OptionNumber$new(
                 "barAlpha",
@@ -116,12 +138,28 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showSpiderPlot",
                 showSpiderPlot,
                 default=TRUE)
+            private$..spiderColorBy <- jmvcore::OptionList$new(
+                "spiderColorBy",
+                spiderColorBy,
+                options=list(
+                    "response",
+                    "group"),
+                default="response")
+            private$..spiderColorScheme <- jmvcore::OptionList$new(
+                "spiderColorScheme",
+                spiderColorScheme,
+                options=list(
+                    "classic",
+                    "jamovi",
+                    "colorful"),
+                default="classic")
             private$..addResponseCategory <- jmvcore::OptionOutput$new(
                 "addResponseCategory")
 
             self$.addOption(private$..patientID)
             self$.addOption(private$..responseVar)
             self$.addOption(private$..timeVar)
+            self$.addOption(private$..groupVar)
             self$.addOption(private$..inputType)
             self$.addOption(private$..sortBy)
             self$.addOption(private$..showThresholds)
@@ -129,17 +167,21 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showMedian)
             self$.addOption(private$..showCI)
             self$.addOption(private$..minResponseForLabel)
+            self$.addOption(private$..colorBy)
             self$.addOption(private$..colorScheme)
             self$.addOption(private$..barAlpha)
             self$.addOption(private$..barWidth)
             self$.addOption(private$..showWaterfallPlot)
             self$.addOption(private$..showSpiderPlot)
+            self$.addOption(private$..spiderColorBy)
+            self$.addOption(private$..spiderColorScheme)
             self$.addOption(private$..addResponseCategory)
         }),
     active = list(
         patientID = function() private$..patientID$value,
         responseVar = function() private$..responseVar$value,
         timeVar = function() private$..timeVar$value,
+        groupVar = function() private$..groupVar$value,
         inputType = function() private$..inputType$value,
         sortBy = function() private$..sortBy$value,
         showThresholds = function() private$..showThresholds$value,
@@ -147,16 +189,20 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showMedian = function() private$..showMedian$value,
         showCI = function() private$..showCI$value,
         minResponseForLabel = function() private$..minResponseForLabel$value,
+        colorBy = function() private$..colorBy$value,
         colorScheme = function() private$..colorScheme$value,
         barAlpha = function() private$..barAlpha$value,
         barWidth = function() private$..barWidth$value,
         showWaterfallPlot = function() private$..showWaterfallPlot$value,
         showSpiderPlot = function() private$..showSpiderPlot$value,
+        spiderColorBy = function() private$..spiderColorBy$value,
+        spiderColorScheme = function() private$..spiderColorScheme$value,
         addResponseCategory = function() private$..addResponseCategory$value),
     private = list(
         ..patientID = NA,
         ..responseVar = NA,
         ..timeVar = NA,
+        ..groupVar = NA,
         ..inputType = NA,
         ..sortBy = NA,
         ..showThresholds = NA,
@@ -164,11 +210,14 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showMedian = NA,
         ..showCI = NA,
         ..minResponseForLabel = NA,
+        ..colorBy = NA,
         ..colorScheme = NA,
         ..barAlpha = NA,
         ..barWidth = NA,
         ..showWaterfallPlot = NA,
         ..showSpiderPlot = NA,
+        ..spiderColorBy = NA,
+        ..spiderColorScheme = NA,
         ..addResponseCategory = NA)
 )
 
@@ -301,13 +350,16 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showWaterfallPlot)",
                 clearWith=list(
                     "patientID",
-                    "response",
+                    "responseVar",
                     "sortBy",
                     "showThresholds",
                     "labelOutliers",
+                    "colorBy",
                     "colorScheme",
                     "showMedian",
-                    "showCI")))
+                    "showCI",
+                    "groupVar",
+                    "inputType")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="spiderplot",
@@ -319,10 +371,19 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showSpiderPlot)",
                 clearWith=list(
                     "patientID",
-                    "response",
+                    "responseVar",
                     "timeVar",
                     "inputType",
-                    "sortBy")))
+                    "sortBy",
+                    "groupVar",
+                    "showThresholds",
+                    "labelOutliers",
+                    "colorBy",
+                    "colorScheme",
+                    "spiderColorBy",
+                    "spiderColorScheme",
+                    "showMedian",
+                    "showCI")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="addResponseCategory",
@@ -401,6 +462,9 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   indicate tumor shrinkage (improvement).
 #' @param timeVar Time point of measurement for spider plot (e.g., months from
 #'   baseline)
+#' @param groupVar Optional grouping variable for coloring bars by patient
+#'   groups (e.g., treatment arms, disease subtypes). When specified, overrides
+#'   RECIST category coloring to show group-based colors.
 #' @param inputType Specify data format: 'raw' for actual measurements (will
 #'   calculate percent change) or 'percentage' for pre-calculated percentage
 #'   changes
@@ -411,13 +475,20 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showCI Show confidence interval around median response.
 #' @param minResponseForLabel Minimum response value for labels to be
 #'   displayed.
-#' @param colorScheme Color scheme for waterfall plot.
+#' @param colorBy Coloring method: RECIST categories or patient groups
+#'   (requires Group Variable).
+#' @param colorScheme Color scheme for waterfall plot. 'Colorful' provides
+#'   distinct colors for group-based coloring.
 #' @param barAlpha Transparency of bars in waterfall plot.
 #' @param barWidth Width of bars in waterfall plot.
 #' @param showWaterfallPlot Display the waterfall plot showing best response
 #'   for each patient.
 #' @param showSpiderPlot Display spider plot showing response trajectories
 #'   over time (requires time variable).
+#' @param spiderColorBy Coloring method for spider plot: Response status or
+#'   patient groups. For backward compatibility, defaults to response status
+#'   coloring.
+#' @param spiderColorScheme Color scheme for spider plot lines and points.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -442,6 +513,7 @@ waterfall <- function(
     patientID,
     responseVar,
     timeVar = NULL,
+    groupVar = NULL,
     inputType = "percentage",
     sortBy = "response",
     showThresholds = FALSE,
@@ -449,11 +521,14 @@ waterfall <- function(
     showMedian = FALSE,
     showCI = FALSE,
     minResponseForLabel = 50,
+    colorBy = "recist",
     colorScheme = "jamovi",
     barAlpha = 1,
     barWidth = 0.7,
     showWaterfallPlot = TRUE,
-    showSpiderPlot = TRUE) {
+    showSpiderPlot = TRUE,
+    spiderColorBy = "response",
+    spiderColorScheme = "classic") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("waterfall requires jmvcore to be installed (restart may be required)")
@@ -461,18 +536,21 @@ waterfall <- function(
     if ( ! missing(patientID)) patientID <- jmvcore::resolveQuo(jmvcore::enquo(patientID))
     if ( ! missing(responseVar)) responseVar <- jmvcore::resolveQuo(jmvcore::enquo(responseVar))
     if ( ! missing(timeVar)) timeVar <- jmvcore::resolveQuo(jmvcore::enquo(timeVar))
+    if ( ! missing(groupVar)) groupVar <- jmvcore::resolveQuo(jmvcore::enquo(groupVar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(patientID), patientID, NULL),
             `if`( ! missing(responseVar), responseVar, NULL),
-            `if`( ! missing(timeVar), timeVar, NULL))
+            `if`( ! missing(timeVar), timeVar, NULL),
+            `if`( ! missing(groupVar), groupVar, NULL))
 
 
     options <- waterfallOptions$new(
         patientID = patientID,
         responseVar = responseVar,
         timeVar = timeVar,
+        groupVar = groupVar,
         inputType = inputType,
         sortBy = sortBy,
         showThresholds = showThresholds,
@@ -480,11 +558,14 @@ waterfall <- function(
         showMedian = showMedian,
         showCI = showCI,
         minResponseForLabel = minResponseForLabel,
+        colorBy = colorBy,
         colorScheme = colorScheme,
         barAlpha = barAlpha,
         barWidth = barWidth,
         showWaterfallPlot = showWaterfallPlot,
-        showSpiderPlot = showSpiderPlot)
+        showSpiderPlot = showSpiderPlot,
+        spiderColorBy = spiderColorBy,
+        spiderColorScheme = spiderColorScheme)
 
     analysis <- waterfallClass$new(
         options = options,

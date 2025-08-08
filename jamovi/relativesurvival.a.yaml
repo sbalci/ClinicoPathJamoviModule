@@ -1,0 +1,314 @@
+---
+name: relativesurvival
+title: Relative Survival Analysis
+menuGroup: SurvivalD
+menuSubgroup: Advanced Survival
+menuSubtitle: 'Population-Based Survival Comparison'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Relative survival analysis compares observed survival in a patient cohort to 
+        expected survival in a matched general population. Essential for cancer registry 
+        studies and population-based research.
+    R:
+        dontrun: true
+        usage: |
+            # Example: Cancer relative survival
+            relativesurvival(
+                data = cancer_registry,
+                time = followup_years,
+                status = vital_status,
+                age = age_at_diagnosis,
+                sex = gender,
+                year = diagnosis_year,
+                ratetable = "us_population"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: 'Follow-up Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Follow-up time (in days, months, or years)
+          R: >
+            Follow-up time variable
+
+    - name: status
+      title: 'Vital Status'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Vital status (0 = alive/censored, 1 = dead)
+          R: >
+            Event status variable
+
+    - name: age
+      title: 'Age at Diagnosis'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Age at diagnosis/entry (required for population matching)
+          R: >
+            Age variable for rate table matching
+
+    - name: sex
+      title: 'Sex'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Sex/gender (required for population matching)
+          R: >
+            Sex variable for rate table matching
+
+    - name: year
+      title: 'Calendar Year'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Year of diagnosis/entry (for temporal matching)
+          R: >
+            Calendar year for rate table matching
+
+    - name: covariates
+      title: 'Additional Covariates'
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Additional variables for adjusted analysis
+          R: >
+            Covariates for regression models
+
+    - name: ratetable
+      title: 'Population Rate Table'
+      type: List
+      options:
+        - title: US Population (survexp.us)
+          name: us
+        - title: Minnesota Population (survexp.mn)
+          name: mn
+        - title: French Population (survexp.fr)
+          name: fr
+        - title: Italian Population (survexp.it)
+          name: it
+        - title: Custom Rate Table
+          name: custom
+      default: us
+      description:
+          ui: >
+            Reference population mortality rates
+          R: >
+            Population rate table for expected survival
+
+    - name: method
+      title: 'Estimation Method'
+      type: List
+      options:
+        - title: Ederer I
+          name: ederer1
+        - title: Ederer II
+          name: ederer2
+        - title: Hakulinen
+          name: hakulinen
+        - title: Pohar-Perme
+          name: poharperme
+      default: poharperme
+      description:
+          ui: >
+            Method for relative survival estimation
+          R: >
+            Relative survival estimation method
+
+    - name: time_scale
+      title: 'Time Scale'
+      type: List
+      options:
+        - title: Years
+          name: years
+        - title: Months
+          name: months
+        - title: Days
+          name: days
+      default: years
+      description:
+          ui: >
+            Time scale for analysis
+          R: >
+            Time unit specification
+
+    # Analysis Options
+    - name: net_survival
+      title: 'Net Survival'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate net (cancer-specific) survival
+          R: >
+            Compute net survival estimates
+
+    - name: excess_mortality
+      title: 'Excess Mortality'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate excess mortality (hazard) rates
+          R: >
+            Compute excess mortality
+
+    - name: crude_probability
+      title: 'Crude Probability of Death'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate crude probabilities by cause
+          R: >
+            Compute cause-specific crude probabilities
+
+    - name: age_standardized
+      title: 'Age-Standardized Rates'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Calculate age-standardized survival rates
+          R: >
+            Perform age standardization
+
+    - name: period_analysis
+      title: 'Period Analysis'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform period analysis (vs cohort analysis)
+          R: >
+            Use period analysis approach
+
+    - name: cohort_year
+      title: 'Cohort Definition'
+      type: String
+      default: ""
+      description:
+          ui: >
+            Define cohort years (e.g., "2010-2015")
+          R: >
+            Cohort year specification
+
+    # Regression Options
+    - name: regression_model
+      title: 'Regression Model'
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Additive (Excess Hazard)
+          name: additive
+        - title: Multiplicative
+          name: multiplicative
+        - title: Flexible Parametric
+          name: flexible
+      default: none
+      description:
+          ui: >
+            Type of regression model for covariates
+          R: >
+            Regression model specification
+
+    - name: spline_df
+      title: 'Spline Degrees of Freedom'
+      type: Integer
+      default: 4
+      min: 1
+      max: 10
+      description:
+          ui: >
+            Degrees of freedom for flexible models
+          R: >
+            Spline complexity
+
+    # Visualization Options
+    - name: plot_observed
+      title: 'Plot Observed Survival'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display observed (overall) survival curve
+          R: >
+            Show observed survival
+
+    - name: plot_expected
+      title: 'Plot Expected Survival'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display expected (population) survival curve
+          R: >
+            Show expected survival
+
+    - name: plot_relative
+      title: 'Plot Relative Survival'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display relative survival curve
+          R: >
+            Show relative survival
+
+    - name: plot_excess
+      title: 'Plot Excess Mortality'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display excess mortality rates over time
+          R: >
+            Show excess hazard
+
+    - name: confidence_level
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          ui: >
+            Confidence level for intervals
+          R: >
+            CI level
+
+    - name: timepoints
+      title: 'Time Points for Estimates'
+      type: String
+      default: "1,3,5,10"
+      description:
+          ui: >
+            Time points for survival estimates (comma-separated)
+          R: >
+            Specific time points
+
+...

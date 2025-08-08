@@ -20,6 +20,9 @@ decisionpanel(
   maxTests = 3,
   sequentialStop = "positive",
   optimizationCriteria = "accuracy",
+  panelOptimization = "forward",
+  minImprovement = 0.01,
+  redundancyThreshold = 0.7,
   minSensitivity = 0.8,
   minSpecificity = 0.8,
   createTree = FALSE,
@@ -78,6 +81,14 @@ positive result (when using custom rule).}
 
 \item{optimizationCriteria}{Primary criterion for optimizing test panels.}
 
+\item{panelOptimization}{Method for building optimal test panels.}
+
+\item{minImprovement}{Minimum improvement in performance metric required to
+add a test to the panel.}
+
+\item{redundancyThreshold}{Correlation threshold above which tests are
+considered redundant.}
+
 \item{minSensitivity}{Minimum sensitivity constraint for panel selection.}
 
 \item{minSpecificity}{Minimum specificity constraint for panel selection.}
@@ -128,6 +139,11 @@ A results object containing:
 \code{results$optimalPanel} \tab \tab \tab \tab \tab a table \cr
 \code{results$strategyComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$individualTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$panelBuilding} \tab \tab \tab \tab \tab a table \cr
+\code{results$optimalPanelsBySize} \tab \tab \tab \tab \tab a table \cr
+\code{results$testRedundancy} \tab \tab \tab \tab \tab a table \cr
+\code{results$incrementalValue} \tab \tab \tab \tab \tab a table \cr
+\code{results$resultImportance} \tab \tab \tab \tab \tab a table \cr
 \code{results$allCombinations} \tab \tab \tab \tab \tab a table \cr
 \code{results$treeStructure} \tab \tab \tab \tab \tab a html \cr
 \code{results$treePerformance} \tab \tab \tab \tab \tab a table \cr

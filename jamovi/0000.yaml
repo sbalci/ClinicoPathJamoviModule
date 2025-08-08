@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.95
+version: 0.0.3.97
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-06'
+date: '2025-08-08'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -521,7 +521,7 @@ analyses:
   - title: IHC Expression Analysis
     name: ihcstats
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuSubgroup: IHC Analysis
     menuTitle: IHC Expression Analysis
     ribbon: analyses
@@ -664,7 +664,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1051,7 +1051,7 @@ analyses:
   - title: Medical Decision Tree Analysis
     name: tree
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Medical Decision Tree Analysis
     description: >
@@ -1075,29 +1075,16 @@ analyses:
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine tests and evaluate performance
-    description: >
-      Combines multiple medical diagnostic tests and evaluates their collective 
-
-      performance using different combination rules. This function is essential 
-
-      for optimizing diagnostic accuracy when multiple tests are available for 
-
-      the same condition. Supports OR logic (positive if any test is positive), 
-
-      AND logic (positive only if all tests are positive), and majority rule 
-
-      (positive if more than half of tests are positive). Calculates
-      comprehensive 
-
-      diagnostic performance metrics including sensitivity, specificity,
-      positive 
-
-      and negative predictive values, likelihood ratios, and post-test
-      probabilities 
-
-      for the combined test strategy. Useful for developing optimal test panels 
-
-      and understanding how multiple diagnostic tests perform together.
+    description: |
+      Analyzes and compares multiple medical diagnostic tests by examining all 
+      possible test result combinations. This function evaluates how different 
+      patterns of positive and negative test results perform against a gold 
+      standard, helping clinicians understand which test combinations are most 
+      informative. Shows individual test performance and comprehensive analysis 
+      of all possible test result patterns (e.g., +/+, +/-, -/+, -/-) with 
+      their respective positive predictive values and clinical interpretation. 
+      Essential for understanding test interactions and optimizing diagnostic 
+      strategies when multiple tests are available for the same condition.
     ribbon: analyses
     category: analyses
   - title: Screening Test Calculator
@@ -1216,7 +1203,7 @@ analyses:
   - title: Decision tree
     name: classification
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Decision tree
     menuSubgroup: Drafts
     menuSubtitle: Classification
@@ -1922,6 +1909,99 @@ analyses:
       Analyzes relationships between continuous variables in clinical research
       using  evidence-based approaches from BMJ best practices. Avoids common
       pitfalls like  arbitrary categorization and linear assumptions.
+  - title: Cure Models for Long-term Survivors
+    name: curemodels
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Advanced Survival
+    menuTitle: Cure Models for Long-term Survivors
+    menuSubtitle: Mixture and Non-mixture Cure Models
+    description: >
+      Cure models for analyzing survival data with a cured fraction of long-term
+      survivors.
+
+      Implements mixture cure models and non-mixture cure models for oncology
+      research.
+  - title: Multistate Survival Models
+    name: multistatesurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Advanced Survival
+    menuTitle: Multistate Survival Models
+    menuSubtitle: Disease Progression and Transition Modeling
+    description: >
+      Multistate models for analyzing disease progression through multiple
+      states.
+
+      Implements transition probabilities, state occupation probabilities, and 
+
+      competing transitions for complex disease pathways in clinical research.
+  - title: Relative Survival Analysis
+    name: relativesurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Advanced Survival
+    menuTitle: Relative Survival Analysis
+    menuSubtitle: Population-Based Survival Comparison
+    description: >
+      Relative survival analysis compares observed survival in a patient cohort
+      to 
+
+      expected survival in a matched general population. Essential for cancer
+      registry 
+
+      studies and population-based research.
+  - title: Survival Model Validation
+    name: survivalvalidation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Advanced Survival
+    menuTitle: Survival Model Validation
+    menuSubtitle: Model Performance Assessment and Validation
+    description: >
+      Comprehensive validation and performance assessment for survival models.
+
+      Includes prediction error curves, time-dependent ROC analysis, calibration
+      plots,
+
+      and decision curve analysis for clinical decision making.
+  - title: Joint Longitudinal-Survival Models
+    name: jointmodeling
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Advanced Longitudinal
+    menuTitle: Joint Longitudinal-Survival Models
+    menuSubtitle: Dynamic Biomarker-Survival Integration
+    description: >-
+      Joint modeling of longitudinal biomarker trajectories and survival
+      outcomes.
+
+      Links repeated measurements over time to survival endpoints for dynamic
+      risk
+
+      prediction and personalized medicine applications.
+  - title: Time-Dependent Covariates & ROC Analysis
+    name: timedependent
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Advanced Survival
+    menuTitle: Time-Dependent Covariates & ROC Analysis
+    menuSubtitle: Dynamic Effects and Time-Varying Predictions
+    description: >
+      Analysis of time-dependent covariates and time-varying ROC curves for
+      survival data.
+
+      Handles covariates that change over time, landmark analysis, and dynamic
+      prediction
+
+      accuracy assessment through time-dependent AUC and optimal cutpoint
+      selection.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

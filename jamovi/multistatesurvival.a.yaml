@@ -1,0 +1,318 @@
+---
+name: multistatesurvival
+title: Multistate Survival Models
+menuGroup: SurvivalD
+menuSubgroup: Advanced Survival
+menuSubtitle: 'Disease Progression and Transition Modeling'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Multistate models for analyzing disease progression through multiple states.
+        Implements transition probabilities, state occupation probabilities, and 
+        competing transitions for complex disease pathways in clinical research.
+    R:
+        dontrun: true
+        usage: |
+            # Example: Cancer progression model
+            # States: Diagnosis -> Remission -> Relapse -> Death
+            #                   -> Death (direct)
+            multistatesurvival(
+                data = cancer_data,
+                id = patient_id,
+                time = follow_up_time,
+                state = disease_state,
+                covariates = c(age, stage, treatment)
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: id
+      title: 'Patient ID'
+      type: Variable
+      suggested: [ id ]
+      permitted: [ id, factor, numeric ]
+      description:
+          ui: >
+            Unique patient identifier variable
+          R: >
+            Patient ID variable for tracking individuals
+
+    - name: time_start
+      title: 'Start Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Start time for each transition (0 for initial state)
+          R: >
+            Start time of observation period
+
+    - name: time_stop
+      title: 'Stop Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Stop time for each transition (event or censoring time)
+          R: >
+            End time of observation period
+
+    - name: state_from
+      title: 'From State'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Starting state for each transition
+          R: >
+            State at beginning of interval
+
+    - name: state_to
+      title: 'To State'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Ending state for each transition (or censored)
+          R: >
+            State at end of interval
+
+    - name: covariates
+      title: 'Covariates'
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Covariates affecting transition probabilities
+          R: >
+            Variables influencing state transitions
+
+    - name: model_type
+      title: 'Model Type'
+      type: List
+      options:
+        - title: Markov Model
+          name: markov
+        - title: Semi-Markov Model
+          name: semimarkov
+        - title: Clock-Reset Model
+          name: clock_reset
+        - title: Clock-Forward Model
+          name: clock_forward
+      default: markov
+      description:
+          ui: >
+            Type of multistate model (Markov assumes transitions depend only on current state)
+          R: >
+            Multistate model type specification
+
+    - name: transition_matrix
+      title: 'Define Transition Matrix'
+      type: String
+      default: "auto"
+      description:
+          ui: >
+            Define allowed transitions (auto detects from data, or specify as "1,2;1,3;2,3")
+          R: >
+            Transition matrix specification
+
+    - name: state_names
+      title: 'State Names'
+      type: String
+      default: ""
+      description:
+          ui: >
+            Names for states (comma-separated, e.g., "Healthy,Disease,Death")
+          R: >
+            Custom names for model states
+
+    - name: initial_state
+      title: 'Initial State'
+      type: String
+      default: "1"
+      description:
+          ui: >
+            Initial state for all subjects (name or number)
+          R: >
+            Starting state specification
+
+    - name: absorbing_states
+      title: 'Absorbing States'
+      type: String
+      default: ""
+      description:
+          ui: >
+            Absorbing (terminal) states (comma-separated)
+          R: >
+            States from which no transitions occur
+
+    # Analysis Options
+    - name: transition_probabilities
+      title: 'Calculate Transition Probabilities'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate probability of transitioning between states
+          R: >
+            Compute transition probability matrix
+
+    - name: state_probabilities
+      title: 'State Occupation Probabilities'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate probability of being in each state over time
+          R: >
+            Compute state occupation probabilities
+
+    - name: sojourn_times
+      title: 'Expected Sojourn Times'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate expected time spent in each state
+          R: >
+            Compute mean sojourn times
+
+    - name: hazard_ratios
+      title: 'Transition Hazard Ratios'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate hazard ratios for each transition
+          R: >
+            Compute transition-specific hazard ratios
+
+    - name: prediction_times
+      title: 'Prediction Time Points'
+      type: String
+      default: "6,12,24,60"
+      description:
+          ui: >
+            Time points (months) for predictions (comma-separated)
+          R: >
+            Times at which to evaluate probabilities
+
+    # Visualization Options
+    - name: plot_transitions
+      title: 'Plot Transition Diagram'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display state transition diagram
+          R: >
+            Generate transition diagram plot
+
+    - name: plot_probabilities
+      title: 'Plot State Probabilities'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display state occupation probability curves over time
+          R: >
+            Generate probability curves
+
+    - name: plot_cumhazard
+      title: 'Plot Cumulative Hazards'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display cumulative hazard plots for each transition
+          R: >
+            Generate cumulative hazard plots
+
+    - name: plot_individual
+      title: 'Individual Predictions'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Generate predictions for specific individuals
+          R: >
+            Create individual-level predictions
+
+    # Advanced Options
+    - name: competing_risks
+      title: 'Account for Competing Risks'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Properly handle competing transitions from same state
+          R: >
+            Use competing risks framework
+
+    - name: time_varying
+      title: 'Time-Varying Covariates'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Allow covariates to change over time
+          R: >
+            Include time-varying effects
+
+    - name: stratified
+      title: 'Stratified Analysis'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Stratify analysis by this variable
+          R: >
+            Stratification variable
+
+    - name: confidence_level
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          ui: >
+            Confidence level for intervals
+          R: >
+            Confidence interval level
+
+    - name: bootstrap_ci
+      title: 'Bootstrap Confidence Intervals'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Use bootstrap for confidence intervals
+          R: >
+            Bootstrap-based inference
+
+    - name: n_bootstrap
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          ui: >
+            Number of bootstrap samples
+          R: >
+            Bootstrap iterations
+
+...

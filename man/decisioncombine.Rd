@@ -14,13 +14,7 @@ decisioncombine(
   test2Positive,
   test3,
   test3Positive,
-  combRule = "any",
-  pp = FALSE,
-  pprob = 0.3,
   od = FALSE,
-  fnote = FALSE,
-  ci = FALSE,
-  fagan = FALSE,
   showIndividual = TRUE
 )
 }
@@ -43,24 +37,8 @@ decisioncombine(
 
 \item{test3Positive}{.}
 
-\item{combRule}{Rule for combining test results. "any" means positive if
-any test is positive (OR), "all" means positive only if all tests are
-positive (AND), and "majority" means positive if more than half of tests
-are positive.}
-
-\item{pp}{.}
-
-\item{pprob}{Prior probability (disease prevalence in the community).
-Requires a value between 0.001 and 0.999, default 0.300.}
-
 \item{od}{Boolean selection whether to show frequency tables. Default is
 'false'.}
-
-\item{fnote}{.}
-
-\item{ci}{.}
-
-\item{fagan}{.}
 
 \item{showIndividual}{.}
 }
@@ -69,39 +47,33 @@ A results object containing:
 \tabular{llllll}{
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
-\code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$indTable1} \tab \tab \tab \tab \tab a table \cr
 \code{results$indTable2} \tab \tab \tab \tab \tab a table \cr
 \code{results$indTable3} \tab \tab \tab \tab \tab a table \cr
-\code{results$nTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
-\code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
-\code{results$plot1} \tab \tab \tab \tab \tab an image \cr
+\code{results$combinationsAnalysis} \tab \tab \tab \tab \tab Comprehensive analysis of all possible test combinations \cr
+\code{results$combStatsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$combStatsTableCI} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$cTable$asDF}
+\code{results$indTable1$asDF}
 
-\code{as.data.frame(results$cTable)}
+\code{as.data.frame(results$indTable1)}
 }
 \description{
-Combines multiple medical diagnostic tests and evaluates their collective
-performance using different combination rules. This function is essential
-for optimizing diagnostic accuracy when multiple tests are available for
-the same condition. Supports OR logic (positive if any test is positive),
-AND logic (positive only if all tests are positive), and majority rule
-(positive if more than half of tests are positive). Calculates
-comprehensive
-diagnostic performance metrics including sensitivity, specificity, positive
-and negative predictive values, likelihood ratios, and post-test
-probabilities
-for the combined test strategy. Useful for developing optimal test panels
-and understanding how multiple diagnostic tests perform together.
+Analyzes and compares multiple medical diagnostic tests by examining all
+possible test result combinations. This function evaluates how different
+patterns of positive and negative test results perform against a gold
+standard, helping clinicians understand which test combinations are most
+informative. Shows individual test performance and comprehensive analysis
+of all possible test result patterns (e.g., +/+, +/-, -/+, -/-) with
+their respective positive predictive values and clinical interpretation.
+Essential for understanding test interactions and optimizing diagnostic
+strategies when multiple tests are available for the same condition.
 }
 \examples{
-# Basic two-test combination with OR rule
+# Analyze two-test combinations
 result1 <- decisioncombine(
   data = histopathology,
   gold = "Golden Standart",
@@ -110,12 +82,10 @@ result1 <- decisioncombine(
   test1Positive = "1",
   test2 = "Rater 1",
   test2Positive = "1",
-  test3 = NULL,
-  test3Positive = NULL,
-  combRule = "any"
+  showCombinations = TRUE
 )
 
-# Three-test combination with AND rule
+# Analyze three-test combinations
 result2 <- decisioncombine(
   data = histopathology,
   gold = "Golden Standart",
@@ -126,8 +96,8 @@ result2 <- decisioncombine(
   test2Positive = "1",
   test3 = "Rater 2",
   test3Positive = "1",
-  combRule = "all",
-  ci = TRUE, fagan = TRUE
+  showIndividual = TRUE,
+  showCombinations = TRUE
 )
 
 }

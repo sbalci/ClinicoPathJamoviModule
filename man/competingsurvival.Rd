@@ -13,7 +13,12 @@ competingsurvival(
   dooc,
   awd,
   awod,
-  analysistype = "overall"
+  analysistype = "overall",
+  graystest = TRUE,
+  subdistribution = TRUE,
+  timepoints = "12,24,36,60",
+  confidencelevel = 0.95,
+  showrisksets = TRUE
 )
 }
 \arguments{
@@ -34,6 +39,21 @@ competingsurvival(
 \item{awod}{.}
 
 \item{analysistype}{.}
+
+\item{graystest}{Perform Gray's test to compare cumulative incidence
+functions between groups}
+
+\item{subdistribution}{Use Fine-Gray subdistribution hazard model for
+competing risks regression}
+
+\item{timepoints}{Comma-separated time points (in months) for cumulative
+incidence estimates}
+
+\item{confidencelevel}{Confidence level for hazard ratio confidence
+intervals}
+
+\item{showrisksets}{Display number at risk table below cumulative incidence
+plot}
 }
 \value{
 A results object containing:

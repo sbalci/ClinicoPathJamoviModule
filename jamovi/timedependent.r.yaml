@@ -1,0 +1,398 @@
+---
+name: timedependent
+title: Time-Dependent Covariates & ROC Analysis
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis Instructions
+      type: Html
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - model_type
+
+    - name: model_summary
+      title: Model Summary
+      type: Html
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - model_type
+          - time_transform
+
+    - name: cox_results
+      title: Cox Regression Results
+      type: Table
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - model_type
+      columns:
+          - name: term
+            title: Term
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+            format: dp:3
+          - name: se
+            title: SE
+            type: number
+            format: dp:3
+          - name: statistic
+            title: Z
+            type: number
+            format: dp:3
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+          - name: conf_low
+            title: Lower CI
+            type: number
+            format: dp:3
+          - name: conf_high
+            title: Upper CI
+            type: number
+            format: dp:3
+          - name: hr
+            title: HR
+            type: number
+            format: dp:3
+
+    - name: time_varying_effects
+      title: Time-Varying Coefficients Test
+      type: Table
+      visible: (test_proportional_hazards)
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - test_proportional_hazards
+          - schoenfeld_transform
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: chisq
+            title: Chi-square
+            type: number
+            format: dp:3
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: landmark_results
+      title: Landmark Analysis Results
+      type: Table
+      visible: (perform_landmark)
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - perform_landmark
+          - landmark_times
+      columns:
+          - name: landmark_time
+            title: Landmark Time
+            type: number
+            format: dp:1
+          - name: n_at_risk
+            title: N at Risk
+            type: integer
+          - name: variable
+            title: Variable
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+            format: dp:3
+          - name: hr
+            title: HR
+            type: number
+            format: dp:3
+          - name: conf_low
+            title: Lower CI
+            type: number
+            format: dp:3
+          - name: conf_high
+            title: Upper CI
+            type: number
+            format: dp:3
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+
+    - name: roc_results
+      title: Time-Dependent ROC Results
+      type: Table
+      visible: (time_dependent_roc)
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - time_dependent_roc
+          - roc_times
+          - roc_method
+      columns:
+          - name: time_point
+            title: Time Point
+            type: number
+            format: dp:1
+          - name: variable
+            title: Variable
+            type: text
+          - name: auc
+            title: AUC
+            type: number
+            format: dp:3
+          - name: auc_lower
+            title: AUC Lower CI
+            type: number
+            format: dp:3
+          - name: auc_upper
+            title: AUC Upper CI
+            type: number
+            format: dp:3
+          - name: optimal_cutpoint
+            title: Optimal Cutpoint
+            type: number
+            format: dp:3
+          - name: sensitivity
+            title: Sensitivity
+            type: number
+            format: dp:3
+          - name: specificity
+            title: Specificity
+            type: number
+            format: dp:3
+
+    - name: model_comparison
+      title: Model Comparison
+      type: Table
+      visible: (compare_models)
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - compare_models
+          - comparison_metric
+      columns:
+          - name: model
+            title: Model
+            type: text
+          - name: metric_value
+            title: Metric Value
+            type: number
+            format: dp:4
+          - name: se
+            title: SE
+            type: number
+            format: dp:4
+          - name: improvement
+            title: Improvement
+            type: number
+            format: dp:4
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+
+    - name: validation_results
+      title: Validation Results
+      type: Table
+      visible: (internal_validation)
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - internal_validation
+          - cv_folds
+      columns:
+          - name: time_point
+            title: Time Point
+            type: number
+            format: dp:1
+          - name: apparent_auc
+            title: Apparent AUC
+            type: number
+            format: dp:3
+          - name: optimism
+            title: Optimism
+            type: number
+            format: dp:3
+          - name: corrected_auc
+            title: Corrected AUC
+            type: number
+            format: dp:3
+          - name: cv_auc
+            title: CV AUC
+            type: number
+            format: dp:3
+          - name: cv_se
+            title: CV SE
+            type: number
+            format: dp:3
+
+    # Plots
+    - name: time_varying_plot
+      title: Time-Varying Effects
+      type: Image
+      visible: (plot_time_varying_effects)
+      width: 600
+      height: 400
+      renderFun: .plot_time_varying
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - plot_time_varying_effects
+
+    - name: roc_curves_plot
+      title: Time-Dependent ROC Curves
+      type: Image
+      visible: (plot_roc_curves)
+      width: 600
+      height: 400
+      renderFun: .plot_roc_curves
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - time_dependent_roc
+          - plot_roc_curves
+
+    - name: auc_trajectory_plot
+      title: AUC Over Time
+      type: Image
+      visible: (plot_auc_trajectory)
+      width: 600
+      height: 400
+      renderFun: .plot_auc_trajectory
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - time_dependent_roc
+          - plot_auc_trajectory
+
+    - name: cutpoint_stability_plot
+      title: Optimal Cutpoints Over Time
+      type: Image
+      visible: (plot_cutpoint_stability)
+      width: 600
+      height: 400
+      renderFun: .plot_cutpoint_stability
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - optimal_cutpoint
+          - plot_cutpoint_stability
+
+    - name: landmark_predictions_plot
+      title: Landmark Predictions
+      type: Image
+      visible: (plot_landmark_predictions)
+      width: 600
+      height: 400
+      renderFun: .plot_landmark_predictions
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - perform_landmark
+          - plot_landmark_predictions
+
+    - name: schoenfeld_plot
+      title: Schoenfeld Residuals
+      type: Image
+      visible: (plot_schoenfeld_residuals)
+      width: 600
+      height: 400
+      renderFun: .plot_schoenfeld_residuals
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - test_proportional_hazards
+          - plot_schoenfeld_residuals
+
+    # Interpretation
+    - name: interpretation
+      title: Clinical Interpretation
+      type: Html
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - model_type
+
+    - name: recommendations
+      title: Clinical Recommendations
+      type: Html
+      clearWith:
+          - id
+          - start_time
+          - stop_time
+          - event
+          - time_dependent_vars
+          - baseline_vars
+          - model_type

@@ -59,7 +59,8 @@
       "WebFetch(domain:tidymodels.org)",
       "WebFetch(domain:rpubs.com)",
       "WebFetch(domain:bookdown.org)",
-      "WebFetch(domain:pmc.ncbi.nlm.nih.gov)"
+      "WebFetch(domain:pmc.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": []
   }

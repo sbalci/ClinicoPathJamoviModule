@@ -1,0 +1,264 @@
+---
+name:  relativesurvival
+title: Relative Survival Analysis
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - time
+          - status
+          - age
+          - sex
+          - year
+
+    - name:  summary
+      title: Analysis Summary
+      type:  Html
+      visible: true
+
+    - name:  survivalTable
+      title: Survival Estimates by Time
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: observed
+            title: 'Observed Survival'
+            type: number
+          - name: expected
+            title: 'Expected Survival'
+            type: number
+          - name: relative
+            title: 'Relative Survival'
+            type: number
+          - name: rel_ci_lower
+            title: 'RS CI Lower'
+            type: number
+          - name: rel_ci_upper
+            title: 'RS CI Upper'
+            type: number
+
+    - name:  netSurvivalTable
+      title: Net Survival Estimates
+      type:  Table
+      visible: (net_survival)
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: net_survival
+            title: 'Net Survival'
+            type: number
+          - name: net_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: net_ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: standard_error
+            title: 'Std. Error'
+            type: number
+
+    - name:  excessMortalityTable
+      title: Excess Mortality Rates
+      type:  Table
+      visible: (excess_mortality)
+      rows: 1
+      columns:
+          - name: time_interval
+            title: 'Time Interval'
+            type: text
+          - name: excess_hazard
+            title: 'Excess Hazard'
+            type: number
+          - name: hazard_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: hazard_ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name:  crudeProbTable
+      title: Crude Probability of Death
+      type:  Table
+      visible: (crude_probability)
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: disease_death
+            title: 'Disease Death'
+            type: number
+          - name: other_death
+            title: 'Other Causes Death'
+            type: number
+          - name: disease_ci_lower
+            title: 'Disease CI Lower'
+            type: number
+          - name: disease_ci_upper
+            title: 'Disease CI Upper'
+            type: number
+
+    - name:  regressionTable
+      title: Regression Model Results
+      type:  Table
+      visible: (!regression_model:none)
+      rows: 1
+      columns:
+          - name: variable
+            title: 'Variable'
+            type: text
+          - name: coefficient
+            title: 'Coefficient'
+            type: number
+          - name: std_error
+            title: 'Std. Error'
+            type: number
+          - name: z_value
+            title: 'z-value'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: coef_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: coef_ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  observedPlot
+      title: Observed Survival
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotObserved
+      visible: (plot_observed)
+      clearWith:
+          - time
+          - status
+          - covariates
+
+    - name:  expectedPlot
+      title: Expected Survival
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotExpected
+      visible: (plot_expected)
+      clearWith:
+          - age
+          - sex
+          - year
+          - ratetable
+
+    - name:  relativePlot
+      title: Relative Survival
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotRelative
+      visible: (plot_relative)
+      clearWith:
+          - time
+          - status
+          - age
+          - sex
+          - year
+          - method
+
+    - name:  excessPlot
+      title: Excess Mortality
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotExcess
+      visible: (plot_excess)
+      clearWith:
+          - time
+          - status
+          - age
+          - sex
+          - year
+          - method
+
+    - name:  ageStandardizedTable
+      title: Age-Standardized Survival
+      type:  Table
+      visible: (age_standardized)
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: crude_rate
+            title: 'Crude Rate'
+            type: number
+          - name: age_adjusted
+            title: 'Age-Adjusted Rate'
+            type: number
+          - name: adj_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: adj_ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  periodAnalysisTable
+      title: Period Analysis Results
+      type:  Table
+      visible: (period_analysis)
+      rows: 1
+      columns:
+          - name: period
+            title: 'Period'
+            type: text
+          - name: n_patients
+            title: 'N Patients'
+            type: integer
+          - name: rel_survival_5y
+            title: '5-Year RS'
+            type: number
+          - name: rs_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: rs_ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  modelFit
+      title: Model Fit Statistics
+      type:  Table
+      visible: (!regression_model:none)
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  interpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: true
+
+...

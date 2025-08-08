@@ -9,15 +9,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
         inherit = decisioncombineBase,
         private = list(
             .init = function() {
-                cTable <- self$results$cTable
-
-                cTable$addRow(rowKey = "Test Positive",
-                              values = list(newtest = "Test Positive"))
-
-                cTable$addRow(rowKey = "Test Negative",
-                              values = list(newtest = "Test Negative"))
-
-                cTable$addRow(rowKey = "Total", values = list(newtest = "Total"))
+                # Initialization - no cTable needed anymore
             },
 
             .run = function() {
@@ -196,364 +188,214 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                                 )
                             )
 
-                            # Add footnotes if requested
-                            if (self$options$fnote) {
-                                indTable$addFootnote(rowKey = "Test Positive",
-                                                     col = "GP",
-                                                     "True Positive (TP)")
-                                indTable$addFootnote(rowKey = "Test Positive",
-                                                     col = "GN",
-                                                     "False Positive (FP)")
-                                indTable$addFootnote(rowKey = "Test Negative",
-                                                     col = "GP",
-                                                     "False Negative (FN)")
-                                indTable$addFootnote(rowKey = "Test Negative",
-                                                     col = "GN",
-                                                     "True Negative (TN)")
-                            }
                         }
                     }
                 }
 
-                # Combine test results according to the rule
-                binary_cols <- paste0(testVariables, "_bin")
-                combRule <- self$options$combRule
+                # No combination logic - just analyze all test patterns
 
-                if (combRule == "any") {
-                    # OR rule: positive if any test is positive
-                    mydata2 <- mydata2 %>%
-                        dplyr::mutate(combined_result = dplyr::case_when(
-                            rowSums(dplyr::across(dplyr::all_of(
-                                binary_cols
-                            ))) > 0 ~ "Positive",
-                            TRUE ~ "Negative"
-                        ))
-                } else if (combRule == "all") {
-                    # AND rule: positive only if all tests are positive
-                    mydata2 <- mydata2 %>%
-                        dplyr::mutate(
-                            combined_result = dplyr::case_when(
-                                rowSums(dplyr::across(dplyr::all_of(
-                                    binary_cols
-                                ))) == length(testVariables) ~ "Positive",
-                                TRUE ~ "Negative"
-                            )
-                        )
-                } else if (combRule == "majority") {
-                    # Majority rule: positive if more than half of tests are positive
-                    mydata2 <- mydata2 %>%
-                        dplyr::mutate(
-                            combined_result = dplyr::case_when(
-                                rowSums(dplyr::across(dplyr::all_of(
-                                    binary_cols
-                                ))) > length(testVariables) / 2 ~ "Positive",
-                                TRUE ~ "Negative"
-                            )
-                        )
+                # Add comprehensive test combination analysis
+                if (length(testVariables) >= 2) {
+                    private$.analyzeCombinations(mydata2, testVariables, goldVariable)
                 }
 
-                mydata2 <- mydata2 %>%
-                    dplyr::mutate(combined_result = forcats::fct_relevel(combined_result, "Positive"))
-
-                # Create contingency table for combined test
-                conf_table <- table(mydata2[["combined_result"]], mydata2[["goldVariable2"]])
-
-                # Extract values
-                TP <- conf_table[1, 1]
-                FP <- conf_table[1, 2]
-                FN <- conf_table[2, 1]
-                TN <- conf_table[2, 2]
-
-                # Populate main contingency table
-                cTable <- self$results$cTable
-
-                cTable$setRow(
-                    rowKey = "Test Positive",
-                    values = list(
-                        newtest = "Test Positive",
-                        GP = TP,
-                        GN = FP,
-                        Total = TP + FP
-                    )
-                )
-
-                cTable$setRow(
-                    rowKey = "Test Negative",
-                    values = list(
-                        newtest = "Test Negative",
-                        GP = FN,
-                        GN = TN,
-                        Total = FN + TN
-                    )
-                )
-
-                cTable$setRow(
-                    rowKey = "Total",
-                    values = list(
-                        newtest = "Total",
-                        GP = TP + FN,
-                        GN = FP + TN,
-                        Total = TP + FP + FN + TN
-                    )
-                )
-
-                # Add footnotes to main contingency table if requested
-                if (self$options$fnote) {
-                    cTable$addFootnote(rowKey = "Test Positive",
-                                       col = "GP",
-                                       "True Positive (TP)")
-                    cTable$addFootnote(rowKey = "Test Positive",
-                                       col = "GN",
-                                       "False Positive (FP)")
-                    cTable$addFootnote(rowKey = "Test Negative",
-                                       col = "GP",
-                                       "False Negative (FN)")
-                    cTable$addFootnote(rowKey = "Test Negative",
-                                       col = "GN",
-                                       "True Negative (TN)")
-                }
-
-                # Calculate metrics
-                TotalPop <- TP + TN + FP + FN
-                DiseaseP <- TP + FN
-                DiseaseN <- TN + FP
-                TestP <- TP + FP
-                TestN <- TN + FN
-                TestT <- TP + TN
-                TestW <- FP + FN
-
-                Sens <- TP /
-                    DiseaseP
-                Spec <- TN /
-                    DiseaseN
-                AccurT <- TestT /
-                    TotalPop
-                PrevalenceD <- DiseaseP /
-                    TotalPop
-                PPV <- TP /
-                    TestP
-                NPV <- TN /
-                    TestN
-
-                pp <- self$options$pp
-                pprob <- self$options$pprob
-
-                if (pp) {
-                    # Known prior probability from population
-                    PriorProb <- pprob
-                } else {
-                    # From ConfusionMatrix
-                    PriorProb <- PrevalenceD
-                }
-
-                PostTestProbDisease <- (PriorProb * Sens) /
-                    ((PriorProb * Sens) + ((1 - PriorProb) * (1 - Spec)))
-                PostTestProbHealthy <- ((1 - PriorProb) * Spec) /
-                    (((1 - PriorProb) * Spec) + (PriorProb * (1 - Sens)))
-
-                LRP <- Sens / (1 - Spec)
-                LRN <- (1 - Sens) / Spec
-
-                # nTable Populate Table ----
-                nTable <- self$results$nTable
-                nTable$setRow(
-                    rowNo = 1,
-                    values = list(
-                        tablename = "n",
-                        TotalPop = TotalPop,
-                        DiseaseP = DiseaseP,
-                        DiseaseN = DiseaseN,
-                        TestP = TestP,
-                        TestN = TestN,
-                        TestT = TestT,
-                        TestW = TestW
-                    )
-                )
-
-                # ratioTable Populate Table ----
-                ratioTable <- self$results$ratioTable
-                ratioTable$setRow(
-                    rowNo = 1,
-                    values = list(
-                        tablename = "Ratios",
-                        Sens = Sens,
-                        Spec = Spec,
-                        AccurT = AccurT,
-                        PrevalenceD = PriorProb,
-                        PPV = PPV,
-                        NPV = NPV,
-                        PostTestProbDisease = PostTestProbDisease,
-                        PostTestProbHealthy = PostTestProbHealthy,
-                        LRP = LRP,
-                        LRN = LRN
-                    )
-                )
-
-                # Add footnotes if requested
-                if (self$options$fnote) {
-                    # nTable footnotes
-                    nTable$addFootnote(rowNo = 1,
-                                       col = "TotalPop",
-                                       "Total Number of Subjects")
-                    nTable$addFootnote(rowNo = 1,
-                                       col = "DiseaseP",
-                                       "Total Number of Subjects with Disease")
-                    nTable$addFootnote(rowNo = 1,
-                                       col = "DiseaseN",
-                                       "Total Number of Healthy Subjects")
-                    nTable$addFootnote(rowNo = 1,
-                                       col = "TestP",
-                                       "Total Number of Positive Tests")
-                    nTable$addFootnote(rowNo = 1,
-                                       col = "TestN",
-                                       "Total Number of Negative Tests")
-                    nTable$addFootnote(rowNo = 1,
-                                       col = "TestT",
-                                       "Total Number of True Test Results")
-                    nTable$addFootnote(rowNo = 1,
-                                       col = "TestW",
-                                       "Total Number of Wrong Test Results")
-
-                    # ratioTable footnotes
-                    ratioTable$addFootnote(
-                        rowNo = 1,
-                        col = "Sens",
-                        "Sensitivity (True Positives among Diseased)"
-                    )
-                    ratioTable$addFootnote(
-                        rowNo = 1,
-                        col = "Spec",
-                        "Specificity (True Negatives among Healthy)"
-                    )
-                    ratioTable$addFootnote(rowNo = 1,
-                                           col = "AccurT",
-                                           "Accuracy (True Test Result Ratio)")
-                    ratioTable$addFootnote(rowNo = 1,
-                                           col = "PrevalenceD",
-                                           "Disease Prevalence in this population")
-                    ratioTable$addFootnote(
-                        rowNo = 1,
-                        col = "PPV",
-                        "Positive Predictive Value (Probability of having disease after a positive test using this experimental population)"
-                    )
-                    ratioTable$addFootnote(
-                        rowNo = 1,
-                        col = "NPV",
-                        "Negative Predictive Value (Probability of being healthy after a negative test using this experimental population)"
-                    )
-                    ratioTable$addFootnote(
-                        rowNo = 1,
-                        col = "PostTestProbDisease",
-                        "Post-test Probability of Having Disease (Probability of having disease after a positive test using known Population Prevalence)"
-                    )
-                    ratioTable$addFootnote(
-                        rowNo = 1,
-                        col = "PostTestProbHealthy",
-                        "Post-test Probability of Being Healthy (Probability of being healthy after a negative test using known Population Prevalence)"
-                    )
-                }
-
-                # Calculate confidence intervals if requested
-                if (self$options$ci) {
-                    # epiR calculations
-                    epirresult <- epiR::epi.tests(dat = conf_table)
-                    epirresult2 <- summary(epirresult)
-                    epirresult2 <- as.data.frame(epirresult2) %>%
-                        tibble::rownames_to_column(.data = ., var = 'statsabv')
-
-                    epirresult2$statsnames <-
-                        c(
-                            "Apparent prevalence",
-                            "True prevalence",
-                            "Test sensitivity",
-                            "Test specificity",
-                            "Diagnostic accuracy",
-                            "Diagnostic odds ratio",
-                            "Number needed to diagnose",
-                            "Youden's index",
-                            "Positive predictive value",
-                            "Negative predictive value",
-                            "Likelihood ratio of a positive test",
-                            "Likelihood ratio of a negative test",
-                            "Proportion of subjects with the outcome ruled out",
-                            "Proportion of subjects with the outcome ruled in",
-                            "Proportion of false positives",
-                            "Proportion of false negative",
-                            "False Discovery Rate",
-                            "False Omission Rate"
-                        )
-
-                    ratiorows <- c(
-                        "ap",
-                        "tp",
-                        "se",
-                        "sp",
-                        "diag.ac",
-                        "pv.pos",
-                        "pv.neg",
-                        "p.tpdn",
-                        "p.tndp",
-                        "p.dntp",
-                        "p.dptn"
-                    )
-
-                    numberrows <- c("diag.or", "nndx", "youden", "lr.pos", "lr.neg")
-
-                    epirresult_number <- epirresult2[epirresult2$statistic %in% numberrows, ]
-                    epirresult_ratio <- epirresult2[epirresult2$statistic %in% ratiorows, ]
-
-                    # epirTable_ratio
-                    epirTable_ratio <- self$results$epirTable_ratio
-                    data_frame <- epirresult_ratio
-                    for (i in seq_along(data_frame[, 1, drop =
-                                                   T])) {
-                        epirTable_ratio$addRow(rowKey = i,
-                                               values = c(data_frame[i, ]))
-                    }
-
-                    # epirTable_number
-                    epirTable_number <- self$results$epirTable_number
-                    data_frame <- epirresult_number
-                    for (i in seq_along(data_frame[, 1, drop =
-                                                   T])) {
-                        epirTable_number$addRow(rowKey = i,
-                                                values = c(data_frame[i, ]))
-                    }
-                }
-
-                # Set data for Fagan nomogram if requested
-                if (self$options$fagan) {
-                    plotData1 <- list(
-                        "Prevalence" = PriorProb,
-                        "Sens" = Sens,
-                        "Spec" = Spec,
-                        "Plr" = LRP,
-                        "Nlr" = LRN
-                    )
-
-                    image1 <- self$results$plot1
-                    image1$setState(plotData1)
-                }
+                # End of analysis - individual tests and combinations provide all needed information
             },
 
-            .plot1 = function(image1, ggtheme, ...) {
-                plotData1 <- image1$state
-
-                plot1 <- nomogrammer(
-                    Prevalence = plotData1$Prevalence,
-                    Sens = plotData1$Sens,
-                    Spec = plotData1$Spec,
-                    Plr = plotData1$Plr,
-                    Nlr = plotData1$Nlr,
-                    Detail = TRUE,
-                    NullLine = TRUE,
-                    LabelSize = (14 /
-                                     5),
-                    Verbose = TRUE
-                )
-
-                print(plot1)
-                TRUE
+            .analyzeCombinations = function(mydata2, testVariables, goldVariable) {
+                # Comprehensive analysis of all test combinations with full diagnostic statistics
+                if (length(testVariables) < 2) return()
+                
+                # Helper function to calculate diagnostic statistics with CI
+                calcDiagStats <- function(tp, fp, fn, tn) {
+                    total_pos <- tp + fn  # Total diseased
+                    total_neg <- fp + tn  # Total healthy
+                    total_test_pos <- tp + fp  # Total test positive
+                    total_test_neg <- fn + tn  # Total test negative
+                    total <- tp + fp + fn + tn
+                    
+                    # Calculate basic statistics
+                    sens <- if(total_pos > 0) tp / total_pos else NA
+                    spec <- if(total_neg > 0) tn / total_neg else NA
+                    ppv <- if(total_test_pos > 0) tp / total_test_pos else NA
+                    npv <- if(total_test_neg > 0) tn / total_test_neg else NA
+                    acc <- if(total > 0) (tp + tn) / total else NA
+                    
+                    # Calculate 95% CI using Wilson score interval
+                    calcCI <- function(x, n) {
+                        if (is.na(x) || n == 0) return(c(NA, NA))
+                        p <- x / n
+                        z <- 1.96  # 95% CI
+                        denominator <- 1 + (z^2 / n)
+                        centre <- (p + (z^2 / (2 * n))) / denominator
+                        half_width <- z * sqrt((p * (1 - p) / n) + (z^2 / (4 * n^2))) / denominator
+                        c(max(0, centre - half_width), min(1, centre + half_width))
+                    }
+                    
+                    sens_ci <- calcCI(tp, total_pos)
+                    spec_ci <- calcCI(tn, total_neg) 
+                    ppv_ci <- calcCI(tp, total_test_pos)
+                    npv_ci <- calcCI(tn, total_test_neg)
+                    acc_ci <- calcCI(tp + tn, total)
+                    
+                    list(
+                        sens = sens, spec = spec, ppv = ppv, npv = npv, acc = acc,
+                        sens_ci = sens_ci, spec_ci = spec_ci, ppv_ci = ppv_ci, 
+                        npv_ci = npv_ci, acc_ci = acc_ci
+                    )
+                }
+                
+                # Get gold standard totals
+                gold_table <- table(mydata2$goldVariable2)
+                total_positive_gold <- gold_table["Positive"]
+                total_negative_gold <- gold_table["Negative"]
+                
+                # Determine patterns based on number of tests
+                if (length(testVariables) == 2) {
+                    test1 <- testVariables[1]
+                    test2 <- testVariables[2]
+                    test1_bin <- paste0(test1, "_bin")
+                    test2_bin <- paste0(test2, "_bin")
+                    
+                    # Create combination patterns
+                    mydata2 <- mydata2 %>%
+                        dplyr::mutate(
+                            combination_pattern = dplyr::case_when(
+                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 1 ~ "+/+",
+                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 0 ~ "+/-",  
+                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 1 ~ "-/+",
+                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 0 ~ "-/-",
+                                TRUE ~ "Unknown"
+                            )
+                        )
+                    
+                    patterns <- c("+/+", "+/-", "-/+", "-/-")
+                    descriptions <- c(
+                        "Both tests positive", 
+                        paste(test1, "positive,", test2, "negative"),
+                        paste(test1, "negative,", test2, "positive"), 
+                        "Both tests negative"
+                    )
+                    
+                } else if (length(testVariables) == 3) {
+                    test1 <- testVariables[1]
+                    test2 <- testVariables[2]
+                    test3 <- testVariables[3]
+                    test1_bin <- paste0(test1, "_bin")
+                    test2_bin <- paste0(test2, "_bin")
+                    test3_bin <- paste0(test3, "_bin")
+                    
+                    # Create combination patterns
+                    mydata2 <- mydata2 %>%
+                        dplyr::mutate(
+                            combination_pattern = dplyr::case_when(
+                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 1 & .data[[test3_bin]] == 1 ~ "+/+/+",
+                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 1 & .data[[test3_bin]] == 0 ~ "+/+/-",
+                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 0 & .data[[test3_bin]] == 1 ~ "+/-/+",
+                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 0 & .data[[test3_bin]] == 0 ~ "+/-/-",
+                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 1 & .data[[test3_bin]] == 1 ~ "-/+/+",
+                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 1 & .data[[test3_bin]] == 0 ~ "-/+/-",
+                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 0 & .data[[test3_bin]] == 1 ~ "-/-/+",
+                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 0 & .data[[test3_bin]] == 0 ~ "-/-/-",
+                                TRUE ~ "Unknown"
+                            )
+                        )
+                    
+                    patterns <- c("+/+/+", "+/+/-", "+/-/+", "+/-/-", "-/+/+", "-/+/-", "-/-/+", "-/-/-")
+                    
+                    # Create descriptive names
+                    descriptions <- c()
+                    for (pattern in patterns) {
+                        test_results <- strsplit(pattern, "/")[[1]]
+                        desc_parts <- c()
+                        for (i in seq_along(test_results)) {
+                            test_name <- testVariables[i]
+                            result <- if (test_results[i] == "+") "positive" else "negative"
+                            desc_parts <- c(desc_parts, paste(test_name, result))
+                        }
+                        descriptions <- c(descriptions, paste(desc_parts, collapse = ", "))
+                    }
+                }
+                
+                # Calculate statistics for each combination
+                combo_table <- table(mydata2$combination_pattern, mydata2$goldVariable2)
+                
+                # Create HTML summary
+                num_tests <- length(testVariables)
+                test_names <- paste(testVariables, collapse = ", ")
+                summary_html <- paste0("<h4>Test Combination Patterns (", num_tests, " Tests)</h4>")
+                summary_html <- paste0(summary_html, "<p>Analysis of all possible combinations of <b>", test_names, "</b>:</p>")
+                
+                # Populate diagnostic statistics tables
+                for (i in seq_along(patterns)) {
+                    pattern <- patterns[i]
+                    description <- descriptions[i]
+                    
+                    if (pattern %in% rownames(combo_table)) {
+                        # For each combination pattern, treat it as a "test" vs gold standard
+                        # TP: Pattern present AND disease present
+                        # FP: Pattern present AND disease absent
+                        # FN: Pattern absent AND disease present  
+                        # TN: Pattern absent AND disease absent
+                        
+                        tp <- combo_table[pattern, "Positive"]
+                        fp <- combo_table[pattern, "Negative"]
+                        fn <- total_positive_gold - tp
+                        tn <- total_negative_gold - fp
+                        
+                        # Calculate diagnostic statistics
+                        stats <- calcDiagStats(tp, fp, fn, tn)
+                        
+                        # Add to main statistics table
+                        self$results$combStatsTable$addRow(
+                            rowKey = pattern,
+                            values = list(
+                                combination = paste0(pattern, " (", description, ")"),
+                                sens = stats$sens,
+                                spec = stats$spec,
+                                ppv = stats$ppv,
+                                npv = stats$npv,
+                                acc = stats$acc
+                            )
+                        )
+                        
+                        # Add to CI table (multiple rows per combination)
+                        stat_names <- c("Sensitivity", "Specificity", "PPV", "NPV", "Accuracy")
+                        stat_values <- list(stats$sens, stats$spec, stats$ppv, stats$npv, stats$acc)
+                        stat_cis <- list(stats$sens_ci, stats$spec_ci, stats$ppv_ci, stats$npv_ci, stats$acc_ci)
+                        
+                        for (j in seq_along(stat_names)) {
+                            if (!is.na(stat_values[[j]])) {
+                                self$results$combStatsTableCI$addRow(
+                                    rowKey = paste0(pattern, "_", j),
+                                    values = list(
+                                        combination = pattern,
+                                        statistic = stat_names[j],
+                                        estimate = stat_values[[j]],
+                                        lower = stat_cis[[j]][1],
+                                        upper = stat_cis[[j]][2]
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                # Add clinical interpretation
+                summary_html <- paste0(summary_html, "<p><b>Clinical Interpretation:</b></p>")
+                summary_html <- paste0(summary_html, "<ul>")
+                summary_html <- paste0(summary_html, "<li><b>Sensitivity:</b> Probability of combination being positive when disease is present</li>")
+                summary_html <- paste0(summary_html, "<li><b>Specificity:</b> Probability of combination being negative when disease is absent</li>") 
+                summary_html <- paste0(summary_html, "<li><b>PPV:</b> Probability of disease when combination is positive</li>")
+                summary_html <- paste0(summary_html, "<li><b>NPV:</b> Probability of no disease when combination is negative</li>")
+                summary_html <- paste0(summary_html, "<li><b>Accuracy:</b> Overall probability of correct classification</li>")
+                summary_html <- paste0(summary_html, "</ul>")
+                
+                # Set content
+                if ("combinationsAnalysis" %in% names(self$results)) {
+                    self$results$combinationsAnalysis$setContent(summary_html)
+                }
             }
+
         )
     )

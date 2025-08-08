@@ -1,7 +1,7 @@
 ---
 name: waterfall
 title: Treatment Response Analysis
-menuGroup: Exploration
+menuGroup: ExplorationT
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall Plot, Spider Plot'
 version: '0.0.3'
@@ -88,6 +88,20 @@ options:
             Time point of measurement for spider plot (e.g., months from baseline)
           jamovi: >
             Time point of measurement for spider plot (e.g., months from baseline)
+
+    - name: groupVar
+      title: Group Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: NULL
+      description:
+          R: >
+            Optional grouping variable for coloring bars by patient groups (e.g., treatment arms, disease subtypes).
+            When specified, overrides RECIST category coloring to show group-based colors.
+          jamovi: >
+            Optional grouping variable for coloring bars by patient groups (e.g., treatment arms, disease subtypes).
+            When specified, overrides RECIST category coloring to show group-based colors.
 
 
     - name: inputType
@@ -176,6 +190,21 @@ options:
             Minimum response value for labels to be displayed.
 
 
+    - name: colorBy
+      title: Color By
+      type: List
+      options:
+        - title: RECIST Categories (CR/PR/SD/PD)
+          name: recist
+        - title: Patient Groups
+          name: group
+      default: recist
+      description:
+          R: >
+            Coloring method: RECIST categories or patient groups (requires Group Variable).
+          jamovi: >
+            Coloring method: RECIST categories or patient groups (requires Group Variable).
+
     - name: colorScheme
       title: Color Scheme
       type: List
@@ -186,12 +215,14 @@ options:
           name: recist
         - title: Simple (Red/Green)
           name: simple
+        - title: Colorful (Group Colors)
+          name: colorful
       default: jamovi
       description:
           R: >
-            Color scheme for waterfall plot.
+            Color scheme for waterfall plot. 'Colorful' provides distinct colors for group-based coloring.
           jamovi: >
-            Color scheme for waterfall plot.
+            Color scheme for waterfall plot. 'Colorful' provides distinct colors for group-based coloring.
 
 
     - name: barAlpha
@@ -237,6 +268,40 @@ options:
             Display spider plot showing response trajectories over time (requires time variable).
           jamovi: >
             Display spider plot showing response trajectories over time (requires time variable).
+
+    - name: spiderColorBy
+      title: Spider Plot Color By
+      type: List
+      options:
+        - title: Response Status (Responder/Non-responder)
+          name: response
+        - title: Patient Groups
+          name: group
+      default: response
+      description:
+          R: >
+            Coloring method for spider plot: Response status or patient groups.
+            For backward compatibility, defaults to response status coloring.
+          jamovi: >
+            Coloring method for spider plot: Response status or patient groups.
+            For backward compatibility, defaults to response status coloring.
+
+    - name: spiderColorScheme
+      title: Spider Plot Color Scheme
+      type: List
+      options:
+        - title: Classic (Blue/Red)
+          name: classic
+        - title: jamovi Theme
+          name: jamovi
+        - title: Colorful (for groups)
+          name: colorful
+      default: classic
+      description:
+          R: >
+            Color scheme for spider plot lines and points.
+          jamovi: >
+            Color scheme for spider plot lines and points.
 
     - name: addResponseCategory
       title: Add Response Category to Data

@@ -78,5 +78,58 @@ options:
           name: compete
       default: overall
 
+    # Enhanced Competing Risks Options
+    - name: graystest
+      title: "Gray's Test for Competing Risks"
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform Gray's test to compare cumulative incidence functions between groups
+          R: >
+            Perform Gray's test to compare cumulative incidence functions between groups
+
+    - name: subdistribution
+      title: 'Subdistribution Hazard Model'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Use Fine-Gray subdistribution hazard model for competing risks regression
+          R: >
+            Use Fine-Gray subdistribution hazard model for competing risks regression
+
+    - name: timepoints
+      title: 'Time Points for Cumulative Incidence'
+      type: String
+      default: "12,24,36,60"
+      description:
+          ui: >
+            Comma-separated time points (in months) for cumulative incidence estimates
+          R: >
+            Comma-separated time points (in months) for cumulative incidence estimates
+
+    - name: confidencelevel
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          ui: >
+            Confidence level for hazard ratio confidence intervals
+          R: >
+            Confidence level for hazard ratio confidence intervals
+
+    - name: showrisksets
+      title: 'Show Number at Risk'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display number at risk table below cumulative incidence plot
+          R: >
+            Display number at risk table below cumulative incidence plot
+
 
 ...

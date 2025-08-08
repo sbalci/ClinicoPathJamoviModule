@@ -34,6 +34,13 @@ children:
             name: timeVar
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Group Variable
+        children:
+          - type: VariablesListBox
+            name: groupVar
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Waterfall Plot Options
     collapsed: true
@@ -51,6 +58,8 @@ children:
             children:
               - type: ComboBox
                 name: sortBy
+              - type: ComboBox
+                name: colorBy
               - type: ComboBox
                 name: colorScheme
           - type: Label
@@ -96,4 +105,13 @@ children:
         children:
           - type: CheckBox
             name: showSpiderPlot
-
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Spider Plot Visualization
+            children:
+              - type: ComboBox
+                name: spiderColorBy
+              - type: ComboBox
+                name: spiderColorScheme

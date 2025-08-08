@@ -1,0 +1,303 @@
+---
+name:  survivalvalidation
+title: Survival Model Validation
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - time
+          - status
+          - predicted_risk
+
+    - name:  summary
+      title: Validation Summary
+      type:  Html
+      visible: true
+
+    - name:  performanceTable
+      title: Model Performance Metrics
+      type:  Table
+      visible: true
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: apparent
+            title: 'Apparent'
+            type: number
+          - name: validated
+            title: 'Validated'
+            type: number
+          - name: optimism
+            title: 'Optimism'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  concordanceTable
+      title: Concordance Index Results
+      type:  Table
+      visible: (concordance_index)
+      rows: 1
+      columns:
+          - name: method
+            title: 'Method'
+            type: text
+          - name: c_index
+            title: 'C-index'
+            type: number
+          - name: c_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: c_ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name:  aucTable
+      title: Time-dependent AUC Results
+      type:  Table
+      visible: (time_dependent_auc)
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: auc
+            title: 'AUC'
+            type: number
+          - name: auc_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: auc_ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: sensitivity
+            title: 'Sensitivity'
+            type: number
+          - name: specificity
+            title: 'Specificity'
+            type: number
+
+    - name:  brierTable
+      title: Brier Score Results
+      type:  Table
+      visible: (prediction_error)
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: brier_score
+            title: 'Brier Score'
+            type: number
+          - name: brier_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: brier_ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: integrated_brier
+            title: 'IBS'
+            type: number
+
+    - name:  calibrationTable
+      title: Calibration Assessment
+      type:  Table
+      visible: (calibration_plot)
+      rows: 1
+      columns:
+          - name: risk_group
+            title: 'Risk Group'
+            type: text
+          - name: predicted
+            title: 'Predicted Risk'
+            type: number
+          - name: observed
+            title: 'Observed Risk'
+            type: number
+          - name: n_patients
+            title: 'N'
+            type: integer
+          - name: n_events
+            title: 'Events'
+            type: integer
+          - name: obs_ci_lower
+            title: 'Obs CI Lower'
+            type: number
+          - name: obs_ci_upper
+            title: 'Obs CI Upper'
+            type: number
+
+    - name:  decisionTable
+      title: Decision Curve Analysis
+      type:  Table
+      visible: (decision_curve)
+      rows: 1
+      columns:
+          - name: threshold
+            title: 'Threshold'
+            type: number
+          - name: net_benefit
+            title: 'Net Benefit'
+            type: number
+          - name: nb_ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: nb_ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: treat_all
+            title: 'Treat All'
+            type: number
+          - name: treat_none
+            title: 'Treat None'
+            type: number
+
+    - name:  rocPlot
+      title: Time-dependent ROC Curves
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotROC
+      visible: (plot_roc_curves && time_dependent_auc)
+      clearWith:
+          - time
+          - status
+          - predicted_risk
+          - time_points
+
+    - name:  calibrationPlot
+      title: Calibration Plot
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotCalibration
+      visible: (plot_calibration && calibration_plot)
+      clearWith:
+          - time
+          - status
+          - predicted_risk
+          - risk_groups
+
+    - name:  decisionPlot
+      title: Decision Curve Analysis
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotDecision
+      visible: (plot_decision_curve && decision_curve)
+      clearWith:
+          - time
+          - status
+          - predicted_risk
+          - net_benefit_thresholds
+
+    - name:  predErrorPlot
+      title: Prediction Error Curves
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotPredError
+      visible: (plot_prediction_error && prediction_error)
+      clearWith:
+          - time
+          - status
+          - predicted_risk
+          - max_time
+
+    - name:  calibrationMetrics
+      title: Calibration Metrics
+      type:  Table
+      visible: (calibration_plot)
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  validationSummary
+      title: Overall Validation Assessment
+      type:  Html
+      visible: true
+
+    - name:  modelComparison
+      title: Model Comparison Results
+      type:  Table
+      visible: (model_comparison)
+      rows: 1
+      columns:
+          - name: model_name
+            title: 'Model'
+            type: text
+          - name: c_index
+            title: 'C-index'
+            type: number
+          - name: auc_mean
+            title: 'Mean AUC'
+            type: number
+          - name: ibs
+            title: 'IBS'
+            type: number
+          - name: net_benefit_max
+            title: 'Max Net Benefit'
+            type: number
+          - name: rank
+            title: 'Rank'
+            type: integer
+
+    - name:  externalValidation
+      title: External Validation Results
+      type:  Html
+      visible: (validation_method:external)
+      clearWith:
+          - external_data
+          - predicted_risk
+
+    - name:  competingRisksMetrics
+      title: Competing Risks Validation
+      type:  Table
+      visible: (competing_risks)
+      rows: 1
+      columns:
+          - name: cause
+            title: 'Cause'
+            type: text
+          - name: c_index_cause
+            title: 'Cause-Specific C-index'
+            type: number
+          - name: auc_cause
+            title: 'Cause-Specific AUC'
+            type: number
+          - name: subdist_c_index
+            title: 'Subdistribution C-index'
+            type: number
+
+    - name:  interpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: true
+
+...

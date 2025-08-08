@@ -1,0 +1,339 @@
+---
+name: survivalvalidation
+title: Survival Model Validation
+menuGroup: SurvivalD
+menuSubgroup: Advanced Survival
+menuSubtitle: 'Model Performance Assessment and Validation'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive validation and performance assessment for survival models.
+        Includes prediction error curves, time-dependent ROC analysis, calibration plots,
+        and decision curve analysis for clinical decision making.
+    R:
+        dontrun: true
+        usage: |
+            # Example: Validate Cox regression model
+            survivalvalidation(
+                data = cancer_data,
+                time = followup_time,
+                status = death_status,
+                predicted_risk = risk_score,
+                validation_method = "cv",
+                time_points = c(1, 3, 5)
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: 'Survival Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Follow-up time variable
+          R: >
+            Time to event or censoring
+
+    - name: status
+      title: 'Event Status'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Event status (0 = censored, 1 = event)
+          R: >
+            Event indicator variable
+
+    - name: predicted_risk
+      title: 'Predicted Risk/Score'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Predicted risk score or linear predictor from survival model
+          R: >
+            Model predictions to validate
+
+    - name: model_formula
+      title: 'Model Formula'
+      type: String
+      default: ""
+      description:
+          ui: >
+            Optional: Specify model formula for automatic fitting (e.g., "age + stage + grade")
+          R: >
+            Variables for Cox model if predictions not provided
+
+    - name: external_data
+      title: 'External Validation Dataset'
+      type: Data
+      description:
+          R: Optional external dataset for validation
+
+    # Validation Methods
+    - name: validation_method
+      title: 'Validation Method'
+      type: List
+      options:
+        - title: Cross-Validation
+          name: cv
+        - title: Bootstrap
+          name: bootstrap
+        - title: External Validation
+          name: external
+        - title: Apparent Performance
+          name: apparent
+        - title: Optimism Correction
+          name: optimism
+      default: cv
+      description:
+          ui: >
+            Method for model validation
+          R: >
+            Validation approach
+
+    - name: cv_folds
+      title: 'Cross-Validation Folds'
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+      description:
+          ui: >
+            Number of folds for cross-validation
+          R: >
+            CV fold specification
+
+    - name: bootstrap_samples
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 500
+      min: 100
+      max: 2000
+      description:
+          ui: >
+            Number of bootstrap samples
+          R: >
+            Bootstrap iterations
+
+    # Performance Metrics
+    - name: concordance_index
+      title: 'Concordance Index (C-index)'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate Harrell's concordance index
+          R: >
+            Compute C-index
+
+    - name: time_dependent_auc
+      title: 'Time-dependent AUC'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate time-dependent area under ROC curve
+          R: >
+            Compute time-dependent AUC
+
+    - name: prediction_error
+      title: 'Prediction Error Curves'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Generate prediction error curves (PEC)
+          R: >
+            Compute prediction error curves
+
+    - name: integrated_brier
+      title: 'Integrated Brier Score'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate integrated Brier score
+          R: >
+            Compute IBS
+
+    - name: calibration_plot
+      title: 'Calibration Plot'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Generate calibration plot with slope/intercept
+          R: >
+            Create calibration assessment
+
+    - name: decision_curve
+      title: 'Decision Curve Analysis'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform decision curve analysis for clinical utility
+          R: >
+            DCA for clinical decision making
+
+    # Time Points
+    - name: time_points
+      title: 'Evaluation Time Points'
+      type: String
+      default: "1,2,3,5"
+      description:
+          ui: >
+            Time points for evaluation (comma-separated, in same units as time variable)
+          R: >
+            Specific times for assessment
+
+    - name: max_time
+      title: 'Maximum Follow-up Time'
+      type: Number
+      default: 0
+      min: 0
+      description:
+          ui: >
+            Maximum time for analysis (0 = use data maximum)
+          R: >
+            Upper time limit
+
+    # Plotting Options
+    - name: plot_roc_curves
+      title: 'Plot ROC Curves'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display time-dependent ROC curves
+          R: >
+            Generate ROC plots
+
+    - name: plot_calibration
+      title: 'Plot Calibration'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display calibration plots
+          R: >
+            Generate calibration plots
+
+    - name: plot_decision_curve
+      title: 'Plot Decision Curves'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display decision curve analysis
+          R: >
+            Generate DCA plots
+
+    - name: plot_prediction_error
+      title: 'Plot Prediction Error'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display prediction error curves
+          R: >
+            Generate PEC plots
+
+    # Advanced Options
+    - name: confidence_level
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          ui: >
+            Confidence level for intervals
+          R: >
+            CI level
+
+    - name: smoothing
+      title: 'Smoothing for Plots'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Apply smoothing to curves for better visualization
+          R: >
+            Smooth curve estimation
+
+    - name: risk_groups
+      title: 'Number of Risk Groups'
+      type: Integer
+      default: 4
+      min: 2
+      max: 10
+      description:
+          ui: >
+            Number of risk groups for calibration assessment
+          R: >
+            Risk group stratification
+
+    - name: competing_risks
+      title: 'Competing Risks'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Account for competing risks in validation
+          R: >
+            Competing risks consideration
+
+    - name: cause_specific
+      title: 'Cause-Specific Event'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Cause of failure for competing risks analysis
+          R: >
+            Cause-specific event variable
+
+    - name: model_comparison
+      title: 'Compare Multiple Models'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Compare performance of multiple models
+          R: >
+            Multi-model comparison
+
+    - name: model_names
+      title: 'Model Names'
+      type: String
+      default: ""
+      description:
+          ui: >
+            Names for models being compared (comma-separated)
+          R: >
+            Model labels for comparison
+
+    - name: net_benefit_thresholds
+      title: 'Net Benefit Thresholds'
+      type: String
+      default: "0.01,0.05,0.1,0.2,0.3"
+      description:
+          ui: >
+            Threshold probabilities for decision curve analysis
+          R: >
+            DCA threshold range
+
+...

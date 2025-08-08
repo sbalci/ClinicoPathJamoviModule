@@ -67,7 +67,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             spline_vars = NULL,
             spline_df = 3,
             spline_type = "pspline",
-            showExplanations = FALSE, ...) {
+            showExplanations = FALSE,
+            ml_method = "none",
+            ml_validation = "cv",
+            ml_cv_folds = 5,
+            ml_feature_selection = TRUE,
+            ml_importance = TRUE,
+            ml_calibration = TRUE,
+            ml_performance = TRUE,
+            ml_shap = FALSE,
+            ml_hyperparameter_tuning = FALSE,
+            ml_ensemble_weights = "equal", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -410,6 +420,60 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showExplanations",
                 showExplanations,
                 default=FALSE)
+            private$..ml_method <- jmvcore::OptionList$new(
+                "ml_method",
+                ml_method,
+                options=list(
+                    "none",
+                    "rsf",
+                    "xgboost",
+                    "glmnet",
+                    "svm",
+                    "deepsurv",
+                    "ensemble"),
+                default="none")
+            private$..ml_validation <- jmvcore::OptionList$new(
+                "ml_validation",
+                ml_validation,
+                options=list(
+                    "cv",
+                    "bootstrap",
+                    "split"),
+                default="cv")
+            private$..ml_cv_folds <- jmvcore::OptionInteger$new(
+                "ml_cv_folds",
+                ml_cv_folds,
+                default=5,
+                min=3,
+                max=20)
+            private$..ml_feature_selection <- jmvcore::OptionBool$new(
+                "ml_feature_selection",
+                ml_feature_selection,
+                default=TRUE)
+            private$..ml_importance <- jmvcore::OptionBool$new(
+                "ml_importance",
+                ml_importance,
+                default=TRUE)
+            private$..ml_calibration <- jmvcore::OptionBool$new(
+                "ml_calibration",
+                ml_calibration,
+                default=TRUE)
+            private$..ml_performance <- jmvcore::OptionBool$new(
+                "ml_performance",
+                ml_performance,
+                default=TRUE)
+            private$..ml_shap <- jmvcore::OptionBool$new(
+                "ml_shap",
+                ml_shap,
+                default=FALSE)
+            private$..ml_hyperparameter_tuning <- jmvcore::OptionBool$new(
+                "ml_hyperparameter_tuning",
+                ml_hyperparameter_tuning,
+                default=FALSE)
+            private$..ml_ensemble_weights <- jmvcore::OptionString$new(
+                "ml_ensemble_weights",
+                ml_ensemble_weights,
+                default="equal")
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -477,6 +541,16 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..spline_df)
             self$.addOption(private$..spline_type)
             self$.addOption(private$..showExplanations)
+            self$.addOption(private$..ml_method)
+            self$.addOption(private$..ml_validation)
+            self$.addOption(private$..ml_cv_folds)
+            self$.addOption(private$..ml_feature_selection)
+            self$.addOption(private$..ml_importance)
+            self$.addOption(private$..ml_calibration)
+            self$.addOption(private$..ml_performance)
+            self$.addOption(private$..ml_shap)
+            self$.addOption(private$..ml_hyperparameter_tuning)
+            self$.addOption(private$..ml_ensemble_weights)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -544,7 +618,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         spline_vars = function() private$..spline_vars$value,
         spline_df = function() private$..spline_df$value,
         spline_type = function() private$..spline_type$value,
-        showExplanations = function() private$..showExplanations$value),
+        showExplanations = function() private$..showExplanations$value,
+        ml_method = function() private$..ml_method$value,
+        ml_validation = function() private$..ml_validation$value,
+        ml_cv_folds = function() private$..ml_cv_folds$value,
+        ml_feature_selection = function() private$..ml_feature_selection$value,
+        ml_importance = function() private$..ml_importance$value,
+        ml_calibration = function() private$..ml_calibration$value,
+        ml_performance = function() private$..ml_performance$value,
+        ml_shap = function() private$..ml_shap$value,
+        ml_hyperparameter_tuning = function() private$..ml_hyperparameter_tuning$value,
+        ml_ensemble_weights = function() private$..ml_ensemble_weights$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -611,7 +695,17 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..spline_vars = NA,
         ..spline_df = NA,
         ..spline_type = NA,
-        ..showExplanations = NA)
+        ..showExplanations = NA,
+        ..ml_method = NA,
+        ..ml_validation = NA,
+        ..ml_cv_folds = NA,
+        ..ml_feature_selection = NA,
+        ..ml_importance = NA,
+        ..ml_calibration = NA,
+        ..ml_performance = NA,
+        ..ml_shap = NA,
+        ..ml_hyperparameter_tuning = NA,
+        ..ml_ensemble_weights = NA)
 )
 
 multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1477,6 +1571,16 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showExplanations Display educational explanations for each analysis
 #'   type to help interpret  multivariable survival analysis results, Cox
 #'   regression, adjusted survival  curves, nomograms, and model diagnostics.
+#' @param ml_method Machine learning survival analysis method
+#' @param ml_validation Model validation approach
+#' @param ml_cv_folds CV fold count
+#' @param ml_feature_selection Enable feature selection
+#' @param ml_importance Show variable importance
+#' @param ml_calibration Generate calibration plot
+#' @param ml_performance Show performance metrics
+#' @param ml_shap Compute SHAP values
+#' @param ml_hyperparameter_tuning Enable hyperparameter tuning
+#' @param ml_ensemble_weights Ensemble model weights
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1584,7 +1688,17 @@ multisurvival <- function(
     spline_vars,
     spline_df = 3,
     spline_type = "pspline",
-    showExplanations = FALSE) {
+    showExplanations = FALSE,
+    ml_method = "none",
+    ml_validation = "cv",
+    ml_cv_folds = 5,
+    ml_feature_selection = TRUE,
+    ml_importance = TRUE,
+    ml_calibration = TRUE,
+    ml_performance = TRUE,
+    ml_shap = FALSE,
+    ml_hyperparameter_tuning = FALSE,
+    ml_ensemble_weights = "equal") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("multisurvival requires jmvcore to be installed (restart may be required)")
@@ -1686,7 +1800,17 @@ multisurvival <- function(
         spline_vars = spline_vars,
         spline_df = spline_df,
         spline_type = spline_type,
-        showExplanations = showExplanations)
+        showExplanations = showExplanations,
+        ml_method = ml_method,
+        ml_validation = ml_validation,
+        ml_cv_folds = ml_cv_folds,
+        ml_feature_selection = ml_feature_selection,
+        ml_importance = ml_importance,
+        ml_calibration = ml_calibration,
+        ml_performance = ml_performance,
+        ml_shap = ml_shap,
+        ml_hyperparameter_tuning = ml_hyperparameter_tuning,
+        ml_ensemble_weights = ml_ensemble_weights)
 
     analysis <- multisurvivalClass$new(
         options = options,

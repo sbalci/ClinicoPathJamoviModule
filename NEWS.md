@@ -1,3 +1,43 @@
+# ClinicoPath 0.0.3.96
+
+## Enhancements
+
+### Waterfall Plot Module Improvements
+- **Enhanced Group Coloring**: Implemented group-based coloring system for waterfall and spider plots (GitHub #117)
+  - Added `colorBy` option to switch between RECIST categories and patient groups
+  - Added `spiderColorBy` and `spiderColorScheme` options for spider plot customization
+  - Maintains backward compatibility with existing analyses
+- **Code Quality Improvements**: Major refactoring and quality enhancements
+  - Extracted color generation logic into reusable `.generateGroupColors()` method
+  - Removed debug statements from production code
+  - Added comprehensive sample size validation warnings
+  - Enhanced progress reporting with strategic checkpoint placement
+- **Robust Data Validation**: Improved validation system with user-friendly messages
+  - Sample size warnings (n<10: "very small", n<20: "small")
+  - Data range validation for percentage and raw measurements
+  - Baseline measurement validation for longitudinal data
+  - Time variable validation (negative values, missing baseline)
+- **Performance Optimization**: Enhanced user experience with better feedback
+  - Added progress checkpoints before expensive operations
+  - Improved error handling with meaningful warnings
+  - Better visibility controls for conditional tables
+
+### IHC Expression Analysis Module
+- **Fixed Clear Method Issues**: Resolved "'clear' does not exist in this results element" error
+  - Removed 13 instances of unsupported `clear()` method calls
+  - Replaced with proper jamovi table management patterns
+  - Improved table population reliability across all IHC analysis tables
+
+### Medical Decision Tree Analysis
+- **Progress Bar Implementation**: Added real-time progress visualization
+  - SVG-based progress bar with percentage display
+  - Visual checkpoints during model training and validation
+  - Enhanced user feedback for long-running analyses
+- **Fixed Runtime Errors**: Resolved critical function call errors
+  - Fixed "unused argument (tree_mode)" error
+  - Corrected `imputeMissing` to `missing_data_method` reference
+  - Improved parameter validation and error handling
+
 # ClinicoPath 0.0.3.95
 
 ## Bug Fixes

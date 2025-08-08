@@ -49,14 +49,6 @@ children:
             name: test3Positive
             enable: (test3)
   - type: Label
-    label: Combination Rule
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: ComboBox
-            name: combRule
-  - type: Label
     label: Table Options
     children:
       - type: LayoutBox
@@ -65,27 +57,5 @@ children:
           - type: CheckBox
             name: od
           - type: CheckBox
-            name: fnote
-          - type: CheckBox
-            name: ci
-            enable: (!pp)
-          - type: CheckBox
             name: showIndividual
 
-  - type: Label
-    label: Prior Probability
-    children:
-      - type: CheckBox
-        name: pp
-        enable: (!ci)
-      - type: TextBox
-        name: pprob
-        label: ''
-        format: number
-        enable: (pp)
-
-  - type: Label
-    label: Plots
-    children:
-      - type: CheckBox
-        name: fagan

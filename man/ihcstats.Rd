@@ -7,6 +7,7 @@
 ihcstats(
   data,
   markers,
+  id = NULL,
   computeHScore = FALSE,
   clusterMethod = "hierarchical",
   distanceMetric = "gower",
@@ -18,6 +19,7 @@ ihcstats(
   standardizeData = TRUE,
   showPCAPlot = FALSE,
   showClusterValidation = FALSE,
+  silhouetteAnalysis = FALSE,
   optimalKMethod = "elbow",
   iterativeClustering = FALSE,
   linkageMethod = "average",
@@ -42,13 +44,18 @@ ihcstats(
   immuneSignatureFocus = FALSE,
   tilAnalysisMode = "combined_til",
   multipleTesting = "bonferroni",
-  significanceThreshold = 5.5e-05
+  significanceThreshold = 0.05,
+  maxSamples = 1000,
+  useParallel = FALSE,
+  ihcScaleMax = 3
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
 \item{markers}{IHC marker variables with categorical expression scores}
+
+\item{id}{Optional variable to identify cases/samples in results}
 
 \item{computeHScore}{.}
 
@@ -71,6 +78,8 @@ ihcstats(
 \item{showPCAPlot}{.}
 
 \item{showClusterValidation}{.}
+
+\item{silhouetteAnalysis}{.}
 
 \item{optimalKMethod}{.}
 
@@ -121,6 +130,15 @@ ihcstats(
 \item{multipleTesting}{.}
 
 \item{significanceThreshold}{.}
+
+\item{maxSamples}{Maximum number of samples for full analysis. Larger
+datasets may use sampling.}
+
+\item{useParallel}{Enable parallel processing for distance calculations
+(requires parallel package).}
+
+\item{ihcScaleMax}{Maximum value in IHC scoring scale (e.g., 3 for 0-3
+scale, 300 for H-score).}
 }
 \value{
 A results object containing:

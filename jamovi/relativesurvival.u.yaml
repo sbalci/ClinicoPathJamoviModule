@@ -1,0 +1,119 @@
+title: Relative Survival Analysis
+name: relativesurvival
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Follow-up Time
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Vital Status
+        children:
+          - type: VariablesListBox
+            name: status
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Age at Diagnosis
+        children:
+          - type: VariablesListBox
+            name: age
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Sex
+        children:
+          - type: VariablesListBox
+            name: sex
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Calendar Year
+        children:
+          - type: VariablesListBox
+            name: year
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Additional Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ratetable
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: time_scale
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: net_survival
+      - type: CheckBox
+        name: excess_mortality
+      - type: CheckBox
+        name: crude_probability
+      - type: CheckBox
+        name: age_standardized
+      - type: CheckBox
+        name: period_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cohort_year
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: regression_model
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: spline_df
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: plot_observed
+      - type: CheckBox
+        name: plot_expected
+      - type: CheckBox
+        name: plot_relative
+      - type: CheckBox
+        name: plot_excess
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: timepoints
+        format: string

@@ -20,6 +20,9 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             maxTests = 3,
             sequentialStop = "positive",
             optimizationCriteria = "accuracy",
+            panelOptimization = "forward",
+            minImprovement = 0.01,
+            redundancyThreshold = 0.7,
             minSensitivity = 0.8,
             minSpecificity = 0.8,
             createTree = FALSE,
@@ -139,6 +142,27 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "utility",
                     "efficiency"),
                 default="accuracy")
+            private$..panelOptimization <- jmvcore::OptionList$new(
+                "panelOptimization",
+                panelOptimization,
+                options=list(
+                    "forward",
+                    "backward",
+                    "both",
+                    "exhaustive"),
+                default="forward")
+            private$..minImprovement <- jmvcore::OptionNumber$new(
+                "minImprovement",
+                minImprovement,
+                default=0.01,
+                min=0.001,
+                max=0.1)
+            private$..redundancyThreshold <- jmvcore::OptionNumber$new(
+                "redundancyThreshold",
+                redundancyThreshold,
+                default=0.7,
+                min=0.5,
+                max=0.95)
             private$..minSensitivity <- jmvcore::OptionNumber$new(
                 "minSensitivity",
                 minSensitivity,
@@ -250,6 +274,9 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..maxTests)
             self$.addOption(private$..sequentialStop)
             self$.addOption(private$..optimizationCriteria)
+            self$.addOption(private$..panelOptimization)
+            self$.addOption(private$..minImprovement)
+            self$.addOption(private$..redundancyThreshold)
             self$.addOption(private$..minSensitivity)
             self$.addOption(private$..minSpecificity)
             self$.addOption(private$..createTree)
@@ -285,6 +312,9 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         maxTests = function() private$..maxTests$value,
         sequentialStop = function() private$..sequentialStop$value,
         optimizationCriteria = function() private$..optimizationCriteria$value,
+        panelOptimization = function() private$..panelOptimization$value,
+        minImprovement = function() private$..minImprovement$value,
+        redundancyThreshold = function() private$..redundancyThreshold$value,
         minSensitivity = function() private$..minSensitivity$value,
         minSpecificity = function() private$..minSpecificity$value,
         createTree = function() private$..createTree$value,
@@ -319,6 +349,9 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..maxTests = NA,
         ..sequentialStop = NA,
         ..optimizationCriteria = NA,
+        ..panelOptimization = NA,
+        ..minImprovement = NA,
+        ..redundancyThreshold = NA,
         ..minSensitivity = NA,
         ..minSpecificity = NA,
         ..createTree = NA,
@@ -348,6 +381,11 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         optimalPanel = function() private$.items[["optimalPanel"]],
         strategyComparison = function() private$.items[["strategyComparison"]],
         individualTests = function() private$.items[["individualTests"]],
+        panelBuilding = function() private$.items[["panelBuilding"]],
+        optimalPanelsBySize = function() private$.items[["optimalPanelsBySize"]],
+        testRedundancy = function() private$.items[["testRedundancy"]],
+        incrementalValue = function() private$.items[["incrementalValue"]],
+        resultImportance = function() private$.items[["resultImportance"]],
         allCombinations = function() private$.items[["allCombinations"]],
         treeStructure = function() private$.items[["treeStructure"]],
         treePerformance = function() private$.items[["treePerformance"]],
@@ -489,9 +527,13 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Table$new(
                 options=options,
                 name="individualTests",
-                title="Individual Test Performance",
+                title="Individual Test Performance (Ranked by Diagnostic Value)",
                 visible=TRUE,
                 columns=list(
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer"),
                     list(
                         `name`="test", 
                         `title`="Test", 
@@ -532,11 +574,215 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="number", 
                         `format`="zto"),
                     list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="youden", 
+                        `title`="Youden's J", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
                         `name`="cost", 
                         `title`="Cost", 
                         `type`="number", 
                         `format`="zto", 
                         `visible`="(useCosts)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="panelBuilding",
+                title="Panel Building Analysis (Forward Selection)",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="step", 
+                        `title`="Step", 
+                        `type`="integer"),
+                    list(
+                        `name`="testAdded", 
+                        `title`="Test Added", 
+                        `type`="text"),
+                    list(
+                        `name`="panelComposition", 
+                        `title`="Panel Composition", 
+                        `type`="text"),
+                    list(
+                        `name`="baselineAccuracy", 
+                        `title`="Baseline Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="newAccuracy", 
+                        `title`="New Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="improvementPercent", 
+                        `title`="Improvement", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="pValue", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="keep", 
+                        `title`="Include?", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="optimalPanelsBySize",
+                title="Optimal Panels by Size",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="panelSize", 
+                        `title`="Panel Size", 
+                        `type`="integer"),
+                    list(
+                        `name`="testCombination", 
+                        `title`="Test Combination", 
+                        `type`="text"),
+                    list(
+                        `name`="strategy", 
+                        `title`="Strategy", 
+                        `type`="text"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="youden", 
+                        `title`="Youden's J", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="costEffectiveness", 
+                        `title`="Cost-Effectiveness", 
+                        `type`="number", 
+                        `format`="zto", 
+                        `visible`="(useCosts)"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="testRedundancy",
+                title="Test Redundancy Analysis",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="testPair", 
+                        `title`="Test Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="correlation", 
+                        `title`="Correlation", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="overlap", 
+                        `title`="Result Overlap", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="redundancyLevel", 
+                        `title`="Redundancy", 
+                        `type`="text"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="incrementalValue",
+                title="Incremental Diagnostic Value",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="aloneAccuracy", 
+                        `title`="Alone", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="withOthersAccuracy", 
+                        `title`="With Others", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="incrementalAccuracy", 
+                        `title`="Incremental Value", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="nri", 
+                        `title`="NRI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="pValueImprovement", 
+                        `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="essential", 
+                        `title`="Essential?", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="resultImportance",
+                title="Test Result Importance Analysis",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="resultType", 
+                        `title`="Result", 
+                        `type`="text"),
+                    list(
+                        `name`="frequency", 
+                        `title`="Frequency", 
+                        `type`="number"),
+                    list(
+                        `name`="positiveLR", 
+                        `title`="+LR", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="negativeLR", 
+                        `title`="-LR", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="informationGain", 
+                        `title`="Info Gain", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="diagnosticImpact", 
+                        `title`="Diagnostic Impact", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="allCombinations",
@@ -895,6 +1141,11 @@ decisionpanelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param maxTests Maximum number of tests to combine in any strategy.
 #' @param sequentialStop When to stop testing in sequential strategies.
 #' @param optimizationCriteria Primary criterion for optimizing test panels.
+#' @param panelOptimization Method for building optimal test panels.
+#' @param minImprovement Minimum improvement in performance metric required to
+#'   add a test to the panel.
+#' @param redundancyThreshold Correlation threshold above which tests are
+#'   considered redundant.
 #' @param minSensitivity Minimum sensitivity constraint for panel selection.
 #' @param minSpecificity Minimum specificity constraint for panel selection.
 #' @param createTree Generate an optimal decision tree for test sequencing.
@@ -925,6 +1176,11 @@ decisionpanelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$optimalPanel} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$strategyComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$individualTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$panelBuilding} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$optimalPanelsBySize} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$testRedundancy} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$incrementalValue} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$resultImportance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$allCombinations} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$treeStructure} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$treePerformance} \tab \tab \tab \tab \tab a table \cr
@@ -960,6 +1216,9 @@ decisionpanel <- function(
     maxTests = 3,
     sequentialStop = "positive",
     optimizationCriteria = "accuracy",
+    panelOptimization = "forward",
+    minImprovement = 0.01,
+    redundancyThreshold = 0.7,
     minSensitivity = 0.8,
     minSpecificity = 0.8,
     createTree = FALSE,
@@ -1009,6 +1268,9 @@ decisionpanel <- function(
         maxTests = maxTests,
         sequentialStop = sequentialStop,
         optimizationCriteria = optimizationCriteria,
+        panelOptimization = panelOptimization,
+        minImprovement = minImprovement,
+        redundancyThreshold = redundancyThreshold,
         minSensitivity = minSensitivity,
         minSpecificity = minSpecificity,
         createTree = createTree,

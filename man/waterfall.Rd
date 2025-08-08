@@ -9,6 +9,7 @@ waterfall(
   patientID,
   responseVar,
   timeVar = NULL,
+  groupVar = NULL,
   inputType = "percentage",
   sortBy = "response",
   showThresholds = FALSE,
@@ -16,11 +17,14 @@ waterfall(
   showMedian = FALSE,
   showCI = FALSE,
   minResponseForLabel = 50,
+  colorBy = "recist",
   colorScheme = "jamovi",
   barAlpha = 1,
   barWidth = 0.7,
   showWaterfallPlot = TRUE,
-  showSpiderPlot = TRUE
+  showSpiderPlot = TRUE,
+  spiderColorBy = "response",
+  spiderColorScheme = "classic"
 )
 }
 \arguments{
@@ -35,6 +39,10 @@ indicate tumor shrinkage (improvement).}
 
 \item{timeVar}{Time point of measurement for spider plot (e.g., months from
 baseline)}
+
+\item{groupVar}{Optional grouping variable for coloring bars by patient
+groups (e.g., treatment arms, disease subtypes). When specified, overrides
+RECIST category coloring to show group-based colors.}
 
 \item{inputType}{Specify data format: 'raw' for actual measurements (will
 calculate percent change) or 'percentage' for pre-calculated percentage
@@ -53,7 +61,11 @@ changes}
 \item{minResponseForLabel}{Minimum response value for labels to be
 displayed.}
 
-\item{colorScheme}{Color scheme for waterfall plot.}
+\item{colorBy}{Coloring method: RECIST categories or patient groups
+(requires Group Variable).}
+
+\item{colorScheme}{Color scheme for waterfall plot. 'Colorful' provides
+distinct colors for group-based coloring.}
 
 \item{barAlpha}{Transparency of bars in waterfall plot.}
 
@@ -64,6 +76,12 @@ for each patient.}
 
 \item{showSpiderPlot}{Display spider plot showing response trajectories
 over time (requires time variable).}
+
+\item{spiderColorBy}{Coloring method for spider plot: Response status or
+patient groups. For backward compatibility, defaults to response status
+coloring.}
+
+\item{spiderColorScheme}{Color scheme for spider plot lines and points.}
 }
 \value{
 A results object containing:
