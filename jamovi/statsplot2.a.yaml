@@ -4,7 +4,7 @@ title: Automatic Plot Selection
 menuGroup: JJStatsPlotT
 menuSubgroup: Auto Visualization
 menuSubtitle: Automatic Plot Selection Based on Variable Types
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

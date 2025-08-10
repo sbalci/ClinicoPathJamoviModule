@@ -1,84 +1,7 @@
-#' @title Automatic Plot Selection Based on Variable Types
-#'
-#' @description 
-#' This function automatically selects and generates the most appropriate statistical
-#' visualization based on the data types of the selected variables. It supports both
-#' independent and repeated measurements designs, with various plot types including
-#' violin plots, scatter plots, bar charts, dot plots, and alluvial diagrams.
-#'
-#' The function uses ggstatsplot package for statistical visualizations and ggalluvial
-#' for flow diagrams. Plot selection follows these rules:
-#' - Factor vs Continuous: Violin plots (ggbetweenstats/ggwithinstats)
-#' - Continuous vs Continuous: Scatter plots (ggscatterstats) 
-#' - Factor vs Factor: Bar charts (ggbarstats) or Alluvial diagrams for repeated measures
-#' - Continuous vs Factor: Dot plots (ggdotplotstats)
-#'
-#' @param data The data as a data frame
-#' @param dep The dependent variable (y-axis, 1st measurement). Can be continuous or categorical
-#' @param group The grouping variable (x-axis, 2nd measurement). Can be continuous or categorical
-#' @param grvar Optional grouping variable for creating grouped plots across multiple panels
-#' @param direction Measurement design type. Either "independent" for between-subjects 
-#'   comparisons or "repeated" for within-subjects/repeated measures comparisons
-#' @param distribution Statistical approach for analysis. Options:
-#'   - "p" = parametric (assumes normal distribution)
-#'   - "np" = nonparametric (distribution-free methods) 
-#'   - "r" = robust (resistant to outliers)
-#'   - "bf" = Bayes factor (Bayesian approach)
-#' @param alluvsty Style for alluvial diagrams when both variables are factors in repeated design.
-#'   - "t1" = ggalluvial style with stratum labels
-#'   - "t2" = easyalluvial style with automatic variable selection
-#' @param excl Logical. If TRUE, excludes rows with missing values before analysis
-#'
-#' @return A results object containing plots and explanatory text
-#'
-#' @details
-#' The function intelligently selects plot types based on variable combinations:
-#' 
-#' **Independent Measurements:**
-#' - Factor + Continuous → Violin plot with statistical comparisons
-#' - Continuous + Continuous → Scatter plot with correlation analysis
-#' - Factor + Factor → Bar chart with contingency table analysis
-#' - Continuous + Factor → Cleveland dot plot
-#'
-#' **Repeated Measurements:**
-#' - Factor + Continuous → Paired violin plot with within-subjects comparisons
-#' - Continuous + Continuous → Scatter plot (correlation analysis)
-#' - Factor + Factor → Alluvial diagram showing changes between time points
-#' - Continuous + Factor → Cleveland dot plot
-#'
-#' Statistical tests are automatically selected based on the distribution parameter
-#' and variable types. All plots include appropriate statistical annotations.
-#'
-#' @examples
-#' \donttest{
-#' # Basic usage with factor and continuous variables
-#' statsplot2(
-#'   data = mtcars,
-#'   dep = "mpg",
-#'   group = "cyl",
-#'   direction = "independent",
-#'   distribution = "p"
-#' )
-#' 
-#' # Repeated measures design with alluvial diagram
-#' statsplot2(
-#'   data = survey_data,
-#'   dep = "condition_baseline", 
-#'   group = "condition_followup",
-#'   direction = "repeated",
-#'   alluvsty = "t1"
-#' )
-#' }
-#'
+#' @title Plots and Graphs Based on Variable Types
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import magrittr
-#' @import ggstatsplot
-#' @import ggalluvial
-#' @importFrom easyalluvial alluvial_wide
-#' @importFrom glue glue
-#' @importFrom rlang sym
-#'
 
 
 
@@ -87,547 +10,441 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
         "statsplot2Class",
         inherit = statsplot2Base,
         private = list(
-            # Consolidated validation method (assumes non-NULL variables)
-            .validateInputs = function() {
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
+            # Private function to detect variable types and analysis parameters
+            .detectAnalysisType = function() {
+                # Return early if no variables selected
+                if (is.null(self$options$dep) || is.null(self$options$group)) {
+                    return(NULL)
+                }
                 
-                # Validate variables exist
-                if (!self$options$dep %in% names(self$data))
-                    stop(paste('Variable', self$options$dep, 'not found in data. Available variables:', 
-                              paste(names(self$data), collapse = ', ')))
-                
-                if (!self$options$group %in% names(self$data))
-                    stop(paste('Variable', self$options$group, 'not found in data. Available variables:', 
-                              paste(names(self$data), collapse = ', ')))
-                
+                # Get variable data
                 mydep <- self$data[[self$options$dep]]
                 mygroup <- self$data[[self$options$group]]
                 
-                # Check for minimum data requirements
-                if (length(mydep) < 2 || length(mygroup) < 2) {
-                    stop(paste('Insufficient data: At least 2 observations required for statistical analysis.',
-                              'Current data size:', nrow(self$data), 'rows.',
-                              'Suggestion: Ensure your dataset contains sufficient observations.'))
+                # Define continuous types
+                contin <- c("integer", "numeric", "double")
+                
+                # Determine variable types using inherits with contin array
+                dep_type <- if (inherits(mydep, "factor")) {
+                    "factor"
+                } else if (inherits(mydep, contin)) {
+                    "continuous"
+                } else {
+                    "unknown"
                 }
                 
-                # Check for complete missing data
-                if (all(is.na(mydep))) {
-                    stop(paste('Dependent variable contains only missing values.',
-                              'Suggestion: Check your data quality or select a different variable.'))
-                } else if (all(is.na(mygroup))) {
-                    stop(paste('Group variable contains only missing values.',
-                              'Suggestion: Check your data quality or select a different variable.'))
+                group_type <- if (inherits(mygroup, "factor")) {
+                    "factor"
+                } else if (inherits(mygroup, contin)) {
+                    "continuous"
+                } else {
+                    "unknown"
                 }
                 
-                # Check for valid factor levels
-                if (is.factor(mydep) && length(levels(mydep)) < 1)
-                    stop('Dependent variable has no valid factor levels')
-                    
-                if (is.factor(mygroup) && length(levels(mygroup)) < 1)
-                    stop('Group variable has no valid factor levels')
-                
-                # Validate optional grouping variable
-                if (!is.null(self$options$grvar)) {
-                    if (!self$options$grvar %in% names(self$data)) {
-                        stop(paste('Grouping variable', self$options$grvar, 'not found in data. Available variables:', 
-                                  paste(names(self$data), collapse = ', ')))
-                    }
-                    
-                    grvar_data <- self$data[[self$options$grvar]]
-                    if (all(is.na(grvar_data))) {
-                        stop(paste('Grouping variable contains only missing values.',
-                                  'Suggestion: Check your data or use "Exclude Missing Values" option to automatically handle this.'))
-                    }
-                    
-                    if (is.factor(grvar_data) && length(levels(grvar_data)) < 2) {
-                        stop(paste('Grouping variable must have at least 2 levels for grouped analysis.',
-                                  'Current levels:', paste(levels(grvar_data), collapse = ', '),
-                                  'Suggestion: Use a different grouping variable with multiple categories.'))
-                    }
-                }
-                
-                # Validate distribution parameter
-                distribution <- self$options$distribution
-                if (is.null(distribution) || !distribution %in% c('p', 'np', 'r', 'bf')) {
-                    stop('Invalid distribution parameter. Must be one of: p (parametric), np (nonparametric), r (robust), bf (bayes factor)')
-                }
-                
-                # Validate direction parameter
+                # Get other options
                 direction <- self$options$direction
-                if (is.null(direction) || !direction %in% c('independent', 'repeated')) {
-                    stop('Invalid direction parameter. Must be either "independent" or "repeated"')
-                }
+                distribution <- self$options$distribution
+                alluvsty <- self$options$alluvsty
                 
-                # Validate alluvial style parameter if factor-factor comparison
-                # Only validate if we have valid variable selections
-                if (!is.null(self$options$dep) && !is.null(self$options$group)) {
-                    mydep <- self$data[[self$options$dep]]
-                    mygroup <- self$data[[self$options$group]]
-                    if (is.factor(mydep) && is.factor(mygroup) && direction == "repeated") {
-                        alluvsty <- self$options$alluvsty
-                        if (is.null(alluvsty) || !alluvsty %in% c('t1', 't2')) {
-                            stop(paste('Invalid alluvial style parameter for factor-factor repeated measures.',
-                                      'Must be either "t1" (ggalluvial style) or "t2" (easyalluvial style).',
-                                      'Current value:', alluvsty,
-                                      'Suggestion: Select an appropriate alluvial diagram style from the options.'))
-                        }
-                    }
-                }
+                # Create analysis type identifier
+                plot_type <- paste(direction, group_type, dep_type, sep = "_")
                 
-                return(TRUE)
+                # Return analysis information
+                list(
+                    dep_type = dep_type,
+                    group_type = group_type,
+                    direction = direction,
+                    distribution = distribution,
+                    alluvsty = alluvsty,
+                    plot_type = plot_type,
+                    dep_var = self$options$dep,
+                    group_var = self$options$group,
+                    grvar = self$options$grvar
+                )
             },
-            
+
+            .generateExplanationMessage = function(analysis_info) {
+                # Format variable descriptions with their types
+                dep_desc <- glue::glue("{analysis_info$dep_var} ({analysis_info$dep_type})")
+                group_desc <- glue::glue("{analysis_info$group_var} ({analysis_info$group_type})")
+                
+                # Generate explanation message based on plot type
+                base_message <- switch(analysis_info$plot_type,
+                    "independent_factor_continuous" = glue::glue(
+                        "You have selected to use a violin plot to compare {dep_desc} between independent groups defined by {group_desc}."
+                    ),
+                    "independent_continuous_continuous" = glue::glue(
+                        "You have selected to use a scatter plot to examine the relationship between {group_desc} and {dep_desc}."
+                    ),
+                    "independent_factor_factor" = glue::glue(
+                        "You have selected to use a bar chart to compare {dep_desc} across categories of {group_desc}."
+                    ),
+                    "independent_continuous_factor" = glue::glue(
+                        "You have selected to compare {dep_desc} with {group_desc}. Note: Consider switching variables for a more appropriate visualization."
+                    ),
+                    "repeated_factor_continuous" = glue::glue(
+                        "You have selected to use a violin plot to compare {dep_desc} between repeated measurements defined by {group_desc}."
+                    ),
+                    "repeated_continuous_continuous" = glue::glue(
+                        "Currently this tool does not support scatterplots for repeated measurements of {group_desc} and {dep_desc}. You may refer to R-project rmcorr package."
+                    ),
+                    "repeated_factor_factor" = glue::glue(
+                        "You have selected to compare repeated measurements of {dep_desc} and {group_desc} using an alluvial diagram."
+                    ),
+                    "repeated_continuous_factor" = glue::glue(
+                        "Please switch the variables: {dep_desc} and {group_desc} to generate an appropriate plot."
+                    ),
+                    # Default case for unknown combinations or types
+                    glue::glue("Variable type combination not supported: {dep_desc} vs {group_desc} with {analysis_info$direction} design. Please ensure variables are either factors or numeric types.")
+                )
+                
+                # Add notes about option applicability
+                notes <- character(0)
+                
+                # Note about statistical approach
+                if (analysis_info$dep_type == "factor" && analysis_info$group_type == "factor") {
+                    notes <- c(notes, "Note: Statistical approach option does not apply to categorical comparisons.")
+                }
+                
+                # Note about alluvial style
+                if (analysis_info$plot_type == "repeated_factor_factor") {
+                    notes <- c(notes, "Alluvial style option is now available for this repeated categorical comparison.")
+                } else if (analysis_info$direction == "repeated") {
+                    notes <- c(notes, "Alluvial style option only applies to repeated factor vs factor comparisons.")
+                }
+                
+                # Combine messages
+                if (length(notes) > 0) {
+                    stat_exp <- glue::glue("{base_message}\n\n{paste(notes, collapse = '\n')}")
+                } else {
+                    stat_exp <- base_message
+                }
+                
+                return(stat_exp)
+            },
+
             .run = function() {
-                # Simple NULL check and early return
-                if (is.null(self$options$dep) || is.null(self$options$group)) {
-                    todo <- "
-                    <br>Welcome to ClinicoPath
-                    <br><br>
-                    This tool will help you generate plots based on variable types.
-                    <br><br>
-                    This function uses ggstatsplot and ggalluvial packages. Please cite jamovi and the packages as given below.
-                    "
+
+                StatStratum <- ggalluvial::StatStratum
+
+                analysis_info <- NULL
+
+                # Get analysis type information
+                analysis_info <- private$.detectAnalysisType()
+                
+                # If no variables selected, show initial message
+                if (is.null(analysis_info)) {
+
+                    todo <- glue::glue(
+                "
+                <br>Welcome to ClinicoPath
+                <br><br>
+                This tool will help you generate plots based on variable types.
+                <br><br>
+                This function uses ggstatsplot and ggalluvial packages. Please cite jamovi and the packages as given below.
+                "
+                    )
+
+                    self$results$todo$setVisible(TRUE)
                     self$results$todo$setContent(todo)
+
                     return()
+
                 }
                 
                 # Clear todo message
-                self$results$todo$setContent("")
+                self$results$todo$setVisible(FALSE)
                 
-                # Basic variable processing
-                tryCatch({
-                    mydep <- self$data[[self$options$dep]]
-                    mygroup <- self$data[[self$options$group]]
-                    
-                    if (is.null(mydep) || is.null(mygroup)) {
-                        return()
-                    }
-                    
-                    # Simple type detection
-                    dep_type <- if (inherits(mydep, "factor")) "factor" else "continuous"
-                    group_type <- if (inherits(mygroup, "factor")) "factor" else "continuous"
-                    direction <- self$options$direction
-                    
-                    # Generate explanation
-                    if (direction == "independent") {
-                        if (group_type == "factor" && dep_type == "continuous") {
-                            stat_exp <- "Violin plot for comparing continuous variable between independent groups"
-                        } else if (group_type == "continuous" && dep_type == "continuous") {
-                            stat_exp <- "Scatter plot for correlation analysis between two continuous variables"
-                        } else if (group_type == "factor" && dep_type == "factor") {
-                            stat_exp <- "Bar chart for comparing categorical variables between groups"
-                        } else if (group_type == "continuous" && dep_type == "factor") {
-                            stat_exp <- "Dot plot for comparing categorical variable across continuous predictor"
-                        } else {
-                            stat_exp <- "Unsupported variable combination"
-                        }
-                    } else {
-                        stat_exp <- "Repeated measures analysis selected"
-                    }
-                    
-                    self$results$text4$setContent(stat_exp)
-                    
-                }, error = function(e) {
-                    # If any error occurs, just show a message
-                    self$results$text4$setContent("Error processing variables")
-                })
+                # Check for data
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
+
+                
+                # Generate explanation message using the new function
+                stat_exp <- private$.generateExplanationMessage(analysis_info)
+                
+                # Set the explanation message in results
+                self$results$text4$setContent(stat_exp)
+
             },
             
-            # Generate plot based on variable types and design
-            .generatePlot = function(data, dep_var, group_var, direction, distribution) {
-                # Convert variable names to symbols for NSE
-                dep_sym <- rlang::sym(dep_var)
-                group_sym <- rlang::sym(group_var)
+            .init = function() {
+                # Initialize and set option visibility based on selected variables
                 
-                # Get cached variable types and data for performance
-                var_info <- self$.getVariableTypes(data, dep_var, group_var)
-                plot_key <- paste(direction, var_info$group_type, var_info$dep_type, sep = "_")
+                # Get analysis type information
+                analysis_info <- private$.detectAnalysisType()
                 
-                # Generate plots based on variable type combinations
-                plot <- NULL
-                
-                if (direction == "independent") {
-                    plot <- switch(
-                        plot_key,
-                        "independent_factor_continuous" = ggstatsplot::ggbetweenstats(
-                            data = data, x = !!group_sym, y = !!dep_sym, type = distribution),
-                        "independent_continuous_continuous" = ggstatsplot::ggscatterstats(
-                            data = data, x = !!group_sym, y = !!dep_sym, type = distribution),
-                        "independent_factor_factor" = ggstatsplot::ggbarstats(
-                            data = data, main = !!dep_sym, condition = !!group_sym),
-                        "independent_continuous_factor" = ggstatsplot::ggdotplotstats(
-                            data = data, x = !!group_sym, y = !!dep_sym, type = distribution),
-                        stop("Unsupported variable combination for independent analysis")
-                    )
-                } else if (direction == "repeated") {
-                    if (plot_key == "repeated_factor_continuous") {
-                        plot <- ggstatsplot::ggwithinstats(
-                            data = data, x = !!group_sym, y = !!dep_sym, 
-                            type = distribution, pairwise.comparisons = TRUE)
-                    } else if (plot_key == "repeated_continuous_continuous") {
-                        plot <- ggstatsplot::ggscatterstats(
-                            data = data, x = !!group_sym, y = !!dep_sym, 
-                            type = distribution, marginal = FALSE)
-                    } else if (plot_key == "repeated_factor_factor") {
-                        # Handle alluvial diagrams for factor-factor repeated measures
-                        alluvsty <- self$options$alluvsty
-                        
-                        if (alluvsty == "t1") {
-                            plotData <- data.frame(gr = var_info$mygroup, dp = var_info$mydep)
-                            mydata_changes <- plotData %>%
-                                dplyr::group_by(gr, dp) %>%
-                                dplyr::tally(x = .)
-                            
-                            stratum <- ggalluvial::StatStratum
-                            plot <- ggplot2::ggplot(data = mydata_changes,
-                                                   ggplot2::aes(
-                                                       axis1 = gr,
-                                                       axis2 = dp,
-                                                       y = n
-                                                   )) +
-                                ggplot2::scale_x_discrete(
-                                    limits = c(group_var, dep_var),
-                                    expand = c(.1, .05)
-                                ) +
-                                ggplot2::xlab(group_var) +
-                                ggalluvial::geom_alluvium(ggplot2::aes(fill = gr, colour = gr)) +
-                                ggalluvial::geom_stratum() +
-                                ggalluvial::stat_stratum(geom = "stratum") +
-                                ggplot2::geom_label(stat = stratum, infer.label = TRUE) +
-                                ggplot2::theme_minimal()
-                        } else if (alluvsty == "t2") {
-                            plot <- easyalluvial::alluvial_wide(
-                                data = data,
-                                max_variables = 5,
-                                fill_by = 'first_variable'
-                            )
-                        }
-                    } else if (plot_key == "repeated_continuous_factor") {
-                        plot <- ggstatsplot::ggdotplotstats(
-                            data = data, x = !!group_sym, y = !!dep_sym, type = distribution)
-                    } else {
-                        stop("Unsupported variable combination for repeated measures analysis")
-                    }
-                } else {
-                    stop("Invalid direction parameter")
+                if (is.null(analysis_info)) {
+                    # No variables selected - hide conditional options
+                    # Keep all options visible initially
+                    return()
                 }
+                
+                # Determine which options should be enabled
+                
+                # 1. Study Design (direction) - Always relevant when variables are selected
+                # Could be disabled for specific unsupported combinations
+                
+                # 2. Statistical Approach (distribution) - Only relevant for quantitative analyses
+                # Enable for: continuous outcomes, disable for pure categorical comparisons
+                enable_distribution <- (
+                    analysis_info$dep_type == "continuous" || 
+                    analysis_info$group_type == "continuous"
+                )
+                
+                # 3. Alluvial Style - Only relevant for repeated factor vs factor
+                enable_alluvial <- (
+                    analysis_info$direction == "repeated" && 
+                    analysis_info$dep_type == "factor" && 
+                    analysis_info$group_type == "factor"
+                )
+                
+                # Apply visibility rules (if UI supports it)
+                # Note: Jamovi may not support dynamic enable/disable in all versions
+                # This is primarily for documentation of when options are relevant
+                
+                if (!enable_distribution) {
+                    # Statistical approach not relevant for pure categorical comparisons
+                    # User should be aware this option doesn't affect factor vs factor plots
+                }
+                
+                if (!enable_alluvial) {
+                    # Alluvial style only matters for repeated factor vs factor
+                    # Hide or disable this option for other combinations
+                }
+                
+                # You could also add informative messages
+                if (analysis_info$plot_type == "independent_factor_factor" && 
+                    !is.null(self$options$distribution) && 
+                    self$options$distribution != "p") {
+                    # Note: Statistical approach doesn't affect bar charts for factor comparisons
+                }
+                
+                if (analysis_info$plot_type != "repeated_factor_factor" && 
+                    !is.null(self$options$alluvsty)) {
+                    # Note: Alluvial style only applies to repeated factor comparisons
+                }
+            },
+            
+            # Prepare data for plotting (handle NA exclusion, term composition)
+            .prepareDataForPlot = function(analysis_info) {
+                # Get base data
+                mydata <- self$data
+                
+                # Handle NA exclusion if requested
+                if (self$options$excl) {
+                    mydata <- jmvcore::naOmit(mydata)
+                }
+                
+                # Prepare composed terms for use with ggstatsplot
+                # Note: We use simple strings instead of composed terms to avoid NSE issues
+                dep_var <- analysis_info$dep_var
+                group_var <- analysis_info$group_var
+                grvar <- analysis_info$grvar
+                
+                # Return prepared data and variable names
+                list(
+                    data = mydata,
+                    dep = dep_var,
+                    group = group_var,
+                    grvar = grvar,
+                    distribution = analysis_info$distribution,
+                    alluvsty = analysis_info$alluvsty
+                )
+            },
+            
+            # Main dispatcher for plot generation
+            .generatePlot = function(analysis_info, prepared_data) {
+                # Check if grouped plot is needed
+                if (!is.null(prepared_data$grvar)) {
+                    return(private$.plotGrouped(analysis_info, prepared_data))
+                }
+                
+                # Dispatch to appropriate plot function based on plot type
+                plot <- switch(analysis_info$plot_type,
+                    "independent_factor_continuous" = private$.plotBetweenStats(prepared_data),
+                    "independent_continuous_continuous" = private$.plotScatterStats(prepared_data),
+                    "independent_factor_factor" = private$.plotBarStats(prepared_data),
+                    "independent_continuous_factor" = private$.plotDotplotStats(prepared_data),
+                    "repeated_factor_continuous" = private$.plotWithinStats(prepared_data),
+                    "repeated_factor_factor" = private$.plotAlluvial(prepared_data),
+                    "repeated_continuous_continuous" = NULL,  # Not supported
+                    "repeated_continuous_factor" = NULL,  # Not supported
+                    NULL  # Default case
+                )
                 
                 return(plot)
             },
             
-            # Cache variable types and data for performance optimization
-            .getVariableTypes = function(data, dep_var, group_var) {
-                mydep <- data[[dep_var]]
-                mygroup <- data[[group_var]]
-                list(
-                    dep_type = if (inherits(mydep, "factor")) "factor" else "continuous",
-                    group_type = if (inherits(mygroup, "factor")) "factor" else "continuous",
-                    mydep = mydep,
-                    mygroup = mygroup
+            # Plot function for between-subjects comparisons (factor vs continuous)
+            .plotBetweenStats = function(prepared_data) {
+                plot <- ggstatsplot::ggbetweenstats(
+                    data = prepared_data$data,
+                    x = !!rlang::sym(prepared_data$group),
+                    y = !!rlang::sym(prepared_data$dep),
+                    type = prepared_data$distribution
                 )
+                return(plot)
+            },
+            
+            # Plot function for scatter plots (continuous vs continuous)
+            .plotScatterStats = function(prepared_data) {
+                plot <- ggstatsplot::ggscatterstats(
+                    data = prepared_data$data,
+                    x = !!rlang::sym(prepared_data$group),
+                    y = !!rlang::sym(prepared_data$dep),
+                    type = prepared_data$distribution
+                )
+                return(plot)
+            },
+            
+            # Plot function for bar charts (factor vs factor)
+            .plotBarStats = function(prepared_data) {
+                plot <- ggstatsplot::ggbarstats(
+                    data = prepared_data$data,
+                    x = !!rlang::sym(prepared_data$dep),
+                    y = !!rlang::sym(prepared_data$group)
+                )
+                return(plot)
+            },
+            
+            # Plot function for dot plots (continuous vs factor)
+            .plotDotplotStats = function(prepared_data) {
+                # For ggdotplotstats: x = continuous, y = factor
+                # The combination is "independent_continuous_factor" meaning:
+                # group is continuous, dep is factor
+                plot <- ggstatsplot::ggdotplotstats(
+                    data = prepared_data$data,
+                    x = !!rlang::sym(prepared_data$group),  # continuous variable
+                    y = !!rlang::sym(prepared_data$dep)     # factor variable
+                )
+                return(plot)
+            },
+            
+            # Plot function for within-subjects comparisons (repeated measures)
+            .plotWithinStats = function(prepared_data) {
+                plot <- ggstatsplot::ggwithinstats(
+                    data = prepared_data$data,
+                    x = !!rlang::sym(prepared_data$group),
+                    y = !!rlang::sym(prepared_data$dep),
+                    type = prepared_data$distribution,
+                    pairwise.comparisons = TRUE
+                )
+                return(plot)
+            },
+            
+            # Plot function for alluvial diagrams (factor vs factor, repeated)
+            .plotAlluvial = function(prepared_data) {
+                if (prepared_data$alluvsty == "t1") {
+                    # Use ggalluvial
+                    plot <- private$.plotAlluvialGG(prepared_data)
+                } else {
+                    # Use easyalluvial
+                    plot <- private$.plotAlluvialEasy(prepared_data)
+                }
+                return(plot)
+            },
+            
+            # ggalluvial implementation
+            .plotAlluvialGG = function(prepared_data) {
+                # Create plot data
+                plotData <- data.frame(
+                    gr = prepared_data$data[[prepared_data$group]],
+                    dp = prepared_data$data[[prepared_data$dep]]
+                )
+                
+                # Tally the combinations
+                mydata_changes <- plotData %>%
+                    dplyr::group_by(gr, dp) %>%
+                    dplyr::tally()
+                
+                # Create alluvial plot
+                stratum <- ggalluvial::StatStratum
+                
+                plot <- ggplot2::ggplot(
+                    data = mydata_changes,
+                    ggplot2::aes(axis1 = gr, axis2 = dp, y = n)
+                ) +
+                    ggplot2::scale_x_discrete(
+                        limits = c(prepared_data$group, prepared_data$dep),
+                        expand = c(.1, .05)
+                    ) +
+                    ggplot2::xlab(prepared_data$group) +
+                    ggalluvial::geom_alluvium(ggplot2::aes(fill = gr, colour = gr)) +
+                    ggalluvial::geom_stratum() +
+                    ggalluvial::stat_stratum(geom = "stratum") +
+                    ggplot2::geom_label(stat = stratum, infer.label = TRUE) +
+                    ggplot2::theme_minimal()
+                
+                return(plot)
+            },
+            
+            # easyalluvial implementation
+            .plotAlluvialEasy = function(prepared_data) {
+                plot <- easyalluvial::alluvial_wide(
+                    data = prepared_data$data,
+                    max_variables = 5,
+                    fill_by = 'first_variable'
+                )
+                return(plot)
+            },
+            
+            # Grouped plots for when grvar is specified
+            .plotGrouped = function(analysis_info, prepared_data) {
+                # Currently only supporting grouped_ggbetweenstats
+                # Can be extended for other grouped plot types
+                if (analysis_info$plot_type == "independent_factor_continuous") {
+                    plot <- ggstatsplot::grouped_ggbetweenstats(
+                        data = prepared_data$data,
+                        x = !!rlang::sym(prepared_data$group),
+                        y = !!rlang::sym(prepared_data$dep),
+                        grouping.var = !!rlang::sym(prepared_data$grvar),
+                        pairwise.comparisons = TRUE,
+                        p.adjust.method = "bonferroni"
+                    )
+                } else {
+                    # For other types, return single plot for now
+                    plot <- private$.generatePlot(analysis_info, prepared_data)
+                }
+                return(plot)
             },
 
             .plot = function(image, ggtheme, theme, ...) {
                 # the plot function ----
-
-
-                # Error messages ----
-
-                if (is.null(self$options$dep) ||
-                    is.null(self$options$group))
+                
+                # Get analysis type information
+                analysis_info <- private$.detectAnalysisType()
+                
+                # Return early if no variables selected
+                if (is.null(analysis_info)) {
                     return()
-
-                if (nrow(self$data) == 0)
+                }
+                
+                # Check for data
+                if (nrow(self$data) == 0) {
                     stop('Data contains no (complete) rows')
-                
-                # Validate package dependencies
-                required_packages <- c('ggstatsplot', 'ggalluvial', 'easyalluvial')
-                missing_packages <- required_packages[!sapply(required_packages, requireNamespace, quietly = TRUE)]
-                
-                if (length(missing_packages) > 0) {
-                    stop(paste('Required packages not available:', paste(missing_packages, collapse = ', ')))
                 }
                 
-                # Validate variables exist
-                if (!self$options$dep %in% names(self$data))
-                    stop(paste('Variable', self$options$dep, 'not found in data'))
-                
-                if (!self$options$group %in% names(self$data))
-                    stop(paste('Variable', self$options$group, 'not found in data'))
-
-
-
-                mydep <- self$data[[self$options$dep]]
-                mygroup <- self$data[[self$options$group]]
-                
-                # Validate minimum data requirements for plotting
-                if (length(mydep) < 2 || length(mygroup) < 2)
-                    stop('Insufficient data: At least 2 observations required for plotting')
-                
-                # Validate that variables have some non-missing data
-                valid_dep <- sum(!is.na(mydep))
-                valid_group <- sum(!is.na(mygroup))
-                
-                if (valid_dep < 2)
-                    stop('Dependent variable has insufficient valid data (need at least 2 non-missing values)')
-                    
-                if (valid_group < 2)
-                    stop('Group variable has insufficient valid data (need at least 2 non-missing values)')
-
-                contin <- c("integer", "numeric", "double")
-
-
-
-
-
-
-                # direction ----
-
-                direction <- self$options$direction
-                
-                # Validate direction parameter
-                if (is.null(direction) || !direction %in% c('independent', 'repeated')) {
-                    stop('Invalid direction parameter. Must be either "independent" or "repeated"')
-                }
-
-                # Get parameter values directly
-                direction <- self$options$direction
-                distribution <- self$options$distribution
-
-
-
-                # Prepare data
-                mydata <- self$data
-                excl <- self$options$excl
-                if (excl) {mydata <- jmvcore::naOmit(mydata)}
-                
-                # Get variable names
-                dep <- self$options$dep
-                group <- self$options$group
-                grvar <- self$options$grvar
-
-
-
-
-
-                if ( ! is.null(self$options$grvar) ) {
-                    grvar <- self$options$grvar
-                    
-                    # Validate grouping variable exists
-                    if (!grvar %in% names(mydata)) {
-                        stop(paste('Grouping variable', grvar, 'not found in data'))
-                    }
-                    
-                    # Validate grouping variable has valid data
-                    grvar_data <- mydata[[grvar]]
-                    if (all(is.na(grvar_data))) {
-                        stop('Grouping variable contains only missing values')
-                    }
-                    
-                    if (is.factor(grvar_data) && length(levels(grvar_data)) < 2) {
-                        stop(paste('Grouping variable must have at least 2 levels for grouped analysis.',
-                                  'Current levels:', paste(levels(grvar_data), collapse = ', '),
-                                  'Suggestion: Use a different grouping variable with multiple categories.'))
-                    }
-                }
-
-
-
-                # Determine variable types for plot selection
-                contin <- c("integer", "numeric", "double") 
-                dep_type <- if (inherits(mydep, "factor")) "factor" else "continuous"
-                group_type <- if (inherits(mygroup, "factor")) "factor" else "continuous"
-                plot_key <- paste(direction, group_type, dep_type, sep = "_")
-                
-                # Generate plots based on variable type combinations
-                if (direction == "independent") {
-                    plot <- switch(
-                        plot_key,
-                        "independent_factor_continuous" = ggstatsplot::ggbetweenstats(
-                            data = mydata, x = !!group, y = !!dep, type = distribution),
-                        "independent_continuous_continuous" = ggstatsplot::ggscatterstats(
-                            data = mydata, x = !!group, y = !!dep, type = distribution),
-                        "independent_factor_factor" = ggstatsplot::ggbarstats(
-                            data = mydata, main = !!dep, condition = !!group),
-                        "independent_continuous_factor" = ggstatsplot::ggdotplotstats(
-                            data = mydata, x = !!group, y = !!dep, type = distribution),
-                        stop("Unsupported variable combination for independent analysis")
-                    )
-
-
-                } else if (direction == "repeated") {
-                    if (plot_key == "repeated_factor_continuous") {
-                        plot <- ggstatsplot::ggwithinstats(
-                            data = mydata, x = !!group, y = !!dep, 
-                            type = distribution, pairwise.comparisons = TRUE)
-
-
-
-                    } else if (plot_key == "repeated_continuous_continuous") {
-                        plot <- ggstatsplot::ggscatterstats(
-                            data = mydata, x = !!group, y = !!dep, 
-                            type = distribution, marginal = FALSE)
-
-
-
-
-
-
-
-
-
-                    } else if (plot_key == "repeated_factor_factor") {
-                        # Handle alluvial diagrams for factor-factor repeated measures
-
-
-
-
-                        alluvsty <- self$options$alluvsty
-
-                        if (alluvsty == "t1") {
-
-    
-
-                        plotData <- data.frame(gr = mygroup,
-                                               dp = mydep)
-
-
-                        mydata_changes <- plotData %>%
-                            dplyr::group_by(gr, dp) %>%
-                            dplyr::tally(x = .)
-
-
-
-
-
-
-
-
-
-
-                        stratum <- ggalluvial::StatStratum
-
-                        plot <- ggplot2::ggplot(data = mydata_changes,
-                                                ggplot2::aes(
-                                                    axis1 = gr,
-                                                    axis2 = dp,
-                                                    y = n
-                                                )) +
-                            ggplot2::scale_x_discrete(
-                                limits = c(self$options$group, self$options$dep),
-                                expand = c(.1, .05)
-                            ) +
-                            ggplot2::xlab(self$options$group) +
-                            ggalluvial::geom_alluvium(ggplot2::aes(fill = gr,
-                                                                   colour = gr)) +
-                            ggalluvial::geom_stratum() +
-                            ggalluvial::stat_stratum(geom = "stratum") +
-                            ggplot2::geom_label(stat = stratum, infer.label = TRUE) +
-
-                            ggplot2::theme_minimal()
-
-
-
-
-                        } else if (alluvsty == "t2") {
-
-
-                            plot <-
-                                easyalluvial::alluvial_wide( data = mydata,
-                                                             max_variables = 5,
-                                                             fill_by = 'first_variable'
-                                                             )
-
-
-                        }
-
-
-
-
-                    } else if (inherits(mygroup, contin) &&
-                               inherits(mydep, "factor")) {
-                        
-                        plot <- ggstatsplot::ggdotplotstats(
-                            data = mydata, x = !!group, y = !!dep, type = distribution)
-                    } else {
-                        stop("Unsupported variable combination for repeated measures analysis")
-                    }
-
-                } else {
-                    stop("Invalid direction parameter")
-                }
-
-                # Handle grouped analysis if grouping variable specified
-                if ( ! is.null(self$options$grvar) ) {
-
-
-                    plot <- ggstatsplot::grouped_ggbetweenstats(
-                        data = mydata,
-                        x = !!group,
-                        y = !!dep,
-                        grouping.var = !!grvar,
-                        pairwise.comparisons = TRUE,
-                        p.adjust.method = "bonferroni"
-                    )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                # Validate plot object and print
-                if (is.null(plot)) {
-                    stop('Plot generation failed: No valid plot created')
+                # Check if plot type is supported
+                if (analysis_info$plot_type %in% c("repeated_continuous_continuous", "repeated_continuous_factor")) {
+                    # These combinations are not supported
+                    return()
                 }
                 
-                if (is.character(plot) && length(plot) == 1) {
-                    stop(paste('Plot generation failed:', plot))
-                }
+                # Prepare data for plotting
+                prepared_data <- private$.prepareDataForPlot(analysis_info)
                 
-                # Try to print plot with error handling
-                tryCatch({
+                # Generate the plot
+                plot <- private$.generatePlot(analysis_info, prepared_data)
+                
+                # Return the plot
+                if (!is.null(plot)) {
                     print(plot)
-                    TRUE
-                }, error = function(e) {
-                    stop(paste('Error displaying plot:', e$message))
-                })
-
+                    return(TRUE)
+                } else {
+                    return()
+                }
             }
-
 
         )
     )

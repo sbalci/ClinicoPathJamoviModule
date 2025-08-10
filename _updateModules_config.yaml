@@ -82,7 +82,7 @@ vignette_folders:
 # Module definitions
 modules:
   jjstatsplot:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
     menuGroup_pattern: "menuGroup: JJStatsPlot$"
     menuGroup_pattern_wip: "menuGroup: JJStatsPlot"
