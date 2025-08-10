@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31
+version: 0.0.31.00
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -1358,7 +1358,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Auto Visualization
     menuTitle: Automatic Plot Selection
     description: >-

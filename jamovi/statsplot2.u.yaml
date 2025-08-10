@@ -2,7 +2,7 @@ title: Automatic Plot Selection
 name: statsplot2
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -34,16 +34,19 @@ children:
     children:
       - type: ComboBox
         name: direction
+        enable: (dep && group)
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: distribution
+        enable: (dep && group)
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: alluvsty
+        enable: (dep && group && direction == "repeated")
   - type: LayoutBox
     margin: large
     children:

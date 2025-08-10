@@ -1,0 +1,870 @@
+---
+title: "jamovi Module Development Guide"
+author: "Serdar Balci"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+---
+
+# Introduction
+
+This guide provides a comprehensive overview of how to develop modules for the jamovi statistical platform. It covers the three core components of a jamovi analysis: the analysis definition (`.a.yaml`), the results definition (`.r.yaml`), the user interface definition (`.u.yaml`), and the R code (`.b.R`) that powers the analysis.
+
+# The `.a.yaml` File: Defining the Analysis
+
+The `.a.yaml` file is a YAML file that specifies the analysis definition for a jamovi module. It defines the user interface (UI) that your analysis will have inside jamovi, including the options, input fields, and buttons that the user will interact with. It also specifies the data requirements for the analysis, such as the types of variables that can be used.
+
+Each analysis in a jamovi module has a corresponding `.a.yaml` file. This file is paired with an `.r.yaml` file (which defines the results) and a `.u.yaml` file (which defines the user interface layout).
+
+## Core Components of an `.a.yaml` File
+
+Let's start by looking at the top-level keys in a typical `.a.yaml` file. We'll use `gtsummary.a.yaml` as an example.
+
+```yaml
+---
+name:  gtsummary
+title: Publication-Ready Tables with gtsummary
+menuGroup: ExplorationD
+menuSubgroup: Enhanced Tables
+menuSubtitle: Summary Tables
+version: '0.0.3'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+# ... more options
+```
+
+*   `name`: This is the unique identifier for the analysis. It should be a single word with no spaces. This name is used to reference the analysis in other parts of the module.
+*   `title`: This is the human-readable title of the analysis that will appear in the jamovi menus.
+*   `menuGroup`: This specifies the main menu group under which the analysis will appear in jamovi.
+*   `menuSubgroup`: This specifies a subgroup within the main menu group.
+*   `menuSubtitle`: An optional subtitle for the analysis in the menu.
+*   `version`: The version of the analysis. It's good practice to increment this when you make changes.
+*   `jas`: The jamovi analysis specification version. `'1.2'` is a common value.
+*   `options`: This is the most important part of the `.a.yaml` file. It's a list of all the UI elements (options) that will be available for the analysis. We'll dive into this in detail below.
+
+## The `options` Section: Defining the User Interface
+
+The `options` section is a list of dictionaries, where each dictionary defines a single UI element. Let's break down the common keys for an option:
+
+*   `name`: A unique name for the option within the analysis. This name will be used to access the option's value in your R code.
+*   `title`: The label that will be displayed next to the UI element in jamovi.
+*   `type`: The type of UI element to create. This is a crucial key, and we'll explore the different types below.
+*   `description`: A description of the option. This can have two sub-keys:
+    *   `main`: A general description that appears as a tooltip in jamovi.
+    *   `R`: A description of how the option is used in the corresponding R code.
+*   `default`: The default value for the option.
+*   `suggested`: A list of suggested variable types for `Variable` and `Variables` options. Common values are `[continuous, ordinal, nominal]`.
+*   `permitted`: A list of permitted variable types. Common values are `[numeric, factor]`.
+
+### Common Option Types
+
+Here are some of the most common option types you'll use in your `.a.yaml` files:
+
+#### `Data`
+
+This option type is used to specify the dataset for the analysis. There is usually only one `Data` option per analysis.
+
+```yaml
+- name: data
+  type: Data
+```
+
+#### `Variable`
+
+This option type allows the user to select a single variable from the dataset.
+
+```yaml
+- name: byvar
+  title: Grouping Variable (By)
+  type: Variable
+  suggested: [ ordinal, nominal ]
+  permitted: [ factor ]
+  default: NULL
+```
+
+#### `Variables`
+
+This option type allows the user to select multiple variables from the dataset.
+
+```yaml
+- name: vars
+  title: Variables for Table
+  type: Variables
+  suggested: [ continuous, ordinal, nominal ]
+  permitted: [ numeric, factor ]
+```
+
+#### `List`
+
+This option type creates a dropdown list of choices.
+
+```yaml
+- name: tableType
+  title: Table Type
+  type: List
+  options:
+    - title: Summary Table (tbl_summary)
+      name: summary
+    - title: Cross Table (tbl_cross)
+      name: cross
+    - title: Regression Table (tbl_regression)
+      name: regression
+    - title: Survival Table (tbl_survfit)
+      name: survival
+  default: summary
+```
+
+Each item in the `options` list for a `List` type has a `title` (what the user sees) and a `name` (the value that gets passed to your R code).
+
+#### `NMXList`
+
+This is a "non-mutual exclusive list", which is essentially a list of checkboxes. The user can select multiple options.
+
+```yaml
+- name: statistics
+  title: Statistics to Include
+  type: NMXList
+  options:
+    - name: mean_sd
+      title: Mean (SD)
+    - name: median_iqr
+      title: Median (IQR)
+    - name: range
+      title: Range (Min, Max)
+    - name: n_percent
+      title: N (%)
+    - name: missing
+      title: Missing values
+  default: [ mean_sd, median_iqr, n_percent ]
+```
+
+#### `Bool`
+
+A simple checkbox that returns `true` or `false`.
+
+```yaml
+- name: addPValue
+  title: Add P-values
+  type: Bool
+  default: false
+```
+
+#### `String`
+
+A text input field for short strings.
+
+```yaml
+- name: tableTitle
+  title: Table Title
+  type: String
+  default: ""
+```
+
+#### `Number`
+
+A numeric input field. You can specify `min` and `max` values.
+
+```yaml
+- name: pValueThreshold
+  title: P-value Threshold for Bolding
+  type: Number
+  default: 0.05
+  min: 0.001
+  max: 0.1
+```
+
+#### `Integer`
+
+Similar to `Number`, but for integer values.
+
+```yaml
+- name: digitsOverall
+  title: Digits for Overall Statistics
+  type: Integer
+  default: 1
+  min: 0
+  max: 5
+```
+
+#### `Level`
+
+This option type allows the user to select a specific level from a `Variable`. The `variable` key is used to link this option to the `Variable` option it depends on.
+
+```yaml
+- name: outcomeLevel
+  title: Event Level
+  type: Level
+  variable: (outcome)
+```
+
+#### `Output`
+
+This option type is used to create a new column in the dataset.
+
+```yaml
+- name: calculatedtime
+  title: Add Calculated Time to Data
+  type: Output
+```
+
+## A Complete Example: `advancedbarplot.a.yaml`
+
+Let's look at the `advancedbarplot.a.yaml` file to see how these components come together in a real-world example. This file defines a complex analysis with many options for creating different types of bar charts.
+
+```yaml
+---
+name: advancedbarplot
+title: "Advanced Bar Charts - 5 Ways"
+menuGroup: JJStatsPlotD
+menuSubgroup: ClinicoPath Advanced Plots
+menuSubtitle: "Professional Bar Charts with Multiple Approaches"
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced bar chart visualization module implementing 5 different approaches
+        for creating professional bar charts. Choose from ggplot2 basics, polished
+        presentations, statistical annotations, interactive plots, and publication-ready
+        designs. Each approach optimized for different use cases in clinical research.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage - 5 different bar chart approaches:
+            # 1. Basic ggplot2 approach
+            # 2. Polished presentation style
+            # 3. Statistical annotation style
+            # 4. Interactive plotly style
+            # 5. Publication-ready style
+
+options:
+    - name: data
+      type: Data
+      description:
+        R: The data as a data frame.
+        jamovi: The dataset for advanced bar chart visualization.
+
+    - name: x_var
+      title: "X Variable (Categories)"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        R: Categorical variable for x-axis categories.
+        jamovi: Select categorical variable for the x-axis.
+
+    - name: y_var
+      title: "Y Variable (Values)"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+        R: Numeric variable for bar heights.
+        jamovi: Select numeric variable for bar heights.
+
+    - name: chart_approach
+      title: "Bar Chart Approach"
+      type: List
+      options:
+        - title: "1. Basic ggplot2"
+          name: basic
+        - title: "2. Polished Presentation"
+          name: polished
+        - title: "3. Statistical Annotations"
+          name: statistical
+        - title: "4. Interactive Plotly"
+          name: interactive
+        - title: "5. Publication Ready"
+          name: publication
+        - title: "6. BBC News Style"
+          name: bbc_style
+        - title: "7. GraphPad Prism Style"
+          name: prism_style
+      default: polished
+      description:
+        R: Choose the bar chart approach and styling.
+        jamovi: Select one of 7 professional bar chart approaches including BBC News and GraphPad Prism styles.
+
+# ... many more options
+```
+
+This example demonstrates the use of various option types, including `Data`, `Variable`, and `List`. It also shows how to provide detailed descriptions for both the jamovi UI and the R code.
+
+## Advanced Concepts
+
+### Conditional Visibility
+
+You can make options appear or disappear based on the values of other options. This is not explicitly defined in the `.a.yaml` file but is handled in the `.u.yaml` file, which controls the layout. However, it's important to design your `.a.yaml` file with this in mind. For example, the `stat_method` option in `advancedbarplot.a.yaml` is likely only visible when `add_statistics` is checked.
+
+### Dynamic Content
+
+The content of some options, like the levels in a `Level` option, is dynamic and depends on the selected variable. This is handled automatically by jamovi based on the `variable` key.
+
+## Best Practices
+
+*   **Be Descriptive:** Use the `title` and `description` fields to make your analysis easy to understand for users.
+*   **Use `suggested` and `permitted`:** These keys help guide the user to select the correct variable types and prevent errors.
+*   **Provide Sensible Defaults:** Set default values for your options so that the analysis can be run with minimal configuration.
+*   **Keep it Organized:** Structure your `.a.yaml` file logically. Group related options together.
+*   **Follow Conventions:** Look at the `.a.yaml` files from other jamovi modules (like the ones in this project) to learn the common conventions.
+
+By following these guidelines and using the examples from this project, you can create powerful and user-friendly analyses for jamovi. For more in-depth information, you can always refer to the official [jamovi developer documentation](https://dev.jamovi.org/api_analysis-definition.html).
+
+# The `.b.R` File: The R Code
+
+The `.b.R` file is the "engine" of your jamovi analysis. It's an R script that defines an R6 class responsible for:
+
+*   Initializing the analysis.
+*   Running the analysis whenever the user changes an option.
+*   Handling the data provided by the user.
+*   Performing the statistical calculations.
+*   Populating the results objects (tables, plots, etc.) that you defined in your `.r.yaml` file.
+
+## The R6 Class Structure
+
+Every `.b.R` file defines an R6 class that inherits from a base class. The base class is automatically generated by jamovi and is named after your analysis (e.g., `survivalBase`).
+
+```R
+survivalClass <- if (requireNamespace('jmvcore'))
+    R6::R6Class(
+        "survivalClass",
+        inherit = survivalBase,
+        private = list(
+            # ... analysis logic ...
+        )
+    )
+```
+
+*   `"survivalClass"`: The name of your analysis class.
+*   `inherit = survivalBase`:  Specifies that this class inherits from the `survivalBase` class. This is how your analysis gets all the jamovi-specific functionality.
+*   `private = list(...)`:  All of your analysis logic, including functions and variables, goes inside this `private` list.
+
+## The Core Functions: `.init()` and `.run()`
+
+There are two main functions that you will use to control the lifecycle of your analysis:
+
+### The `.init()` Function
+
+The `.init()` function is called **once** when the analysis is first loaded. It's the perfect place for one-time setup tasks.
+
+```R
+.init = function() {
+    if (self$options$ph_cox) {
+        self$results$cox_ph$setVisible(TRUE)
+    }
+
+    if (!(self$options$ph_cox)) {
+        self$results$cox_ph$setVisible(FALSE)
+    }
+}
+```
+
+In this example from `survival.b.R`, the `.init()` function sets the initial visibility of a results object based on the value of an option.
+
+### The `.run()` Function
+
+The `.run()` function is the main workhorse of your analysis. It's called **every time the user changes an option** in the UI. The typical workflow inside `.run()` is as follows:
+
+1.  **Input Validation:** Check if the user has provided all the necessary inputs. If not, you can display a message and `return()` early.
+2.  **Data Preparation:** Access the data using `self$data` and prepare it for analysis. This might involve cleaning the data, transforming variables, or filtering rows.
+3.  **Run the Analysis:** Perform the statistical calculations using the prepared data and the options selected by the user.
+4.  **Populate Results:** Populate the results objects (tables, plots, etc.) with the results of your analysis.
+
+## Accessing UI Options and Data
+
+### Accessing Options
+
+You can access the values of the UI options you defined in your `.a.yaml` file using `self$options$...`. For example, to get the value of the `explanatory` variable selector:
+
+```R
+explanatory_variable <- self$options$explanatory
+```
+
+### Handling Data
+
+The user's dataset is available to you as a data frame called `self$data`. You can work with this data frame using standard R functions and packages.
+
+```R
+# Get the data
+mydata <- self$data
+
+# Get a specific column
+outcome_column <- self$data[[self$options$outcome]]
+```
+
+## Populating Results
+
+You can access the results objects you defined in your `.r.yaml` file using `self$results$...`.
+
+*   **Tables:** `self$results$tableName$addRow(...)`
+*   **Plots:** `self$results$plotName$setState(...)`
+*   **HTML/Preformatted:** `self$results$itemName$setContent(...)`
+
+Refer to the previous guides on creating tables and plots for more details on how to populate them.
+
+## State Management for Plots
+
+As described in the plots guide, you use `image$setState()` to pass data to your plot rendering functions. This is a key concept for managing the state of your analysis and separating the data preparation from the rendering logic.
+
+```R
+# In .run()
+plotData <- list(
+    "name1time" = name1time,
+    "name2outcome" = name2outcome,
+    "name3explanatory" = name3explanatory,
+    "cleanData" = cleanData
+)
+
+image <- self$results$plot
+image$setState(plotData)
+
+# In .plot()
+.plot = function(image, ...) {
+    results <- image$state
+    # ... use results to create the plot ...
+}
+```
+
+## Helper Functions
+
+For any non-trivial analysis, it's essential to break down your code into smaller, manageable helper functions. In `survival.b.R`, you can see several helper functions, all defined within the `private` list:
+
+*   `.getData()`: A function to get and label the data.
+*   `.definemytime()`: A function to define the survival time variable.
+*   `.definemyoutcome()`: A function to define the outcome variable.
+*   `.cleandata()`: A function that calls the other helper functions to prepare the data for analysis.
+*   `.medianSurv()`, `.cox()`, `.survTable()`: Functions to perform specific parts of the analysis.
+*   `.plot()`, `.plot2()`, etc.: Functions to render the various plots.
+
+This modular approach makes your code easier to read, debug, and maintain.
+
+## A Complete Example: Walkthrough of `survival.b.R`
+
+Let's walk through a simplified version of the `survival.b.R` file to see how all the pieces fit together.
+
+```R
+survivalClass <- R6::R6Class(
+    "survivalClass",
+    inherit = survivalBase,
+    private = list(
+
+        .run = function() {
+
+            # 1. Input Validation
+            if (is.null(self$options$outcome) || is.null(self$options$elapsedtime)) {
+                # Display a "to-do" message and exit
+                private$.todo()
+                return()
+            }
+
+            # 2. Data Preparation
+            results <- private$.cleandata()
+            if (is.null(results)) {
+                return()
+            }
+
+            # 3. Run Analysis and Populate Results
+            private$.medianSurv(results)
+            private$.cox(results)
+            private$.survTable(results)
+
+            # 4. Set State for Plots
+            plotData <- list(
+                # ... data for plotting ...
+            )
+            self$results$plot$setState(plotData)
+        },
+
+        .cleandata = function() {
+            # ... code to clean and prepare the data ...
+            return(list_of_clean_data_and_variable_names)
+        },
+
+        .medianSurv = function(results) {
+            # ... code to calculate median survival ...
+
+            # Populate the median survival table
+            medianTable <- self$results$medianTable
+            for (i in seq_along(data_frame[, 1, drop = T])) {
+                medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
+            }
+        },
+
+        .plot = function(image, ggtheme, theme, ...) {
+            # ... code to generate the plot using image$state ...
+            print(plot)
+            TRUE
+        }
+    )
+)
+```
+
+This example demonstrates the core principles of a `.b.R` file: a `.run` function that orchestrates the analysis, helper functions to do the heavy lifting, and the use of `self$options` and `self$results` to interact with the UI and the output.
+
+By following these guidelines and studying the examples in this project, you can write robust and efficient `.b.R` files for your jamovi modules.
+
+# The `.r.yaml` File: Defining the Results
+
+The `.r.yaml` file is a YAML file that specifies the results definition for a jamovi analysis. It defines the output elements that will be displayed to the user, such as tables, plots, and text. Each analysis in a jamovi module has an `.r.yaml` file, which works in conjunction with the `.a.yaml` (analysis definition) and `.u.yaml` (UI definition) files.
+
+The `.r.yaml` file acts as a blueprint for the results, specifying the structure and properties of each output element. The actual content of these elements is then populated by your R code during the analysis.
+
+## Core Components of an `.r.yaml` File
+
+Let's examine the top-level keys in a typical `.r.yaml` file, using `gtsummary.r.yaml` as a starting point:
+
+```yaml
+---
+name:  gtsummary
+title: Publication-Ready Tables with gtsummary
+jrs:   '1.1'
+
+items:
+    - name:  todo
+      title: Instructions
+      type:  Html
+      visible: false
+# ... more items
+```
+
+*   `name`: This should match the `name` in the corresponding `.a.yaml` file. It uniquely identifies the analysis.
+*   `title`: The title of the results. This can be a static string or can be dynamically generated using variables from the analysis options (e.g., `` `Survival Analysis - ${explanatory}` ``).
+*   `jrs`: The jamovi results specification version. `'1.1'` is a common value.
+*   `items`: This is the core of the `.r.yaml` file. It's a list of all the result elements that will be part of the output.
+
+## The `items` Section: Defining Result Elements
+
+The `items` section is a list of dictionaries, where each dictionary defines a single result element. Here are the common keys for an item:
+
+*   `name`: A unique name for the result item. This name is used in your R code to access and populate the item.
+*   `title`: The title of the result item as it will appear in the jamovi output.
+*   `type`: The type of result element. This determines how the item will be rendered. We'll explore the different types below.
+*   `visible`: A condition that determines whether the item is visible in the output. This is often tied to an option from the `.a.yaml` file (e.g., `(addPValue)`).
+*   `clearWith`: A list of option names from the `.a.yaml` file. If any of these options change, the content of the result item will be cleared. This is important for ensuring that the results are always up-to-date with the current analysis settings.
+*   `refs`: A list of references to be cited for this result.
+
+### Common Result Element Types
+
+Here are some of the most common result element types you'll use:
+
+#### `Html`
+
+This type is used to render HTML content. It's very flexible and can be used for instructions, notes, or complex, custom-formatted output.
+
+```yaml
+- name:  todo
+  title: Instructions
+  type:  Html
+  visible: false
+```
+
+#### `Preformatted`
+
+This type is used to display preformatted text, such as the output from a statistical test or a block of R code. The text will be rendered in a monospace font, preserving whitespace.
+
+```yaml
+- name:  code_output
+  title: R Code
+  type:  Preformatted
+  visible: "(showCode)"
+```
+
+#### `Table`
+
+This is one of the most important result types. It's used to display tabular data.
+
+```yaml
+- name:  medianTable
+  title: '`Median Survival Table: Levels for ${explanatory}`'
+  type:  Table
+  rows: 0
+  columns:
+    - name: factor
+      title: "Levels"
+      type: text
+    - name: records
+      title: "Records"
+      type: integer
+    - name: events
+      title: "Events"
+      type: integer
+    - name: median
+      title: "Median"
+      type: number
+    - name: x0_95lcl
+      title: "Lower"
+      superTitle: '95% Confidence Interval'
+      type: number
+    - name: x0_95ucl
+      title: "Upper"
+      superTitle: '95% Confidence Interval'
+      type: number
+```
+
+*   `rows`: The number of rows in the table. `0` means the number of rows is determined by the data.
+*   `columns`: A list of dictionaries, where each dictionary defines a column in the table.
+    *   `name`: The name of the column.
+    *   `title`: The column header.
+    *   `type`: The data type of the column (`text`, `integer`, `number`).
+    *   `format`: A string specifying the format for numeric values (e.g., `pc` for percentage, `zto` for zero-to-one, `pvalue`).
+    *   `superTitle`: A title that spans across multiple columns.
+
+#### `Image`
+
+This type is used to display plots and other images.
+
+```yaml
+- name: plot
+  title: '`Survival Plot - ${explanatory}`'
+  type: Image
+  width:  600
+  height: 450
+  renderFun: .plot
+  visible: (sc)
+  requiresData: true
+```
+
+*   `width` and `height`: The dimensions of the plot in pixels.
+*   `renderFun`: The name of the R function that will generate the plot. This function is defined in your analysis's R code.
+*   `requiresData`: Whether the plot requires data to be rendered.
+
+#### `Output`
+
+This type is used to create a new variable in the dataset.
+
+```yaml
+- name: calculatedtime
+  title: Add Calculated Time to Data
+  type: Output
+  varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
+  varDescription: '`Calculated Time from Given Dates - from ${ dxdate } to { fudate } in Survival Analysis`'
+  measureType: continuous
+```
+
+*   `varTitle`: The title of the new variable.
+*   `varDescription`: A description of the new variable.
+*   `measureType`: The measure type of the new variable (`continuous`, `nominal`, `ordinal`).
+
+## A Complete Example: `survival.r.yaml`
+
+The `survival.r.yaml` file provides an excellent example of a complex results definition with multiple tables, plots, and other elements.
+
+```yaml
+---
+name:  survival
+title: Survival Analysis
+jrs:   '1.1'
+
+items:
+    - name: subtitle
+      title: '`Survival Analysis - ${explanatory}`'
+      type:  Preformatted
+
+    - name:  medianTable
+      title: '`Median Survival Table: Levels for ${explanatory}`'
+      type:  Table
+      # ... (column definitions)
+
+    - name: plot
+      title: '`Survival Plot - ${explanatory}`'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot
+      visible: (sc)
+      requiresData: true
+
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+      # ... (output variable definitions)
+```
+
+This example showcases several key features:
+
+*   **Dynamic Titles:** The titles of the results items are dynamically generated using the `${explanatory}` variable from the analysis options.
+*   **Conditional Visibility:** The visibility of the plot is controlled by the `sc` option.
+*   **Multiple Result Types:** The analysis produces a variety of outputs, including preformatted text, tables, plots, and new data variables.
+
+## Best Practices
+
+*   **Clear and Descriptive Names:** Use clear and descriptive names for your result items. This will make your R code easier to read and maintain.
+*   **Use `clearWith`:** Always use the `clearWith` property to ensure that your results are updated when the user changes the analysis options.
+*   **Organize Your Results:** Use `Group` elements (not shown in the examples, but available) to organize your results into logical sections.
+*   **Provide Informative Titles:** Use dynamic titles to provide context for your results.
+*   **Refer to the Documentation:** The official [jamovi results definition documentation](https://dev.jamovi.org/api_results-definition.html) and [results elements documentation](https://dev.jamovi.org/api_results-elements.html) are invaluable resources.
+
+By following these guidelines and studying the examples in this project, you can create well-structured and informative results for your jamovi analyses.
+
+# The `.u.yaml` File: Defining the User Interface
+
+The `.u.yaml` file is a YAML file that specifies the user interface definition for a jamovi analysis. It arranges the UI elements defined in the `.a.yaml` file into a structured and user-friendly layout. While the `.a.yaml` file defines *what* UI elements exist, the `.u.yaml` file defines *where* and *how* they are displayed.
+
+## Core Components of a `.u.yaml` File
+
+A `.u.yaml` file is essentially a tree of UI components. The root of the tree is a list of top-level UI elements. Let's look at the basic structure of `survival.u.yaml`:
+
+```yaml
+title: Survival Analysis
+name: survival
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    # ...
+  - type: CollapseBox
+    # ...
+```
+
+*   `title`: The title of the analysis UI.
+*   `name`: The name of the analysis, which must match the name in the `.a.yaml` and `.r.yaml` files.
+*   `jus`: The jamovi UI specification version. `'3.0'` is a common value.
+*   `stage`: The developmental stage of the analysis (e.g., `0` for development).
+*   `compilerMode`: Can be `tame` or `aggressive`. `tame` is generally recommended.
+*   `children`: A list of the top-level UI components that make up the analysis UI.
+
+## Common UI Components
+
+The `children` list contains a variety of UI components that you can use to build your interface. Here are some of the most common ones:
+
+### `VariableSupplier`
+
+This is a container for the variable selection lists. It typically appears at the top of the UI.
+
+```yaml
+- type: VariableSupplier
+  persistentItems: false
+  stretchFactor: 1
+  children:
+    - type: TargetLayoutBox
+      label: Time Elapsed
+      children:
+        - type: VariablesListBox
+          name: elapsedtime
+          maxItemCount: 1
+          isTarget: true
+```
+
+*   `TargetLayoutBox`: A box that contains a `VariablesListBox` and a label.
+*   `VariablesListBox`: The list of variables that the user can drag and drop into. The `name` here must match the name of a `Variable` or `Variables` option in your `.a.yaml` file.
+
+### `CollapseBox`
+
+A collapsible box that can be used to group related options. This is essential for keeping complex UIs organized.
+
+```yaml
+- type: CollapseBox
+  label: Advanced Elapsed Time Options
+  collapsed: true
+  children:
+    # ... other UI components
+```
+
+*   `label`: The text that appears on the header of the `CollapseBox`.
+*   `collapsed`: Whether the box is collapsed by default.
+
+### `LayoutBox`
+
+A flexible container for arranging other UI elements. It can be used to create vertical or horizontal layouts.
+
+```yaml
+- type: LayoutBox
+  margin: large
+  children:
+    - type: ComboBox
+      name: chart_approach
+```
+
+*   `margin`: The amount of space around the `LayoutBox`.
+
+### Referencing `.a.yaml` Options
+
+Most of the UI components in a `.u.yaml` file are simply references to the options you defined in your `.a.yaml` file. You reference an option by its `name`. The `type` of the component in the `.u.yaml` file should correspond to the `type` of the option in the `.a.yaml` file.
+
+Here are some common examples:
+
+*   `ComboBox` for `List` options.
+*   `CheckBox` for `Bool` options.
+*   `TextBox` for `String`, `Number`, and `Integer` options.
+*   `VariablesListBox` for `Variable` and `Variables` options.
+*   `LevelSelector` for `Level` options.
+
+## Layout and Arrangement
+
+You can create sophisticated layouts by nesting `LayoutBox` components. While not explicitly shown in these examples, you can use `VerticalStack` and `HorizontalStack` within a `LayoutBox` to arrange elements. However, the default behavior of a `LayoutBox` is to stack its children vertically.
+
+## Conditional Visibility
+
+One of the most powerful features of the `.u.yaml` file is the ability to create a dynamic UI where options appear and disappear based on the user's selections. This is achieved using the `enable` property.
+
+```yaml
+- type: ComboBox
+  name: stat_method
+  enable: add_statistics
+```
+
+In this example, the `stat_method` `ComboBox` will only be enabled (i.e., clickable) if the `add_statistics` `CheckBox` is checked. The `enable` property takes a condition that is evaluated in real-time.
+
+You can also use more complex conditions:
+
+```yaml
+- type: LevelSelector
+  name: outcomeLevel
+  enable: (outcome && !multievent)
+```
+
+Here, the `outcomeLevel` `LevelSelector` is only enabled if the `outcome` variable is selected *and* the `multievent` checkbox is *not* checked.
+
+## A Complete Example: `advancedbarplot.u.yaml`
+
+The `advancedbarplot.u.yaml` file provides a great example of a well-structured and dynamic UI.
+
+```yaml
+title: Advanced Bar Charts - 5 Ways
+name: advancedbarplot
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    # ...
+  - type: Label
+    label: Chart Approach & Style
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: chart_approach
+  - type: CollapseBox
+    label: Data & Statistics
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: normal
+        children:
+          - type: ComboBox
+            name: stat_method
+            enable: add_statistics
+      # ...
+```
+
+This example demonstrates:
+
+*   **Clear Organization:** The UI is organized into logical sections using `CollapseBox` elements.
+*   **Dynamic UI:** The `stat_method` `ComboBox` is conditionally enabled based on the `add_statistics` `CheckBox`.
+*   **Variety of Components:** The UI uses a variety of components, including `VariableSupplier`, `Label`, `LayoutBox`, `ComboBox`, and `CollapseBox`.
+
+## Best Practices
+
+*   **Organize with `CollapseBox`:** For any analysis with more than a few options, use `CollapseBox` to group related settings. This makes the UI much less overwhelming for the user.
+*   **Use `enable` for Dynamic UIs:** Use the `enable` property to create a responsive and intuitive UI that only shows the user the options that are relevant to their current selections.
+*   **Keep it Clean:** Use `LayoutBox` and margins to create a visually appealing and easy-to-read layout.
+*   **Refer to the Documentation:** The official jamovi documentation on [UI definition](https://dev.jamovi.org/api_ui-definition.html), [basic design](https://dev.jamovi.org/ui-basic-design.html), [advanced design](https://dev.jamovi.org/ui-advanced-design.html), and [advanced customization](https://dev.jamovi.org/ui-advanced-customisation.html) are essential resources.
+
+By following these guidelines and learning from the examples in this project, you can design effective and user-friendly interfaces for your jamovi analyses.
