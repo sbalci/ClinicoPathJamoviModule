@@ -24,7 +24,9 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             pointsize = 3,
             pointalpha = 0.4,
             smoothlinesize = 1.5,
-            smoothlinecolor = "blue", ...) {
+            smoothlinecolor = "blue",
+            plotwidth = 600,
+            plotheight = 450, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -133,6 +135,18 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "smoothlinecolor",
                 smoothlinecolor,
                 default="blue")
+            private$..plotwidth <- jmvcore::OptionInteger$new(
+                "plotwidth",
+                plotwidth,
+                default=600,
+                min=300,
+                max=1200)
+            private$..plotheight <- jmvcore::OptionInteger$new(
+                "plotheight",
+                plotheight,
+                default=450,
+                min=300,
+                max=800)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -153,6 +167,8 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..pointalpha)
             self$.addOption(private$..smoothlinesize)
             self$.addOption(private$..smoothlinecolor)
+            self$.addOption(private$..plotwidth)
+            self$.addOption(private$..plotheight)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -173,7 +189,9 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         pointsize = function() private$..pointsize$value,
         pointalpha = function() private$..pointalpha$value,
         smoothlinesize = function() private$..smoothlinesize$value,
-        smoothlinecolor = function() private$..smoothlinecolor$value),
+        smoothlinecolor = function() private$..smoothlinecolor$value,
+        plotwidth = function() private$..plotwidth$value,
+        plotheight = function() private$..plotheight$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -193,7 +211,9 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..pointsize = NA,
         ..pointalpha = NA,
         ..smoothlinesize = NA,
-        ..smoothlinecolor = NA)
+        ..smoothlinecolor = NA,
+        ..plotwidth = NA,
+        ..plotheight = NA)
 )
 
 jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -220,7 +240,23 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "grvar",
                     "excl",
                     "originaltheme",
-                    "typestatistics"))
+                    "typestatistics",
+                    "conflevel",
+                    "bfmessage",
+                    "k",
+                    "marginal",
+                    "xsidefill",
+                    "ysidefill",
+                    "pointsize",
+                    "pointalpha",
+                    "smoothlinesize",
+                    "smoothlinecolor",
+                    "mytitle",
+                    "xtitle",
+                    "ytitle",
+                    "resultssubtitle",
+                    "plotwidth",
+                    "plotheight"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -335,6 +371,8 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param pointalpha Transparency level for scatter plot points.
 #' @param smoothlinesize Width of the regression/smooth line.
 #' @param smoothlinecolor Color of the regression/smooth line.
+#' @param plotwidth Width of the plot in pixels. Default is 600.
+#' @param plotheight Height of the plot in pixels. Default is 450.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -363,7 +401,9 @@ jjscatterstats <- function(
     pointsize = 3,
     pointalpha = 0.4,
     smoothlinesize = 1.5,
-    smoothlinecolor = "blue") {
+    smoothlinecolor = "blue",
+    plotwidth = 600,
+    plotheight = 450) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjscatterstats requires jmvcore to be installed (restart may be required)")
@@ -399,7 +439,9 @@ jjscatterstats <- function(
         pointsize = pointsize,
         pointalpha = pointalpha,
         smoothlinesize = smoothlinesize,
-        smoothlinecolor = smoothlinecolor)
+        smoothlinecolor = smoothlinecolor,
+        plotwidth = plotwidth,
+        plotheight = plotheight)
 
     analysis <- jjscatterstatsClass$new(
         options = options,

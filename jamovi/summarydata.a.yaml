@@ -3,7 +3,7 @@ name: summarydata
 title: Summary of Continuous Variables
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptives
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:
@@ -22,21 +22,6 @@ description:
 
 
 options:
-
-    # - name: lang
-    #   title: Language
-    #   type: List
-    #   options:
-    #     - title: English
-    #       name: English
-    #     - title: Türkçe
-    #       name: Türkçe
-    #     - title: Deutsch
-    #       name: Deutsch
-    #   default: English
-    #   description:
-    #       R: select language
-
 
     - name: data
       type: Data
@@ -63,6 +48,16 @@ options:
         R: >
           If TRUE, additional distribution diagnostics (Shapiro-Wilk test, skewness, and kurtosis)
           will be computed and explained.
+
+    - name: decimal_places
+      title: "Decimal Places"
+      type: Integer
+      min: 0
+      max: 5
+      default: 1
+      description:
+        R: >
+          Number of decimal places to display for statistical measures.
 
 
 #

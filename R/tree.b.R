@@ -14,38 +14,25 @@
 #' @importFrom htmltools HTML
 
 # Progress bar helper function for tree analysis
-treeProgressBar <- function(current, total = 100, message = '', width = 520, height = 40) {
+treeProgressBar <- function(current, total = 100, message = '', width = 400, height = 30) {
     # Ensure current is within bounds
     current <- max(0, min(current, total))
     
     # Calculate progress percentage
-    progress_width <- (width - 20) * current / total + 10
-    
-    # Create outer border points
-    outer_points <- paste(
-        "10,10", "10,35", paste0(width - 10, ",35"), paste0(width - 10, ",10"), "10,10",
-        sep = " "
-    )
-    
-    # Create inner progress bar points  
-    inner_points <- paste(
-        "10,10", "10,35", paste0(progress_width, ",35"), paste0(progress_width, ",10"), "10,10",
-        sep = " "
-    )
+    progress_percent <- current / total * 100
     
     # Determine color based on progress
     bar_color <- if (current < 30) "#FF9800" else if (current < 70) "#2196F3" else "#4CAF50"
     
-    # Create HTML output with enhanced styling
+    # Create responsive HTML progress bar that fits jamovi interface
     html_output <- paste0(
-        '<div style="margin: 10px auto; text-align: center;">',
-        '<svg width="', width, '" height="', height, '" style="background-color: transparent; margin: auto; padding: 0;" xmlns="http://www.w3.org/2000/svg">',
-        '<polyline points="', outer_points, '" fill="#FFFFFF" stroke="#333333" fill-opacity="1" stroke-width="1.5" stroke-opacity="1" />',
-        '<polyline points="', inner_points, '" fill="', bar_color, '" stroke="', bar_color, '" fill-opacity="0.7" stroke-width="1" stroke-opacity="1" />',
-        '<text x="', width/2, '" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333333">',
-        round(current/total * 100, 1), '%',
-        '</text>',
-        '</svg>',
+        '<div style="margin: 8px auto; width: 100%; max-width: ', width, 'px; text-align: center;">',
+        '<div style="background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; height: ', height, 'px; position: relative; overflow: hidden;">',
+        '<div style="background-color: ', bar_color, '; height: 100%; width: ', progress_percent, '%; transition: width 0.3s ease; border-radius: 3px;"></div>',
+        '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: Arial, sans-serif; font-size: 11px; color: #333; font-weight: bold;">',
+        round(progress_percent, 1), '%',
+        '</div>',
+        '</div>',
         '</div>'
     )
     
@@ -148,8 +135,8 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 # Clear any previous messages when validation passes
                 self$results$todo$setContent("")
 
-                # Initialize progress feedback
-                private$.update_progress("initializing", "Initializing analysis...", 10)
+                # Initialize progress feedback with finer granularity
+                private$.update_progress("initializing", "Initializing analysis...", 5)
 
                 # Display analysis introduction
                 intro_msg <- private$.generate_analysis_introduction()
@@ -192,16 +179,19 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             # Wrap main analysis in error handling
             tryCatch({
                 # Prepare data and build model
-                private$.update_progress("data_prep", "Preparing and validating data...", 20)
+                private$.update_progress("data_prep", "Preparing and validating data...", 10)
                 message("[DEBUG] Preparing data...")
                 data_prepared <- private$.prepare_data()
                 if (is.null(data_prepared)) {
                     message("[DEBUG] Data preparation failed, exiting")
                     return()
                 }
+                
+                private$.update_progress("data_validated", "Data validation complete...", 25)
                 message("[DEBUG] Data prepared successfully")
 
                 # Train model
+                private$.update_progress("model_training", "Training model...", 40)
                 private$.update_algorithm_progress(self$options$algorithm, "training")
                 message("[DEBUG] Training model with algorithm: ", self$options$algorithm)
                 message("[DEBUG] Analysis mode: ", tree_mode)
@@ -209,6 +199,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 model_results <- private$.train_model(data_prepared)
                 private$.model_results <- model_results
 
+                private$.update_progress("model_completed", "Model training completed...", 60)
                 message("[DEBUG] Model training completed: ", !is.null(model_results))
 
                 if (!is.null(model_results)) {
@@ -232,11 +223,13 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 self$results$text1$setContent(success_html)
                 self$results$text1$setVisible(TRUE)
                 # Generate performance summary
+                private$.update_progress("generating_summary", "Generating performance summary...", 70)
                 if (self$options$show_performance_metrics) {
                     summary_html <- private$.generate_model_summary(model_results)
                     self$results$model_summary$setContent(summary_html)
 
                     # Performance table
+                    private$.update_progress("performance_metrics", "Calculating performance metrics...", 75)
                     private$.generate_performance_table(model_results)
 
                     # Clinical metrics table
@@ -249,6 +242,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
 
                 # Confusion matrix
                 if (self$options$show_confusion_matrix) {
+                    private$.update_progress("confusion_matrix", "Generating confusion matrix...", 80)
                     cm_html <- private$.generate_confusion_matrix(model_results)
                     self$results$confusion_matrix$setContent(cm_html)
 
@@ -375,7 +369,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
 
                 # Mark analysis as completed
                 # Generate final results
-                private$.update_progress("generating_results", "Generating final results and visualizations...", 95)
+                private$.update_progress("generating_results", "Generating final results and visualizations...", 90)
                 
                 private$.update_progress("completed", "Analysis completed successfully!", 100,
                                        paste0("Algorithm: ", toupper(gsub("_", " ", self$options$algorithm)),
@@ -395,15 +389,18 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
         .plot_tree = function(image, ggtheme, theme, ...) {
 
             if (is.null(private$.model_results)) {
+                message("[DEBUG] No model results available for tree plotting")
                 return()
             }
 
             algorithm <- self$options$algorithm
+            message(paste("[DEBUG] Plotting tree for algorithm:", algorithm))
 
             tryCatch({
                 if (algorithm == "fftrees") {
                     # Plot FFTrees with appropriate labels
                     model <- private$.model_results$model
+                    message("[DEBUG] Plotting FFTrees model")
 
                     # Get class labels from training data
                     target_levels <- levels(private$.training_data[[self$options$target]])
@@ -426,13 +423,51 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                           side = 3, line = 0.5, cex = 0.8, col = "darkblue")
 
                 } else if (algorithm == "rpart") {
-                    # Plot rpart tree with enhanced styling (Appsilon-style)
+                    # Plot rpart tree with enhanced styling
                     model <- private$.model_results$model
+                    message("[DEBUG] Plotting rpart model")
+                    
+                    # Check if model is valid
+                    if (is.null(model)) {
+                        message("[DEBUG] Model is NULL, cannot plot tree")
+                        return()
+                    }
+                    
+                    # Check if model has splits
+                    if (nrow(model$splits) == 0) {
+                        message("[DEBUG] Model has no splits - creating simple root node visualization")
+                        plot.new()
+                        plot.window(xlim = c(0, 1), ylim = c(0, 1))
+                        text(0.5, 0.5, "Single Node Tree\n(No splits found)", 
+                             cex = 1.2, col = "darkblue", font = 2)
+                        text(0.5, 0.3, paste("All cases classified as:", 
+                                            names(sort(table(private$.training_data[[self$options$target]]), 
+                                                       decreasing = TRUE))[1]), 
+                             cex = 1, col = "darkred")
+                        title("Enhanced CART Decision Tree", col.main = "darkblue")
+                        return()
+                    }
+                    
                     plot_style <- self$options$tree_plot_style %||% "standard"
                     show_node_stats <- self$options$show_node_statistics %||% FALSE
 
                     # Configure plot parameters based on style
                     plot_params <- private$.get_tree_plot_params(plot_style, show_node_stats)
+
+                    # Determine color palette based on target variable type
+                    target_levels <- length(unique(private$.training_data[[self$options$target]]))
+                    message(paste("[DEBUG] Target has", target_levels, "levels"))
+                    
+                    # Set appropriate box.palette for multiclass vs binary
+                    if (target_levels > 2) {
+                        # Multiclass: use "auto" or list of palettes
+                        box_palette <- "auto"  # Let rpart.plot handle multiclass automatically
+                        message("[DEBUG] Using 'auto' palette for multiclass problem")
+                    } else {
+                        # Binary: use custom color palette
+                        box_palette <- private$.get_color_palette(plot_style)
+                        message("[DEBUG] Using custom palette for binary problem")
+                    }
 
                     # Apply enhanced rpart.plot styling
                     do.call(rpart.plot::rpart.plot, c(
@@ -441,7 +476,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                             main = paste("Enhanced CART Decision Tree -", toupper(plot_style), "Style"),
                             under = TRUE,
                             clip.right.labs = FALSE,
-                            box.palette = private$.get_color_palette(plot_style),
+                            box.palette = box_palette,
                             shadow.col = "gray85",
                             nn = TRUE  # Show node numbers
                         ),
@@ -453,10 +488,22 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                                     "| Positive Class:", self$options$targetLevel,
                                     "| Nodes:", length(unique(model$where)))
                     mtext(subtitle, side = 3, line = 0.5, cex = 0.8, col = "darkblue")
+                    
+                } else {
+                    message(paste("[DEBUG] Unsupported algorithm for tree plotting:", algorithm))
+                    return()
                 }
 
+                message("[DEBUG] Tree plot completed successfully")
                 TRUE
             }, error = function(e) {
+                message(paste("[ERROR] Tree plotting failed:", e$message))
+                # Show a simple error message plot instead of silent failure
+                plot.new()
+                plot.window(xlim = c(0, 1), ylim = c(0, 1))
+                text(0.5, 0.5, "Tree Plot Error", cex = 1.5, col = "red", font = 2)
+                text(0.5, 0.3, paste("Error:", e$message), cex = 0.8, col = "darkred")
+                title("Decision Tree Visualization", col.main = "darkblue")
                 return()
             })
         },
@@ -1964,8 +2011,12 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             tryCatch({
                 actual <- results$actual
                 predicted <- results$predictions_class
+                n_levels <- length(levels(actual))
+                
+                message(paste("[DEBUG] Performance table - Target has", n_levels, "levels"))
 
-                if (length(levels(actual)) == 2 && !is.null(self$options$targetLevel)) {
+                if (n_levels == 2 && !is.null(self$options$targetLevel)) {
+                    # Binary classification
                     cm <- caret::confusionMatrix(predicted, actual, positive = self$options$targetLevel)
 
                     # Use performance table (columns already defined in .r.yaml)
@@ -2032,11 +2083,78 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                         ci_lower = npv_ci["lower"],
                         ci_upper = npv_ci["upper"]
                     ))
+                } else if (n_levels > 2) {
+                    # Multiclass classification
+                    message("[DEBUG] Handling multiclass performance metrics")
+                    cm <- caret::confusionMatrix(predicted, actual)
+                    table <- self$results$performance_table
+                    
+                    # Calculate overall accuracy
+                    table$addRow(rowKey = "accuracy", values = list(
+                        metric = "Overall Accuracy",
+                        value = cm$overall["Accuracy"],
+                        ci_lower = cm$overall["AccuracyLower"],
+                        ci_upper = cm$overall["AccuracyUpper"]
+                    ))
+                    
+                    # Add macro-averaged metrics for multiclass
+                    if (!is.null(cm$byClass) && is.matrix(cm$byClass)) {
+                        # Calculate macro averages
+                        macro_sens <- mean(cm$byClass[, "Sensitivity"], na.rm = TRUE)
+                        macro_spec <- mean(cm$byClass[, "Specificity"], na.rm = TRUE)
+                        macro_ppv <- mean(cm$byClass[, "Pos Pred Value"], na.rm = TRUE)
+                        macro_f1 <- mean(cm$byClass[, "F1"], na.rm = TRUE)
+                        
+                        table$addRow(rowKey = "macro_sensitivity", values = list(
+                            metric = "Macro-Avg Sensitivity",
+                            value = macro_sens,
+                            ci_lower = "NA",
+                            ci_upper = "NA"
+                        ))
+                        
+                        table$addRow(rowKey = "macro_specificity", values = list(
+                            metric = "Macro-Avg Specificity", 
+                            value = macro_spec,
+                            ci_lower = "NA",
+                            ci_upper = "NA"
+                        ))
+                        
+                        table$addRow(rowKey = "macro_ppv", values = list(
+                            metric = "Macro-Avg Precision",
+                            value = macro_ppv,
+                            ci_lower = "NA",
+                            ci_upper = "NA"
+                        ))
+                        
+                        table$addRow(rowKey = "macro_f1", values = list(
+                            metric = "Macro-Avg F1-Score",
+                            value = macro_f1,
+                            ci_lower = "NA",
+                            ci_upper = "NA"
+                        ))
+                    }
+                    
+                    # Add Kappa statistic for multiclass agreement
+                    # Try to get Kappa CI if available from confusionMatrix
+                    kappa_lower <- ifelse("KappaLower" %in% names(cm$overall), 
+                                         cm$overall["KappaLower"], "NA")
+                    kappa_upper <- ifelse("KappaUpper" %in% names(cm$overall), 
+                                         cm$overall["KappaUpper"], "NA")
+                    
+                    table$addRow(rowKey = "kappa", values = list(
+                        metric = "Cohen's Kappa",
+                        value = cm$overall["Kappa"],
+                        ci_lower = kappa_lower,
+                        ci_upper = kappa_upper
+                    ))
+                } else {
+                    message("[DEBUG] Unsupported number of target levels:", n_levels)
                 }
 
                 # Table is populated directly, no need to return
 
             }, error = function(e) {
+                message("[ERROR] Performance table generation failed:", e$message)
                 return(NULL)
             })
         },
@@ -2046,8 +2164,12 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             tryCatch({
                 actual <- results$actual
                 predicted <- results$predictions_class
+                n_levels <- length(levels(actual))
+                
+                message(paste("[DEBUG] Clinical metrics - Target has", n_levels, "levels"))
 
-                if (length(levels(actual)) == 2 && !is.null(self$options$targetLevel)) {
+                if (n_levels == 2 && !is.null(self$options$targetLevel)) {
+                    # Binary classification
                     pos_class <- self$options$targetLevel
                     cm <- caret::confusionMatrix(predicted, actual, positive = pos_class)
 
@@ -2122,9 +2244,89 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                         value = (sensitivity + specificity) / 2,
                         interpretation = interpretation
                     ))
+                } else if (n_levels > 2) {
+                    # Multiclass clinical metrics
+                    message("[DEBUG] Handling multiclass clinical metrics")
+                    cm <- caret::confusionMatrix(predicted, actual)
+                    table <- self$results$clinicalMetricsTable
+                    
+                    # Overall accuracy interpretation for multiclass
+                    accuracy <- cm$overall["Accuracy"]
+                    if (accuracy > 0.9) {
+                        acc_interpretation <- "Excellent multiclass classification performance"
+                    } else if (accuracy > 0.8) {
+                        acc_interpretation <- "Good multiclass classification performance"
+                    } else if (accuracy > 0.7) {
+                        acc_interpretation <- "Moderate multiclass classification performance"
+                    } else {
+                        acc_interpretation <- "Limited multiclass classification performance"
+                    }
+                    
+                    table$addRow(rowKey = "multiclass_accuracy", values = list(
+                        metric = "Overall Classification Accuracy",
+                        value = accuracy,
+                        interpretation = acc_interpretation
+                    ))
+                    
+                    # Kappa coefficient interpretation
+                    kappa <- cm$overall["Kappa"]
+                    if (kappa > 0.8) {
+                        kappa_interpretation <- "Almost perfect agreement beyond chance"
+                    } else if (kappa > 0.6) {
+                        kappa_interpretation <- "Substantial agreement beyond chance"
+                    } else if (kappa > 0.4) {
+                        kappa_interpretation <- "Moderate agreement beyond chance"
+                    } else if (kappa > 0.2) {
+                        kappa_interpretation <- "Fair agreement beyond chance"
+                    } else {
+                        kappa_interpretation <- "Slight agreement beyond chance"
+                    }
+                    
+                    table$addRow(rowKey = "kappa_agreement", values = list(
+                        metric = "Cohen's Kappa",
+                        value = kappa,
+                        interpretation = kappa_interpretation
+                    ))
+                    
+                    # Add class-specific metrics for target level if specified
+                    if (!is.null(self$options$targetLevel) && 
+                        !is.null(cm$byClass) && is.matrix(cm$byClass)) {
+                        
+                        target_class <- paste("Class:", self$options$targetLevel)
+                        if (target_class %in% rownames(cm$byClass)) {
+                            target_sens <- cm$byClass[target_class, "Sensitivity"]
+                            target_spec <- cm$byClass[target_class, "Specificity"]
+                            target_ppv <- cm$byClass[target_class, "Pos Pred Value"]
+                            
+                            table$addRow(rowKey = "target_sensitivity", values = list(
+                                metric = paste("Sensitivity for", self$options$targetLevel),
+                                value = target_sens,
+                                interpretation = paste0(round(target_sens * 100, 1), "% of true ", 
+                                                      self$options$targetLevel, " cases correctly identified")
+                            ))
+                            
+                            table$addRow(rowKey = "target_ppv", values = list(
+                                metric = paste("Precision for", self$options$targetLevel),
+                                value = target_ppv,
+                                interpretation = paste0("When predicting ", self$options$targetLevel, 
+                                                      ", correct ", round(target_ppv * 100, 1), "% of the time")
+                            ))
+                        }
+                    }
+                    
+                    # Multiclass interpretation guidance
+                    table$addRow(rowKey = "multiclass_guidance", values = list(
+                        metric = "Clinical Application",
+                        value = n_levels,
+                        interpretation = paste0("This is a ", n_levels, "-class classification problem. ",
+                                              "Consider class-specific performance for clinical decisions.")
+                    ))
+                } else {
+                    message("[DEBUG] Unsupported number of target levels for clinical metrics:", n_levels)
                 }
 
             }, error = function(e) {
+                message("[ERROR] Clinical metrics generation failed:", e$message)
                 return(NULL)
             })
         },
@@ -3014,7 +3216,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                 message("[DEBUG-VALIDATE] Failed: No target variable")
                 return(list(
                     valid = FALSE,
-                    show_welcome = FALSE,
+                    show_welcome = TRUE,
                     message = "Please select a target outcome variable for prediction."
                 ))
             }
@@ -3045,7 +3247,7 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                     message("[DEBUG-VALIDATE] Failed: No target level specified")
                     return(list(
                         valid = FALSE,
-                        show_welcome = FALSE,
+                        show_welcome = TRUE,
                         message = paste("Please select the positive class level for target variable '",
                                       self$options$target, "'. Available levels: ",
                                       paste(unique_levels, collapse = ", "))
@@ -5170,6 +5372,18 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             return(html)
         },
 
+        # Smooth progress update helper for long-running operations
+        .update_progress_smooth = function(start_percent, end_percent, steps, base_message, operation_name) {
+            step_size <- (end_percent - start_percent) / steps
+            for (i in 1:steps) {
+                current_percent <- start_percent + (i * step_size)
+                step_message <- paste0(base_message, " (", i, "/", steps, ")")
+                private$.update_progress(paste0(operation_name, "_step_", i), step_message, current_percent)
+                # Small delay to show progression (minimal performance impact)
+                Sys.sleep(0.05)  # 50ms delay per step
+            }
+        },
+
         # Progress feedback system
         .update_progress = function(stage, message, percent = NULL, details = NULL) {
             timestamp <- format(Sys.time(), "%H:%M:%S")
@@ -5258,7 +5472,10 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
             if (stage == "training") {
                 message <- paste0("Training ", display_name, " model...")
                 details <- paste0("Algorithm: ", display_name, " | Mode: ", self$options$tree_mode)
-                percent <- 50  # Training is roughly halfway through the process
+                
+                # Use smooth progress updates for model training (40% to 60%)
+                private$.update_progress_smooth(40, 60, 8, paste0("Training ", display_name), "training")
+                return()  # Return early since smooth progress was handled
             } else if (stage == "hyperparameter_tuning") {
                 percent <- if (!is.null(step_current) && !is.null(step_total)) {
                     round((step_current / step_total) * 100)
@@ -6297,6 +6514,23 @@ treeClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeClass",
                             levels = c("Other", positive_level)
                         )
                         negative_class <- "Other"
+                    }
+
+                    # FFTrees requires complete cases (no NA in target variable)
+                    complete_train_rows <- complete.cases(train_data[[target_var]])
+                    train_data <- train_data[complete_train_rows, ]
+                    
+                    complete_test_rows <- complete.cases(test_data[[target_var]])
+                    test_data <- test_data[complete_test_rows, ]
+                    
+                    message(paste("[DEBUG] After removing NA values: train_data =", nrow(train_data), "rows, test_data =", nrow(test_data), "rows"))
+                    
+                    # Check if we have enough data after NA removal
+                    if (nrow(train_data) == 0) {
+                        stop("No complete cases found in training data for FFTrees analysis")
+                    }
+                    if (nrow(test_data) == 0) {
+                        stop("No complete cases found in test data for FFTrees analysis")
                     }
 
                     # Create logical version of target variable

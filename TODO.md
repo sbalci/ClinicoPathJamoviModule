@@ -1,5 +1,52 @@
 # TODO
 
+- improve @vignettes/jamovi_a_yaml_guide.md prepare a comprehensive documentation on how to write .a.yaml files in developing jamovi functions. Be detailed and give example codes. Use the existing .a.yaml files as examples.
+Also use the following resources:
+  - <https://dev.jamovi.org/api_analysis-definition.html>
+  - <https://github.com/jamovi/jmv/tree/master/jamovi>
+
+- improve @vignettes/jamovi_r_yaml_guide.md prepare a comprehensive documentation on how to write .r.yaml files in developing jamovi functions. Be detailed and give example codes. Use the existing .r.yaml files as examples.
+Also use the following resources:
+  - <https://dev.jamovi.org/api_results-definition.html>
+  - <https://dev.jamovi.org/api_results-elements.html>
+  - <https://github.com/jamovi/jmv/tree/master/jamovi>
+
+- improve @vignettes/jamovi_u_yaml_guide.md prepare a comprehensive documentation on how to write .u.yaml files in developing jamovi functions. Be detailed and give example codes. Use the existing .u.yaml files as examples.
+Also use the following resources:
+  - <https://dev.jamovi.org/api_ui-definition.html>
+  - <https://dev.jamovi.org/ui-basic-design.html>
+  - <https://dev.jamovi.org/ui-advanced-design.html>
+  - <https://dev.jamovi.org/ui-advanced-customisation.html>
+  - <https://github.com/jamovi/jmv/tree/master/jamovi>
+
+- improve @vignettes/jamovi_tables_guide.md prepare a comprehensive documentation on how to make and populate tables in developing jamovi functions. Be detailed and give example codes. Use the existing .yaml files and .b.R files as examples.
+Also use the following resources:
+  - <https://dev.jamovi.org/api_results-elements.html>
+  - <https://dev.jamovi.org/api_table.html>
+  - <https://dev.jamovi.org/tuts0105-creating-rich-results.html>
+  - <https://dev.jamovi.org/tuts0201-dynamic-tables.html>
+  - <https://github.com/jamovi/jmv/tree/master/R>
+  - <https://github.com/jamovi/jmv/tree/master/jamovi>
+
+- improve @vignettes/jamovi_plots_guide.md prepare a comprehensive documentation on how to make and populate plots in developing jamovi functions. Be detailed and give example codes. Use the existing .yaml files and .b.R files as examples.
+Also use the following resources:
+  - <https://dev.jamovi.org/tuts0106-adding-plots.html>
+  - <https://github.com/jamovi/jmv/tree/master/R>
+  - <https://github.com/jamovi/jmv/tree/master/jamovi>
+
+- improve @vignettes/jamovi_b_R_guide.md prepare a comprehensive documentation on how to write .b.R files in developing jamovi functions. Be detailed and give example codes. Use the existing .b.R files as examples.
+Also use the following resources:
+  - <https://dev.jamovi.org/tuts0202-handling-data.html>
+  - <https://dev.jamovi.org/tuts0203-state.html>
+  - <https://github.com/jamovi/jmv/tree/master/R>
+  - <https://github.com/jamovi/jmv/tree/master/jamovi>
+
+- improve @vignettes/jamovi_formula_guide.md prepare a comprehensive documentation on how to write formula in developing jamovi functions. Be detailed and give example codes. Use the existing .b.R files as examples.
+Also use the following resources:
+  - <https://dev.jamovi.org/tuts0104-implementing-an-analysis.html>
+  - <https://github.com/jamovi/jmv/tree/master/R>
+
+---
 
   5 Powerful Custom Slash Commands:
 
@@ -93,30 +140,6 @@
   2. Review module health: /check-module
   3. Fix any issues found: /fix-function functionname
   4. Create new functions: /create-function newname type
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Comprehensive Implementation Plan for ClinicoPath Survival Analysis Enhancement
 
@@ -315,26 +338,7 @@
 - Phase 3: 2-3 months (specialized applications)
 - Total: 7-10 months for complete implementation
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ---
-
 
 # Stage Migration Module - Future Enhancements
 
@@ -544,9 +548,10 @@ Based on comprehensive analysis of CRAN Task Views, this implementation plan pri
 
 **Target Package Suite:** `PowerTOST`, `TrialSize`, `gsDesign`, `pwr`, `Hmisc`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Clinical Trial Designer (`clinicaltrialdesign.b.R`)**
+
 - Sample size calculations for superiority/non-inferiority/equivalence trials
 - Power analysis for biomarker studies
 - Group sequential design with interim analysis
@@ -555,6 +560,7 @@ Based on comprehensive analysis of CRAN Task Views, this implementation plan pri
 - Bayesian adaptive designs
 
 **2. Sample Size Calculator (`samplesizecalc.b.R`)**
+
 - Two-sample t-tests, chi-square tests
 - Survival analysis (log-rank test) power calculations
 - Diagnostic test accuracy studies
@@ -562,6 +568,7 @@ Based on comprehensive analysis of CRAN Task Views, this implementation plan pri
 - Multiple testing correction considerations
 
 **Implementation Details:**
+
 ```yaml
 # jamovi/clinicaltrialdesign.a.yaml
 name: clinicaltrialdesign
@@ -578,9 +585,10 @@ menuSubgroup: Study Design
 
 **Target Package Suite:** `metafor`, `meta`, `netmeta`, `mada`, `bayesmeta`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Diagnostic Test Meta-Analysis (`diagnosticmeta.b.R`)**
+
 - Bivariate random-effects model for sensitivity/specificity
 - HSROC (Hierarchical Summary ROC) curves
 - Publication bias assessment (funnel plots, Egger's test)
@@ -588,6 +596,7 @@ menuSubgroup: Study Design
 - Meta-regression for exploring heterogeneity sources
 
 **2. Treatment Effect Meta-Analysis (`treatmentmeta.b.R`)**
+
 - Fixed and random effects models
 - Forest plots with subgroup analysis
 - Network meta-analysis for multiple treatment comparisons
@@ -595,12 +604,14 @@ menuSubgroup: Study Design
 - Leave-one-out sensitivity analysis
 
 **3. Biomarker Meta-Analysis (`biomarkermeta.b.R`)**
+
 - Hazard ratio meta-analysis from survival studies
 - Prognostic factor meta-analysis
 - Individual participant data (IPD) meta-analysis framework
 - Time-to-event outcome synthesis
 
 **Implementation Details:**
+
 ```yaml
 # jamovi/diagnosticmeta.a.yaml
 name: diagnosticmeta
@@ -617,9 +628,10 @@ menuSubgroup: Clinical Evidence Synthesis
 
 **Target Package Suite:** `mice`, `VIM`, `naniar`, `missMethods`, `JointAI`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Missing Data Explorer (`missingdataexplorer.b.R`)**
+
 - Missing data pattern visualization
 - Little's MCAR test
 - Missing data mechanism assessment
@@ -627,6 +639,7 @@ menuSubgroup: Clinical Evidence Synthesis
 - Impact assessment of missing data on analyses
 
 **2. Advanced Imputation (`advancedimputation.b.R`)**
+
 - Multiple imputation by chained equations (MICE)
 - Joint modeling imputation
 - Predictive mean matching
@@ -634,12 +647,14 @@ menuSubgroup: Clinical Evidence Synthesis
 - Imputation diagnostics and convergence assessment
 
 **3. Sensitivity Analysis for Missing Data (`missingsensitivity.b.R`)**
+
 - Pattern-mixture models
 - Selection models
 - Tipping point analysis
 - Multiple imputation sensitivity analysis
 
 **Implementation Details:**
+
 ```yaml
 # jamovi/missingdataexplorer.a.yaml
 name: missingdataexplorer
@@ -658,9 +673,10 @@ menuSubgroup: Missing Data Management
 
 **Target Package Suite:** `RNifti`, `oro.dicom`, `radiomics`, `MRIcro`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Radiomics-Pathology Correlation (`radiomicscorr.b.R`)**
+
 - DICOM image import and processing
 - Texture feature extraction
 - Shape and intensity features
@@ -668,12 +684,14 @@ menuSubgroup: Missing Data Management
 - Radiomics signature development
 
 **2. Image-Guided Analysis (`imageguided.b.R`)**
+
 - ROI-based analysis
 - Multi-parametric imaging integration
 - Quantitative imaging biomarkers
 - Reproducibility assessment
 
 **Implementation Details:**
+
 ```yaml
 # jamovi/radiomicscorr.a.yaml
 name: radiomicscorr
@@ -690,9 +708,10 @@ menuSubgroup: Quantitative Imaging
 
 **Target Package Suite:** `randomForest`, `xgboost`, `glmnet`, `DALEX`, `mlr3`
 
-#### Enhanced Functions:
+#### Enhanced Functions
 
 **1. Clinical Prediction Models (`clinicalprediction.b.R`)**
+
 - Automated feature selection pipelines
 - Cross-validation with clinical considerations
 - Model interpretability (SHAP, LIME)
@@ -700,6 +719,7 @@ menuSubgroup: Quantitative Imaging
 - Clinical decision thresholds
 
 **2. Biomarker Discovery Platform (`biomarkerdiscovery.b.R`)**
+
 - High-dimensional data handling
 - Ensemble methods for robust prediction
 - Stability selection for biomarker identification
@@ -707,6 +727,7 @@ menuSubgroup: Quantitative Imaging
 - Multi-omics integration
 
 **Implementation Details:**
+
 - Enhance existing `multisurvival.b.R` and create new specialized functions
 - Integration with survival analysis workflow
 
@@ -718,9 +739,10 @@ menuSubgroup: Quantitative Imaging
 
 **Target Package Suite:** `psych`, `lavaan`, `mirt`, `CTT`, `networktools`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Patient-Reported Outcomes (`patientreported.b.R`)**
+
 - Scale reliability analysis (Cronbach's α, McDonald's ω)
 - Factor analysis for construct validity
 - Item response theory (IRT) analysis
@@ -728,6 +750,7 @@ menuSubgroup: Quantitative Imaging
 - Longitudinal measurement invariance
 
 **2. Quality of Life Analysis (`qualityoflife.b.R`)**
+
 - Multi-domain QoL assessment
 - Clinically important difference estimation
 - Responder analysis
@@ -735,6 +758,7 @@ menuSubgroup: Quantitative Imaging
 - Mixed models for repeated QoL measures
 
 **Implementation Details:**
+
 ```yaml
 # jamovi/patientreported.a.yaml
 name: patientreported
@@ -753,9 +777,10 @@ menuSubgroup: Patient Outcomes
 
 **Target Package Suite:** `MatchIt`, `WeightIt`, `CausalImpact`, `DoubleML`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Treatment Effect Estimation (`treatmenteffects.b.R`)**
+
 - Propensity score matching and weighting
 - Inverse probability of treatment weighting (IPTW)
 - Doubly robust estimation
@@ -763,12 +788,14 @@ menuSubgroup: Patient Outcomes
 - Regression discontinuity design
 
 **2. Observational Study Analysis (`observationalstudy.b.R`)**
+
 - Confounding assessment and control
 - Sensitivity analysis for unmeasured confounding
 - E-values for robustness assessment
 - Marginal structural models
 
 **Implementation Details:**
+
 ```yaml
 # jamovi/treatmenteffects.a.yaml
 name: treatmenteffects
@@ -785,9 +812,10 @@ menuSubgroup: Observational Studies
 
 **Target Package Suite:** `EpiModel`, `incidence2`, `surveillance`, `epiR`, `epitools`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Outbreak Analysis (`outbreakanalysis.b.R`)**
+
 - Epidemic curve generation
 - Basic and effective reproduction number (R₀, Rₑ)
 - Attack rate calculations
@@ -795,6 +823,7 @@ menuSubgroup: Observational Studies
 - Spatial clustering detection
 
 **2. Screening Program Evaluation (`screeningevaluation.b.R`)**
+
 - Test performance in screening settings
 - Lead-time and length-time bias assessment
 - Number needed to screen calculations
@@ -802,6 +831,7 @@ menuSubgroup: Observational Studies
 - ROC analysis for screening thresholds
 
 **Implementation Details:**
+
 ```yaml
 # jamovi/outbreakanalysis.a.yaml
 name: outbreakanalysis
@@ -818,9 +848,10 @@ menuSubgroup: Disease Surveillance
 
 **Target Package Suite:** `brms`, `rstanarm`, `MCMCpack`, `BayesFactor`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Bayesian Clinical Analysis (`bayesianclinical.b.R`)**
+
 - Bayesian t-tests and ANOVA
 - Bayesian regression with informative priors
 - Hierarchical models for multi-center data
@@ -828,6 +859,7 @@ menuSubgroup: Disease Surveillance
 - Prior sensitivity analysis
 
 **2. Adaptive Trial Design (`adaptivetrial.b.R`)**
+
 - Bayesian adaptive randomization
 - Futility and efficacy monitoring
 - Dose-finding with continual reassessment
@@ -835,6 +867,7 @@ menuSubgroup: Disease Surveillance
 - Decision-theoretic approaches
 
 **Implementation Details:**
+
 ```yaml
 # jamovi/bayesianclinical.a.yaml
 name: bayesianclinical
@@ -853,9 +886,10 @@ menuSubgroup: Clinical Research
 
 **Target Package Suite:** `lme4`, `nlme`, `glmmTMB`, `MCMCglmm`
 
-#### Enhanced Functions:
+#### Enhanced Functions
 
 **1. Longitudinal Clinical Data (`longitudinalclinical.b.R`)**
+
 - Mixed-effects models for repeated measures
 - Growth curve modeling
 - Time-varying covariates
@@ -863,6 +897,7 @@ menuSubgroup: Clinical Research
 - Model diagnostics and visualization
 
 **2. Multi-Center Study Analysis (`multicenterstudy.b.R`)**
+
 - Random effects for center heterogeneity
 - Fixed vs. random effects decision frameworks
 - Intracluster correlation assessment
@@ -876,9 +911,10 @@ menuSubgroup: Clinical Research
 
 **Target Package Suite:** Bioconductor integration packages, `limma`, `edgeR`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Genomic Pathology Integration (`genomicpathology.b.R`)**
+
 - Gene expression correlation with pathology features
 - Pathway analysis in clinical context
 - Multi-omics data integration
@@ -893,9 +929,10 @@ menuSubgroup: Clinical Research
 
 **Target Package Suite:** `DoE.base`, `FrF2`, `rsm`, `AlgDesign`
 
-#### New Functions to Implement:
+#### New Functions to Implement
 
 **1. Laboratory Assay Optimization (`assayoptimization.b.R`)**
+
 - Factorial design for assay conditions
 - Response surface methodology
 - Optimal design for parameter estimation
@@ -907,13 +944,15 @@ menuSubgroup: Clinical Research
 
 ## Implementation Timeline and Resource Allocation
 
-### Development Phases:
+### Development Phases
+
 - **Phase 1 (Months 1-6):** 3 developers, focus on clinical trial tools
 - **Phase 2 (Months 7-12):** 4 developers, advanced analytics team
 - **Phase 3 (Months 13-18):** 3 developers, specialized methods
 - **Phase 4 (Months 19-24):** 2 developers, advanced applications
 
-### Key Milestones:
+### Key Milestones
+
 - **Month 3:** Clinical trial design module release
 - **Month 6:** Meta-analysis and missing data modules release
 - **Month 9:** Medical imaging and ML enhancement release
@@ -923,14 +962,16 @@ menuSubgroup: Clinical Research
 - **Month 21:** Mixed models enhancement release
 - **Month 24:** Full suite integration and final release
 
-### Success Metrics:
+### Success Metrics
+
 - User adoption rates for new modules
 - Citation impact in clinical literature
 - Integration with clinical workflows
 - User feedback and satisfaction scores
 - Performance benchmarks against existing tools
 
-### Risk Mitigation:
+### Risk Mitigation
+
 - Parallel development tracks to avoid bottlenecks
 - Regular user testing and feedback incorporation
 - Compatibility testing across jamovi versions
@@ -941,17 +982,20 @@ menuSubgroup: Clinical Research
 
 ## Expected Clinical Impact Summary
 
-### Immediate Impact (Phase 1):
+### Immediate Impact (Phase 1)
+
 - **50% improvement** in study design quality through proper power analysis
 - **Standardized meta-analysis** capabilities for evidence synthesis
 - **Robust handling** of missing data in 90% of clinical studies
 
-### Medium-term Impact (Phases 2-3):
+### Medium-term Impact (Phases 2-3)
+
 - **Integration** of imaging and pathology data analysis
 - **Advanced predictive modeling** for clinical decision support
 - **Causal inference** capabilities for observational study analysis
 
-### Long-term Impact (Phase 4):
+### Long-term Impact (Phase 4)
+
 - **Precision medicine** applications through omics integration
 - **Multi-center study** analysis standardization
 - **Laboratory optimization** and quality control enhancement

@@ -32,7 +32,9 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             meanplotting = TRUE,
             meanci = FALSE,
             notch = FALSE,
-            samplesizeLabel = TRUE, ...) {
+            samplesizeLabel = TRUE,
+            plotwidth = 650,
+            plotheight = 450, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -196,6 +198,18 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "samplesizeLabel",
                 samplesizeLabel,
                 default=TRUE)
+            private$..plotwidth <- jmvcore::OptionInteger$new(
+                "plotwidth",
+                plotwidth,
+                default=650,
+                min=300,
+                max=1200)
+            private$..plotheight <- jmvcore::OptionInteger$new(
+                "plotheight",
+                plotheight,
+                default=450,
+                min=300,
+                max=800)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -224,6 +238,8 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..meanci)
             self$.addOption(private$..notch)
             self$.addOption(private$..samplesizeLabel)
+            self$.addOption(private$..plotwidth)
+            self$.addOption(private$..plotheight)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -252,7 +268,9 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         meanplotting = function() private$..meanplotting$value,
         meanci = function() private$..meanci$value,
         notch = function() private$..notch$value,
-        samplesizeLabel = function() private$..samplesizeLabel$value),
+        samplesizeLabel = function() private$..samplesizeLabel$value,
+        plotwidth = function() private$..plotwidth$value,
+        plotheight = function() private$..plotheight$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -280,7 +298,9 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..meanplotting = NA,
         ..meanci = NA,
         ..notch = NA,
-        ..samplesizeLabel = NA)
+        ..samplesizeLabel = NA,
+        ..plotwidth = NA,
+        ..plotheight = NA)
 )
 
 jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -305,9 +325,32 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "dep",
                     "group",
                     "grvar",
-                    "originaltheme",
                     "typestatistics",
-                    "excl"))
+                    "pairwisecomparisons",
+                    "pairwisedisplay",
+                    "padjustmethod",
+                    "effsizetype",
+                    "centralityplotting",
+                    "centralitytype",
+                    "violin",
+                    "boxplot",
+                    "point",
+                    "plottype",
+                    "bfmessage",
+                    "k",
+                    "conflevel",
+                    "varequal",
+                    "meanplotting",
+                    "meanci",
+                    "notch",
+                    "samplesizeLabel",
+                    "mytitle",
+                    "xtitle",
+                    "ytitle",
+                    "originaltheme",
+                    "resultssubtitle",
+                    "plotwidth",
+                    "plotheight"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -349,12 +392,64 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Box-Violin Plots to Compare Between Groups
 #'
+#' Wrapper Function for ggstatsplot::ggbetweenstats and
+#' ggstatsplot::grouped_ggbetweenstats to generate Box-Violin Plots
+#' for comparing continuous variables between groups with statistical
+#' annotations.
 #' 
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Basic comparison between groups
+#' jjbetweenstats(
+#'     data = iris,
+#'     dep = "Sepal.Length",
+#'     group = "Species",
+#'     typestatistics = "parametric",
+#'     pairwisecomparisons = TRUE
+#' )
+#'
+#' # Multiple variables comparison
+#' jjbetweenstats(
+#'     data = mtcars,
+#'     dep = c("mpg", "hp", "wt"),
+#'     group = "cyl",
+#'     plottype = "boxviolin",
+#'     typestatistics = "nonparametric",
+#'     pairwisecomparisons = TRUE,
+#'     pairwisedisplay = "significant",
+#'     padjustmethod = "bonferroni"
+#' )
+#'
+#' # Grouped analysis with split variable
+#' jjbetweenstats(
+#'     data = mtcars,
+#'     dep = "mpg",
+#'     group = "cyl",
+#'     grvar = "am",
+#'     typestatistics = "robust",
+#'     centralityplotting = TRUE,
+#'     centralitytype = "robust",
+#'     meanplotting = TRUE,
+#'     meanci = TRUE,
+#'     notch = TRUE
+#' )
+#'
+#' # Bayesian analysis with custom aesthetics
+#' jjbetweenstats(
+#'     data = ToothGrowth,
+#'     dep = "len",
+#'     group = "supp",
+#'     grvar = "dose",
+#'     typestatistics = "bayes",
+#'     bfmessage = TRUE,
+#'     violin = TRUE,
+#'     boxplot = TRUE,
+#'     point = FALSE,
+#'     mytitle = "Tooth Growth by Supplement Type",
+#'     xtitle = "Supplement",
+#'     ytitle = "Tooth Length"
+#' )
+#'
 #' @param data The data as a data frame.
 #' @param dep .
 #' @param group .
@@ -388,6 +483,8 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param notch Whether to use notched box plots for comparing medians.
 #' @param samplesizeLabel Whether to display sample size information for each
 #'   group.
+#' @param plotwidth Width of the plot in pixels. Default is 650.
+#' @param plotheight Height of the plot in pixels. Default is 450.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -424,7 +521,9 @@ jjbetweenstats <- function(
     meanplotting = TRUE,
     meanci = FALSE,
     notch = FALSE,
-    samplesizeLabel = TRUE) {
+    samplesizeLabel = TRUE,
+    plotwidth = 650,
+    plotheight = 450) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjbetweenstats requires jmvcore to be installed (restart may be required)")
@@ -469,7 +568,9 @@ jjbetweenstats <- function(
         meanplotting = meanplotting,
         meanci = meanci,
         notch = notch,
-        samplesizeLabel = samplesizeLabel)
+        samplesizeLabel = samplesizeLabel,
+        plotwidth = plotwidth,
+        plotheight = plotheight)
 
     analysis <- jjbetweenstatsClass$new(
         options = options,

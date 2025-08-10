@@ -1,7 +1,7 @@
 ---
 name: decisioncombine
 title: Combine Medical Decision Tests
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Combine tests and evaluate performance
 version: '0.0.3'
@@ -29,8 +29,7 @@ description:
               test1 = "New Test", 
               test1Positive = "1",
               test2 = "Rater 1",
-              test2Positive = "1",
-              showCombinations = TRUE
+              test2Positive = "1"
             )
             
             # Analyze three-test combinations
@@ -44,8 +43,7 @@ description:
               test2Positive = "1",
               test3 = "Rater 2",
               test3Positive = "1",
-              showIndividual = TRUE,
-              showCombinations = TRUE
+              showIndividual = TRUE
             )
 
 options:
@@ -117,5 +115,12 @@ options:
       title: 'Show Individual Test Results'
       type: Bool
       default: true
+
+    - name: addCombinationPattern
+      title: 'Add Combination Pattern to Data'
+      type: Output
+      description:
+          R: >
+            Add a new variable to the data frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
 
 ...

@@ -17,7 +17,7 @@ children:
             isTarget: true
           - type: LevelSelector
             name: goldPositive
-            enable: (gold)
+            enable: (!is.null(gold))
       - type: TargetLayoutBox
         label: Test 1
         children:
@@ -27,7 +27,7 @@ children:
             isTarget: true
           - type: LevelSelector
             name: test1Positive
-            enable: (test1)
+            enable: (!is.null(test1))
       - type: TargetLayoutBox
         label: Test 2
         children:
@@ -37,7 +37,7 @@ children:
             isTarget: true
           - type: LevelSelector
             name: test2Positive
-            enable: (test2)
+            enable: (!is.null(test2))
       - type: TargetLayoutBox
         label: Test 3
         children:
@@ -47,7 +47,7 @@ children:
             isTarget: true
           - type: LevelSelector
             name: test3Positive
-            enable: (test3)
+            enable: (!is.null(test3))
   - type: Label
     label: Table Options
     children:
@@ -58,4 +58,12 @@ children:
             name: od
           - type: CheckBox
             name: showIndividual
+  - type: Label
+    label: Export to Data
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Output
+            name: addCombinationPattern
 

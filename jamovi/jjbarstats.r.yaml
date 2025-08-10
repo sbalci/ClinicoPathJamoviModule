@@ -7,8 +7,14 @@ clearWith:
     - dep
     - group
     - grvar
-    - direction
+    - excl
+    - typestatistics
+    - pairwisecomparisons
+    - pairwisedisplay
+    - padjustmethod
     - originaltheme
+    - resultssubtitle
+    - messages
 
 
 items:

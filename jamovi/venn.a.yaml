@@ -4,7 +4,7 @@ title: Venn Diagram
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
 menuSubtitle: Venn Diagram, UpSet Plot
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 options:

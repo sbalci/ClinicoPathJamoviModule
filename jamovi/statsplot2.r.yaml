@@ -15,7 +15,6 @@ items:
           - distribution
           - excl
           - grvar
-          - originaltheme
 
 
     - name:  text4
@@ -28,7 +27,6 @@ items:
           - distribution
           - excl
           - grvar
-          - originaltheme
 
 
 
@@ -47,7 +45,6 @@ items:
           - alluvsty
           - excl
           - grvar
-          - originaltheme
 
 
 refs:

@@ -18,11 +18,25 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 if (nrow(self$data) == 0)
                     stop("Data contains no (complete) rows")
+                
+                # Validate that at least one test is provided
+                test_vars <- c(self$options$test1, self$options$test2, self$options$test3)
+                test_vars <- test_vars[!is.null(test_vars) & test_vars != ""]
+                
+                if (length(test_vars) == 0) {
+                    return()
+                    # stop("At least one test variable is required for analysis")
+                }
 
                 # Data definition ----
+                # Keep original data for level selection - don't remove NAs yet
                 mydata <- self$data
-                mydata <- jmvcore::naOmit(mydata)
 
+                # Validate gold positive level is specified
+                if (is.null(self$options$goldPositive) || self$options$goldPositive == "") {
+                    stop("Positive level for gold standard must be specified")
+                }
+                
                 goldPLevel <- jmvcore::constructFormula(terms = self$options$goldPositive)
                 goldPLevel <- jmvcore::decomposeFormula(formula = goldPLevel)
                 goldPLevel <- unlist(goldPLevel)
@@ -33,13 +47,28 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 mydata[[goldVariable]] <- forcats::as_factor(mydata[[goldVariable]])
 
-                # Handle original data display
+                # Handle original data display with jamovi tables
                 if (self$options$od) {
-                    # Create frequency tables for original data
-                    freq_table <- table(mydata[[goldVariable]])
-                    self$results$text1$setContent(freq_table)
+                    # Create frequency table for gold standard (use original data before NA removal)
+                    freq_table <- table(mydata[[goldVariable]], useNA = "ifany")
+                    total_n <- sum(freq_table, na.rm = TRUE)
+                    
+                    # Populate gold standard frequency table
+                    goldFreqTable <- self$results$goldStandardFreqTable
+                    for (level in names(freq_table)) {
+                        level_display <- if (is.na(level)) "Missing" else as.character(level)
+                        freq_count <- as.numeric(freq_table[level])
+                        # Handle NA or zero counts properly
+                        freq_pct <- if (!is.na(freq_count) && total_n > 0) freq_count / total_n else 0
+                        
+                        goldFreqTable$addRow(rowKey = level_display, values = list(
+                            level = level_display,
+                            frequency = freq_count,
+                            percentage = freq_pct
+                        ))
+                    }
 
-                    # Create a cross-tabulation of all tests with gold standard
+                    # Create cross-tabulation tables for all tests with gold standard
                     test_vars <- c(self$options$test1,
                                    self$options$test2,
                                    self$options$test3)
@@ -47,23 +76,47 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                                                test_vars != ""]
 
                     if (length(test_vars) > 0) {
-                        html_tables <- ""
+                        crossTabTable <- self$results$crossTabTable
+                        
                         for (test_var in test_vars) {
-                            # Create cross-tabulation
-                            cross_tab <- table(mydata[[test_var]], mydata[[goldVariable]])
-                            html_table <- knitr::kable(
-                                cross_tab,
-                                format = "html",
-                                caption = paste(
-                                    "Cross-tabulation of",
-                                    test_var,
-                                    "and",
-                                    goldVariable
+                            # Create cross-tabulation (use original data with NAs shown)
+                            cross_tab <- table(mydata[[test_var]], mydata[[goldVariable]], useNA = "ifany")
+                            
+                            # Add rows for each test level
+                            for (i in seq_along(rownames(cross_tab))) {
+                                test_level <- rownames(cross_tab)[i]
+                                # Handle NA rows if present
+                                test_level_display <- if (is.na(test_level)) "Missing" else as.character(test_level)
+                                
+                                # Calculate values for each gold standard level using safe indexing
+                                gold_pos_count <- 0
+                                tryCatch({
+                                    # Use numeric indexing which is safer with tables
+                                    col_idx <- which(colnames(cross_tab) == goldPLevel)
+                                    if (length(col_idx) > 0) {
+                                        gold_pos_count <- as.numeric(cross_tab[i, col_idx[1]])
+                                    }
+                                }, error = function(e) {
+                                    # If any error, default to 0
+                                    gold_pos_count <- 0
+                                })
+                                
+                                # Calculate gold negative count (all non-positive levels)
+                                row_total <- sum(cross_tab[i, ], na.rm = TRUE)
+                                gold_neg_count <- row_total - gold_pos_count
+                                
+                                crossTabTable$addRow(
+                                    rowKey = paste0(test_var, "_", test_level_display), 
+                                    values = list(
+                                        test_var = test_var,
+                                        test_level = test_level_display,
+                                        gold_positive = gold_pos_count,
+                                        gold_negative = gold_neg_count,
+                                        total = row_total
+                                    )
                                 )
-                            )
-                            html_tables <- paste(html_tables, html_table, "<br><br>")
+                            }
                         }
-                        self$results$text2$setContent(html_tables)
                     }
                 }
 
@@ -75,21 +128,45 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                                                    testVariables != ""]
 
                 testPositives <- list()
-                if (!is.null(self$options$test1) &&
-                    self$options$test1 != "") {
+                if (!is.null(self$options$test1) && self$options$test1 != "") {
+                    if (is.null(self$options$test1Positive) || self$options$test1Positive == "") {
+                        stop(paste("Positive level for", self$options$test1, "must be specified"))
+                    }
                     testPositives[[self$options$test1]] <- self$options$test1Positive
                 }
-                if (!is.null(self$options$test2) &&
-                    self$options$test2 != "") {
+                if (!is.null(self$options$test2) && self$options$test2 != "") {
+                    if (is.null(self$options$test2Positive) || self$options$test2Positive == "") {
+                        stop(paste("Positive level for", self$options$test2, "must be specified"))
+                    }
                     testPositives[[self$options$test2]] <- self$options$test2Positive
                 }
-                if (!is.null(self$options$test3) &&
-                    self$options$test3 != "") {
+                if (!is.null(self$options$test3) && self$options$test3 != "") {
+                    if (is.null(self$options$test3Positive) || self$options$test3Positive == "") {
+                        stop(paste("Positive level for", self$options$test3, "must be specified"))
+                    }
                     testPositives[[self$options$test3]] <- self$options$test3Positive
                 }
 
                 # Create recoded data with positives and negatives for each test
                 mydata2 <- mydata
+                
+                # Remove rows with NAs only for analysis variables (after level selection)
+                analysis_vars <- c(goldVariable, testVariables)
+                complete_rows <- complete.cases(mydata2[analysis_vars])
+                
+                if (sum(complete_rows) == 0) {
+                    stop("No complete cases found for analysis variables. Please check for missing values.")
+                }
+                
+                mydata2 <- mydata2[complete_rows, ]
+                
+                # Report data used for analysis
+                n_original <- nrow(mydata)
+                n_analysis <- nrow(mydata2)
+                if (n_original != n_analysis) {
+                    message(paste("Using", n_analysis, "of", n_original, "rows (", 
+                                 n_original - n_analysis, "rows removed due to missing values in analysis variables)"))
+                }
 
                 # Add gold standard recode
                 mydata2 <- mydata2 %>%
@@ -138,14 +215,24 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         mydata2 <- mydata2 %>%
                             dplyr::mutate(!!recode_col_name := forcats::fct_relevel(.data[[recode_col_name]], "Positive"))
 
-                        # Create contingency table
-                        conf_table <- table(mydata2[[recode_col_name]], mydata2[["goldVariable2"]])
-
-                        # Extract values
-                        TP <- conf_table[1, 1]
-                        FP <- conf_table[1, 2]
-                        FN <- conf_table[2, 1]
-                        TN <- conf_table[2, 2]
+                        # Create contingency table with error handling
+                        tryCatch({
+                            conf_table <- table(mydata2[[recode_col_name]], mydata2[["goldVariable2"]])
+                            
+                            # Validate table structure
+                            if (!all(dim(conf_table) == c(2, 2))) {
+                                stop(paste("Invalid contingency table structure for", testVariable, 
+                                          "- ensure both test and gold standard have exactly two levels"))
+                            }
+                            
+                            # Extract values safely with bounds checking
+                            TP <- if (nrow(conf_table) >= 1 && ncol(conf_table) >= 1) conf_table[1, 1] else 0
+                            FP <- if (nrow(conf_table) >= 1 && ncol(conf_table) >= 2) conf_table[1, 2] else 0
+                            FN <- if (nrow(conf_table) >= 2 && ncol(conf_table) >= 1) conf_table[2, 1] else 0
+                            TN <- if (nrow(conf_table) >= 2 && ncol(conf_table) >= 2) conf_table[2, 2] else 0
+                        }, error = function(e) {
+                            stop(paste("Error creating contingency table for", testVariable, ":", e$message))
+                        })
 
                         # Get appropriate individual table
                         indTable <- NULL
@@ -196,53 +283,113 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 # Add comprehensive test combination analysis
                 if (length(testVariables) >= 2) {
-                    private$.analyzeCombinations(mydata2, testVariables, goldVariable)
+                    mydata2 <- private$.analyzeCombinations(mydata2, testVariables, goldVariable)
+                    
+                    # Export combination pattern to data if requested
+                    if (self$options$addCombinationPattern && self$results$addCombinationPattern$isNotFilled()) {
+                        # Create combination pattern for export
+                        if ("combination_pattern" %in% names(mydata2)) {
+                            # Export the combination pattern to the dataset
+                            self$results$addCombinationPattern$setRowNums(rownames(mydata))
+                            self$results$addCombinationPattern$setValues(mydata2$combination_pattern)
+                        }
+                    }
                 }
 
                 # End of analysis - individual tests and combinations provide all needed information
+            },
+            
+            .generateTestPatterns = function(n_tests, test_names = NULL) {
+                # Helper function to generate all possible test combination patterns
+                if (n_tests == 2) {
+                    patterns <- c("+/+", "+/-", "-/+", "-/-")
+                    if (!is.null(test_names) && length(test_names) >= 2) {
+                        descriptions <- c(
+                            "Both tests positive",
+                            paste(test_names[1], "positive,", test_names[2], "negative"),
+                            paste(test_names[1], "negative,", test_names[2], "positive"),
+                            "Both tests negative"
+                        )
+                    } else {
+                        descriptions <- patterns
+                    }
+                } else if (n_tests == 3) {
+                    patterns <- c("+/+/+", "+/+/-", "+/-/+", "+/-/-", 
+                                 "-/+/+", "-/+/-", "-/-/+", "-/-/-")
+                    descriptions <- c()
+                    if (!is.null(test_names) && length(test_names) >= 3) {
+                        for (pattern in patterns) {
+                            test_results <- strsplit(pattern, "/")[[1]]
+                            desc_parts <- c()
+                            for (j in seq_along(test_results)) {
+                                if (test_results[j] == "+") {
+                                    desc_parts <- c(desc_parts, paste(test_names[j], "pos"))
+                                } else {
+                                    desc_parts <- c(desc_parts, paste(test_names[j], "neg"))
+                                }
+                            }
+                            descriptions <- c(descriptions, paste(desc_parts, collapse = ", "))
+                        }
+                    } else {
+                        descriptions <- patterns
+                    }
+                } else {
+                    stop("Pattern generation only supports 2 or 3 tests")
+                }
+                
+                return(list(patterns = patterns, descriptions = descriptions))
+            },
+            
+            .calculateDiagnosticStats = function(tp, fp, fn, tn) {
+                # Extracted diagnostic statistics calculation with Wilson CI
+                total_pos <- tp + fn  # Total diseased
+                total_neg <- fp + tn  # Total healthy
+                total_test_pos <- tp + fp  # Total test positive
+                total_test_neg <- fn + tn  # Total test negative
+                total <- tp + fp + fn + tn
+                
+                # Calculate basic statistics
+                sens <- if(total_pos > 0) tp / total_pos else NA
+                spec <- if(total_neg > 0) tn / total_neg else NA
+                ppv <- if(total_test_pos > 0) tp / total_test_pos else NA
+                npv <- if(total_test_neg > 0) tn / total_test_neg else NA
+                acc <- if(total > 0) (tp + tn) / total else NA
+                
+                # Calculate AUC (simplified - for single point)
+                auc <- if(!is.na(sens) && !is.na(spec)) (sens + spec) / 2 else NA
+                
+                # Wilson score confidence interval function
+                calcCI <- function(x, n) {
+                    if (is.na(x) || n == 0) return(c(NA, NA))
+                    p <- x / n
+                    z <- 1.96  # 95% CI
+                    denominator <- 1 + (z^2 / n)
+                    centre <- (p + (z^2 / (2 * n))) / denominator
+                    half_width <- z * sqrt((p * (1 - p) / n) + (z^2 / (4 * n^2))) / denominator
+                    c(max(0, centre - half_width), min(1, centre + half_width))
+                }
+                
+                sens_ci <- calcCI(tp, total_pos)
+                spec_ci <- calcCI(tn, total_neg)
+                ppv_ci <- calcCI(tp, total_test_pos)
+                npv_ci <- calcCI(tn, total_test_neg)
+                acc_ci <- calcCI(tp + tn, total)
+                
+                list(
+                    sens = sens, spec = spec, ppv = ppv, npv = npv, acc = acc, auc = auc,
+                    sens_ci = sens_ci, spec_ci = spec_ci, ppv_ci = ppv_ci,
+                    npv_ci = npv_ci, acc_ci = acc_ci,
+                    tp = tp, fp = fp, fn = fn, tn = tn
+                )
             },
 
             .analyzeCombinations = function(mydata2, testVariables, goldVariable) {
                 # Comprehensive analysis of all test combinations with full diagnostic statistics
                 if (length(testVariables) < 2) return()
                 
-                # Helper function to calculate diagnostic statistics with CI
-                calcDiagStats <- function(tp, fp, fn, tn) {
-                    total_pos <- tp + fn  # Total diseased
-                    total_neg <- fp + tn  # Total healthy
-                    total_test_pos <- tp + fp  # Total test positive
-                    total_test_neg <- fn + tn  # Total test negative
-                    total <- tp + fp + fn + tn
-                    
-                    # Calculate basic statistics
-                    sens <- if(total_pos > 0) tp / total_pos else NA
-                    spec <- if(total_neg > 0) tn / total_neg else NA
-                    ppv <- if(total_test_pos > 0) tp / total_test_pos else NA
-                    npv <- if(total_test_neg > 0) tn / total_test_neg else NA
-                    acc <- if(total > 0) (tp + tn) / total else NA
-                    
-                    # Calculate 95% CI using Wilson score interval
-                    calcCI <- function(x, n) {
-                        if (is.na(x) || n == 0) return(c(NA, NA))
-                        p <- x / n
-                        z <- 1.96  # 95% CI
-                        denominator <- 1 + (z^2 / n)
-                        centre <- (p + (z^2 / (2 * n))) / denominator
-                        half_width <- z * sqrt((p * (1 - p) / n) + (z^2 / (4 * n^2))) / denominator
-                        c(max(0, centre - half_width), min(1, centre + half_width))
-                    }
-                    
-                    sens_ci <- calcCI(tp, total_pos)
-                    spec_ci <- calcCI(tn, total_neg) 
-                    ppv_ci <- calcCI(tp, total_test_pos)
-                    npv_ci <- calcCI(tn, total_test_neg)
-                    acc_ci <- calcCI(tp + tn, total)
-                    
-                    list(
-                        sens = sens, spec = spec, ppv = ppv, npv = npv, acc = acc,
-                        sens_ci = sens_ci, spec_ci = spec_ci, ppv_ci = ppv_ci, 
-                        npv_ci = npv_ci, acc_ci = acc_ci
-                    )
+                # Add progress indication for large datasets
+                if (nrow(mydata2) > 1000) {
+                    private$.checkpoint("Analyzing test combinations for large dataset...")
                 }
                 
                 # Get gold standard totals
@@ -250,71 +397,43 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 total_positive_gold <- gold_table["Positive"]
                 total_negative_gold <- gold_table["Negative"]
                 
-                # Determine patterns based on number of tests
+                # Get pattern info using helper function
+                pattern_info <- private$.generateTestPatterns(length(testVariables), testVariables)
+                patterns <- pattern_info$patterns
+                descriptions <- pattern_info$descriptions
+                
+                # Create combination patterns more efficiently using base R
+                test_bins <- paste0(testVariables, "_bin")
+                
                 if (length(testVariables) == 2) {
-                    test1 <- testVariables[1]
-                    test2 <- testVariables[2]
-                    test1_bin <- paste0(test1, "_bin")
-                    test2_bin <- paste0(test2, "_bin")
+                    # For 2 tests - create pattern directly
+                    test1_bin <- test_bins[1]
+                    test2_bin <- test_bins[2]
                     
-                    # Create combination patterns
-                    mydata2 <- mydata2 %>%
-                        dplyr::mutate(
-                            combination_pattern = dplyr::case_when(
-                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 1 ~ "+/+",
-                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 0 ~ "+/-",  
-                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 1 ~ "-/+",
-                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 0 ~ "-/-",
-                                TRUE ~ "Unknown"
-                            )
-                        )
-                    
-                    patterns <- c("+/+", "+/-", "-/+", "-/-")
-                    descriptions <- c(
-                        "Both tests positive", 
-                        paste(test1, "positive,", test2, "negative"),
-                        paste(test1, "negative,", test2, "positive"), 
-                        "Both tests negative"
-                    )
+                    # Create combination patterns using base R (more efficient)
+                    mydata2$combination_pattern <- ifelse(
+                        mydata2[[test1_bin]] == 1 & mydata2[[test2_bin]] == 1, "+/+",
+                        ifelse(mydata2[[test1_bin]] == 1 & mydata2[[test2_bin]] == 0, "+/-",
+                               ifelse(mydata2[[test1_bin]] == 0 & mydata2[[test2_bin]] == 1, "-/+",
+                                      ifelse(mydata2[[test1_bin]] == 0 & mydata2[[test2_bin]] == 0, "-/-",
+                                             "Unknown"))))
                     
                 } else if (length(testVariables) == 3) {
-                    test1 <- testVariables[1]
-                    test2 <- testVariables[2]
-                    test3 <- testVariables[3]
-                    test1_bin <- paste0(test1, "_bin")
-                    test2_bin <- paste0(test2, "_bin")
-                    test3_bin <- paste0(test3, "_bin")
+                    # For 3 tests - create pattern string directly using base R
+                    test1_bin <- test_bins[1]
+                    test2_bin <- test_bins[2]
+                    test3_bin <- test_bins[3]
                     
-                    # Create combination patterns
-                    mydata2 <- mydata2 %>%
-                        dplyr::mutate(
-                            combination_pattern = dplyr::case_when(
-                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 1 & .data[[test3_bin]] == 1 ~ "+/+/+",
-                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 1 & .data[[test3_bin]] == 0 ~ "+/+/-",
-                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 0 & .data[[test3_bin]] == 1 ~ "+/-/+",
-                                .data[[test1_bin]] == 1 & .data[[test2_bin]] == 0 & .data[[test3_bin]] == 0 ~ "+/-/-",
-                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 1 & .data[[test3_bin]] == 1 ~ "-/+/+",
-                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 1 & .data[[test3_bin]] == 0 ~ "-/+/-",
-                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 0 & .data[[test3_bin]] == 1 ~ "-/-/+",
-                                .data[[test1_bin]] == 0 & .data[[test2_bin]] == 0 & .data[[test3_bin]] == 0 ~ "-/-/-",
-                                TRUE ~ "Unknown"
-                            )
-                        )
-                    
-                    patterns <- c("+/+/+", "+/+/-", "+/-/+", "+/-/-", "-/+/+", "-/+/-", "-/-/+", "-/-/-")
-                    
-                    # Create descriptive names
-                    descriptions <- c()
-                    for (pattern in patterns) {
-                        test_results <- strsplit(pattern, "/")[[1]]
-                        desc_parts <- c()
-                        for (i in seq_along(test_results)) {
-                            test_name <- testVariables[i]
-                            result <- if (test_results[i] == "+") "positive" else "negative"
-                            desc_parts <- c(desc_parts, paste(test_name, result))
-                        }
-                        descriptions <- c(descriptions, paste(desc_parts, collapse = ", "))
-                    }
+                    # Create combination patterns more efficiently
+                    mydata2$combination_pattern <- paste(
+                        ifelse(mydata2[[test1_bin]] == 1, "+", "-"),
+                        ifelse(mydata2[[test2_bin]] == 1, "+", "-"),
+                        ifelse(mydata2[[test3_bin]] == 1, "+", "-"),
+                        sep = "/"
+                    )
+                    # Handle any NA or unexpected values
+                    mydata2$combination_pattern[is.na(mydata2$combination_pattern) | 
+                                              !mydata2$combination_pattern %in% patterns] <- "Unknown"
                 }
                 
                 # Calculate statistics for each combination
@@ -344,7 +463,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                         tn <- total_negative_gold - fp
                         
                         # Calculate diagnostic statistics
-                        stats <- calcDiagStats(tp, fp, fn, tn)
+                        stats <- private$.calculateDiagnosticStats(tp, fp, fn, tn)
                         
                         # Add to main statistics table
                         self$results$combStatsTable$addRow(
@@ -395,6 +514,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 if ("combinationsAnalysis" %in% names(self$results)) {
                     self$results$combinationsAnalysis$setContent(summary_html)
                 }
+                
+                # Return mydata2 with combination_pattern column
+                return(mydata2)
             }
 
         )

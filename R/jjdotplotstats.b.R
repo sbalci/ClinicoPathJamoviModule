@@ -1,6 +1,10 @@
 #' @title Dot Chart
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import glue
+#' @import ggplot2
+#' @importFrom rlang sym
+#' @importFrom digest digest
 #'
 
 
@@ -8,18 +12,22 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjdotplotstatsClass",
     inherit = jjdotplotstatsBase,
     private = list(
-
         # Cache for processed data and options to avoid redundant computation
         .processedData = NULL,
         .processedOptions = NULL,
+        .data_hash = NULL,
+        .options_hash = NULL,
+        .messages = NULL,
 
         # init ----
 
         .init = function() {
-
-            deplen <- length(self$options$dep)
-
-            self$results$plot$setSize(650, deplen * 450)
+            # Since dep is single variable, use fixed size
+            # Use configurable plot dimensions
+            plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 650
+            plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
+            
+            self$results$plot$setSize(plotwidth, plotheight)
 
 
             if (!is.null(self$options$grvar)) {
@@ -32,7 +40,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     as.factor(mydata[[grvar]])
                 )
 
-                self$results$plot2$setSize(num_levels * 650, deplen * 450)
+                self$results$plot2$setSize(num_levels * plotwidth, plotheight)
 
             }
 
@@ -40,46 +48,181 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 ,
-        # Optimized data preparation with caching
+        # Shared validation helper
+        .validateInputs = function() {
+            if (is.null(self$options$dep) || is.null(self$options$group))
+                return(FALSE)
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows')
+            
+            # Check variable existence
+            if (!(self$options$dep %in% names(self$data)))
+                stop(paste('Variable "', self$options$dep, '" not found in data'))
+            if (!(self$options$group %in% names(self$data)))
+                stop(paste('Variable "', self$options$group, '" not found in data'))
+                
+            return(TRUE)
+        },
+        
+        # Message accumulation helper
+        .accumulateMessage = function(message) {
+            if (is.null(private$.messages)) {
+                private$.messages <- character()
+            }
+            private$.messages <- append(private$.messages, message)
+            self$results$todo$setContent(paste(private$.messages, collapse = ""))
+        },
+        
+        # Data quality validation helper
+        .validateDataQuality = function(mydata, dep_var) {
+            num_vals <- jmvcore::toNumeric(mydata[[dep_var]])
+            num_vals <- num_vals[!is.na(num_vals)]
+            
+            if (length(num_vals) < 3) {
+                private$.accumulateMessage(
+                    glue::glue("<br>⚠️ Warning: {dep_var} has less than 3 valid observations<br>")
+                )
+            }
+            if (length(unique(num_vals)) < 2) {
+                private$.accumulateMessage(
+                    glue::glue("<br>⚠️ Warning: {dep_var} has no variation (all values are the same)<br>")
+                )
+            }
+        },
+        
+        # Outlier detection helper
+        .detectOutliers = function(data, var) {
+            vals <- jmvcore::toNumeric(data[[var]])
+            vals <- vals[!is.na(vals)]
+            if (length(vals) > 0) {
+                Q1 <- quantile(vals, 0.25, na.rm = TRUE)
+                Q3 <- quantile(vals, 0.75, na.rm = TRUE)
+                IQR <- Q3 - Q1
+                outliers <- which(data[[var]] < (Q1 - 1.5 * IQR) | data[[var]] > (Q3 + 1.5 * IQR))
+                if (length(outliers) > 0) {
+                    private$.accumulateMessage(
+                        glue::glue("<br>ℹ️ {length(outliers)} potential outlier(s) detected in {var}<br>")
+                    )
+                }
+            }
+        },
+        
+        # Statistical summary helper
+        .addDataSummary = function(data, dep_var, group_var) {
+            if (!is.null(dep_var) && !is.null(group_var)) {
+                tryCatch({
+                    summary_stats <- tapply(data[[dep_var]], data[[group_var]], 
+                                           function(x) c(mean = mean(x, na.rm = TRUE), 
+                                                        n = sum(!is.na(x))))
+                    n_groups <- length(summary_stats)
+                    total_n <- sum(sapply(summary_stats, function(x) x["n"]), na.rm = TRUE)
+                    private$.accumulateMessage(
+                        glue::glue("<br>📊 Analysis summary: {n_groups} groups, {total_n} total observations<br>")
+                    )
+                }, error = function(e) {
+                    # Silently handle errors in summary calculation
+                })
+            }
+        },
+
+        # Optimized data preparation with robust caching
         .prepareData = function(force_refresh = FALSE) {
-            if (!is.null(private$.processedData) && !force_refresh) {
+            # Create robust hash of current data to detect changes
+            current_hash <- digest::digest(list(
+                dep = self$options$dep,
+                group = self$options$group,
+                data_dim = dim(self$data),
+                col_names = names(self$data),
+                grvar = self$options$grvar
+            ), algo = "md5")
+            
+            # Only reprocess if data has changed or forced refresh
+            if (!is.null(private$.processedData) && 
+                private$.data_hash == current_hash && 
+                !force_refresh) {
                 return(private$.processedData)
             }
 
-            # Prepare data with progress feedback
-            self$results$todo$setContent(
+            # Clear previous messages and add processing feedback
+            private$.messages <- NULL
+            private$.accumulateMessage(
                 glue::glue("<br>Processing data for dot plot analysis...<br><hr>")
             )
+            
+            # Track processing time for large datasets
+            start_time <- Sys.time()
 
             mydata <- self$data
             
-            # Convert variables to numeric
-            vars <- self$options$dep
-            if (!is.null(vars)) {
-                for (var in vars) {
-                    mydata[[var]] <- jmvcore::toNumeric(mydata[[var]])
-                }
+            # Convert dependent variable to numeric (single variable)
+            dep_var <- self$options$dep
+            if (!is.null(dep_var)) {
+                mydata[[dep_var]] <- jmvcore::toNumeric(mydata[[dep_var]])
             }
 
             # Exclude NA with checkpoint
             private$.checkpoint()
             mydata <- jmvcore::naOmit(mydata)
+            
+            # Validate data quality
+            if (!is.null(dep_var)) {
+                private$.validateDataQuality(mydata, dep_var)
+            }
+            
+            # Detect outliers for datasets with sufficient size
+            if (nrow(mydata) > 10 && !is.null(dep_var)) {
+                private$.detectOutliers(mydata, dep_var)
+            }
+            
+            # Add statistical summary
+            private$.addDataSummary(mydata, dep_var, self$options$group)
+            
+            # Add processing time feedback for large datasets
+            elapsed <- difftime(Sys.time(), start_time, units = "secs")
+            if (nrow(mydata) > 1000) {
+                private$.accumulateMessage(
+                    glue::glue("<br>✅ Large dataset processed in {round(elapsed, 2)} seconds<br>")
+                )
+            }
 
-            # Cache the processed data
+            # Cache the processed data with hash
             private$.processedData <- mydata
+            private$.data_hash <- current_hash
             return(mydata)
         },
 
-        # Optimized options preparation with caching
+        # Optimized options preparation with robust caching
         .prepareOptions = function(force_refresh = FALSE) {
-            if (!is.null(private$.processedOptions) && !force_refresh) {
+            # Create robust hash of current options to detect changes
+            current_options_hash <- digest::digest(list(
+                typestatistics = self$options$typestatistics,
+                effsizetype = self$options$effsizetype,
+                centralityplotting = self$options$centralityplotting,
+                centralitytype = self$options$centralitytype,
+                testvalue = self$options$testvalue,
+                bfmessage = self$options$bfmessage,
+                conflevel = self$options$conflevel,
+                k = self$options$k,
+                testvalueline = self$options$testvalueline,
+                centralityparameter = self$options$centralityparameter,
+                centralityk = self$options$centralityk,
+                titles = list(self$options$mytitle, self$options$xtitle, self$options$ytitle),
+                display = list(self$options$resultssubtitle, self$options$originaltheme)
+            ), algo = "md5")
+            
+            # Only reprocess if options have changed or forced refresh
+            if (!is.null(private$.processedOptions) && 
+                private$.options_hash == current_options_hash && 
+                !force_refresh) {
                 return(private$.processedOptions)
             }
 
-            # Prepare options with progress feedback
-            self$results$todo$setContent(
-                glue::glue("<br>Preparing dot plot analysis options...<br><hr>")
-            )
+            # Add options preparation feedback if not already processing
+            if (is.null(private$.messages)) {
+                private$.accumulateMessage(
+                    glue::glue("<br>Preparing dot plot analysis options...<br><hr>")
+                )
+            }
 
             # Process type of statistics
             typestatistics <- self$options$typestatistics
@@ -98,7 +241,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ytitle <- self$options$ytitle
             if (ytitle == '') ytitle <- NULL
             
-            # Cache the processed options
+            # Cache the processed options with all parameters
             options_list <- list(
                 typestatistics = typestatistics,
                 dep = dep,
@@ -107,6 +250,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 xtitle = xtitle,
                 ytitle = ytitle,
                 effsizetype = self$options$effsizetype,
+                centralityplotting = self$options$centralityplotting,
+                centralitytype = self$options$centralitytype,
                 testvalue = self$options$testvalue,
                 bfmessage = self$options$bfmessage,
                 conflevel = self$options$conflevel,
@@ -114,15 +259,28 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 testvalueline = self$options$testvalueline,
                 centralityparameter = self$options$centralityparameter,
                 centralityk = self$options$centralityk,
-                resultssubtitle = self$options$resultssubtitle
+                resultssubtitle = self$options$resultssubtitle,
+                originaltheme = self$options$originaltheme
             )
+            
+            # Process centrality parameters if enabled
+            if (options_list$centralityplotting) {
+                options_list$centrality.plotting <- TRUE
+                options_list$centrality.type <- options_list$centralitytype
+            } else {
+                options_list$centrality.plotting <- FALSE
+            }
+            
             private$.processedOptions <- options_list
+            private$.options_hash <- current_options_hash
             return(options_list)
         },
 
         # run ----
         .run = function() {
-
+            # Clear messages at start of new run
+            private$.messages <- NULL
+            
             # Initial Message ----
             if ( is.null(self$options$dep) || is.null(self$options$group)) {
 
@@ -154,9 +312,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
 
-                # Pre-process data and options for performance
-                private$.prepareData()
-                private$.prepareOptions()
+                # Pre-process data and options for performance with enhanced validation
+                tryCatch({
+                    private$.prepareData()
+                    private$.prepareOptions()
+                }, error = function(e) {
+                    private$.accumulateMessage(
+                        glue::glue("<br>❌ Error during processing: {e$message}<br>")
+                    )
+                    stop(paste("Data processing failed:", e$message, "\nPlease check your variable selections."))
+                })
 
             }
         }
@@ -164,14 +329,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ,
         .plot = function(image, ggtheme, theme, ...) {
-            # the plot function ----
-            # Error messages ----
-
-            if ( is.null(self$options$dep) || is.null(self$options$group))
+            # Use shared validation helper ----
+            if (!private$.validateInputs())
                 return()
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
 
             # Use cached data and options for performance ----
             mydata <- private$.prepareData()
@@ -183,30 +343,27 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            plot <-
-                ggstatsplot::ggdotplotstats(
-                    data = mydata,
-                    x = !!rlang::sym(options_data$dep),
-                    y = !!rlang::sym(options_data$group),
-                    title = options_data$mytitle,
-                    xlab = options_data$xtitle,
-                    ylab = options_data$ytitle,
-                    type = options_data$typestatistics,
-                    test.value = options_data$testvalue,
-                    effsize.type = options_data$effsizetype,
-                    conf.level = options_data$conflevel,
-                    k = options_data$k,
-                    bf.message = options_data$bfmessage,
-                    test.value.line = options_data$testvalueline,
-                    centrality.parameter = options_data$centralityparameter,
-                    centrality.k = options_data$centralityk,
-                    results.subtitle = options_data$resultssubtitle
-                )
+            plot <- ggstatsplot::ggdotplotstats(
+                data = mydata,
+                x = !!rlang::sym(options_data$dep),
+                y = !!rlang::sym(options_data$group),
+                title = options_data$mytitle,
+                xlab = options_data$xtitle,
+                ylab = options_data$ytitle,
+                type = options_data$typestatistics,
+                test.value = options_data$testvalue,
+                effsize.type = options_data$effsizetype,
+                conf.level = options_data$conflevel,
+                k = options_data$k,
+                bf.message = options_data$bfmessage,
+                test.value.line = options_data$testvalueline,
+                centrality.parameter = options_data$centralityparameter,
+                centrality.k = options_data$centralityk,
+                results.subtitle = options_data$resultssubtitle
+            )
 
 
-            originaltheme <- self$options$originaltheme
-
-            if (!originaltheme) {
+            if (!options_data$originaltheme) {
                 plot <- plot + ggtheme
             } else {
                 plot <- plot + ggstatsplot::theme_ggstatsplot()
@@ -223,14 +380,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
         .plot2 = function(image, ggtheme, theme, ...) {
-            # the plot function ----
-            # Error messages ----
-
-            if ( is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar))
+            # Use shared validation helper with additional grouping check ----
+            if (!private$.validateInputs() || is.null(self$options$grvar))
                 return()
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
 
             # Use cached data and options for performance ----
             mydata <- private$.prepareData()
@@ -242,13 +394,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            if ( !is.null(self$options$grvar) ) {
-
-                originaltheme <- self$options$originaltheme
-
-                selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
-
-
+            if (!is.null(self$options$grvar)) {
+                selected_theme <- if (!options_data$originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
                 grvar <- self$options$grvar
 
                 plot2 <- ggstatsplot::grouped_ggdotplotstats(

@@ -7,9 +7,32 @@ clearWith:
     - dep
     - group
     - grvar
-    - originaltheme
     - typestatistics
-    - excl
+    - pairwisecomparisons
+    - pairwisedisplay
+    - padjustmethod
+    - effsizetype
+    - centralityplotting
+    - centralitytype
+    - violin
+    - boxplot
+    - point
+    - plottype
+    - bfmessage
+    - k
+    - conflevel
+    - varequal
+    - meanplotting
+    - meanci
+    - notch
+    - samplesizeLabel
+    - mytitle
+    - xtitle
+    - ytitle
+    - originaltheme
+    - resultssubtitle
+    - plotwidth
+    - plotheight
 
 
 

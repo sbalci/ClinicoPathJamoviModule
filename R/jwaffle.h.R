@@ -28,7 +28,8 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..groups <- jmvcore::OptionVariable$new(
                 "groups",
                 groups,
@@ -44,7 +45,8 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..rows <- jmvcore::OptionInteger$new(
                 "rows",
                 rows,
@@ -147,7 +149,7 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="plot",
                 title="Waffle Chart",
                 width=600,
-                height=450,
+                height=500,
                 renderFun=".plot",
                 requiresData=TRUE))}))
 
@@ -196,9 +198,9 @@ jwaffleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 jwaffle <- function(
     data,
-    counts,
+    counts = NULL,
     groups,
-    facet,
+    facet = NULL,
     rows = 5,
     flip = FALSE,
     color_palette = "default",

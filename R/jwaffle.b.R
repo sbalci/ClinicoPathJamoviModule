@@ -7,6 +7,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom glue glue
 #' @import scales
+#' @importFrom rlang sym
 #'
 #' @description Create Waffle Charts to visualize distributions.
 #'
@@ -185,6 +186,103 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(private$.cached_palette)
         },
         
+        .generateCaption = function(plotdata, total_cases) {
+            # Calculate waffle chart statistics for caption
+            n_squares <- 100  # Total number of squares in waffle chart
+            cases_per_square <- total_cases / n_squares
+            squares_per_case <- 100 / total_cases  # Each square represents this percentage
+            
+            caption_text <- sprintf(
+                "Each square represents %.1f cases (approximately %.1f%%) (total n=%d)",
+                cases_per_square, squares_per_case, total_cases
+            )
+            
+            return(caption_text)
+        },
+        
+        .validateInputs = function() {
+            # Check if required groups variable exists
+            if (is.null(self$options$groups) || self$options$groups == "") {
+                stop("Please specify a grouping variable for the waffle chart.")
+            }
+            
+            if (!self$options$groups %in% names(self$data)) {
+                stop(paste("Grouping variable '", self$options$groups, 
+                          "' not found in data. Available variables: ", 
+                          paste(names(self$data), collapse = ", ")))
+            }
+            
+            # Check optional counts variable
+            if (!is.null(self$options$counts) && self$options$counts != "" &&
+                !self$options$counts %in% names(self$data)) {
+                stop(paste("Counts variable '", self$options$counts, 
+                          "' not found in data. Available variables: ", 
+                          paste(names(self$data), collapse = ", ")))
+            }
+            
+            # Check optional facet variable  
+            if (!is.null(self$options$facet) && self$options$facet != "" &&
+                !self$options$facet %in% names(self$data)) {
+                stop(paste("Facet variable '", self$options$facet, 
+                          "' not found in data. Available variables: ", 
+                          paste(names(self$data), collapse = ", ")))
+            }
+            
+            # Validate data types
+            groups_data <- self$data[[self$options$groups]]
+            if (!is.factor(groups_data) && !is.character(groups_data) && !is.logical(groups_data)) {
+                stop(paste("Grouping variable '", self$options$groups, 
+                          "' must be categorical (factor, character, or logical), not ", 
+                          class(groups_data)[1]))
+            }
+            
+            # Check for minimum data requirements
+            if (length(unique(groups_data)) < 2) {
+                stop(paste("Grouping variable '", self$options$groups, 
+                          "' must have at least 2 categories for meaningful waffle chart."))
+            }
+            
+            # Validate counts variable if specified
+            if (!is.null(self$options$counts) && self$options$counts != "") {
+                counts_data <- self$data[[self$options$counts]]
+                if (!is.numeric(counts_data)) {
+                    stop(paste("Counts variable '", self$options$counts, 
+                              "' must be numeric, not ", class(counts_data)[1]))
+                }
+                if (any(counts_data < 0, na.rm = TRUE)) {
+                    warning("Counts variable contains negative values which will be treated as zero.")
+                }
+            }
+        },
+        
+        .aggregateData = function(data, groups_var, facet_var = NULL, counts_var = NULL) {
+            # Build grouping variables
+            group_vars <- c(groups_var)
+            if (!is.null(facet_var) && facet_var != "") {
+                group_vars <- c(group_vars, facet_var)
+            }
+            
+            # Build count expression
+            if (!is.null(counts_var) && counts_var != "") {
+                count_expr <- rlang::expr(sum(!!rlang::sym(counts_var), na.rm = TRUE))
+            } else {
+                count_expr <- rlang::expr(dplyr::n())
+            }
+            
+            # Aggregate data with error handling
+            tryCatch({
+                result <- data %>%
+                    dplyr::group_by(!!!rlang::syms(group_vars)) %>%
+                    dplyr::summarise(count = !!count_expr, .groups = 'drop') %>%
+                    dplyr::ungroup()
+                
+                return(result)
+            }, error = function(e) {
+                stop(paste("Error aggregating data:", e$message, 
+                          "Please check that your variables are properly formatted."))
+            })
+        },
+        
         .run = function() {
             if (is.null(self$options$groups)) {
                 todo <- glue::glue(
@@ -206,6 +304,20 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0)
                 stop('Data contains no (complete) rows')
 
+            # Validate inputs before processing
+            tryCatch({
+                private$.validateInputs()
+            }, error = function(e) {
+                # Display validation error in todo and stop
+                error_msg <- glue::glue(
+                    "<br>❌ <b>Input Validation Error:</b><br>
+                    <br>{e$message}<br>
+                    <br>Please check your variable selections and try again.<br><hr>"
+                )
+                self$results$todo$setContent(error_msg)
+                stop(e$message)
+            })
+            
             # Performance optimization: prepare data and options with caching
             mydata <- private$.prepareData()
             options <- private$.prepareOptions()
@@ -230,7 +342,8 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # Prepare data using cached method
+            # Validate inputs and prepare data using cached method
+            private$.validateInputs()
             mydata <- private$.prepareData()
             
             if (is.null(mydata) || nrow(mydata) == 0)
@@ -240,54 +353,12 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             facet_var <- self$options$facet
             counts_var <- self$options$counts
 
-            # Build grouping expression based on whether faceting is used
-            if (!is.null(facet_var)) {
-                if (!is.null(counts_var)) {
-                    plotdata <- mydata %>%
-                        dplyr::group_by(
-                            !!rlang::sym(groups_var),
-                            !!rlang::sym(facet_var)
-                        ) %>%
-                        dplyr::summarise(
-                            count = sum(!!rlang::sym(counts_var))
-                        ) %>%
-                        dplyr::ungroup()
-                } else {
-                    plotdata <- mydata %>%
-                        dplyr::group_by(
-                            !!rlang::sym(groups_var),
-                            !!rlang::sym(facet_var)
-                        ) %>%
-                        dplyr::summarise(
-                            count = dplyr::n()
-                        ) %>%
-                        dplyr::ungroup()
-                }
-            } else {
-                if (!is.null(counts_var)) {
-                    plotdata <- mydata %>%
-                        dplyr::group_by(!!rlang::sym(groups_var)) %>%
-                        dplyr::summarise(
-                            count = sum(!!rlang::sym(counts_var))
-                        ) %>%
-                        dplyr::ungroup()
-                } else {
-                    plotdata <- mydata %>%
-                        dplyr::group_by(!!rlang::sym(groups_var)) %>%
-                        dplyr::summarise(
-                            count = dplyr::n()
-                        ) %>%
-                        dplyr::ungroup()
-                }
-            }
+            # Use consolidated data aggregation helper
+            plotdata <- private$.aggregateData(mydata, groups_var, facet_var, counts_var)
 
-            # Calculate values for caption
+            # Calculate values for caption using helper method
             total_cases <- sum(plotdata$count)
-            n_squares <- 100  # Total number of squares in waffle chart
-            cases_per_square <- total_cases / n_squares
-            squares_per_case <- 100 / total_cases  # Each square represents this percentage
-            caption_text <- sprintf("Each square represents %.1f cases (approximately %.1f%%) (total n=%d)",
-                                    cases_per_square, squares_per_case, total_cases)
+            caption_text <- private$.generateCaption(plotdata, total_cases)
 
             # Get number of unique groups
             n_groups <- length(unique(plotdata[[groups_var]]))

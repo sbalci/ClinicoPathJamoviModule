@@ -14,7 +14,9 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bin = "default",
             orient = "vert",
             usetitle = FALSE,
-            mytitle = "Alluvial Plot", ...) {
+            mytitle = "Alluvial Plot",
+            maxvars = 8,
+            custombinlabels = "", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -70,6 +72,16 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "mytitle",
                 mytitle,
                 default="Alluvial Plot")
+            private$..maxvars <- jmvcore::OptionInteger$new(
+                "maxvars",
+                maxvars,
+                min=2,
+                max=20,
+                default=8)
+            private$..custombinlabels <- jmvcore::OptionString$new(
+                "custombinlabels",
+                custombinlabels,
+                default="")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..condensationvar)
@@ -80,6 +92,8 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..orient)
             self$.addOption(private$..usetitle)
             self$.addOption(private$..mytitle)
+            self$.addOption(private$..maxvars)
+            self$.addOption(private$..custombinlabels)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -90,7 +104,9 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bin = function() private$..bin$value,
         orient = function() private$..orient$value,
         usetitle = function() private$..usetitle$value,
-        mytitle = function() private$..mytitle$value),
+        mytitle = function() private$..mytitle$value,
+        maxvars = function() private$..maxvars$value,
+        custombinlabels = function() private$..custombinlabels$value),
     private = list(
         ..vars = NA,
         ..condensationvar = NA,
@@ -100,7 +116,9 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bin = NA,
         ..orient = NA,
         ..usetitle = NA,
-        ..mytitle = NA)
+        ..mytitle = NA,
+        ..maxvars = NA,
+        ..custombinlabels = NA)
 )
 
 alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -138,12 +156,13 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "excl",
                     "marg",
-                    "verb",
                     "fill",
                     "bin",
+                    "custombinlabels",
                     "orient",
                     "usetitle",
-                    "mytitle")))
+                    "mytitle",
+                    "maxvars")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="`Condensation Plot ${condensationvar}`",
@@ -193,6 +212,9 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param orient Orientation of the plot. Default is 'vertical'.
 #' @param usetitle Use a custom title for the plot.
 #' @param mytitle Title for the plot.
+#' @param maxvars Maximum number of variables to include in the alluvial plot.
+#' @param custombinlabels Custom labels for bins, separated by commas (e.g.,
+#'   "Low,Medium,High").  Leave empty to use bin option defaults.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -211,7 +233,9 @@ alluvial <- function(
     bin = "default",
     orient = "vert",
     usetitle = FALSE,
-    mytitle = "Alluvial Plot") {
+    mytitle = "Alluvial Plot",
+    maxvars = 8,
+    custombinlabels = "") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("alluvial requires jmvcore to be installed (restart may be required)")
@@ -234,7 +258,9 @@ alluvial <- function(
         bin = bin,
         orient = orient,
         usetitle = usetitle,
-        mytitle = mytitle)
+        mytitle = mytitle,
+        maxvars = maxvars,
+        custombinlabels = custombinlabels)
 
     analysis <- alluvialClass$new(
         options = options,

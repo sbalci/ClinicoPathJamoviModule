@@ -154,18 +154,21 @@ children:
               - type: ComboBox
                 name: centralitylinetype
                 enable: (centralityline)
-                options:
-                  - title: Solid
-                    name: solid
-                  - title: Dashed
-                    name: dashed
-                  - title: Dotted
-                    name: dotted
-                  - title: Dotted
-                    name: dotted
-                  - title: Dot-dash
-                    name: dotdash
-                  - title: Long dash
-                    name: longdash
-                  - title: Two dash
-                    name: twodash
+
+  - type: CollapseBox
+    label: Plot Configuration
+    collapsed: true
+    children:
+      - type: Label
+        label: Plot Dimensions
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: plotwidth
+                format: number
+              - type: TextBox
+                name: plotheight
+                format: number

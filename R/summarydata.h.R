@@ -7,7 +7,8 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     public = list(
         initialize = function(
             vars = NULL,
-            distr = FALSE, ...) {
+            distr = FALSE,
+            decimal_places = 1, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -26,16 +27,25 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "distr",
                 distr,
                 default=FALSE)
+            private$..decimal_places <- jmvcore::OptionInteger$new(
+                "decimal_places",
+                decimal_places,
+                min=0,
+                max=5,
+                default=1)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..distr)
+            self$.addOption(private$..decimal_places)
         }),
     active = list(
         vars = function() private$..vars$value,
-        distr = function() private$..distr$value),
+        distr = function() private$..distr$value,
+        decimal_places = function() private$..decimal_places$value),
     private = list(
         ..vars = NA,
-        ..distr = NA)
+        ..distr = NA,
+        ..decimal_places = NA)
 )
 
 summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -110,6 +120,8 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   the continuous values used for the report
 #' @param distr If TRUE, additional distribution diagnostics (Shapiro-Wilk
 #'   test, skewness, and kurtosis) will be computed and explained.
+#' @param decimal_places Number of decimal places to display for statistical
+#'   measures.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -121,7 +133,8 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 summarydata <- function(
     data,
     vars,
-    distr = FALSE) {
+    distr = FALSE,
+    decimal_places = 1) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("summarydata requires jmvcore to be installed (restart may be required)")
@@ -135,7 +148,8 @@ summarydata <- function(
 
     options <- summarydataOptions$new(
         vars = vars,
-        distr = distr)
+        distr = distr,
+        decimal_places = decimal_places)
 
     analysis <- summarydataClass$new(
         options = options,

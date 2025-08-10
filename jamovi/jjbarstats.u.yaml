@@ -66,7 +66,6 @@ children:
                   - type: ComboBox
                     name: padjustmethod
                     enable: (pairwisecomparisons)
-
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -80,4 +79,7 @@ children:
             children:
               - type: CheckBox
                 name: originaltheme
-
+              - type: CheckBox
+                name: resultssubtitle
+              - type: CheckBox
+                name: messages

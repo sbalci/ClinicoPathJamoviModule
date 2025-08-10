@@ -9,6 +9,20 @@ clearWith:
     - excl
     - originaltheme
     - typestatistics
+    - matrixtype
+    - matrixmethod
+    - siglevel
+    - conflevel
+    - padjustmethod
+    - k
+    - lowcolor
+    - midcolor
+    - highcolor
+    - title
+    - subtitle
+    - caption
+    - plotwidth
+    - plotheight
 
 
 items:
@@ -21,8 +35,8 @@ items:
     - name: plot2
       title: Chart
       type: Image
-      width:  800
-      height: 600
+      width:  600
+      height: 450
       renderFun: .plot2
       requiresData: true
       visible: (grvar)
@@ -30,8 +44,8 @@ items:
     - name: plot
       title: Chart
       type: Image
-      width:  800
-      height: 600
+      width:  600
+      height: 450
       renderFun: .plot
       requiresData: true
 

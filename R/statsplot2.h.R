@@ -12,8 +12,7 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             direction = "independent",
             distribution = "p",
             alluvsty = "t1",
-            excl = FALSE,
-            originaltheme = FALSE, ...) {
+            excl = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -29,7 +28,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 group)
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
-                grvar)
+                grvar,
+                default=NULL)
             private$..direction <- jmvcore::OptionList$new(
                 "direction",
                 direction,
@@ -57,10 +57,6 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "excl",
                 excl,
                 default=FALSE)
-            private$..originaltheme <- jmvcore::OptionBool$new(
-                "originaltheme",
-                originaltheme,
-                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -69,7 +65,6 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..distribution)
             self$.addOption(private$..alluvsty)
             self$.addOption(private$..excl)
-            self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -78,8 +73,7 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         direction = function() private$..direction$value,
         distribution = function() private$..distribution$value,
         alluvsty = function() private$..alluvsty$value,
-        excl = function() private$..excl$value,
-        originaltheme = function() private$..originaltheme$value),
+        excl = function() private$..excl$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -87,8 +81,7 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..direction = NA,
         ..distribution = NA,
         ..alluvsty = NA,
-        ..excl = NA,
-        ..originaltheme = NA)
+        ..excl = NA)
 )
 
 statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -120,8 +113,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "direction",
                     "distribution",
                     "excl",
-                    "grvar",
-                    "originaltheme")))
+                    "grvar")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text4",
@@ -132,8 +124,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "direction",
                     "distribution",
                     "excl",
-                    "grvar",
-                    "originaltheme")))
+                    "grvar")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Automatically Selected Plot",
@@ -149,8 +140,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "distribution",
                     "alluvsty",
                     "excl",
-                    "grvar",
-                    "originaltheme")))}))
+                    "grvar")))}))
 
 statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "statsplot2Base",
@@ -160,7 +150,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "statsplot2",
-                version = c(0,1,0),
+                version = c(0,0,3),
                 options = options,
                 results = statsplot2Results$new(options=options),
                 data = data,
@@ -214,8 +204,6 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param alluvsty Style for alluvial diagrams: "t1" = ggalluvial with stratum
 #'   labels,  "t2" = easyalluvial with automatic variable selection.
 #' @param excl If TRUE, excludes rows with missing values before analysis.
-#' @param originaltheme If TRUE, uses original ggplot2 themes instead of
-#'   ggstatsplot themes.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -228,12 +216,11 @@ statsplot2 <- function(
     data,
     dep,
     group,
-    grvar,
+    grvar = NULL,
     direction = "independent",
     distribution = "p",
     alluvsty = "t1",
-    excl = FALSE,
-    originaltheme = FALSE) {
+    excl = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("statsplot2 requires jmvcore to be installed (restart may be required)")
@@ -256,8 +243,7 @@ statsplot2 <- function(
         direction = direction,
         distribution = distribution,
         alluvsty = alluvsty,
-        excl = excl,
-        originaltheme = originaltheme)
+        excl = excl)
 
     analysis <- statsplot2Class$new(
         options = options,

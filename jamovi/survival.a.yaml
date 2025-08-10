@@ -4,7 +4,7 @@ title: Survival Analysis
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

@@ -11,7 +11,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             grvar = NULL,
             typestatistics = "parametric",
             originaltheme = FALSE,
-            resultssubtitle = TRUE, ...) {
+            resultssubtitle = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -34,7 +34,8 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..grvar <- jmvcore::OptionVariable$new(
                 "grvar",
                 grvar,
@@ -42,7 +43,8 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -59,7 +61,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -102,17 +104,18 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
-                    "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do",
+                    "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",
                     "group",
                     "grvar",
-                    "direction",
-                    "originaltheme")))
+                    "typestatistics",
+                    "originaltheme",
+                    "resultssubtitle"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot4",
@@ -121,12 +124,6 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=300,
                 renderFun=".plot4",
                 requiresData=TRUE,
-                clearWith=list(
-                    "dep",
-                    "group",
-                    "grvar",
-                    "direction",
-                    "originaltheme"),
                 visible="(grvar)"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -136,12 +133,6 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=300,
                 renderFun=".plot2",
                 requiresData=TRUE,
-                clearWith=list(
-                    "dep",
-                    "group",
-                    "grvar",
-                    "direction",
-                    "originaltheme"),
                 visible="(group)"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -151,12 +142,6 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=300,
                 renderFun=".plot1",
                 requiresData=TRUE,
-                clearWith=list(
-                    "dep",
-                    "group",
-                    "grvar",
-                    "direction",
-                    "originaltheme"),
                 visible="(dep)"))}))
 
 jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -249,11 +234,11 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jjpiestats <- function(
     data,
     dep,
-    group,
-    grvar,
+    group = NULL,
+    grvar = NULL,
     typestatistics = "parametric",
     originaltheme = FALSE,
-    resultssubtitle = TRUE) {
+    resultssubtitle = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjpiestats requires jmvcore to be installed (restart may be required)")

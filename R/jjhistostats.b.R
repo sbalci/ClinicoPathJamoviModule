@@ -2,6 +2,10 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
+#' @import rlang
+#' @import purrr
+#' @import glue
+#' @import ggstatsplot
 
 
 jjhistostatsClass <- if (requireNamespace('jmvcore'))
@@ -13,13 +17,18 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             # Cache for processed data and options to avoid redundant computation
             .processedData = NULL,
             .processedOptions = NULL,
+            .processedAesthetics = NULL,
 
             # init ----
             .init = function() {
 
                 deplen <- length(self$options$dep)
+                
+                # Use configurable plot dimensions
+                plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 600
+                plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
 
-                self$results$plot$setSize(600, deplen * 450)
+                self$results$plot$setSize(plotwidth, deplen * plotheight)
 
 
                 if (!is.null(self$options$grvar)) {
@@ -32,7 +41,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     as.factor(mydata[[grvar]])
                 )
 
-                self$results$plot2$setSize(num_levels * 600, deplen * 450)
+                self$results$plot2$setSize(num_levels * plotwidth, deplen * plotheight)
 
                 }
 
@@ -69,33 +78,67 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 return(mydata)
             },
 
-            # Optimized options preparation with caching
-            .prepareOptions = function(force_refresh = FALSE) {
-                if (!is.null(private$.processedOptions) && !force_refresh) {
-                    return(private$.processedOptions)
-                }
-
-                # Prepare options with progress feedback
-                self$results$todo$setContent(
-                    glue::glue("<br>Preparing histogram analysis options...<br><hr>")
+            # Shared plot generation function to eliminate duplication
+            .generateHistogram = function(data, x_var, options_data, aesthetics_data, grvar_sym = NULL, messages = TRUE) {
+                # Build base arguments common to all plots
+                base_args <- list(
+                    data = data,
+                    x = rlang::sym(x_var),
+                    messages = messages,
+                    type = options_data$typestatistics,
+                    results.subtitle = options_data$resultssubtitle,
+                    centrality.plotting = options_data$centralityline,
+                    binwidth = options_data$binwidth,
+                    test.value = options_data$test.value,
+                    conf.level = options_data$conf.level,
+                    bf.message = options_data$bf.message,
+                    digits = options_data$digits,
+                    xlab = aesthetics_data$xlab,
+                    title = aesthetics_data$title,
+                    subtitle = aesthetics_data$subtitle,
+                    caption = aesthetics_data$caption,
+                    bin.args = aesthetics_data$bin.args,
+                    centrality.line.args = aesthetics_data$centrality.line.args
                 )
-
-                # Process options
-                typestatistics <- self$options$typestatistics  # No need for constructFormula
-                dep <- self$options$dep
                 
-                # Process binwidth
-                binwidth <- NULL
-                if (self$options$changebinwidth) {
-                    binwidth <- self$options$binwidth
+                # Add grouping variable if provided
+                if (!is.null(grvar_sym)) {
+                    base_args$grouping.var <- grvar_sym
                 }
                 
-                # Process text parameters
-                xlab <- if (self$options$xlab != '') self$options$xlab else NULL
-                title <- if (self$options$title != '') self$options$title else NULL
-                subtitle <- if (self$options$subtitle != '') self$options$subtitle else NULL
-                caption <- if (self$options$caption != '') self$options$caption else NULL
+                # Add centrality.type if specified
+                if (!is.null(options_data$centrality.type)) {
+                    base_args$centrality.type <- options_data$centrality.type
+                }
                 
+                # Remove NULL arguments to prevent conflicts
+                base_args <- base_args[!sapply(base_args, is.null)]
+                
+                # Call appropriate function based on grouping
+                if (is.null(grvar_sym)) {
+                    do.call(ggstatsplot::gghistostats, base_args)
+                } else {
+                    do.call(ggstatsplot::grouped_gghistostats, base_args)
+                }
+            },
+            
+            # Consolidated input validation
+            .validateInputs = function() {
+                if (is.null(self$options$dep))
+                    return(FALSE)
+                    
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
+                    
+                return(TRUE)
+            },
+            
+            # Optimized aesthetic preparation with caching
+            .prepareAesthetics = function(force_refresh = FALSE) {
+                if (!is.null(private$.processedAesthetics) && !force_refresh) {
+                    return(private$.processedAesthetics)
+                }
+
                 # Process bin.args
                 bin.args <- list(
                     fill = self$options$binfill,
@@ -109,6 +152,46 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     linewidth = self$options$centralitylinewidth,
                     linetype = self$options$centralitylinetype
                 )
+                
+                # Process text parameters
+                xlab <- if (self$options$xlab != '') self$options$xlab else NULL
+                title <- if (self$options$title != '') self$options$title else NULL
+                subtitle <- if (self$options$subtitle != '') self$options$subtitle else NULL
+                caption <- if (self$options$caption != '') self$options$caption else NULL
+                
+                aesthetics_list <- list(
+                    bin.args = bin.args,
+                    centrality.line.args = centrality.line.args,
+                    xlab = xlab,
+                    title = title,
+                    subtitle = subtitle,
+                    caption = caption
+                )
+                
+                private$.processedAesthetics <- aesthetics_list
+                return(aesthetics_list)
+            },
+
+            # Optimized options preparation with caching
+            .prepareOptions = function(force_refresh = FALSE) {
+                if (!is.null(private$.processedOptions) && !force_refresh) {
+                    return(private$.processedOptions)
+                }
+
+                # Prepare options with progress feedback
+                self$results$todo$setContent(
+                    glue::glue("<br>Preparing histogram analysis options...<br><hr>")
+                )
+
+                # Process core analysis options
+                typestatistics <- self$options$typestatistics
+                dep <- self$options$dep
+                
+                # Process binwidth
+                binwidth <- NULL
+                if (self$options$changebinwidth) {
+                    binwidth <- self$options$binwidth
+                }
                 
                 # Process centrality.type
                 centrality.type <- if (self$options$centralitytype != 'default') self$options$centralitytype else NULL
@@ -124,12 +207,6 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     conf.level = self$options$conf.level,
                     bf.message = self$options$bf.message,
                     digits = self$options$digits,
-                    xlab = xlab,
-                    title = title,
-                    subtitle = subtitle,
-                    caption = caption,
-                    bin.args = bin.args,
-                    centrality.line.args = centrality.line.args,
                     centrality.type = centrality.type
                 )
                 private$.processedOptions <- options_list
@@ -168,332 +245,125 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     if (nrow(self$data) == 0)
                         stop('Data contains no (complete) rows')
 
-                    # Pre-process data and options for performance
+                    # Pre-process data, options, and aesthetics for performance
                     private$.prepareData()
                     private$.prepareOptions()
+                    private$.prepareAesthetics()
 
                 }
             }
 
             ,
             .plot = function(image, ggtheme, theme, ...) {
-                # the plot function ----
-
-                ## Error messages ----
-
-                if (is.null(self$options$dep))
+                # Main plot generation function
+                
+                # Validate inputs using shared helper
+                if (!private$.validateInputs())
                     return()
 
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-                # Use cached data and options for performance ----
+                # Use cached data, options, and aesthetics for performance
                 mydata <- private$.prepareData()
                 options_data <- private$.prepareOptions()
+                aesthetics_data <- private$.prepareAesthetics()
                 
                 dep <- options_data$dep
-                typestatistics <- options_data$typestatistics
-                binwidth <- options_data$binwidth
 
-
-
-
-
-                # gghistostats
-                # https://indrajeetpatil.github.io/ggstatsplot/reference/gghistostats.html
-
-                    # originaltheme <- self$options$originaltheme
-                    #
-                    # selected_theme <- if (!originaltheme) ggtheme else ggstatsplot::theme_ggstatsplot()
-
-                ## dep == 1 ----
-
+                # Single variable plot
                 if (length(self$options$dep) == 1) {
-                    if (!is.null(options_data$centrality.type)) {
-                        plot <- ggstatsplot::gghistostats(
-                            data = mydata,
-                            x = !!rlang::sym(dep),
-                            type = typestatistics,
-                            results.subtitle = options_data$resultssubtitle,
-                            centrality.plotting = options_data$centralityline,
-                            binwidth = binwidth,
-                            test.value = options_data$test.value,
-                            conf.level = options_data$conf.level,
-                            bf.message = options_data$bf.message,
-                            digits = options_data$digits,
-                            xlab = options_data$xlab,
-                            title = options_data$title,
-                            subtitle = options_data$subtitle,
-                            caption = options_data$caption,
-                            bin.args = options_data$bin.args,
-                            centrality.line.args = options_data$centrality.line.args,
-                            centrality.type = options_data$centrality.type
-                        )
-                    } else {
-                        plot <- ggstatsplot::gghistostats(
-                            data = mydata,
-                            x = !!rlang::sym(dep),
-                            type = typestatistics,
-                            results.subtitle = options_data$resultssubtitle,
-                            centrality.plotting = options_data$centralityline,
-                            binwidth = binwidth,
-                            test.value = options_data$test.value,
-                            conf.level = options_data$conf.level,
-                            bf.message = options_data$bf.message,
-                            digits = options_data$digits,
-                            xlab = options_data$xlab,
-                            title = options_data$title,
-                            subtitle = options_data$subtitle,
-                            caption = options_data$caption,
-                            bin.args = options_data$bin.args,
-                            centrality.line.args = options_data$centrality.line.args
-                        )
-                    }
-
-# extracted_stats <- ggstatsplot::extract_stats(plot)
-# extracted_subtitle <- ggstatsplot::extract_subtitle(plot)
-# extracted_caption <- ggstatsplot::extract_caption(plot)
-#
-# self$results$e_stats$setContent(extracted_stats)
-# self$results$e_subtitle$setContent(extracted_subtitle)
-# self$results$e_caption$setContent(extracted_caption)
-
-
-                    # originaltheme <- self$options$originaltheme
-                    #
-                    # if (!originaltheme) {
-                    #     plot <- plot + ggtheme
-                    # } else {
-                    #     plot <- plot + ggstatsplot::theme_ggstatsplot()
-                    # }
-
+                    plot <- private$.generateHistogram(
+                        data = mydata,
+                        x_var = dep,
+                        options_data = options_data,
+                        aesthetics_data = aesthetics_data
+                    )
                 }
 
-
-                ## dep > 1 ----
-
+                # Multiple variable plots
                 if (length(self$options$dep) > 1) {
-
                     dep2 <- as.list(self$options$dep)
-                    dep2_symbols <- purrr::map(dep2, rlang::sym)
 
-                    plotlist <-
-                        purrr::pmap(
-                            .l = list(
-                                x = dep2_symbols,
-                                messages = FALSE),
-                            .f = function(x, messages) {
-                                    if (!is.null(options_data$centrality.type)) {
-                                        ggstatsplot::gghistostats(
-                                            data = mydata,
-                                            x = !!x,
-                                            messages = messages,
-                                            type = typestatistics,
-                                            results.subtitle = options_data$resultssubtitle,
-                                            centrality.plotting = options_data$centralityline,
-                                            binwidth = binwidth,
-                                            test.value = options_data$test.value,
-                                            conf.level = options_data$conf.level,
-                                            bf.message = options_data$bf.message,
-                                            digits = options_data$digits,
-                                            xlab = options_data$xlab,
-                                            title = options_data$title,
-                                            subtitle = options_data$subtitle,
-                                            caption = options_data$caption,
-                                            bin.args = options_data$bin.args,
-                                            centrality.line.args = options_data$centrality.line.args,
-                                            centrality.type = options_data$centrality.type
-                                        )
-                                    } else {
-                                        ggstatsplot::gghistostats(
-                                            data = mydata,
-                                            x = !!x,
-                                            messages = messages,
-                                            type = typestatistics,
-                                            results.subtitle = options_data$resultssubtitle,
-                                            centrality.plotting = options_data$centralityline,
-                                            binwidth = binwidth,
-                                            test.value = options_data$test.value,
-                                            conf.level = options_data$conf.level,
-                                            bf.message = options_data$bf.message,
-                                            digits = options_data$digits,
-                                            xlab = options_data$xlab,
-                                            title = options_data$title,
-                                            subtitle = options_data$subtitle,
-                                            caption = options_data$caption,
-                                            bin.args = options_data$bin.args,
-                                            centrality.line.args = options_data$centrality.line.args
-                                        )
-                                    }
-                            }
-                        )
-
-                    plot <-
-                        ggstatsplot::combine_plots(
-                            plotlist = plotlist,
-                            plotgrid.args = list(ncol = 1)
+                    plotlist <- purrr::map(
+                        dep2,
+                        function(x_var) {
+                            private$.generateHistogram(
+                                data = mydata,
+                                x_var = x_var,
+                                options_data = options_data,
+                                aesthetics_data = aesthetics_data,
+                                messages = FALSE
                             )
+                        }
+                    )
+
+                    plot <- ggstatsplot::combine_plots(
+                        plotlist = plotlist,
+                        plotgrid.args = list(ncol = 1)
+                    )
                 }
 
-            # originaltheme <- self$options$originaltheme
-            #
-            # if (!originaltheme) {
-            #     plot <- plot + ggtheme
-            # } else {
-            #     plot <- plot + ggstatsplot::theme_ggstatsplot()
-            #     # ggplot2::theme_bw()
-            # }
-
-                ## Print Plot ----
+                # Print plot
                 print(plot)
                 TRUE
-
             }
 
 
             ,
             .plot2 = function(image, ggtheme, theme, ...) {
-                # the plot2 function ----
-
-                ## Error messages ----
-
-                if (is.null(self$options$dep) ||
-                    is.null(self$options$grvar))
+                # Grouped plot generation function
+                
+                # Validate inputs
+                if (is.null(self$options$dep) || is.null(self$options$grvar))
+                    return()
+                    
+                if (!private$.validateInputs())
                     return()
 
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-
-                # Use cached data and options for performance ----
+                # Use cached data, options, and aesthetics for performance
                 mydata <- private$.prepareData()
                 options_data <- private$.prepareOptions()
+                aesthetics_data <- private$.prepareAesthetics()
                 
                 dep <- options_data$dep
-                typestatistics <- options_data$typestatistics
-                binwidth <- options_data$binwidth
-
-
-
-                # grouped_gghistostats
-                # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_gghistostats.html
-
-
                 grvar <- self$options$grvar
 
-                ## dep = 1 ----
-
+                # Single variable grouped plot
                 if (length(self$options$dep) == 1) {
-                    if (!is.null(options_data$centrality.type)) {
-                        plot2 <- ggstatsplot::grouped_gghistostats(
-                            data = mydata,
-                            x = !!rlang::sym(dep),
-                            grouping.var = !!rlang::sym(grvar),
-                            type = typestatistics,
-                            results.subtitle = options_data$resultssubtitle,
-                            centrality.plotting = options_data$centralityline,
-                            binwidth = binwidth,
-                            test.value = options_data$test.value,
-                            conf.level = options_data$conf.level,
-                            bf.message = options_data$bf.message,
-                            digits = options_data$digits,
-                            xlab = options_data$xlab,
-                            caption = options_data$caption,
-                            bin.args = options_data$bin.args,
-                            centrality.line.args = options_data$centrality.line.args,
-                            centrality.type = options_data$centrality.type
-                        )
-                    } else {
-                        plot2 <- ggstatsplot::grouped_gghistostats(
-                            data = mydata,
-                            x = !!rlang::sym(dep),
-                            grouping.var = !!rlang::sym(grvar),
-                            type = typestatistics,
-                            results.subtitle = options_data$resultssubtitle,
-                            centrality.plotting = options_data$centralityline,
-                            binwidth = binwidth,
-                            test.value = options_data$test.value,
-                            conf.level = options_data$conf.level,
-                            bf.message = options_data$bf.message,
-                            digits = options_data$digits,
-                            xlab = options_data$xlab,
-                            caption = options_data$caption,
-                            bin.args = options_data$bin.args,
-                            centrality.line.args = options_data$centrality.line.args
-                        )
-                    }
-
+                    plot2 <- private$.generateHistogram(
+                        data = mydata,
+                        x_var = dep,
+                        options_data = options_data,
+                        aesthetics_data = aesthetics_data,
+                        grvar_sym = rlang::sym(grvar)
+                    )
                 }
 
-                ## dep > 1 ----
-
+                # Multiple variable grouped plots
                 if (length(self$options$dep) > 1) {
                     dep2 <- as.list(self$options$dep)
-                    dep2_symbols <- purrr::map(dep2, rlang::sym)
 
-                    plotlist <-
-                        purrr::pmap(
-                            .l = list(
-                                x = dep2_symbols,
-                                messages = FALSE),
-                            .f = function(x, messages) {
-                                if (!is.null(options_data$centrality.type)) {
-                                    ggstatsplot::grouped_gghistostats(
-                                        data = mydata,
-                                        x = !!x,
-                                        messages = messages,
-                                        grouping.var = !!rlang::sym(grvar),
-                                        type = typestatistics,
-                                        results.subtitle = options_data$resultssubtitle,
-                                        centrality.plotting = options_data$centralityline,
-                                        binwidth = binwidth,
-                                        test.value = options_data$test.value,
-                                        conf.level = options_data$conf.level,
-                                        bf.message = options_data$bf.message,
-                                        digits = options_data$digits,
-                                        xlab = options_data$xlab,
-                                        caption = options_data$caption,
-                                        bin.args = options_data$bin.args,
-                                        centrality.line.args = options_data$centrality.line.args,
-                                        centrality.type = options_data$centrality.type
-                                    )
-                                } else {
-                                    ggstatsplot::grouped_gghistostats(
-                                        data = mydata,
-                                        x = !!x,
-                                        messages = messages,
-                                        grouping.var = !!rlang::sym(grvar),
-                                        type = typestatistics,
-                                        results.subtitle = options_data$resultssubtitle,
-                                        centrality.plotting = options_data$centralityline,
-                                        binwidth = binwidth,
-                                        test.value = options_data$test.value,
-                                        conf.level = options_data$conf.level,
-                                        bf.message = options_data$bf.message,
-                                        digits = options_data$digits,
-                                        xlab = options_data$xlab,
-                                        caption = options_data$caption,
-                                        bin.args = options_data$bin.args,
-                                        centrality.line.args = options_data$centrality.line.args
-                                    )
-                                }
-                            }
-)
+                    plotlist <- purrr::map(
+                        dep2,
+                        function(x_var) {
+                            private$.generateHistogram(
+                                data = mydata,
+                                x_var = x_var,
+                                options_data = options_data,
+                                aesthetics_data = aesthetics_data,
+                                grvar_sym = rlang::sym(grvar),
+                                messages = FALSE
+                            )
+                        }
+                    )
 
-
-                    plot2 <-
-                        ggstatsplot::combine_plots(
-            plotlist = plotlist,
+                    plot2 <- ggstatsplot::combine_plots(
+                        plotlist = plotlist,
                         plotgrid.args = list(ncol = 1)
-                         )
-
+                    )
                 }
 
-
-                ## Print Plot 2 ----
-
+                # Print plot
                 print(plot2)
                 TRUE
-
             }
         )
     )

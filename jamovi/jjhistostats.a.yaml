@@ -4,7 +4,7 @@ title: Histogram
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous
 # menuSubtitle: Histogram
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 
@@ -295,6 +295,28 @@ options:
       description:
           R: >
             Line type for the vertical centrality line.
+
+# Plot Size Configuration ----
+
+    - name: plotwidth
+      title: Plot Width
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+      description:
+          R: >
+            Width of each plot in pixels. Default is 600.
+
+    - name: plotheight
+      title: Plot Height
+      type: Integer
+      default: 450
+      min: 300
+      max: 800
+      description:
+          R: >
+            Height of each plot in pixels. Default is 450.
 
 
 ...
