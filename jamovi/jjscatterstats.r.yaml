@@ -11,6 +11,22 @@ clearWith:
     - excl
     - originaltheme
     - typestatistics
+    - conflevel
+    - bfmessage
+    - k
+    - marginal
+    - xsidefill
+    - ysidefill
+    - pointsize
+    - pointalpha
+    - smoothlinesize
+    - smoothlinecolor
+    - mytitle
+    - xtitle
+    - ytitle
+    - resultssubtitle
+    - plotwidth
+    - plotheight
 
 
 items:

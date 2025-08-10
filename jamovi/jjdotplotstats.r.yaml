@@ -8,9 +8,24 @@ clearWith:
     - dep
     - group
     - grvar
-    - excl
-    - originaltheme
     - typestatistics
+    - effsizetype
+    - centralityplotting
+    - centralitytype
+    - mytitle
+    - xtitle
+    - ytitle
+    - originaltheme
+    - resultssubtitle
+    - testvalue
+    - bfmessage
+    - conflevel
+    - k
+    - testvalueline
+    - centralityparameter
+    - centralityk
+    - plotwidth
+    - plotheight
 
 
 

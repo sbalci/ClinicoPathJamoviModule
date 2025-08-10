@@ -26,7 +26,12 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             xtitle = "",
             ytitle = "",
             originaltheme = FALSE,
-            resultssubtitle = TRUE, ...) {
+            resultssubtitle = TRUE,
+            bfmessage = TRUE,
+            conflevel = 0.95,
+            k = 2,
+            plotwidth = 650,
+            plotheight = 450, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -160,6 +165,34 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "resultssubtitle",
                 resultssubtitle,
                 default=TRUE)
+            private$..bfmessage <- jmvcore::OptionBool$new(
+                "bfmessage",
+                bfmessage,
+                default=TRUE)
+            private$..conflevel <- jmvcore::OptionNumber$new(
+                "conflevel",
+                conflevel,
+                default=0.95,
+                min=0,
+                max=1)
+            private$..k <- jmvcore::OptionInteger$new(
+                "k",
+                k,
+                default=2,
+                min=0,
+                max=5)
+            private$..plotwidth <- jmvcore::OptionInteger$new(
+                "plotwidth",
+                plotwidth,
+                default=650,
+                min=300,
+                max=1200)
+            private$..plotheight <- jmvcore::OptionInteger$new(
+                "plotheight",
+                plotheight,
+                default=450,
+                min=300,
+                max=800)
 
             self$.addOption(private$..dep1)
             self$.addOption(private$..dep2)
@@ -182,6 +215,11 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..ytitle)
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..resultssubtitle)
+            self$.addOption(private$..bfmessage)
+            self$.addOption(private$..conflevel)
+            self$.addOption(private$..k)
+            self$.addOption(private$..plotwidth)
+            self$.addOption(private$..plotheight)
         }),
     active = list(
         dep1 = function() private$..dep1$value,
@@ -204,7 +242,12 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
         originaltheme = function() private$..originaltheme$value,
-        resultssubtitle = function() private$..resultssubtitle$value),
+        resultssubtitle = function() private$..resultssubtitle$value,
+        bfmessage = function() private$..bfmessage$value,
+        conflevel = function() private$..conflevel$value,
+        k = function() private$..k$value,
+        plotwidth = function() private$..plotwidth$value,
+        plotheight = function() private$..plotheight$value),
     private = list(
         ..dep1 = NA,
         ..dep2 = NA,
@@ -226,7 +269,12 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..xtitle = NA,
         ..ytitle = NA,
         ..originaltheme = NA,
-        ..resultssubtitle = NA)
+        ..resultssubtitle = NA,
+        ..bfmessage = NA,
+        ..conflevel = NA,
+        ..k = NA,
+        ..plotwidth = NA,
+        ..plotheight = NA)
 )
 
 jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -267,7 +315,12 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "xtitle",
                     "ytitle",
                     "originaltheme",
-                    "resultssubtitle"))
+                    "resultssubtitle",
+                    "bfmessage",
+                    "conflevel",
+                    "k",
+                    "plotwidth",
+                    "plotheight"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -302,12 +355,86 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Box-Violin Plots to Compare Within Groups
 #'
+#' Wrapper Function for ggstatsplot::ggwithinstats and
+#' ggstatsplot::grouped_ggwithinstats to generate violin plots
+#' for repeated measurements and within-subjects analysis with
+#' statistical annotations and significance testing.
 #' 
 #'
 #' @examples
-#' \donttest{
-#' # example will be added
-#'}
+#' # Basic within-subjects analysis with iris dataset (simulated repeated measures)
+#' data(iris)
+#' iris_wide <- data.frame(
+#'     Subject = 1:50,
+#'     Time1 = iris$Sepal.Length[1:50],
+#'     Time2 = iris$Sepal.Width[1:50] * 2.5,
+#'     Time3 = iris$Petal.Length[1:50] * 1.8
+#' )
+#' jjwithinstats(
+#'     data = iris_wide,
+#'     dep1 = "Time1",
+#'     dep2 = "Time2",
+#'     dep3 = "Time3",
+#'     typestatistics = "parametric"
+#' )
+#'
+#' # Advanced within-subjects analysis with custom settings
+#' jjwithinstats(
+#'     data = iris_wide,
+#'     dep1 = "Time1",
+#'     dep2 = "Time2",
+#'     dep3 = "Time3",
+#'     typestatistics = "nonparametric",
+#'     pairwisecomparisons = TRUE,
+#'     pairwisedisplay = "significant",
+#'     centralityplotting = TRUE,
+#'     centralitytype = "nonparametric",
+#'     pointpath = TRUE,
+#'     mytitle = "Repeated Measurements Over Time",
+#'     xtitle = "Time Point",
+#'     ytitle = "Measurement Value"
+#' )
+#'
+#' # Robust analysis with mtcars dataset (horsepower measurements)
+#' data(mtcars)
+#' mtcars_wide <- data.frame(
+#'     Car = rownames(mtcars)[1:20],
+#'     HP_Stock = mtcars$hp[1:20],
+#'     HP_Tuned = mtcars$hp[1:20] * 1.15,
+#'     HP_Racing = mtcars$hp[1:20] * 1.35
+#' )
+#' jjwithinstats(
+#'     data = mtcars_wide,
+#'     dep1 = "HP_Stock",
+#'     dep2 = "HP_Tuned",
+#'     dep3 = "HP_Racing",
+#'     typestatistics = "robust",
+#'     centralityplotting = TRUE,
+#'     centralitytype = "robust",
+#'     effsizetype = "unbiased",
+#'     conflevel = 0.99,
+#'     k = 3
+#' )
+#'
+#' # Bayesian analysis with ToothGrowth dataset (growth measurements)
+#' data(ToothGrowth)
+#' tooth_wide <- data.frame(
+#'     Subject = 1:20,
+#'     Week1 = ToothGrowth$len[1:20],
+#'     Week2 = ToothGrowth$len[21:40],
+#'     Week3 = ToothGrowth$len[41:60]
+#' )
+#' jjwithinstats(
+#'     data = tooth_wide,
+#'     dep1 = "Week1",
+#'     dep2 = "Week2",
+#'     dep3 = "Week3",
+#'     typestatistics = "bayes",
+#'     bfmessage = TRUE,
+#'     centralityplotting = TRUE,
+#'     mytitle = "Tooth Growth Over Time"
+#' )
+#'
 #' @param data The data as a data frame.
 #' @param dep1 .
 #' @param dep2 .
@@ -330,6 +457,13 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ytitle .
 #' @param originaltheme .
 #' @param resultssubtitle .
+#' @param bfmessage Whether to display Bayes Factor in the subtitle when using
+#'   Bayesian analysis.
+#' @param conflevel Confidence level for confidence intervals.
+#' @param k Number of decimal places for displaying statistics in the
+#'   subtitle.
+#' @param plotwidth Width of the plot in pixels. Default is 650.
+#' @param plotheight Height of the plot in pixels. Default is 450.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -359,7 +493,12 @@ jjwithinstats <- function(
     xtitle = "",
     ytitle = "",
     originaltheme = FALSE,
-    resultssubtitle = TRUE) {
+    resultssubtitle = TRUE,
+    bfmessage = TRUE,
+    conflevel = 0.95,
+    k = 2,
+    plotwidth = 650,
+    plotheight = 450) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjwithinstats requires jmvcore to be installed (restart may be required)")
@@ -398,7 +537,12 @@ jjwithinstats <- function(
         xtitle = xtitle,
         ytitle = ytitle,
         originaltheme = originaltheme,
-        resultssubtitle = resultssubtitle)
+        resultssubtitle = resultssubtitle,
+        bfmessage = bfmessage,
+        conflevel = conflevel,
+        k = k,
+        plotwidth = plotwidth,
+        plotheight = plotheight)
 
     analysis <- jjwithinstatsClass$new(
         options = options,

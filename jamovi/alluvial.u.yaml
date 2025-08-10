@@ -65,6 +65,13 @@ children:
                     name: fill
                   - type: ComboBox
                     name: bin
+                  - type: TextBox
+                    name: custombinlabels
+                    format: string
+                    width: large
+                  - type: TextBox
+                    name: maxvars
+                    format: number
                   - type: CheckBox
                     name: usetitle
                     enable: (!marg)

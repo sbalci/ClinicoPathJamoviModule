@@ -19,3 +19,9 @@ children:
     children:
       - type: CheckBox
         name: distr
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: decimal_places
+        format: number

@@ -4,16 +4,58 @@ title: Combine Medical Decision Tests
 jrs: '1.1'
 
 items:
-    - name: text1
-      title: Original Data
-      type: Preformatted
+    - name: goldStandardFreqTable
+      title: Gold Standard Frequencies
+      type: Table
       visible: (od)
+      rows: 0
+      columns:
+        - name: level
+          title: 'Level'
+          type: text
+        - name: frequency
+          title: 'Frequency'
+          type: number
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: percent
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test1Positive
+        - test2Positive
+        - test3Positive
 
-    - name: text2
-      title: Original Data
-      type: Html
+    - name: crossTabTable
+      title: Cross-tabulation Tables
+      type: Table
       visible: (od)
-
+      rows: 0
+      columns:
+        - name: test_var
+          title: 'Test Variable'
+          type: text
+        - name: test_level
+          title: 'Test Level'
+          type: text
+        - name: gold_positive
+          title: 'Gold Standard Positive'
+          type: number
+        - name: gold_negative
+          title: 'Gold Standard Negative'
+          type: number
+        - name: total
+          title: 'Total'
+          type: number
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test1Positive
+        - test2Positive
+        - test3Positive
 
     # Individual test tables
     - name: indTable1
@@ -34,6 +76,13 @@ items:
         - name: Total
           title: 'Total'
           type: number
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test1Positive
+        - test2Positive
+        - test3Positive
 
     - name: indTable2
       title: 'Test 2 Results'
@@ -53,6 +102,13 @@ items:
         - name: Total
           title: 'Total'
           type: number
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test1Positive
+        - test2Positive
+        - test3Positive
 
     - name: indTable3
       title: 'Test 3 Results'
@@ -72,12 +128,26 @@ items:
         - name: Total
           title: 'Total'
           type: number
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test1Positive
+        - test2Positive
+        - test3Positive
 
     - name: combinationsAnalysis
       title: 'Test Combination Patterns Analysis'
       type: Html
       visible: true
       description: 'Comprehensive analysis of all possible test combinations'
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test1Positive
+        - test2Positive
+        - test3Positive
 
     # Combination statistics tables
     - name: combStatsTable
@@ -109,6 +179,13 @@ items:
           title: 'Accuracy'
           type: number
           format: pc
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test1Positive
+        - test2Positive
+        - test3Positive
 
     - name: combStatsTableCI
       title: 'Combination Diagnostic Statistics with 95% CI'
@@ -136,7 +213,27 @@ items:
           superTitle: '95% CI'
           type: number
           format: pc
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test1Positive
+        - test2Positive
+        - test3Positive
 
+    - name: addCombinationPattern
+      title: 'Add Combination Pattern to Data'
+      type: Output
+      varTitle: TestCombination
+      varDescription: Test combination pattern (e.g., +/+, +/-, -/+, -/-)
+      measureType: nominal
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - test1Positive
+        - test2Positive
+        - test3Positive
 
 
 refs:

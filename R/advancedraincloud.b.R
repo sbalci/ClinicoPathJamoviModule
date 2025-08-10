@@ -3,7 +3,7 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot aes labs theme_minimal theme element_text
 #' @importFrom ggplot2 scale_fill_manual scale_color_manual
 #' @importFrom ggrain geom_rain
@@ -19,38 +19,93 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
         
         .analysis_data = NULL,
         
+        # Validation helper functions
+        .validate_numeric_range = function(value, name, min, max) {
+            if (!is.null(value)) {
+                if (!is.numeric(value) || value < min || value > max) {
+                    jmvcore::reject(paste(name, "must be a numeric value between", min, "and", max), code = "")
+                }
+            }
+        },
+        
+        .validate_numeric_positive = function(value, name) {
+            if (!is.null(value)) {
+                if (!is.numeric(value) || value <= 0) {
+                    jmvcore::reject(paste(name, "must be a positive numeric value"), code = "")
+                }
+            }
+        },
+        
+        .validate_numeric_type = function(value, name) {
+            if (!is.null(value) && !is.numeric(value)) {
+                jmvcore::reject(paste(name, "must be a numeric value"), code = "")
+            }
+        },
+        
+        # Memory-efficient HTML generation helper
+        .build_html_table = function(data_frame, title, headers, bg_color = "#f8f9fa", title_color = "#495057") {
+            if (nrow(data_frame) == 0) return("")
+            
+            # Pre-allocate string vector for better memory efficiency
+            html_parts <- vector("character", nrow(data_frame) + 10)
+            idx <- 1
+            
+            html_parts[idx] <- paste0("<div style='background-color: ", bg_color, "; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>"); idx <- idx + 1
+            html_parts[idx] <- paste0("<h3 style='color: ", title_color, "; margin-top: 0;'>", title, "</h3>"); idx <- idx + 1
+            html_parts[idx] <- "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>"; idx <- idx + 1
+            
+            # Headers
+            html_parts[idx] <- paste0("<thead><tr style='background-color: #6c757d; color: white;'>", 
+                paste0("<th style='padding: 8px; border: 1px solid #dee2e6;'>", headers, "</th>", collapse = ""),
+                "</tr></thead><tbody>"); idx <- idx + 1
+            
+            # Rows
+            for (i in 1:nrow(data_frame)) {
+                row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
+                html_parts[idx] <- paste0("<tr style='background-color: ", row_bg, ";'>")
+                idx <- idx + 1
+            }
+            
+            html_parts[idx] <- "</tbody></table></div>"
+            
+            return(paste(html_parts[1:idx], collapse = ""))
+        },
+        
         .init = function() {
-            # Validate numeric ranges for alpha values
-            if (!is.null(self$options$point_alpha)) {
-                if (self$options$point_alpha < 0 || self$options$point_alpha > 1) {
-                    jmvcore::reject("Point transparency must be between 0 and 1", code = "")
-                }
+            # Use validation helpers for cleaner, more maintainable code
+            private$.validate_numeric_range(self$options$point_alpha, "Point transparency", 0, 1)
+            private$.validate_numeric_range(self$options$violin_alpha, "Violin transparency", 0, 1)
+            private$.validate_numeric_range(self$options$point_size, "Point size", 0.1, 5)
+            private$.validate_numeric_range(self$options$boxplot_width, "Boxplot width", 0.1, 1)
+            
+            # Validate responder threshold only when change scores are enabled
+            if (self$options$show_change_scores) {
+                private$.validate_numeric_range(self$options$responder_threshold, "Responder threshold", 0, 100)
             }
             
-            if (!is.null(self$options$violin_alpha)) {
-                if (self$options$violin_alpha < 0 || self$options$violin_alpha > 1) {
-                    jmvcore::reject("Violin transparency must be between 0 and 1", code = "")
-                }
+            # Validate CV bands only when enabled
+            if (self$options$show_cv_bands) {
+                private$.validate_numeric_range(self$options$cv_band_1, "CV Band 1 percentage", 1, 50)
+                private$.validate_numeric_range(self$options$cv_band_2, "CV Band 2 percentage", 1, 50)
             }
             
-            # Validate point size
-            if (!is.null(self$options$point_size)) {
-                if (self$options$point_size < 0.1 || self$options$point_size > 5) {
-                    jmvcore::reject("Point size must be between 0.1 and 5", code = "")
-                }
+            # Validate numeric types
+            private$.validate_numeric_type(self$options$clinical_cutoff, "Clinical cutoff")
+            private$.validate_numeric_type(self$options$reference_range_min, "Reference range minimum")
+            private$.validate_numeric_type(self$options$reference_range_max, "Reference range maximum")
+            
+            # Validate positive values only when relevant options are enabled
+            if (self$options$show_mcid) {
+                private$.validate_numeric_positive(self$options$mcid_value, "MCID value")
             }
             
-            # Validate boxplot width
-            if (!is.null(self$options$boxplot_width)) {
-                if (self$options$boxplot_width < 0.1 || self$options$boxplot_width > 1) {
-                    jmvcore::reject("Boxplot width must be between 0.1 and 1", code = "")
-                }
-            }
-            
-            # Validate responder threshold
-            if (!is.null(self$options$responder_threshold)) {
-                if (self$options$responder_threshold < 0 || self$options$responder_threshold > 100) {
-                    jmvcore::reject("Responder threshold must be between 0 and 100 percent", code = "")
+            # Validate reference range logic only when both values are set and non-zero
+            if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max)) {
+                if (is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max) &&
+                    self$options$reference_range_min != 0 && self$options$reference_range_max != 0) {
+                    if (self$options$reference_range_min >= self$options$reference_range_max) {
+                        jmvcore::reject("Reference range minimum must be less than maximum", code = "")
+                    }
                 }
             }
         },
@@ -184,6 +239,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             # Generate summary statistics if requested
             if (self$options$show_statistics) {
                 stats_html <- private$.generate_statistics(analysis_data, y_var, x_var, fill_var)
+                
+                # Add missing data information if requested
+                if (self$options$show_missing_info) {
+                    missing_info_html <- private$.generate_missing_data_info(dataset, analysis_data, required_vars)
+                    stats_html <- paste0(stats_html, missing_info_html)
+                }
+                
                 self$results$statistics$setContent(stats_html)
             }
             
@@ -201,7 +263,16 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Generate effect size analysis if requested
             if (self$options$show_effect_size) {
+                start_time <- Sys.time()
                 effect_size_html <- private$.generate_effect_sizes(analysis_data, y_var, x_var, self$options$effect_size_type)
+                elapsed <- round(difftime(Sys.time(), start_time, units = "secs"), 2)
+                
+                # Add timing info for complex calculations
+                if (elapsed > 1) {
+                    effect_size_html <- paste0(effect_size_html, 
+                        "<p style='font-size:10px;color:#666;margin-top:10px;'>⏱️ Computed in ", elapsed, "s</p>")
+                }
+                
                 self$results$effect_sizes$setContent(effect_size_html)
             }
             
@@ -248,6 +319,19 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             id_var <- self$options$id_var
             cov_var <- self$options$cov_var
             
+            # Validate that we have groups
+            n_groups <- length(unique(analysis_data[[x_var]]))
+            if (n_groups == 0) {
+                warning("No groups found in the data")
+                return()
+            }
+            
+            # Validate data structure
+            if (nrow(analysis_data) == 0) {
+                warning("No data available for plotting")
+                return()
+            }
+            
             # Determine fill mapping
             if (!is.null(fill_var) && fill_var != "") {
                 fill_mapping <- fill_var
@@ -255,19 +339,32 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 fill_mapping <- x_var
             }
             
-            # Create base plot
-            p <- ggplot2::ggplot(analysis_data, ggplot2::aes(
-                x = .data[[x_var]], 
-                y = .data[[y_var]], 
-                fill = .data[[fill_mapping]]
-            ))
+            # Create base plot with error handling
+            tryCatch({
+                p <- ggplot2::ggplot(analysis_data, ggplot2::aes(
+                    x = .data[[x_var]], 
+                    y = .data[[y_var]], 
+                    fill = .data[[fill_mapping]]
+                ))
+            }, error = function(e) {
+                stop("Failed to create base plot: ", e$message, ". Please check your variable selections.")
+            })
             
             # Add covariate mapping if specified
             if (!is.null(cov_var) && cov_var != "") {
                 p$mapping$colour <- rlang::sym(cov_var)
             }
             
-            # Create geom_rain with advanced options
+            # Validate data structure for ggrain compatibility
+            n_groups <- length(unique(analysis_data[[x_var]]))
+            if (n_groups > 20) {
+                warning("Large number of groups (", n_groups, ") may cause display issues. Consider grouping your data.")
+            }
+            
+            # Ensure no NA values in grouping variable
+            analysis_data <- analysis_data[!is.na(analysis_data[[x_var]]) & !is.na(analysis_data[[y_var]]), ]
+            
+            # Create geom_rain with enhanced error handling and validation
             rain_params <- list(
                 rain.side = self$options$rain_side,
                 point.args = list(
@@ -282,9 +379,14 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 )
             )
             
-            # Add longitudinal connections if requested
-            if (self$options$show_longitudinal && !is.null(id_var) && id_var != "") {
-                rain_params$id.long.var <- id_var
+            # Add longitudinal connections if requested and valid
+            if (self$options$show_longitudinal && !is.null(id_var) && id_var != "" && id_var %in% names(analysis_data)) {
+                # Ensure ID variable has no NAs for connections
+                if (!any(is.na(analysis_data[[id_var]]))) {
+                    rain_params$id.long.var <- id_var
+                } else {
+                    warning("ID variable contains NA values. Longitudinal connections disabled.")
+                }
             }
             
             # Add Likert mode if requested
@@ -292,26 +394,159 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 rain_params$likert <- TRUE
             }
             
-            # Add covariate mapping if specified
-            if (!is.null(cov_var) && cov_var != "") {
-                rain_params$cov <- cov_var
+            # Add covariate mapping if specified and valid
+            if (!is.null(cov_var) && cov_var != "" && cov_var %in% names(analysis_data)) {
+                # Ensure covariate variable is properly formatted
+                if (!any(is.na(analysis_data[[cov_var]]))) {
+                    rain_params$cov <- cov_var
+                } else {
+                    warning("Covariate variable contains NA values. Covariate mapping disabled.")
+                }
             }
             
-            # Add geom_rain with all parameters
-            p <- p + do.call(ggrain::geom_rain, rain_params)
+            # Check for problematic ggrain combinations and use fallback
+            use_fallback <- FALSE
             
-            # Apply color palette
-            colors <- private$.get_color_palette(fill_mapping, analysis_data)
-            p <- p + ggplot2::scale_fill_manual(values = colors)
+            # Known problematic combinations that cause ggrain NA issues
+            if (n_groups > 7 || 
+                (!is.null(fill_var) && fill_var != "" && length(unique(analysis_data[[fill_var]])) > 3) ||
+                any(table(analysis_data[[x_var]]) < 3)) {  # Groups with very few observations
+                use_fallback <- TRUE
+                warning("Using standard geom fallback due to data structure that may cause ggrain issues.")
+            }
             
-            # Apply covariate color scale if needed
+            # Try ggrain first, with immediate fallback on any error
+            if (!use_fallback) {
+                tryCatch({
+                    # Validate rain.side parameter
+                    valid_sides <- c("l", "r", "f")
+                    if (!self$options$rain_side %in% valid_sides) {
+                        rain_params$rain.side <- "l"  # Default fallback
+                        warning("Invalid rain.side value. Using default 'l' (left).")
+                    }
+                    
+                    p <- p + do.call(ggrain::geom_rain, rain_params)
+                }, error = function(e) {
+                    # Set fallback flag for any ggrain error
+                    use_fallback <<- TRUE
+                    warning("ggrain failed with error: ", e$message, ". Using standard geom fallback.")
+                })
+            }
+            
+            # Use fallback geoms if ggrain failed or was skipped
+            if (use_fallback) {
+                tryCatch({
+                    # Create sophisticated fallback that mimics raincloud appearance
+                    dodge_width <- 0.8
+                    jitter_width <- 0.15
+                    
+                    # Build plot layers based on raincloud position
+                    if (self$options$rain_side == "l") {
+                        # Left-side raincloud: violin on left, points on right
+                        p <- p + 
+                            ggplot2::geom_violin(
+                                alpha = self$options$violin_alpha, 
+                                position = ggplot2::position_nudge(x = -0.2),
+                                trim = FALSE
+                            ) +
+                            ggplot2::geom_boxplot(
+                                width = self$options$boxplot_width, 
+                                alpha = 0.7,
+                                position = ggplot2::position_nudge(x = -0.1),
+                                outlier.shape = NA
+                            ) +
+                            ggplot2::geom_point(
+                                size = self$options$point_size, 
+                                alpha = self$options$point_alpha,
+                                position = ggplot2::position_jitter(width = jitter_width, height = 0)
+                            )
+                    } else if (self$options$rain_side == "r") {
+                        # Right-side raincloud: points on left, violin on right
+                        p <- p + 
+                            ggplot2::geom_point(
+                                size = self$options$point_size, 
+                                alpha = self$options$point_alpha,
+                                position = ggplot2::position_jitter(width = jitter_width, height = 0)
+                            ) +
+                            ggplot2::geom_boxplot(
+                                width = self$options$boxplot_width, 
+                                alpha = 0.7,
+                                position = ggplot2::position_nudge(x = 0.1),
+                                outlier.shape = NA
+                            ) +
+                            ggplot2::geom_violin(
+                                alpha = self$options$violin_alpha, 
+                                position = ggplot2::position_nudge(x = 0.2),
+                                trim = FALSE
+                            )
+                    } else {  # flanking
+                        # Flanking: violin split or centered
+                        p <- p + 
+                            ggplot2::geom_violin(
+                                alpha = self$options$violin_alpha, 
+                                position = ggplot2::position_dodge(dodge_width),
+                                trim = FALSE
+                            ) +
+                            ggplot2::geom_boxplot(
+                                width = self$options$boxplot_width, 
+                                alpha = 0.7,
+                                position = ggplot2::position_dodge(dodge_width),
+                                outlier.shape = NA
+                            ) +
+                            ggplot2::geom_point(
+                                size = self$options$point_size, 
+                                alpha = self$options$point_alpha,
+                                position = ggplot2::position_jitterdodge(
+                                    dodge.width = dodge_width,
+                                    jitter.width = jitter_width
+                                )
+                            )
+                    }
+                    
+                    # Add a note that fallback was used
+                    p <- p + ggplot2::labs(
+                        caption = paste0(
+                            ifelse(is.null(p$labels$caption) || p$labels$caption == "", "", 
+                                   paste0(p$labels$caption, "\n")),
+                            "Note: Standard geom fallback used due to data compatibility"
+                        )
+                    )
+                    
+                }, error = function(e2) {
+                    # Enhanced error context for better debugging
+                    data_info <- paste0("Data: ", nrow(analysis_data), " rows, ", 
+                                      ncol(analysis_data), " cols, ",
+                                      length(unique(analysis_data[[x_var]])), " groups")
+                    stop("Both ggrain and fallback plotting failed. ", 
+                         "Fallback error: ", e2$message, ". ",
+                         data_info, ". ",
+                         "Please check your data structure and variable types.")
+                })
+            }
+            
+            # Apply color palette with error handling
+            tryCatch({
+                colors <- private$.get_color_palette(fill_mapping, analysis_data)
+                p <- p + ggplot2::scale_fill_manual(values = colors)
+            }, error = function(e) {
+                # Fallback to default ggplot2 colors if palette generation fails
+                warning("Color palette generation failed, using default colors: ", e$message)
+                # ggplot2 will use default colors automatically
+            })
+            
+            # Apply covariate color scale if needed with error handling
             if (!is.null(cov_var) && cov_var != "") {
-                if (is.numeric(analysis_data[[cov_var]])) {
-                    p <- p + ggplot2::scale_color_viridis_c()
-                } else {
-                    cov_colors <- private$.get_color_palette(cov_var, analysis_data)
-                    p <- p + ggplot2::scale_color_manual(values = cov_colors)
-                }
+                tryCatch({
+                    if (is.numeric(analysis_data[[cov_var]])) {
+                        p <- p + ggplot2::scale_color_viridis_c()
+                    } else {
+                        cov_colors <- private$.get_color_palette(cov_var, analysis_data)
+                        p <- p + ggplot2::scale_color_manual(values = cov_colors)
+                    }
+                }, error = function(e) {
+                    warning("Covariate color scale generation failed, using defaults: ", e$message)
+                    # ggplot2 will use default colors automatically
+                })
             }
             
             # Add clinical cutoff line if specified
@@ -474,6 +709,25 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 }
             }
             
+            # Apply custom time point labels if provided (for longitudinal data)
+            if (!is.null(self$options$time_labels) && self$options$time_labels != "") {
+                time_labels <- trimws(strsplit(self$options$time_labels, ",")[[1]])
+                x_levels <- levels(analysis_data[[x_var]])
+                
+                # For longitudinal data, time labels override regular group labels
+                if (self$options$show_longitudinal && !is.null(id_var) && id_var != "") {
+                    if (length(time_labels) == length(x_levels)) {
+                        # Create a named vector for scale_x_discrete
+                        names(time_labels) <- x_levels
+                        p <- p + ggplot2::scale_x_discrete(labels = time_labels)
+                    } else {
+                        warning(paste("Number of time point labels (", length(time_labels), 
+                                    ") does not match number of time points (", length(x_levels), 
+                                    "). Using default labels."))
+                    }
+                }
+            }
+            
             # Apply journal-specific theme
             p <- private$.apply_journal_theme(p, self$options$journal_style)
             
@@ -517,12 +771,29 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             palette_name <- self$options$color_palette
             n_colors <- length(levels(as.factor(data[[var_name]])))
             
+            # Handle case when no groups are present
+            if (n_colors == 0) {
+                return("#2E86AB")  # Return single default color
+            }
+            
             if (palette_name == "clinical") {
-                return(c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#593E2C", "#8E6C8A")[1:n_colors])
+                base_colors <- c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#593E2C", "#8E6C8A")
+                if (n_colors <= length(base_colors)) {
+                    return(base_colors[1:n_colors])
+                } else {
+                    # Use colorRampPalette to generate more colors
+                    return(grDevices::colorRampPalette(base_colors)(n_colors))
+                }
             } else if (palette_name == "viridis") {
                 return(viridis::viridis(n_colors, discrete = TRUE))
             } else if (palette_name == "pastel") {
-                return(c("#FFB3BA", "#BAFFC9", "#BAE1FF", "#FFFFBA", "#FFDFBA", "#E0BBE4")[1:n_colors])
+                base_colors <- c("#FFB3BA", "#BAFFC9", "#BAE1FF", "#FFFFBA", "#FFDFBA", "#E0BBE4")
+                if (n_colors <= length(base_colors)) {
+                    return(base_colors[1:n_colors])
+                } else {
+                    # Use colorRampPalette to generate more colors
+                    return(grDevices::colorRampPalette(base_colors)(n_colors))
+                }
             } else if (palette_name %in% c("set1", "set2", "dark2")) {
                 palette_r_name <- switch(palette_name,
                     "set1" = "Set1",
@@ -536,8 +807,14 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     return(grDevices::colorRampPalette(base_colors)(n_colors))
                 }
             } else {
-                # Default clinical colors
-                return(c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#593E2C", "#8E6C8A")[1:n_colors])
+                # Default clinical colors with fallback for large numbers
+                base_colors <- c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#593E2C", "#8E6C8A")
+                if (n_colors <= length(base_colors)) {
+                    return(base_colors[1:n_colors])
+                } else {
+                    # Use colorRampPalette to generate more colors
+                    return(grDevices::colorRampPalette(base_colors)(n_colors))
+                }
             }
         },
 
@@ -545,17 +822,16 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             group_var <- if (!is.null(fill_var) && fill_var != "") fill_var else x_var
             
-            stats_summary <- data %>%
-                dplyr::group_by(.data[[group_var]]) %>%
-                dplyr::summarise(
-                    n = dplyr::n(),
-                    mean = round(mean(.data[[y_var]], na.rm = TRUE), 3),
-                    median = round(median(.data[[y_var]], na.rm = TRUE), 3),
-                    sd = round(sd(.data[[y_var]], na.rm = TRUE), 3),
-                    min_val = round(min(.data[[y_var]], na.rm = TRUE), 3),
-                    max_val = round(max(.data[[y_var]], na.rm = TRUE), 3),
-                    .groups = 'drop'
-                )
+            stats_summary <- dplyr::summarise(
+                dplyr::group_by(data, .data[[group_var]]),
+                n = dplyr::n(),
+                mean = round(mean(.data[[y_var]], na.rm = TRUE), 3),
+                median = round(median(.data[[y_var]], na.rm = TRUE), 3),
+                sd = round(sd(.data[[y_var]], na.rm = TRUE), 3),
+                min_val = round(min(.data[[y_var]], na.rm = TRUE), 3),
+                max_val = round(max(.data[[y_var]], na.rm = TRUE), 3),
+                .groups = 'drop'
+            )
             
             stats_html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
@@ -973,6 +1249,64 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             }
             
             return(p)
+        },
+        
+        .generate_missing_data_info = function(original_data, analysis_data, required_vars) {
+            n_original <- nrow(original_data)
+            n_analysis <- nrow(analysis_data)
+            n_excluded <- n_original - n_analysis
+            
+            # Calculate missing data by variable
+            missing_info <- list()
+            for (var in required_vars) {
+                if (var %in% names(original_data)) {
+                    n_missing <- sum(is.na(original_data[[var]]))
+                    pct_missing <- round((n_missing / n_original) * 100, 1)
+                    missing_info[[var]] <- list(n_missing = n_missing, pct_missing = pct_missing)
+                }
+            }
+            
+            html <- paste0(
+                "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; margin-top: 20px;'>",
+                "<h3 style='color: #e65100; margin-top: 0;'>📊 Missing Data Information</h3>",
+                "<h4>Data Exclusions</h4>",
+                "<p><strong>Original dataset:</strong> ", n_original, " observations</p>",
+                "<p><strong>Analysis dataset:</strong> ", n_analysis, " observations</p>",
+                "<p><strong>Excluded (incomplete):</strong> ", n_excluded, " observations (", 
+                round((n_excluded / n_original) * 100, 1), "%)</p>"
+            )
+            
+            if (length(missing_info) > 0) {
+                html <- paste0(html, "<h4>Missing Data by Variable</h4>",
+                    "<table style='width: 100%; border-collapse: collapse;'>",
+                    "<thead><tr style='background-color: #ff9800; color: white;'>",
+                    "<th style='padding: 8px; border: 1px solid #ddd;'>Variable</th>",
+                    "<th style='padding: 8px; border: 1px solid #ddd;'>Missing (n)</th>",
+                    "<th style='padding: 8px; border: 1px solid #ddd;'>Missing (%)</th>",
+                    "</tr></thead><tbody>"
+                )
+                
+                for (var_name in names(missing_info)) {
+                    info <- missing_info[[var_name]]
+                    html <- paste0(html,
+                        "<tr>",
+                        "<td style='padding: 8px; border: 1px solid #ddd;'>", var_name, "</td>",
+                        "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", info$n_missing, "</td>",
+                        "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", info$pct_missing, "%</td>",
+                        "</tr>"
+                    )
+                }
+                
+                html <- paste0(html, "</tbody></table>")
+            }
+            
+            html <- paste0(html, 
+                "<p style='font-size: 12px; color: #e65100; margin-top: 15px;'>",
+                "<em>Complete case analysis performed. Observations with missing values in any required variable were excluded.</em>",
+                "</p></div>"
+            )
+            
+            return(html)
         },
         
         .add_p_values = function(p, data, y_var, x_var, position) {

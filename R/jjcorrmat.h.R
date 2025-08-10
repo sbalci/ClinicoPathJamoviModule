@@ -20,7 +20,9 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             highcolor = "#009E73",
             title = "",
             subtitle = "",
-            caption = "", ...) {
+            caption = "",
+            plotwidth = 600,
+            plotheight = 450, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -121,6 +123,18 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "caption",
                 caption,
                 default="")
+            private$..plotwidth <- jmvcore::OptionInteger$new(
+                "plotwidth",
+                plotwidth,
+                default=600,
+                min=300,
+                max=1200)
+            private$..plotheight <- jmvcore::OptionInteger$new(
+                "plotheight",
+                plotheight,
+                default=450,
+                min=300,
+                max=800)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
@@ -137,6 +151,8 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..title)
             self$.addOption(private$..subtitle)
             self$.addOption(private$..caption)
+            self$.addOption(private$..plotwidth)
+            self$.addOption(private$..plotheight)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -153,7 +169,9 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         highcolor = function() private$..highcolor$value,
         title = function() private$..title$value,
         subtitle = function() private$..subtitle$value,
-        caption = function() private$..caption$value),
+        caption = function() private$..caption$value,
+        plotwidth = function() private$..plotwidth$value,
+        plotheight = function() private$..plotheight$value),
     private = list(
         ..dep = NA,
         ..grvar = NA,
@@ -169,7 +187,9 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..highcolor = NA,
         ..title = NA,
         ..subtitle = NA,
-        ..caption = NA)
+        ..caption = NA,
+        ..plotwidth = NA,
+        ..plotheight = NA)
 )
 
 jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -195,7 +215,21 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "grvar",
                     "excl",
                     "originaltheme",
-                    "typestatistics"))
+                    "typestatistics",
+                    "matrixtype",
+                    "matrixmethod",
+                    "siglevel",
+                    "conflevel",
+                    "padjustmethod",
+                    "k",
+                    "lowcolor",
+                    "midcolor",
+                    "highcolor",
+                    "title",
+                    "subtitle",
+                    "caption",
+                    "plotwidth",
+                    "plotheight"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -204,8 +238,8 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="plot2",
                 title="Chart",
-                width=800,
-                height=600,
+                width=600,
+                height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
                 visible="(grvar)"))
@@ -213,8 +247,8 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="plot",
                 title="Chart",
-                width=800,
-                height=600,
+                width=600,
+                height=450,
                 renderFun=".plot",
                 requiresData=TRUE))}))
 
@@ -305,6 +339,10 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param title Title for the correlation matrix plot.
 #' @param subtitle Subtitle for the correlation matrix plot.
 #' @param caption Caption for the correlation matrix plot.
+#' @param plotwidth Width of the correlation matrix plot in pixels. Default is
+#'   600.
+#' @param plotheight Height of the correlation matrix plot in pixels. Default
+#'   is 450.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -329,7 +367,9 @@ jjcorrmat <- function(
     highcolor = "#009E73",
     title = "",
     subtitle = "",
-    caption = "") {
+    caption = "",
+    plotwidth = 600,
+    plotheight = 450) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjcorrmat requires jmvcore to be installed (restart may be required)")
@@ -359,7 +399,9 @@ jjcorrmat <- function(
         highcolor = highcolor,
         title = title,
         subtitle = subtitle,
-        caption = caption)
+        caption = caption,
+        plotwidth = plotwidth,
+        plotheight = plotheight)
 
     analysis <- jjcorrmatClass$new(
         options = options,

@@ -4,7 +4,7 @@ title: ROC Analysis
 menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: ROC Analysis, AUC, Cutpoints
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

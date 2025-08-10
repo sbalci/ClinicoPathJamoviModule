@@ -4,37 +4,66 @@ title: Dot Chart
 menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
 # menuSubtitle: Dot Chart
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 
 
 description:
-    # main: |
-    #     'Wrapper Function for ggstatsplot::ggdotplotstats and
-    #     ggstatsplot::grouped_ggdotplotstats to generate Dot Charts.'
+    main: |
+        Wrapper Function for ggstatsplot::ggdotplotstats and
+        ggstatsplot::grouped_ggdotplotstats to generate dot plots
+        comparing continuous variables between groups with statistical
+        annotations and significance testing.
     R:
-        dontrun: true
+        dontrun: false
         usage: |
-            # Load test data
-            data(jjdotplotstats_test_data)
-            
-            # Basic dot plot
+            # Basic dot plot with iris dataset
             jjdotplotstats(
-              data = jjdotplotstats_test_data,
-              dep = "crp_level",
-              group = "disease_severity",
-              typestatistics = "parametric"
+                data = iris,
+                dep = "Sepal.Length",
+                group = "Species",
+                typestatistics = "parametric"
             )
             
-            # Grouped dot plot by treatment center
+            # Advanced dot plot with custom settings
             jjdotplotstats(
-              data = jjdotplotstats_test_data,
-              dep = "esr_level",
-              group = "disease_severity",
-              grvar = "treatment_center",
-              typestatistics = "nonparametric",
-              centralityplotting = TRUE
+                data = iris,
+                dep = "Petal.Width",
+                group = "Species",
+                typestatistics = "nonparametric",
+                centralityplotting = TRUE,
+                centralitytype = "nonparametric",
+                testvalueline = TRUE,
+                testvalue = 1.0,
+                mytitle = "Petal Width by Species",
+                xtitle = "Petal Width (cm)",
+                ytitle = "Species"
+            )
+            
+            # Grouped analysis with mtcars dataset
+            jjdotplotstats(
+                data = mtcars,
+                dep = "mpg",
+                group = "cyl",
+                grvar = "am",
+                typestatistics = "robust",
+                centralityplotting = TRUE,
+                centralitytype = "robust",
+                effsizetype = "unbiased",
+                conflevel = 0.99,
+                k = 3
+            )
+            
+            # Bayesian analysis with ToothGrowth dataset
+            jjdotplotstats(
+                data = ToothGrowth,
+                dep = "len",
+                group = "supp",
+                typestatistics = "bayes",
+                bfmessage = TRUE,
+                centralityparameter = "mean",
+                mytitle = "Tooth Growth by Supplement Type"
             )
 
 options:
@@ -230,6 +259,26 @@ options:
       description:
           R: >
             Number of decimal places for centrality parameter label.
+
+    - name: plotwidth
+      title: Plot Width
+      type: Integer
+      default: 650
+      min: 300
+      max: 1200
+      description:
+          R: >
+            Width of the plot in pixels. Default is 650.
+
+    - name: plotheight
+      title: Plot Height
+      type: Integer
+      default: 450
+      min: 300
+      max: 800
+      description:
+          R: >
+            Height of the plot in pixels. Default is 450.
 
 ...
 

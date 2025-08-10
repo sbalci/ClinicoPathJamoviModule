@@ -1,6 +1,7 @@
 #' @title Correlation Matrix
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import glue
 #'
 
 
@@ -12,14 +13,18 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Cache for processed data and options to avoid redundant computation
         .processedData = NULL,
         .processedOptions = NULL,
+        .options_hash = NULL,
 
         # init ----
         .init = function() {
 
             deplen <- length(self$options$dep)
 
-            self$results$plot$setSize(600, 450)
+            # Use configurable plot dimensions
+            plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 600
+            plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
 
+            self$results$plot$setSize(plotwidth, plotheight)
 
             if (!is.null(self$options$grvar)) {
 
@@ -31,7 +36,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     as.factor(mydata[[grvar]])
                 )
 
-                self$results$plot2$setSize(num_levels * 600, 450)
+                self$results$plot2$setSize(num_levels * plotwidth, plotheight)
 
             }
 
@@ -61,9 +66,55 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(mydata)
         },
 
+        # Shared validation helper
+        .validateInputs = function() {
+            if (length(self$options$dep) < 2)
+                return(FALSE)
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows')
+            
+            # Enhanced validation for correlation analysis
+            mydata <- self$data
+            
+            # Check if variables exist in data
+            for (var in self$options$dep) {
+                if (!(var %in% names(mydata)))
+                    stop(paste('Variable "', var, '" not found in data'))
+            }
+            
+            # Convert to numeric and check for sufficient numeric data
+            numeric_vars <- 0
+            for (var in self$options$dep) {
+                num_vals <- jmvcore::toNumeric(mydata[[var]])
+                num_vals <- num_vals[!is.na(num_vals)]
+                
+                if (length(num_vals) >= 3) {  # Minimum observations for correlation
+                    if (length(unique(num_vals)) >= 2) {  # Must have variation
+                        numeric_vars <- numeric_vars + 1
+                    }
+                }
+            }
+            
+            if (numeric_vars < 2)
+                stop('Correlation analysis requires at least 2 numeric variables with sufficient variation and observations')
+                
+            return(TRUE)
+        },
+
         # Optimized options preparation with caching
         .prepareOptions = function(force_refresh = FALSE) {
-            if (!is.null(private$.processedOptions) && !force_refresh) {
+            # Create hash of current options to detect changes
+            current_options_hash <- paste(
+                paste(self$options$dep, collapse = ","),
+                self$options$typestatistics, self$options$matrixtype, self$options$matrixmethod,
+                self$options$siglevel, self$options$conflevel, self$options$padjustmethod,
+                self$options$k, self$options$lowcolor, self$options$midcolor, self$options$highcolor,
+                self$options$title, self$options$subtitle, self$options$caption,
+                self$options$plotwidth, self$options$plotheight,
+                collapse = "_"
+            )
+            
+            if (!is.null(private$.processedOptions) && private$.options_hash == current_options_hash && !force_refresh) {
                 return(private$.processedOptions)
             }
 
@@ -108,6 +159,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 caption = caption
             )
             private$.processedOptions <- options_list
+            private$.options_hash <- current_options_hash
             return(options_list)
         }
 
@@ -116,7 +168,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             .run = function() {
 
             # Initial Message ----
-            if ( length(self$options$dep) <= 1 ) {
+            if ( length(self$options$dep) < 2 ) {
 
                 # TODO ----
 
@@ -157,14 +209,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ,
         .plot = function(image, ggtheme, theme, ...) {
-            # the plot function ----
-            # Error messages ----
-
-            if ( length(self$options$dep) <= 1 )
+            # Use shared validation ----
+            if (!private$.validateInputs())
                 return()
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
 
             # Use cached data and options for performance ----
             mydata <- private$.prepareData()
@@ -208,18 +255,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             )
 
-
-            # originaltheme <- self$options$originaltheme
-            #
-            # if (!originaltheme) {
-            #     plot <- plot + ggtheme
-            # } else {
-            #     plot <- plot + ggstatsplot::theme_ggstatsplot()
-            #     # ggplot2::theme_bw()
-            # }
-
-
-
             # Print Plot ----
 
             print(plot)
@@ -231,14 +266,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
         .plot2 = function(image, ggtheme, theme, ...) {
-            # the plot function ----
-            # Error messages ----
-
-            if ( is.null(self$options$dep) || is.null(self$options$grvar))
+            # Use shared validation with additional grouping variable check ----
+            if (!private$.validateInputs() || is.null(self$options$grvar))
                 return()
-
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
 
             # Use cached data and options for performance ----
             mydata <- private$.prepareData()
@@ -286,18 +316,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 )
 
-
             }
-
-
-            # originaltheme <- self$options$originaltheme
-            #
-            # if (!originaltheme) {
-            #     plot <- plot + ggtheme
-            # } else {
-            #     plot <- plot + ggstatsplot::theme_ggstatsplot()
-            #     # ggplot2::theme_bw()
-            # }
 
             # Print Plot ----
 

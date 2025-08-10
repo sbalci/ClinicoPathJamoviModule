@@ -10,13 +10,6 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Counts (Optional)
-        children:
-          - type: VariablesListBox
-            name: counts
-            maxItemCount: 1
-            isTarget: true
-      - type: TargetLayoutBox
         label: Groups
         children:
           - type: VariablesListBox
@@ -28,6 +21,13 @@ children:
         children:
           - type: VariablesListBox
             name: facet
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Counts (Optional)
+        children:
+          - type: VariablesListBox
+            name: counts
             maxItemCount: 1
             isTarget: true
 

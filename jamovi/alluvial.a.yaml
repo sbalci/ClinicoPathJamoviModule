@@ -3,7 +3,7 @@ name:  alluvial
 title: Alluvial Diagrams
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 options:
     - name: data
@@ -148,6 +148,30 @@ options:
             Title for the plot.
           jamovi: >
             Title for the plot.
+
+    - name: maxvars
+      title: Maximum variables
+      type: Integer
+      min: 2
+      max: 20
+      default: 8
+      description:
+          R: >
+            Maximum number of variables to include in the alluvial plot.
+          jamovi: >
+            Maximum number of variables to include in the alluvial plot.
+
+    - name: custombinlabels
+      title: Custom bin labels
+      type: String
+      default: ''
+      description:
+          R: >
+            Custom labels for bins, separated by commas (e.g., "Low,Medium,High"). 
+            Leave empty to use bin option defaults.
+          jamovi: >
+            Custom labels for bins, separated by commas (e.g., "Low,Medium,High"). 
+            Leave empty to use bin option defaults.
 
 
     # - name: originaltheme

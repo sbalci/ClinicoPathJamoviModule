@@ -1,10 +1,10 @@
 ---
 name:  jjbarstats
 title: Bar Charts
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Categorical'
 menuSubtitle: 'Bar Charts, Grouped Bar Charts'
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:
@@ -68,7 +68,7 @@ options:
     - name: excl
       title: Exclude Missing (NA)
       type: Bool
-      default: true
+      default: false
 
 
     - name: typestatistics
@@ -88,7 +88,7 @@ options:
     - name: pairwisecomparisons
       title: Pairwise Comparisons
       type: Bool
-      default: true
+      default: false
 
     - name: pairwisedisplay
       title: 'Pairwise Display'
@@ -130,6 +130,24 @@ options:
       title: Add GGStatsPlot Layer
       type: Bool
       default: false
+
+    - name: resultssubtitle
+      title: Show Statistical Results in Subtitle
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display statistical test results in plot subtitle. 
+            Disabling improves performance significantly.
+
+    - name: messages
+      title: Show Console Messages
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display statistical messages in console. 
+            Disabling improves performance.
 
 
 

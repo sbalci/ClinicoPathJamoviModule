@@ -9,12 +9,14 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             group = NULL,
             grvar = NULL,
-            excl = TRUE,
+            excl = FALSE,
             typestatistics = "parametric",
-            pairwisecomparisons = TRUE,
+            pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
-            originaltheme = FALSE, ...) {
+            originaltheme = FALSE,
+            resultssubtitle = FALSE,
+            messages = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -50,7 +52,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
-                default=TRUE)
+                default=FALSE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
@@ -63,7 +65,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..pairwisecomparisons <- jmvcore::OptionBool$new(
                 "pairwisecomparisons",
                 pairwisecomparisons,
-                default=TRUE)
+                default=FALSE)
             private$..pairwisedisplay <- jmvcore::OptionList$new(
                 "pairwisedisplay",
                 pairwisedisplay,
@@ -89,6 +91,14 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
+            private$..resultssubtitle <- jmvcore::OptionBool$new(
+                "resultssubtitle",
+                resultssubtitle,
+                default=FALSE)
+            private$..messages <- jmvcore::OptionBool$new(
+                "messages",
+                messages,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -99,6 +109,8 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..pairwisedisplay)
             self$.addOption(private$..padjustmethod)
             self$.addOption(private$..originaltheme)
+            self$.addOption(private$..resultssubtitle)
+            self$.addOption(private$..messages)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -109,7 +121,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
         padjustmethod = function() private$..padjustmethod$value,
-        originaltheme = function() private$..originaltheme$value),
+        originaltheme = function() private$..originaltheme$value,
+        resultssubtitle = function() private$..resultssubtitle$value,
+        messages = function() private$..messages$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -119,7 +133,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
         ..padjustmethod = NA,
-        ..originaltheme = NA)
+        ..originaltheme = NA,
+        ..resultssubtitle = NA,
+        ..messages = NA)
 )
 
 jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -144,8 +160,14 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dep",
                     "group",
                     "grvar",
-                    "direction",
-                    "originaltheme"))
+                    "excl",
+                    "typestatistics",
+                    "pairwisecomparisons",
+                    "pairwisedisplay",
+                    "padjustmethod",
+                    "originaltheme",
+                    "resultssubtitle",
+                    "messages"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -205,6 +227,10 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pairwisedisplay .
 #' @param padjustmethod .
 #' @param originaltheme .
+#' @param resultssubtitle Display statistical test results in plot subtitle.
+#'   Disabling improves performance significantly.
+#' @param messages Display statistical messages in console.  Disabling
+#'   improves performance.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -218,12 +244,14 @@ jjbarstats <- function(
     dep,
     group,
     grvar = NULL,
-    excl = TRUE,
+    excl = FALSE,
     typestatistics = "parametric",
-    pairwisecomparisons = TRUE,
+    pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
-    originaltheme = FALSE) {
+    originaltheme = FALSE,
+    resultssubtitle = FALSE,
+    messages = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjbarstats requires jmvcore to be installed (restart may be required)")
@@ -251,7 +279,9 @@ jjbarstats <- function(
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,
         padjustmethod = padjustmethod,
-        originaltheme = originaltheme)
+        originaltheme = originaltheme,
+        resultssubtitle = resultssubtitle,
+        messages = messages)
 
     analysis <- jjbarstatsClass$new(
         options = options,

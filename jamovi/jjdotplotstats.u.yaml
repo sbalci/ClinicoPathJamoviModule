@@ -81,11 +81,22 @@ children:
                 name: centralityk
                 format: number
                 enable: (centralityparameter:mean || centralityparameter:median)
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Centrality Options
+    collapsed: true
     children:
-      - type: CheckBox
-        name: centralityplotting
+      - type: Label
+        label: Centrality Display
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: centralityplotting
+              - type: ComboBox
+                name: centralitytype
+                enable: (centralityplotting)
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -120,8 +131,21 @@ children:
                 name: ytitle
                 format: string
                 width: large
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Plot Configuration
+    collapsed: true
     children:
-      - type: ComboBox
-        name: centralitytype
+      - type: Label
+        label: Plot Dimensions
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: plotwidth
+                format: number
+              - type: TextBox
+                name: plotheight
+                format: number

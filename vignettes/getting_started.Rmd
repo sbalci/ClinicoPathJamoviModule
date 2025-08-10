@@ -1,0 +1,67 @@
+---
+title: "Getting Started with ClinicoPathJamoviModule"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with ClinicoPathJamoviModule}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+Welcome to the ClinicoPathJamoviModule! This vignette will guide you through the basics of using the module to perform common analyses in clinicopathological research.
+
+## Installation
+
+First, you need to install the module in jamovi. You can do this from the jamovi library or by side-loading the `.jmo` file. For detailed instructions, please see the [INSTALL.md](INSTALL.md) file.
+
+## Loading Data
+
+Let's start by loading one of the example datasets that comes with the module. We'll use the `survival` dataset for this example.
+
+In jamovi, you can open the `survival` dataset by going to the `File` menu, selecting `Open`, and then navigating to the `ClinicoPathJamoviModule` library.
+
+## Performing a Simple Analysis: Table One
+
+One of the most common tasks in clinicopathological research is to create a "Table One" that summarizes the baseline characteristics of the study population. Let's create a Table One using the `gtsummary` function.
+
+1.  Go to the `Analyses` tab in jamovi.
+2.  Under the `Exploration` menu, select `gtsummary`.
+3.  Drag the variables you want to summarize into the `Variables` box.
+4.  Optionally, you can select a grouping variable in the `Group by` box to create a comparative table.
+
+## Performing a Survival Analysis
+
+Now, let's perform a simple survival analysis using the `survival` function.
+
+1.  Go to the `Analyses` tab in jamovi.
+2.  Under the `Survival` menu, select `Survival`.
+3.  Select the `Time Elapsed` variable.
+4.  Select the `Outcome` variable and the `Event Level`.
+5.  Select the `Explanatory Variable` to compare survival between groups.
+
+This will generate a Kaplan-Meier plot and a table with survival statistics.
+
+## Interpreting the Results
+
+The output of the analysis will be displayed in the results panel in jamovi. The tables and plots are designed to be publication-ready and easy to interpret.
+
+For more detailed information on how to interpret the results of a specific analysis, please refer to the documentation for that analysis.
+
+## Next Steps
+
+This vignette has provided a brief introduction to the ClinicoPathJamoviModule. To learn more, we recommend exploring the other vignettes in this package, which provide more in-depth information on specific topics:
+
+*   `jamovi_a_yaml_guide.md`: A guide to writing `.a.yaml` files.
+*   `jamovi_r_yaml_guide.md`: A guide to writing `.r.yaml` files.
+*   `jamovi_u_yaml_guide.md`: A guide to writing `.u.yaml` files.
+*   `jamovi_tables_guide.md`: A guide to creating and populating tables.
+*   `jamovi_plots_guide.md`: A guide to creating and populating plots.
+*   `jamovi_b_R_guide.md`: A guide to writing `.b.R` files.

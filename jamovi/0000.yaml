@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.3.97
+version: 0.0.31
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-08'
+date: '2025-08-10'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -767,12 +767,12 @@ analyses:
       and heterogeneity testing.
     ribbon: analyses
     category: analyses
-  - title: Advanced Raincloud Plot
+  - title: Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
     menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
-    menuTitle: Advanced Raincloud Plot
+    menuTitle: Raincloud Plot
     menuSubtitle: Longitudinal & Likert Support with ggrain
     description: >
       Creates advanced raincloud plots with longitudinal connections using
@@ -1051,7 +1051,7 @@ analyses:
   - title: Medical Decision Tree Analysis
     name: tree
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Medical Decision Tree Analysis
     description: >
@@ -1071,7 +1071,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine tests and evaluate performance
@@ -1288,6 +1288,11 @@ analyses:
     menuTitle: Dot Chart
     ribbon: analyses
     category: analyses
+    description: |
+      Wrapper Function for ggstatsplot::ggdotplotstats and
+      ggstatsplot::grouped_ggdotplotstats to generate dot plots
+      comparing continuous variables between groups with statistical
+      annotations and significance testing.
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
@@ -1297,6 +1302,11 @@ analyses:
     menuSubtitle: Independent Samples
     ribbon: analyses
     category: analyses
+    description: |
+      Wrapper Function for ggstatsplot::ggbetweenstats and
+      ggstatsplot::grouped_ggbetweenstats to generate Box-Violin Plots
+      for comparing continuous variables between groups with statistical
+      annotations.
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
@@ -1306,10 +1316,15 @@ analyses:
     menuSubtitle: Repeated Continuous Measurements
     ribbon: analyses
     category: analyses
+    description: |
+      Wrapper Function for ggstatsplot::ggwithinstats and
+      ggstatsplot::grouped_ggwithinstats to generate violin plots
+      for repeated measurements and within-subjects analysis with
+      statistical annotations and significance testing.
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
     description: |
@@ -1321,7 +1336,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -1333,7 +1348,7 @@ analyses:
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
     description: |
@@ -1343,7 +1358,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlot
     menuSubgroup: Auto Visualization
     menuTitle: Automatic Plot Selection
     description: >-

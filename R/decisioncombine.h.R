@@ -75,6 +75,8 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "showIndividual",
                 showIndividual,
                 default=TRUE)
+            private$..addCombinationPattern <- jmvcore::OptionOutput$new(
+                "addCombinationPattern")
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
@@ -86,6 +88,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..test3Positive)
             self$.addOption(private$..od)
             self$.addOption(private$..showIndividual)
+            self$.addOption(private$..addCombinationPattern)
         }),
     active = list(
         gold = function() private$..gold$value,
@@ -97,7 +100,8 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         test3 = function() private$..test3$value,
         test3Positive = function() private$..test3Positive$value,
         od = function() private$..od$value,
-        showIndividual = function() private$..showIndividual$value),
+        showIndividual = function() private$..showIndividual$value,
+        addCombinationPattern = function() private$..addCombinationPattern$value),
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
@@ -108,21 +112,23 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..test3 = NA,
         ..test3Positive = NA,
         ..od = NA,
-        ..showIndividual = NA)
+        ..showIndividual = NA,
+        ..addCombinationPattern = NA)
 )
 
 decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncombineResults",
     inherit = jmvcore::Group,
     active = list(
-        text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
+        goldStandardFreqTable = function() private$.items[["goldStandardFreqTable"]],
+        crossTabTable = function() private$.items[["crossTabTable"]],
         indTable1 = function() private$.items[["indTable1"]],
         indTable2 = function() private$.items[["indTable2"]],
         indTable3 = function() private$.items[["indTable3"]],
         combinationsAnalysis = function() private$.items[["combinationsAnalysis"]],
         combStatsTable = function() private$.items[["combStatsTable"]],
-        combStatsTableCI = function() private$.items[["combStatsTableCI"]]),
+        combStatsTableCI = function() private$.items[["combStatsTableCI"]],
+        addCombinationPattern = function() private$.items[["addCombinationPattern"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -133,16 +139,67 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 refs=list(
                     "DiagnosticTests",
                     "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text1",
-                title="Original Data",
-                visible="(od)"))
-            self$add(jmvcore::Html$new(
+                name="goldStandardFreqTable",
+                title="Gold Standard Frequencies",
+                visible="(od)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="level", 
+                        `title`="Level", 
+                        `type`="text"),
+                    list(
+                        `name`="frequency", 
+                        `title`="Frequency", 
+                        `type`="number"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="percent")),
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive")))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text2",
-                title="Original Data",
-                visible="(od)"))
+                name="crossTabTable",
+                title="Cross-tabulation Tables",
+                visible="(od)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="test_var", 
+                        `title`="Test Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="test_level", 
+                        `title`="Test Level", 
+                        `type`="text"),
+                    list(
+                        `name`="gold_positive", 
+                        `title`="Gold Standard Positive", 
+                        `type`="number"),
+                    list(
+                        `name`="gold_negative", 
+                        `title`="Gold Standard Negative", 
+                        `type`="number"),
+                    list(
+                        `name`="total", 
+                        `title`="Total", 
+                        `type`="number")),
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="indTable1",
@@ -165,7 +222,14 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="Total", 
                         `title`="Total", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="indTable2",
@@ -188,7 +252,14 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="Total", 
                         `title`="Total", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="indTable3",
@@ -211,12 +282,26 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="Total", 
                         `title`="Total", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="combinationsAnalysis",
                 title="Test Combination Patterns Analysis",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="combStatsTable",
@@ -252,7 +337,14 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="acc", 
                         `title`="Accuracy", 
                         `type`="number", 
-                        `format`="pc"))))
+                        `format`="pc")),
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="combStatsTableCI",
@@ -284,7 +376,28 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `title`="Upper", 
                         `superTitle`="95% CI", 
                         `type`="number", 
-                        `format`="pc"))))}))
+                        `format`="pc")),
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="addCombinationPattern",
+                title="Add Combination Pattern to Data",
+                varTitle="TestCombination",
+                varDescription="Test combination pattern (e.g., +/+, +/-, -/+, -/-)",
+                measureType="nominal",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "test1Positive",
+                    "test2Positive",
+                    "test3Positive")))}))
 
 decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncombineBase",
@@ -304,7 +417,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Combine Medical Decision Tests
@@ -329,8 +442,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   test1 = "New Test",
 #'   test1Positive = "1",
 #'   test2 = "Rater 1",
-#'   test2Positive = "1",
-#'   showCombinations = TRUE
+#'   test2Positive = "1"
 #' )
 #'
 #' # Analyze three-test combinations
@@ -344,8 +456,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   test2Positive = "1",
 #'   test3 = "Rater 2",
 #'   test3Positive = "1",
-#'   showIndividual = TRUE,
-#'   showCombinations = TRUE
+#'   showIndividual = TRUE
 #' )
 #'
 #' @param data The data as a data frame.
@@ -362,21 +473,22 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param showIndividual .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$goldStandardFreqTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$crossTabTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$indTable1} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$indTable2} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$indTable3} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$combinationsAnalysis} \tab \tab \tab \tab \tab Comprehensive analysis of all possible test combinations \cr
 #'   \code{results$combStatsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$combStatsTableCI} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$addCombinationPattern} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$indTable1$asDF}
+#' \code{results$goldStandardFreqTable$asDF}
 #'
-#' \code{as.data.frame(results$indTable1)}
+#' \code{as.data.frame(results$goldStandardFreqTable)}
 #'
 #' @export
 decisioncombine <- function(

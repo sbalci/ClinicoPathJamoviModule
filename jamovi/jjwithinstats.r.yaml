@@ -25,6 +25,11 @@ clearWith:
     - ytitle
     - originaltheme
     - resultssubtitle
+    - bfmessage
+    - conflevel
+    - k
+    - plotwidth
+    - plotheight
 
 
 items:

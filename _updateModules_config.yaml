@@ -8,8 +8,8 @@
 
 # Global settings
 global:
-  new_version: "0.0.3.97"  # New version number for the modules
-  new_date: "2025-08-08" # New date for the modules
+  new_version: "0.0.31.00"  # New version number for the modules
+  new_date: "2025-08-10" # New date for the modules
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 # Operation modes
@@ -82,7 +82,7 @@ vignette_folders:
 # Module definitions
 modules:
   jjstatsplot:
-    enabled: false
+    enabled: true
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
     menuGroup_pattern: "menuGroup: JJStatsPlot$"
     menuGroup_pattern_wip: "menuGroup: JJStatsPlot"

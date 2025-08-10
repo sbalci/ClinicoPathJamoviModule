@@ -30,79 +30,89 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 # Clear the to-do message if variables are selected.
                 self$results$todo$setContent("")
-            }
+                
+                # Check if the provided data contains any rows.
+                if (nrow(self$data) == 0)
+                    stop('Data contains no (complete) rows')
 
-            # Check if the provided data contains any rows.
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
+                mydata <- self$data
 
-            mydata <- self$data
+                # Construct a formula from the selected variables.
+                formula <- jmvcore::constructFormula(terms = self$options$vars)
+                myvars <- jmvcore::decomposeFormula(formula = formula)
+                myvars <- unlist(myvars)
+                
+                # Validate that selected variables are actually categorical
+                non_categorical <- myvars[!sapply(mydata[myvars], function(x) is.factor(x) || is.character(x))]
+                if (length(non_categorical) > 0) {
+                    stop(paste("Non-categorical variables detected:", paste(non_categorical, collapse = ", "), 
+                              ". Please select only categorical (factor or character) variables."))
+                }
 
-            # Construct a formula from the selected variables.
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
-            myvars <- jmvcore::decomposeFormula(formula = formula)
-            myvars <- unlist(myvars)
+                # Function to generate a summary for a single categorical variable.
+                catsummary <- function(myvar) {
+                    # Calculate total observations, missing values, and valid (non-missing) count.
+                    total_obs <- length(mydata[[myvar]])
+                    missing_obs <- sum(is.na(mydata[[myvar]]))
+                    valid_obs <- total_obs - missing_obs
+                    num_levels <- nlevels(as.factor(mydata[[myvar]]))
 
-            # Function to generate a summary for a single categorical variable.
-            catsummary <- function(myvar) {
-                # Calculate total observations, missing values, and valid (non-missing) count.
-                total_obs <- length(mydata[[myvar]])
-                missing_obs <- sum(is.na(mydata[[myvar]]))
-                valid_obs <- total_obs - missing_obs
-                num_levels <- nlevels(as.factor(mydata[[myvar]]))
-
-                # Create a summary table for the variable.
-                summar <- summary(as.factor(mydata[[myvar]])) %>%
-                    as.table() %>%
-                    tibble::as_tibble(.name_repair = "unique") %>%
-                    dplyr::filter(.[[1]] != "NA's") %>%
-                    dplyr::arrange(dplyr::desc(n))
-                summar$validtotal <- valid_obs
-
-                # Build a description for each level showing count and percentage.
-                description <- summar %>%
-                    dplyr::mutate(
-                        percent = n / validtotal,
-                        level_description = glue::glue(
-                            "{...1}: n = {n}, {scales::percent(percent)} of valid cases. "
-                        )
+                    # Create a summary table for the variable.
+                    tbl <- summary(as.factor(mydata[[myvar]]))
+                    summar <- data.frame(
+                        level = names(tbl),
+                        n = as.numeric(tbl),
+                        stringsAsFactors = FALSE
                     ) %>%
-                    dplyr::pull(level_description)
+                        dplyr::filter(level != "NA's") %>%
+                        dplyr::arrange(dplyr::desc(n))
+                    summar$validtotal <- valid_obs
 
-                # Create overall summary sentences with HTML tags for styling.
-                sentence1 <- paste0("<strong>", myvar, "</strong> has ", total_obs, " observations and ", num_levels, " levels.")
-                sentence2 <- paste0("Missing values: ", missing_obs, ".")
-                full_description <- paste(c(sentence1, description, sentence2), collapse = "<br>")
-                return(full_description)
-            }
+                    # Build a description for each level showing count and percentage.
+                    description <- summar %>%
+                        dplyr::mutate(
+                            percent = n / validtotal,
+                            level_description = glue::glue(
+                                "{level}: n = {n}, {scales::percent(percent)} of valid cases. "
+                            )
+                        ) %>%
+                        dplyr::pull(level_description)
 
-            # Generate summaries for all selected variables and combine them.
-            summaries <- purrr::map(.x = myvars, .f = catsummary)
-            summary_text <- paste(summaries, collapse = "<br><br>")
-            self$results$text$setContent(summary_text)
+                    # Create overall summary sentences with HTML tags for styling.
+                    sentence1 <- paste0("<strong>", myvar, "</strong> has ", total_obs, " observations and ", num_levels, " levels.")
+                    sentence2 <- paste0("Missing values: ", missing_obs, ".")
+                    full_description <- paste(c(sentence1, description, sentence2), collapse = "<br>")
+                    return(full_description)
+                }
 
-            # Version-compatible gtExtras implementation with fallbacks for categorical data
-            plot_dataset <- tryCatch({
-                # Primary approach: Use gtExtras with version compatibility for categorical data
-                private$.safe_gt_plt_summary_cat(mydata, myvars)
-            }, error = function(e) {
-                # Secondary approach: Custom gt table with gtExtras-like styling for categorical data
-                tryCatch({
-                    private$.gtExtras_style_fallback_cat(mydata, myvars)
-                }, error = function(e2) {
-                    # Final fallback: Simple HTML message
-                    htmltools::HTML(paste0(
-                        "<div style='padding: 20px; border-left: 4px solid #dc3545; background-color: #f8d7da; margin: 10px 0;'>",
-                        "<h5 style='color: #721c24; margin-top: 0;'>Summary Table Error</h5>",
-                        "<p><strong>gtExtras error:</strong> ", e$message, "</p>",
-                        "<p><strong>Fallback error:</strong> ", e2$message, "</p>",
-                        "<p>Please check your data types and ensure variables are categorical.</p>",
-                        "</div>"
-                    ))
+                # Generate summaries for all selected variables and combine them.
+                summaries <- purrr::map(.x = myvars, .f = catsummary)
+                summary_text <- paste(summaries, collapse = "<br><br>")
+                self$results$text$setContent(summary_text)
+
+                # Version-compatible gtExtras implementation with fallbacks for categorical data
+                plot_dataset <- tryCatch({
+                    # Primary approach: Use gtExtras with version compatibility for categorical data
+                    private$.safe_gt_plt_summary_cat(mydata, myvars)
+                }, error = function(e) {
+                    # Secondary approach: Custom gt table with gtExtras-like styling for categorical data
+                    tryCatch({
+                        private$.gtExtras_style_fallback_cat(mydata, myvars)
+                    }, error = function(e2) {
+                        # Final fallback: Simple HTML message
+                        htmltools::HTML(paste0(
+                            "<div style='padding: 20px; border-left: 4px solid #dc3545; background-color: #f8d7da; margin: 10px 0;'>",
+                            "<h5 style='color: #721c24; margin-top: 0;'>Summary Table Error</h5>",
+                            "<p><strong>gtExtras error:</strong> ", e$message, "</p>",
+                            "<p><strong>Fallback error:</strong> ", e2$message, "</p>",
+                            "<p>Please check your data types and ensure variables are categorical.</p>",
+                            "</div>"
+                        ))
+                    })
                 })
-            })
-            
-            self$results$text1$setContent(plot_dataset)
+                
+                self$results$text1$setContent(plot_dataset)
+            }
         },
 
         # Version-compatible gtExtras wrapper for categorical data
@@ -139,12 +149,22 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clean_data %>% gtExtras::gt_plt_summary()
             })
             
-            # Safely hide columns that might not exist for categorical data
+            # Safely hide numeric columns that might not be relevant for categorical data
             summary_table <- tryCatch({
-                # Try to hide columns, but don't fail if they don't exist
-                summary_table %>% gt::cols_hide(columns = c("Mean", "Median", "SD"))
+                # Get all column names in the table
+                table_cols <- names(summary_table$`_data`)
+                # Define numeric columns that should be hidden for categorical data
+                numeric_cols_to_hide <- c("Mean", "Median", "SD", "Min", "Max", "Q25", "Q75")
+                # Only hide columns that actually exist in the table
+                existing_cols_to_hide <- intersect(numeric_cols_to_hide, table_cols)
+                
+                if (length(existing_cols_to_hide) > 0) {
+                    summary_table %>% gt::cols_hide(columns = existing_cols_to_hide)
+                } else {
+                    summary_table
+                }
             }, error = function(e) {
-                # If hiding columns fails (columns don't exist), return table as-is
+                # If hiding columns fails for any reason, return table as-is
                 summary_table
             })
             
@@ -221,48 +241,4 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 )
 
 
-
-# med <- self$options$med
-# cent <- self$options$cent
-# disp <- self$options$disp
-# ran <- self$options$ran
-# distr <- self$options$distr
-# lev <- self$options$lev
-# n_ch <- self$options$n_ch
-# mis <- self$options$mis
-#
-#
-
-# myreport <- mydata %>%
-#     select(myvars) %>%
-#     report::report(.,
-#                    median = FALSE,
-#                    centrality = TRUE,
-#                    dispersion = TRUE,
-#                    range = TRUE,
-#                    distribution = FALSE,
-#                    levels_percentage = FALSE,
-#                    n_entries = 3,
-#                    missing_percentage = FALSE
-# #                    median = med,
-# #                    centrality = cent,
-# #                    dispersion = disp,
-# #                    range = ran,
-# #                    distribution = distr,
-# #                    levels_percentage = lev,
-# #                    n_characters = n_ch,
-# #                    missing_percentage = mis
-#                    )
-#
-# results1 <- myreport
-
-
-
-# results1 <- mydata %>%
-#     explore::describe(.) %>%
-#     dplyr::filter(na > 0)
-
-
-# for (fac in facs)
-#     data[[fac]] <- as.factor(data[[fac]])
 

@@ -154,3 +154,21 @@ children:
                 format: string
                 width: large
 
+  - type: CollapseBox
+    label: Plot Configuration
+    collapsed: true
+    children:
+      - type: Label
+        label: Plot Dimensions
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: plotwidth
+                format: number
+              - type: TextBox
+                name: plotheight
+                format: number
+

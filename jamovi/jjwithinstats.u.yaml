@@ -119,6 +119,8 @@ children:
                 name: resultssubtitle
               - type: CheckBox
                 name: originaltheme
+              - type: CheckBox
+                name: bfmessage
       - type: Label
         label: Plot Labels
         fitToGrid: true
@@ -138,6 +140,36 @@ children:
                 name: ytitle
                 format: string
                 width: large
+      - type: Label
+        label: Advanced Options
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: conflevel
+                format: number
+                width: small
+              - type: TextBox
+                name: k
+                format: number
+                width: small
+      - type: Label
+        label: Plot Dimensions
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: plotwidth
+                format: number
+                width: small
+              - type: TextBox
+                name: plotheight
+                format: number
+                width: small
 
 
 

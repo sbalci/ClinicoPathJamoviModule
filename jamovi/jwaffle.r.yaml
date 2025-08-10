@@ -23,7 +23,7 @@ items:
       title: Waffle Chart
       type: Image
       width: 600
-      height: 450
+      height: 500
       renderFun: .plot
       requiresData: true
 

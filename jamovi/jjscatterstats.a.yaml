@@ -4,7 +4,7 @@ title: Scatter Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 
@@ -213,6 +213,26 @@ options:
       description:
           R: >
             Color of the regression/smooth line.
+
+    - name: plotwidth
+      title: Plot Width
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+      description:
+          R: >
+            Width of the plot in pixels. Default is 600.
+
+    - name: plotheight
+      title: Plot Height
+      type: Integer
+      default: 450
+      min: 300
+      max: 800
+      description:
+          R: >
+            Height of the plot in pixels. Default is 450.
 
 ...
 

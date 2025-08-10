@@ -39,23 +39,27 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             var_formula <- jmvcore::constructFormula(terms = self$options$vars)
             var_list <- unlist(jmvcore::decomposeFormula(formula = var_formula))
 
-            # mysummary function
+            # mysummary function with optimized calculations
             mysummary <- function(myvar) {
-
-                mean_x <- round(mean(jmvcore::toNumeric(dataset[[myvar]]),
-                  na.rm = TRUE), digits = 1)
-
-                sd_x <- round(sd(x = jmvcore::toNumeric(dataset[[myvar]]),
-                  na.rm = TRUE), digits = 1)
-
-                median_x <- round(median(jmvcore::toNumeric(dataset[[myvar]]),
-                  na.rm = TRUE), digits = 1)
-
-                min_x <- round(min(jmvcore::toNumeric(dataset[[myvar]]), na.rm = TRUE),
-                  digits = 1)
-
-                max_x <- round(max(jmvcore::toNumeric(dataset[[myvar]]), na.rm = TRUE),
-                  digits = 1)
+                # Cache numeric conversion to avoid repeated calls
+                numeric_data <- jmvcore::toNumeric(dataset[[myvar]])
+                
+                # Calculate all statistics at once with specified decimal places
+                decimal_places <- if (!is.null(self$options$decimal_places)) self$options$decimal_places else 1
+                
+                stats <- round(c(
+                    mean = mean(numeric_data, na.rm = TRUE),
+                    sd = sd(numeric_data, na.rm = TRUE),
+                    median = median(numeric_data, na.rm = TRUE),
+                    min = min(numeric_data, na.rm = TRUE),
+                    max = max(numeric_data, na.rm = TRUE)
+                ), digits = decimal_places)
+                
+                mean_x <- stats["mean"]
+                sd_x <- stats["sd"]
+                median_x <- stats["median"]
+                min_x <- stats["min"]
+                max_x <- stats["max"]
 
 
 
@@ -64,9 +68,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 # If the distribution diagnostics option is enabled, add additional tests.
                 if (self$options$distr) {
                     # Shapiro-Wilk test (only valid if 3 <= sample size <= 5000)
-
-                    numeric_data <- jmvcore::toNumeric(dataset[[myvar]])
-
+                    # Use already cached numeric_data
                     valid_data <- na.omit(numeric_data)
                     if (length(valid_data) >= 3 && length(valid_data) <= 5000) {
                         sw_test <- shapiro.test(valid_data)
@@ -93,10 +95,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     )
                 }
 
-                    # Append the distribution diagnostics to the summary text.
-                    print(paste0("Mean of <strong>", myvar, "</strong> is: ", mean_x, " \U00B1 ", sd_x,
-                                 ". (Median: ", median_x, " [Min: ", min_x, " - ", "Max: ",
-                                 max_x, "]) <br>", dist_text, "<br><br>", collapse = " "))
+                    # Return the summary text with distribution diagnostics.
+                    paste0("Mean of <strong>", myvar, "</strong> is: ", mean_x, " &plusmn; ", sd_x,
+                           ". (Median: ", median_x, " [Min: ", min_x, " - ", "Max: ",
+                           max_x, "]) <br>", dist_text, "<br><br>", collapse = " ")
 
             }
 
@@ -105,22 +107,22 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             self$results$text$setContent(results)
 
 
-            # Version-compatible gtExtras implementation with fallbacks
+            # Simplified gtExtras implementation with fallback
             plot_dataset <- tryCatch({
-                # Primary approach: Use gtExtras with version compatibility
-                private$.safe_gt_plt_summary(dataset, var_list)
+                # Primary approach: Direct gtExtras call (version compatibility verified)
+                private$.create_summary_table(dataset, var_list)
             }, error = function(e) {
-                # Secondary approach: Custom gt table with gtExtras-like styling
+                # Fallback: Custom gt table with comprehensive statistics
                 tryCatch({
                     private$.gtExtras_style_fallback(dataset, var_list)
                 }, error = function(e2) {
-                    # Final fallback: Simple HTML message
+                    # Final fallback: Error message with diagnostics
                     htmltools::HTML(paste0(
                         "<div style='padding: 20px; border-left: 4px solid #dc3545; background-color: #f8d7da; margin: 10px 0;'>",
                         "<h5 style='color: #721c24; margin-top: 0;'>Summary Table Error</h5>",
-                        "<p><strong>gtExtras error:</strong> ", e$message, "</p>",
+                        "<p><strong>Primary error:</strong> ", e$message, "</p>",
                         "<p><strong>Fallback error:</strong> ", e2$message, "</p>",
-                        "<p>Please check your data types and ensure variables are numeric.</p>",
+                        "<p>Ensure variables are numeric and gtExtras package is properly installed.</p>",
                         "</div>"
                     ))
                 })
@@ -131,13 +133,13 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         }
         },
 
-        # Version-compatible gtExtras wrapper
-        .safe_gt_plt_summary = function(dataset, var_list) {
+        # Simplified gtExtras wrapper (compatibility verified)
+        .create_summary_table = function(dataset, var_list) {
             # Filter to numeric variables only
             numeric_vars <- var_list[sapply(dataset[var_list], is.numeric)]
             
             if (length(numeric_vars) == 0) {
-                return(htmltools::HTML("<p>No numeric variables selected for gtExtras summary.</p>"))
+                return(htmltools::HTML("<p>No numeric variables selected for summary table.</p>"))
             }
             
             # Prepare clean dataset with only numeric variables
@@ -148,17 +150,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 if (is.factor(x)) as.numeric(as.character(x)) else as.numeric(x)
             }))
             
-            # Check gt version and handle missing value formatting
-            gt_version <- utils::packageVersion("gt")
-            
-            # Try gtExtras with version compatibility
-            if (gt_version >= "0.6.0") {
-                # For newer gt versions, gtExtras should handle sub_missing internally
-                summary_table <- clean_data %>% gtExtras::gt_plt_summary()
-            } else {
-                # For older gt versions, use fmt_missing approach
-                summary_table <- clean_data %>% gtExtras::gt_plt_summary()
-            }
+            # Use gtExtras with default styling
+            summary_table <- clean_data %>% 
+                gtExtras::gt_plt_summary()
             
             # Convert to HTML
             print_table <- print(summary_table)

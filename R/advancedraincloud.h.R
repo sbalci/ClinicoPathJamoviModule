@@ -458,7 +458,51 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 options=options,
                 name="",
-                title="Advanced Raincloud Plot")
+                title="Advanced Raincloud Plot",
+                clearWith=list(
+                    "y_var",
+                    "x_var",
+                    "fill_var",
+                    "id_var",
+                    "cov_var",
+                    "rain_side",
+                    "likert_mode",
+                    "show_longitudinal",
+                    "point_size",
+                    "point_alpha",
+                    "violin_alpha",
+                    "boxplot_width",
+                    "color_palette",
+                    "plot_title",
+                    "x_label",
+                    "y_label",
+                    "clinical_cutoff",
+                    "reference_range_min",
+                    "reference_range_max",
+                    "show_mcid",
+                    "mcid_value",
+                    "log_transform",
+                    "outlier_method",
+                    "show_cv_bands",
+                    "cv_band_1",
+                    "cv_band_2",
+                    "trial_arms",
+                    "time_labels",
+                    "population_type",
+                    "journal_style",
+                    "p_value_position",
+                    "show_statistics",
+                    "show_comparisons",
+                    "show_interpretation",
+                    "show_effect_size",
+                    "effect_size_type",
+                    "show_change_scores",
+                    "baseline_group",
+                    "responder_threshold",
+                    "show_sample_size",
+                    "show_missing_info",
+                    "generate_report",
+                    "include_methods"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -528,7 +572,7 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 weightsSupport = 'auto')
         }))
 
-#' Advanced Raincloud Plot
+#' Raincloud Plot
 #'
 #' Creates advanced raincloud plots with longitudinal connections using ggrain 
 #' package.

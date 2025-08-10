@@ -24,7 +24,9 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             k = 2,
             testvalueline = FALSE,
             centralityparameter = "mean",
-            centralityk = 2, ...) {
+            centralityk = 2,
+            plotwidth = 650,
+            plotheight = 450, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -144,6 +146,18 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 default=2,
                 min=0,
                 max=5)
+            private$..plotwidth <- jmvcore::OptionInteger$new(
+                "plotwidth",
+                plotwidth,
+                default=650,
+                min=300,
+                max=1200)
+            private$..plotheight <- jmvcore::OptionInteger$new(
+                "plotheight",
+                plotheight,
+                default=450,
+                min=300,
+                max=800)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -164,6 +178,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..testvalueline)
             self$.addOption(private$..centralityparameter)
             self$.addOption(private$..centralityk)
+            self$.addOption(private$..plotwidth)
+            self$.addOption(private$..plotheight)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -184,7 +200,9 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         k = function() private$..k$value,
         testvalueline = function() private$..testvalueline$value,
         centralityparameter = function() private$..centralityparameter$value,
-        centralityk = function() private$..centralityk$value),
+        centralityk = function() private$..centralityk$value,
+        plotwidth = function() private$..plotwidth$value,
+        plotheight = function() private$..plotheight$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -204,7 +222,9 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..k = NA,
         ..testvalueline = NA,
         ..centralityparameter = NA,
-        ..centralityk = NA)
+        ..centralityk = NA,
+        ..plotwidth = NA,
+        ..plotheight = NA)
 )
 
 jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -229,9 +249,24 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "dep",
                     "group",
                     "grvar",
-                    "excl",
+                    "typestatistics",
+                    "effsizetype",
+                    "centralityplotting",
+                    "centralitytype",
+                    "mytitle",
+                    "xtitle",
+                    "ytitle",
                     "originaltheme",
-                    "typestatistics"))
+                    "resultssubtitle",
+                    "testvalue",
+                    "bfmessage",
+                    "conflevel",
+                    "k",
+                    "testvalueline",
+                    "centralityparameter",
+                    "centralityk",
+                    "plotwidth",
+                    "plotheight"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -277,31 +312,61 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Dot Chart
 #'
+#' Wrapper Function for ggstatsplot::ggdotplotstats and
+#' ggstatsplot::grouped_ggdotplotstats to generate dot plots
+#' comparing continuous variables between groups with statistical
+#' annotations and significance testing.
 #' 
 #'
 #' @examples
-#' \donttest{
-#' # Load test data
-#' data(jjdotplotstats_test_data)
-#'
-#' # Basic dot plot
+#' # Basic dot plot with iris dataset
 #' jjdotplotstats(
-#'   data = jjdotplotstats_test_data,
-#'   dep = "crp_level",
-#'   group = "disease_severity",
-#'   typestatistics = "parametric"
+#'     data = iris,
+#'     dep = "Sepal.Length",
+#'     group = "Species",
+#'     typestatistics = "parametric"
 #' )
 #'
-#' # Grouped dot plot by treatment center
+#' # Advanced dot plot with custom settings
 #' jjdotplotstats(
-#'   data = jjdotplotstats_test_data,
-#'   dep = "esr_level",
-#'   group = "disease_severity",
-#'   grvar = "treatment_center",
-#'   typestatistics = "nonparametric",
-#'   centralityplotting = TRUE
+#'     data = iris,
+#'     dep = "Petal.Width",
+#'     group = "Species",
+#'     typestatistics = "nonparametric",
+#'     centralityplotting = TRUE,
+#'     centralitytype = "nonparametric",
+#'     testvalueline = TRUE,
+#'     testvalue = 1.0,
+#'     mytitle = "Petal Width by Species",
+#'     xtitle = "Petal Width (cm)",
+#'     ytitle = "Species"
 #' )
-#'}
+#'
+#' # Grouped analysis with mtcars dataset
+#' jjdotplotstats(
+#'     data = mtcars,
+#'     dep = "mpg",
+#'     group = "cyl",
+#'     grvar = "am",
+#'     typestatistics = "robust",
+#'     centralityplotting = TRUE,
+#'     centralitytype = "robust",
+#'     effsizetype = "unbiased",
+#'     conflevel = 0.99,
+#'     k = 3
+#' )
+#'
+#' # Bayesian analysis with ToothGrowth dataset
+#' jjdotplotstats(
+#'     data = ToothGrowth,
+#'     dep = "len",
+#'     group = "supp",
+#'     typestatistics = "bayes",
+#'     bfmessage = TRUE,
+#'     centralityparameter = "mean",
+#'     mytitle = "Tooth Growth by Supplement Type"
+#' )
+#'
 #' @param data The data as a data frame.
 #' @param dep A continuous numeric variable for which the distribution will be
 #'   displayed across different groups using dot plots.
@@ -333,6 +398,8 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param centralityparameter Which measure of central tendency to display as
 #'   a vertical line.
 #' @param centralityk Number of decimal places for centrality parameter label.
+#' @param plotwidth Width of the plot in pixels. Default is 650.
+#' @param plotheight Height of the plot in pixels. Default is 450.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -361,7 +428,9 @@ jjdotplotstats <- function(
     k = 2,
     testvalueline = FALSE,
     centralityparameter = "mean",
-    centralityk = 2) {
+    centralityk = 2,
+    plotwidth = 650,
+    plotheight = 450) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjdotplotstats requires jmvcore to be installed (restart may be required)")
@@ -398,7 +467,9 @@ jjdotplotstats <- function(
         k = k,
         testvalueline = testvalueline,
         centralityparameter = centralityparameter,
-        centralityk = centralityk)
+        centralityk = centralityk,
+        plotwidth = plotwidth,
+        plotheight = plotheight)
 
     analysis <- jjdotplotstatsClass$new(
         options = options,

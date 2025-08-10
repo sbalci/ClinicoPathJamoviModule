@@ -27,7 +27,9 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             binalpha = 0.7,
             centralitylinecolor = "blue",
             centralitylinewidth = 1,
-            centralitylinetype = "dashed", ...) {
+            centralitylinetype = "dashed",
+            plotwidth = 600,
+            plotheight = 450, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -156,6 +158,18 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "longdash",
                     "twodash"),
                 default="dashed")
+            private$..plotwidth <- jmvcore::OptionInteger$new(
+                "plotwidth",
+                plotwidth,
+                default=600,
+                min=300,
+                max=1200)
+            private$..plotheight <- jmvcore::OptionInteger$new(
+                "plotheight",
+                plotheight,
+                default=450,
+                min=300,
+                max=800)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
@@ -179,6 +193,8 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..centralitylinecolor)
             self$.addOption(private$..centralitylinewidth)
             self$.addOption(private$..centralitylinetype)
+            self$.addOption(private$..plotwidth)
+            self$.addOption(private$..plotheight)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -202,7 +218,9 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         binalpha = function() private$..binalpha$value,
         centralitylinecolor = function() private$..centralitylinecolor$value,
         centralitylinewidth = function() private$..centralitylinewidth$value,
-        centralitylinetype = function() private$..centralitylinetype$value),
+        centralitylinetype = function() private$..centralitylinetype$value,
+        plotwidth = function() private$..plotwidth$value,
+        plotheight = function() private$..plotheight$value),
     private = list(
         ..dep = NA,
         ..grvar = NA,
@@ -225,7 +243,9 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..binalpha = NA,
         ..centralitylinecolor = NA,
         ..centralitylinewidth = NA,
-        ..centralitylinetype = NA)
+        ..centralitylinetype = NA,
+        ..plotwidth = NA,
+        ..plotheight = NA)
 )
 
 jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -247,7 +267,30 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ggstatsplot",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
-                    "*"))
+                    "dep",
+                    "grvar",
+                    "typestatistics",
+                    "changebinwidth",
+                    "binwidth",
+                    "centralityline",
+                    "centralitytype",
+                    "resultssubtitle",
+                    "test.value",
+                    "conf.level",
+                    "bf.message",
+                    "binfill",
+                    "bincolor",
+                    "binalpha",
+                    "centralitylinecolor",
+                    "centralitylinewidth",
+                    "centralitylinetype",
+                    "plotwidth",
+                    "plotheight",
+                    "xlab",
+                    "title",
+                    "subtitle",
+                    "caption",
+                    "digits"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -367,6 +410,8 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param centralitylinecolor Color of the vertical centrality line.
 #' @param centralitylinewidth Width of the vertical centrality line.
 #' @param centralitylinetype Line type for the vertical centrality line.
+#' @param plotwidth Width of each plot in pixels. Default is 600.
+#' @param plotheight Height of each plot in pixels. Default is 450.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -398,7 +443,9 @@ jjhistostats <- function(
     binalpha = 0.7,
     centralitylinecolor = "blue",
     centralitylinewidth = 1,
-    centralitylinetype = "dashed") {
+    centralitylinetype = "dashed",
+    plotwidth = 600,
+    plotheight = 450) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjhistostats requires jmvcore to be installed (restart may be required)")
@@ -435,7 +482,9 @@ jjhistostats <- function(
         binalpha = binalpha,
         centralitylinecolor = centralitylinecolor,
         centralitylinewidth = centralitylinewidth,
-        centralitylinetype = centralitylinetype)
+        centralitylinetype = centralitylinetype,
+        plotwidth = plotwidth,
+        plotheight = plotheight)
 
     analysis <- jjhistostatsClass$new(
         options = options,

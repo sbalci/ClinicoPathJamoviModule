@@ -6,36 +6,101 @@
 #' @importFrom magrittr %>%
 #' @import easyalluvial
 #'
-#' @description This tool will help you form Alluvial Diagrams (Alluvial Plots).
+#' @description 
+#' This tool creates Alluvial Diagrams (Alluvial Plots) to visualize the flow of 
+#' categorical data across multiple dimensions. Alluvial diagrams are particularly 
+#' useful for showing how categorical variables relate to each other and how 
+#' observations flow between different categories.
 #'
+#' Features:
+#' - Multiple variable alluvial plots with configurable maximum variables
+#' - Condensation plots for detailed variable analysis  
+#' - Marginal histograms for additional context
+#' - Flexible orientation (horizontal/vertical)
+#' - Customizable bin labels and fill options
+#' - Comprehensive data validation for optimal results
 #'
 
 alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "alluvialClass",
     inherit = alluvialBase,
     private = list(
+        
+        # Shared validation helper to reduce duplication
+        .validateAlluvialInputs = function() {
+            if (is.null(self$options$vars) || length(self$options$vars) == 0)
+                return(FALSE)
+            
+            if (length(self$options$vars) < 2)
+                stop('Alluvial diagrams require at least 2 variables. Please select additional variables.')
+            
+            if (nrow(self$data) == 0)
+                stop('Data contains no (complete) rows. Please check your data.')
+            
+            # Validate that variables are appropriate for alluvial diagrams
+            private$.validateVariableTypes(self$options$vars)
+            
+            return(TRUE)
+        },
+
+        # Data type validation helper
+        .validateVariableTypes = function(vars) {
+            for (var in vars) {
+                if (!(var %in% names(self$data))) {
+                    stop(paste("Variable '", var, "' not found in the data."))
+                }
+                
+                var_data <- self$data[[var]]
+                
+                # Check if variable is numeric with too many unique values (likely continuous)
+                if (is.numeric(var_data)) {
+                    unique_values <- length(unique(var_data[!is.na(var_data)]))
+                    total_values <- sum(!is.na(var_data))
+                    
+                    # If more than 20 unique values or >50% unique values, warn user
+                    if (unique_values > 20 || (unique_values / total_values) > 0.5) {
+                        warning(paste("Variable '", var, "' appears to be continuous (", unique_values, 
+                                    " unique values). Alluvial diagrams work best with categorical variables. ",
+                                    "Consider binning this variable first."))
+                    }
+                }
+            }
+        },
         .run = function() {
 
-            # Error Message ----
+            # Input Validation ----
 
-            if (is.null(self$options$vars)) {
+            if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 # ToDo Message ----
                 todo <- "
-                <br>Welcome to ClinicoPath
-                <br><br>
-                This tool will help you form Alluvial Diagrams (Alluvial Plots).
-                <hr><br>
+                <div style='font-family: Arial, sans-serif; color: #2c3e50;'>
+                  <h2>Welcome to ClinicoPath</h2>
+                  <p>This tool will help you form Alluvial Diagrams (Alluvial Plots).</p>
+                  <p><strong>Instructions:</strong> Please select at least <em>2 variables</em> to create an alluvial diagram.</p>
+                  <p>Alluvial diagrams show the flow of categorical data across multiple dimensions.</p>
+                  <hr>
+                </div>
                 "
 
                 html <- self$results$todo
                 html$setContent(todo)
 
             } else {
+                # Clear the to-do message
                 todo <- ""
                 html <- self$results$todo
                 html$setContent(todo)
 
-                if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+                # Use shared validation logic
+                private$.validateAlluvialInputs()
+
+                # Validate condensation variable if provided
+                if (!is.null(self$options$condensationvar) && 
+                    length(self$options$condensationvar) > 0 && 
+                    !(self$options$condensationvar %in% names(self$data))) {
+                    stop(paste("Condensation variable '", self$options$condensationvar, 
+                              "' not found in the data. Please select a valid variable."))
+                }
 
             }
 
@@ -44,148 +109,82 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
         .plot = function(image, ggtheme, theme, ...) {
-            # the plot function ----
-
-            #Errors ----
-
-            if (is.null(self$options$vars) )
+            # Main alluvial plot generation function
+            
+            # Input validation using shared helper
+            if (!private$.validateAlluvialInputs())
                 return()
 
-            if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-
-            # Prepare Data ----
-
+            # Data Preparation ----
+            # Extract selected variables and create working dataset
             varsName <- self$options$vars
-
             mydata <- jmvcore::select(self$data, c(varsName))
 
-            fill <- jmvcore::composeTerm(self$options$fill)
-
-            # Exclude NA ----
-
+            # Handle missing values based on user preference
             excl <- self$options$excl
-
             if (excl) {mydata <- jmvcore::naOmit(mydata)}
 
-            # verbose ----
-            # verbose <- FALSE
-            # verb <- self$options$verb
-            # if (isTRUE(verb)) verbose <- TRUE
-
-            # fill_by ----
-
+            # Configure plot aesthetics ----
+            # Set color fill strategy for the alluvial flows
             fill <- jmvcore::composeTerm(self$options$fill)
 
-            #bin ----
-
+            # Configure bin labels with custom override capability
             bin <- self$options$bin
+            custombinlabels <- self$options$custombinlabels
 
-            if (bin == "default") bin <- c("LL", "ML", "M", "MH", "HH")
+            # Use custom bin labels if provided, otherwise use bin option
+            if (!is.null(custombinlabels) && custombinlabels != "") {
+                bin <- trimws(strsplit(custombinlabels, ",")[[1]])
+            } else if (bin == "default") {
+                bin <- c("LL", "ML", "M", "MH", "HH")
+            }
 
-            # easyalluvial ----
-            # https://erblast.github.io/easyalluvial/
+            # Generate core alluvial plot ----
+            # Using easyalluvial package for robust alluvial diagram generation
+            # Reference: https://erblast.github.io/easyalluvial/
+            maxvars <- self$options$maxvars
 
-            plot <-
-                easyalluvial::alluvial_wide( data = mydata,
-                                             max_variables = 8,
-                                             fill_by = fill,
-                                             verbose = TRUE,
-                                             # verbose = verb,
-                                             bin_labels = bin
-                )
+            plot <- easyalluvial::alluvial_wide(
+                data = mydata,
+                max_variables = maxvars,
+                fill_by = fill,
+                verbose = TRUE,
+                bin_labels = bin
+            )
 
-            # marginal table ----
-
+            # Add marginal histograms if requested ----
+            # Marginal plots provide additional context by showing distributions
             marg <- self$options$marg
-
             if (marg) {
-                plot <- easyalluvial::add_marginal_histograms(p = plot,
-                                                              data_input = mydata,
-                                                              keep_labels = TRUE,
-                                                              top = TRUE,
-                                                              plot = TRUE)
+                plot <- easyalluvial::add_marginal_histograms(
+                    p = plot,
+                    data_input = mydata,
+                    keep_labels = TRUE,
+                    top = TRUE,
+                    plot = TRUE
+                )
             }
 
-            # Plot orientation ----
-
+            # Configure plot orientation ----
+            # Support both vertical (default) and horizontal layouts
             orient <- self$options$orient
-
-            if (orient == "vert") {
-                plot <- plot
-            } else {
-                plot <- plot +
-                    ggplot2::coord_flip()
+            if (orient != "vert") {
+                plot <- plot + ggplot2::coord_flip()
             }
 
-            # # flip coordinates
-            #
-            # flip <- self$options$flip
-            #
-            # if (flip) {
-            #     plot <- plot +
-            #         ggplot2::coord_flip()
-            #         # ggplot2::theme_minimal()
-            # }
-
-            # # select theme ----
-            #
-            # themex <- self$options$themex
-            #
-            #
-            # if (themex == "jamovi") {
-            #     plot <- plot + ggtheme
-            # } else if (marg || themex == "easyalluvial") {
-            #     plot <- plot
-            # # } else if (themex == "ipsum") {
-            # #     plot <- plot + hrbrthemes::theme_ipsum()
-            # } else if (themex == "grey") {
-            #     plot <- plot + ggplot2::theme_grey()
-            # } else if (themex == "gray") {
-            #     plot <- plot + ggplot2::theme_gray()
-            # } else if (themex == "bw") {
-            #     plot <- plot + ggplot2::theme_bw()
-            # } else if (themex == "linedraw") {
-            #     plot <- plot + ggplot2::theme_linedraw()
-            # } else if (themex == "light") {
-            #     plot <- plot + ggplot2::theme_light()
-            # } else if (themex == "dark") {
-            #     plot <- plot + ggplot2::theme_dark()
-            # } else if (themex == "minimal") {
-            #     plot <- plot + ggplot2::theme_minimal()
-            # } else if (themex == "classic") {
-            #     plot <- plot + ggplot2::theme_classic()
-            # } else if (themex == "void") {
-            #     plot <- plot + ggplot2::theme_void()
-            # } else if (themex == "test") {
-            #     plot <- plot + ggplot2::theme_test()
-            # }
-
-            # originaltheme <- self$options$originaltheme
-            #
-            # if (!originaltheme) {
-            #     plot <- plot + ggtheme
-            # }
-
-            # add title ----
-
-            mytitle <- self$options$mytitle
-
-            # mytitle <- jmvcore::composeTerm(components = mytitle)
-
-            # use title ----
-
+            # Apply custom title if specified ----
+            # Note: Custom titles are incompatible with marginal plots
             usetitle <- self$options$usetitle
-
-            if (marg && usetitle)
-                stop("Please do not use Marginal plots with Custom title")
-
+            if (marg && usetitle) {
+                stop("Custom titles cannot be used with marginal plots. Please either disable marginal plots or use the default title.")
+            }
+            
             if (!marg && usetitle) {
-                plot <- plot +
-                    ggplot2::ggtitle(mytitle)
+                mytitle <- self$options$mytitle
+                plot <- plot + ggplot2::ggtitle(mytitle)
             }
 
-            # Print Plot ----
+            # Render the final plot
             print(plot)
             TRUE
         }
@@ -193,104 +192,33 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
         .plot2 = function(image, ggtheme, theme, ...) {
-            # the plot function ----
-
-            #Errors ----
-
+            # Condensation plot generation function
+            # Creates a detailed view of how one specific variable relates to others
+            
+            # Input validation - requires both variables and condensation variable
             if (is.null(self$options$condensationvar) || is.null(self$options$vars))
                 return()
 
             if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
+                stop('Data contains no (complete) rows. Please check your data.')
 
-            # Prepare Data ----
-
+            # Data preparation for condensation analysis ----
+            # Extract the primary condensation variable
             condvarName <- self$options$condensationvar
-
             condvarName <- jmvcore::composeTerm(components = condvarName)
-
             mydata <- self$data
 
-            # easyalluvial ----
+            # Generate condensation plot ----
+            # Condensation plots show detailed relationships between the primary variable
+            # and all other variables in the dataset
+            plot2 <- easyalluvial::plot_condensation(
+                df = mydata,
+                first = condvarName
+            )
 
-            plot2 <-
-                easyalluvial::plot_condensation(df = mydata,
-                                                first = .data[[condvarName]])
-
-            # Print Plot ----
+            # Render the condensation plot
             print(plot2)
             TRUE
         }
     )
 )
-
-# #Errors ----
-#
-# if (is.null(self$options$vars) )
-#     return()
-#
-# if (nrow(self$data) == 0)
-#     stop('Data contains no (complete) rows')
-#
-# # Prepare Data ----
-#
-# varsName <- self$options$vars
-#
-# mydata <- jmvcore::select(self$data, c(varsName))
-#
-#
-#
-# # Exclude NA ----
-#
-# excl <- self$options$excl
-#
-# if (excl) {mydata <- jmvcore::naOmit(mydata)}
-#
-#
-# # easyalluvial ----
-# # https://erblast.github.io/easyalluvial/
-#
-# plot <-
-#     easyalluvial::alluvial_wide( data = mydata,
-#                                  max_variables = 6,
-#                                  fill_by = 'first_variable'
-#     )
-#
-#
-# # marginal table ----
-#
-# marg <- self$options$marg
-#
-# if (marg) {
-#     plot <- plot %>%
-#         easyalluvial::add_marginal_histograms(mydata)
-# }
-#
-#
-#
-# # Interactive ----
-#
-# inter <- self$options$inter
-#
-# if (inter) {
-#     plot <-
-#         parcats::parcats(plot,
-#                          data_input = mydata)
-# }
-#
-#
-# plothtml <- plot
-#
-# html <- self$results$plothtml
-# html$setContent(plothtml)
-#
-
-# # Interactive ----
-#
-# inter <- self$options$inter
-#
-# if (inter) {
-#     plot <-
-#         parcats::parcats(plot,
-#                          data_input = mydata)
-# }

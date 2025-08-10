@@ -16,7 +16,30 @@ jrs:   '1.1'
 #     - centralityparameter
 
 clearWith:
-    - '*'
+    - dep
+    - grvar
+    - typestatistics
+    - changebinwidth
+    - binwidth
+    - centralityline
+    - centralitytype
+    - resultssubtitle
+    - test.value
+    - conf.level
+    - bf.message
+    - binfill
+    - bincolor
+    - binalpha
+    - centralitylinecolor
+    - centralitylinewidth
+    - centralitylinetype
+    - plotwidth
+    - plotheight
+    - xlab
+    - title
+    - subtitle
+    - caption
+    - digits
 
 
 items:

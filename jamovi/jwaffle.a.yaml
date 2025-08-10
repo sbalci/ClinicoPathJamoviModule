@@ -1,9 +1,9 @@
 ---
 name:  jwaffle
 title: Waffle Charts
-menuGroup: JJStatsPlotD
+menuGroup: JJStatsPlot
 menuSubgroup: 'Distribution'
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:
@@ -22,6 +22,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description:
           R: >
             Optional numeric values to be represented in the waffle chart. If not provided, will use number of cases.
@@ -40,6 +41,7 @@ options:
       type: Variable
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
+      default: NULL
       description:
           R: >
             Optional variable to create faceted waffle charts
