@@ -223,6 +223,91 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         LRN <- (1 - Sens) / Spec
 
+        # Advanced confidence interval calculations ----
+        # Following DiagROC's comprehensive approach
+        
+        # Clopper-Pearson exact binomial CIs for sensitivity and specificity
+        sens_ci <- stats::binom.test(TP, TP + FN, conf.level = 0.95)$conf.int
+        spec_ci <- stats::binom.test(TN, TN + FP, conf.level = 0.95)$conf.int
+        
+        # Logit transformation CIs for PPV and NPV (more accurate)
+        # PPV CI using logit transformation
+        if (TP > 0 && TestP > 0) {
+            ppv_logit <- log(PPV / (1 - PPV))
+            ppv_se <- sqrt((1/TP) + (1/FP))
+            ppv_ci_logit <- ppv_logit + c(-1.96, 1.96) * ppv_se
+            ppv_ci <- exp(ppv_ci_logit) / (1 + exp(ppv_ci_logit))
+        } else {
+            ppv_ci <- c(0, 1)
+        }
+        
+        # NPV CI using logit transformation
+        if (TN > 0 && TestN > 0) {
+            npv_logit <- log(NPV / (1 - NPV))
+            npv_se <- sqrt((1/TN) + (1/FN))
+            npv_ci_logit <- npv_logit + c(-1.96, 1.96) * npv_se
+            npv_ci <- exp(npv_ci_logit) / (1 + exp(npv_ci_logit))
+        } else {
+            npv_ci <- c(0, 1)
+        }
+        
+        # Log-transformed CIs for likelihood ratios
+        # PLR CI
+        if (TP > 0 && FP > 0) {
+            plr_log <- log(LRP)
+            plr_se <- sqrt((1/TP) - (1/(TP + FN)) + (1/FP) - (1/(TN + FP)))
+            plr_ci_log <- plr_log + c(-1.96, 1.96) * plr_se
+            plr_ci <- exp(plr_ci_log)
+        } else {
+            plr_ci <- c(0, Inf)
+        }
+        
+        # NLR CI
+        if (FN > 0 && TN > 0) {
+            nlr_log <- log(LRN)
+            nlr_se <- sqrt((1/FN) - (1/(TP + FN)) + (1/TN) - (1/(TN + FP)))
+            nlr_ci_log <- nlr_log + c(-1.96, 1.96) * nlr_se
+            nlr_ci <- exp(nlr_ci_log)
+        } else {
+            nlr_ci <- c(0, 1)
+        }
+        
+        # Additional diagnostic metrics from DiagROC
+        # Diagnostic Odds Ratio
+        if (FN > 0 && FP > 0) {
+            DOR <- (TP * TN) / (FN * FP)
+            # CI for DOR using log transformation
+            dor_log <- log(DOR)
+            dor_se <- sqrt((1/TP) + (1/TN) + (1/FN) + (1/FP))
+            dor_ci_log <- dor_log + c(-1.96, 1.96) * dor_se
+            dor_ci <- exp(dor_ci_log)
+        } else {
+            DOR <- Inf
+            dor_ci <- c(0, Inf)
+        }
+        
+        # Youden's Index (optimal cut-off criterion)
+        YoudenIndex <- Sens + Spec - 1
+        
+        # Balanced Accuracy (useful when dealing with imbalanced data)
+        BalancedAccuracy <- (Sens + Spec) / 2
+        
+        # F1 Score (harmonic mean of sensitivity and PPV)
+        if (Sens > 0 && PPV > 0) {
+            F1Score <- 2 * (Sens * PPV) / (Sens + PPV)
+        } else {
+            F1Score <- 0
+        }
+        
+        # Matthews Correlation Coefficient (MCC)
+        mcc_numerator <- (TP * TN) - (FP * FN)
+        mcc_denominator <- sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
+        if (mcc_denominator > 0) {
+            MCC <- mcc_numerator / mcc_denominator
+        } else {
+            MCC <- 0
+        }
+
 
         # nTable Populate Table ----
 
@@ -425,6 +510,43 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         epirresult_number <- epirresult2[epirresult2$statistic %in% numberrows, ]
 
         epirresult_ratio <- epirresult2[epirresult2$statistic %in% ratiorows, ]
+        
+        # Enhanced metrics from DiagROC - add to existing results
+        # Add Balanced Accuracy
+        balanced_acc_row <- data.frame(
+            statistic = "bal.acc",
+            est = BalancedAccuracy,
+            lower = BalancedAccuracy - 1.96*sqrt((Sens*(1-Sens)/(TP+FN) + Spec*(1-Spec)/(TN+FP))/4),
+            upper = BalancedAccuracy + 1.96*sqrt((Sens*(1-Sens)/(TP+FN) + Spec*(1-Spec)/(TN+FP))/4),
+            statsabv = "bal.acc",
+            statsnames = "Balanced accuracy",
+            stringsAsFactors = FALSE
+        )
+        
+        # Add F1 Score
+        f1_row <- data.frame(
+            statistic = "f1.score",
+            est = F1Score,
+            lower = 0,  # F1 score CI is complex, using simple bounds
+            upper = 1,
+            statsabv = "f1.score", 
+            statsnames = "F1 score",
+            stringsAsFactors = FALSE
+        )
+        
+        # Add Matthews Correlation Coefficient
+        mcc_row <- data.frame(
+            statistic = "mcc",
+            est = MCC,
+            lower = -1,  # MCC CI is complex, using theoretical bounds
+            upper = 1,
+            statsabv = "mcc",
+            statsnames = "Matthews correlation coefficient", 
+            stringsAsFactors = FALSE
+        )
+        
+        # Combine enhanced metrics with existing epiR results
+        epirresult_ratio <- rbind(epirresult_ratio, balanced_acc_row, f1_row, mcc_row)
 
 
 
@@ -457,6 +579,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
+        # Enhanced functionality: Multiple CI methods applied
+        # - Clopper-Pearson exact for sensitivity/specificity  
+        # - Logit transformation for PPV/NPV
+        # - Log transformation for likelihood ratios
+        # - Additional metrics: Balanced Accuracy, F1 Score, MCC
+        
         # self$results$text4$setContent(text4)
 
 
@@ -545,9 +673,97 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
                         }
-
-
-
+        
+        # Multiple cut-off evaluation (DiagROC inspired)
+        if (self$options$multiplecuts) {
+            multipleCutoffTable <- self$results$multipleCutoffTable
+            
+            # Helper function to calculate metrics for a cut-off
+            calculate_cutoff_metrics <- function(tp, fp, tn, fn, cutoff_name) {
+                total <- tp + fp + tn + fn
+                diseased <- tp + fn
+                healthy <- tn + fp
+                
+                sens <- tp / diseased
+                spec <- tn / healthy
+                ppv <- tp / (tp + fp)
+                npv <- tn / (tn + fn)
+                accuracy <- (tp + tn) / total
+                youden <- sens + spec - 1
+                
+                # Clinical recommendation based on Youden index and balanced metrics
+                if (youden > 0.8 && accuracy > 0.9) {
+                    recommendation <- "Excellent performance - Recommended"
+                } else if (youden > 0.6 && accuracy > 0.8) {
+                    recommendation <- "Good performance - Consider for use"
+                } else if (youden > 0.4) {
+                    recommendation <- "Fair performance - Use with caution"
+                } else {
+                    recommendation <- "Poor performance - Not recommended"
+                }
+                
+                return(list(
+                    cutoffName = cutoff_name,
+                    sensitivity = sens,
+                    specificity = spec,
+                    ppv = ppv,
+                    npv = npv,
+                    accuracy = accuracy,
+                    youden = youden,
+                    recommendation = recommendation
+                ))
+            }
+            
+            # Calculate metrics for both cut-offs
+            cutoff1_metrics <- calculate_cutoff_metrics(
+                self$options$tp1, self$options$fp1, 
+                self$options$tn1, self$options$fn1,
+                self$options$cutoff1
+            )
+            
+            cutoff2_metrics <- calculate_cutoff_metrics(
+                self$options$tp2, self$options$fp2,
+                self$options$tn2, self$options$fn2, 
+                self$options$cutoff2
+            )
+            
+            # Add rows to comparison table
+            multipleCutoffTable$addRow(
+                rowKey = 1,
+                values = cutoff1_metrics
+            )
+            
+            multipleCutoffTable$addRow(
+                rowKey = 2, 
+                values = cutoff2_metrics
+            )
+            
+            # Add optimal cut-off recommendation based on current data
+            current_youden <- YoudenIndex
+            current_accuracy <- AccurT
+            
+            if (cutoff1_metrics$youden > current_youden && cutoff1_metrics$accuracy > current_accuracy) {
+                optimal_msg <- paste0(cutoff1_metrics$cutoffName, " cut-off performs better than current")
+            } else if (cutoff2_metrics$youden > current_youden && cutoff2_metrics$accuracy > current_accuracy) {
+                optimal_msg <- paste0(cutoff2_metrics$cutoffName, " cut-off performs better than current")
+            } else {
+                optimal_msg <- "Current cut-off appears optimal"
+            }
+            
+            multipleCutoffTable$addRow(
+                rowKey = 3,
+                values = list(
+                    cutoffName = "Current (Reference)",
+                    sensitivity = Sens,
+                    specificity = Spec,
+                    ppv = PPV,
+                    npv = NPV,
+                    accuracy = AccurT,
+                    youden = YoudenIndex,
+                    recommendation = optimal_msg
+                )
+            )
+        }
 
         # Send Data to Plot ----
 

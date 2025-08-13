@@ -1,5 +1,18 @@
 # ClinicoPath News
 
+## Version 0.0.31.01
+
+### Enhancements
+
+*   **Automatic Plot Selection (statsplot2) Module:**
+    *   **Enhanced Error Messages:** Implemented comprehensive contextual error messages with variable names, data counts, and actionable guidance for debugging
+    *   **Performance Optimization:** Added analysis result caching to eliminate redundant calculations between `.init()` and `.plot()` methods
+    *   **Code Quality:** Extracted magic numbers to constants for better maintainability
+    *   **Robust Data Validation:** Added specific validation for dotplot statistics with detailed feedback on data requirements
+    *   **Edge Case Handling:** Improved validation for empty factor levels in grouped plots with informative warnings
+    *   **Package Dependency Validation:** Added defensive package checking with clear installation instructions for ggalluvial and easyalluvial
+    *   **Variable Type Detection:** Enhanced unknown variable type detection with warnings and class information
+
 ## Version 0.0.3.96
 
 ### New Features & Enhancements

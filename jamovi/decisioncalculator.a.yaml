@@ -99,6 +99,62 @@ options:
       title: 'Fagan Nomogram'
       type: Bool
       default: false
+      
+    # Multiple cut-off evaluation (DiagROC inspired)
+    - name: multiplecuts
+      title: 'Multiple Cut-off Evaluation'
+      type: Bool
+      default: false
+      
+    - name: cutoff1
+      title: 'Cut-off Scenario 1 Name'
+      type: String
+      default: 'Conservative'
+      
+    - name: tp1
+      title: 'TP (Cut-off 1)'
+      type: Number
+      default: 85
+      
+    - name: fp1
+      title: 'FP (Cut-off 1)'
+      type: Number
+      default: 10
+      
+    - name: tn1
+      title: 'TN (Cut-off 1)'
+      type: Number
+      default: 190
+      
+    - name: fn1
+      title: 'FN (Cut-off 1)'
+      type: Number
+      default: 15
+      
+    - name: cutoff2
+      title: 'Cut-off Scenario 2 Name'
+      type: String
+      default: 'Aggressive'
+      
+    - name: tp2
+      title: 'TP (Cut-off 2)'
+      type: Number
+      default: 95
+      
+    - name: fp2
+      title: 'FP (Cut-off 2)'
+      type: Number
+      default: 25
+      
+    - name: tn2
+      title: 'TN (Cut-off 2)'
+      type: Number
+      default: 175
+      
+    - name: fn2
+      title: 'FN (Cut-off 2)'
+      type: Number
+      default: 5
 
 
 ...

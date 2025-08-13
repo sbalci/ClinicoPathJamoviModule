@@ -7,7 +7,20 @@
 Alluvial Plot
 }
 \description{
-This tool will help you form Alluvial Diagrams (Alluvial Plots).
+This tool creates Alluvial Diagrams (Alluvial Plots) to visualize the flow of
+categorical data across multiple dimensions. Alluvial diagrams are particularly
+useful for showing how categorical variables relate to each other and how
+observations flow between different categories.
+
+Features:
+\itemize{
+\item Multiple variable alluvial plots with configurable maximum variables
+\item Condensation plots for detailed variable analysis
+\item Marginal histograms for additional context
+\item Flexible orientation (horizontal/vertical)
+\item Customizable bin labels and fill options
+\item Comprehensive data validation for optimal results
+}
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::alluvialBase} -> \code{alluvialClass}

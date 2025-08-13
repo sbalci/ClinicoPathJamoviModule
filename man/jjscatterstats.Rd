@@ -24,7 +24,9 @@ jjscatterstats(
   pointsize = 3,
   pointalpha = 0.4,
   smoothlinesize = 1.5,
-  smoothlinecolor = "blue"
+  smoothlinecolor = "blue",
+  plotwidth = 600,
+  plotheight = 450
 )
 }
 \arguments{
@@ -71,6 +73,10 @@ using ggside.}
 \item{smoothlinesize}{Width of the regression/smooth line.}
 
 \item{smoothlinecolor}{Color of the regression/smooth line.}
+
+\item{plotwidth}{Width of the plot in pixels. Default is 600.}
+
+\item{plotheight}{Height of the plot in pixels. Default is 450.}
 }
 \value{
 A results object containing:

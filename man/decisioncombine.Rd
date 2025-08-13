@@ -45,21 +45,22 @@ decisioncombine(
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$goldStandardFreqTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$crossTabTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$indTable1} \tab \tab \tab \tab \tab a table \cr
 \code{results$indTable2} \tab \tab \tab \tab \tab a table \cr
 \code{results$indTable3} \tab \tab \tab \tab \tab a table \cr
 \code{results$combinationsAnalysis} \tab \tab \tab \tab \tab Comprehensive analysis of all possible test combinations \cr
 \code{results$combStatsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$combStatsTableCI} \tab \tab \tab \tab \tab a table \cr
+\code{results$addCombinationPattern} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$indTable1$asDF}
+\code{results$goldStandardFreqTable$asDF}
 
-\code{as.data.frame(results$indTable1)}
+\code{as.data.frame(results$goldStandardFreqTable)}
 }
 \description{
 Analyzes and compares multiple medical diagnostic tests by examining all
@@ -81,8 +82,7 @@ result1 <- decisioncombine(
   test1 = "New Test",
   test1Positive = "1",
   test2 = "Rater 1",
-  test2Positive = "1",
-  showCombinations = TRUE
+  test2Positive = "1"
 )
 
 # Analyze three-test combinations
@@ -96,8 +96,7 @@ result2 <- decisioncombine(
   test2Positive = "1",
   test3 = "Rater 2",
   test3Positive = "1",
-  showIndividual = TRUE,
-  showCombinations = TRUE
+  showIndividual = TRUE
 )
 
 }

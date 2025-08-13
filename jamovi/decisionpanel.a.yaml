@@ -1,10 +1,10 @@
 ---
 name: decisionpanel
 title: Decision Panel Optimization
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Optimize test panels and decision trees
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:
@@ -525,3 +525,11 @@ options:
       description:
           R: >
             Random seed for reproducibility in bootstrap and cross-validation.
+
+    - name: showProgress
+      title: Show Progress Indicators
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display progress indicators for long-running operations like bootstrap and cross-validation.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/advancedraincloud.h.R
 \name{advancedraincloud}
 \alias{advancedraincloud}
-\title{Advanced Raincloud Plot}
+\title{Raincloud Plot}
 \usage{
 advancedraincloud(
   data,

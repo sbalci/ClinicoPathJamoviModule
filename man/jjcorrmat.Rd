@@ -20,7 +20,9 @@ jjcorrmat(
   highcolor = "#009E73",
   title = "",
   subtitle = "",
-  caption = ""
+  caption = "",
+  plotwidth = 600,
+  plotheight = 450
 )
 }
 \arguments{
@@ -62,6 +64,12 @@ insignificant.}
 \item{subtitle}{Subtitle for the correlation matrix plot.}
 
 \item{caption}{Caption for the correlation matrix plot.}
+
+\item{plotwidth}{Width of the correlation matrix plot in pixels. Default is
+600.}
+
+\item{plotheight}{Height of the correlation matrix plot in pixels. Default
+is 450.}
 }
 \value{
 A results object containing:

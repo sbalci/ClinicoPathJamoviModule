@@ -1,14 +1,14 @@
 ---
 name:  statsplot2
 title: Automatic Plot Selection
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Auto Visualization
 menuSubtitle: Automatic Plot Selection Based on Variable Types
 version: '0.0.31'
 jas: '1.2'
 
 description:
-    main: 'Automatically selects and generates the most appropriate statistical visualization based on variable data types. Supports both independent and repeated measures designs with various plot types including violin plots, scatter plots, bar charts, and alluvial diagrams.'
+    main: 'Automatically selects and generates the most appropriate statistical visualization based on variable data types. Features enhanced error messages with contextual guidance, robust data validation, and comprehensive fallback options. Supports both independent and repeated measures designs with various plot types including violin plots, scatter plots, bar charts, and alluvial diagrams.'
     R:
         dontrun: false
         usage: |
@@ -29,6 +29,12 @@ description:
                 direction = "repeated",
                 alluvsty = "t1"
             )
+            
+            # Enhanced error messages provide contextual guidance:
+            # - Variable names and types in error messages
+            # - Specific data requirement feedback
+            # - Package installation instructions when needed
+            # - Actionable suggestions for unsupported combinations
 
 
 options:

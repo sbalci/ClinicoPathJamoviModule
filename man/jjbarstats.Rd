@@ -9,12 +9,14 @@ jjbarstats(
   dep,
   group,
   grvar = NULL,
-  excl = TRUE,
+  excl = FALSE,
   typestatistics = "parametric",
-  pairwisecomparisons = TRUE,
+  pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
-  originaltheme = FALSE
+  originaltheme = FALSE,
+  resultssubtitle = FALSE,
+  messages = FALSE
 )
 }
 \arguments{
@@ -37,6 +39,12 @@ jjbarstats(
 \item{padjustmethod}{.}
 
 \item{originaltheme}{.}
+
+\item{resultssubtitle}{Display statistical test results in plot subtitle.
+Disabling improves performance significantly.}
+
+\item{messages}{Display statistical messages in console.  Disabling
+improves performance.}
 }
 \value{
 A results object containing:

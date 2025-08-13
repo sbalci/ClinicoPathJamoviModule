@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.00
+version: 0.0.31.01
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-10'
+date: '2025-08-11'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1189,7 +1189,7 @@ analyses:
   - title: Decision Panel Optimization
     name: decisionpanel
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Decision Panel Optimization
     menuSubgroup: Decision
     menuSubtitle: Optimize test panels and decision trees
@@ -1358,14 +1358,16 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Auto Visualization
     menuTitle: Automatic Plot Selection
     description: >-
       Automatically selects and generates the most appropriate statistical
-      visualization based on variable data types. Supports both independent and
-      repeated measures designs with various plot types including violin plots,
-      scatter plots, bar charts, and alluvial diagrams.
+      visualization based on variable data types. Features enhanced error
+      messages with contextual guidance, robust data validation, and
+      comprehensive fallback options. Supports both independent and repeated
+      measures designs with various plot types including violin plots, scatter
+      plots, bar charts, and alluvial diagrams.
     menuSubtitle: Automatic Plot Selection Based on Variable Types
     ribbon: analyses
     category: analyses

@@ -87,4 +87,45 @@ options:
       title: 'Fagan Nomogram'
       type: Bool
       default: false
+      
+    # Sample size estimation options (DiagROC inspired)
+    - name: samplesize
+      title: 'Sample Size Estimation'
+      type: Bool
+      default: false
+      
+    - name: expected_sens
+      title: 'Expected Sensitivity'
+      type: Number
+      default: 0.85
+      min: 0.5
+      max: 0.99
+      
+    - name: expected_spec
+      title: 'Expected Specificity'  
+      type: Number
+      default: 0.80
+      min: 0.5
+      max: 0.99
+      
+    - name: width_sens
+      title: 'CI Width for Sensitivity'
+      type: Number
+      default: 0.10
+      min: 0.01
+      max: 0.20
+      
+    - name: width_spec
+      title: 'CI Width for Specificity'
+      type: Number  
+      default: 0.10
+      min: 0.01
+      max: 0.20
+      
+    - name: alpha_level
+      title: 'Alpha Level (1-Confidence)'
+      type: Number
+      default: 0.05
+      min: 0.01
+      max: 0.10
 ...

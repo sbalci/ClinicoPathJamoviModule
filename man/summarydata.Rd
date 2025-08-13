@@ -4,7 +4,7 @@
 \alias{summarydata}
 \title{Summary of Continuous Variables}
 \usage{
-summarydata(data, vars, distr = FALSE)
+summarydata(data, vars, distr = FALSE, decimal_places = 1)
 }
 \arguments{
 \item{data}{The data as a data frame.}
@@ -14,6 +14,9 @@ the continuous values used for the report}
 
 \item{distr}{If TRUE, additional distribution diagnostics (Shapiro-Wilk
 test, skewness, and kurtosis) will be computed and explained.}
+
+\item{decimal_places}{Number of decimal places to display for statistical
+measures.}
 }
 \value{
 A results object containing:

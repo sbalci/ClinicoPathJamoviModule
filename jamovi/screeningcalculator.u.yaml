@@ -19,7 +19,6 @@ children:
           - type: TextBox
             name: prev
             format: number
-
   - type: Label
     label: Display Options
     children:
@@ -34,3 +33,35 @@ children:
             name: fnote
           - type: CheckBox
             name: fagan
+          - type: CheckBox
+            name: samplesize
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: expected_sens
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: expected_spec
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: width_sens
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: width_spec
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha_level
+        format: number

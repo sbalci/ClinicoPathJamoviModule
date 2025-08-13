@@ -10,7 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
-  eval = FALSE,
+  eval = FALSE, # Set to TRUE to run the code chunks when knitting
   collapse = TRUE,
   comment = "#>",
   fig.width = 8,
@@ -23,6 +23,10 @@ knitr::opts_chunk$set(
 ## Introduction
 
 This vignette demonstrates a complete clinical research workflow using ClinicoPathDescriptives, from initial data exploration to final manuscript-ready tables and figures. We'll use the included histopathology dataset to simulate a real oncology study comparing treatment outcomes.
+
+## How to Run This Vignette
+
+To execute the code chunks in this vignette and reproduce the analysis, you need to set `eval = TRUE` in the `knitr::opts_chunk$set()` call at the beginning of this Rmd file. You can then "knit" the document to generate the output.
 
 ## Study Scenario
 
@@ -82,6 +86,8 @@ cat("Treatment Groups:", table(clinical_data$Group), "\n")
 
 ### Dataset Overview and Quality Check
 
+The `vartree` function from `ClinicoPath` provides a visual overview of the data structure and relationships between variables. Due to the complexity of rendering interactive `vartree` outputs directly within this static vignette, the code below demonstrates its usage. To view the full interactive output, please run this code locally in your R environment.
+
 ```{r}
 # Generate variable tree for data structure overview
 # Check if vartree function is available and works properly
@@ -89,7 +95,7 @@ if(requireNamespace("ClinicoPath", quietly = TRUE)) {
   tryCatch({
     results <- vartree(
       data = clinical_data,
-      vars = c("Group", "Sex", "Age_Group", "Grade", "TStage", 
+      vars = c("Group", "Sex", "Age_Group", "Grade", "TStage",
                "LVI", "PNI", "LymphNodeMetastasis", "Outcome_Status"),
       percvar = NULL,
       percvarLevel = NULL,
@@ -108,18 +114,18 @@ if(requireNamespace("ClinicoPath", quietly = TRUE)) {
       nodelabel = TRUE,
       pct = FALSE
     )
-    
+
     # Check if results has the expected structure
     if(is.list(results) && !is.null(results$asString)) {
       results1 <- results$asString()
-      
+
       # Create output directory if it doesn't exist
       if(!dir.exists("./vignettes/output")) {
         dir.create("./vignettes/output", recursive = TRUE)
       }
-      
+
       writeLines(results1, "./vignettes/output/vartree_output_raw_results_asstring.txt")
-      cat("Variable tree generated successfully\n")
+      cat("Variable tree generated successfully. Check './vignettes/output/vartree_output_raw_results_asstring.txt' for raw output.\n")
     } else {
       cat("Variable tree structure overview:\n")
       print(str(clinical_data[, c("Group", "Sex", "Age_Group", "Grade", "TStage")]))
@@ -142,18 +148,18 @@ clean_vartree_html <- function(vartree_result, filepath = "vartree_final_clean.h
 
   # Remove noise
   raw <- gsub("VARIABLE TREE", "", raw, fixed = TRUE)
-  raw <- gsub("character\\(0\\)", "", raw, fixed = TRUE)
+  raw <- gsub("character(0)", "", raw, fixed = TRUE)
   raw <- gsub("<div[^>]*>", "", raw)
   raw <- gsub("</div>", "", raw)
-  raw <- gsub("<\\?xml[^>]*\\?>", "", raw)
+  raw <- gsub("<\?xml[^>]*\?>", "", raw)
   raw <- gsub("<!DOCTYPE svg[^>]*>", "", raw)
-  raw <- gsub("#myDIV\\s*\\{[^}]*\\}", "", raw, perl = TRUE)
+  raw <- gsub("#myDIV\s*\{[^}]*\}", "", raw, perl = TRUE)
 
   # ❗ REMOVE illegal SVG text
-  raw <- gsub("(?<=<g[^>]*>)\\s*vtree\\s*(?=<g|<polygon)", "", raw, perl = TRUE)
+  raw <- gsub("(?<=<g[^>]*>)\s*vtree\s*(?=<g|<polygon)", "", raw, perl = TRUE)
 
   # Find actual SVG start
-  svg_start <- regexpr("<svg[\\s\\S]*", raw, perl = TRUE)
+  svg_start <- regexpr("<svg[\s\S]*", raw, perl = TRUE)
   svg_raw <- regmatches(raw, svg_start)
 
   if (length(svg_raw) == 0 || svg_raw == "") {
@@ -192,7 +198,7 @@ if(exists("results") && is.list(results) && !is.null(results$asString)) {
 
 ```{r}
 # Note: Additional vartree processing code has been simplified for compatibility
-# In a full implementation environment, additional HTML cleaning and processing 
+# In a full implementation environment, additional HTML cleaning and processing
 # functions would be available here for advanced variable tree visualization
 
 cat("Clinical workflow data exploration complete.\n")
@@ -217,7 +223,7 @@ cat("==========================================\n\n")
 
 baseline_table <- tableone(
   data = clinical_data,
-  vars = c("Age", "Sex", "Race", "Age_Group", "Grade", "TStage", 
+  vars = c("Age", "Sex", "Race", "Age_Group", "Grade", "TStage",
            "PreinvasiveComponent", "LVI", "PNI", "LymphNodeMetastasis",
            "OverallTime", "MeasurementA", "MeasurementB")
 )
@@ -356,9 +362,9 @@ alluvial(
 # Create high/low biomarker groups for analysis
 clinical_data_biomarker <- clinical_data %>%
   mutate(
-    MeasurementA_Level = ifelse(MeasurementA > median(MeasurementA, na.rm = TRUE), 
+    MeasurementA_Level = ifelse(MeasurementA > median(MeasurementA, na.rm = TRUE),
                                "High", "Low"),
-    MeasurementB_Level = ifelse(MeasurementB > median(MeasurementB, na.rm = TRUE), 
+    MeasurementB_Level = ifelse(MeasurementB > median(MeasurementB, na.rm = TRUE),
                                "High", "Low")
   )
 
@@ -386,7 +392,7 @@ venn(
   data = clinical_venn,
   var1 = "LVI_positive",
   var1true = "1",
-  var2 = "PNI_positive", 
+  var2 = "PNI_positive",
   var2true = "1",
   var3 = "LN_positive",
   var3true = "1",
@@ -478,9 +484,10 @@ This analysis workflow is fully reproducible and can be adapted for different da
 3. Adding additional statistical tests for specific research questions
 4. Customizing visualizations for publication requirements
 
+## Conclusion
+
+This vignette has demonstrated a complete clinical research workflow using the ClinicoPathJamoviModule, from data preparation and exploration to advanced analysis and interpretation. The module provides a powerful and user-friendly environment for conducting rigorous clinicopathological research, enabling researchers to generate high-quality, reproducible results.
+
 ## Next Steps
 
-For more specialized analyses, refer to:
-- **Treatment Response Analysis Vignette**: For oncology-specific endpoints
-- **Visualization Gallery Vignette**: For advanced plotting techniques
-- **Data Quality Vignette**: For comprehensive data validation methods
+For more specialized analyses and detailed documentation, please refer to our [Documentation Hub](../documentation_hub.md)

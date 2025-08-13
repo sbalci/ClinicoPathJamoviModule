@@ -58,12 +58,32 @@ children:
             name: od
           - type: CheckBox
             name: showIndividual
+          - type: CheckBox
+            name: exportCombinationPattern
   - type: Label
-    label: Export to Data
+    label: Visualization Options
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: Output
-            name: addCombinationPattern
-
+          - type: CheckBox
+            name: showVisualization
+          - type: ComboBox
+            name: plotType
+            enable: (showVisualization)
+          - type: ComboBox
+            name: colorScheme
+            enable: >-
+              (showVisualization && (plotType == 'heatmap' || plotType ==
+              'all'))
+          - type: TextBox
+            name: plotWidth
+            format: number
+            enable: (showVisualization)
+          - type: TextBox
+            name: plotHeight
+            format: number
+            enable: (showVisualization)
+  - type: Label
+    label: Export to Data
+    children: []

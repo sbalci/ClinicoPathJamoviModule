@@ -116,11 +116,81 @@ options:
       type: Bool
       default: true
 
-    - name: addCombinationPattern
-      title: 'Add Combination Pattern to Data'
-      type: Output
+    - name: exportCombinationPattern
+      title: 'Export Combination Patterns'
+      type: Bool
+      default: false
       description:
           R: >
-            Add a new variable to the data frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
+            Export a new variable to the data frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
+
+    # Visualization options
+    - name: showVisualization
+      title: Show Visualizations
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display visualizations for test combination analysis.
+
+    - name: plotType
+      title: Visualization Type
+      type: List
+      options:
+        - title: Performance Heatmap
+          name: heatmap
+        - title: ROC Curves Comparison
+          name: roc
+        - title: Decision Tree
+          name: tree
+        - title: Venn Diagram
+          name: venn
+        - title: Forest Plot
+          name: forest
+        - title: All Plots
+          name: all
+      default: heatmap
+      description:
+          R: >
+            Type of visualization to display. Heatmap shows combination patterns performance,
+            ROC curves compare individual and combined tests, Decision tree shows test hierarchy,
+            Venn diagram shows test overlaps, Forest plot shows diagnostic statistics with CI.
+
+    - name: plotHeight
+      title: Plot Height (pixels)
+      type: Integer
+      default: 600
+      min: 400
+      max: 1200
+      description:
+          R: >
+            Height of the plot in pixels.
+
+    - name: plotWidth
+      title: Plot Width (pixels)
+      type: Integer
+      default: 800
+      min: 600
+      max: 1600
+      description:
+          R: >
+            Width of the plot in pixels.
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: Clinical (Red-Green)
+          name: clinical
+        - title: Viridis
+          name: viridis
+        - title: Blue-Yellow
+          name: blueyellow
+        - title: Grayscale
+          name: grayscale
+      default: clinical
+      description:
+          R: >
+            Color scheme for visualizations. Clinical uses red for negative and green for positive.
 
 ...

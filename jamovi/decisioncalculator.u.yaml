@@ -61,4 +61,68 @@ children:
     children:
       - type: CheckBox
         name: fagan
-
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: multiplecuts
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cutoff1
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: tp1
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fp1
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: tn1
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fn1
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cutoff2
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: tp2
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fp2
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: tn2
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fn2
+        format: number

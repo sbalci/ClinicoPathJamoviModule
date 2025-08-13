@@ -2,68 +2,11 @@
 % Please edit documentation in R/statsplot2.b.R
 \name{statsplot2Class}
 \alias{statsplot2Class}
-\title{Automatic Plot Selection Based on Variable Types}
-\value{
-A results object containing plots and explanatory text
-}
+\title{Plots and Graphs Based on Variable Types}
 \description{
-This function automatically selects and generates the most appropriate statistical
-visualization based on the data types of the selected variables. It supports both
-independent and repeated measurements designs, with various plot types including
-violin plots, scatter plots, bar charts, dot plots, and alluvial diagrams.
+Plots and Graphs Based on Variable Types
 
-The function uses ggstatsplot package for statistical visualizations and ggalluvial
-for flow diagrams. Plot selection follows these rules:
-\itemize{
-\item Factor vs Continuous: Violin plots (ggbetweenstats/ggwithinstats)
-\item Continuous vs Continuous: Scatter plots (ggscatterstats)
-\item Factor vs Factor: Bar charts (ggbarstats) or Alluvial diagrams for repeated measures
-\item Continuous vs Factor: Dot plots (ggdotplotstats)
-}
-}
-\details{
-The function intelligently selects plot types based on variable combinations:
-
-\strong{Independent Measurements:}
-\itemize{
-\item Factor + Continuous → Violin plot with statistical comparisons
-\item Continuous + Continuous → Scatter plot with correlation analysis
-\item Factor + Factor → Bar chart with contingency table analysis
-\item Continuous + Factor → Cleveland dot plot
-}
-
-\strong{Repeated Measurements:}
-\itemize{
-\item Factor + Continuous → Paired violin plot with within-subjects comparisons
-\item Continuous + Continuous → Scatter plot (correlation analysis)
-\item Factor + Factor → Alluvial diagram showing changes between time points
-\item Continuous + Factor → Cleveland dot plot
-}
-
-Statistical tests are automatically selected based on the distribution parameter
-and variable types. All plots include appropriate statistical annotations.
-}
-\examples{
-\donttest{
-# Basic usage with factor and continuous variables
-statsplot2(
-  data = mtcars,
-  dep = "mpg",
-  group = "cyl",
-  direction = "independent",
-  distribution = "p"
-)
-
-# Repeated measures design with alluvial diagram
-statsplot2(
-  data = survey_data,
-  dep = "condition_baseline", 
-  group = "condition_followup",
-  direction = "repeated",
-  alluvsty = "t1"
-)
-}
-
+Plots and Graphs Based on Variable Types
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::statsplot2Base} -> \code{statsplot2Class}
