@@ -669,41 +669,6 @@ menuSubgroup: Missing Data Management
 
 ## Phase 2: Advanced Analytics Integration (Months 7-12)
 
-### 🔬 Priority 4: Medical Imaging Task View Integration
-
-**Target Package Suite:** `RNifti`, `oro.dicom`, `radiomics`, `MRIcro`
-
-#### New Functions to Implement
-
-**1. Radiomics-Pathology Correlation (`radiomicscorr.b.R`)**
-
-- DICOM image import and processing
-- Texture feature extraction
-- Shape and intensity features
-- Correlation with pathological features
-- Radiomics signature development
-
-**2. Image-Guided Analysis (`imageguided.b.R`)**
-
-- ROI-based analysis
-- Multi-parametric imaging integration
-- Quantitative imaging biomarkers
-- Reproducibility assessment
-
-**Implementation Details:**
-
-```yaml
-# jamovi/radiomicscorr.a.yaml
-name: radiomicscorr
-title: Radiomics-Pathology Correlation Analysis
-menuGroup: Medical Imaging
-menuSubgroup: Quantitative Imaging
-```
-
-**Clinical Impact:** Integration of imaging and pathology data, quantitative imaging biomarkers, precision medicine.
-
----
-
 ### 🧠 Priority 5: Machine Learning Task View Enhancement
 
 **Target Package Suite:** `randomForest`, `xgboost`, `glmnet`, `DALEX`, `mlr3`
@@ -907,23 +872,6 @@ menuSubgroup: Clinical Research
 
 ---
 
-### 🧬 Priority 11: Omics Task View Integration
-
-**Target Package Suite:** Bioconductor integration packages, `limma`, `edgeR`
-
-#### New Functions to Implement
-
-**1. Genomic Pathology Integration (`genomicpathology.b.R`)**
-
-- Gene expression correlation with pathology features
-- Pathway analysis in clinical context
-- Multi-omics data integration
-- Biomarker signature validation
-- Survival analysis with genomic data
-
-**Clinical Impact:** Precision medicine applications, genomic pathology correlation, biomarker development.
-
----
 
 ### 📋 Priority 12: Experimental Design Task View Integration
 
@@ -1001,3 +949,1288 @@ menuSubgroup: Clinical Research
 - **Laboratory optimization** and quality control enhancement
 
 This comprehensive implementation plan will position ClinicoPath as the leading clinical research analysis platform in the jamovi ecosystem, serving researchers, clinicians, and pathologists worldwide.
+
+---
+
+# Digital Pathology Statistical Methods Roadmap
+
+## Executive Summary
+
+Based on comprehensive analysis of 195 articles from the American Journal of Pathology and extensive review of statistical methods in digital pathology research, this roadmap identifies critical statistical methods currently missing from our ClinicoPath jamovi module. The analysis reveals that 93% of pathology studies employ statistical testing, with significant methodological gaps in our current implementation.
+
+## Phase 1: Essential Classical Tests (Immediate Priority - Months 1-3)
+
+### 🚨 **Critical Missing Tests - High Usage in Pathology (30%+ of studies)**
+
+#### 1. Enhanced Non-Parametric Tests (`enhancednonparametric.b.R`)
+- **Mann-Whitney U Test Enhancement** 
+  - Current: Basic implementation in existing modules
+  - **Missing**: Assumption checking, effect size (rank-biserial correlation), confidence intervals
+  - **Usage**: ~30% of pathology studies comparing biomarker expression
+  - **Priority**: CRITICAL - Most used test in digital pathology
+
+- **Kruskal-Wallis Test with Post Hoc Analysis**
+  - Current: Basic implementation
+  - **Missing**: Proper post hoc testing (Dunn's test), effect sizes, pairwise comparisons
+  - **Usage**: Comparing biomarker expression across tumor stages
+  - **Priority**: HIGH - 68% of studies fail to perform proper post hoc testing
+
+#### 2. Advanced ANOVA Suite (`advancedanova.b.R`)
+- **ANOVA with Comprehensive Post Hoc Testing**
+  - Current: Basic ANOVA available
+  - **Missing**: Tukey HSD, Dunnett's test, Games-Howell, Bonferroni corrections
+  - **Issue**: 68% of studies fail to perform proper multiple comparisons
+  - **Priority**: CRITICAL - Prevents statistical errors in pathology research
+
+#### 3. Enhanced Chi-Square and Fisher's Tests (`categoricaladvanced.b.R`)
+- **Chi-Square Test Enhancement**
+  - Current: Basic implementation
+  - **Missing**: Effect sizes (Cramér's V, phi coefficient), residual analysis, goodness-of-fit tests
+- **Fisher's Exact Test Enhancement**
+  - Current: Available in crosstable
+  - **Missing**: Odds ratio confidence intervals, stratified analysis
+  - **Usage**: Biomarker positivity vs. survival status analysis
+
+## Phase 2: Spatial Statistics for Digital Pathology (Months 4-8)
+
+### 🔬 **Critical Missing Capability - Unique to Digital Pathology**
+
+#### 4. Spatial Point Pattern Analysis (`spatialpathology.b.R`)
+**Target Packages**: `spatstat`, `spatialTIME`, `SpatialQPFs`
+
+- **Ripley's K Function Analysis**
+  - Mathematical basis: K(r) = λ⁻¹E[number of points within distance r]
+  - L-function transformation for easier interpretation
+  - Critical for immune cell clustering analysis
+  - **Usage**: Essential for multiplex immunofluorescence analysis
+
+- **Morisita Index for Clustering**
+  - Immune cell clustering detection
+  - Spatial randomness testing
+  - **Application**: Tumor immune microenvironment analysis
+
+- **Getis-Ord Gi* Statistics**
+  - Hotspot detection for biomarker expression
+  - Local spatial autocorrelation
+  - **Application**: Identifying areas of high biomarker activity
+
+#### 5. Multi-Type Spatial Analysis (`multiTypeParial.b.R`)
+- **Cross-Type K Functions**
+  - Analyzing relationships between different cell types
+  - Distance-based interaction analysis
+- **Clark-Evans Nearest Neighbor Analysis**
+  - Spatial distribution pattern assessment
+- **Integration**: High compatibility with `spatialTIME` package (CRAN)
+
+## Phase 3: Hierarchical Data Analysis (Months 6-10)
+
+### 📊 **Critical for WSI and ROI Analysis**
+
+#### 6. Advanced Mixed-Effects Models (`hierarchicalpathology.b.R`)
+**Target Packages**: `lme4`, `nlme`, `performance`
+
+- **Three-Level Hierarchical Models**
+  - Structure: Patient > Slide > ROI > Cell
+  - Random effects for multiple levels of clustering
+  - **Current Gap**: No support for complex nested pathology data
+
+- **Variance Component Analysis**
+  - Intraclass Correlation Coefficient (ICC) calculation
+  - Partition variance across hierarchical levels
+  - **Application**: Multi-ROI and multi-slide analysis reliability
+
+- **Generalized Linear Mixed Models (GLMMs)**
+  - Logistic mixed models for binary outcomes
+  - Poisson mixed models for cell count data
+  - **Application**: Cell count analysis with nested structure
+
+## Phase 4: Advanced Survival Analysis for Biomarkers (Months 9-12)
+
+### ⏱️ **Enhanced Survival Methods**
+
+#### 7. Optimal Cutpoint Determination (`optimalcutpoint.b.R`)
+**Target Packages**: `survminer`, `maxstat`
+
+- **Maximally Selected Rank Statistics**
+  - Optimal cutpoint for continuous biomarkers
+  - Multiple biomarker optimization
+  - **Current Gap**: Basic cutpoint methods only
+
+- **Concordance Index Optimization**
+  - C-index based cutpoint selection
+  - Time-dependent ROC analysis
+  - **Application**: Nuclear morphometry and texture analysis cutpoints
+
+#### 8. Time-Dependent ROC Analysis (`timedependentroc.b.R`)
+**Target Packages**: `timeROC`, `survivalROC`, `survAUC`
+
+- **Dynamic ROC Curves**
+  - Cumulative/Dynamic (C/D) approaches
+  - Incident/Dynamic (I/D) approaches
+  - **Application**: Evaluating biomarker discrimination over time
+
+## Phase 5: Cell Segmentation and Count Analysis (Months 10-14)
+
+### 🧬 **Specialized for Digital Pathology Data**
+
+#### 9. Count Data Models (`countanalysis.b.R`)
+**Target Packages**: `MASS`, `pscl`, `glmmTMB`
+
+- **Zero-Inflated Models**
+  - Zero-inflation Poisson (ZIP)
+  - Zero-inflation Negative Binomial (ZINB)
+  - **Application**: Cell count data with excess zeros
+
+- **Tabular Morphometry Analysis**
+  - Statistical analysis of pre-extracted shape measurements
+  - Distribution analysis of morphometric features
+  - **Note**: Requires features to be extracted externally and imported as tabular data
+
+#### 10. Algorithm Performance Metrics (`algorithmmetrics.b.R`)
+**Note**: Works with pre-calculated validation metrics in tabular format
+
+- **Statistical Analysis of Validation Metrics**
+  - Analysis of Dice coefficients across samples
+  - Statistical comparison of algorithm performances
+  - Agreement statistics between methods
+  - **Application**: Statistical validation of pre-computed metrics
+
+## Phase 6: Inter-Observer Agreement (Months 12-16)
+
+### 🤝 **Critical for Pathology Validation**
+
+#### 11. Advanced Agreement Statistics (`pathologyagreement.b.R`)
+**Target Packages**: `psych`, `irr`, `blandr`
+
+- **Enhanced Kappa Statistics**
+  - Cohen's κ for two-rater agreement
+  - Fleiss' κ for multiple raters
+  - Weighted kappa for ordinal data
+  - **Interpretation**: κ > 0.61 indicates substantial agreement
+
+- **Intraclass Correlation Coefficient (ICC)**
+  - ICC(1,1), ICC(2,1), ICC(3,1) for different study designs
+  - **Interpretation**: ICC > 0.75 indicates good reliability
+  - **Application**: Digital pathology measurement reliability
+
+- **Bland-Altman Analysis**
+  - Continuous measurement agreement
+  - Bias and limits of agreement
+  - **Application**: Automated vs. manual measurement comparison
+
+## Phase 7: Machine Learning Evaluation (Months 14-18)
+
+### 🤖 **Pathology-Specific ML Metrics**
+
+#### 12. Advanced ML Evaluation (`mlpathology.b.R`)
+**Target Packages**: `caret`, `MLmetrics`, `DALEX`
+
+- **Imbalanced Dataset Metrics**
+  - Area Under Precision-Recall Curve (AUPRC)
+  - Matthews Correlation Coefficient (MCC)
+  - Balanced accuracy, G-mean: √(Sensitivity × Specificity)
+  - **Application**: Rare disease detection, minority class analysis
+
+- **Segmentation-Specific Metrics**
+  - Enhanced Dice coefficient analysis
+  - Average surface distance
+  - **Application**: Cell and tissue segmentation validation
+
+## Phase 8: Multiple Testing Corrections (Months 16-20)
+
+### 📈 **Advanced FDR Control**
+
+#### 13. Advanced Multiple Testing (`multipletesting.b.R`)
+**Target Packages**: `qvalue` (Bioconductor), `IHW`
+
+- **Advanced FDR Methods**
+  - Storey's q-value method
+  - Independent Hypothesis Weighting (IHW)
+  - AdaPT: Adaptive p-value thresholding
+  - **Current Gap**: Only basic Bonferroni and BH-FDR available
+
+- **Permutation-Based FDR**
+  - For correlated features in high-dimensional data
+  - **Application**: Multi-biomarker analysis with correlation
+
+## Implementation Priority Matrix
+
+### Immediate Implementation (Months 1-6)
+1. **Enhanced Non-Parametric Tests** - CRITICAL (30% usage rate)
+2. **Advanced ANOVA Suite** - CRITICAL (68% need proper post hoc)
+3. **Spatial Point Pattern Analysis** - HIGH (unique to digital pathology)
+
+### High Priority (Months 4-12)
+4. **Hierarchical Mixed-Effects Models** - HIGH (WSI/ROI structure)
+5. **Optimal Cutpoint Determination** - HIGH (biomarker analysis)
+6. **Count Data Models** - HIGH (cell counting applications)
+
+### Medium Priority (Months 10-18)
+7. **Time-Dependent ROC Analysis** - MEDIUM (advanced survival)
+8. **Segmentation Quality Metrics** - MEDIUM (validation needs)
+9. **Advanced Agreement Statistics** - MEDIUM (reliability assessment)
+
+### Future Enhancements (Months 16-24)
+10. **Advanced ML Evaluation** - FUTURE (specialized metrics)
+11. **Advanced Multiple Testing** - FUTURE (high-dimensional data)
+
+## Integration with Existing ClinicoPath Modules
+
+### Enhance Existing Functions
+- **survival.b.R**: Add optimal cutpoint methods, time-dependent ROC
+- **crosstable.b.R**: Enhanced chi-square with effect sizes and residuals
+- **ihcstats.b.R**: Integration with spatial analysis for H-score spatial patterns
+
+### New Module Categories
+- **Spatial Analysis**: New menuGroup for spatial pathology methods
+- **Digital Pathology**: Specialized menuGroup for DP-specific methods
+- **Advanced Agreement**: Enhanced reliability and agreement assessment
+
+## Expected Impact
+
+### Research Quality Improvement
+- **50% reduction** in methodological errors through proper post hoc testing
+- **Standardized spatial analysis** for immune microenvironment studies
+- **Robust hierarchical analysis** for multi-ROI and multi-slide studies
+
+### Clinical Translation
+- **Improved biomarker validation** through optimal cutpoint methods
+- **Enhanced reproducibility** through advanced agreement statistics
+- **Better segmentation validation** through comprehensive metrics
+
+### User Adoption
+- **Target**: 75% of digital pathology researchers using spatial analysis tools
+- **Goal**: ClinicoPath becomes standard for digital pathology statistical analysis
+- **Timeline**: 24-month implementation for complete digital pathology suite
+
+This roadmap positions ClinicoPath as the definitive statistical analysis platform for digital pathology research, addressing the specific needs identified in peer-reviewed literature and filling critical gaps in current methodology.
+
+---
+
+# Digital Pathology Statistical Methods Integration Roadmap (NEW)
+
+## Executive Summary
+
+Based on comprehensive analysis of digital pathology research methods, this roadmap outlines the integration of essential statistical tests and analyses specifically designed for digital pathology workflows into the ClinicoPath jamovi module.
+
+## Phase 1: Core Digital Pathology Statistics (Months 1-4)
+
+### 🔬 **1. Spatial Statistics for Tabular Cell Coordinates** (`spatialtabular`)
+**Target Packages**: `spatstat`, `spatialTIME`, `SpatialQPFs`
+**IMPORTANT**: Requires cell coordinates (X, Y) and cell types as tabular input
+
+#### New Functions to Implement:
+- **spatial_from_table.b.R**
+  - Import cell coordinates from CSV/Excel tables
+  - Statistical analysis of spatial patterns from coordinate data
+  - Ripley's K-function analysis on imported coordinates
+  - Nearest neighbor distance statistics
+  - Clustering indices calculation
+
+- **spatial_summary_stats.b.R**
+  - Summary statistics of spatial distributions
+  - Distance metrics between cell types
+  - Density calculations per region
+  - Export results as tabular data
+
+**Data Requirements**:
+- Table with columns: Cell_ID, X_coordinate, Y_coordinate, Cell_Type
+- Pre-segmented cell data exported from image analysis platforms
+- ROI identifiers for multi-region analysis
+
+### 📊 **2. ROI and WSI Hierarchical Analysis** (`hierarchicalpathology`)
+**Target Packages**: `lme4`, `nlme`, `glmmTMB`
+
+#### New Functions:
+- **roi_hierarchical.b.R**
+  - Three-level mixed models (Patient > Slide > ROI)
+  - Variance component analysis for multi-ROI studies
+  - Intraclass correlation for reproducibility
+  - Random slopes for ROI-specific effects
+
+**Applications**:
+- Multi-ROI biomarker quantification
+- Whole-slide heterogeneity assessment
+- Technical vs. biological variance partitioning
+
+## Phase 2: Image-Derived Metrics Analysis (Months 5-8)
+
+### 🎯 **3. Diagnostic Test Meta-Analysis for Pathology** (`diagnosticmeta`)
+**Target Packages**: `mada`, `meta`, `metafor`
+
+#### New Functions:
+- **pathology_meta.b.R**
+  - Bivariate random-effects model for sensitivity/specificity
+  - HSROC curves for diagnostic accuracy
+  - Meta-regression for heterogeneity sources
+  - Publication bias assessment
+
+**Applications**:
+- AI algorithm performance meta-analysis
+- Biomarker diagnostic accuracy synthesis
+- Inter-study validation
+
+### 📈 **4. Classification Performance Metrics** (`mlpathology`)
+**Target Packages**: `pROC`, `MLmetrics`, `caret`
+
+#### New Functions:
+- **classification_metrics.b.R**
+  - Confusion matrix with comprehensive metrics
+  - F1-score, precision, recall, AUROC calculation
+  - McNemar's test for paired classifier comparison
+  - DeLong's test for ROC curve comparison
+  - Bootstrap confidence intervals for metrics
+
+- **segmentation_metrics.b.R**
+  - Dice similarity coefficient (DSC)
+  - Jaccard index (IoU)
+  - Hausdorff distance
+  - Surface distance metrics
+  - Statistical testing for segmentation comparisons
+
+**Applications**:
+- AI model validation
+- Algorithm comparison studies
+- Segmentation quality assessment
+
+## Phase 3: Advanced Survival and Prognostic Analysis (Months 9-12)
+
+### ⏱️ **5. Image Biomarker Survival Analysis** (`imagebiomarkers`)
+**Target Packages**: `survminer`, `maxstat`, `timeROC`
+
+#### New Functions:
+- **biomarker_cutpoint.b.R**
+  - Maximally selected rank statistics
+  - X-tile analysis for optimal cutpoints
+  - Multiple testing correction for cutpoint selection
+  - Time-dependent ROC for biomarker evaluation
+
+- **spatial_survival.b.R**
+  - Spatial feature integration with Cox models
+  - Immune contexture survival analysis
+  - Multi-marker prognostic signatures
+  - Landmark analysis for image features
+
+**Applications**:
+- TIL density cutpoint optimization
+- Spatial immune signature prognostication
+- Multi-parametric biomarker panels
+
+## Phase 4: Agreement and Reproducibility (Months 13-16)
+
+### 🤝 **6. Digital Pathology Agreement Analysis** (`pathologyagreement`)
+**Target Packages**: `irr`, `psych`, `blandr`, `irrCAC`
+
+#### New Functions:
+- **digital_agreement.b.R**
+  - Multi-rater kappa (Fleiss, Light's kappa)
+  - Weighted kappa for ordinal scores
+  - Gwet's AC1 for paradox-resistant agreement
+  - Krippendorff's alpha for various data types
+
+- **measurement_agreement.b.R**
+  - Bland-Altman plots with statistical tests
+  - ICC for continuous measurements
+  - Concordance correlation coefficient (CCC)
+  - Total deviation index (TDI)
+
+**Applications**:
+- Algorithm vs. pathologist agreement
+- Inter-observer reproducibility
+- Multi-institutional validation studies
+
+## Phase 5: Specialized Digital Pathology Methods (Months 17-20)
+
+### 🔬 **7. Quantitative Feature Analysis** (`quantfeatures`)
+**Note**: Requires pre-extracted tabular features from digital pathology
+
+#### New Functions:
+- **morphometry_stats.b.R**
+  - Statistical analysis of pre-extracted nuclear measurements
+  - Distribution analysis of shape features (area, perimeter, circularity)
+  - Comparison of morphometric features between groups
+  - Correlation with clinical outcomes
+
+**Applications**:
+- Analysis of exported morphometric data
+- Statistical comparison of quantitative features
+- Biomarker development from tabular measurements
+
+### 📊 **8. Multiplexed Data Statistical Analysis** (`multiplexstats`)
+**Note**: Works with pre-extracted quantitative data from multiplex assays
+
+#### New Functions:
+- **multiplex_tabular.b.R**
+  - Statistical analysis of marker expression levels (tabular format)
+  - Correlation analysis between multiple markers
+  - Phenotype frequency statistics
+  - Co-expression pattern analysis
+
+**Data Requirements**:
+- Tabular data with marker intensities per cell/ROI
+- Pre-processed expression matrices
+- Phenotype assignments in categorical columns
+
+## Phase 6: Integration and Validation (Months 21-24)
+
+### 🎯 **9. Statistical Analysis Pipeline for Digital Pathology Data** (`dpstatspipeline`)
+
+#### Integration Functions:
+- **tabular_workflow.b.R**
+  - Import and validate tabular pathology data
+  - Automated statistical analysis workflow
+  - Batch processing for multiple datasets
+  - Quality control of tabular inputs
+  - Report generation with statistical results
+
+### 📋 **10. Clinical Translation Tools** (`clinicaltranslation`)
+
+#### New Functions:
+- **clinical_calculator.b.R**
+  - Risk score calculators from image features
+  - Nomogram generation for clinical use
+  - Decision curve analysis
+  - Clinical impact assessment
+
+## Implementation Specifications
+
+### New Module Structure:
+```
+jamovi/
+├── spatialpathology.a.yaml
+├── hierarchicalpathology.a.yaml
+├── diagnosticmeta.a.yaml
+├── mlpathology.a.yaml
+├── imagebiomarkers.a.yaml
+├── pathologyagreement.a.yaml
+├── morphometry.a.yaml
+├── multiplexpathology.a.yaml
+└── digitalpathologypipeline.a.yaml
+
+R/
+├── spatialpatterns.b.R
+├── multitype_spatial.b.R
+├── roi_hierarchical.b.R
+├── pathology_meta.b.R
+├── classification_metrics.b.R
+├── segmentation_metrics.b.R
+├── biomarker_cutpoint.b.R
+├── spatial_survival.b.R
+├── digital_agreement.b.R
+├── measurement_agreement.b.R
+├── texture_analysis.b.R
+├── nuclear_morphometry.b.R
+├── multiplex_analysis.b.R
+├── pipeline_integration.b.R
+└── clinical_calculator.b.R
+```
+
+### Dependencies to Add:
+```r
+Imports:
+  spatstat,
+  spatialTIME,
+  mada,
+  irr,
+  irrCAC,
+  blandr,
+  maxstat,
+  timeROC,
+  MLmetrics
+  
+Suggests:
+  SpatialQPFs,
+  EBImage,
+  radiomics,
+  phenoptr
+```
+
+## Priority Implementation Order
+
+### Immediate (Months 1-6):
+1. **Spatial Point Pattern Analysis** - Essential for immune profiling
+2. **Classification Performance Metrics** - Critical for AI validation
+3. **ROI Hierarchical Analysis** - Addresses multi-level data structure
+
+### High Priority (Months 7-12):
+4. **Image Biomarker Survival Analysis** - Clinical translation
+5. **Digital Agreement Analysis** - Validation studies
+6. **Diagnostic Meta-Analysis** - Evidence synthesis
+
+### Medium Priority (Months 13-18):
+7. **Texture and Morphometry Analysis** - Advanced features
+8. **Multiplexed Imaging Analysis** - Emerging technologies
+
+### Future Enhancement (Months 19-24):
+9. **Comprehensive Pipeline** - Workflow automation
+10. **Clinical Translation Tools** - Point-of-care integration
+
+## Expected Impact
+
+### Research Quality:
+- **80% reduction** in spatial analysis errors through proper statistical methods
+- **Standardized validation** metrics for AI algorithms
+- **Robust multi-level analysis** for WSI studies
+
+### Clinical Translation:
+- **Validated biomarker cutpoints** for clinical decision-making
+- **Reproducible spatial signatures** for patient stratification
+- **Evidence-based algorithm deployment** in clinical practice
+
+### User Adoption Metrics:
+- Target: **500+ digital pathology labs** within 2 years
+- Expected: **100+ publications** citing these methods
+- Goal: **Industry standard** for digital pathology statistics
+
+## Success Criteria
+
+1. **Method Validation**: Each method validated against published benchmarks
+2. **Performance**: Processing 1000+ ROIs in <5 minutes
+3. **Usability**: GUI-based interface requiring no coding
+4. **Documentation**: Comprehensive tutorials with pathology examples
+5. **Integration**: Seamless workflow with existing ClinicoPath modules
+
+This implementation will establish ClinicoPath as the premier statistical analysis platform for digital pathology research, bridging the gap between image analysis and clinical interpretation.
+
+---
+
+# Enhanced Digital Pathology Statistical Methods - Gemini Analysis Integration
+
+## Executive Summary
+
+Based on the comprehensive Gemini analysis of digital pathology workflows and statistical methods, this enhanced roadmap adds critical components for handling the complete digital pathology pipeline from WSI generation to clinical insights. The analysis emphasizes the importance of quality control, batch effect detection, and proper statistical assumptions checking throughout the entire workflow.
+
+## New Priority Areas from Gemini Analysis
+
+### 🚨 **Critical Addition: Data Quality and Batch Effect Control for Tabular Data**
+
+#### **Quality Control for Pathology Tables** (`tabularqc`)
+**Priority**: IMMEDIATE - Must be implemented before any statistical analysis
+
+**New Functions**:
+- **batch_effect_tabular.b.R**
+  - PCA visualization of tabular features by batch variables
+  - Statistical comparison across technical groups (scanner_ID, batch_ID)
+  - Batch effect quantification in feature matrices
+  - ComBat batch correction for tabular data
+
+- **feature_quality_check.b.R**
+  - Distribution analysis of quantitative features
+  - Missing data pattern detection
+  - Outlier detection in measurements
+  - Feature correlation and redundancy analysis
+
+**Data Format**: Tabular data with technical metadata columns
+
+### 📊 **Enhanced Foundational Statistics Suite**
+
+#### **Advanced Descriptive Statistics** (`enhanceddescriptive`)
+
+Based on Gemini's emphasis on proper exploratory data analysis:
+
+- **feature_exploration.b.R**
+  - Automatic generation of "Table 1" for pathology studies
+  - Multi-level descriptive statistics (cell, ROI, slide, patient)
+  - Feature correlation matrices with significance testing
+  - Bimodality detection for identifying distinct cell populations
+
+#### **Assumption-Aware Testing** (`assumptionaware`)
+
+- **parametric_assumptions.b.R**
+  - Automatic assumption checking before t-tests/ANOVA
+  - Variance homogeneity testing (Levene's, Brown-Forsythe)
+  - Normality assessment with effect size reporting
+  - Automatic fallback to non-parametric alternatives
+
+### 🔬 **Advanced Spatial Statistics Framework**
+
+Building on Gemini's comprehensive spatial analysis hierarchy:
+
+#### **Hierarchical Spatial Questions** (`spatialhierarchy`)
+
+**Density Analysis from Coordinates**:
+- **coordinate_density.b.R**
+  - Cell density calculations from X,Y coordinate tables
+  - Statistical comparison of densities between regions
+  - Export density metrics as tabular summaries
+
+**Distance-Based Analysis**:
+- **distance_statistics.b.R**
+  - Pairwise distance calculations from coordinate tables
+  - Statistical analysis of nearest neighbor distances
+  - Distance-based clustering validation
+
+**Neighborhood Analysis from Tables**:
+- **neighborhood_stats.b.R**
+  - Statistical analysis of pre-computed neighborhood compositions
+  - Frequency analysis of cell type combinations
+  - Chi-square tests for spatial associations
+
+### 🎯 **Comprehensive Survival Analysis Enhancement**
+
+Per Gemini's detailed survival analysis requirements:
+
+#### **Advanced Kaplan-Meier Features** (`enhancedkm`)
+- **optimal_dichotomization.b.R**
+  - Median-based stratification
+  - Quartile-based multi-group analysis
+  - Data-driven cutpoint selection with validation
+  - Risk table integration with confidence intervals
+
+#### **Cox Model Diagnostics** (`coxdiagnostics`)
+- **proportional_hazards_check.b.R**
+  - Schoenfeld residuals analysis
+  - Time-varying coefficient detection
+  - Martingale residual plots
+  - Influence diagnostics for outlier detection
+
+### 📈 **Publication-Ready Output Framework**
+
+Following Gemini's emphasis on user-friendly, publication-quality outputs:
+
+#### **Natural Language Results** (`nlresults`)
+- **statistical_interpretation.b.R**
+  - Automatic generation of methods sections
+  - Plain-language result summaries
+  - Effect size interpretation guidelines
+  - Clinical significance vs. statistical significance
+
+#### **Visualization Excellence** (`publicationplots`)
+- **ggplot2_templates.b.R**
+  - Journal-specific formatting templates
+  - Colorblind-friendly palettes
+  - High-resolution export options
+  - Interactive plot generation for supplementary materials
+
+## Enhanced Implementation Roadmap
+
+### Phase 0: Foundation (Month 0-1) - NEW CRITICAL PHASE
+
+**Quality Control Implementation**:
+1. Batch effect detection framework
+2. Data quality assessment pipeline
+3. Technical artifact identification
+4. Standardization protocols
+
+**Rationale**: Gemini analysis shows that "garbage in, garbage out" is the primary threat to valid statistical conclusions in digital pathology.
+
+### Phase 1: Core Statistics with Assumptions (Months 1-4)
+
+**Enhanced Classical Tests**:
+- All tests include automatic assumption checking
+- Transparent reporting of assumption violations
+- Guided selection between parametric/non-parametric methods
+- Effect size reporting for all comparisons
+
+### Phase 2: Spatial Analysis Hierarchy (Months 5-8)
+
+**Three-Tier Spatial Framework**:
+1. **Where** (First-order): Density and intensity patterns
+2. **How** (Second-order): Clustering and dispersion
+3. **With Whom** (Multi-type): Cellular neighborhoods and niches
+
+### Phase 3: Model-Based Analysis (Months 9-12)
+
+**Regression Framework**:
+- Linear models with diagnostic plots
+- Logistic regression with calibration assessment
+- Poisson/Negative Binomial for count data
+- Zero-inflated models for sparse data
+
+### Phase 4: Advanced Methods (Months 13-16)
+
+**Machine Learning Integration**:
+- Random Forest with interpretability
+- Gradient boosting with SHAP values
+- Deep learning integration hooks
+- Cross-validation strategies for pathology data
+
+### Phase 5: Clinical Translation (Months 17-20)
+
+**Clinical Decision Support**:
+- Risk calculators with confidence intervals
+- Nomogram generation
+- Decision curve analysis
+- Cost-effectiveness integration
+
+## Technical Implementation Details
+
+### Enhanced R Package Dependencies
+
+```r
+# Core Statistical Packages
+Imports:
+  # Quality Control
+  performance,    # Model diagnostics
+  datawizard,    # Data exploration
+  see,           # Visualization grammar
+  
+  # Spatial Analysis
+  spatstat.explore,  # Modern spatstat
+  spatstat.model,    # Model fitting
+  SpatialQPFs,      # Pathology-specific
+  
+  # Publication Quality
+  gtsummary,     # Table 1 generation
+  ggpubr,        # Publication plots
+  patchwork,     # Plot composition
+  
+  # Natural Language
+  report,        # Automated reporting
+  
+# Suggested Packages  
+Suggests:
+  # Advanced Spatial
+  spatialTIME,
+  phenoptr,
+  
+  # Machine Learning
+  tidymodels,    # Unified ML framework
+  DALEX,         # Model explanations
+```
+
+### Module Architecture Enhancement
+
+```yaml
+# New module structure
+jamovi/
+├── qualitycontrol/
+│   ├── batcheffect.a.yaml
+│   ├── dataquality.a.yaml
+│   └── technicalqc.a.yaml
+├── spatialanalysis/
+│   ├── firstorder.a.yaml
+│   ├── secondorder.a.yaml
+│   └── multitype.a.yaml
+├── assumptions/
+│   ├── normality.a.yaml
+│   ├── variance.a.yaml
+│   └── independence.a.yaml
+└── reporting/
+    ├── naturallanguage.a.yaml
+    └── publication.a.yaml
+```
+
+## Key Innovations from Gemini Analysis
+
+### 1. **Holistic Pipeline Awareness**
+- Every analysis includes upstream quality checks
+- Batch effect assessment is mandatory, not optional
+- Technical metadata tracking throughout analysis
+
+### 2. **Hierarchical Spatial Framework**
+- Structured progression from simple to complex spatial questions
+- Biologically interpretable parameters (e.g., Thomas process)
+- Integration with modern graph-based methods
+
+### 3. **User-Centric Design**
+- Natural language summaries for all analyses
+- Guided decision-making for test selection
+- Publication-ready outputs by default
+
+### 4. **Reproducibility Focus**
+- Comprehensive logging of all decisions
+- Seed management for stochastic methods
+- Version tracking for all dependencies
+
+## Expected Outcomes
+
+### Immediate Impact (Months 1-6):
+- **90% reduction** in batch effect-related false discoveries
+- **Complete assumption checking** for all statistical tests
+- **Standardized quality control** across all digital pathology studies
+
+### Medium-term Impact (Months 7-12):
+- **Hierarchical spatial analysis** becoming standard practice
+- **Model-based clustering** replacing arbitrary cutpoints
+- **Graph-based niche discovery** for complex tissue architecture
+
+### Long-term Impact (Months 13-20):
+- **Fully integrated pipeline** from WSI to publication
+- **Natural language reporting** reducing interpretation errors
+- **Clinical decision tools** directly from pathology images
+
+## Success Metrics
+
+1. **Quality Assurance**: 100% of analyses include batch effect assessment
+2. **Statistical Rigor**: Zero assumption violations go unreported
+3. **Spatial Completeness**: All three spatial hierarchy levels available
+4. **User Satisfaction**: 95% can generate publication-ready results
+5. **Clinical Adoption**: 50+ clinical labs using the module within 2 years
+
+## Conclusion
+
+The Gemini analysis reveals that successful digital pathology statistics requires more than just implementing tests—it demands a comprehensive framework that acknowledges the entire data generation pipeline, enforces quality control, and guides users through appropriate statistical choices. This enhanced roadmap positions ClinicoPath not just as a statistical tool, but as a complete analytical ecosystem for digital pathology research.
+
+---
+
+# Comprehensive Anatomic Pathology Statistical Framework - Complete Coverage Plan
+
+## Vision Statement
+
+Transform ClinicoPath into the definitive statistical analysis platform for ALL anatomic pathology research, providing specialized tools for every subspecialty while maintaining a unified, user-friendly interface that empowers pathologists to conduct rigorous, reproducible research across all domains of their practice.
+
+## Part I: Subspecialty-Specific Statistical Modules
+
+### 🧠 **1. Neuropathology Module** (`neuropath`)
+
+#### Specialized Statistical Methods:
+- **brain_tumor_grading.b.R**
+  - WHO grade progression analysis
+  - IDH mutation status correlation
+  - MGMT methylation survival analysis
+  - Molecular subtype clustering (GBM, oligodendroglioma, etc.)
+
+- **neurodegenerative_staging.b.R**
+  - Braak & Braak staging statistics
+  - CERAD score analysis
+  - Tau/amyloid burden quantification
+  - Regional brain analysis with multiple comparison correction
+
+- **pediatric_brain_analysis.b.R**
+  - Medulloblastoma molecular subgrouping
+  - H3K27M mutation impact analysis
+  - Age-adjusted survival models
+
+**Unique Statistical Needs**:
+- Spatial analysis for regional brain involvement
+- Hierarchical models for multi-region sampling
+- Time-to-progression analysis for grade transformation
+
+### 🫁 **2. Pulmonary Pathology Module** (`pulmpath`)
+
+#### Specialized Methods:
+- **lung_cancer_staging.b.R**
+  - TNM stage migration analysis
+  - PD-L1 TPS score optimization
+  - Tumor mutation burden correlation
+  - Spread through air spaces (STAS) analysis
+
+- **interstitial_disease_scoring.b.R**
+  - UIP pattern recognition statistics
+  - Fibrosis score progression modeling
+  - Multi-lobe sampling variance analysis
+  - Ashcroft score reliability metrics
+
+- **mesothelioma_diagnosis.b.R**
+  - BAP1/MTAP loss correlation
+  - Calretinin/WT1 diagnostic accuracy
+  - Asbestos burden quantification
+
+**Unique Needs**:
+- Multi-site biopsy concordance analysis
+- Spatial heterogeneity in large resections
+- Molecular-morphologic correlation statistics
+
+### 🩸 **3. Hematopathology Module** (`hematopath`)
+
+#### Specialized Methods:
+- **lymphoma_classification.b.R**
+  - Hans algorithm statistics
+  - Cell-of-origin classification
+  - MYC/BCL2/BCL6 rearrangement analysis
+  - Ki-67 proliferation index optimization
+
+- **flow_cytometry_integration.b.R**
+  - Flow-morphology correlation
+  - Minimal residual disease (MRD) detection
+  - Immunophenotype clustering
+  - Aberrant antigen expression analysis
+
+- **bone_marrow_analysis.b.R**
+  - Cellularity age-adjustment
+  - M:E ratio calculation
+  - Blast count optimization
+  - Fibrosis grading statistics
+
+**Unique Needs**:
+- Multi-parameter flow cytometry analysis
+- Clonality assessment statistics
+- Sequential biopsy comparison methods
+
+### 🦴 **4. Bone and Soft Tissue Pathology Module** (`softissue`)
+
+#### Specialized Methods:
+- **sarcoma_grading.b.R**
+  - FNCLCC grading system analysis
+  - Mitotic count standardization
+  - Necrosis percentage estimation
+  - Molecular subtype correlation
+
+- **margin_assessment.b.R**
+  - R0/R1/R2 classification statistics
+  - Distance to margin optimization
+  - Multi-focal tumor analysis
+  - Re-excision prediction models
+
+- **bone_tumor_analysis.b.R**
+  - Enneking staging statistics
+  - Growth rate modeling
+  - Response to neoadjuvant therapy
+  - Pathological fracture risk assessment
+
+**Unique Needs**:
+- 3D margin assessment statistics
+- Heterogeneous tumor sampling
+- Treatment effect quantification
+
+### 🧬 **5. Molecular Pathology Integration Module** (`molpath`)
+
+#### Specialized Methods:
+- **ngs_integration.b.R**
+  - Variant allele frequency (VAF) analysis
+  - Tumor mutational burden (TMB) statistics
+  - Microsatellite instability (MSI) scoring
+  - Clonal evolution modeling
+
+- **fish_analysis.b.R**
+  - HER2/CEP17 ratio optimization
+  - ALK/ROS1 rearrangement statistics
+  - Amplification vs. polysomy discrimination
+  - Cut-off optimization for novel probes
+
+- **methylation_profiling.b.R**
+  - CpG island methylator phenotype (CIMP)
+  - Methylation age calculation
+  - Tumor classification by methylation
+  - Prognostic methylation signatures
+
+**Unique Needs**:
+- Multi-platform data integration
+- Variant interpretation statistics
+- Germline vs. somatic discrimination
+
+### 👶 **6. Pediatric Pathology Module** (`pedpath`)
+
+#### Specialized Methods:
+- **developmental_staging.b.R**
+  - Gestational age adjustment
+  - Growth curve integration
+  - Maturation assessment statistics
+  - Congenital anomaly clustering
+
+- **pediatric_tumors.b.R**
+  - Age-specific incidence modeling
+  - International Neuroblastoma criteria
+  - Wilms tumor staging statistics
+  - Risk stratification models
+
+- **placental_pathology.b.R**
+  - Villous maturation scoring
+  - Maternal vascular malperfusion
+  - Fetal vascular malperfusion
+  - Twin-twin transfusion analysis
+
+**Unique Needs**:
+- Age-adjusted normal ranges
+- Growth-adjusted statistics
+- Developmental stage correlation
+
+### 🔬 **7. Cytopathology Module** (`cytopath`)
+
+#### Specialized Methods:
+- **bethesda_analysis.b.R**
+  - Bethesda system statistics (thyroid, cervical)
+  - ROM (Risk of Malignancy) calculation
+  - Adequacy assessment metrics
+  - Inter-observer variability in categories
+
+- **liquid_based_cytology.b.R**
+  - HPV co-testing integration
+  - Cell block correlation
+  - Atypical cell quantification
+  - Screening error analysis
+
+- **fine_needle_aspiration.b.R**
+  - Milan system statistics (salivary)
+  - Paris system (urinary)
+  - IAC system (pancreatobiliary)
+  - Rapid on-site evaluation (ROSE) accuracy
+
+**Unique Needs**:
+- Sample adequacy statistics
+- Screening sensitivity/specificity
+- Cyto-histologic correlation
+
+### 🏥 **8. Transplant Pathology Module** (`transplant`)
+
+#### Specialized Methods:
+- **rejection_scoring.b.R**
+  - Banff classification statistics
+  - C4d deposition quantification
+  - DSA correlation analysis
+  - Time-to-rejection modeling
+
+- **graft_survival_analysis.b.R**
+  - Competing risks (rejection vs. infection)
+  - Recurrent disease modeling
+  - Protocol vs. indication biopsy analysis
+  - Multi-state transition models
+
+- **immunosuppression_effects.b.R**
+  - Drug toxicity scoring
+  - Opportunistic infection rates
+  - PTLD risk assessment
+  - Calcineurin inhibitor toxicity
+
+**Unique Needs**:
+- Longitudinal biopsy analysis
+- Time-varying covariate models
+- Multi-organ correlation statistics
+
+### 🧪 **9. Gastrointestinal Pathology Module** (`gipath`)
+
+#### Specialized Methods:
+- **ibd_scoring.b.R**
+  - Nancy index, Robarts index
+  - Geboes score analysis
+  - Activity vs. chronicity discrimination
+  - Dysplasia detection statistics
+
+- **barrett_surveillance.b.R**
+  - Prague classification
+  - Dysplasia progression modeling
+  - Sampling error correction
+  - Risk stratification algorithms
+
+- **polyp_analysis.b.R**
+  - Advanced adenoma criteria
+  - Serrated pathway statistics
+  - Size measurement standardization
+  - Surveillance interval optimization
+
+**Unique Needs**:
+- Multi-level sampling statistics
+- Longitudinal surveillance analysis
+- Field effect quantification
+
+### 💀 **10. Autopsy Pathology Module** (`autopsy`)
+
+#### Specialized Methods:
+- **cause_of_death_analysis.b.R**
+  - Primary vs. contributory cause statistics
+  - Multi-organ failure modeling
+  - Sudden death classification
+  - Discrepancy rate analysis
+
+- **postmortem_interval.b.R**
+  - Decomposition stage modeling
+  - Time since death estimation
+  - Artifact vs. pathology discrimination
+  - Toxicology correlation
+
+- **clinical_correlation.b.R**
+  - Ante-mortem vs. post-mortem diagnosis
+  - Missed diagnosis analysis
+  - Quality assurance metrics
+  - Learning value assessment
+
+**Unique Needs**:
+- Multi-organ correlation analysis
+- Temporal sequence modeling
+- Artifact adjustment statistics
+
+## Part II: Cross-Cutting Analytical Frameworks
+
+### 📊 **A. Universal Pathology Statistics Core** (`pathcore`)
+
+#### Essential Methods for All Subspecialties:
+- **specimen_adequacy.b.R**
+  - Sample size calculations
+  - Adequacy criteria by specimen type
+  - Quality metrics dashboard
+  - Turnaround time analysis
+
+- **diagnostic_concordance.b.R**
+  - Second opinion agreement
+  - Expert panel consensus
+  - Frozen-permanent concordance
+  - Intradepartmental consultation patterns
+
+- **quality_assurance.b.R**
+  - Amendment/correction rates
+  - Critical value reporting
+  - CAP checklist compliance
+  - Peer review statistics
+
+### 🎯 **B. Biomarker Development Framework** (`biomarkerdev`)
+
+#### Comprehensive Biomarker Pipeline:
+- **discovery_phase.b.R**
+  - High-throughput screening statistics
+  - Multiple testing correction
+  - Feature selection algorithms
+  - Preliminary cutpoint determination
+
+- **validation_phase.b.R**
+  - Independent cohort validation
+  - Multi-institutional reproducibility
+  - Pre-analytical variable assessment
+  - Clinical utility metrics
+
+- **implementation_phase.b.R**
+  - Laboratory developed test (LDT) validation
+  - Proficiency testing analysis
+  - External quality assessment
+  - Real-world performance monitoring
+
+### 🤖 **C. AI/ML Integration Framework** (`aipath`)
+
+#### Machine Learning for Pathology:
+- **wsi_analysis.b.R**
+  - Patch-level classification aggregation
+  - Attention heatmap statistics
+  - Model uncertainty quantification
+  - Human-AI concordance metrics
+
+- **feature_extraction.b.R**
+  - Deep feature statistical analysis
+  - Handcrafted vs. learned features
+  - Multi-scale feature integration
+  - Interpretability metrics
+
+- **clinical_deployment.b.R**
+  - Model drift detection
+  - Performance monitoring statistics
+  - Fairness and bias assessment
+  - Regulatory compliance metrics
+
+## Part III: Implementation Strategy
+
+### Phase 1: Foundation (Months 1-6)
+1. **Core Infrastructure**
+   - Universal pathology statistics core
+   - Quality control framework
+   - Basic subspecialty modules
+
+### Phase 2: Subspecialty Development (Months 7-18)
+2. **Priority Subspecialties**
+   - Breast pathology (high volume)
+   - GI pathology (screening programs)
+   - Dermatopathology (visual analysis)
+   - Hematopathology (multi-parameter)
+
+### Phase 3: Advanced Integration (Months 19-24)
+3. **Complex Modules**
+   - Molecular pathology integration
+   - AI/ML framework
+   - Transplant pathology
+   - Pediatric pathology
+
+### Phase 4: Specialized Applications (Months 25-30)
+4. **Niche Areas**
+   - Autopsy pathology
+   - Forensic applications
+   - Veterinary pathology adaptation
+   - Research-specific tools
+
+## Part IV: Technical Architecture
+
+### Module Organization Structure:
+```
+ClinicoPath/
+├── core/
+│   ├── universal_stats/
+│   ├── quality_control/
+│   └── data_management/
+├── subspecialties/
+│   ├── neuropath/
+│   ├── pulmpath/
+│   ├── hematopath/
+│   ├── softissue/
+│   ├── molpath/
+│   ├── pedpath/
+│   ├── cytopath/
+│   ├── transplant/
+│   ├── gipath/
+│   └── autopsy/
+├── frameworks/
+│   ├── biomarker_development/
+│   ├── ai_integration/
+│   └── clinical_trials/
+└── integration/
+    ├── lis_connectivity/
+    ├── image_management/
+    └── reporting_tools/
+```
+
+### Key R Package Dependencies by Domain:
+
+```r
+# Subspecialty-Specific Packages
+neuropath_packages <- c(
+  "neurobase",      # Neuroimaging analysis
+  "ANTsR",          # Advanced brain registration
+  "freesurfer"      # Brain region analysis
+)
+
+hematopath_packages <- c(
+  "flowCore",       # Flow cytometry analysis
+  "FlowSOM",        # Flow data clustering
+  "CytoML"          # Cytometry markup language
+)
+
+molpath_packages <- c(
+  "GenomicRanges",  # Genomic interval analysis
+  "VariantAnnotation", # Variant analysis
+  "methylKit"       # Methylation analysis
+)
+
+transplant_packages <- c(
+  "transplantr",    # Transplant-specific stats
+  "competing risks", # Graft survival analysis
+  "DSA"             # Donor-specific antibodies
+)
+```
+
+## Part V: Expected Impact and Success Metrics
+
+### Clinical Impact Goals:
+1. **Coverage**: 100% of anatomic pathology subspecialties
+2. **Adoption**: 500+ pathology departments globally
+3. **Publications**: 1000+ papers using the module
+4. **Education**: Integration into residency training
+5. **Standardization**: Become CAP/ASCP recommended tool
+
+### Quality Metrics:
+- **Accuracy**: Validated against gold standard methods
+- **Efficiency**: 75% reduction in analysis time
+- **Reproducibility**: 100% result reproducibility
+- **Accessibility**: No coding required for 95% of analyses
+- **Compliance**: Meets all regulatory requirements
+
+### Innovation Metrics:
+- **Novel Methods**: 50+ pathology-specific statistical methods
+- **AI Integration**: Seamless ML model deployment
+- **Real-time Analysis**: Sub-second response for routine analyses
+- **Cloud Scalability**: Handle institutional-scale data
+- **Interoperability**: LIS/PACS integration
+
+## Part VI: Sustainability and Growth
+
+### Community Development:
+1. **Open Source Governance**: Establish steering committee
+2. **Contribution Guidelines**: Enable community modules
+3. **Plugin Architecture**: Allow third-party extensions
+4. **Educational Resources**: Comprehensive documentation
+5. **Support Network**: User forums and help desk
+
+### Funding Strategy:
+1. **Research Grants**: NIH/NSF pathology informatics
+2. **Industry Partnerships**: Diagnostic companies
+3. **Institutional Licenses**: Enterprise deployments
+4. **Training Programs**: Certification courses
+5. **Consulting Services**: Custom implementations
+
+### Future Directions:
+1. **Digital Twins**: Patient-specific modeling
+2. **Federated Learning**: Multi-institutional AI
+3. **Real-time Decisions**: Intraoperative consultation
+4. **Predictive Pathology**: Outcome forecasting
+5. **Precision Medicine**: Treatment selection algorithms
+
+## Conclusion
+
+This comprehensive plan transforms ClinicoPath from a statistical tool into the definitive platform for anatomic pathology research. By providing specialized methods for every subspecialty while maintaining a unified framework, we empower pathologists to conduct rigorous, reproducible research that directly impacts patient care. The modular architecture ensures scalability, the open-source approach fosters innovation, and the focus on user experience removes barriers to advanced statistical analysis.
+
+The ultimate goal: Every pathologist, regardless of statistical expertise, can perform publication-quality analyses that advance the field and improve patient outcomes.
