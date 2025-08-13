@@ -1,0 +1,107 @@
+---
+title: "Data Import and Export"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Data Import and Export}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+This vignette provides guidance on how to import and export data within the ClinicoPathJamoviModule ecosystem, covering both jamovi and R environments.
+
+## Importing Data into jamovi
+
+jamovi supports various data formats for import. The most common are CSV (Comma Separated Values) and its own `.omv` format.
+
+### From CSV Files
+
+1.  Open jamovi.
+2.  Go to `File` > `Open` > `This PC` (or relevant cloud service).
+3.  Browse to your CSV file and select it. jamovi will automatically detect delimiters and data types.
+
+### From jamovi (.omv) Files
+
+1.  Open jamovi.
+2.  Go to `File` > `Open` > `This PC`.
+3.  Select your `.omv` file. These files preserve all analyses and data from a previous jamovi session.
+
+## Importing Data into R
+
+When working directly in R, you can import data using various functions depending on the file format.
+
+### From CSV Files
+
+Use the `read.csv()` function from base R or `read_csv()` from the `readr` package (part of `tidyverse`).
+
+```R
+# Using base R
+data_csv_base <- read.csv("path/to/your/data.csv")
+
+# Using readr (recommended for better performance and consistency)
+# install.packages("readr") # if not already installed
+library(readr)
+data_csv_readr <- read_csv("path/to/your/data.csv")
+```
+
+### From Excel Files (.xlsx, .xls)
+
+Use the `read_excel()` function from the `readxl` package.
+
+```R
+# install.packages("readxl") # if not already installed
+library(readxl)
+data_excel <- read_excel("path/to/your/data.xlsx")
+```
+
+### From SPSS, SAS, Stata Files
+
+Use functions from the `haven` package.
+
+```R
+# install.packages("haven") # if not already installed
+library(haven)
+
+data_spss <- read_spss("path/to/your/data.sav")
+data_sas <- read_sas("path/to/your/data.sas7bdat")
+data_stata <- read_stata("path/to/your/data.dta")
+```
+
+## Exporting Data from jamovi
+
+jamovi allows you to export your data in several formats.
+
+1.  With your data open in jamovi, go to `File` > `Export` > `Data`.
+2.  Choose your desired format (e.g., CSV, SPSS, R, SAS, Stata) and specify the file name and location.
+
+## Exporting Data from R
+
+To export data from R to various formats, you can use functions like `write.csv()` or functions from specialized packages.
+
+### To CSV Files
+
+```R
+write.csv(your_dataframe, "path/to/save/your_data.csv", row.names = FALSE)
+```
+
+### To Excel Files
+
+Use the `write.xlsx()` function from the `openxlsx` package.
+
+```R
+# install.packages("openxlsx") # if not already installed
+library(openxlsx)
+write.xlsx(your_dataframe, "path/to/save/your_data.xlsx")
+```
+
+## Next Steps
+
+For more detailed information on specific analyses or other aspects of the ClinicoPathJamoviModule, please refer to the [Documentation Hub](../documentation_hub.md).

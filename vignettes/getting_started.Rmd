@@ -18,15 +18,18 @@ knitr::opts_chunk$set(
 
 Welcome to the ClinicoPathJamoviModule! This vignette will guide you through the basics of using the module to perform common analyses in clinicopathological research.
 
-## Installation
+## Prerequisites
 
-First, you need to install the module in jamovi. You can do this from the jamovi library or by side-loading the `.jmo` file. For detailed instructions, please see the [INSTALL.md](INSTALL.md) file.
+Before you begin, please ensure you have:
+
+*   **jamovi:** Download and install the latest version of jamovi from [https://www.jamovi.org/download.html](https://www.jamovi.org/download.html).
+*   **ClinicoPathJamoviModule:** Install the module within jamovi. For detailed instructions, please refer to the [Installation Guide in our Documentation Hub](../documentation_hub.md#installation-guide).
 
 ## Loading Data
 
 Let's start by loading one of the example datasets that comes with the module. We'll use the `survival` dataset for this example.
 
-In jamovi, you can open the `survival` dataset by going to the `File` menu, selecting `Open`, and then navigating to the `ClinicoPathJamoviModule` library.
+In jamovi, you can open the `survival` dataset by going to the `File` menu, selecting `Open`, and then navigating to the `Data Library` and selecting `ClinicoPathJamoviModule` to find the example datasets. (Consider adding a screenshot here for visual guidance).
 
 ## Performing a Simple Analysis: Table One
 
@@ -57,11 +60,4 @@ For more detailed information on how to interpret the results of a specific anal
 
 ## Next Steps
 
-This vignette has provided a brief introduction to the ClinicoPathJamoviModule. To learn more, we recommend exploring the other vignettes in this package, which provide more in-depth information on specific topics:
-
-*   `jamovi_a_yaml_guide.md`: A guide to writing `.a.yaml` files.
-*   `jamovi_r_yaml_guide.md`: A guide to writing `.r.yaml` files.
-*   `jamovi_u_yaml_guide.md`: A guide to writing `.u.yaml` files.
-*   `jamovi_tables_guide.md`: A guide to creating and populating tables.
-*   `jamovi_plots_guide.md`: A guide to creating and populating plots.
-*   `jamovi_b_R_guide.md`: A guide to writing `.b.R` files.
+This vignette has provided a brief introduction to the ClinicoPathJamoviModule. To learn more, we recommend exploring the comprehensive documentation available in our [Documentation Hub](../documentation_hub.md).

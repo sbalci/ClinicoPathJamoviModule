@@ -18,9 +18,9 @@ children:
           - type: TextBox
             name: testLevels
             format: string
-            label: >-
-              Positive Test Levels (Blank for auto-detect, Specify
-              Positive,Yes,1)
+            # label: >-
+            #   Positive Test Levels (Blank for auto-detect, Specify
+            #   Positive,Yes,1)
             enable: (tests)
       - type: TargetLayoutBox
         label: Gold Standard
@@ -239,3 +239,6 @@ children:
             name: seed
             format: number
             label: Random Seed
+          - type: CheckBox
+            name: showProgress
+            label: Show progress indicators

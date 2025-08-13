@@ -15,7 +15,13 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             test3 = NULL,
             test3Positive = NULL,
             od = FALSE,
-            showIndividual = TRUE, ...) {
+            showIndividual = TRUE,
+            exportCombinationPattern = FALSE,
+            showVisualization = TRUE,
+            plotType = "heatmap",
+            plotHeight = 600,
+            plotWidth = 800,
+            colorScheme = "clinical", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -75,8 +81,46 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "showIndividual",
                 showIndividual,
                 default=TRUE)
-            private$..addCombinationPattern <- jmvcore::OptionOutput$new(
-                "addCombinationPattern")
+            private$..exportCombinationPattern <- jmvcore::OptionBool$new(
+                "exportCombinationPattern",
+                exportCombinationPattern,
+                default=FALSE)
+            private$..showVisualization <- jmvcore::OptionBool$new(
+                "showVisualization",
+                showVisualization,
+                default=TRUE)
+            private$..plotType <- jmvcore::OptionList$new(
+                "plotType",
+                plotType,
+                options=list(
+                    "heatmap",
+                    "roc",
+                    "tree",
+                    "venn",
+                    "forest",
+                    "all"),
+                default="heatmap")
+            private$..plotHeight <- jmvcore::OptionInteger$new(
+                "plotHeight",
+                plotHeight,
+                default=600,
+                min=400,
+                max=1200)
+            private$..plotWidth <- jmvcore::OptionInteger$new(
+                "plotWidth",
+                plotWidth,
+                default=800,
+                min=600,
+                max=1600)
+            private$..colorScheme <- jmvcore::OptionList$new(
+                "colorScheme",
+                colorScheme,
+                options=list(
+                    "clinical",
+                    "viridis",
+                    "blueyellow",
+                    "grayscale"),
+                default="clinical")
 
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
@@ -88,7 +132,12 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..test3Positive)
             self$.addOption(private$..od)
             self$.addOption(private$..showIndividual)
-            self$.addOption(private$..addCombinationPattern)
+            self$.addOption(private$..exportCombinationPattern)
+            self$.addOption(private$..showVisualization)
+            self$.addOption(private$..plotType)
+            self$.addOption(private$..plotHeight)
+            self$.addOption(private$..plotWidth)
+            self$.addOption(private$..colorScheme)
         }),
     active = list(
         gold = function() private$..gold$value,
@@ -101,7 +150,12 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         test3Positive = function() private$..test3Positive$value,
         od = function() private$..od$value,
         showIndividual = function() private$..showIndividual$value,
-        addCombinationPattern = function() private$..addCombinationPattern$value),
+        exportCombinationPattern = function() private$..exportCombinationPattern$value,
+        showVisualization = function() private$..showVisualization$value,
+        plotType = function() private$..plotType$value,
+        plotHeight = function() private$..plotHeight$value,
+        plotWidth = function() private$..plotWidth$value,
+        colorScheme = function() private$..colorScheme$value),
     private = list(
         ..gold = NA,
         ..goldPositive = NA,
@@ -113,7 +167,12 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..test3Positive = NA,
         ..od = NA,
         ..showIndividual = NA,
-        ..addCombinationPattern = NA)
+        ..exportCombinationPattern = NA,
+        ..showVisualization = NA,
+        ..plotType = NA,
+        ..plotHeight = NA,
+        ..plotWidth = NA,
+        ..colorScheme = NA)
 )
 
 decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -128,7 +187,12 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         combinationsAnalysis = function() private$.items[["combinationsAnalysis"]],
         combStatsTable = function() private$.items[["combStatsTable"]],
         combStatsTableCI = function() private$.items[["combStatsTableCI"]],
-        addCombinationPattern = function() private$.items[["addCombinationPattern"]]),
+        addCombinationPattern = function() private$.items[["addCombinationPattern"]],
+        performanceHeatmap = function() private$.items[["performanceHeatmap"]],
+        rocCurves = function() private$.items[["rocCurves"]],
+        decisionTree = function() private$.items[["decisionTree"]],
+        vennDiagram = function() private$.items[["vennDiagram"]],
+        forestPlot = function() private$.items[["forestPlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -387,7 +451,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Output$new(
                 options=options,
                 name="addCombinationPattern",
-                title="Add Combination Pattern to Data",
+                title="Test Combination Patterns",
                 varTitle="TestCombination",
                 varDescription="Test combination pattern (e.g., +/+, +/-, -/+, -/-)",
                 measureType="nominal",
@@ -397,7 +461,78 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test3",
                     "test1Positive",
                     "test2Positive",
-                    "test3Positive")))}))
+                    "test3Positive")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="performanceHeatmap",
+                title="Performance Heatmap",
+                width=800,
+                height=600,
+                visible="(showVisualization && (plotType == 'heatmap' || plotType == 'all'))",
+                renderFun=".plotPerformanceHeatmap",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "colorScheme",
+                    "plotWidth",
+                    "plotHeight")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="rocCurves",
+                title="ROC Curves Comparison",
+                width=800,
+                height=600,
+                visible="(showVisualization && (plotType == 'roc' || plotType == 'all'))",
+                renderFun=".plotROCCurves",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "plotWidth",
+                    "plotHeight")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="decisionTree",
+                title="Decision Tree Visualization",
+                width=800,
+                height=600,
+                visible="(showVisualization && (plotType == 'tree' || plotType == 'all'))",
+                renderFun=".plotDecisionTree",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "plotWidth",
+                    "plotHeight")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="vennDiagram",
+                title="Test Agreement Venn Diagram",
+                width=800,
+                height=600,
+                visible="(showVisualization && (plotType == 'venn' || plotType == 'all'))",
+                renderFun=".plotVennDiagram",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "plotWidth",
+                    "plotHeight")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="forestPlot",
+                title="Forest Plot of Diagnostic Statistics",
+                width=800,
+                height=600,
+                visible="(showVisualization && (plotType == 'forest' || plotType == 'all'))",
+                renderFun=".plotForest",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "plotWidth",
+                    "plotHeight")))}))
 
 decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncombineBase",
@@ -417,7 +552,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'none')
+                weightsSupport = 'auto')
         }))
 
 #' Combine Medical Decision Tests
@@ -471,6 +606,18 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param od Boolean selection whether to show frequency tables. Default is
 #'   'false'.
 #' @param showIndividual .
+#' @param exportCombinationPattern Export a new variable to the data frame
+#'   indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
+#' @param showVisualization Display visualizations for test combination
+#'   analysis.
+#' @param plotType Type of visualization to display. Heatmap shows combination
+#'   patterns performance, ROC curves compare individual and combined tests,
+#'   Decision tree shows test hierarchy, Venn diagram shows test overlaps,
+#'   Forest plot shows diagnostic statistics with CI.
+#' @param plotHeight Height of the plot in pixels.
+#' @param plotWidth Width of the plot in pixels.
+#' @param colorScheme Color scheme for visualizations. Clinical uses red for
+#'   negative and green for positive.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$goldStandardFreqTable} \tab \tab \tab \tab \tab a table \cr
@@ -482,6 +629,11 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$combStatsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$combStatsTableCI} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$addCombinationPattern} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$performanceHeatmap} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$rocCurves} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$decisionTree} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$vennDiagram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$forestPlot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -502,7 +654,13 @@ decisioncombine <- function(
     test3,
     test3Positive,
     od = FALSE,
-    showIndividual = TRUE) {
+    showIndividual = TRUE,
+    exportCombinationPattern = FALSE,
+    showVisualization = TRUE,
+    plotType = "heatmap",
+    plotHeight = 600,
+    plotWidth = 800,
+    colorScheme = "clinical") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncombine requires jmvcore to be installed (restart may be required)")
@@ -534,7 +692,13 @@ decisioncombine <- function(
         test3 = test3,
         test3Positive = test3Positive,
         od = od,
-        showIndividual = showIndividual)
+        showIndividual = showIndividual,
+        exportCombinationPattern = exportCombinationPattern,
+        showVisualization = showVisualization,
+        plotType = plotType,
+        plotHeight = plotHeight,
+        plotWidth = plotWidth,
+        colorScheme = colorScheme)
 
     analysis <- decisioncombineClass$new(
         options = options,

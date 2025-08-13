@@ -27,7 +27,9 @@ jjhistostats(
   binalpha = 0.7,
   centralitylinecolor = "blue",
   centralitylinewidth = 1,
-  centralitylinetype = "dashed"
+  centralitylinetype = "dashed",
+  plotwidth = 600,
+  plotheight = 450
 )
 }
 \arguments{
@@ -97,6 +99,10 @@ transparent, 1 = opaque).}
 \item{centralitylinewidth}{Width of the vertical centrality line.}
 
 \item{centralitylinetype}{Line type for the vertical centrality line.}
+
+\item{plotwidth}{Width of each plot in pixels. Default is 600.}
+
+\item{plotheight}{Height of each plot in pixels. Default is 450.}
 }
 \value{
 A results object containing:

@@ -6,9 +6,9 @@
 \usage{
 jwaffle(
   data,
-  counts,
+  counts = NULL,
   groups,
-  facet,
+  facet = NULL,
   rows = 5,
   flip = FALSE,
   color_palette = "default",

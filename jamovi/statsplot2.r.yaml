@@ -17,7 +17,7 @@ items:
           - grvar
 
 
-    - name:  text4
+    - name:  ExplanationMessage
       title: Explanation
       type:  Preformatted
       clearWith:

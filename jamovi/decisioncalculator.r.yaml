@@ -234,6 +234,55 @@ items:
           - Fagan
           - Fagan2
           - sensspecwiki
+          
+    # Multiple cut-off comparison table (DiagROC inspired)
+    - name: multipleCutoffTable
+      title: 'Cut-off Comparison'
+      type: Table
+      visible: (multiplecuts)
+      rows: 0
+      columns:
+        - name: cutoffName
+          title: "Cut-off Scenario"
+          type: text
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+          format: pc
+        - name: specificity
+          title: "Specificity"
+          type: number
+          format: pc
+        - name: ppv
+          title: "PPV"
+          type: number
+          format: pc
+        - name: npv
+          title: "NPV"
+          type: number
+          format: pc
+        - name: accuracy
+          title: "Accuracy"
+          type: number
+          format: pc
+        - name: youden
+          title: "Youden Index"
+          type: number
+        - name: recommendation
+          title: "Clinical Recommendation"
+          type: text
+      clearWith:
+          - multiplecuts
+          - cutoff1
+          - cutoff2
+          - tp1
+          - fp1
+          - tn1
+          - fn1
+          - tp2
+          - fp2
+          - tn2
+          - fn2
 
 
     # - name: plot2

@@ -631,6 +631,81 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                         image3NNN$setState(plotData3NNN)
                     }
                 }
+                
+                # Sample size estimation (DiagROC inspired functionality)
+                if (self$options$samplesize) {
+                    sampleSizeTable <- self$results$sampleSizeTable
+                    
+                    expected_sens <- self$options$expected_sens
+                    expected_spec <- self$options$expected_spec
+                    width_sens <- self$options$width_sens
+                    width_spec <- self$options$width_spec
+                    alpha <- self$options$alpha_level
+                    
+                    # Calculate z-score for confidence level
+                    z_score <- stats::qnorm(1 - alpha/2)
+                    
+                    # Sample size for sensitivity estimation (Clopper-Pearson)
+                    # n = [z^2 * p * (1-p)] / (width/2)^2
+                    # where p is expected sensitivity
+                    n_sens_diseased <- ceiling((z_score^2 * expected_sens * (1 - expected_sens)) / (width_sens/2)^2)
+                    
+                    # Sample size for specificity estimation
+                    n_spec_healthy <- ceiling((z_score^2 * expected_spec * (1 - expected_spec)) / (width_spec/2)^2)
+                    
+                    # Total sample size assuming 50% prevalence for balanced design
+                    n_total_balanced <- n_sens_diseased + n_spec_healthy
+                    
+                    # Sample size for different prevalence scenarios
+                    prev_scenarios <- c(0.05, 0.10, 0.20, 0.50)
+                    
+                    sampleSizeTable$addRow(
+                        rowKey = 1,
+                        values = list(
+                            parameter = "Sensitivity Precision",
+                            value = n_sens_diseased,
+                            assumptions = paste0("Diseased subjects needed (Expected Sens = ", 
+                                                round(expected_sens*100, 1), "%, CI width = ", 
+                                                round(width_sens*100, 1), "%)")
+                        )
+                    )
+                    
+                    sampleSizeTable$addRow(
+                        rowKey = 2, 
+                        values = list(
+                            parameter = "Specificity Precision",
+                            value = n_spec_healthy,
+                            assumptions = paste0("Healthy subjects needed (Expected Spec = ",
+                                                round(expected_spec*100, 1), "%, CI width = ",
+                                                round(width_spec*100, 1), "%)")
+                        )
+                    )
+                    
+                    # Add prevalence-specific total sample sizes
+                    for (i in seq_along(prev_scenarios)) {
+                        prev <- prev_scenarios[i]
+                        n_total_prev <- ceiling(n_sens_diseased / prev) + ceiling(n_spec_healthy / (1 - prev))
+                        
+                        sampleSizeTable$addRow(
+                            rowKey = 2 + i,
+                            values = list(
+                                parameter = paste0("Total Sample (Prev = ", round(prev*100, 1), "%)"),
+                                value = n_total_prev,
+                                assumptions = paste0("Assuming disease prevalence of ", round(prev*100, 1), "% in study population")
+                            )
+                        )
+                    }
+                    
+                    # Add balanced design recommendation
+                    sampleSizeTable$addRow(
+                        rowKey = 7,
+                        values = list(
+                            parameter = "Balanced Design",
+                            value = n_total_balanced,
+                            assumptions = "Equal numbers of diseased and healthy subjects (50% prevalence)"
+                        )
+                    )
+                }
             },
 
             .plot1 = function(image1, ggtheme, ...) {

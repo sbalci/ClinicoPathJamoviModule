@@ -24,7 +24,9 @@ jjdotplotstats(
   k = 2,
   testvalueline = FALSE,
   centralityparameter = "mean",
-  centralityk = 2
+  centralityk = 2,
+  plotwidth = 650,
+  plotheight = 450
 )
 }
 \arguments{
@@ -78,6 +80,10 @@ subtitle.}
 a vertical line.}
 
 \item{centralityk}{Number of decimal places for centrality parameter label.}
+
+\item{plotwidth}{Width of the plot in pixels. Default is 650.}
+
+\item{plotheight}{Height of the plot in pixels. Default is 450.}
 }
 \value{
 A results object containing:
@@ -88,29 +94,58 @@ A results object containing:
 }
 }
 \description{
-Dot Chart
+Wrapper Function for ggstatsplot::ggdotplotstats and
+ggstatsplot::grouped_ggdotplotstats to generate dot plots
+comparing continuous variables between groups with statistical
+annotations and significance testing.
 }
 \examples{
-\donttest{
-# Load test data
-data(jjdotplotstats_test_data)
-
-# Basic dot plot
+# Basic dot plot with iris dataset
 jjdotplotstats(
-  data = jjdotplotstats_test_data,
-  dep = "crp_level",
-  group = "disease_severity",
-  typestatistics = "parametric"
+    data = iris,
+    dep = "Sepal.Length",
+    group = "Species",
+    typestatistics = "parametric"
 )
 
-# Grouped dot plot by treatment center
+# Advanced dot plot with custom settings
 jjdotplotstats(
-  data = jjdotplotstats_test_data,
-  dep = "esr_level",
-  group = "disease_severity",
-  grvar = "treatment_center",
-  typestatistics = "nonparametric",
-  centralityplotting = TRUE
+    data = iris,
+    dep = "Petal.Width",
+    group = "Species",
+    typestatistics = "nonparametric",
+    centralityplotting = TRUE,
+    centralitytype = "nonparametric",
+    testvalueline = TRUE,
+    testvalue = 1.0,
+    mytitle = "Petal Width by Species",
+    xtitle = "Petal Width (cm)",
+    ytitle = "Species"
 )
-}
+
+# Grouped analysis with mtcars dataset
+jjdotplotstats(
+    data = mtcars,
+    dep = "mpg",
+    group = "cyl",
+    grvar = "am",
+    typestatistics = "robust",
+    centralityplotting = TRUE,
+    centralitytype = "robust",
+    effsizetype = "unbiased",
+    conflevel = 0.99,
+    k = 3
+)
+
+# Bayesian analysis with ToothGrowth dataset
+jjdotplotstats(
+    data = ToothGrowth,
+    dep = "len",
+    group = "supp",
+    typestatistics = "bayes",
+    bfmessage = TRUE,
+    centralityparameter = "mean",
+    mytitle = "Tooth Growth by Supplement Type"
+)
+
 }

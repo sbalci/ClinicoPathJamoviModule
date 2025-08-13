@@ -41,7 +41,8 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             prevalence = 0,
             crossValidate = FALSE,
             nFolds = 5,
-            seed = 12345, ...) {
+            seed = 12345,
+            showProgress = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -259,6 +260,10 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "seed",
                 seed,
                 default=12345)
+            private$..showProgress <- jmvcore::OptionBool$new(
+                "showProgress",
+                showProgress,
+                default=TRUE)
 
             self$.addOption(private$..tests)
             self$.addOption(private$..testLevels)
@@ -296,6 +301,7 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..crossValidate)
             self$.addOption(private$..nFolds)
             self$.addOption(private$..seed)
+            self$.addOption(private$..showProgress)
         }),
     active = list(
         tests = function() private$..tests$value,
@@ -333,7 +339,8 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         prevalence = function() private$..prevalence$value,
         crossValidate = function() private$..crossValidate$value,
         nFolds = function() private$..nFolds$value,
-        seed = function() private$..seed$value),
+        seed = function() private$..seed$value,
+        showProgress = function() private$..showProgress$value),
     private = list(
         ..tests = NA,
         ..testLevels = NA,
@@ -370,7 +377,8 @@ decisionpanelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..prevalence = NA,
         ..crossValidate = NA,
         ..nFolds = NA,
-        ..seed = NA)
+        ..seed = NA,
+        ..showProgress = NA)
 )
 
 decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1018,7 +1026,7 @@ decisionpanelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisionpanel",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = decisionpanelResults$new(options=options),
                 data = data,
@@ -1170,6 +1178,8 @@ decisionpanelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param nFolds Number of folds for cross-validation.
 #' @param seed Random seed for reproducibility in bootstrap and
 #'   cross-validation.
+#' @param showProgress Display progress indicators for long-running operations
+#'   like bootstrap and cross-validation.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
@@ -1237,7 +1247,8 @@ decisionpanel <- function(
     prevalence = 0,
     crossValidate = FALSE,
     nFolds = 5,
-    seed = 12345) {
+    seed = 12345,
+    showProgress = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisionpanel requires jmvcore to be installed (restart may be required)")
@@ -1289,7 +1300,8 @@ decisionpanel <- function(
         prevalence = prevalence,
         crossValidate = crossValidate,
         nFolds = nFolds,
-        seed = seed)
+        seed = seed,
+        showProgress = showProgress)
 
     analysis <- decisionpanelClass$new(
         options = options,

@@ -14,7 +14,9 @@ alluvial(
   bin = "default",
   orient = "vert",
   usetitle = FALSE,
-  mytitle = "Alluvial Plot"
+  mytitle = "Alluvial Plot",
+  maxvars = 8,
+  custombinlabels = ""
 )
 }
 \arguments{
@@ -39,6 +41,11 @@ represented by color. Default is 'first_variable'.}
 \item{usetitle}{Use a custom title for the plot.}
 
 \item{mytitle}{Title for the plot.}
+
+\item{maxvars}{Maximum number of variables to include in the alluvial plot.}
+
+\item{custombinlabels}{Custom labels for bins, separated by commas (e.g.,
+"Low,Medium,High").  Leave empty to use bin option defaults.}
 }
 \value{
 A results object containing:

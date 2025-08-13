@@ -89,7 +89,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        text4 = function() private$.items[["text4"]],
+        ExplanationMessage = function() private$.items[["ExplanationMessage"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -116,7 +116,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "grvar")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text4",
+                name="ExplanationMessage",
                 title="Explanation",
                 clearWith=list(
                     "dep",
@@ -166,9 +166,11 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Automatic Plot Selection
 #'
 #' Automatically selects and generates the most appropriate statistical 
-#' visualization based on variable data types. Supports both independent and 
-#' repeated measures designs with various plot types including violin plots, 
-#' scatter plots, bar charts, and alluvial diagrams.
+#' visualization based on variable data types. Features enhanced error 
+#' messages with contextual guidance, robust data validation, and 
+#' comprehensive fallback options. Supports both independent and repeated 
+#' measures designs with various plot types including violin plots, scatter 
+#' plots, bar charts, and alluvial diagrams.
 #'
 #' @examples
 #' # Automatic plot selection for factor vs continuous variables
@@ -189,6 +191,12 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     alluvsty = "t1"
 #' )
 #'
+#' # Enhanced error messages provide contextual guidance:
+#' # - Variable names and types in error messages
+#' # - Specific data requirement feedback
+#' # - Package installation instructions when needed
+#' # - Actionable suggestions for unsupported combinations
+#'
 #' @param data The data as a data frame.
 #' @param dep The dependent variable (y-axis, 1st measurement). Can be
 #'   continuous or categorical.
@@ -207,7 +215,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$text4} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$ExplanationMessage} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'

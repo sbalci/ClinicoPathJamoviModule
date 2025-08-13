@@ -8,12 +8,11 @@ statsplot2(
   data,
   dep,
   group,
-  grvar,
+  grvar = NULL,
   direction = "independent",
   distribution = "p",
   alluvsty = "t1",
-  excl = FALSE,
-  originaltheme = FALSE
+  excl = FALSE
 )
 }
 \arguments{
@@ -39,15 +38,12 @@ nonparametric,  "r" = robust, "bf" = Bayes factor.}
 labels,  "t2" = easyalluvial with automatic variable selection.}
 
 \item{excl}{If TRUE, excludes rows with missing values before analysis.}
-
-\item{originaltheme}{If TRUE, uses original ggplot2 themes instead of
-ggstatsplot themes.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$text4} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$ExplanationMessage} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }

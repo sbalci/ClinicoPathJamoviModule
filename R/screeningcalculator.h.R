@@ -12,7 +12,13 @@ screeningcalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             repeat2 = TRUE,
             repeat3 = TRUE,
             fnote = FALSE,
-            fagan = FALSE, ...) {
+            fagan = FALSE,
+            samplesize = FALSE,
+            expected_sens = 0.85,
+            expected_spec = 0.8,
+            width_sens = 0.1,
+            width_spec = 0.1,
+            alpha_level = 0.05, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -54,6 +60,40 @@ screeningcalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 "fagan",
                 fagan,
                 default=FALSE)
+            private$..samplesize <- jmvcore::OptionBool$new(
+                "samplesize",
+                samplesize,
+                default=FALSE)
+            private$..expected_sens <- jmvcore::OptionNumber$new(
+                "expected_sens",
+                expected_sens,
+                default=0.85,
+                min=0.5,
+                max=0.99)
+            private$..expected_spec <- jmvcore::OptionNumber$new(
+                "expected_spec",
+                expected_spec,
+                default=0.8,
+                min=0.5,
+                max=0.99)
+            private$..width_sens <- jmvcore::OptionNumber$new(
+                "width_sens",
+                width_sens,
+                default=0.1,
+                min=0.01,
+                max=0.2)
+            private$..width_spec <- jmvcore::OptionNumber$new(
+                "width_spec",
+                width_spec,
+                default=0.1,
+                min=0.01,
+                max=0.2)
+            private$..alpha_level <- jmvcore::OptionNumber$new(
+                "alpha_level",
+                alpha_level,
+                default=0.05,
+                min=0.01,
+                max=0.1)
 
             self$.addOption(private$..sens)
             self$.addOption(private$..spec)
@@ -62,6 +102,12 @@ screeningcalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..repeat3)
             self$.addOption(private$..fnote)
             self$.addOption(private$..fagan)
+            self$.addOption(private$..samplesize)
+            self$.addOption(private$..expected_sens)
+            self$.addOption(private$..expected_spec)
+            self$.addOption(private$..width_sens)
+            self$.addOption(private$..width_spec)
+            self$.addOption(private$..alpha_level)
         }),
     active = list(
         sens = function() private$..sens$value,
@@ -70,7 +116,13 @@ screeningcalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         repeat2 = function() private$..repeat2$value,
         repeat3 = function() private$..repeat3$value,
         fnote = function() private$..fnote$value,
-        fagan = function() private$..fagan$value),
+        fagan = function() private$..fagan$value,
+        samplesize = function() private$..samplesize$value,
+        expected_sens = function() private$..expected_sens$value,
+        expected_spec = function() private$..expected_spec$value,
+        width_sens = function() private$..width_sens$value,
+        width_spec = function() private$..width_spec$value,
+        alpha_level = function() private$..alpha_level$value),
     private = list(
         ..sens = NA,
         ..spec = NA,
@@ -78,7 +130,13 @@ screeningcalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         ..repeat2 = NA,
         ..repeat3 = NA,
         ..fnote = NA,
-        ..fagan = NA)
+        ..fagan = NA,
+        ..samplesize = NA,
+        ..expected_sens = NA,
+        ..expected_spec = NA,
+        ..width_sens = NA,
+        ..width_spec = NA,
+        ..alpha_level = NA)
 )
 
 screeningcalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -94,7 +152,8 @@ screeningcalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         plot2PP = function() private$.items[["plot2PP"]],
         plot2NN = function() private$.items[["plot2NN"]],
         plot3PPP = function() private$.items[["plot3PPP"]],
-        plot3NNN = function() private$.items[["plot3NNN"]]),
+        plot3NNN = function() private$.items[["plot3NNN"]],
+        sampleSizeTable = function() private$.items[["sampleSizeTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -270,7 +329,33 @@ screeningcalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "spec",
                     "prev",
                     "fagan",
-                    "repeat3")))}))
+                    "repeat3")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="sampleSizeTable",
+                title="Sample Size Estimation for Diagnostic Study",
+                visible="(samplesize)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Sample Size Required", 
+                        `type`="number"),
+                    list(
+                        `name`="assumptions", 
+                        `title`="Assumptions", 
+                        `type`="text")),
+                clearWith=list(
+                    "expected_sens",
+                    "expected_spec",
+                    "width_sens",
+                    "width_spec",
+                    "alpha_level",
+                    "samplesize")))}))
 
 screeningcalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "screeningcalculatorBase",
@@ -340,6 +425,12 @@ screeningcalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param repeat3 .
 #' @param fnote .
 #' @param fagan .
+#' @param samplesize .
+#' @param expected_sens .
+#' @param expected_spec .
+#' @param width_sens .
+#' @param width_spec .
+#' @param alpha_level .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$explanatoryText} \tab \tab \tab \tab \tab a html \cr
@@ -352,6 +443,7 @@ screeningcalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   \code{results$plot2NN} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3PPP} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3NNN} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$sampleSizeTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -368,7 +460,13 @@ screeningcalculator <- function(
     repeat2 = TRUE,
     repeat3 = TRUE,
     fnote = FALSE,
-    fagan = FALSE) {
+    fagan = FALSE,
+    samplesize = FALSE,
+    expected_sens = 0.85,
+    expected_spec = 0.8,
+    width_sens = 0.1,
+    width_spec = 0.1,
+    alpha_level = 0.05) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("screeningcalculator requires jmvcore to be installed (restart may be required)")
@@ -381,7 +479,13 @@ screeningcalculator <- function(
         repeat2 = repeat2,
         repeat3 = repeat3,
         fnote = fnote,
-        fagan = fagan)
+        fagan = fagan,
+        samplesize = samplesize,
+        expected_sens = expected_sens,
+        expected_spec = expected_spec,
+        width_sens = width_sens,
+        width_spec = width_spec,
+        alpha_level = alpha_level)
 
     analysis <- screeningcalculatorClass$new(
         options = options,

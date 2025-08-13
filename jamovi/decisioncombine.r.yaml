@@ -222,7 +222,7 @@ items:
         - test3Positive
 
     - name: addCombinationPattern
-      title: 'Add Combination Pattern to Data'
+      title: 'Test Combination Patterns'
       type: Output
       varTitle: TestCombination
       varDescription: Test combination pattern (e.g., +/+, +/-, -/+, -/-)
@@ -234,6 +234,78 @@ items:
         - test1Positive
         - test2Positive
         - test3Positive
+
+    # Visualization outputs
+    - name: performanceHeatmap
+      title: 'Performance Heatmap'
+      type: Image
+      width: 800
+      height: 600
+      visible: (showVisualization && (plotType == 'heatmap' || plotType == 'all'))
+      renderFun: .plotPerformanceHeatmap
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - colorScheme
+        - plotWidth
+        - plotHeight
+
+    - name: rocCurves
+      title: 'ROC Curves Comparison'
+      type: Image
+      width: 800
+      height: 600
+      visible: (showVisualization && (plotType == 'roc' || plotType == 'all'))
+      renderFun: .plotROCCurves
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - plotWidth
+        - plotHeight
+
+    - name: decisionTree
+      title: 'Decision Tree Visualization'
+      type: Image
+      width: 800
+      height: 600
+      visible: (showVisualization && (plotType == 'tree' || plotType == 'all'))
+      renderFun: .plotDecisionTree
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - plotWidth
+        - plotHeight
+
+    - name: vennDiagram
+      title: 'Test Agreement Venn Diagram'
+      type: Image
+      width: 800
+      height: 600
+      visible: (showVisualization && (plotType == 'venn' || plotType == 'all'))
+      renderFun: .plotVennDiagram
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - plotWidth
+        - plotHeight
+
+    - name: forestPlot
+      title: 'Forest Plot of Diagnostic Statistics'
+      type: Image
+      width: 800
+      height: 600
+      visible: (showVisualization && (plotType == 'forest' || plotType == 'all'))
+      renderFun: .plotForest
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - plotWidth
+        - plotHeight
 
 
 refs:

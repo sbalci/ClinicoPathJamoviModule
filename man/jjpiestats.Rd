@@ -7,11 +7,11 @@
 jjpiestats(
   data,
   dep,
-  group,
-  grvar,
+  group = NULL,
+  grvar = NULL,
   typestatistics = "parametric",
   originaltheme = FALSE,
-  resultssubtitle = TRUE
+  resultssubtitle = FALSE
 )
 }
 \arguments{

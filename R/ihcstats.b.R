@@ -33,6 +33,77 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .supervised_clusters = NULL, # Stores supervised clustering results
         .til_signatures = NULL,     # Stores TIL signature characterization
         
+        # Constants for visualization and analysis
+        .COLORS = list(
+            primary = c("#E74C3C", "#3498DB", "#2ECC71", "#F39C12", "#9B59B6", "#1ABC9C", "#34495E", "#E67E22"),
+            scientific = c("#2E86AB", "#A23B72", "#F18F01", "#0F4C75", "#3282B8", "#BBE1FA"),
+            clinical = c("#FFFFFF", "#FFF2CC", "#FFE699", "#FFD966", "#FFCC02", "#E6AC00", "#CC9900", "#B38600", "#8B4513"),
+            neutral = list(
+                dark = "#2C3E50",
+                medium = "#34495E",
+                light_gray = "#7F8C8D",
+                lighter_gray = "#95A5A6",
+                background = "#ECF0F1",
+                border = "#BDC3C7"
+            ),
+            ui = list(
+                text_primary = "#2C3E50",
+                text_secondary = "#666666",
+                text_caption = "#888888",
+                border_light = "#E0E0E0",
+                border_lighter = "#F0F0F0",
+                background_white = "white",
+                background_panel = "#F8F9FA",
+                border_panel = "#DEE2E6"
+            )
+        ),
+        
+        .PLOT_PARAMS = list(
+            font_sizes = list(
+                title = 14,
+                subtitle = 12,
+                axis_title = 12,
+                axis_text = 10,
+                legend_title = 11,
+                legend_text = 10,
+                caption = 10,
+                strip_text = 11
+            ),
+            dimensions = list(
+                cell_width = 15,
+                cell_height = 12,
+                min_plot_width = 600,
+                min_plot_height = 400,
+                max_markers_detailed = 6,
+                max_clusters_detailed = 4
+            ),
+            alpha_values = list(
+                violin = 0.4,
+                boxplot = 0.8,
+                jitter = 0.3,
+                outlier = 0.6
+            )
+        ),
+        
+        .THRESHOLDS = list(
+            silhouette = list(
+                strong = 0.7,
+                reasonable = 0.5,
+                weak = 0.25
+            ),
+            significance = list(
+                high = 0.001,
+                medium = 0.01,
+                low = 0.05
+            ),
+            performance = list(
+                max_samples_full = 1000,
+                max_samples_warning = 2000,
+                min_markers = 2,
+                max_optimal_markers = 6
+            )
+        ),
+        
         # Package dependency checker
         .checkPackageDependencies = function(required_packages) {
             missing_packages <- character(0)
@@ -53,25 +124,91 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Safe execution wrapper for error handling with progress reporting
         .safeExecute = function(operation, operation_name = "Analysis", fallback = NULL, show_progress = TRUE) {
             if (show_progress) {
-                message(paste("Starting", operation_name, "..."))
+                private$.reportProgress(paste("Starting", operation_name, "..."))
             }
             
             tryCatch({
                 result <- operation()
                 if (show_progress) {
-                    message(paste(operation_name, "completed successfully"))
+                    private$.reportProgress(paste(operation_name, "completed successfully"))
                 }
                 return(result)
             }, error = function(e) {
                 error_msg <- paste(operation_name, "failed:", conditionMessage(e))
+                private$.reportProgress(error_msg, type = "error")
                 jmvcore::reject(error_msg)
                 return(fallback)
             }, warning = function(w) {
                 warning_msg <- paste(operation_name, "warning:", conditionMessage(w))
-                # Log warning but continue
-                message(warning_msg)
+                private$.reportProgress(warning_msg, type = "warning")
                 return(operation())
             })
+        },
+        
+        # Progress reporting method
+        .reportProgress = function(message, type = "info") {
+            timestamp <- format(Sys.time(), "%H:%M:%S")
+            formatted_message <- paste0("[", timestamp, "] ", message)
+            
+            if (type == "error") {
+                message(paste("ERROR:", formatted_message))
+            } else if (type == "warning") {
+                message(paste("WARNING:", formatted_message))
+            } else {
+                message(formatted_message)
+            }
+        },
+        
+        # Get color palette based on number of items and context
+        .getColorPalette = function(n_items, context = "primary") {
+            if (n_items <= 3) {
+                return(private$.COLORS$primary[1:n_items])
+            } else if (n_items <= 8) {
+                if (context == "scientific") {
+                    return(private$.COLORS$scientific[1:min(n_items, 6)])
+                } else {
+                    return(RColorBrewer::brewer.pal(n_items, "Set1"))
+                }
+            } else {
+                return(rainbow(n_items, s = 0.8, v = 0.9))
+            }
+        },
+        
+        # Create publication-quality color palette for different visualization contexts
+        .createPublicationColorPalette = function(n_items, context = "general") {
+            # Define publication-quality color schemes
+            publication_palettes <- list(
+                # Nature-style colors (colorblind-friendly)
+                nature = c("#E64B35FF", "#4DBBD5FF", "#00A087FF", "#3C5488FF", "#F39B7FFF", 
+                          "#8491B4FF", "#91D1C2FF", "#DC0000FF"),
+                # Scientific journal colors
+                science = c("#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E", 
+                           "#E6AB02", "#A6761D", "#666666"),
+                # Cell/Nature Medicine colors
+                medical = c("#C51B7D", "#2166AC", "#762A83", "#5AAE61", "#FDB863", 
+                           "#B2182B", "#D1E5F0", "#F7F7F7"),
+                # Dendrogram-specific (high contrast, colorblind safe)
+                dendrogram = c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", 
+                              "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"),
+                # Heatmap-specific (sequential and diverging)
+                heatmap = c("#2166ac", "#4393c3", "#92c5de", "#d1e5f0", "#fdbf6f", 
+                           "#ff7f00", "#d94701", "#a50f15")
+            )
+            
+            # Select palette based on context
+            if (context %in% names(publication_palettes)) {
+                base_colors <- publication_palettes[[context]]
+            } else {
+                base_colors <- publication_palettes$nature
+            }
+            
+            # Handle different numbers of clusters
+            if (n_items <= length(base_colors)) {
+                return(base_colors[1:n_items])
+            } else {
+                # For many clusters, create interpolated palette
+                return(grDevices::colorRampPalette(base_colors)(n_items))
+            }
         },
         
         # Memory cleanup method
@@ -152,6 +289,12 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .validateAnalysisRequirements = function() {
+            # Validate package dependencies first
+            private$.validatePackageDependencies()
+            
+            # Distance metric validation
+            private$.validateDistanceMetric()
+            
             # Multi-region analysis validation
             if (self$options$tumorRegionAnalysis) {
                 if (!private$.validateVariableExists("Central region variable", self$options$centralRegionVar, self$data) ||
@@ -175,6 +318,88 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!private$.validateVariableExists("Tumor type variable", self$options$tumorTypeVar, self$data)) {
                     stop("Differential diagnosis/antibody optimization requires tumor type variable")
                 }
+            }
+            
+            return(TRUE)
+        },
+        
+        # Distance metric validation for data type compatibility
+        .validateDistanceMetric = function() {
+            distance_method <- self$options$distanceMetric
+            markers <- self$options$markers
+            
+            if (length(markers) == 0) return(TRUE)
+            
+            # Enhanced data type detection
+            data_types <- sapply(self$data[markers], function(x) {
+                if (is.factor(x)) return("categorical")
+                if (is.numeric(x)) return("numeric")
+                if (is.logical(x)) return("binary")
+                return("other")
+            })
+            
+            has_categorical <- any(data_types %in% c("categorical", "binary"))
+            has_numeric <- any(data_types == "numeric")
+            is_purely_numeric <- all(data_types == "numeric")
+            
+            # Strict validation with immediate stopping
+            if (distance_method == "jaccard" && is_purely_numeric) {
+                jmvcore::reject("Jaccard distance is not suitable for purely numeric data. Please use Gower distance instead.")
+                return(FALSE)
+            }
+            
+            if (!distance_method %in% c("gower", "jaccard")) {
+                jmvcore::reject(paste("Distance metric", distance_method, "is not supported. Use 'gower' or 'jaccard'."))
+                return(FALSE)
+            }
+            
+            # Recommend optimal distance metric
+            if (distance_method == "jaccard" && has_numeric && has_categorical) {
+                message("Note: Gower distance is recommended for mixed categorical/numeric data.")
+            }
+            
+            return(TRUE)
+        },
+        
+        # Centralized package dependency validation
+        .validatePackageDependencies = function(required_packages = NULL) {
+            if (is.null(required_packages)) {
+                # Define core required packages based on analysis options
+                required_packages <- c("cluster")
+                
+                if (self$options$showHeatmap || self$options$olsenVisualization) {
+                    required_packages <- c(required_packages, "pheatmap")
+                }
+                
+                if (self$options$showDendrogram) {
+                    required_packages <- c(required_packages, "dendextend")
+                }
+                
+                if (self$options$pcaAnalysis || self$options$showPCAPlot) {
+                    required_packages <- c(required_packages, "factoextra")
+                }
+                
+                if (self$options$prognosticClustering) {
+                    required_packages <- c(required_packages, "survival")
+                }
+                
+                if (self$options$useParallel) {
+                    required_packages <- c(required_packages, "parallel")
+                }
+            }
+            
+            missing_packages <- c()
+            
+            for (pkg in required_packages) {
+                if (!requireNamespace(pkg, quietly = TRUE)) {
+                    missing_packages <- c(missing_packages, pkg)
+                }
+            }
+            
+            if (length(missing_packages) > 0) {
+                error_msg <- paste("Required packages not available:", paste(missing_packages, collapse = ", "))
+                jmvcore::reject(error_msg)
+                return(FALSE)
             }
             
             return(TRUE)
@@ -373,6 +598,11 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 message(paste("Computing distance matrix for", n, "samples..."))
             }
             
+            # Parallel processing implementation
+            if (self$options$useParallel && n > 100 && requireNamespace("parallel", quietly = TRUE)) {
+                return(private$.calculateJaccardDistanceParallel(ihc_matrix, max_distance))
+            }
+            
             # Use lower triangular approach for efficiency
             distances <- numeric(n * (n - 1) / 2)
             k <- 1
@@ -425,6 +655,84 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(as.dist(distances))
         },
         
+        # Parallel Jaccard distance calculation for large datasets
+        .calculateJaccardDistanceParallel = function(ihc_matrix, max_distance) {
+            n <- nrow(ihc_matrix)
+            
+            # Set up parallel processing
+            num_cores <- min(parallel::detectCores() - 1, 4)  # Leave one core free, max 4
+            
+            message(paste("Using parallel processing with", num_cores, "cores for distance calculation..."))
+            
+            # Create cluster
+            cl <- parallel::makeCluster(num_cores)
+            on.exit(parallel::stopCluster(cl), add = TRUE)
+            
+            # Export necessary variables to cluster
+            parallel::clusterExport(cl, c("ihc_matrix", "max_distance"), envir = environment())
+            
+            # Define chunk-based processing for better load balancing
+            indices <- which(lower.tri(matrix(1, n, n)), arr.ind = TRUE)
+            total_pairs <- nrow(indices)
+            
+            # Split work into chunks
+            chunk_size <- ceiling(total_pairs / (num_cores * 2))  # Smaller chunks for better balance
+            chunks <- split(1:total_pairs, ceiling(seq_along(1:total_pairs) / chunk_size))
+            
+            # Parallel computation function
+            compute_chunk_distances <- function(chunk_ids) {
+                chunk_indices <- indices[chunk_ids, , drop = FALSE]
+                chunk_distances <- numeric(length(chunk_ids))
+                
+                for (k in seq_len(nrow(chunk_indices))) {
+                    i <- chunk_indices[k, 1]
+                    j <- chunk_indices[k, 2]
+                    
+                    i_row <- ihc_matrix[i, ]
+                    j_row <- ihc_matrix[j, ]
+                    
+                    # Vectorized operations (same as sequential version)
+                    valid_pairs <- !(is.na(i_row) & is.na(j_row))
+                    if (sum(valid_pairs) == 0) {
+                        chunk_distances[k] <- 1
+                    } else {
+                        i_valid <- i_row[valid_pairs]
+                        j_valid <- j_row[valid_pairs]
+                        
+                        # Exact matches
+                        exact_matches <- sum(i_valid == j_valid)
+                        
+                        # Partial matches
+                        if (max_distance > 0) {
+                            partial_indices <- i_valid != j_valid
+                            if (sum(partial_indices) > 0) {
+                                partial_similarities <- pmax(0, 1 - abs(i_valid[partial_indices] - j_valid[partial_indices]) / max_distance)
+                                shared_weights <- exact_matches + sum(partial_similarities)
+                            } else {
+                                shared_weights <- exact_matches
+                            }
+                        } else {
+                            shared_weights <- exact_matches
+                        }
+                        
+                        similarity <- shared_weights / length(i_valid)
+                        chunk_distances[k] <- 1 - similarity
+                    }
+                }
+                return(chunk_distances)
+            }
+            
+            # Execute parallel computation
+            result_chunks <- parallel::parLapply(cl, chunks, compute_chunk_distances)
+            
+            # Combine results
+            distances <- unlist(result_chunks)
+            
+            message("Parallel distance calculation completed.")
+            
+            return(as.dist(distances))
+        },
+        
         # Create text summary of expression patterns in a cluster
         .summarizeClusterPattern = function(data, cluster_members) {
             # Prepare results
@@ -460,14 +768,70 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(paste(pattern_elements, collapse = "; "))
         },
         
-        # Convert IHC data to numeric matrix
+        # Convert IHC data to numeric matrix with enhanced error handling
         .prepareIHCMatrix = function(data) {
-            # Create empty matrix with proper dimensions
-            ihc_matrix <- matrix(0, nrow = nrow(data), ncol = ncol(data))
-            colnames(ihc_matrix) <- colnames(data)
-            rownames(ihc_matrix) <- rownames(data)
+            # Comprehensive data cleaning and validation
+            ihc_matrix <- data.frame(data)
             
-            # Create row names if missing
+            # Handle missing values and data type conversion
+            for (i in 1:ncol(ihc_matrix)) {
+                if (is.factor(ihc_matrix[[i]])) {
+                    # Convert factors to proper numeric scale
+                    levels_count <- length(levels(ihc_matrix[[i]]))
+                    ihc_matrix[[i]] <- as.numeric(ihc_matrix[[i]]) - 1  # 0-based indexing
+                    
+                    # Handle missing values in factors
+                    if (any(is.na(ihc_matrix[[i]]))) {
+                        # Use mode imputation for factors
+                        non_na_vals <- ihc_matrix[[i]][!is.na(ihc_matrix[[i]])]
+                        if (length(non_na_vals) > 0) {
+                            mode_val <- as.numeric(names(sort(table(non_na_vals), decreasing = TRUE))[1])
+                            ihc_matrix[[i]][is.na(ihc_matrix[[i]])] <- mode_val
+                        } else {
+                            ihc_matrix[[i]][is.na(ihc_matrix[[i]])] <- 0  # Default to lowest score
+                        }
+                    }
+                } else if (is.numeric(ihc_matrix[[i]])) {
+                    # Handle missing values in numeric data
+                    if (any(is.na(ihc_matrix[[i]]))) {
+                        non_na_vals <- ihc_matrix[[i]][!is.na(ihc_matrix[[i]])]
+                        if (length(non_na_vals) > 0) {
+                            median_val <- median(non_na_vals, na.rm = TRUE)
+                            ihc_matrix[[i]][is.na(ihc_matrix[[i]])] <- median_val
+                        } else {
+                            ihc_matrix[[i]][is.na(ihc_matrix[[i]])] <- 0
+                        }
+                    }
+                    
+                    # Handle infinite values
+                    if (any(is.infinite(ihc_matrix[[i]]))) {
+                        finite_vals <- ihc_matrix[[i]][is.finite(ihc_matrix[[i]])]
+                        if (length(finite_vals) > 0) {
+                            median_val <- median(finite_vals, na.rm = TRUE)
+                            ihc_matrix[[i]][is.infinite(ihc_matrix[[i]])] <- median_val
+                        } else {
+                            ihc_matrix[[i]][is.infinite(ihc_matrix[[i]])] <- 0
+                        }
+                    }
+                } else {
+                    # Handle other data types by converting to numeric
+                    ihc_matrix[[i]] <- as.numeric(as.factor(ihc_matrix[[i]])) - 1
+                }
+            }
+            
+            # Ensure all values are finite and complete
+            ihc_matrix <- ihc_matrix[complete.cases(ihc_matrix), , drop = FALSE]
+            
+            # Final validation
+            if (nrow(ihc_matrix) == 0) {
+                stop("No complete cases available after data cleaning")
+            }
+            
+            if (any(!is.finite(as.matrix(ihc_matrix)))) {
+                stop("Data contains non-finite values after preprocessing")
+            }
+            
+            # Create proper row names
             if (is.null(rownames(ihc_matrix))) {
                 # Use ID variable if provided
                 if (!is.null(self$options$id) && self$options$id != "" && 
@@ -479,73 +843,75 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
             
-            # Convert each column to numeric
-            for (i in 1:ncol(data)) {
-                if (is.factor(data[,i])) {
-                    # Get levels count to determine scoring system
-                    level_count <- length(levels(data[,i]))
-                    
-                    # For categorical IHC data, map to 0-(n-1) scale
-                    if (level_count <= 5) {  # Standard IHC scoring has 2-4 levels typically
-                        # Convert factor to numeric, preserving order
-                        # This maps the first level to 1, second to 2, etc.
-                        # Then subtract 1 to get 0-based indexing
-                        ihc_matrix[,i] <- as.numeric(data[,i]) - 1
-                    } else {
-                        # For other categorical variables with many levels
-                        # Just use numeric conversion without offset
-                        ihc_matrix[,i] <- as.numeric(data[,i])
-                    }
-                } else if (is.numeric(data[,i])) {
-                    # For already numeric data (like H-scores)
-                    ihc_matrix[,i] <- data[,i]
-                } else {
-                    # For unsupported types, set to NA
-                    ihc_matrix[,i] <- NA
-                }
-            }
-            
             return(ihc_matrix)
         },
         
-        # Perform hierarchical clustering
+        # Perform hierarchical clustering with enhanced error handling
         .performHierarchicalClustering = function(data) {
+            private$.reportProgress("Starting hierarchical clustering...")
+            
             # Check required libraries
             required_packages <- c("pheatmap", "dendextend", "RColorBrewer", "cluster")
             if (!private$.checkPackageDependencies(required_packages)) {
                 return(NULL)
             }
             
-            # Convert categorical IHC data to numeric matrix for analysis
-            ihc_matrix <- private$.prepareIHCMatrix(data)
-            
-            # Calculate distance matrix based on selected metric
-            if (self$options$distanceMetric == "jaccard") {
-                # Custom Jaccard distance optimized for IHC categorical data
-                dist_matrix <- private$.calculateJaccardDistance(ihc_matrix)
-            } else {
-                # Gower distance (handles mixed data types)
-                dist_matrix <- cluster::daisy(ihc_matrix, metric = "gower")
-            }
-            
-            # Perform hierarchical clustering
-            hc <- hclust(dist_matrix, method = self$options$linkageMethod)
-            
-            # Cut tree to get cluster assignments
-            clusters <- cutree(hc, k = self$options$nClusters)
-            
-            # Store results for visualizations
-            private$.clusters <- clusters
-            private$.hc <- hc
-            private$.ihc_matrix <- ihc_matrix
-            
-            # Generate cluster summaries for results table
-            private$.generateClusterSummaries(data, clusters)
-            
-            # Perform silhouette analysis if requested
-            if (self$options$silhouetteAnalysis) {
-                private$.performSilhouetteAnalysis(dist_matrix, clusters)
-            }
+            # Enhanced data preparation with validation
+            tryCatch({
+                ihc_matrix <- private$.prepareIHCMatrix(data)
+                
+                # Validate matrix before clustering
+                if (any(!is.finite(as.matrix(ihc_matrix)))) {
+                    jmvcore::reject("Data preprocessing failed - non-finite values detected")
+                    return(NULL)
+                }
+                
+                # Calculate distance matrix with error handling
+                if (self$options$distanceMetric == "jaccard") {
+                    dist_matrix <- private$.calculateJaccardDistance(ihc_matrix)
+                } else {
+                    # Enhanced Gower distance calculation
+                    dist_matrix <- cluster::daisy(ihc_matrix, metric = "gower", stand = FALSE)
+                }
+                
+                # Validate distance matrix
+                if (any(is.na(dist_matrix)) || any(!is.finite(dist_matrix))) {
+                    jmvcore::reject("Distance calculation produced invalid values")
+                    return(NULL)
+                }
+                
+                # Perform clustering with validation
+                hc <- hclust(dist_matrix, method = self$options$linkageMethod)
+                
+                # Validate hierarchical clustering result
+                if (is.null(hc) || is.null(hc$height) || any(!is.finite(hc$height))) {
+                    jmvcore::reject("Invalid hierarchical clustering result")
+                    return(NULL)
+                }
+                
+                clusters <- cutree(hc, k = self$options$nClusters)
+                
+                # Store results
+                private$.clusters <- clusters
+                private$.hc <- hc
+                private$.ihc_matrix <- ihc_matrix
+                
+                # Generate cluster summaries
+                private$.generateClusterSummaries(data, clusters)
+                
+                # Perform silhouette analysis if requested
+                if (self$options$silhouetteAnalysis) {
+                    private$.performSilhouetteAnalysis(dist_matrix, clusters)
+                }
+                
+                private$.reportProgress("Hierarchical clustering completed successfully")
+                
+            }, error = function(e) {
+                error_msg <- paste("Hierarchical clustering failed:", conditionMessage(e))
+                private$.reportProgress(error_msg, type = "error")
+                jmvcore::reject(error_msg)
+                return(NULL)
+            })
         },
         
         # Perform PAM (Partitioning Around Medoids) clustering
@@ -836,44 +1202,162 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!self$options$showDendrogram || is.null(private$.hc))
                 return()
             
+            # Check required packages
+            required_packages <- c("dendextend", "RColorBrewer", "ggplot2", "ggdendro")
+            if (!private$.checkPackageDependencies(required_packages)) {
+                return()
+            }
+            
             # Get hierarchical clustering result
             hc <- private$.hc
             clusters <- private$.clusters
+            n_clusters <- self$options$nClusters
             
-            # Convert to dendrogram
-            dend <- as.dendrogram(hc)
-            
-            # Color branches by cluster
-            dend <- dendextend::color_branches(dend, k = self$options$nClusters)
-            
-            # Color labels by cluster if showing labels
-            if (self$options$showSampleLabels) {
-                dend <- dendextend::color_labels(dend, k = self$options$nClusters)
-            } else {
-                # Hide labels when not showing them
-                dend <- dendextend::set(dend, "labels", rep("", length(private$.clusters)))
-            }
-            
-            # Plot dendrogram
-            plot(dend, main = "IHC Expression Pattern Clustering",
-                 ylab = "Distance", xlab = "Cases",
-                 horiz = FALSE)
-            
-            # Add cluster rectangles if requested
-            if (self$options$showClusterBoxes) {
-                # Get colors for clusters - using RColorBrewer for consistent colors
-                cluster_cols <- RColorBrewer::brewer.pal(min(self$options$nClusters, 8), "Set1")
-                if (self$options$nClusters > 8) {
-                    # Extend colors if needed
-                    cluster_cols <- colorRampPalette(cluster_cols)(self$options$nClusters)
+            # Create publication-ready dendrogram using enhanced ggplot2
+            private$.safeExecute({
+                # Convert to dendrogram data
+                dend_data <- ggdendro::dendro_data(hc, type = "rectangle")
+                
+                # Create sophisticated cluster colors for publication
+                cluster_colors <- private$.createPublicationColorPalette(n_clusters, "dendrogram")
+                
+                # Get cluster assignments for coloring
+                cluster_assignments <- cutree(hc, k = n_clusters)
+                
+                # Enhanced segment coloring based on cluster membership
+                segments <- dend_data$segments
+                labels <- dend_data$labels
+                
+                # Add cluster colors to labels
+                if (nrow(labels) > 0) {
+                    labels$cluster <- cluster_assignments[as.numeric(labels$label)]
+                    labels$color <- cluster_colors[labels$cluster]
                 }
                 
-                # Add rectangles
-                dendextend::rect.dendrogram(dend, k = self$options$nClusters, 
-                                           border = cluster_cols)
-            }
-            
-            return(TRUE)
+                # Calculate meaningful statistics for subtitle
+                n_samples <- length(cluster_assignments)
+                cluster_sizes <- table(cluster_assignments)
+                min_size <- min(cluster_sizes)
+                max_size <- max(cluster_sizes)
+                
+                # Create the enhanced dendrogram plot
+                p <- ggplot2::ggplot() +
+                    ggplot2::geom_segment(data = segments, 
+                                         ggplot2::aes(x = x, y = y, xend = xend, yend = yend),
+                                         color = "#2C3E50", size = 0.6, alpha = 0.8) +
+                    ggplot2::scale_y_reverse(expand = ggplot2::expansion(mult = c(0.02, 0.12))) +
+                    ggplot2::labs(
+                        title = "Hierarchical Clustering of IHC Expression Patterns",
+                        subtitle = paste0("n = ", n_samples, " samples, ", n_clusters, " clusters", 
+                                        " (size range: ", min_size, "-", max_size, ")"),
+                        x = "Sample Cases",
+                        y = "Distance",
+                        caption = paste0("Clustering method: ", self$options$linkageMethod, 
+                                       " | Distance metric: ", self$options$distanceMetric,
+                                       " | Generated with ClinicoPath")
+                    ) +
+                    ggplot2::theme_minimal(base_size = 11) +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5, 
+                                                          color = "#2C3E50", margin = ggplot2::margin(b = 10)),
+                        plot.subtitle = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$subtitle, hjust = 0.5, color = private$.COLORS$ui$text_secondary),
+                        plot.caption = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$caption, color = private$.COLORS$ui$text_caption),
+                        axis.title = ggplot2::element_text(size = 12, face = "bold"),
+                        axis.text.x = ggplot2::element_blank(),
+                        axis.ticks.x = ggplot2::element_blank(),
+                        panel.grid = ggplot2::element_blank(),
+                        panel.border = ggplot2::element_blank(),
+                        plot.background = ggplot2::element_rect(fill = "white", color = NA),
+                        panel.background = ggplot2::element_rect(fill = "white", color = NA)
+                    )
+                
+                # Add cluster rectangles if requested
+                if (exists("showClusterBoxes", where = self$options) && 
+                    !is.null(self$options$showClusterBoxes) && 
+                    self$options$showClusterBoxes) {
+                    
+                    # Calculate rectangle positions
+                    cut_heights <- as.dendrogram(hc) %>% 
+                        dendextend::heights_per_k.dendrogram(k = n_clusters)
+                    cut_height <- cut_heights[as.character(n_clusters)]
+                    
+                    # Get cluster groups for rectangles
+                    cluster_groups <- split(1:length(cluster_assignments), cluster_assignments)
+                    
+                    # Add rectangles for each cluster
+                    for (i in seq_along(cluster_groups)) {
+                        group_indices <- cluster_groups[[i]]
+                        if (length(group_indices) > 1) {
+                            x_min <- min(group_indices) - 0.4
+                            x_max <- max(group_indices) + 0.4
+                            
+                            p <- p + ggplot2::geom_rect(
+                                ggplot2::aes(xmin = x_min, xmax = x_max, 
+                                           ymin = -Inf, ymax = cut_height),
+                                fill = cluster_colors[i], alpha = 0.2,
+                                color = cluster_colors[i], size = 1.2
+                            )
+                        }
+                    }
+                    
+                    # Add cluster legend
+                    cluster_legend <- data.frame(
+                        Cluster = factor(1:n_clusters),
+                        Color = cluster_colors[1:n_clusters]
+                    )
+                    
+                    p <- p + ggplot2::geom_point(
+                        data = cluster_legend,
+                        ggplot2::aes(x = -Inf, y = -Inf, color = Cluster),
+                        size = 0, alpha = 0
+                    ) +
+                    ggplot2::scale_color_manual(
+                        name = "Cluster",
+                        values = setNames(cluster_colors[1:n_clusters], 1:n_clusters),
+                        guide = ggplot2::guide_legend(
+                            title = "Clusters",
+                            title.theme = ggplot2::element_text(size = 11, face = "bold"),
+                            label.theme = ggplot2::element_text(size = 10)
+                        )
+                    ) +
+                    ggplot2::theme(
+                        legend.position = "right",
+                        legend.background = ggplot2::element_rect(fill = "white", color = "#CCCCCC")
+                    )
+                }
+                
+                # Add sample labels if requested
+                if (exists("showSampleLabels", where = self$options) && 
+                    !is.null(self$options$showSampleLabels) && 
+                    self$options$showSampleLabels && 
+                    !is.null(self$options$id) && 
+                    !is.null(self$data[[self$options$id]])) {
+                    
+                    # Get sample labels
+                    sample_labels <- as.character(self$data[[self$options$id]])
+                    
+                    # Add labels to dendrogram
+                    labels_data <- data.frame(
+                        x = 1:length(sample_labels),
+                        y = 0,
+                        label = sample_labels,
+                        cluster = factor(cluster_assignments)
+                    )
+                    
+                    p <- p + ggplot2::geom_text(
+                        data = labels_data,
+                        ggplot2::aes(x = x, y = y, label = label, color = cluster),
+                        angle = 90, hjust = 1, vjust = 0.5, size = 3
+                    ) +
+                    ggplot2::scale_color_manual(
+                        values = setNames(cluster_colors[1:n_clusters], 1:n_clusters)
+                    )
+                }
+                
+                # Print the plot
+                print(p)
+                return(TRUE)
+            }, "Dendrogram visualization")
         },
         
         # Perform multi-region tumor analysis (Matsuoka method)
@@ -1925,142 +2409,201 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!self$options$showHeatmap || is.null(private$.clusters) || is.null(private$.ihc_matrix))
                 return()
             
-            # Get stored data
-            ihc_matrix <- private$.ihc_matrix
-            clusters <- private$.clusters
-            
-            # Try to get grouping information if provided
-            has_groups <- FALSE
-            if (!is.null(self$options$group) && self$options$group != "" && 
-                !is.null(self$data[[self$options$group]])) {
-                groups <- self$data[[self$options$group]]
-                has_groups <- TRUE
+            # Check required packages
+            required_packages <- c("pheatmap", "RColorBrewer", "ComplexHeatmap")
+            if (!private$.checkPackageDependencies(required_packages)) {
+                return()
             }
             
-            # Create annotation data frame
-            if (has_groups) {
-                annotation_row <- data.frame(
-                    Cluster = factor(clusters),
-                    Group = factor(groups)
-                )
-            } else {
-                annotation_row <- data.frame(
-                    Cluster = factor(clusters)
-                )
-            }
-            rownames(annotation_row) <- rownames(ihc_matrix)
-            
-            # Create Carvalho-style color palettes
-            # Blue (0) -> Black (1) -> Yellow (2) as shown in paper figures
-            if (self$options$iterativeClustering) {
-                color_palette <- colorRampPalette(c("#000080", "#000000", "#FFFF00"))(50)
-            } else {
-                # Default color scheme
-                color_palette <- colorRampPalette(c("#F7F7F7", "#FFC000", "#FF0000"))(50)
-            }
-            
-            # For clusters - use Carvalho paper colors if 4 clusters
-            n_clusters <- length(unique(clusters))
-            if (n_clusters == 4 && self$options$iterativeClustering) {
-                # Use colors similar to Carvalho paper for 4 groups
-                cluster_colors <- c("#FF6B6B", "#FFA726", "#66BB6A", "#42A5F5")
-            } else {
-                cluster_colors <- RColorBrewer::brewer.pal(min(n_clusters, 8), "Set1")
-                if (n_clusters > 8) {
-                    cluster_colors <- colorRampPalette(cluster_colors)(n_clusters)
+            # Execute heatmap creation safely
+            private$.safeExecute({
+                # Get stored data
+                ihc_matrix <- private$.ihc_matrix
+                clusters <- private$.clusters
+                n_clusters <- length(unique(clusters))
+                
+                # Try to get grouping information if provided
+                has_groups <- FALSE
+                groups <- NULL
+                if (!is.null(self$options$groupVariable) && self$options$groupVariable != "" && 
+                    !is.null(self$data[[self$options$groupVariable]])) {
+                    groups <- self$data[[self$options$groupVariable]]
+                    has_groups <- TRUE
                 }
-            }
-            names(cluster_colors) <- levels(factor(clusters))
-            
-            # For groups if available
-            annotation_colors <- list(
-                Cluster = setNames(cluster_colors, levels(factor(clusters)))
-            )
-            
-            if (has_groups) {
-                n_groups <- length(unique(groups))
-                group_colors <- RColorBrewer::brewer.pal(min(n_groups, 8), "Set2")
-                if (n_groups > 8) {
-                    group_colors <- colorRampPalette(group_colors)(n_groups)
+                
+                # Create publication-ready annotation data frame
+                annotation_row <- data.frame(
+                    Cluster = factor(paste("Cluster", clusters), 
+                                   levels = paste("Cluster", 1:n_clusters))
+                )
+                
+                if (has_groups) {
+                    annotation_row$Group <- factor(groups)
                 }
-                names(group_colors) <- levels(factor(groups))
-                annotation_colors$Group <- group_colors
-            }
-            
-            # Create marker type annotations if requested
-            annotation_col <- NULL
-            if (self$options$annotateMarkers) {
-                # Determine marker types based on levels
-                marker_types <- sapply(self$data[self$options$markers], function(x) {
-                    if (is.factor(x)) {
-                        paste0(length(levels(x)), "-level")
-                    } else if (is.numeric(x)) {
-                        "H-score"
-                    } else {
-                        "Other"
+                rownames(annotation_row) <- rownames(ihc_matrix)
+                
+                # Publication-quality color schemes
+                if (self$options$iterativeClustering) {
+                    # Scientific publication color scheme (blue-white-red)
+                    color_palette <- colorRampPalette(c("#2E86AB", "#A23B72", "#F18F01"))(100)
+                } else {
+                    # Standard clinical color scheme (white-yellow-red)
+                    color_palette <- colorRampPalette(c("#FFFFFF", "#FFF2CC", "#FFE699", 
+                                                      "#FFD966", "#FFCC02", "#E6AC00", 
+                                                      "#CC9900", "#B38600", "#8B4513"))(100)
+                }
+                
+                # Publication-quality cluster colors
+                cluster_colors <- private$.createPublicationColorPalette(n_clusters, "heatmap")
+                names(cluster_colors) <- paste("Cluster", 1:n_clusters)
+                
+                # Create annotation colors
+                annotation_colors <- list(
+                    Cluster = cluster_colors
+                )
+                
+                if (has_groups) {
+                    n_groups <- length(unique(groups))
+                    group_colors <- private$.createPublicationColorPalette(n_groups, "nature")
+                    names(group_colors) <- levels(factor(groups))
+                    annotation_colors$Group <- group_colors
+                }
+                
+                # Create marker type annotations if available
+                annotation_col <- NULL
+                if (ncol(ihc_matrix) > 1) {
+                    # Determine marker types based on data characteristics
+                    marker_types <- sapply(colnames(ihc_matrix), function(marker_name) {
+                        if (marker_name %in% self$options$markers && 
+                            !is.null(self$data[[marker_name]])) {
+                            marker_data <- self$data[[marker_name]]
+                            if (is.factor(marker_data)) {
+                                paste0(length(levels(marker_data)), "-tier")
+                            } else if (is.numeric(marker_data)) {
+                                "H-score"
+                            } else {
+                                "Other"
+                            }
+                        } else {
+                            "Standard"
+                        }
+                    })
+                    
+                    if (length(unique(marker_types)) > 1) {
+                        annotation_col <- data.frame(
+                            Type = factor(marker_types)
+                        )
+                        rownames(annotation_col) <- colnames(ihc_matrix)
+                        
+                        # Add marker type colors
+                        type_colors <- RColorBrewer::brewer.pal(max(3, length(unique(marker_types))), "Pastel1")
+                        names(type_colors) <- unique(marker_types)
+                        annotation_colors$Type <- type_colors[unique(marker_types)]
                     }
-                })
+                }
                 
-                annotation_col <- data.frame(
-                    MarkerType = factor(marker_types)
-                )
-                rownames(annotation_col) <- colnames(ihc_matrix)
+                # Generate publication-ready heatmap
+                if (self$options$iterativeClustering) {
+                    # Advanced Carvalho-style layout with ComplexHeatmap if available
+                    if (requireNamespace("ComplexHeatmap", quietly = TRUE)) {
+                        # Use ComplexHeatmap for advanced visualization
+                        col_fun <- circlize::colorRamp2(
+                            seq(min(ihc_matrix, na.rm = TRUE), max(ihc_matrix, na.rm = TRUE), length = 3),
+                            c("#2E86AB", "#FFFFFF", "#F18F01")
+                        )
+                        
+                        # Create cluster annotation
+                        cluster_annotation <- ComplexHeatmap::HeatmapAnnotation(
+                            Cluster = annotation_row$Cluster,
+                            col = annotation_colors,
+                            annotation_name_side = "left",
+                            annotation_legend_param = list(
+                                Cluster = list(title = "Clusters", title_gp = grid::gpar(fontsize = 12, fontface = "bold"))
+                            )
+                        )
+                        
+                        # Create the heatmap
+                        heatmap_plot <- ComplexHeatmap::Heatmap(
+                            t(ihc_matrix),  # Transpose for Carvalho-style layout
+                            name = "Expression",
+                            col = col_fun,
+                            top_annotation = cluster_annotation,
+                            cluster_rows = TRUE,
+                            cluster_columns = TRUE,
+                            clustering_distance_rows = "euclidean",
+                            clustering_distance_columns = "euclidean",
+                            clustering_method_rows = self$options$linkageMethod,
+                            clustering_method_columns = self$options$linkageMethod,
+                            show_column_names = FALSE,
+                            show_row_names = TRUE,
+                            row_names_gp = grid::gpar(fontsize = 10),
+                            column_title = "IHC Expression Cluster Analysis",
+                            column_title_gp = grid::gpar(fontsize = 14, fontface = "bold"),
+                            heatmap_legend_param = list(
+                                title = "Expression Level",
+                                title_gp = grid::gpar(fontsize = 11, fontface = "bold"),
+                                labels_gp = grid::gpar(fontsize = 10)
+                            )
+                        )
+                        
+                        ComplexHeatmap::draw(heatmap_plot)
+                    } else {
+                        # Fallback to pheatmap
+                        heatmap_plot <- pheatmap::pheatmap(
+                            mat = t(ihc_matrix),
+                            color = color_palette,
+                            cluster_rows = TRUE,
+                            cluster_cols = TRUE,
+                            clustering_distance_rows = "euclidean",
+                            clustering_distance_cols = "euclidean",
+                            clustering_method = self$options$linkageMethod,
+                            annotation_col = annotation_row,
+                            annotation_row = annotation_col,
+                            annotation_colors = annotation_colors,
+                            show_colnames = FALSE,
+                            show_rownames = TRUE,
+                            fontsize = 11,
+                            fontsize_row = 10,
+                            cellwidth = 12,
+                            cellheight = 14,
+                            border_color = "white",
+                            main = "IHC Expression Cluster Analysis",
+                            silent = TRUE
+                        )
+                        print(heatmap_plot)
+                    }
+                } else {
+                    # Standard publication-ready heatmap layout
+                    heatmap_plot <- pheatmap::pheatmap(
+                        mat = ihc_matrix,
+                        color = color_palette,
+                        cluster_rows = TRUE,
+                        cluster_cols = TRUE,
+                        clustering_distance_rows = self$options$distanceMetric,
+                        clustering_distance_cols = "euclidean",
+                        clustering_method = self$options$linkageMethod,
+                        annotation_row = annotation_row,
+                        annotation_col = annotation_col,
+                        annotation_colors = annotation_colors,
+                        fontsize = 11,
+                        fontsize_row = 9,
+                        fontsize_col = 10,
+                        show_rownames = !is.null(self$options$id) && self$options$id != "",
+                        show_colnames = TRUE,
+                        cellwidth = 15,
+                        cellheight = 12,
+                        border_color = "#E0E0E0",
+                        main = "IHC Expression Pattern Analysis",
+                        gaps_col = NULL,
+                        cutree_rows = n_clusters,
+                        cutree_cols = length(self$options$markers),
+                        silent = TRUE
+                    )
+                    print(heatmap_plot)
+                }
                 
-                # Add marker type colors
-                marker_type_colors <- RColorBrewer::brewer.pal(
-                    min(length(unique(marker_types)), 8), "Pastel1")
-                names(marker_type_colors) <- unique(marker_types)
-                annotation_colors$MarkerType <- marker_type_colors
-            }
-            
-            # Generate heatmap - Carvalho style if iterative clustering enabled
-            if (self$options$iterativeClustering) {
-                # Carvalho-style layout: markers as rows, samples as columns
-                heatmap_plot <- pheatmap::pheatmap(
-                    mat = t(ihc_matrix),  # Transpose to match Carvalho layout
-                    color = color_palette,
-                    cluster_rows = TRUE,   # Cluster markers
-                    cluster_cols = TRUE,   # Cluster samples
-                    clustering_distance_rows = "euclidean",
-                    clustering_distance_cols = "euclidean",
-                    clustering_method = self$options$linkageMethod,
-                    annotation_col = annotation_row,  # Sample annotations
-                    annotation_row = annotation_col,  # Marker annotations
-                    annotation_colors = annotation_colors,
-                    show_colnames = FALSE,  # Hide sample names like in paper
-                    show_rownames = TRUE,   # Show marker names
-                    fontsize = 10,
-                    fontsize_row = 9,
-                    cellwidth = 8,
-                    cellheight = 12,
-                    border_color = "white",
-                    main = "IHC Cluster Analysis (Carvalho Method)",
-                    silent = TRUE
-                )
-            } else {
-                # Standard heatmap layout
-                heatmap_plot <- pheatmap::pheatmap(
-                    mat = ihc_matrix,
-                    color = color_palette,
-                    cluster_rows = TRUE,
-                    cluster_cols = TRUE,
-                    clustering_distance_rows = "euclidean",
-                    clustering_distance_cols = "euclidean",
-                    clustering_method = self$options$linkageMethod,
-                    annotation_row = annotation_row,
-                    annotation_col = annotation_col,
-                    annotation_colors = annotation_colors,
-                    fontsize = 10,
-                    fontsize_row = 8,
-                    show_rownames = self$options$showSampleLabels,
-                    main = "IHC Expression Pattern Clusters",
-                    silent = TRUE
-                )
-            }
-            
-            # Print the plot
-            print(heatmap_plot)
-            return(TRUE)
+                return(TRUE)
+            }, "Heatmap visualization")
         },
         
         # Create PCA biplot visualization
@@ -2069,24 +2612,142 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!self$options$showPCAPlot || is.null(private$.pca))
                 return()
             
-            # Check required library
-            if (!requireNamespace("factoextra", quietly = TRUE)) {
+            # Check required packages
+            required_packages <- c("ggplot2", "RColorBrewer", "ggrepel")
+            if (!private$.checkPackageDependencies(required_packages)) {
                 return()
             }
             
-            # Create PCA biplot with clusters
-            pca_plot <- factoextra::fviz_pca_biplot(
-                private$.pca,
-                col.ind = factor(private$.clusters),
-                palette = "Set1",
-                addEllipses = TRUE,
-                ellipse.level = 0.68,
-                repel = TRUE,
-                title = "PCA Biplot with IHC Clusters"
-            )
-            
-            print(pca_plot)
-            return(TRUE)
+            # Execute PCA biplot creation safely
+            private$.safeExecute({
+                pca_result <- private$.pca
+                clusters <- private$.clusters
+                n_clusters <- length(unique(clusters))
+                
+                # Extract PCA scores and loadings
+                pca_scores <- as.data.frame(pca_result$x[, 1:2])
+                pca_loadings <- as.data.frame(pca_result$rotation[, 1:2])
+                
+                # Add cluster information to scores
+                pca_scores$Cluster <- factor(paste("Cluster", clusters), 
+                                           levels = paste("Cluster", 1:n_clusters))
+                
+                # Add sample IDs if available
+                if (!is.null(self$options$id) && self$options$id != "" && 
+                    !is.null(self$data[[self$options$id]])) {
+                    pca_scores$SampleID <- as.character(self$data[[self$options$id]])
+                } else {
+                    pca_scores$SampleID <- rownames(pca_scores)
+                }
+                
+                # Prepare loadings data for arrows
+                pca_loadings$Marker <- rownames(pca_loadings)
+                arrow_scale <- 3  # Scale factor for loadings arrows
+                pca_loadings$PC1_scaled <- pca_loadings$PC1 * arrow_scale
+                pca_loadings$PC2_scaled <- pca_loadings$PC2 * arrow_scale
+                
+                # Calculate variance explained
+                var_explained <- summary(pca_result)$importance[2, 1:2] * 100
+                
+                # Create publication-ready color palette
+                if (n_clusters <= 3) {
+                    cluster_colors <- c("#E74C3C", "#3498DB", "#2ECC71")[1:n_clusters]
+                } else if (n_clusters <= 8) {
+                    cluster_colors <- RColorBrewer::brewer.pal(n_clusters, "Set1")
+                } else {
+                    cluster_colors <- rainbow(n_clusters, s = 0.8, v = 0.9)
+                }
+                names(cluster_colors) <- paste("Cluster", 1:n_clusters)
+                
+                # Create the main biplot
+                p <- ggplot2::ggplot() +
+                    # Plot sample points
+                    ggplot2::geom_point(
+                        data = pca_scores,
+                        ggplot2::aes(x = PC1, y = PC2, color = Cluster),
+                        size = 3, alpha = 0.8
+                    ) +
+                    # Add cluster ellipses
+                    ggplot2::stat_ellipse(
+                        data = pca_scores,
+                        ggplot2::aes(x = PC1, y = PC2, color = Cluster),
+                        level = 0.68, type = "norm", linetype = "dashed", size = 1
+                    ) +
+                    # Add loading arrows
+                    ggplot2::geom_segment(
+                        data = pca_loadings,
+                        ggplot2::aes(x = 0, y = 0, xend = PC1_scaled, yend = PC2_scaled),
+                        arrow = ggplot2::arrow(length = ggplot2::unit(0.3, "cm"), type = "closed"),
+                        color = "#2C3E50", size = 0.8, alpha = 0.8
+                    ) +
+                    # Add loading labels
+                    ggrepel::geom_text_repel(
+                        data = pca_loadings,
+                        ggplot2::aes(x = PC1_scaled, y = PC2_scaled, label = Marker),
+                        color = "#2C3E50", fontface = "bold", size = 3.5,
+                        box.padding = 0.5, point.padding = 0.3,
+                        segment.color = "#7F8C8D", segment.size = 0.3
+                    ) +
+                    # Customize colors
+                    ggplot2::scale_color_manual(
+                        name = "Clusters",
+                        values = cluster_colors,
+                        guide = ggplot2::guide_legend(
+                            title = "IHC Clusters",
+                            override.aes = list(size = 4),
+                            title.theme = ggplot2::element_text(size = 12, face = "bold")
+                        )
+                    ) +
+                    # Add axis labels with variance explained
+                    ggplot2::labs(
+                        title = "PCA Biplot of IHC Expression Patterns",
+                        subtitle = paste("Cluster analysis with", n_clusters, "groups"),
+                        x = paste0("PC1 (", round(var_explained[1], 1), "% variance)"),
+                        y = paste0("PC2 (", round(var_explained[2], 1), "% variance)"),
+                        caption = "Arrows represent IHC marker loadings; ellipses show 68% confidence intervals"
+                    ) +
+                    # Apply professional theme
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$title, face = "bold", hjust = 0.5),
+                        plot.subtitle = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$subtitle, hjust = 0.5, color = private$.COLORS$ui$text_secondary),
+                        plot.caption = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$caption, color = private$.COLORS$ui$text_caption, hjust = 0.5),
+                        axis.title = ggplot2::element_text(size = 12, face = "bold"),
+                        axis.text = ggplot2::element_text(size = 10),
+                        legend.title = ggplot2::element_text(size = 11, face = "bold"),
+                        legend.text = ggplot2::element_text(size = 10),
+                        legend.position = "right",
+                        legend.background = ggplot2::element_rect(fill = "white", color = "#CCCCCC"),
+                        panel.grid.major = ggplot2::element_line(color = "#E0E0E0", size = 0.3),
+                        panel.grid.minor = ggplot2::element_line(color = "#F0F0F0", size = 0.2),
+                        plot.background = ggplot2::element_rect(fill = "white", color = NA),
+                        panel.background = ggplot2::element_rect(fill = "white", color = NA)
+                    ) +
+                    # Add origin lines
+                    ggplot2::geom_hline(yintercept = 0, color = "#BDC3C7", linetype = "dotted", size = 0.5) +
+                    ggplot2::geom_vline(xintercept = 0, color = "#BDC3C7", linetype = "dotted", size = 0.5) +
+                    # Ensure equal aspect ratio
+                    ggplot2::coord_fixed()
+                
+                # Add sample labels if requested and available
+                if (exists("showSampleLabels", where = self$options) && 
+                    !is.null(self$options$showSampleLabels) && 
+                    self$options$showSampleLabels && 
+                    !is.null(pca_scores$SampleID)) {
+                    
+                    p <- p + ggrepel::geom_text_repel(
+                        data = pca_scores,
+                        ggplot2::aes(x = PC1, y = PC2, label = SampleID, color = Cluster),
+                        size = 2.5, alpha = 0.8,
+                        box.padding = 0.3, point.padding = 0.2,
+                        max.overlaps = 20
+                    )
+                }
+                
+                # Print the plot
+                print(p)
+                return(TRUE)
+            }, "PCA biplot visualization")
         },
         
         # Create cluster validation plot
@@ -2095,15 +2756,149 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!self$options$showClusterValidation || is.null(private$.silhouette))
                 return()
             
-            # Check required library
-            if (!requireNamespace("factoextra", quietly = TRUE)) {
+            # Check required packages
+            required_packages <- c("ggplot2", "RColorBrewer")
+            if (!private$.checkPackageDependencies(required_packages)) {
                 return()
             }
             
-            # Create silhouette plot
-            sil_plot <- factoextra::fviz_silhouette(private$.silhouette)
-            print(sil_plot)
-            return(TRUE)
+            # Execute cluster validation visualization safely
+            private$.safeExecute({
+                silhouette_data <- private$.silhouette
+                n_clusters <- length(unique(silhouette_data[, "cluster"]))
+                
+                # Convert silhouette object to data frame
+                sil_df <- data.frame(
+                    Sample = 1:nrow(silhouette_data),
+                    Cluster = factor(paste("Cluster", silhouette_data[, "cluster"]),
+                                   levels = paste("Cluster", 1:n_clusters)),
+                    Neighbor = silhouette_data[, "neighbor"],
+                    Width = silhouette_data[, "sil_width"]
+                )
+                
+                # Add sample IDs if available
+                if (!is.null(self$options$id) && self$options$id != "" && 
+                    !is.null(self$data[[self$options$id]])) {
+                    sil_df$SampleID <- as.character(self$data[[self$options$id]])
+                } else {
+                    sil_df$SampleID <- paste("Sample", sil_df$Sample)
+                }
+                
+                # Calculate cluster statistics
+                cluster_stats <- aggregate(Width ~ Cluster, sil_df, function(x) {
+                    c(mean = mean(x), n = length(x), min = min(x), max = max(x))
+                })
+                cluster_stats <- do.call(data.frame, cluster_stats)
+                names(cluster_stats) <- c("Cluster", "Mean_Width", "Count", "Min_Width", "Max_Width")
+                
+                # Overall silhouette statistics
+                avg_silhouette <- mean(sil_df$Width)
+                
+                # Create publication-ready color palette
+                if (n_clusters <= 3) {
+                    cluster_colors <- c("#E74C3C", "#3498DB", "#2ECC71")[1:n_clusters]
+                } else if (n_clusters <= 8) {
+                    cluster_colors <- RColorBrewer::brewer.pal(n_clusters, "Set1")
+                } else {
+                    cluster_colors <- rainbow(n_clusters, s = 0.8, v = 0.9)
+                }
+                names(cluster_colors) <- paste("Cluster", 1:n_clusters)
+                
+                # Order samples by cluster and silhouette width for better visualization
+                sil_df <- sil_df[order(sil_df$Cluster, -sil_df$Width), ]
+                sil_df$Order <- 1:nrow(sil_df)
+                
+                # Create the main silhouette plot
+                p <- ggplot2::ggplot(sil_df, ggplot2::aes(x = Order, y = Width)) +
+                    # Add bars colored by cluster
+                    ggplot2::geom_bar(
+                        ggplot2::aes(fill = Cluster), 
+                        stat = "identity", width = 1, color = "white", size = 0.1
+                    ) +
+                    # Add average silhouette line
+                    ggplot2::geom_hline(
+                        yintercept = avg_silhouette, 
+                        color = "#2C3E50", linetype = "dashed", size = 1.2
+                    ) +
+                    # Add zero line
+                    ggplot2::geom_hline(
+                        yintercept = 0, 
+                        color = "#34495E", linetype = "solid", size = 0.8
+                    ) +
+                    # Customize colors
+                    ggplot2::scale_fill_manual(
+                        name = "Clusters",
+                        values = cluster_colors,
+                        guide = ggplot2::guide_legend(
+                            title = "IHC Clusters",
+                            title.theme = ggplot2::element_text(size = 11, face = "bold")
+                        )
+                    ) +
+                    # Add labels and titles
+                    ggplot2::labs(
+                        title = "Cluster Validation: Silhouette Analysis",
+                        subtitle = paste0("Average silhouette width: ", round(avg_silhouette, 3), 
+                                        " (n=", nrow(sil_df), " samples)"),
+                        x = "Samples (ordered by cluster and silhouette width)",
+                        y = "Silhouette Width",
+                        caption = paste("Dashed line shows average silhouette width.",
+                                      "Negative values indicate potential misclassification.")
+                    ) +
+                    # Apply professional theme
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$title, face = "bold", hjust = 0.5),
+                        plot.subtitle = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$subtitle, hjust = 0.5, color = private$.COLORS$ui$text_secondary),
+                        plot.caption = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$caption, color = private$.COLORS$ui$text_caption, hjust = 0.5),
+                        axis.title = ggplot2::element_text(size = 12, face = "bold"),
+                        axis.text = ggplot2::element_text(size = 10),
+                        axis.text.x = ggplot2::element_blank(),  # Hide x-axis labels for clarity
+                        axis.ticks.x = ggplot2::element_blank(),
+                        legend.title = ggplot2::element_text(size = 11, face = "bold"),
+                        legend.text = ggplot2::element_text(size = 10),
+                        legend.position = "right",
+                        legend.background = ggplot2::element_rect(fill = "white", color = "#CCCCCC"),
+                        panel.grid.major.x = ggplot2::element_blank(),
+                        panel.grid.minor = ggplot2::element_blank(),
+                        panel.grid.major.y = ggplot2::element_line(color = "#E0E0E0", size = 0.3),
+                        plot.background = ggplot2::element_rect(fill = "white", color = NA),
+                        panel.background = ggplot2::element_rect(fill = "white", color = NA)
+                    )
+                
+                # Add cluster separation lines
+                cluster_boundaries <- cumsum(table(sil_df$Cluster))
+                cluster_boundaries <- cluster_boundaries[-length(cluster_boundaries)]  # Remove last boundary
+                
+                if (length(cluster_boundaries) > 0) {
+                    for (boundary in cluster_boundaries) {
+                        p <- p + ggplot2::geom_vline(
+                            xintercept = boundary + 0.5, 
+                            color = "#7F8C8D", linetype = "dotted", size = 0.8, alpha = 0.7
+                        )
+                    }
+                }
+                
+                # Add interpretation text annotation
+                interpretation <- 
+                    if (avg_silhouette > 0.7) "Strong structure"
+                    else if (avg_silhouette > 0.5) "Reasonable structure"
+                    else if (avg_silhouette > 0.25) "Weak structure"
+                    else "No substantial structure"
+                
+                p <- p + ggplot2::annotate(
+                    "text", 
+                    x = nrow(sil_df) * 0.02, 
+                    y = max(sil_df$Width) * 0.9,
+                    label = paste("Cluster Quality:", interpretation),
+                    hjust = 0, vjust = 1,
+                    size = 4, fontface = "italic",
+                    color = "#2C3E50"
+                )
+                
+                # Print the plot
+                print(p)
+                return(TRUE)
+            }, "Cluster validation visualization")
         },
         
         # Create score distribution plot
@@ -2125,25 +2920,73 @@ ihcstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                          variable.name = "Marker",
                                          value.name = "Score")
                 
-                # Create box plot
-                p <- ggplot2::ggplot(ihc_long, ggplot2::aes(x = Marker, y = Score, fill = Cluster)) +
-                    ggplot2::geom_boxplot(alpha = 0.7) +
-                    ggplot2::facet_wrap(~Cluster, ncol = 2) +
-                    ggplot2::theme_minimal() +
-                    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
-                    ggplot2::labs(
-                        title = "IHC Score Distribution by Cluster",
-                        x = "IHC Markers",
-                        y = "Expression Score"
-                    ) +
-                    ggplot2::scale_fill_brewer(type = "qual", palette = "Set1")
+                # Create publication-ready distribution plot
+                n_clusters <- length(unique(ihc_df$Cluster))
+                n_markers <- length(unique(ihc_long$Marker))
+                
+                # Professional color palette
+                if (n_clusters <= 3) {
+                    cluster_colors <- c("#E74C3C", "#3498DB", "#2ECC71")[1:n_clusters]
+                } else if (n_clusters <= 8) {
+                    cluster_colors <- RColorBrewer::brewer.pal(n_clusters, "Set1")
+                } else {
+                    cluster_colors <- rainbow(n_clusters, s = 0.8, v = 0.9)
+                }
+                
+                # Create comprehensive visualization
+                if (n_markers <= 6 && n_clusters <= 4) {
+                    # Detailed violin + box plot for smaller datasets
+                    p <- ggplot2::ggplot(ihc_long, ggplot2::aes(x = Marker, y = Score, fill = Cluster)) +
+                        ggplot2::geom_violin(alpha = 0.4, scale = "width", trim = FALSE) +
+                        ggplot2::geom_boxplot(width = 0.3, alpha = 0.8, outlier.alpha = 0.6) +
+                        ggplot2::geom_jitter(width = 0.1, alpha = 0.3, size = 0.8) +
+                        ggplot2::scale_fill_manual(values = cluster_colors) +
+                        ggplot2::facet_wrap(~Cluster, ncol = min(n_clusters, 2)) +
+                        ggplot2::labs(
+                            title = "IHC Expression Score Distribution by Cluster",
+                            subtitle = paste0("Detailed distribution across ", n_markers, " markers"),
+                            x = "IHC Markers",
+                            y = "Expression Score",
+                            caption = "Violin plots show distribution shape; boxes show quartiles and outliers"
+                        ) +
+                        ggplot2::theme_minimal() +
+                        ggplot2::theme(
+                            plot.title = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$title, face = "bold", hjust = 0.5),
+                            plot.subtitle = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$subtitle, hjust = 0.5, color = private$.COLORS$ui$text_secondary),
+                            plot.caption = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$caption, color = private$.COLORS$ui$text_caption, hjust = 0.5),
+                            axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1),
+                            strip.text = ggplot2::element_text(face = "bold"),
+                            legend.position = "bottom"
+                        )
+                } else {
+                    # Simplified box plot for larger datasets
+                    p <- ggplot2::ggplot(ihc_long, ggplot2::aes(x = Marker, y = Score, fill = Cluster)) +
+                        ggplot2::geom_boxplot(alpha = 0.8, outlier.alpha = 0.6) +
+                        ggplot2::scale_fill_manual(values = cluster_colors) +
+                        ggplot2::facet_wrap(~Cluster, ncol = 2, scales = "free_y") +
+                        ggplot2::labs(
+                            title = "IHC Expression Patterns by Cluster",
+                            subtitle = paste0("Comparison across ", n_markers, " markers and ", n_clusters, " clusters"),
+                            x = "IHC Markers",
+                            y = "Expression Score"
+                        ) +
+                        ggplot2::theme_minimal() +
+                        ggplot2::theme(
+                            plot.title = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$title, face = "bold", hjust = 0.5),
+                            plot.subtitle = ggplot2::element_text(size = private$.PLOT_PARAMS$font_sizes$subtitle, hjust = 0.5, color = private$.COLORS$ui$text_secondary),
+                            axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                            strip.text = ggplot2::element_text(face = "bold"),
+                            legend.position = "none"  # Colors explained by facets
+                        )
+                }
                 
                 print(p)
             }
             
             return(TRUE)
         },
-        # Missing iterative clustering method
+        
+        # Implement iterative clustering method
         .performIterativeClustering = function(data) {
             if (!self$options$iterativeClustering) return()
             

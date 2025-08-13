@@ -155,6 +155,30 @@ items:
           - prev
           - fagan
           - repeat3
+          
+    # Sample size estimation table (DiagROC inspired)
+    - name: sampleSizeTable
+      title: 'Sample Size Estimation for Diagnostic Study'
+      type: Table
+      visible: (samplesize)
+      rows: 0
+      columns:
+        - name: parameter
+          title: "Parameter"
+          type: text
+        - name: value
+          title: "Sample Size Required"
+          type: number
+        - name: assumptions
+          title: "Assumptions"
+          type: text
+      clearWith:
+          - expected_sens
+          - expected_spec
+          - width_sens
+          - width_spec
+          - alpha_level
+          - samplesize
 
 refs:
     - DiagnosticTests

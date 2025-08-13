@@ -36,6 +36,12 @@ knitr::opts_chunk$set(
 
 ---
 
+## Documentation
+
+For a comprehensive guide to all the documentation available for this package, please see the [Documentation Hub](vignettes/documentation_hub.md).
+
+---
+
 
 ## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
 
