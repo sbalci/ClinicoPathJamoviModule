@@ -744,7 +744,13 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         riskScoreExplanation = function() private$.items[["riskScoreExplanation"]],
         nomogramExplanation = function() private$.items[["nomogramExplanation"]],
         personTimeExplanation = function() private$.items[["personTimeExplanation"]],
-        stratifiedAnalysisExplanation = function() private$.items[["stratifiedAnalysisExplanation"]]),
+        stratifiedAnalysisExplanation = function() private$.items[["stratifiedAnalysisExplanation"]],
+        ml_variable_importance = function() private$.items[["ml_variable_importance"]],
+        ml_performance_metrics = function() private$.items[["ml_performance_metrics"]],
+        ml_feature_selection_results = function() private$.items[["ml_feature_selection_results"]],
+        ml_ensemble_summary = function() private$.items[["ml_ensemble_summary"]],
+        ml_prediction_intervals = function() private$.items[["ml_prediction_intervals"]],
+        ml_cross_validation_summary = function() private$.items[["ml_cross_validation_summary"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1295,6 +1301,117 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "use_stratify",
                     "stratvar",
+                    "outcome")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ml_variable_importance",
+                title="Variable Importance (Machine Learning)",
+                visible="(ml_method != 'cox')",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="importance", 
+                        `title`="Importance", 
+                        `type`="number"),
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer")),
+                clearWith=list(
+                    "ml_method",
+                    "explanatory",
+                    "contexpl",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="ml_performance_metrics",
+                title="Machine Learning Model Performance",
+                visible="(ml_method != 'cox')",
+                clearWith=list(
+                    "ml_method",
+                    "ml_validation_method",
+                    "ml_cv_folds",
+                    "outcome")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ml_feature_selection_results",
+                title="Feature Selection Results",
+                visible="(ml_feature_selection)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="selected", 
+                        `title`="Selected", 
+                        `type`="text"),
+                    list(
+                        `name`="selection_frequency", 
+                        `title`="Selection Frequency", 
+                        `type`="number"),
+                    list(
+                        `name`="importance_score", 
+                        `title`="Importance Score", 
+                        `type`="number")),
+                clearWith=list(
+                    "ml_feature_selection",
+                    "ml_method",
+                    "explanatory",
+                    "contexpl")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="ml_ensemble_summary",
+                title="Ensemble Model Summary",
+                visible="(ml_method == 'ensemble')",
+                clearWith=list(
+                    "ml_method",
+                    "ml_ensemble_weights",
+                    "outcome")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ml_prediction_intervals",
+                title="Prediction Intervals (Machine Learning)",
+                visible="(ml_method != 'cox')",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="observation", 
+                        `title`="Observation", 
+                        `type`="integer"),
+                    list(
+                        `name`="prediction", 
+                        `title`="Predicted Risk", 
+                        `type`="number"),
+                    list(
+                        `name`="lower_ci", 
+                        `title`="Lower 95% CI", 
+                        `type`="number"),
+                    list(
+                        `name`="upper_ci", 
+                        `title`="Upper 95% CI", 
+                        `type`="number"),
+                    list(
+                        `name`="risk_group", 
+                        `title`="Risk Group", 
+                        `type`="text")),
+                clearWith=list(
+                    "ml_method",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="ml_cross_validation_summary",
+                title="Cross-Validation Performance",
+                visible="(ml_method != 'cox' && ml_validation_method == 'cv')",
+                clearWith=list(
+                    "ml_method",
+                    "ml_validation_method",
+                    "ml_cv_folds",
                     "outcome")))}))
 
 multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1616,6 +1733,12 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$nomogramExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ml_variable_importance} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ml_performance_metrics} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ml_feature_selection_results} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ml_ensemble_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ml_prediction_intervals} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ml_cross_validation_summary} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

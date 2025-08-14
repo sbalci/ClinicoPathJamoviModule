@@ -8,17 +8,11 @@ enhancednonparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R
         initialize = function(
             dependent = NULL,
             grouping = NULL,
-            mann_whitney = TRUE,
-            kruskal_wallis = TRUE,
-            posthoc_dunn = TRUE,
-            correction_method = "bonferroni",
-            assumptions = TRUE,
-            effect_sizes = TRUE,
-            descriptives = TRUE,
+            exact_test = FALSE,
+            posthoc = TRUE,
+            posthoc_method = "bonferroni",
             show_plots = TRUE,
-            plot_type = "both",
-            confidence_level = 0.95,
-            bootstrap_samples = 1000, ...) {
+            confidence_level = 0.95, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -40,108 +34,60 @@ enhancednonparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..mann_whitney <- jmvcore::OptionBool$new(
-                "mann_whitney",
-                mann_whitney,
+            private$..exact_test <- jmvcore::OptionBool$new(
+                "exact_test",
+                exact_test,
+                default=FALSE)
+            private$..posthoc <- jmvcore::OptionBool$new(
+                "posthoc",
+                posthoc,
                 default=TRUE)
-            private$..kruskal_wallis <- jmvcore::OptionBool$new(
-                "kruskal_wallis",
-                kruskal_wallis,
-                default=TRUE)
-            private$..posthoc_dunn <- jmvcore::OptionBool$new(
-                "posthoc_dunn",
-                posthoc_dunn,
-                default=TRUE)
-            private$..correction_method <- jmvcore::OptionList$new(
-                "correction_method",
-                correction_method,
+            private$..posthoc_method <- jmvcore::OptionList$new(
+                "posthoc_method",
+                posthoc_method,
                 options=list(
                     "bonferroni",
                     "holm",
                     "hochberg",
+                    "fdr",
                     "bh",
-                    "by",
-                    "none"),
+                    "by"),
                 default="bonferroni")
-            private$..assumptions <- jmvcore::OptionBool$new(
-                "assumptions",
-                assumptions,
-                default=TRUE)
-            private$..effect_sizes <- jmvcore::OptionBool$new(
-                "effect_sizes",
-                effect_sizes,
-                default=TRUE)
-            private$..descriptives <- jmvcore::OptionBool$new(
-                "descriptives",
-                descriptives,
-                default=TRUE)
             private$..show_plots <- jmvcore::OptionBool$new(
                 "show_plots",
                 show_plots,
                 default=TRUE)
-            private$..plot_type <- jmvcore::OptionList$new(
-                "plot_type",
-                plot_type,
-                options=list(
-                    "boxplot",
-                    "violin",
-                    "both"),
-                default="both")
             private$..confidence_level <- jmvcore::OptionNumber$new(
                 "confidence_level",
                 confidence_level,
                 min=0.5,
                 max=0.99,
                 default=0.95)
-            private$..bootstrap_samples <- jmvcore::OptionInteger$new(
-                "bootstrap_samples",
-                bootstrap_samples,
-                min=100,
-                max=10000,
-                default=1000)
 
             self$.addOption(private$..dependent)
             self$.addOption(private$..grouping)
-            self$.addOption(private$..mann_whitney)
-            self$.addOption(private$..kruskal_wallis)
-            self$.addOption(private$..posthoc_dunn)
-            self$.addOption(private$..correction_method)
-            self$.addOption(private$..assumptions)
-            self$.addOption(private$..effect_sizes)
-            self$.addOption(private$..descriptives)
+            self$.addOption(private$..exact_test)
+            self$.addOption(private$..posthoc)
+            self$.addOption(private$..posthoc_method)
             self$.addOption(private$..show_plots)
-            self$.addOption(private$..plot_type)
             self$.addOption(private$..confidence_level)
-            self$.addOption(private$..bootstrap_samples)
         }),
     active = list(
         dependent = function() private$..dependent$value,
         grouping = function() private$..grouping$value,
-        mann_whitney = function() private$..mann_whitney$value,
-        kruskal_wallis = function() private$..kruskal_wallis$value,
-        posthoc_dunn = function() private$..posthoc_dunn$value,
-        correction_method = function() private$..correction_method$value,
-        assumptions = function() private$..assumptions$value,
-        effect_sizes = function() private$..effect_sizes$value,
-        descriptives = function() private$..descriptives$value,
+        exact_test = function() private$..exact_test$value,
+        posthoc = function() private$..posthoc$value,
+        posthoc_method = function() private$..posthoc_method$value,
         show_plots = function() private$..show_plots$value,
-        plot_type = function() private$..plot_type$value,
-        confidence_level = function() private$..confidence_level$value,
-        bootstrap_samples = function() private$..bootstrap_samples$value),
+        confidence_level = function() private$..confidence_level$value),
     private = list(
         ..dependent = NA,
         ..grouping = NA,
-        ..mann_whitney = NA,
-        ..kruskal_wallis = NA,
-        ..posthoc_dunn = NA,
-        ..correction_method = NA,
-        ..assumptions = NA,
-        ..effect_sizes = NA,
-        ..descriptives = NA,
+        ..exact_test = NA,
+        ..posthoc = NA,
+        ..posthoc_method = NA,
         ..show_plots = NA,
-        ..plot_type = NA,
-        ..confidence_level = NA,
-        ..bootstrap_samples = NA)
+        ..confidence_level = NA)
 )
 
 enhancednonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -151,10 +97,11 @@ enhancednonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
         instructions = function() private$.items[["instructions"]],
         descriptives = function() private$.items[["descriptives"]],
         assumptions = function() private$.items[["assumptions"]],
-        mannwhitney = function() private$.items[["mannwhitney"]],
-        kruskalwallis = function() private$.items[["kruskalwallis"]],
+        tests = function() private$.items[["tests"]],
+        effectsizes = function() private$.items[["effectsizes"]],
         posthoc = function() private$.items[["posthoc"]],
-        boxplot = function() private$.items[["boxplot"]],
+        distributionplot = function() private$.items[["distributionplot"]],
+        effectsizeplot = function() private$.items[["effectsizeplot"]],
         interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
@@ -172,6 +119,9 @@ enhancednonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                 options=options,
                 name="descriptives",
                 title="Descriptive Statistics",
+                clearWith=list(
+                    "dependent",
+                    "grouping"),
                 columns=list(
                     list(
                         `name`="group", 
@@ -184,36 +134,68 @@ enhancednonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     list(
                         `name`="median", 
                         `title`="Median", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="zto,pvalue"),
                     list(
-                        `name`="iqr", 
-                        `title`="IQR", 
-                        `type`="number"),
+                        `name`="q1", 
+                        `title`="Q1", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
                     list(
-                        `name`="min_val", 
+                        `name`="q3", 
+                        `title`="Q3", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="min", 
                         `title`="Min", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="zto,pvalue"),
                     list(
-                        `name`="max_val", 
+                        `name`="max", 
                         `title`="Max", 
-                        `type`="number"),
-                    list(
-                        `name`="mean_rank", 
-                        `title`="Mean Rank", 
-                        `type`="number")),
-                visible="(descriptives)",
-                clearWith=list(
-                    "dependent",
-                    "grouping")))
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="assumptions",
-                title="Assumption Checking",
+                title="Assumption Testing",
+                clearWith=list(
+                    "dependent",
+                    "grouping"),
                 columns=list(
                     list(
                         `name`="assumption", 
                         `title`="Assumption", 
                         `type`="text"),
+                    list(
+                        `name`="assessment", 
+                        `title`="Assessment", 
+                        `type`="text"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="tests",
+                title="Non-Parametric Tests",
+                clearWith=list(
+                    "dependent",
+                    "grouping",
+                    "exact_test",
+                    "confidence_level"),
+                columns=list(
                     list(
                         `name`="test", 
                         `title`="Test", 
@@ -221,156 +203,106 @@ enhancednonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     list(
                         `name`="statistic", 
                         `title`="Statistic", 
-                        `type`="text"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p", 
-                        `type`="text"),
-                    list(
-                        `name`="conclusion", 
-                        `title`="Conclusion", 
-                        `type`="text"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                visible="(assumptions)",
-                clearWith=list(
-                    "dependent",
-                    "grouping")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="mannwhitney",
-                title="Mann-Whitney U Test Results",
-                columns=list(
-                    list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="n1", 
-                        `title`="N\u2081", 
-                        `type`="text"),
-                    list(
-                        `name`="n2", 
-                        `title`="N\u2082", 
-                        `type`="text"),
-                    list(
-                        `name`="u_statistic", 
-                        `title`="U", 
-                        `type`="number"),
-                    list(
-                        `name`="z_statistic", 
-                        `title`="Z", 
-                        `type`="number"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"),
-                    list(
-                        `name`="r_rb", 
-                        `title`="r_rb", 
-                        `type`="number"),
-                    list(
-                        `name`="r_rb_ci", 
-                        `title`="95% CI", 
-                        `type`="text"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Effect Size", 
-                        `type`="text")),
-                visible="(mann_whitney)",
-                clearWith=list(
-                    "dependent",
-                    "grouping",
-                    "effect_sizes",
-                    "confidence_level")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="kruskalwallis",
-                title="Kruskal-Wallis Test Results",
-                columns=list(
-                    list(
-                        `name`="test", 
-                        `title`="Test", 
-                        `type`="text"),
                     list(
                         `name`="df", 
                         `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="chi_square", 
-                        `title`="\u03C7\u00B2", 
-                        `type`="number"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
-                        `name`="eta_squared", 
-                        `title`="\u03B7\u00B2", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Effect Size", 
-                        `type`="text"),
-                    list(
-                        `name`="conclusion", 
-                        `title`="Conclusion", 
-                        `type`="text")),
-                visible="(kruskal_wallis)",
-                clearWith=list(
-                    "dependent",
-                    "grouping",
-                    "effect_sizes")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="posthoc",
-                title="Post Hoc Pairwise Comparisons (Dunn's Test)",
-                columns=list(
-                    list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="z_statistic", 
-                        `title`="Z", 
-                        `type`="number"),
-                    list(
-                        `name`="p_value", 
+                        `name`="p", 
                         `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="p_adjusted", 
-                        `title`="p_adj", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
                         `name`="effect_size", 
-                        `title`="r_rb", 
-                        `type`="text"),
+                        `title`="Effect Size", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
                     list(
                         `name`="interpretation", 
-                        `title`="Effect Size", 
-                        `type`="text"),
-                    list(
-                        `name`="significance", 
-                        `title`="Result", 
-                        `type`="text")),
-                visible="(posthoc_dunn)",
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="effectsizes",
+                title="Effect Size Summary",
                 clearWith=list(
                     "dependent",
                     "grouping",
-                    "posthoc_dunn",
-                    "correction_method",
-                    "effect_sizes")))
+                    "confidence_level"),
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Effect Size Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="posthoc",
+                title="Post Hoc Comparisons (Dunn's Test)",
+                visible="(posthoc)",
+                clearWith=list(
+                    "dependent",
+                    "grouping",
+                    "posthoc_method",
+                    "confidence_level"),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="z_statistic", 
+                        `title`="Z", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="p_raw", 
+                        `title`="p (raw)", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="p_adjusted", 
+                        `title`="p (adj)", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size (r)", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="significance", 
+                        `title`="Sig", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="boxplot",
-                title="Distribution Comparison Plot",
+                name="distributionplot",
+                title="Distribution Comparison",
                 width=600,
                 height=500,
                 visible="(show_plots)",
@@ -378,8 +310,20 @@ enhancednonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                 clearWith=list(
                     "dependent",
                     "grouping",
+                    "show_plots")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="effectsizeplot",
+                title="Effect Size Plot",
+                width=600,
+                height=400,
+                visible="(show_plots)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "dependent",
+                    "grouping",
                     "show_plots",
-                    "plot_type")))
+                    "confidence_level")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -409,39 +353,41 @@ enhancednonparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 
 #' Enhanced Non-Parametric Tests
 #'
+#' Enhanced Mann-Whitney U and Kruskal-Wallis tests with comprehensive
+#' effect size calculations, assumption checking, and post hoc analysis. 
+#' Essential for pathology research with non-normal data.
 #' 
+#'
+#' @examples
+#' data('histopathology')
+#'
+#' enhancednonparametric(data = histopathology,
+#'                      dependent = measurement,
+#'                      grouping = group)
+#'
 #' @param data the data as a data frame
 #' @param dependent The dependent variable from \code{data}, variable must be
 #'   numeric
 #' @param grouping The grouping variable from \code{data}, variable must be a
 #'   factor
-#' @param mann_whitney Perform Mann-Whitney U test for two-group comparisons
-#' @param kruskal_wallis Perform Kruskal-Wallis test for multiple-group
-#'   comparisons
-#' @param posthoc_dunn Perform Dunn's test for pairwise comparisons following
-#'   significant Kruskal-Wallis
-#' @param correction_method Method for multiple comparison correction in post
-#'   hoc tests
-#' @param assumptions Check and report assumptions for non-parametric tests
-#' @param effect_sizes Calculate and report effect sizes with confidence
-#'   intervals
-#' @param descriptives Show descriptive statistics for each group
-#' @param show_plots Generate boxplots and violin plots for group comparisons
-#' @param plot_type Type of distribution plot to generate
-#' @param confidence_level Confidence level for effect size confidence
-#'   intervals
-#' @param bootstrap_samples Number of bootstrap samples for confidence
-#'   interval estimation
+#' @param exact_test Use exact computation for Mann-Whitney U test p-values
+#' @param posthoc Perform post hoc tests for multi-group comparisons
+#'   (Kruskal-Wallis)
+#' @param posthoc_method Multiple comparison correction method for post hoc
+#'   tests
+#' @param show_plots Generate distribution and effect size plots
+#' @param confidence_level Confidence level for confidence intervals and tests
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$descriptives} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$mannwhitney} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$kruskalwallis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$tests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$effectsizes} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$posthoc} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$boxplot} \tab \tab \tab \tab \tab Box plots with violin plots showing group distributions \cr
-#'   \code{results$interpretation} \tab \tab \tab \tab \tab Clinical context and interpretation guidelines for non-parametric tests \cr
+#'   \code{results$distributionplot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$effectsizeplot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -455,17 +401,11 @@ enhancednonparametric <- function(
     data,
     dependent,
     grouping,
-    mann_whitney = TRUE,
-    kruskal_wallis = TRUE,
-    posthoc_dunn = TRUE,
-    correction_method = "bonferroni",
-    assumptions = TRUE,
-    effect_sizes = TRUE,
-    descriptives = TRUE,
+    exact_test = FALSE,
+    posthoc = TRUE,
+    posthoc_method = "bonferroni",
     show_plots = TRUE,
-    plot_type = "both",
-    confidence_level = 0.95,
-    bootstrap_samples = 1000) {
+    confidence_level = 0.95) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("enhancednonparametric requires jmvcore to be installed (restart may be required)")
@@ -483,17 +423,11 @@ enhancednonparametric <- function(
     options <- enhancednonparametricOptions$new(
         dependent = dependent,
         grouping = grouping,
-        mann_whitney = mann_whitney,
-        kruskal_wallis = kruskal_wallis,
-        posthoc_dunn = posthoc_dunn,
-        correction_method = correction_method,
-        assumptions = assumptions,
-        effect_sizes = effect_sizes,
-        descriptives = descriptives,
+        exact_test = exact_test,
+        posthoc = posthoc,
+        posthoc_method = posthoc_method,
         show_plots = show_plots,
-        plot_type = plot_type,
-        confidence_level = confidence_level,
-        bootstrap_samples = bootstrap_samples)
+        confidence_level = confidence_level)
 
     analysis <- enhancednonparametricClass$new(
         options = options,

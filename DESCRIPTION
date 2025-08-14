@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.31.02
-Date: 2025-08-13
+Version: 0.0.31.03
+Date: 2025-08-14
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -217,7 +217,8 @@ Imports:
     spatstat.geom,
     spatstat.explore,
     PMCMRplus,
-    boot
+    boot,
+    flexsurv
 VignetteBuilder: 
     knitr, 
     tiff, 
@@ -239,6 +240,5 @@ Suggests:
     quarto,
     rmarkdown,
     randomForestSRC,
-    flexsurv,
     icenReg,
     OncoDataSets

@@ -1,9 +1,23 @@
 ---
 name: enhancednonparametric
 title: Enhanced Non-Parametric Tests
-menuGroup: ClinicoPath Descriptives
+menuGroup: ClinicoPath
 version: '1.0.0'
 jas: '1.2'
+
+description:
+    main: |
+        Enhanced Mann-Whitney U and Kruskal-Wallis tests with comprehensive
+        effect size calculations, assumption checking, and post hoc analysis. 
+        Essential for pathology research with non-normal data.
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology')
+            
+            enhancednonparametric(data = histopathology,
+                                 dependent = measurement,
+                                 grouping = group)
 
 options:
     - name: data
@@ -15,9 +29,9 @@ options:
       title: Dependent Variable
       type: Variable
       suggested:
-        - continuous
+          - continuous
       permitted:
-        - numeric
+          - numeric
       description:
           R: >
             The dependent variable from `data`, variable must be numeric
@@ -26,128 +40,66 @@ options:
       title: Grouping Variable
       type: Variable
       suggested:
-        - nominal
+          - nominal
       permitted:
-        - factor
+          - factor
       description:
           R: >
             The grouping variable from `data`, variable must be a factor
 
-    # Test Selection Options
-    - name: mann_whitney
-      title: Mann-Whitney U Test
+    - name: exact_test
+      title: Use exact test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use exact computation for Mann-Whitney U test p-values
+
+    - name: posthoc
+      title: Post hoc tests
       type: Bool
       default: true
       description:
           R: >
-            Perform Mann-Whitney U test for two-group comparisons
+            Perform post hoc tests for multi-group comparisons (Kruskal-Wallis)
 
-    - name: kruskal_wallis
-      title: Kruskal-Wallis Test  
-      type: Bool
-      default: true
-      description:
-          R: >
-            Perform Kruskal-Wallis test for multiple-group comparisons
-
-    # Post Hoc Options
-    - name: posthoc_dunn
-      title: Dunn's Post Hoc Test
-      type: Bool
-      default: true
-      description:
-          R: >
-            Perform Dunn's test for pairwise comparisons following significant Kruskal-Wallis
-
-    - name: correction_method
-      title: Multiple Comparison Correction
+    - name: posthoc_method
+      title: Post hoc correction
       type: List
       options:
-        - name: bonferroni
-          title: Bonferroni
-        - name: holm
-          title: Holm
-        - name: hochberg
-          title: Hochberg
-        - name: bh
-          title: Benjamini-Hochberg (FDR)
-        - name: by
-          title: Benjamini-Yekutieli
-        - name: none
-          title: None
+          - name: bonferroni
+            title: Bonferroni
+          - name: holm
+            title: Holm
+          - name: hochberg
+            title: Hochberg
+          - name: fdr
+            title: False Discovery Rate (Benjamini-Hochberg)
+          - name: bh
+            title: Benjamini-Hochberg
+          - name: by
+            title: Benjamini-Yekutieli
       default: bonferroni
       description:
           R: >
-            Method for multiple comparison correction in post hoc tests
+            Multiple comparison correction method for post hoc tests
 
-    # Analysis Options
-    - name: assumptions
-      title: Check Assumptions
-      type: Bool
-      default: true
-      description:
-          R: >
-            Check and report assumptions for non-parametric tests
-
-    - name: effect_sizes
-      title: Calculate Effect Sizes
-      type: Bool
-      default: true
-      description:
-          R: >
-            Calculate and report effect sizes with confidence intervals
-
-    - name: descriptives
-      title: Descriptive Statistics
-      type: Bool
-      default: true
-      description:
-          R: >
-            Show descriptive statistics for each group
-
-    # Visualization Options
     - name: show_plots
-      title: Show Plots
+      title: Show plots
       type: Bool
       default: true
       description:
           R: >
-            Generate boxplots and violin plots for group comparisons
+            Generate distribution and effect size plots
 
-    - name: plot_type
-      title: Plot Type
-      type: List
-      options:
-        - name: boxplot
-          title: Box Plot
-        - name: violin
-          title: Violin Plot
-        - name: both
-          title: Box + Violin Plot
-      default: both
-      description:
-          R: >
-            Type of distribution plot to generate
-
-    # Advanced Options
     - name: confidence_level
-      title: Confidence Level
+      title: Confidence level
       type: Number
       min: 0.5
       max: 0.99
       default: 0.95
       description:
           R: >
-            Confidence level for effect size confidence intervals
-
-    - name: bootstrap_samples
-      title: Bootstrap Samples
-      type: Integer
-      min: 100
-      max: 10000
-      default: 1000
-      description:
-          R: >
-            Number of bootstrap samples for confidence interval estimation
+            Confidence level for confidence intervals and tests
 
 ...

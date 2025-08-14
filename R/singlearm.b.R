@@ -647,22 +647,83 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Add explanatory output for median survival
         if (self$options$showExplanations) {
             median_explanation_html <- '
-            <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
-                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Median Survival Analysis</h4>
-                <p style="margin-bottom: 10px;">Median survival represents the time point at which 50% of patients have experienced the event of interest:</p>
-                <ul style="margin-left: 20px;">
-                    <li><strong>Median Survival:</strong> Time when half the patients have experienced the event</li>
-                    <li><strong>95% CI:</strong> Range of plausible values for the true median survival</li>
-                    <li><strong>Events:</strong> Number of patients who experienced the event during follow-up</li>
-                    <li><strong>Records:</strong> Total number of patients in the analysis</li>
-                </ul>
-                <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
-                <ul style="margin-left: 20px;">
-                    <li>Median survival is robust to outliers and right-censoring</li>
-                    <li>When median is not reached (NR), more than 50% of patients remain event-free</li>
-                    <li>Wide confidence intervals suggest greater uncertainty in the estimate</li>
-                    <li>Consider both statistical significance and clinical meaningfulness</li>
-                </ul>
+            <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Median Survival Analysis</h3>
+                
+                <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                    <h4 style="color: #2d3748; margin-top: 0;">What is Median Survival?</h4>
+                    <p style="margin: 8px 0;">Median survival is the <strong>time point when exactly 50% of patients</strong> have experienced the event of interest (e.g., death, recurrence). 
+                    Think of it as the "halfway point" in your patient population.</p>
+                    
+                    <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>💯 Key Concept:</strong> If median survival = 24 months, it means:
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li>At 24 months: 50% of patients have experienced the event</li>
+                            <li>At 24 months: 50% of patients are still event-free</li>
+                            <li>Half the patients will survive longer than 24 months</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                    <h4 style="color: #d68910; margin-top: 0;">📈 Understanding the Results Table</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                        <tr style="background-color: #fff3cd;">
+                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Measure</th>
+                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Meaning</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Records</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Total number of patients in analysis</td>
+                        </tr>
+                        <tr style="background-color: #fffbf0;">
+                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Events</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Number who experienced the event</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Median</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Time when 50% experienced event</td>
+                        </tr>
+                        <tr style="background-color: #fffbf0;">
+                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>95% CI</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Range of plausible values</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                    <h4 style="color: #2e7d32; margin-top: 0;">💬 Clinical Interpretation Guide</h4>
+                    
+                    <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>✅ When Median is Reached:</strong>
+                        <p style="margin: 5px 0;">"The median survival is 36 months (95% CI: 28-45 months)"</p>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li>Half of patients survived longer than 3 years</li>
+                            <li>The true median is likely between 28-45 months</li>
+                            <li>This provides concrete information for patient counseling</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>⚠️ When Median is "Not Reached" (NR):</strong>
+                        <p style="margin: 5px 0;">More than 50% of patients remain event-free</p>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li>Excellent prognosis - most patients doing well</li>
+                            <li>Need longer follow-up to determine median</li>
+                            <li>Can still report survival rates at specific time points</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+                    <strong>💡 Practical Tips:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li><strong>Robust measure:</strong> Less affected by extreme values than mean survival</li>
+                        <li><strong>Easy communication:</strong> "Half of patients lived longer than X months"</li>
+                        <li><strong>Compare cautiously:</strong> Consider confidence intervals when comparing groups</li>
+                        <li><strong>Clinical context:</strong> Always interpret alongside patient characteristics and treatment details</li>
+                    </ul>
+                </div>
             </div>
             '
             self$results$medianSurvivalExplanation$setContent(median_explanation_html)
@@ -777,23 +838,98 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Add explanatory output for survival probabilities
         if (self$options$showExplanations) {
             survival_probability_explanation_html <- '
-            <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #4169e1;">
-                <h4 style="margin-top: 0; color: #2c3e50;">Understanding Survival Probabilities</h4>
-                <p style="margin-bottom: 10px;">Time-specific survival probabilities show the percentage of patients expected to be alive (event-free) at specific time points:</p>
-                <ul style="margin-left: 20px;">
-                    <li><strong>Time Point:</strong> Specific time of interest (e.g., 12, 36, 60 months)</li>
-                    <li><strong>Survival %:</strong> Percentage of patients alive at that time point</li>
-                    <li><strong>Number at Risk:</strong> Patients still being followed at that time</li>
-                    <li><strong>95% CI:</strong> Confidence interval for the survival probability</li>
-                </ul>
-                <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
-                <ul style="margin-left: 20px;">
-                    <li>Higher survival percentages indicate better prognosis</li>
-                    <li>Confidence intervals reflect uncertainty - wider intervals suggest less precision</li>
-                    <li>Number at risk decreases over time due to events and censoring</li>
-                    <li>These estimates help in patient counseling and treatment planning</li>
-                    <li>Compare with historical controls or published benchmarks for context</li>
-                </ul>
+            <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <h3 style="color: #2c5282; margin-top: 0;">📅 Understanding Survival Probability Tables</h3>
+                
+                <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                    <h4 style="color: #2d3748; margin-top: 0;">What are Time-Specific Survival Probabilities?</h4>
+                    <p style="margin: 8px 0;">These show the <strong>percentage of patients expected to be event-free</strong> at specific milestone time points. 
+                    Common time points are 1, 3, and 5 years (12, 36, 60 months).</p>
+                    
+                    <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>💯 Example Interpretation:</strong>
+                        <p style="margin: 5px 0;">If 5-year survival = 75% (95% CI: 68-82%)</p>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li>75% of patients are expected to be alive at 5 years</li>
+                            <li>25% are expected to have experienced the event by 5 years</li>
+                            <li>The true rate is likely between 68-82%</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                    <h4 style="color: #d68910; margin-top: 0;">📈 Understanding Each Column</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                        <tr style="background-color: #fff3cd;">
+                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Column</th>
+                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Meaning</th>
+                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Use</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Time</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Milestone timepoint</td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Standard follow-up intervals</td>
+                        </tr>
+                        <tr style="background-color: #fffbf0;">
+                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Number at Risk</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Patients still followed</td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Reliability of estimates</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Number of Events</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Events in interval</td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Risk pattern over time</td>
+                        </tr>
+                        <tr style="background-color: #fffbf0;">
+                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Survival %</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Cumulative survival</td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Patient counseling</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>95% CI</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Uncertainty range</td>
+                            <td style="padding: 8px; border: 1px solid #ffc107;">Precision assessment</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                    <h4 style="color: #2e7d32; margin-top: 0;">💬 How to Use These Numbers Clinically</h4>
+                    
+                    <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>👥 Patient Counseling:</strong>
+                        <p style="margin: 5px 0;">"Based on our data, about 8 out of 10 patients with your condition are doing well at 3 years"</p>
+                    </div>
+                    
+                    <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>🔍 Treatment Planning:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li>High early survival rates → consider less intensive follow-up</li>
+                            <li>Declining rates over time → focus on long-term monitoring</li>
+                            <li>Wide confidence intervals → need more data or longer follow-up</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>📋 Comparison with Standards:</strong>
+                        <p style="margin: 5px 0;">Compare your results with:</p>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li>Historical controls from your institution</li>
+                            <li>Published literature for similar populations</li>
+                            <li>Registry data (SEER, national cancer registries)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+                    <strong>💡 Important Considerations:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li><strong>Sample size matters:</strong> Fewer patients at later time points = less reliable estimates</li>
+                        <li><strong>Confidence intervals:</strong> Wider intervals = more uncertainty</li>
+                        <li><strong>Clinical context:</strong> Consider patient selection, treatment changes over time</li>
+                        <li><strong>Censoring:</strong> Patients lost to follow-up affect late-time estimates</li>
+                    </ul>
+                </div>
             </div>
             '
             self$results$survivalProbabilityExplanation$setContent(survival_probability_explanation_html)
@@ -958,6 +1094,42 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             '
             self$results$personTimeExplanation$setContent(person_time_explanation_html)
+        }
+        
+        # Survival Plots Explanation
+        if (self$options$showExplanations && (self$options$sc || self$options$ce || self$options$ch || self$options$kmunicate)) {
+            survival_plots_explanation_html <- '
+            <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Survival Curves and Plots</h3>
+                
+                <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                    <h4 style="color: #2d3748; margin-top: 0;">📈 Kaplan-Meier Survival Curve</h4>
+                    <p style="margin: 8px 0;">The survival curve shows the <strong>probability of being event-free over time</strong>. It steps down each time an event occurs.</p>
+                    
+                    <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>📖 How to Read the Plot:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li><strong>Y-axis:</strong> Survival probability (0-100%)</li>
+                            <li><strong>X-axis:</strong> Time since study start</li>
+                            <li><strong>Steps down:</strong> Each step represents an event</li>
+                            <li><strong>Tick marks (+):</strong> Censored patients (lost to follow-up)</li>
+                            <li><strong>Shaded areas:</strong> 95% confidence intervals</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+                    <strong>💡 Clinical Interpretation Tips:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li><strong>Median survival:</strong> Where curve crosses 50% line</li>
+                        <li><strong>1-year survival:</strong> Height of curve at 12 months</li>
+                        <li><strong>Confidence intervals:</strong> Wider bands = more uncertainty</li>
+                        <li><strong>Pattern recognition:</strong> Steep drops vs gradual decline reveal different risk patterns</li>
+                    </ul>
+                </div>
+            </div>
+            '
+            self$results$survivalPlotsExplanation$setContent(survival_plots_explanation_html)
         }
       }
 

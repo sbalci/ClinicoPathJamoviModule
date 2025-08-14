@@ -6,93 +6,24 @@
 
 
 
-- New Function: advancedcompetingrisks.b.R
-- Key Features:
-  - Gray's test for comparing cumulative incidence
-  - Subdistribution hazard ratios
-  - Time-dependent cumulative incidence plots
-  - Risk stratification for competing events
-
-  1.2 Cure Models Implementation
-
-  Target Package: smcure (add to dependencies)
-
-- New Function: curemodels.b.R
-- Key Features:
-  - Mixture cure models
-  - Non-mixture cure models
-  - Cure fraction estimation
-  - Long-term survivor identification
-
-  1.3 Multistate Survival Models
-
-  Target Package: mstate (add to dependencies)
-
-- New Function: multistatesurvival.b.R
-- Key Features:
-  - Transition probability matrices
-  - Multi-state Kaplan-Meier
-  - Disease progression modeling
-  - Treatment response pathways
-
-  🎯 Phase 2: Advanced Clinical Analytics (High Priority)
-
-  2.1 Relative Survival Analysis
-
-  Target Package: relsurv (add to dependencies)
-
-- New Function: relativesurvival.b.R
-- Key Features:
-  - Excess mortality modeling
-  - Population-based survival comparisons
-  - Cancer registry analysis
-  - Age-standardized survival rates
-
-  2.2 Enhanced Model Validation
-
-  Target Package: pec (add to dependencies)
-
-- New Function: survivalvalidation.b.R
-- Key Features:
-  - Prediction error curves
-  - Cross-validation for survival models
-  - Model comparison metrics
-  - Calibration plots
-
-  2.3 Joint Longitudinal-Survival Modeling
-
-  Target Packages: JMbayes, joineR (add to dependencies)
-
-- New Function: jointmodeling.b.R
-- Key Features:
-  - Longitudinal biomarker integration
-  - Dynamic predictions
-  - Time-varying covariates
-  - Bayesian estimation
+✅ COMPLETED: advancedcompetingrisks features integrated into existing competingsurvival.b.R
+  - Gray's test for comparing cumulative incidence ✅
+  - Subdistribution hazard ratios ✅ 
+  - Time-dependent cumulative incidence plots ✅
+  - Risk stratification for competing events ✅
 
   📊 Phase 3: Specialized Applications (Medium Priority)
 
-  3.1 Machine Learning Enhancement
+  ✅ 3.2 Parametric Survival Models - COMPLETED
 
-  Target Packages: Enhance existing randomForestSRC, glmnet
+  Target Package: Enhanced flexsurv integration
 
-- Enhanced Function: Update multisurvival.b.R
-- Key Features:
-  - Cross-validated feature selection
-  - Ensemble methods
-  - Variable importance plots
-  - Prediction intervals
-
-  3.2 Parametric Survival Models
-
-  Target Package: Enhance existing flexsurv
-
-- Enhanced Function: Update survival.b.R
-- Key Features:
-  - Spline-based hazard functions
-  - Parametric regression
-  - Model diagnostics
-  - Extrapolation capabilities
+- Enhanced Function: Updated survival.b.R with comprehensive parametric modeling
+- Key Features IMPLEMENTED:
+  - Spline-based hazard functions (Royston-Parmar splines)
+  - Parametric regression (exponential, Weibull, log-normal, log-logistic, gamma, generalized gamma, Gompertz)
+  - Model diagnostics (AIC/BIC comparison, parameter estimates, goodness-of-fit)
+  - Extrapolation capabilities (beyond observed follow-up with confidence intervals)
 
   3.3 Bayesian Survival Analysis
 
@@ -110,33 +41,33 @@
   A. New Dependencies to Add (DESCRIPTION file):
 
   Imports:
+    rstanarm,    # Bayesian methods (pending)
+    
+  ✅ COMPLETED DEPENDENCIES (modules implemented but dependencies may need to be added):
     smcure,      # Cure models
     mstate,      # Multistate models  
     relsurv,     # Relative survival
     pec,         # Model validation
     JMbayes,     # Joint modeling
     joineR,      # Joint modeling alternative
-    rstanarm,    # Bayesian methods
     prodlim,     # Fast algorithms
     survAUC      # Additional validation
 
   B. New Jamovi Module Structure:
 
   jamovi/
-  ├── curemodels.a.yaml           # Cure model analysis
-  ├── multistatesurvival.a.yaml   # Disease progression modeling
-  ├── relativesurvival.a.yaml     # Population-based survival
-  ├── survivalvalidation.a.yaml   # Model validation
-  ├── jointmodeling.a.yaml        # Longitudinal-survival integration
-  └── bayesiansurvival.a.yaml     # Bayesian survival analysis
+  └── bayesiansurvival.a.yaml     # Bayesian survival analysis (pending)
 
   R/
-  ├── curemodels.b.R              # Implementation files
-  ├── multistatesurvival.b.R
-  ├── relativesurvival.b.R
-  ├── survivalvalidation.b.R
-  ├── jointmodeling.b.R
-  └── bayesiansurvival.b.R
+  └── bayesiansurvival.b.R        # Implementation file (pending)
+
+  ✅ COMPLETED MODULES (already implemented):
+  - curemodels.a.yaml / curemodels.b.R
+  - multistatesurvival.a.yaml / multistatesurvival.b.R  
+  - relativesurvival.a.yaml / relativesurvival.b.R
+  - survivalvalidation.a.yaml / survivalvalidation.b.R
+  - jointmodeling.a.yaml / jointmodeling.b.R
+  - timedependent.a.yaml / timedependent.b.R
 
   C. Enhanced Existing Functions:
 
@@ -183,7 +114,7 @@
 
 ### **1. Advanced Cox Modeling Enhancements**
 
-- ✅ **Frailty Models for Clustering:** Mixed-effects Cox models (coxme) for multi-institutional data with center-specific random effects (v0.0.3.81)
+- ✅ **Frailty Models for Clustering:** Mixed-effects Cox models (coxme) for multi-institutional data with center-specific random effects (v0.0.3.81) - COMPLETED
 
 ### **2. Enhanced Stage Migration Quantification**
 
@@ -204,8 +135,8 @@
 
 ### **5. Enhanced Discrimination Metrics**
 
-- ✅ **Concordance Probability Estimates:** Alternative concordance measures for heavily censored data (v0.0.3.80)
-- ✅ **Win Ratio Analysis:** Composite endpoint analysis for staging comparison (v0.0.3.80)
+- ✅ **Concordance Probability Estimates:** Alternative concordance measures for heavily censored data (v0.0.3.80) - COMPLETED
+- ✅ **Win Ratio Analysis:** Composite endpoint analysis for staging comparison (v0.0.3.80) - COMPLETED
 
 ### **6. Clinical Decision Analysis Integration**
 
@@ -375,15 +306,7 @@ menuSubgroup: Study Design
 
 #### New Functions to Implement
 
-**1. Diagnostic Test Meta-Analysis (`diagnosticmeta.b.R`)**
-
-- Bivariate random-effects model for sensitivity/specificity
-- HSROC (Hierarchical Summary ROC) curves
-- Publication bias assessment (funnel plots, Egger's test)
-- Heterogeneity assessment (I² statistics, Q-test)
-- Meta-regression for exploring heterogeneity sources
-
-**2. Treatment Effect Meta-Analysis (`treatmentmeta.b.R`)**
+**1. Treatment Effect Meta-Analysis (`treatmentmeta.b.R`)**
 
 - Fixed and random effects models
 - Forest plots with subgroup analysis
@@ -391,7 +314,7 @@ menuSubgroup: Study Design
 - Bayesian meta-analysis with informative priors
 - Leave-one-out sensitivity analysis
 
-**3. Biomarker Meta-Analysis (`biomarkermeta.b.R`)**
+**2. Biomarker Meta-Analysis (`biomarkermeta.b.R`)**
 
 - Hazard ratio meta-analysis from survival studies
 - Prognostic factor meta-analysis
@@ -944,9 +867,9 @@ Based on comprehensive analysis of 195 articles from the American Journal of Pat
 ## Implementation Priority Matrix
 
 ### Immediate Implementation (Months 1-6)
-1. **🔥 NEXT: Advanced ANOVA Suite** - CRITICAL (68% need proper post hoc)
-2. **✅ COMPLETED: Enhanced Non-Parametric Tests** - CRITICAL (30% usage rate)
-3. **✅ COMPLETED: Spatial Point Pattern Analysis** - HIGH (unique to digital pathology)
+1. **🔥 NEXT: Enhanced Non-Parametric Tests** - CRITICAL (30% usage rate)
+2. **🔥 NEXT: Advanced ANOVA Suite** - CRITICAL (68% need proper post hoc)
+3. **🔥 NEXT: Spatial Point Pattern Analysis** - HIGH (unique to digital pathology)
 
 ### High Priority (Months 4-12)
 4. **Hierarchical Mixed-Effects Models** - HIGH (WSI/ROI structure)
@@ -1978,87 +1901,33 @@ The ultimate goal: Every pathologist, regardless of statistical expertise, can p
 
 ## Status Overview (Updated: January 2025)
 
-### ✅ **Already Implemented** (Current Session)
+### ✅ **Already Implemented** (COMPLETED - Documented in NEWS.md v0.0.31.03)
 
-1. **Enhanced Competing Risks** (`competingsurvival.b.R`) - Gray's test, Fine-Gray models
-2. **Cure Models** (`curemodels.b.R`) - Mixture/non-mixture models for long-term survivors  
-3. **Multistate Models** (`multistatesurvival.b.R`) - Disease progression tracking
-4. **Machine Learning Survival** (Enhanced `multisurvival.a.yaml`) - RSF, XGBoost, SHAP, ensemble methods
-5. **Relative Survival** (`relativesurvival.b.R`) - Population-based survival comparison
+1. **Enhanced Competing Risks** (`competingsurvival.b.R`) - Gray's test, Fine-Gray models ✅ COMPLETED
+2. **Cure Models** (`curemodels.b.R`) - Mixture/non-mixture models for long-term survivors ✅ COMPLETED  
+3. **Multistate Models** (`multistatesurvival.b.R`) - Disease progression tracking ✅ COMPLETED
+4. **Relative Survival** (`relativesurvival.b.R`) - Population-based survival comparison ✅ COMPLETED
+5. **Joint Longitudinal-Survival Models** (`jointmodeling.b.R`) - Biomarker trajectory integration ✅ COMPLETED
+6. **Time-Dependent Covariates & ROC** (`timedependent.b.R`) - Dynamic predictions ✅ COMPLETED
+7. **Survival Model Validation** (`survivalvalidation.b.R`) - Prediction error curves, time-dependent ROC ✅ COMPLETED
+
+**Note:** Machine Learning Survival enhancements are still pending - NOT yet implemented.
 
 ### 🚀 **Implementation Queue: High-Impact Features** (Priority Order)
 
 #### **Phase 1: Core Validation & Modeling (Next 2 months)**
 
-##### **1. Advanced Model Validation Suite** (`pec`, `timeROC`, `survAUC`)
+##### **1. Advanced Model Validation Suite** - ✅ COMPLETED
 
-```yaml
-Module: survivalvalidation.a.yaml / survivalvalidation.b.R
-Priority: 🔥 Critical
-Dependencies: pec, timeROC, survAUC, riskRegression
+Module: survivalvalidation.a.yaml / survivalvalidation.b.R - ✅ COMPLETED
 
-Key Features:
-- Prediction Error Curves (PEC)
-- Time-dependent ROC/AUC curves
-- Integrated Brier Score (IBS)
-- Calibration plots with slopes/intercepts
-- Cross-validated Concordance Index
-- Decision curve analysis
-- Bootstrap validation
-- Apparent vs optimism-corrected performance
+##### **2. Joint Longitudinal-Survival Models** - ✅ COMPLETED
 
-Clinical Impact:
-- Essential quality assurance for all survival models
-- Model comparison and selection
-- Publication-ready validation metrics
-- Regulatory compliance (FDA, EMA)
-```
+Module: jointmodeling.a.yaml / jointmodeling.b.R - ✅ COMPLETED
 
-##### **2. Joint Longitudinal-Survival Models** (`JMbayes2`, `joineR`)
+##### **3. Time-Dependent Covariates & ROC** - ✅ COMPLETED
 
-```yaml
-Module: jointmodeling.a.yaml / jointmodeling.b.R
-Priority: 🔥 Critical
-Dependencies: JMbayes2, joineR, rstanarm, nlme
-
-Key Features:
-- Link repeated biomarker measurements to survival
-- Dynamic risk prediction updates
-- Individual-specific survival trajectories
-- Time-varying biomarker effects
-- Bayesian joint modeling framework
-- Multi-marker joint models
-- Dynamic discrimination indices
-
-Clinical Impact:
-- Personalized medicine applications
-- Dynamic biomarker utilization
-- Precision oncology
-- Treatment monitoring
-```
-
-##### **3. Time-Dependent Covariates & ROC** (`timeROC`, `pROC`, `plotROC`)
-
-```yaml
-Module: timedependent.a.yaml / timedependent.b.R
-Priority: 🔥 High  
-Dependencies: timeROC, pROC, plotROC, survival
-
-Key Features:
-- Time-varying coefficient models
-- Landmark analysis framework
-- Dynamic AUC curves over time
-- Optimal cutpoint selection over time
-- Time-dependent associations
-- Schoenfeld residuals analysis
-- Time-stratified models
-
-Clinical Impact:
-- Dynamic prediction capabilities
-- Screening program optimization
-- Time-varying treatment effects
-- Adaptive clinical decision making
-```
+Module: timedependent.a.yaml / timedependent.b.R - ✅ COMPLETED
 
 #### **Phase 2: Specialized Models (Months 3-4)**
 
