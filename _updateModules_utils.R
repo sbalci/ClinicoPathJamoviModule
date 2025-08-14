@@ -217,6 +217,165 @@ check_module_dependencies <- function(module_dir) {
   })
 }
 
+# NAMESPACE-DESCRIPTION Synchronization: Check and update DESCRIPTION based on NAMESPACE
+sync_namespace_with_description <- function(module_dir, dry_run = FALSE) {
+  namespace_file <- file.path(module_dir, "NAMESPACE")
+  desc_file <- file.path(module_dir, "DESCRIPTION")
+  
+  if (!file.exists(namespace_file)) {
+    message("ℹ️ No NAMESPACE file found in ", basename(module_dir), " - skipping sync")
+    return(TRUE)
+  }
+  
+  if (!file.exists(desc_file)) {
+    warning("❌ DESCRIPTION file not found in ", basename(module_dir), " - cannot sync")
+    return(FALSE)
+  }
+  
+  tryCatch({
+    # Read NAMESPACE file and extract package imports
+    namespace_lines <- readLines(namespace_file, warn = FALSE)
+    
+    # Extract packages from various import patterns
+    imported_packages <- c()
+    
+    # Parse different import patterns
+    for (line in namespace_lines) {
+      line <- trimws(line)
+      
+      # import(package)
+      if (grepl("^import\\(", line)) {
+        pkg <- gsub("^import\\(([^)]+)\\).*", "\\1", line)
+        imported_packages <- c(imported_packages, pkg)
+      }
+      
+      # importFrom(package, ...)
+      if (grepl("^importFrom\\(", line)) {
+        pkg <- gsub("^importFrom\\(([^,)]+).*", "\\1", line)
+        imported_packages <- c(imported_packages, pkg)
+      }
+      
+      # requireNamespace patterns in comments or code
+      if (grepl("requireNamespace.*['\"]([^'\"]+)['\"]", line)) {
+        pkg <- gsub(".*requireNamespace.*['\"]([^'\"]+)['\"].*", "\\1", line)
+        imported_packages <- c(imported_packages, pkg)
+      }
+    }
+    
+    # Clean up package names
+    imported_packages <- unique(trimws(imported_packages))
+    imported_packages <- imported_packages[nchar(imported_packages) > 0]
+    imported_packages <- imported_packages[!imported_packages %in% c("stats", "utils", "base", "methods", "graphics", "grDevices")]
+    
+    if (length(imported_packages) == 0) {
+      message("ℹ️ No external packages found in NAMESPACE for ", basename(module_dir))
+      return(TRUE)
+    }
+    
+    message("📦 Found packages in NAMESPACE: ", paste(imported_packages, collapse = ", "))
+    
+    # Read current DESCRIPTION file
+    desc_content <- read.dcf(desc_file)
+    
+    # Get current Imports and Suggests
+    current_imports <- if ("Imports" %in% colnames(desc_content) && !is.na(desc_content[1, "Imports"])) {
+      trimws(strsplit(desc_content[1, "Imports"], ",")[[1]])
+    } else {
+      c()
+    }
+    
+    current_suggests <- if ("Suggests" %in% colnames(desc_content) && !is.na(desc_content[1, "Suggests"])) {
+      trimws(strsplit(desc_content[1, "Suggests"], ",")[[1]])
+    } else {
+      c()
+    }
+    
+    # Clean package names (remove version specifications)
+    current_imports <- gsub("\\s*\\([^)]*\\)", "", current_imports)
+    current_suggests <- gsub("\\s*\\([^)]*\\)", "", current_suggests)
+    current_imports <- trimws(current_imports[nchar(current_imports) > 0])
+    current_suggests <- trimws(current_suggests[nchar(current_suggests) > 0])
+    
+    # Find missing packages
+    all_declared <- c(current_imports, current_suggests)
+    missing_packages <- imported_packages[!imported_packages %in% all_declared]
+    
+    if (length(missing_packages) == 0) {
+      message("✅ All NAMESPACE packages are declared in DESCRIPTION for ", basename(module_dir))
+      return(TRUE)
+    }
+    
+    message("⚠️ Missing packages in DESCRIPTION for ", basename(module_dir), ": ", paste(missing_packages, collapse = ", "))
+    
+    if (dry_run) {
+      message("🔍 DRY RUN: Would add packages to Imports: ", paste(missing_packages, collapse = ", "))
+      return(TRUE)
+    }
+    
+    # Add missing packages to Imports
+    updated_imports <- c(current_imports, missing_packages)
+    updated_imports <- unique(updated_imports)
+    updated_imports <- sort(updated_imports)
+    
+    # Update DESCRIPTION content
+    desc_content[1, "Imports"] <- paste(updated_imports, collapse = ",\n    ")
+    
+    # Create backup of original DESCRIPTION
+    backup_file <- paste0(desc_file, ".backup.", format(Sys.time(), "%Y%m%d_%H%M%S"))
+    file.copy(desc_file, backup_file)
+    message("💾 Created backup: ", basename(backup_file))
+    
+    # Write updated DESCRIPTION
+    write.dcf(desc_content, desc_file)
+    message("✅ Updated DESCRIPTION for ", basename(module_dir), " - added: ", paste(missing_packages, collapse = ", "))
+    
+    return(TRUE)
+    
+  }, error = function(e) {
+    warning("❌ Failed to sync NAMESPACE with DESCRIPTION for ", basename(module_dir), ": ", e$message)
+    return(FALSE)
+  })
+}
+
+# Enhanced function to sync all modules
+sync_all_modules_namespace <- function(modules_config, main_repo_dir, dry_run = FALSE) {
+  message("\n🔄 Starting NAMESPACE-DESCRIPTION synchronization...")
+  
+  success_count <- 0
+  error_count <- 0
+  
+  for (module_name in names(modules_config)) {
+    module_config <- modules_config[[module_name]]
+    
+    if (!module_config$enabled) {
+      message("⏭️ Skipping disabled module: ", module_name)
+      next
+    }
+    
+    module_dir <- module_config$directory %||% file.path(main_repo_dir, module_config$repo_dir)
+    
+    if (!dir.exists(module_dir)) {
+      warning("⚠️ Module directory not found: ", module_dir)
+      error_count <- error_count + 1
+      next
+    }
+    
+    message("\n📁 Processing module: ", module_name)
+    
+    if (sync_namespace_with_description(module_dir, dry_run)) {
+      success_count <- success_count + 1
+    } else {
+      error_count <- error_count + 1
+    }
+  }
+  
+  message("\n📊 NAMESPACE-DESCRIPTION sync completed:")
+  message("   ✅ Success: ", success_count, " modules")
+  message("   ❌ Errors: ", error_count, " modules")
+  
+  return(error_count == 0)
+}
+
 # Backup management: Create backup
 create_backup <- function(module_dir, backup_base_dir = "backups") {
   if (!dir.exists(module_dir)) {

@@ -1,0 +1,94 @@
+title: Hierarchical Mixed-Effects Models
+name: hierarchicalpathology
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Dependent Variable
+        children:
+          - type: VariablesListBox
+            name: dependent
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Level 3 (Highest - e.g., Patient)
+        children:
+          - type: VariablesListBox
+            name: level_3
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Level 2 (Intermediate - e.g., Slide)
+        children:
+          - type: VariablesListBox
+            name: level_2
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Level 1 (Lowest - e.g., ROI)
+        children:
+          - type: VariablesListBox
+            name: level_1
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Covariates (Fixed Effects)
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+            itemDropBehaviour: insert
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Model Options
+          - type: ComboBox
+            name: model_type
+          - type: ComboBox
+            name: optimizer
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Analysis Options
+          - type: CheckBox
+            name: descriptives
+          - type: CheckBox
+            name: variance_components
+          - type: CheckBox
+            name: icc_analysis
+          - type: CheckBox
+            name: random_effects
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Advanced Options
+          - type: CheckBox
+            name: model_comparison
+          - type: CheckBox
+            name: diagnostics
+          - type: TextBox
+            name: confidence_level
+            label: Confidence Level
+            format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: max_iterations
+        format: number

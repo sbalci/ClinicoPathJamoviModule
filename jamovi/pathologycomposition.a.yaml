@@ -1,0 +1,162 @@
+---
+name: pathologycomposition
+title: Pathology Composition Analysis
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Semi-quantitative analysis of histologic components and their association with 
+        clinical outcomes. Based on advanced pathology research methodologies, particularly 
+        gastric cancer composition analysis. Performs component risk assessment, composition 
+        pattern analysis, and optimal threshold identification.
+    R:
+        dontrun: false
+        usage: |
+            data('pathology_data')
+            
+            pathologycomposition(data = pathology_data,
+                                outcome_variable = lymph_node_metastasis,
+                                component1 = signet_ring_cells,
+                                component2 = poorly_differentiated,
+                                composition_analysis = TRUE)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: outcome_variable
+      title: Outcome Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Clinical outcome variable for composition analysis
+
+    - name: component1
+      title: Component 1
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: First histologic component (proportion or category)
+
+    - name: component2
+      title: Component 2
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Second histologic component (proportion or category)
+
+    - name: component3
+      title: Component 3
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Third histologic component (proportion or category)
+
+    - name: component4
+      title: Component 4
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Fourth histologic component (proportion or category)
+
+    - name: composition_analysis
+      title: Composition Pattern Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze risk based on component composition patterns
+
+    - name: optimal_composition
+      title: Optimal Composition Identification
+      type: Bool
+      default: true
+      description:
+          R: Identify optimal low-risk and high-risk composition patterns
+
+    - name: trend_test
+      title: Trend Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform trend tests for dose-response relationships
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for risk estimates and intervals
+
+    - name: low_risk_threshold
+      title: Low Risk Threshold
+      type: Number
+      min: 0.01
+      max: 0.10
+      default: 0.05
+      description:
+          R: Maximum risk probability for low-risk classification (5% = 0.05)
+
+    - name: high_risk_threshold
+      title: High Risk Threshold
+      type: Number
+      min: 0.10
+      max: 0.50
+      default: 0.20
+      description:
+          R: Minimum risk probability for high-risk classification (20% = 0.20)
+
+    - name: min_group_size
+      title: Minimum Group Size
+      type: Integer
+      min: 5
+      max: 100
+      default: 10
+      description:
+          R: Minimum number of cases required for composition pattern analysis
+
+    - name: quantitative_categories
+      title: Semi-Quantitative Categories
+      type: List
+      options:
+          - name: 'gastric_cancer'
+            title: Gastric Cancer Standard (0%, ≤10%, >10%-≤50%, >50%-<90%, ≥90%)
+          - name: 'simplified'
+            title: Simplified (Low, Moderate, High)
+          - name: 'custom'
+            title: Custom Categories
+      default: gastric_cancer
+      description:
+          R: Semi-quantitative categorization system for components
+
+    - name: composition_plot
+      title: Composition Risk Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate scatter plot of component composition vs risk

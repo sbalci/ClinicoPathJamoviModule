@@ -9,12 +9,12 @@
 # Global settings
 global:
   new_version: "0.0.31.02"  # New version number for the modules
-  new_date: "2025-08-12" # New date for the modules
+  new_date: "2025-08-13" # New date for the modules
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 # Operation modes
 modes:
-  quick: true # Quick mode to install main module
+  quick: false # Quick mode to install main module
   check: false
   extended: true
   webpage: false
@@ -28,6 +28,18 @@ modes:
   copy_test_files: false      # Enable/disable test file copying
   copy_r_files: true         # Enable/disable R utility file copying
   use_legacy_copying: false   # Use legacy hardcoded file lists instead of config-based copying
+  
+  # NAMESPACE-DESCRIPTION synchronization
+  sync_namespace_description: true  # Enable NAMESPACE to DESCRIPTION package synchronization
+  namespace_sync_dry_run: false     # Perform dry run only (show what would be changed)
+  # 
+  # How it works:
+  # - Scans each module's NAMESPACE file for import() and importFrom() statements
+  # - Extracts package names from these import statements
+  # - Checks if these packages are declared in the module's DESCRIPTION file
+  # - Automatically adds missing packages to the Imports field in DESCRIPTION
+  # - Creates backup of original DESCRIPTION before making changes
+  # - Supports dry run mode to preview changes without modifying files
 
 # Required packages for validation
 required_packages:
@@ -221,7 +233,8 @@ modules:
       - "menuGroup: meddecideT$"
       - "menuGroup: SurvivalT$"
       - "menuGroup: ExplorationT$"
-    
+      - "menuGroup: OncoPathologyT$"
+
     data_files:
       - "histopathology.rda"
     

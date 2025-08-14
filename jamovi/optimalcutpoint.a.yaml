@@ -1,0 +1,205 @@
+---
+name: optimalcutpoint
+title: Optimal Cutpoint Determination
+menuGroup: ClinicoPath
+menuSubgroup: Inferential
+menuTitle: Optimal Cutpoint Determination
+menuSubtitle: Find optimal thresholds for continuous biomarkers
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: |
+        Determines optimal cutpoints for continuous biomarkers to maximize 
+        diagnostic or prognostic performance. Essential for converting 
+        continuous measurements to clinically actionable thresholds and 
+        preventing arbitrary cutpoint selection in pathology studies.
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology')
+            
+            optimalcutpoint(data = histopathology, 
+                           biomarker = ki67_score, 
+                           outcome = tumor_grade,
+                           analysis_type = "binary")
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: biomarker
+      title: Biomarker Variable
+      type: Variable
+      suggested: 
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Continuous biomarker variable for cutpoint optimization
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+          - name: "binary"
+            title: "Binary Outcome"
+          - name: "survival"
+            title: "Survival Analysis"
+          - name: "continuous"
+            title: "Continuous Outcome"
+      default: "binary"
+      description:
+          R: Type of analysis based on outcome variable
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: 
+          - nominal
+          - continuous
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Outcome variable for binary or continuous analysis
+
+    - name: time_var
+      title: Time Variable
+      type: Variable
+      suggested: 
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Time-to-event variable for survival analysis
+
+    - name: status_var
+      title: Status Variable
+      type: Variable
+      suggested: 
+          - nominal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Event status variable for survival analysis (0=censored, 1=event)
+
+    - name: cutpoint_method
+      title: Cutpoint Method
+      type: List
+      options:
+          - name: "youden"
+            title: "Youden Index (Sensitivity + Specificity - 1)"
+          - name: "closest_topleft"
+            title: "Closest to Top-Left Corner"
+          - name: "roc01"
+            title: "ROC01 (Minimize Cost)"
+          - name: "maxstat"
+            title: "Maximally Selected Rank Statistics"
+          - name: "median"
+            title: "Median Split"
+          - name: "tertiles"
+            title: "Tertile Split"
+          - name: "quartiles"
+            title: "Quartile Split"
+          - name: "correlation"
+            title: "Maximum Correlation"
+      default: "youden"
+      description:
+          R: Method for cutpoint optimization
+
+    - name: bootstrap_validation
+      title: Bootstrap Validation
+      type: Bool
+      default: false
+      description:
+          R: Perform bootstrap validation of cutpoint stability
+
+    - name: bootstrap_runs
+      title: Bootstrap Runs
+      type: Integer
+      min: 100
+      max: 5000
+      default: 1000
+      description:
+          R: Number of bootstrap runs for validation
+
+    - name: cross_validation
+      title: Cross Validation
+      type: Bool
+      default: false
+      description:
+          R: Perform cross-validation for cutpoint assessment
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      min: 3
+      max: 20
+      default: 10
+      description:
+          R: Number of folds for cross-validation
+
+    - name: performance_metrics
+      title: Performance Metrics
+      type: Bool
+      default: true
+      description:
+          R: Calculate comprehensive performance metrics
+
+    - name: survival_analysis
+      title: Survival Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform survival analysis for optimal groups
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for intervals and tests
+
+    - name: multiple_testing
+      title: Multiple Testing Correction
+      type: List
+      options:
+          - name: "none"
+            title: "None"
+          - name: "bonferroni"
+            title: "Bonferroni"
+          - name: "holm"
+            title: "Holm"
+          - name: "miller_siegmund"
+            title: "Miller-Siegmund"
+      default: "miller_siegmund"
+      description:
+          R: Multiple testing correction for cutpoint selection
+
+    - name: plot_roc
+      title: ROC Curve Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate ROC curve with optimal cutpoint
+
+    - name: plot_distribution
+      title: Distribution Plot
+      type: Bool
+      default: true
+      description:
+          R: Show biomarker distribution with cutpoint
+
+    - name: plot_survival
+      title: Survival Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate Kaplan-Meier curves for optimal groups

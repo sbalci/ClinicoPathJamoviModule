@@ -1,177 +1,10 @@
 # TODO
 
-- improve @vignettes/jamovi_a_yaml_guide.md prepare a comprehensive documentation on how to write .a.yaml files in developing jamovi functions. Be detailed and give example codes. Use the existing .a.yaml files as examples.
-Also use the following resources:
-  - <https://dev.jamovi.org/api_analysis-definition.html>
-  - <https://github.com/jamovi/jmv/tree/master/jamovi>
-
-- improve @vignettes/jamovi_r_yaml_guide.md prepare a comprehensive documentation on how to write .r.yaml files in developing jamovi functions. Be detailed and give example codes. Use the existing .r.yaml files as examples.
-Also use the following resources:
-  - <https://dev.jamovi.org/api_results-definition.html>
-  - <https://dev.jamovi.org/api_results-elements.html>
-  - <https://github.com/jamovi/jmv/tree/master/jamovi>
-
-- improve @vignettes/jamovi_u_yaml_guide.md prepare a comprehensive documentation on how to write .u.yaml files in developing jamovi functions. Be detailed and give example codes. Use the existing .u.yaml files as examples.
-Also use the following resources:
-  - <https://dev.jamovi.org/api_ui-definition.html>
-  - <https://dev.jamovi.org/ui-basic-design.html>
-  - <https://dev.jamovi.org/ui-advanced-design.html>
-  - <https://dev.jamovi.org/ui-advanced-customisation.html>
-  - <https://github.com/jamovi/jmv/tree/master/jamovi>
-
-- improve @vignettes/jamovi_tables_guide.md prepare a comprehensive documentation on how to make and populate tables in developing jamovi functions. Be detailed and give example codes. Use the existing .yaml files and .b.R files as examples.
-Also use the following resources:
-  - <https://dev.jamovi.org/api_results-elements.html>
-  - <https://dev.jamovi.org/api_table.html>
-  - <https://dev.jamovi.org/tuts0105-creating-rich-results.html>
-  - <https://dev.jamovi.org/tuts0201-dynamic-tables.html>
-  - <https://github.com/jamovi/jmv/tree/master/R>
-  - <https://github.com/jamovi/jmv/tree/master/jamovi>
-
-- improve @vignettes/jamovi_plots_guide.md prepare a comprehensive documentation on how to make and populate plots in developing jamovi functions. Be detailed and give example codes. Use the existing .yaml files and .b.R files as examples.
-Also use the following resources:
-  - <https://dev.jamovi.org/tuts0106-adding-plots.html>
-  - <https://github.com/jamovi/jmv/tree/master/R>
-  - <https://github.com/jamovi/jmv/tree/master/jamovi>
-
-- improve @vignettes/jamovi_b_R_guide.md prepare a comprehensive documentation on how to write .b.R files in developing jamovi functions. Be detailed and give example codes. Use the existing .b.R files as examples.
-Also use the following resources:
-  - <https://dev.jamovi.org/tuts0202-handling-data.html>
-  - <https://dev.jamovi.org/tuts0203-state.html>
-  - <https://github.com/jamovi/jmv/tree/master/R>
-  - <https://github.com/jamovi/jmv/tree/master/jamovi>
-
-- improve @vignettes/jamovi_formula_guide.md prepare a comprehensive documentation on how to write formula in developing jamovi functions. Be detailed and give example codes. Use the existing .b.R files as examples.
-Also use the following resources:
-  - <https://dev.jamovi.org/tuts0104-implementing-an-analysis.html>
-  - <https://github.com/jamovi/jmv/tree/master/R>
+## 📊 **HIGH PRIORITY QUEUE**
 
 ---
 
-  5 Powerful Custom Slash Commands:
 
-  1. /check-function <name> - Systematic quality check
-  2. /review-function <name> - Detailed code review
-  3. /fix-function <name> [type] - Generate specific fixes
-  4. /check-module - Batch module assessment
-  5. /create-function <name> [type] - Scaffold new functions
-
-  📁 Files Created:
-
-- .claude/commands/check-function.md - Main systematic check
-- .claude/commands/review-function.md - Code quality review
-- .claude/commands/fix-function.md - Issue resolution guide
-- .claude/commands/check-module.md - Module-wide assessment
-- .claude/commands/create-function.md - Function scaffolding
-- CLAUDE_CODE_SLASH_COMMANDS_GUIDE.md - Comprehensive usage guide
-
-  🚀 How to Use (Super Simple!):
-
-  Quick Start - Test It Now:
-
-# Try your first systematic check
-
-  /check-function lassocox
-
-# Get an overview of your entire module
-
-  /check-module
-
-# Review code quality in detail
-
-  /review-function lassocox
-
-  Daily Development Workflow:
-
-# Morning: Check status
-
-  /check-function myfunction
-
-# Fix issues found
-
-  /fix-function myfunction schema
-
-# Verify fixes worked
-
-  /check-function myfunction
-
-# Final quality review
-
-  /review-function myfunction
-
-  🎯 Key Advantages Over Scripts:
-
-  ⚡ Speed & Integration:
-
-- No file paths needed - Commands automatically find files
-- Context-aware - Knows your project structure
-- Instant feedback - Results immediately in your Claude session
-
-  🎨 Precision & Quality:
-
-- Jamovi-specific - Understands .yaml ↔ .b.R integration patterns
-- Actionable fixes - Provides exact code changes needed
-- Consistent standards - Maintains quality across all functions
-
-  🔄 Workflow Enhancement:
-
-- Iterative improvement - Quick check → fix → recheck cycles
-- Learning integration - Builds jamovi best practices knowledge
-- Prevention-focused - Helps avoid common integration pitfalls
-
-  📈 Impact on Your Development:
-
-  Before:
-
-- Manual file inspection → Time-consuming
-- Inconsistent quality checks → Error-prone
-- Generic code review → Misses jamovi-specific issues
-
-  After:
-
-- Systematic quality assurance with /check-function
-- Instant issue resolution with /fix-function
-- Module-wide visibility with /check-module
-- Consistent scaffolding with /create-function
-
-  🎯 Next Steps:
-
-  1. Test the system: /check-function lassocox
-  2. Review module health: /check-module
-  3. Fix any issues found: /fix-function functionname
-  4. Create new functions: /create-function newname type
-
-## Comprehensive Implementation Plan for ClinicoPath Survival Analysis Enhancement
-
-  Current State Analysis
-
-  ✅ Well Implemented (Already Available)
-
-- Core survival analysis: survival, survminer, finalfit packages
-- Basic competing risks: cmprsk package
-- Machine learning: glmnet, randomForest, randomForestSRC packages
-- Advanced modeling: rms, flexsurv packages
-- Validation: timeROC package
-- Comprehensive functions: Kaplan-Meier, Cox regression, competing risks, RMST, person-time analysis
-
-  ❌ Critical Gaps Identified
-
-  High-Impact Missing Capabilities:
-
-  1. Cure Models - No smcure or flexsurvcure implementation
-  2. Multistate Models - Missing mstate, msm packages
-  3. Relative Survival - No relsurv implementation
-  4. Advanced Validation - Missing pec package
-  5. Joint Modeling - No JMbayes or joineR implementation
-  6. Bayesian Methods - Missing rstanarm survival capabilities
-
-  Implementation Plan
-
-  🚀 Phase 1: Critical Pathology Functions (Immediate Priority)
-
-  1.1 Enhanced Competing Risks Analysis
-
-  Target Package: cmprsk (already installed, enhance implementation)
 
 - New Function: advancedcompetingrisks.b.R
 - Key Features:
@@ -311,58 +144,13 @@ Also use the following resources:
 - multisurvival.b.R: Integrate ensemble ML methods, Bayesian options
 - competingsurvival.b.R: Enhanced cumulative incidence, Gray's test
 
-  📈 Expected Impact by Phase
 
-  Phase 1 Impact:
-
-- Complete competing risks workflow
-- Long-term survivor analysis (critical for oncology)
-- Complex disease progression modeling
-
-  Phase 2 Impact:
-
-- Population-based cancer research capabilities
-- Robust model validation and comparison
-- Integration of longitudinal biomarkers
-
-  Phase 3 Impact:
-
-- State-of-the-art machine learning survival analysis
-- Advanced parametric modeling for projections
-- Uncertainty quantification through Bayesian methods
-
-  🎯 Implementation Timeline
-
-- Phase 1: 3-4 months (core pathology functions)
-- Phase 2: 2-3 months (advanced analytics)
-- Phase 3: 2-3 months (specialized applications)
-- Total: 7-10 months for complete implementation
 
 ---
 
 # Stage Migration Module - Future Enhancements
 
-## Summary
 
-The stagemigration module has completed **Phase 1** (Foundational Features), **Phase 2** (Advanced Validation & Clinical Utility), **Phase 3** (Clinical Integration Features), and major components of **Phase 4-5** (Advanced Features - Enhanced Statistical Analysis Suite).
-
-**Completed Advanced Features (v0.0.3.72-v0.0.3.81):**
-
-- ✅ Optimal Cut-point Determination (v0.0.3.72)
-- ✅ SHAP Model Interpretability (v0.0.3.73)  
-- ✅ Competing Risks Analysis with Fine-Gray Models (v0.0.3.74)
-- ✅ Multi-State Models (v0.0.3.75)
-- ✅ Random Survival Forests (v0.0.3.76)
-- ✅ Cure Models (v0.0.3.77)
-- ✅ Interval Censoring Support (v0.0.3.78)
-- ✅ Informative Censoring Detection (v0.0.3.79)
-- ✅ Concordance Probability Estimates (v0.0.3.80)
-- ✅ Win Ratio Analysis (v0.0.3.80)
-- ✅ Frailty Models for Clustering (v0.0.3.81)
-
-This document lists the **remaining features** that could further enhance the module for research and specialized use cases.
-
----
 
 ## **Phase 4: Enhanced Features from ChatGPT Stage Migration Analysis**
 
@@ -1156,9 +944,9 @@ Based on comprehensive analysis of 195 articles from the American Journal of Pat
 ## Implementation Priority Matrix
 
 ### Immediate Implementation (Months 1-6)
-1. **Enhanced Non-Parametric Tests** - CRITICAL (30% usage rate)
-2. **Advanced ANOVA Suite** - CRITICAL (68% need proper post hoc)
-3. **Spatial Point Pattern Analysis** - HIGH (unique to digital pathology)
+1. **🔥 NEXT: Advanced ANOVA Suite** - CRITICAL (68% need proper post hoc)
+2. **✅ COMPLETED: Enhanced Non-Parametric Tests** - CRITICAL (30% usage rate)
+3. **✅ COMPLETED: Spatial Point Pattern Analysis** - HIGH (unique to digital pathology)
 
 ### High Priority (Months 4-12)
 4. **Hierarchical Mixed-Effects Models** - HIGH (WSI/ROI structure)
@@ -1215,60 +1003,9 @@ Based on comprehensive analysis of digital pathology research methods, this road
 
 ## Phase 1: Core Digital Pathology Statistics (Months 1-4)
 
-### 🔬 **1. Spatial Statistics for Tabular Cell Coordinates** (`spatialtabular`)
-**Target Packages**: `spatstat`, `spatialTIME`, `SpatialQPFs`
-**IMPORTANT**: Requires cell coordinates (X, Y) and cell types as tabular input
-
-#### New Functions to Implement:
-- **spatial_from_table.b.R**
-  - Import cell coordinates from CSV/Excel tables
-  - Statistical analysis of spatial patterns from coordinate data
-  - Ripley's K-function analysis on imported coordinates
-  - Nearest neighbor distance statistics
-  - Clustering indices calculation
-
-- **spatial_summary_stats.b.R**
-  - Summary statistics of spatial distributions
-  - Distance metrics between cell types
-  - Density calculations per region
-  - Export results as tabular data
-
-**Data Requirements**:
-- Table with columns: Cell_ID, X_coordinate, Y_coordinate, Cell_Type
-- Pre-segmented cell data exported from image analysis platforms
-- ROI identifiers for multi-region analysis
-
-### 📊 **2. ROI and WSI Hierarchical Analysis** (`hierarchicalpathology`)
-**Target Packages**: `lme4`, `nlme`, `glmmTMB`
-
-#### New Functions:
-- **roi_hierarchical.b.R**
-  - Three-level mixed models (Patient > Slide > ROI)
-  - Variance component analysis for multi-ROI studies
-  - Intraclass correlation for reproducibility
-  - Random slopes for ROI-specific effects
-
-**Applications**:
-- Multi-ROI biomarker quantification
-- Whole-slide heterogeneity assessment
-- Technical vs. biological variance partitioning
 
 ## Phase 2: Image-Derived Metrics Analysis (Months 5-8)
 
-### 🎯 **3. Diagnostic Test Meta-Analysis for Pathology** (`diagnosticmeta`)
-**Target Packages**: `mada`, `meta`, `metafor`
-
-#### New Functions:
-- **pathology_meta.b.R**
-  - Bivariate random-effects model for sensitivity/specificity
-  - HSROC curves for diagnostic accuracy
-  - Meta-regression for heterogeneity sources
-  - Publication bias assessment
-
-**Applications**:
-- AI algorithm performance meta-analysis
-- Biomarker diagnostic accuracy synthesis
-- Inter-study validation
 
 ### 📈 **4. Classification Performance Metrics** (`mlpathology`)
 **Target Packages**: `pROC`, `MLmetrics`, `caret`
@@ -2234,3 +1971,273 @@ transplant_packages <- c(
 This comprehensive plan transforms ClinicoPath from a statistical tool into the definitive platform for anatomic pathology research. By providing specialized methods for every subspecialty while maintaining a unified framework, we empower pathologists to conduct rigorous, reproducible research that directly impacts patient care. The modular architecture ensures scalability, the open-source approach fosters innovation, and the focus on user experience removes barriers to advanced statistical analysis.
 
 The ultimate goal: Every pathologist, regardless of statistical expertise, can perform publication-quality analyses that advance the field and improve patient outcomes.
+
+
+
+# 🎯 ClinicoPath Survival Analysis Enhancement Roadmap
+
+## Status Overview (Updated: January 2025)
+
+### ✅ **Already Implemented** (Current Session)
+
+1. **Enhanced Competing Risks** (`competingsurvival.b.R`) - Gray's test, Fine-Gray models
+2. **Cure Models** (`curemodels.b.R`) - Mixture/non-mixture models for long-term survivors  
+3. **Multistate Models** (`multistatesurvival.b.R`) - Disease progression tracking
+4. **Machine Learning Survival** (Enhanced `multisurvival.a.yaml`) - RSF, XGBoost, SHAP, ensemble methods
+5. **Relative Survival** (`relativesurvival.b.R`) - Population-based survival comparison
+
+### 🚀 **Implementation Queue: High-Impact Features** (Priority Order)
+
+#### **Phase 1: Core Validation & Modeling (Next 2 months)**
+
+##### **1. Advanced Model Validation Suite** (`pec`, `timeROC`, `survAUC`)
+
+```yaml
+Module: survivalvalidation.a.yaml / survivalvalidation.b.R
+Priority: 🔥 Critical
+Dependencies: pec, timeROC, survAUC, riskRegression
+
+Key Features:
+- Prediction Error Curves (PEC)
+- Time-dependent ROC/AUC curves
+- Integrated Brier Score (IBS)
+- Calibration plots with slopes/intercepts
+- Cross-validated Concordance Index
+- Decision curve analysis
+- Bootstrap validation
+- Apparent vs optimism-corrected performance
+
+Clinical Impact:
+- Essential quality assurance for all survival models
+- Model comparison and selection
+- Publication-ready validation metrics
+- Regulatory compliance (FDA, EMA)
+```
+
+##### **2. Joint Longitudinal-Survival Models** (`JMbayes2`, `joineR`)
+
+```yaml
+Module: jointmodeling.a.yaml / jointmodeling.b.R
+Priority: 🔥 Critical
+Dependencies: JMbayes2, joineR, rstanarm, nlme
+
+Key Features:
+- Link repeated biomarker measurements to survival
+- Dynamic risk prediction updates
+- Individual-specific survival trajectories
+- Time-varying biomarker effects
+- Bayesian joint modeling framework
+- Multi-marker joint models
+- Dynamic discrimination indices
+
+Clinical Impact:
+- Personalized medicine applications
+- Dynamic biomarker utilization
+- Precision oncology
+- Treatment monitoring
+```
+
+##### **3. Time-Dependent Covariates & ROC** (`timeROC`, `pROC`, `plotROC`)
+
+```yaml
+Module: timedependent.a.yaml / timedependent.b.R
+Priority: 🔥 High  
+Dependencies: timeROC, pROC, plotROC, survival
+
+Key Features:
+- Time-varying coefficient models
+- Landmark analysis framework
+- Dynamic AUC curves over time
+- Optimal cutpoint selection over time
+- Time-dependent associations
+- Schoenfeld residuals analysis
+- Time-stratified models
+
+Clinical Impact:
+- Dynamic prediction capabilities
+- Screening program optimization
+- Time-varying treatment effects
+- Adaptive clinical decision making
+```
+
+#### **Phase 2: Specialized Models (Months 3-4)**
+
+##### **4. Frailty & Random Effects Models** (`coxme`, `frailtypack`, `parfm`)
+
+```yaml
+Module: frailtymodels.a.yaml / frailtymodels.b.R
+Priority: ⚡ High
+Dependencies: coxme, frailtypack, parfm, survival
+
+Key Features:
+- Shared frailty models (gamma, lognormal)
+- Correlated frailty for family studies
+- Random effects for clustering
+- Multi-level survival models
+- Center effects in multicenter trials
+- Spatial frailty models
+- Nested frailty structures
+
+Clinical Impact:
+- Multi-center clinical trials
+- Family-based genetic studies
+- Geographic health disparities
+- Institutional quality assessment
+```
+
+##### **5. Pseudo-Observations Methods** (`pseudo`, `geepack`)
+
+```yaml
+Module: pseudoobs.a.yaml / pseudoobs.b.R
+Priority: ⚡ Medium
+Dependencies: pseudo, geepack, prodlim
+
+Key Features:
+- Pseudo-values for survival probability
+- Restricted Mean Survival Time (RMST) regression
+- Cumulative incidence regression
+- GEE models for survival outcomes
+- Direct covariate effects on survival probability
+- Flexible modeling of survival curves
+
+Clinical Impact:
+- Alternative to Cox proportional hazards
+- Direct interpretation of survival probability
+- Robust inference for clustered data
+- Flexible survival curve modeling
+```
+
+##### **6. Interval-Censored Survival** (`icenReg`, `interval`, `survPresmooth`)
+
+```yaml
+Module: intervalcensored.a.yaml / intervalcensored.b.R
+Priority: ⚡ Medium
+Dependencies: icenReg, interval, survPresmooth, Icens
+
+Key Features:
+- Turnbull estimator (NPMLE)
+- Parametric interval-censored models
+- Semi-parametric approaches
+- Smoothed survival curve estimation
+- Regression models for interval-censored data
+- Goodness of fit tests
+
+Clinical Impact:
+- Real-world data analysis
+- Screening studies (time to detection)
+- Disease onset modeling
+- Laboratory test intervals
+```
+
+#### **Phase 3: Advanced Clinical Applications (Months 5-6)**
+
+##### **7. Recurrent Event Analysis** (`reda`, `reReg`, `survrec`)
+
+```yaml
+Module: recurrentevents.a.yaml / recurrentevents.b.R
+Priority: ✨ Medium
+Dependencies: reda, reReg, survrec, frailtypack
+
+Key Features:
+- Andersen-Gill counting process models
+- Prentice-Williams-Peterson models
+- Frailty models for recurrent events
+- Mean cumulative function (MCF)
+- Gap time vs calendar time models
+- Terminal event modeling
+
+Clinical Impact:
+- Cancer recurrence studies
+- Chronic disease exacerbations
+- Hospital readmissions
+- Infection recurrences
+```
+
+##### **8. Advanced Biomarker Integration** (`survcomp`, `Biomarker`)
+
+```yaml
+Module: biomarkersurvival.a.yaml / biomarkersurvival.b.R
+Priority: ✨ Medium
+Dependencies: survcomp, Biomarker, OptimalCutpoints
+
+Key Features:
+- Biomarker cut-point optimization
+- Time-dependent biomarker modeling
+- Multiple biomarker integration
+- Predictive vs prognostic analysis
+- Biomarker signature development
+- Cross-validation for biomarkers
+
+Clinical Impact:
+- Precision medicine
+- Companion diagnostics
+- Treatment selection
+- Prognostic tool development
+```
+
+#### **Phase 4: Research & Specialized Methods (Future)**
+
+##### **9. Bayesian Survival Analysis** (`rstanarm`, `brms`, `INLA`)
+
+```yaml
+Module: bayesiansurvival.a.yaml / bayesiansurvival.b.R
+Priority: ✨ Research
+Dependencies: rstanarm, brms, INLA, rstan
+
+Key Features:
+- Bayesian Cox models
+- Prior specification interfaces
+- Posterior predictive checks
+- MCMC diagnostics and convergence
+- Bayesian model averaging
+- Hierarchical survival models
+
+Clinical Impact:
+- Uncertainty quantification
+- Prior knowledge incorporation
+- Small sample studies
+- Meta-analysis applications
+```
+
+##### **10. Causal Survival Analysis** (`CausalImpact`, `MatchIt`, `WeightIt`)
+
+```yaml
+Module: causalsurvival.a.yaml / causalsurvival.b.R
+Priority: ✨ Research
+Dependencies: CausalImpact, MatchIt, WeightIt, tmle
+
+Key Features:
+- Propensity score matching for survival
+- Instrumental variable survival analysis
+- G-methods (G-formula, IPW, G-estimation)
+- Marginal structural models
+- Targeted maximum likelihood estimation
+
+Clinical Impact:
+- Observational study causal inference
+- Treatment effectiveness evaluation
+- Health policy evaluation
+- Real-world evidence generation
+```
+
+##### **11. Spatial Survival Models** (`spBayesSurv`, `geoR`)
+
+```yaml
+Module: spatialsurvival.a.yaml / spatialsurvival.b.R
+Priority: ✨ Specialized
+Dependencies: spBayesSurv, geoR, sp, spdep
+
+Key Features:
+- Geographic survival modeling
+- Spatial clustering detection
+- Environmental factor integration
+- Disease mapping
+- Spatial frailty models
+
+Clinical Impact:
+- Geographic health disparities
+- Environmental epidemiology
+- Cancer clusters investigation
+- Health services research
+```
+

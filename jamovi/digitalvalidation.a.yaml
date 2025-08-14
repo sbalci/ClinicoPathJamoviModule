@@ -1,0 +1,165 @@
+---
+name: digitalvalidation
+title: Digital Pathology Validation
+menuGroup: OncoPathologyT
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: reference
+      title: Reference Method
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            reference/gold standard measurements
+
+    - name: test
+      title: Test Method
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            test method measurements to be validated
+
+    - name: platform_var
+      title: Platform/Batch Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            platform or batch identifier for stratified analysis
+
+    - name: validation_type
+      title: Validation Type
+      type: List
+      options:
+        - name: analytical
+          title: 'Analytical Validation'
+        - name: clinical
+          title: 'Clinical Validation'
+        - name: both
+          title: 'Both Analytical and Clinical'
+      default: both
+      description:
+          R: >
+            type of validation analysis to perform
+
+    - name: acceptance_criteria
+      title: Acceptance Criteria
+      type: List
+      options:
+        - name: fda_strict
+          title: 'FDA Strict (r≥0.95, ICC≥0.90)'
+        - name: fda_standard
+          title: 'FDA Standard (r≥0.90, ICC≥0.75)'
+        - name: clsi_ep09
+          title: 'CLSI EP09 Guidelines'
+        - name: custom
+          title: 'Custom Criteria'
+      default: fda_standard
+      description:
+          R: >
+            regulatory acceptance criteria for validation
+
+    - name: custom_correlation_threshold
+      title: Minimum Correlation
+      type: Number
+      min: 0.70
+      max: 0.99
+      default: 0.90
+      description:
+          R: >
+            minimum acceptable correlation coefficient
+
+    - name: custom_icc_threshold
+      title: Minimum ICC
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.75
+      description:
+          R: >
+            minimum acceptable ICC value
+
+    - name: bias_assessment
+      title: Bias Assessment
+      type: Bool
+      default: true
+      description:
+          R: >
+            perform systematic and proportional bias assessment
+
+    - name: decision_threshold1
+      title: Clinical Decision Threshold 1
+      type: Number
+      default: 0
+      description:
+          R: >
+            first clinical threshold for decision impact analysis
+
+    - name: decision_threshold2
+      title: Clinical Decision Threshold 2
+      type: Number
+      default: 0
+      description:
+          R: >
+            second clinical threshold for decision impact analysis
+
+    - name: decision_threshold3
+      title: Clinical Decision Threshold 3
+      type: Number
+      default: 0
+      description:
+          R: >
+            third clinical threshold for decision impact analysis
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            use bootstrap method for robust confidence intervals
+
+    - name: bootstrap_n
+      title: Bootstrap Replicates
+      type: Integer
+      min: 500
+      max: 5000
+      default: 1000
+      description:
+          R: >
+            number of bootstrap replicates
+
+    - name: show_validation_plots
+      title: Show Validation Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            display validation and residual plots
+
+    - name: generate_report
+      title: Generate Validation Report
+      type: Bool
+      default: true
+      description:
+          R: >
+            generate comprehensive validation report
+
+...

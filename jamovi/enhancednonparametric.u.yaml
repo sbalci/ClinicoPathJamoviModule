@@ -1,0 +1,80 @@
+title: Enhanced Non-Parametric Tests
+name: enhancednonparametric
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Dependent Variable
+        children:
+          - type: VariablesListBox
+            name: dependent
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: grouping
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Test Options
+          - type: CheckBox
+            name: mann_whitney
+          - type: CheckBox
+            name: kruskal_wallis
+          - type: CheckBox
+            name: posthoc_dunn
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Multiple Comparison Correction
+          - type: ComboBox
+            name: correction_method
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Analysis Options
+          - type: CheckBox
+            name: assumptions
+          - type: CheckBox
+            name: effect_sizes
+          - type: CheckBox
+            name: descriptives
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Visualization
+          - type: CheckBox
+            name: show_plots
+          - type: ComboBox
+            name: plot_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_samples
+        format: number

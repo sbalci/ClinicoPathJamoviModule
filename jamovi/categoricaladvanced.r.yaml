@@ -1,0 +1,127 @@
+---
+name: categoricaladvanced
+title: Enhanced Chi-Square and Fisher's Tests
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Getting Started
+      type: Html
+      visible: true
+
+    - name: contingencytable
+      title: Contingency Table
+      type: Table
+      clearWith:
+          - rows
+          - cols
+          - stratify
+          - show_expected
+      columns: []
+
+    - name: chisquaretest
+      title: Chi-Square Tests
+      type: Table
+      clearWith:
+          - rows
+          - cols
+          - test_type
+          - fisher_exact
+          - simulation_runs
+      columns: []
+
+    - name: fishertest
+      title: Fisher's Exact Test
+      type: Table
+      visible: (fisher_exact)
+      clearWith:
+          - rows
+          - cols
+          - stratify
+          - simulation_runs
+      columns: []
+
+    - name: effectsizes
+      title: Effect Sizes and Association Strength
+      type: Table
+      visible: (effect_sizes)
+      clearWith:
+          - rows
+          - cols
+          - effect_sizes
+          - confidence_level
+      columns: []
+
+    - name: associations
+      title: Association Measures
+      type: Table
+      visible: (association_measures)
+      clearWith:
+          - rows
+          - cols
+          - stratify
+          - association_measures
+      columns: []
+
+    - name: residuals
+      title: Standardized Residuals
+      type: Table
+      visible: (residual_analysis)
+      clearWith:
+          - rows
+          - cols
+          - residual_analysis
+      columns: []
+
+    - name: posthoc
+      title: Post Hoc Pairwise Comparisons
+      type: Table
+      visible: (posthoc_comparisons)
+      clearWith:
+          - rows
+          - cols
+          - posthoc_comparisons
+          - correction_method
+      columns: []
+
+    - name: stratifiedanalysis
+      title: Stratified Analysis Results
+      type: Table
+      visible: (test_type:stratified && stratify)
+      clearWith:
+          - rows
+          - cols
+          - stratify
+          - test_type
+      columns: []
+
+    - name: mosaicplot
+      title: Mosaic Plot
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_mosaic)
+      requiresData: true
+      clearWith:
+          - rows
+          - cols
+          - stratify
+          - plot_mosaic
+
+    - name: residualsplot
+      title: Standardized Residuals Plot
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_residuals && residual_analysis)
+      requiresData: true
+      clearWith:
+          - rows
+          - cols
+          - residual_analysis
+          - plot_residuals
+
+    - name: interpretation
+      title: Clinical Interpretation and Guidelines
+      type: Html
+      visible: true

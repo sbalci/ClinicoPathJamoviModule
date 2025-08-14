@@ -1,0 +1,71 @@
+---
+name: pathologycomposition
+title: Pathology Composition Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Getting Started
+      type: Html
+      visible: true
+
+    - name: componentanalysis
+      title: Individual Component Analysis
+      type: Table
+      clearWith:
+          - outcome_variable
+          - component1
+          - component2
+          - component3
+          - component4
+          - confidence_level
+          - trend_test
+      columns: []
+
+    - name: compositionrisk
+      title: Composition Risk Analysis
+      type: Table
+      visible: (composition_analysis)
+      clearWith:
+          - outcome_variable
+          - component1
+          - component2
+          - component3
+          - component4
+          - composition_analysis
+          - confidence_level
+      columns: []
+
+    - name: optimalcompositions
+      title: Optimal Composition Patterns
+      type: Table
+      visible: (optimal_composition)
+      clearWith:
+          - outcome_variable
+          - component1
+          - component2
+          - component3
+          - component4
+          - optimal_composition
+          - low_risk_threshold
+          - high_risk_threshold
+          - min_group_size
+      columns: []
+
+    - name: compositionplot
+      title: Composition Risk Visualization
+      type: Image
+      width: 600
+      height: 500
+      visible: (composition_plot && component1 && component2)
+      requiresData: true
+      clearWith:
+          - outcome_variable
+          - component1
+          - component2
+          - composition_plot
+
+    - name: interpretation
+      title: Clinical Interpretation and Guidelines
+      type: Html
+      visible: true

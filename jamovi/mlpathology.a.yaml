@@ -1,0 +1,188 @@
+---
+name: mlpathology
+title: Classification Performance Metrics for Digital Pathology
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive evaluation of machine learning models and algorithms for 
+        digital pathology applications. Provides classification metrics, ROC analysis, 
+        segmentation quality assessment, and statistical model comparison for AI 
+        validation and algorithm comparison studies.
+    R:
+        dontrun: false
+        usage: |
+            data('classification_results')
+            
+            mlpathology(data = classification_results,
+                       analysis_type = 'classification',
+                       actual_labels = actual,
+                       predicted_labels = predicted,
+                       predicted_probabilities = prob)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+          - name: 'classification'
+            title: Classification Analysis
+          - name: 'segmentation'
+            title: Segmentation Analysis
+          - name: 'comparison'
+            title: Model Comparison
+      default: classification
+      description:
+          R: Type of performance analysis to conduct
+
+    - name: actual_labels
+      title: Actual Labels
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: True/actual classification labels
+
+    - name: predicted_labels
+      title: Predicted Labels
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Predicted classification labels from model
+
+    - name: predicted_probabilities
+      title: Predicted Probabilities
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Predicted probabilities for ROC analysis (binary classification)
+
+    - name: reference_segmentation
+      title: Reference Segmentation
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Reference/ground truth segmentation masks (binary)
+
+    - name: predicted_segmentation
+      title: Predicted Segmentation
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Predicted segmentation masks from model (binary)
+
+    - name: model1_predictions
+      title: Model 1 Predictions
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Predictions from first model for comparison
+
+    - name: model2_predictions
+      title: Model 2 Predictions
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Predictions from second model for comparison
+
+    - name: model1_probabilities
+      title: Model 1 Probabilities
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Probabilities from first model for ROC comparison
+
+    - name: model2_probabilities
+      title: Model 2 Probabilities
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Probabilities from second model for ROC comparison
+
+    - name: roc_analysis
+      title: ROC Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform ROC curve analysis for binary classification
+
+    - name: roc_comparison
+      title: ROC Curve Comparison
+      type: Bool
+      default: false
+      description:
+          R: Compare ROC curves between two models using DeLong's test
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for performance metrics
+
+    - name: confusion_matrix_plot
+      title: Confusion Matrix Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate confusion matrix heatmap
+
+    - name: roc_plot
+      title: ROC Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate ROC curve plot
+
+    - name: bootstrap_validation
+      title: Bootstrap Validation
+      type: Bool
+      default: false
+      description:
+          R: Use bootstrap sampling for confidence intervals
+
+    - name: bootstrap_runs
+      title: Bootstrap Runs
+      type: Integer
+      min: 100
+      max: 5000
+      default: 1000
+      description:
+          R: Number of bootstrap replicates for validation

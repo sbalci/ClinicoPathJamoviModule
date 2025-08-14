@@ -1,0 +1,133 @@
+---
+name: haralicktexture
+title: Haralick Texture Analysis
+jrs: '1.1'
+
+items:
+    - name: interpretation
+      title: Clinical Context and Interpretation
+      type: Html
+      visible: true
+
+    - name: texturetable
+      title: Texture Feature Statistics
+      type: Table
+      description: Descriptive statistics for each texture feature
+      columns: []
+      clearWith:
+          - texture_vars
+          - analysis_type
+
+    - name: correlationtable
+      title: Feature Correlation Matrix
+      type: Table
+      description: Correlation between texture features
+      columns: []
+      visible: (correlation_analysis)
+      clearWith:
+          - texture_vars
+          - correlation_analysis
+
+    - name: groupcomparisontable
+      title: Group Comparison Results
+      type: Table
+      description: Statistical comparison across groups
+      columns: []
+      visible: (group_comparison && group_var)
+      clearWith:
+          - texture_vars
+          - group_var
+          - group_comparison
+
+    - name: normalitytable
+      title: Normality Testing Results
+      type: Table
+      description: Shapiro-Wilk and other normality tests
+      columns: []
+      visible: (normality_testing)
+      clearWith:
+          - texture_vars
+          - normality_testing
+
+    - name: outliertable
+      title: Outlier Detection Results
+      type: Table
+      description: Identified outliers in texture features
+      columns: []
+      visible: (outlier_detection)
+      clearWith:
+          - texture_vars
+          - outlier_detection
+
+    - name: distributionplot
+      title: Distribution Plots
+      type: Image
+      description: Histogram and density plots for texture features
+      width: 700
+      height: 500
+      visible: (show_plots)
+      requiresData: true
+      clearWith:
+          - texture_vars
+          - show_plots
+
+    - name: heatmapplot
+      title: Feature Correlation Heatmap
+      type: Image
+      description: Visual correlation matrix between features
+      width: 600
+      height: 600
+      visible: (show_heatmaps && correlation_analysis)
+      requiresData: true
+      clearWith:
+          - texture_vars
+          - show_heatmaps
+          - correlation_analysis
+
+    - name: boxplot
+      title: Group Comparison Boxplots
+      type: Image
+      description: Boxplots comparing texture features across groups
+      width: 600
+      height: 400
+      visible: (show_plots && group_comparison && group_var)
+      requiresData: true
+      clearWith:
+          - texture_vars
+          - group_var
+          - group_comparison
+
+    - name: clinicalrelevance
+      title: Clinical Relevance Assessment
+      type: Group
+      visible: (generate_interpretation)
+      items:
+          - name: clinicalinterpretation
+            title: Clinical Interpretation
+            type: Html
+            description: Context-specific clinical interpretation
+
+          - name: prognosticsummary
+            title: Prognostic Summary
+            type: Table
+            description: Prognostic relevance of texture features
+            columns: []
+
+    - name: qualityassessment
+      title: Data Quality Assessment
+      type: Group
+      visible: true
+      items:
+          - name: missingdata
+            title: Missing Data Summary
+            type: Table
+            description: Missing data patterns and impact
+            columns: []
+
+          - name: variability
+            title: Variability Assessment
+            type: Table
+            description: Coefficient of variation and reliability
+            columns: []
+
+...

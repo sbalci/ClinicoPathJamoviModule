@@ -1,0 +1,193 @@
+---
+name: multiplexanalysis
+title: Multiplex Immunofluorescence Analysis
+jrs: '1.1'
+
+items:
+    - name: interpretation
+      title: Analysis Overview and Clinical Context
+      type: Html
+      visible: true
+
+    - name: expressiontable
+      title: Marker Expression Summary
+      type: Table
+      columns: []
+      description: Descriptive statistics for each biomarker
+      clearWith:
+          - marker_vars
+          - positivity_cutpoint
+          - normalization_method
+
+    - name: correlationtable
+      title: Co-expression Analysis
+      type: Table
+      columns: []
+      description: Pairwise correlations between biomarkers
+      clearWith:
+          - marker_vars
+          - correlation_method
+          - multiple_testing
+
+    - name: clusteringtable
+      title: Cell Population Clustering
+      type: Table
+      columns: []
+      description: Identified cell clusters and phenotype suggestions
+      visible: (perform_clustering)
+      clearWith:
+          - marker_vars
+          - perform_clustering
+          - n_clusters
+
+    - name: pcatable
+      title: Principal Component Analysis
+      type: Table
+      columns: []
+      description: PCA results and variance explained
+      visible: (perform_pca)
+      clearWith:
+          - marker_vars
+          - perform_pca
+
+    - name: correlationplot
+      title: Marker Correlation Matrix
+      type: Image
+      description: Heatmap showing pairwise marker correlations
+      width: 600
+      height: 500
+      visible: (show_plots)
+      requiresData: true
+      clearWith:
+          - marker_vars
+          - correlation_method
+          - show_plots
+
+    - name: heatmapplot
+      title: Expression Heatmap
+      type: Image  
+      description: Comprehensive marker expression patterns
+      width: 600
+      height: 500
+      visible: (show_plots)
+      requiresData: true
+      clearWith:
+          - marker_vars
+          - show_plots
+          - normalization_method
+
+    - name: pcaplot
+      title: Principal Component Analysis Plot
+      type: Image
+      description: PCA visualization with optional loading vectors
+      width: 600
+      height: 500
+      visible: (perform_pca && show_plots)
+      requiresData: true
+      clearWith:
+          - marker_vars
+          - perform_pca
+          - show_plots
+          - show_loadings
+
+    - name: clusterplot
+      title: Cluster Analysis Plot
+      type: Image
+      description: Visualization of identified cell populations
+      width: 600
+      height: 500
+      visible: (perform_clustering && show_clustering_plots)
+      requiresData: true
+      clearWith:
+          - marker_vars
+          - perform_clustering
+          - show_clustering_plots
+          - n_clusters
+
+    - name: spatialanalysis
+      title: Spatial Proximity Analysis
+      type: Group
+      visible: (spatial_analysis && x_coord && y_coord)
+      items:
+          - name: proximityresults
+            title: Cell-Cell Proximity Statistics
+            type: Table
+            columns: []
+            description: Distance-based interaction analysis
+
+          - name: spatialplot
+            title: Spatial Distribution Plot
+            type: Image
+            width: 600
+            height: 500
+
+    - name: immunecontexture
+      title: Immune Contexture Scoring
+      type: Group
+      visible: (immune_contexture)
+      items:
+          - name: immunescores
+            title: Immunoscore Results
+            type: Table
+            columns: []
+            description: T-cell infiltration and immune context metrics
+
+          - name: immuneplot
+            title: Immune Profile Visualization
+            type: Image
+            width: 500
+            height: 400
+
+    - name: diversityanalysis
+      title: Cellular Diversity Metrics
+      type: Group
+      visible: (diversity_metrics)
+      items:
+          - name: diversitytable
+            title: Diversity Index Results
+            type: Table
+            columns: []
+            description: Shannon, Simpson, and evenness indices
+
+    - name: qualitycontrol
+      title: Quality Control Assessment
+      type: Group
+      visible: true
+      items:
+          - name: qcmetrics
+            title: Data Quality Metrics
+            type: Table
+            columns: []
+            description: Missing data, outliers, and technical quality
+
+          - name: batcheffects
+            title: Batch Effect Assessment
+            type: Table
+            columns: []
+            description: Analysis of systematic technical variation
+
+    - name: advancedanalysis
+      title: Advanced Statistical Analysis
+      type: Group
+      visible: (biomarker_panel:immune || analysis_focus:comprehensive)
+      items:
+          - name: networkanalysis
+            title: Marker Network Analysis
+            type: Table
+            columns: []
+            description: Network-based marker interaction analysis
+
+          - name: pathwayenrichment
+            title: Pathway Enrichment Results
+            type: Table
+            columns: []
+            description: Biological pathway associations
+
+    - name: exportdata
+      title: Export-Ready Results
+      type: Table
+      columns: []
+      visible: false
+      description: Formatted data for external analysis
+
+...

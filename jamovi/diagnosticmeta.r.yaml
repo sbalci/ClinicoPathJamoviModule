@@ -1,0 +1,135 @@
+---
+name: diagnosticmeta
+title: Diagnostic Test Meta-Analysis for Pathology
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Getting Started
+      type: Html
+      visible: true
+
+    - name: bivariateresults
+      title: Bivariate Meta-Analysis Results
+      type: Table
+      visible: (bivariate_analysis)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+          - confidence_level
+          - method
+      columns: []
+
+    - name: hsrocresults
+      title: HSROC Model Results
+      type: Table
+      visible: (hsroc_analysis)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+          - method
+      columns: []
+
+    - name: heterogeneity
+      title: Heterogeneity Assessment
+      type: Table
+      visible: (heterogeneity_analysis)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+          - method
+      columns: []
+
+    - name: metaregression
+      title: Meta-Regression Results
+      type: Table
+      visible: (meta_regression && covariate)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+          - covariate
+          - method
+      columns: []
+
+    - name: publicationbias
+      title: Publication Bias Assessment
+      type: Table
+      visible: (publication_bias)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+      columns: []
+
+    - name: individualstudies
+      title: Individual Study Results
+      type: Table
+      visible: (show_individual_studies)
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+      columns: []
+
+    - name: forestplot
+      title: Forest Plot
+      type: Image
+      width: 800
+      height: 600
+      visible: (forest_plot)
+      requiresData: true
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+
+    - name: srocplot
+      title: Summary ROC Plot
+      type: Image
+      width: 600
+      height: 600
+      visible: (sroc_plot)
+      requiresData: true
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+
+    - name: funnelplot
+      title: Funnel Plot for Publication Bias
+      type: Image
+      width: 600
+      height: 500
+      visible: (funnel_plot && publication_bias)
+      requiresData: true
+      clearWith:
+          - study
+          - true_positives
+          - false_positives
+          - false_negatives
+          - true_negatives
+
+    - name: interpretation
+      title: Clinical Interpretation and Guidelines
+      type: Html
+      visible: true

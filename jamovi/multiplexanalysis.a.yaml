@@ -1,0 +1,265 @@
+---
+name: multiplexanalysis
+title: Multiplex Immunofluorescence Analysis
+menuGroup: OncoPathologyT
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: marker_vars
+      title: Marker Variables
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            expression levels or intensities for multiple biomarkers
+
+    - name: x_coord
+      title: X Coordinate (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            X spatial coordinates for proximity analysis
+
+    - name: y_coord
+      title: Y Coordinate (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Y spatial coordinates for proximity analysis
+
+    - name: cell_type_var
+      title: Cell Type Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            pre-defined cell type classifications
+
+    - name: sample_id_var
+      title: Sample ID Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - id
+      description:
+          R: >
+            unique identifier for samples/regions
+
+    - name: group_var
+      title: Group Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            grouping variable for comparative analysis
+
+    - name: analysis_focus
+      title: Analysis Focus
+      type: List
+      options:
+        - name: coexpression
+          title: 'Co-expression Analysis'
+        - name: phenotyping
+          title: 'Cell Phenotyping'
+        - name: spatial
+          title: 'Spatial Proximity'
+        - name: comprehensive
+          title: 'Comprehensive Analysis'
+      default: comprehensive
+      description:
+          R: >
+            primary focus of multiplex analysis
+
+    - name: correlation_method
+      title: Correlation Method
+      type: List
+      options:
+        - name: pearson
+          title: 'Pearson (Linear)'
+        - name: spearman
+          title: 'Spearman (Rank-based)'
+      default: pearson
+      description:
+          R: >
+            correlation method for co-expression analysis
+
+    - name: positivity_cutpoint
+      title: Positivity Cutpoint
+      type: Number
+      min: 0
+      default: 0.1
+      description:
+          R: >
+            threshold for defining positive marker expression
+
+    - name: perform_clustering
+      title: Perform Clustering Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            identify cell populations through clustering
+
+    - name: n_clusters
+      title: Number of Clusters
+      type: Integer
+      min: 0
+      max: 10
+      default: 0
+      description:
+          R: >
+            number of clusters (0 = auto-determine)
+
+    - name: perform_pca
+      title: Perform Principal Component Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            dimensionality reduction and visualization
+
+    - name: show_loadings
+      title: Show PCA Loadings
+      type: Bool
+      default: true
+      description:
+          R: >
+            display loading vectors on PCA plot
+
+    - name: immune_contexture
+      title: Calculate Immune Contexture Score
+      type: Bool
+      default: false
+      description:
+          R: >
+            calculate immunoscore and T-cell infiltration metrics
+
+    - name: diversity_metrics
+      title: Calculate Diversity Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Shannon and Simpson diversity for cellular composition
+
+    - name: spatial_analysis
+      title: Spatial Proximity Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            cell-cell interaction analysis (requires coordinates)
+
+    - name: proximity_threshold
+      title: Proximity Threshold (pixels)
+      type: Number
+      min: 1
+      max: 1000
+      default: 20
+      description:
+          R: >
+            distance threshold for defining cell proximity
+
+    - name: show_plots
+      title: Show Analysis Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            display correlation, PCA, and expression plots
+
+    - name: show_clustering_plots
+      title: Show Clustering Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            display cluster analysis visualizations
+
+    - name: biomarker_panel
+      title: Biomarker Panel Type
+      type: List
+      options:
+        - name: immune
+          title: 'Immune Panel'
+        - name: tumor
+          title: 'Tumor Markers'
+        - name: angiogenesis
+          title: 'Angiogenesis Panel'
+        - name: metabolism
+          title: 'Metabolic Markers'
+        - name: custom
+          title: 'Custom Panel'
+      default: custom
+      description:
+          R: >
+            type of biomarker panel for optimized analysis
+
+    - name: normalization_method
+      title: Data Normalization
+      type: List
+      options:
+        - name: none
+          title: 'No Normalization'
+        - name: zscore
+          title: 'Z-score Standardization'
+        - name: minmax
+          title: 'Min-Max Scaling'
+        - name: quantile
+          title: 'Quantile Normalization'
+      default: zscore
+      description:
+          R: >
+            normalization method for marker expressions
+
+    - name: multiple_testing
+      title: Multiple Testing Correction
+      type: List
+      options:
+        - name: none
+          title: 'No Correction'
+        - name: bonferroni
+          title: 'Bonferroni'
+        - name: fdr
+          title: 'False Discovery Rate (BH)'
+      default: fdr
+      description:
+          R: >
+            correction for multiple comparisons
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            confidence level for statistical intervals
+
+...

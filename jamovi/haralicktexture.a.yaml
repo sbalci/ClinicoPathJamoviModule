@@ -1,0 +1,212 @@
+---
+name: haralicktexture
+title: Haralick Texture Analysis
+menuGroup: OncoPathologyT
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: texture_features
+      title: Texture Features
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Haralick texture feature measurements (entropy, contrast, correlation, etc.)
+
+    - name: x_coord
+      title: X Coordinate (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            X spatial coordinate for spatial analysis
+
+    - name: y_coord
+      title: Y Coordinate (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Y spatial coordinate for spatial analysis
+
+    - name: group_var
+      title: Grouping Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            grouping variable for stratified analysis
+
+    - name: outcome_var
+      title: Outcome Variable (Optional)
+      type: Variable
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            clinical outcome for prognostic analysis
+
+    - name: analysis_focus
+      title: Analysis Focus
+      type: List
+      options:
+        - name: descriptive
+          title: 'Descriptive Statistics'
+        - name: correlation
+          title: 'Feature Correlation Analysis'
+        - name: spatial
+          title: 'Spatial Heterogeneity'
+        - name: prognostic
+          title: 'Prognostic Modeling'
+        - name: comprehensive
+          title: 'Comprehensive Analysis'
+      default: comprehensive
+      description:
+          R: >
+            primary focus of texture analysis
+
+    - name: feature_selection
+      title: Feature Selection Method
+      type: List
+      options:
+        - name: all
+          title: 'Use All Features'
+        - name: correlation_filter
+          title: 'Remove Highly Correlated (r>0.9)'
+        - name: variance_filter
+          title: 'Remove Low Variance Features'
+        - name: clinical_priority
+          title: 'Clinical Priority Features'
+      default: all
+      description:
+          R: >
+            method for feature selection/filtering
+
+    - name: correlation_threshold
+      title: Correlation Threshold
+      type: Number
+      min: 0.70
+      max: 0.99
+      default: 0.90
+      description:
+          R: >
+            threshold for identifying highly correlated features
+
+    - name: normality_testing
+      title: Test for Normality
+      type: Bool
+      default: true
+      description:
+          R: >
+            perform normality testing for distribution assessment
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            identify and flag potential outliers
+
+    - name: outlier_method
+      title: Outlier Detection Method
+      type: List
+      options:
+        - name: iqr
+          title: 'Interquartile Range (IQR)'
+        - name: zscore
+          title: 'Z-Score (±3 SD)'
+        - name: modified_zscore
+          title: 'Modified Z-Score'
+        - name: isolation_forest
+          title: 'Isolation Forest'
+      default: iqr
+      description:
+          R: >
+            method for outlier detection
+
+    - name: show_distribution_plots
+      title: Show Distribution Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            display histograms and distribution plots
+
+    - name: show_correlation_plot
+      title: Show Correlation Heatmap
+      type: Bool
+      default: true
+      description:
+          R: >
+            display correlation matrix heatmap
+
+    - name: show_spatial_plot
+      title: Show Spatial Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            display spatial distribution plot (requires coordinates)
+
+    - name: texture_interpretation
+      title: Texture Interpretation Guide
+      type: List
+      options:
+        - name: basic
+          title: 'Basic Interpretation'
+        - name: clinical
+          title: 'Clinical Context'
+        - name: research
+          title: 'Research Applications'
+        - name: comprehensive
+          title: 'Comprehensive Guide'
+      default: clinical
+      description:
+          R: >
+            level of interpretation and guidance provided
+
+    - name: biomarker_context
+      title: Biomarker Context
+      type: List
+      options:
+        - name: ki67
+          title: 'Ki67 Proliferation'
+        - name: her2
+          title: 'HER2 Expression'
+        - name: pdl1
+          title: 'PD-L1 Expression'
+        - name: cd8
+          title: 'CD8+ T-cells'
+        - name: general
+          title: 'General Biomarker'
+        - name: custom
+          title: 'Custom Application'
+      default: general
+      description:
+          R: >
+            biomarker context for specialized interpretation
+
+...

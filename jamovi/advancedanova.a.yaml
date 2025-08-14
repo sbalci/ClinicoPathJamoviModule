@@ -1,0 +1,187 @@
+---
+name: advancedanova
+title: Advanced ANOVA Suite
+menuGroup: ClinicoPath
+menuSubgroup: Inferential
+menuTitle: Advanced ANOVA Suite
+menuSubtitle: Comprehensive ANOVA with enhanced post hoc testing
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: |
+        Advanced ANOVA analysis with comprehensive post hoc testing, 
+        effect sizes, and assumption checking. Addresses the critical issue 
+        where 68% of pathology studies fail proper multiple comparisons.
+    R:
+        dontrun: false
+        usage: |
+            data('ToothGrowth')
+            
+            advancedanova(data = ToothGrowth, 
+                         dependent = len, 
+                         fixed = supp)
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: dependent
+      title: Dependent Variable
+      type: Variable
+      suggested: 
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: The dependent variable from `data`, variable must be numeric
+
+    - name: fixed
+      title: Fixed Factors
+      type: Variables
+      suggested: 
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: The grouping variable(s) from `data`, variable(s) must be a factor
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: 
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Optional covariates for ANCOVA analysis
+
+    - name: wls
+      title: WLS Weights
+      type: Variable
+      suggested: 
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Optional weights for weighted least squares
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+          - name: "oneway"
+            title: "One-way ANOVA"
+          - name: "factorial"
+            title: "Factorial ANOVA"
+          - name: "ancova"
+            title: "ANCOVA"
+          - name: "repeated"
+            title: "Repeated Measures"
+      default: "oneway"
+      description:
+          R: Type of ANOVA model to fit
+
+    - name: posthoc_method
+      title: Post Hoc Method
+      type: List
+      options:
+          - name: "tukey"
+            title: "Tukey HSD"
+          - name: "games_howell"
+            title: "Games-Howell"
+          - name: "dunnett"
+            title: "Dunnett's Test"
+          - name: "bonferroni"
+            title: "Bonferroni"
+          - name: "holm"
+            title: "Holm"
+          - name: "all"
+            title: "All Methods"
+      default: "tukey"
+      description:
+          R: Post hoc comparison method
+
+    - name: control_group
+      title: Control Group
+      type: String
+      default: ""
+      description:
+          R: Control group for Dunnett's test comparisons
+
+    - name: assumptions
+      title: Check Assumptions
+      type: Bool
+      default: true
+      description:
+          R: Check and report ANOVA assumptions
+
+    - name: effect_sizes
+      title: Calculate Effect Sizes
+      type: Bool
+      default: true
+      description:
+          R: Calculate eta-squared, omega-squared, and Cohen's f
+
+    - name: descriptives
+      title: Descriptive Statistics
+      type: Bool
+      default: true
+      description:
+          R: Show descriptive statistics for each group
+
+    - name: show_plots
+      title: Generate Plots
+      type: Bool
+      default: true
+      description:
+          R: Generate diagnostic and comparison plots
+
+    - name: plot_type
+      title: Plot Type
+      type: List
+      options:
+          - name: "diagnostic"
+            title: "Diagnostic Plots"
+          - name: "means"
+            title: "Group Means Plot"
+          - name: "both"
+            title: "Both"
+      default: "both"
+      description:
+          R: Type of plots to generate
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for effect size confidence intervals
+
+    - name: alpha_level
+      title: Alpha Level
+      type: Number
+      min: 0.001
+      max: 0.1
+      default: 0.05
+      description:
+          R: Alpha level for significance testing
+
+    - name: welch_correction
+      title: Welch Correction
+      type: Bool
+      default: false
+      description:
+          R: Apply Welch correction for unequal variances
+
+    - name: robust_anova
+      title: Robust ANOVA
+      type: Bool
+      default: false
+      description:
+          R: Use robust ANOVA methods for non-normal data

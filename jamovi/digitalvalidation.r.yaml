@@ -1,0 +1,113 @@
+---
+name: digitalvalidation
+title: Digital Pathology Validation
+jrs: '1.1'
+
+items:
+    - name: interpretation
+      title: Validation Framework and Guidelines
+      type: Html
+      visible: true
+
+    - name: performancetable
+      title: Performance Metrics
+      type: Table
+      description: Comprehensive validation performance metrics
+      columns: []
+      clearWith:
+          - reference
+          - test
+          - validation_type
+
+    - name: biastable
+      title: Bias Assessment
+      type: Table
+      description: Systematic and proportional bias analysis
+      columns: []
+      visible: (bias_assessment)
+      clearWith:
+          - reference
+          - test
+          - bias_assessment
+
+    - name: agreementtable
+      title: Agreement Statistics
+      type: Table
+      description: ICC, CCC, and correlation measures
+      columns: []
+      clearWith:
+          - reference
+          - test
+          - acceptance_criteria
+
+    - name: thresholdtable
+      title: Clinical Decision Impact
+      type: Table
+      description: Impact at different clinical thresholds
+      columns: []
+      visible: (decision_threshold1 > 0 || decision_threshold2 > 0 || decision_threshold3 > 0)
+      clearWith:
+          - reference
+          - test
+          - decision_threshold1
+          - decision_threshold2
+          - decision_threshold3
+
+    - name: validationplot
+      title: Method Comparison Plot
+      type: Image
+      description: Scatter plot with regression and agreement lines
+      width: 600
+      height: 500
+      visible: (show_validation_plots)
+      requiresData: true
+      clearWith:
+          - reference
+          - test
+          - show_validation_plots
+
+    - name: blandaltmanplot
+      title: Bland-Altman Agreement Plot
+      type: Image
+      description: Agreement analysis with limits of agreement
+      width: 600
+      height: 500
+      visible: (show_validation_plots)
+      requiresData: true
+      clearWith:
+          - reference
+          - test
+          - show_validation_plots
+
+    - name: residualplot
+      title: Residual Analysis Plot
+      type: Image
+      description: Residual patterns for bias detection
+      width: 500
+      height: 400
+      visible: (show_validation_plots && bias_assessment)
+      requiresData: true
+      clearWith:
+          - reference
+          - test
+          - bias_assessment
+
+    - name: validationreport
+      title: Comprehensive Validation Report
+      type: Html
+      visible: (generate_report)
+      description: Complete validation report with regulatory framework
+      clearWith:
+          - generate_report
+
+    - name: acceptancesummary
+      title: Acceptance Criteria Summary
+      type: Table
+      description: Pass/fail status for regulatory criteria
+      columns: []
+      clearWith:
+          - acceptance_criteria
+          - custom_correlation_threshold
+          - custom_icc_threshold
+
+...
