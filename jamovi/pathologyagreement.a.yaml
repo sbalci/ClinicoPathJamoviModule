@@ -1,0 +1,100 @@
+---
+name: pathologyagreement
+title: Pathology Agreement Analysis
+menuGroup: OncoPathologyT
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: dep1
+      title: Method 1
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            a vector of numbers (the first measurement method)
+
+    - name: dep2
+      title: Method 2
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            a vector of numbers (the second measurement method)
+
+    - name: bootstrap_n
+      title: Bootstrap Replicates
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: >
+            number of bootstrap replicates for confidence intervals
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            confidence level for intervals (default 0.95 for 95% CI)
+
+    - name: show_plots
+      title: Show Agreement Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            show scatter plot and Bland-Altman plot
+
+    - name: icc_type
+      title: ICC Type
+      type: List
+      options:
+        - name: consistency
+          title: 'ICC(3,1) - Consistency'
+        - name: agreement
+          title: 'ICC(3,k) - Agreement'
+      default: consistency
+      description:
+          R: >
+            type of intraclass correlation coefficient to calculate
+
+    - name: correlation_method
+      title: Correlation Method
+      type: List
+      options:
+        - name: both
+          title: 'Both Pearson and Spearman'
+        - name: pearson
+          title: 'Pearson only'
+        - name: spearman
+          title: 'Spearman only'
+      default: both
+      description:
+          R: >
+            correlation method(s) to calculate
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            provide clinical interpretation of agreement statistics
+
+...

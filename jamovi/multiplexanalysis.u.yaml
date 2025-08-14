@@ -1,0 +1,175 @@
+title: Multiplex Immunofluorescence Analysis
+name: multiplexanalysis
+jus: '3.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Marker Variables
+        children:
+          - type: VariablesListBox
+            name: marker_vars
+            isTarget: true
+            itemDropBehaviour: insert
+
+      - type: TargetLayoutBox
+        label: Optional Variables
+        children:
+          - type: VariablesListBox
+            name: x_coord
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+          - type: VariablesListBox
+            name: y_coord
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+          - type: VariablesListBox
+            name: cell_type_var
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+          - type: VariablesListBox
+            name: sample_id_var
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+          - type: VariablesListBox
+            name: group_var
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Analysis Configuration
+            
+          - type: ComboBox
+            name: analysis_focus
+
+          - type: ComboBox
+            name: biomarker_panel
+
+          - type: ComboBox
+            name: correlation_method
+
+      - type: CollapseBox
+        label: Expression Analysis
+        collapsed: false
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: positivity_cutpoint
+                format: number
+                suffix: expression units
+
+              - type: ComboBox
+                name: normalization_method
+
+              - type: CheckBox
+                name: diversity_metrics
+
+      - type: CollapseBox
+        label: Clustering Analysis
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: perform_clustering
+
+              - type: TextBox
+                name: n_clusters
+                format: number
+                suffix: (0 = auto)
+                enable: (perform_clustering)
+
+      - type: CollapseBox
+        label: Principal Component Analysis
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: perform_pca
+
+              - type: CheckBox
+                name: show_loadings
+                enable: (perform_pca)
+
+      - type: CollapseBox
+        label: Spatial Analysis
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: spatial_analysis
+
+              - type: TextBox
+                name: proximity_threshold
+                format: number
+                suffix: pixels
+                enable: (spatial_analysis)
+
+      - type: CollapseBox
+        label: Immune Contexture
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: immune_contexture
+
+      - type: CollapseBox
+        label: Visualization Options
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_plots
+
+              - type: CheckBox
+                name: show_clustering_plots
+                enable: (perform_clustering)
+
+      - type: CollapseBox
+        label: Statistical Settings
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: multiple_testing
+
+              - type: TextBox
+                name: confidence_level
+                format: number
+                suffix: (0.80-0.99)
+
+...

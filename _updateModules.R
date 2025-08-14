@@ -91,6 +91,10 @@ copy_data_files <- modes$copy_data_files %||% TRUE
 copy_test_files <- modes$copy_test_files %||% TRUE
 copy_r_files <- modes$copy_r_files %||% TRUE
 
+# NAMESPACE-DESCRIPTION synchronization modes
+sync_namespace_description <- modes$sync_namespace_description %||% FALSE
+namespace_sync_dry_run <- modes$namespace_sync_dry_run %||% FALSE
+
 # Module-specific flags (extracted from config)
 ClinicoPathDescriptives_module <- modules_config$ClinicoPathDescriptives$enabled %||% FALSE
 jsurvival_module <- modules_config$jsurvival$enabled %||% FALSE
@@ -1464,6 +1468,13 @@ if (extended) {
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
+      
+      # NAMESPACE-DESCRIPTION synchronization for jjstatsplot
+      if (sync_namespace_description) {
+        cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
+        sync_namespace_with_description(jjstatsplot_dir, namespace_sync_dry_run)
+      }
+      
       jmvtools::prepare()
       devtools::document()
       cat("  📦 Installing...\n")
@@ -1496,6 +1507,13 @@ if (extended) {
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
+      
+      # NAMESPACE-DESCRIPTION synchronization for meddecide
+      if (sync_namespace_description) {
+        cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
+        sync_namespace_with_description(meddecide_dir, namespace_sync_dry_run)
+      }
+      
       jmvtools::prepare()
       devtools::document()
       cat("  📦 Installing...\n")
@@ -1528,6 +1546,13 @@ if (extended) {
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
+      
+      # NAMESPACE-DESCRIPTION synchronization for jsurvival
+      if (sync_namespace_description) {
+        cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
+        sync_namespace_with_description(jsurvival_dir, namespace_sync_dry_run)
+      }
+      
       jmvtools::prepare()
       devtools::document()
       cat("  📦 Installing...\n")
@@ -1560,6 +1585,13 @@ if (extended) {
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
+      
+      # NAMESPACE-DESCRIPTION synchronization for ClinicoPathDescriptives
+      if (sync_namespace_description) {
+        cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
+        sync_namespace_with_description(ClinicoPathDescriptives_dir, namespace_sync_dry_run)
+      }
+      
       jmvtools::prepare()
       devtools::document()
       cat("  📦 Installing...\n")
@@ -1595,6 +1627,13 @@ if (extended) {
       jmvtools::prepare()
       cat("  📝 Documenting...\n")
       devtools::document()
+      
+      # NAMESPACE-DESCRIPTION synchronization for JamoviTest
+      if (sync_namespace_description) {
+        cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
+        sync_namespace_with_description(test_dir, namespace_sync_dry_run)
+      }
+      
       jmvtools::prepare()
       devtools::document()
       cat("  📦 Installing...\n")
@@ -1617,6 +1656,9 @@ if (extended) {
 }
 
 setwd(main_repo_dir)
+
+# NAMESPACE-DESCRIPTION synchronization now occurs within each module's processing block
+# This ensures updated DESCRIPTION files are used during the second jmvtools::prepare() and installation
 
 
 # if (!WIP & !extended) {

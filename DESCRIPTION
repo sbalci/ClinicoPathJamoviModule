@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.31.01
-Date: 2025-08-11
+Version: 0.0.31.02
+Date: 2025-08-13
 Authors@R: 
     person(given = "Serdar",
            family = "Balci",
@@ -90,6 +90,8 @@ Imports:
     zeallot,
     ez,
     metafor,
+    mada,
+    meta,
     rcompanion,
     WRS2,
     PMCMRplus,
@@ -130,6 +132,7 @@ Imports:
     MASS,
     ROCR,
     cutpointr,
+    maxstat,
     binom,
     pROC,
     plotROC,
@@ -161,6 +164,9 @@ Imports:
     tinytable,
     ggrain,
     performance,
+    lme4,
+    nlme,
+    glmmTMB,
     datefixR,
     anytime,
     TidyDensity,
@@ -170,6 +176,7 @@ Imports:
     randomForest,
     grafify,
     emmeans,
+    multcomp,
     crosstable,
     officer,
     gsDesign,
@@ -205,7 +212,12 @@ Imports:
     mutationtypes,
     rank,
     patchwork,
-    cardx
+    cardx,
+    spatstat,
+    spatstat.geom,
+    spatstat.explore,
+    PMCMRplus,
+    boot
 VignetteBuilder: 
     knitr, 
     tiff, 

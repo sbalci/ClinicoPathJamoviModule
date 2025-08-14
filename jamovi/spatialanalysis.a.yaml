@@ -1,0 +1,192 @@
+---
+name: spatialanalysis
+title: Spatial Statistics from Coordinates
+menuGroup: OncoPathologyT
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+      
+    - name: coords_x
+      title: X Coordinates
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        ui: Numeric variable containing X-axis spatial coordinates
+        R: >
+          X coordinate variable (numeric). Must contain spatial position data for each observation.
+
+    - name: coords_y  
+      title: Y Coordinates
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+        ui: Numeric variable containing Y-axis spatial coordinates
+        R: >
+          Y coordinate variable (numeric). Must contain spatial position data for each observation.
+
+    - name: cell_types
+      title: Cell Types (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+        ui: Optional categorical variable for cell type classification
+        R: >
+          Optional cell type variable for multi-type spatial analysis. 
+          Should be a factor or character variable identifying different cell populations.
+
+    - name: groups
+      title: Group Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+        ui: Optional grouping variable for comparative spatial analysis
+        R: >
+          Optional grouping variable for comparing spatial patterns between conditions 
+          (e.g., treatment vs control, tumor vs normal).
+
+    - name: roi_id
+      title: Region of Interest ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+        ui: Optional identifier for different regions of interest or tissue sections
+        R: >
+          Optional ROI identifier for analyzing multiple tissue regions separately.
+
+    # Analysis Options
+    - name: perform_ripley
+      title: Perform Ripley's K-function Analysis
+      type: Bool
+      default: true
+      description:
+        ui: Test for spatial clustering using Ripley's K-function at multiple distance scales
+        R: >
+          Perform Ripley's K-function analysis to detect spatial clustering or dispersion patterns.
+
+    - name: perform_nnd
+      title: Perform Nearest Neighbor Distance Analysis
+      type: Bool
+      default: true
+      description:
+        ui: Analyze nearest neighbor distances with Clark-Evans randomness test
+        R: >
+          Calculate nearest neighbor distances and perform Clark-Evans test for spatial randomness.
+
+    - name: perform_hotspot
+      title: Perform Hotspot Analysis
+      type: Bool
+      default: true
+      description:
+        ui: Identify spatial hotspots using kernel density estimation
+        R: >
+          Detect spatial hotspots using kernel density estimation and statistical thresholds.
+
+    - name: perform_interaction
+      title: Perform Multi-type Interaction Analysis
+      type: Bool
+      default: true
+      description:
+        ui: Analyze spatial interactions between different cell types (requires Cell Types variable)
+        R: >
+          Perform multi-type spatial interaction analysis when cell types are specified.
+
+    - name: show_plots
+      title: Show Spatial Plots
+      type: Bool
+      default: true
+      description:
+        ui: Generate spatial distribution visualizations
+        R: >
+          Create spatial distribution plots showing coordinate data with optional cell type coloring.
+
+    # Advanced Options
+    - name: analysis_scope
+      title: Analysis Scope
+      type: List
+      options:
+        - name: basic
+          title: Basic Spatial Statistics
+        - name: comprehensive
+          title: Comprehensive Analysis
+        - name: clinical
+          title: Clinical-Focused Analysis
+      default: comprehensive
+      description:
+        ui: Select the depth and focus of spatial analysis
+        R: >
+          Analysis scope: basic (core statistics), comprehensive (all methods), 
+          or clinical (pathology-focused interpretation).
+
+    - name: distance_method
+      title: Distance Calculation Method
+      type: List
+      options:
+        - name: euclidean
+          title: Euclidean Distance
+        - name: manhattan
+          title: Manhattan Distance
+      default: euclidean
+      description:
+        ui: Method for calculating distances between spatial points
+        R: >
+          Distance calculation method for spatial analysis.
+
+    - name: correction_method
+      title: Edge Correction Method
+      type: List
+      options:
+        - name: border
+          title: Border Correction
+        - name: isotropic
+          title: Isotropic Correction
+        - name: both
+          title: Both Methods
+      default: both
+      description:
+        ui: Edge correction method for spatial statistics
+        R: >
+          Edge correction method for handling boundary effects in spatial analysis.
+
+    - name: significance_level
+      title: Significance Level
+      type: Number
+      min: 0.001
+      max: 0.1
+      default: 0.05
+      description:
+        ui: Statistical significance level for hypothesis tests
+        R: >
+          Alpha level for statistical significance testing.
+
+    - name: min_points
+      title: Minimum Points Required
+      type: Integer
+      min: 5
+      max: 100
+      default: 10
+      description:
+        ui: Minimum number of coordinate points required for analysis
+        R: >
+          Minimum number of complete coordinate pairs required to perform spatial analysis.
+
+...

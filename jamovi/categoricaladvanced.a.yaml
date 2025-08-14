@@ -1,0 +1,172 @@
+---
+name: categoricaladvanced
+title: Enhanced Chi-Square and Fisher's Tests
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Enhanced categorical analysis with chi-square tests, Fisher's exact tests, 
+        effect sizes, and association measures. Addresses the critical issue where 
+        25% of pathology studies use categorical analysis incorrectly.
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology')
+            
+            categoricaladvanced(data = histopathology,
+                               rows = tumor_type,
+                               cols = grade)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: rows
+      title: Rows
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      description:
+          R: Row variable for the contingency table
+
+    - name: cols
+      title: Columns
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      description:
+          R: Column variable for the contingency table
+
+    - name: stratify
+      title: Stratify by
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      description:
+          R: Optional stratification variable for Mantel-Haenszel tests
+
+    - name: test_type
+      title: Analysis Type
+      type: List
+      options:
+          - name: 'basic'
+            title: Basic Chi-square
+          - name: 'enhanced'
+            title: Enhanced Analysis
+          - name: 'stratified'
+            title: Stratified Analysis
+      default: enhanced
+      description:
+          R: Type of categorical analysis to perform
+
+    - name: fisher_exact
+      title: Fisher's Exact Test
+      type: Bool
+      default: true
+      description:
+          R: Perform Fisher's exact test when appropriate
+
+    - name: effect_sizes
+      title: Effect Sizes
+      type: Bool
+      default: true
+      description:
+          R: Calculate effect sizes (Cramér's V, phi coefficient, Cohen's w)
+
+    - name: association_measures
+      title: Association Measures
+      type: Bool
+      default: true
+      description:
+          R: Calculate association measures (Lambda, Tau, Gamma)
+
+    - name: residual_analysis
+      title: Residual Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform standardized residual analysis
+
+    - name: posthoc_comparisons
+      title: Post Hoc Comparisons
+      type: Bool
+      default: false
+      description:
+          R: Perform pairwise comparisons for tables larger than 2×2
+
+    - name: correction_method
+      title: Multiple Correction
+      type: List
+      options:
+          - name: 'none'
+            title: None
+          - name: 'bonferroni'
+            title: Bonferroni
+          - name: 'holm'
+            title: Holm
+          - name: 'fdr'
+            title: False Discovery Rate
+      default: bonferroni
+      description:
+          R: Multiple testing correction method
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for effect size intervals
+
+    - name: exact_threshold
+      title: Exact Test Threshold
+      type: Integer
+      min: 5
+      max: 1000
+      default: 50
+      description:
+          R: Maximum total sample size for automatic exact tests
+
+    - name: simulation_runs
+      title: Monte Carlo Runs
+      type: Integer
+      min: 1000
+      max: 10000
+      default: 5000
+      description:
+          R: Number of Monte Carlo simulations for exact p-values
+
+    - name: show_expected
+      title: Show Expected Frequencies
+      type: Bool
+      default: true
+      description:
+          R: Display expected frequencies in contingency table
+
+    - name: plot_mosaic
+      title: Mosaic Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate mosaic plot showing association patterns
+
+    - name: plot_residuals
+      title: Residuals Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate standardized residuals plot

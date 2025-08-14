@@ -1,0 +1,101 @@
+name: pathologycomposition
+title: Pathology Composition Analysis
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: outcome_variable
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: component1
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: component2
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: component3
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: component4
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 2
+    children:
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: composition_analysis
+              - type: CheckBox
+                name: optimal_composition
+              - type: CheckBox
+                name: trend_test
+              - type: ComboBox
+                name: quantitative_categories
+      - type: Label
+        label: Risk Thresholds
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: low_risk_threshold
+                format: number
+                suffix: '%'
+              - type: TextBox
+                name: high_risk_threshold
+                format: number
+                suffix: '%'
+      - type: Label
+        label: Advanced Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: confidence_level
+                format: number
+                suffix: '%'
+      - type: Label
+        label: Visualization
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: composition_plot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: min_group_size
+        format: number

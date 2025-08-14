@@ -1,0 +1,177 @@
+---
+name: ihcscoring
+title: IHC Scoring Standardization
+jrs: '1.1'
+
+items:
+    - name: interpretation
+      title: Clinical Interpretation and Guidelines
+      type: Html
+      visible: true
+
+    - name: scorestable
+      title: Individual Sample Scores
+      type: Table
+      description: Calculated H-scores, Allred scores, and binary classifications
+      columns: []
+      clearWith:
+          - intensity_var
+          - proportion_var
+          - scoring_method
+          - binary_cutpoint
+          - allred_cutpoint
+
+    - name: statisticstable
+      title: Descriptive Statistics by Score Type
+      type: Table
+      description: Comprehensive statistical summary for each scoring method
+      columns: []
+      clearWith:
+          - intensity_var
+          - proportion_var
+          - scoring_method
+          - include_statistics
+
+    - name: agreementtable
+      title: Method Agreement Analysis
+      type: Table
+      description: Correlation and agreement statistics between scoring methods
+      columns: []
+      visible: (agreement_analysis)
+      clearWith:
+          - intensity_var
+          - proportion_var
+          - agreement_analysis
+          - confidence_level
+
+    - name: qualitycontroltable
+      title: Quality Control Metrics
+      type: Table
+      description: Outlier detection and data quality assessment
+      columns: []
+      visible: (quality_control)
+      clearWith:
+          - intensity_var
+          - proportion_var
+          - quality_control
+
+    - name: distributionplot
+      title: Scoring Distribution Plot
+      type: Image
+      description: Visual distribution of H-scores and Allred scores
+      width: 600
+      height: 400
+      visible: (show_plots)
+      requiresData: true
+      clearWith:
+          - intensity_var
+          - proportion_var
+          - show_plots
+          - scoring_method
+
+    - name: correlationplot
+      title: Method Correlation Plot
+      type: Image
+      description: Correlation between H-score and Allred score methods
+      width: 500
+      height: 400
+      visible: (show_plots)
+      requiresData: true
+      clearWith:
+          - intensity_var
+          - proportion_var
+          - show_plots
+          - agreement_analysis
+
+    - name: agreementplot
+      title: Method Agreement Plot
+      type: Image
+      description: Bland-Altman style agreement analysis between methods
+      width: 500
+      height: 400
+      visible: (show_agreement_plots)
+      requiresData: true
+      clearWith:
+          - intensity_var
+          - proportion_var
+          - show_agreement_plots
+          - agreement_analysis
+
+    - name: cutpointplot
+      title: Cutpoint Optimization Plot
+      type: Image
+      description: ROC analysis for optimal cutpoint determination
+      width: 500
+      height: 400
+      visible: false
+      requiresData: true
+
+    - name: biomarkerspecific
+      title: Biomarker-Specific Analysis
+      type: Group
+      visible: (biomarker_type:er || biomarker_type:pr || biomarker_type:her2 || biomarker_type:ki67 || biomarker_type:pdl1)
+      items:
+          - name: biomarkerresults
+            title: Biomarker-Specific Results
+            type: Table
+            description: Analysis tailored to specific biomarker characteristics
+            columns: []
+
+          - name: clinicalcutpoints
+            title: Clinical Cutpoint Analysis
+            type: Table
+            description: Established clinical thresholds and their performance
+            columns: []
+
+    - name: digitalvalidation
+      title: Digital Pathology Validation
+      type: Group
+      visible: (include_digital_validation)
+      items:
+          - name: algorithmcomparison
+            title: Algorithm vs Manual Comparison
+            type: Table
+            description: Statistical comparison of digital vs manual scoring
+            columns: []
+
+          - name: batcheffects
+            title: Batch Effect Assessment
+            type: Table
+            description: Analysis of systematic differences across batches
+            columns: []
+
+          - name: validationplot
+            title: Digital Validation Plot
+            type: Image
+            width: 500
+            height: 400
+
+    - name: advancedmetrics
+      title: Advanced Statistical Metrics
+      type: Group
+      visible: true
+      items:
+          - name: reliabilitymetrics
+            title: Reliability Assessment
+            type: Table
+            description: Comprehensive reliability and consistency metrics
+            columns: []
+
+          - name: distributionanalysis
+            title: Distribution Analysis
+            type: Table
+            description: Normality testing and distribution characteristics
+            columns: []
+
+    - name: exportdata
+      title: Export-Ready Data
+      type: Table
+      visible: (export_results)
+      description: Formatted results for external analysis or reporting
+      columns: []
+      clearWith:
+          - export_results
+          - intensity_var
+          - proportion_var
+
+...

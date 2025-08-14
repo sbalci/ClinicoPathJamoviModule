@@ -1,0 +1,90 @@
+---
+name: spatialanalysis
+title: Spatial Statistics from Coordinates
+jrs: '1.1'
+
+items:
+    - name: text
+      title: Getting Started
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Spatial Summary Statistics
+      type: Table
+      columns: []
+      description: Basic spatial metrics including point counts, density, and study area
+      clearWith:
+          - coords_x
+          - coords_y
+          - cell_types
+          - roi_id
+
+    - name: ripley
+      title: Ripley's K-function Analysis
+      type: Table
+      columns: []
+      description: Spatial clustering analysis at multiple distance scales
+      visible: (perform_ripley)
+      clearWith:
+          - coords_x
+          - coords_y
+          - perform_ripley
+          - correction_method
+
+    - name: nearestneighbor
+      title: Nearest Neighbor Analysis
+      type: Table
+      columns: []
+      description: Nearest neighbor distances and Clark-Evans randomness test
+      visible: (perform_nnd)
+      clearWith:
+          - coords_x
+          - coords_y
+          - perform_nnd
+          - distance_method
+
+    - name: hotspots
+      title: Hotspot Detection Results
+      type: Table
+      columns: []
+      description: Spatial hotspot analysis using kernel density estimation
+      visible: (perform_hotspot)
+      clearWith:
+          - coords_x
+          - coords_y
+          - perform_hotspot
+
+    - name: interaction
+      title: Multi-type Spatial Interaction
+      type: Table
+      columns: []
+      description: Cross-type spatial relationships and interaction patterns
+      visible: (perform_interaction && cell_types)
+      clearWith:
+          - coords_x
+          - coords_y
+          - cell_types
+          - perform_interaction
+
+    - name: spatialplot
+      title: Spatial Distribution Plot
+      type: Image
+      description: Visualization of spatial coordinate data with optional cell type coloring
+      width: 600
+      height: 600
+      visible: (show_plots)
+      requiresData: true
+      clearWith:
+          - coords_x
+          - coords_y
+          - cell_types
+          - show_plots
+
+    - name: interpretation
+      title: Clinical Interpretation and Context
+      type: Html
+      visible: true
+      description: Clinical significance and pathology applications of spatial patterns
+
+...

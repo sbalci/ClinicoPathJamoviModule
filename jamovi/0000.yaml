@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.01
+version: 0.0.31.02
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-11'
+date: '2025-08-13'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -111,7 +111,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: OncoPathologyT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -125,7 +125,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: OncoPathologyT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -138,7 +138,7 @@ analyses:
   - title: Genomic Landscape Visualization
     name: ggoncoplot
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: OncoPathologyT
     menuSubgroup: Molecular Pathology Plots
     menuTitle: Genomic Landscape Visualization
     description: >-
@@ -192,7 +192,7 @@ analyses:
   - title: Clinical Hemodynamic Monitoring
     name: clinmon
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: OncoPathologyT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Clinical Hemodynamic Monitoring
     menuSubtitle: Hemodynamic Indices from Continuous Monitoring
@@ -333,7 +333,7 @@ analyses:
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: OncoPathologyT
     menuSubgroup: ClinicoPath Biomarker Analysis
     menuTitle: Biomarker Response Association
     description: >-
@@ -484,7 +484,7 @@ analyses:
   - title: CONSORT Flowchart
     name: consort
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: OncoPathologyT
     menuSubgroup: ClinicoPath Reports
     menuTitle: CONSORT Flowchart
     ribbon: analyses
@@ -492,7 +492,7 @@ analyses:
   - title: Study Flowchart
     name: flowchart
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: OncoPathologyT
     menuSubgroup: ClinicoPath Reports
     menuTitle: Study Flowchart
     ribbon: analyses
@@ -521,7 +521,7 @@ analyses:
   - title: IHC Expression Analysis
     name: ihcstats
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: OncoPathologyT
     menuSubgroup: IHC Analysis
     menuTitle: IHC Expression Analysis
     ribbon: analyses
@@ -732,7 +732,7 @@ analyses:
   - title: Date Field Correction
     name: datecorrection
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Data Preparation
     menuTitle: Date Field Correction
     menuSubtitle: Multi-Package Date Standardization
@@ -2019,6 +2019,155 @@ analyses:
 
       accuracy assessment through time-dependent AUC and optimal cutpoint
       selection.
+  - title: Biopsy Simulation Analysis
+    name: biopsysimulation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuTitle: Biopsy Simulation Analysis
+  - title: Digital Pathology Validation
+    name: digitalvalidation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuTitle: Digital Pathology Validation
+  - title: Haralick Texture Analysis
+    name: haralicktexture
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuTitle: Haralick Texture Analysis
+  - title: IHC Scoring Standardization
+    name: ihcscoring
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuTitle: IHC Scoring Standardization
+  - title: Multiplex Immunofluorescence Analysis
+    name: multiplexanalysis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuTitle: Multiplex Immunofluorescence Analysis
+  - title: Pathology Agreement Analysis
+    name: pathologyagreement
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuTitle: Pathology Agreement Analysis
+  - title: Spatial Statistics from Coordinates
+    name: spatialanalysis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyT
+    menuTitle: Spatial Statistics from Coordinates
+  - title: Enhanced Non-Parametric Tests
+    name: enhancednonparametric
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath Descriptives
+    menuTitle: Enhanced Non-Parametric Tests
+  - title: Advanced ANOVA Suite
+    name: advancedanova
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Inferential
+    menuTitle: Advanced ANOVA Suite
+    menuSubtitle: Comprehensive ANOVA with enhanced post hoc testing
+    description: |
+      Advanced ANOVA analysis with comprehensive post hoc testing, 
+      effect sizes, and assumption checking. Addresses the critical issue 
+      where 68% of pathology studies fail proper multiple comparisons.
+  - title: Hierarchical Mixed-Effects Models
+    name: hierarchicalpathology
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Inferential
+    menuTitle: Hierarchical Mixed-Effects Models
+    menuSubtitle: Multi-level analysis for nested pathology data
+    description: |
+      Hierarchical (multilevel) mixed-effects models for analyzing nested 
+      pathology data structures. Essential for WSI analysis with Patient > 
+      Slide > ROI > Cell hierarchies, and prevents Type I errors from ignoring 
+      clustering effects.
+  - title: Optimal Cutpoint Determination
+    name: optimalcutpoint
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Inferential
+    menuTitle: Optimal Cutpoint Determination
+    menuSubtitle: Find optimal thresholds for continuous biomarkers
+    description: |
+      Determines optimal cutpoints for continuous biomarkers to maximize 
+      diagnostic or prognostic performance. Essential for converting 
+      continuous measurements to clinically actionable thresholds and 
+      preventing arbitrary cutpoint selection in pathology studies.
+  - title: Enhanced Chi-Square and Fisher's Tests
+    name: categoricaladvanced
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuTitle: Enhanced Chi-Square and Fisher's Tests
+    description: >
+      Enhanced categorical analysis with chi-square tests, Fisher's exact
+      tests, 
+
+      effect sizes, and association measures. Addresses the critical issue
+      where 
+
+      25% of pathology studies use categorical analysis incorrectly.
+  - title: Diagnostic Test Meta-Analysis for Pathology
+    name: diagnosticmeta
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuTitle: Diagnostic Test Meta-Analysis for Pathology
+    description: >
+      Comprehensive meta-analysis of diagnostic test accuracy studies designed
+      for 
+
+      pathology research. Performs bivariate random-effects modeling, HSROC
+      analysis, 
+
+      meta-regression, and publication bias assessment for AI algorithm
+      validation 
+
+      and biomarker diagnostic accuracy synthesis.
+  - title: Classification Performance Metrics for Digital Pathology
+    name: mlpathology
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuTitle: Classification Performance Metrics for Digital Pathology
+    description: >
+      Comprehensive evaluation of machine learning models and algorithms for 
+
+      digital pathology applications. Provides classification metrics, ROC
+      analysis, 
+
+      segmentation quality assessment, and statistical model comparison for AI 
+
+      validation and algorithm comparison studies.
+  - title: Pathology Composition Analysis
+    name: pathologycomposition
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuTitle: Pathology Composition Analysis
+    description: >
+      Semi-quantitative analysis of histologic components and their association
+      with 
+
+      clinical outcomes. Based on advanced pathology research methodologies,
+      particularly 
+
+      gastric cancer composition analysis. Performs component risk assessment,
+      composition 
+
+      pattern analysis, and optimal threshold identification.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

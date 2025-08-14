@@ -1,0 +1,102 @@
+title: Optimal Cutpoint Determination
+name: optimalcutpoint
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Biomarker Variable
+        children:
+          - type: VariablesListBox
+            name: biomarker
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Outcome Variable (Binary/Continuous)
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Time Variable (Survival)
+        children:
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Status Variable (Survival)
+        children:
+          - type: VariablesListBox
+            name: status_var
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Analysis Options
+          - type: ComboBox
+            name: analysis_type
+          - type: ComboBox
+            name: cutpoint_method
+          - type: ComboBox
+            name: multiple_testing
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Validation Options
+          - type: CheckBox
+            name: bootstrap_validation
+          - type: CheckBox
+            name: cross_validation
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Output Options
+          - type: CheckBox
+            name: performance_metrics
+          - type: CheckBox
+            name: survival_analysis
+          - type: TextBox
+            name: confidence_level
+            label: Confidence Level
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Plots
+          - type: CheckBox
+            name: plot_roc
+          - type: CheckBox
+            name: plot_distribution
+          - type: CheckBox
+            name: plot_survival
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_runs
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cv_folds
+        format: number

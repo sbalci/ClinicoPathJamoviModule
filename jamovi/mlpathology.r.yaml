@@ -1,0 +1,97 @@
+---
+name: mlpathology
+title: Classification Performance Metrics for Digital Pathology
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Getting Started
+      type: Html
+      visible: true
+
+    - name: confusionmatrix
+      title: Confusion Matrix
+      type: Table
+      visible: (analysis_type:classification)
+      clearWith:
+          - actual_labels
+          - predicted_labels
+          - analysis_type
+      columns: []
+
+    - name: performancemetrics
+      title: Performance Metrics
+      type: Table
+      visible: (analysis_type:classification)
+      clearWith:
+          - actual_labels
+          - predicted_labels
+          - confidence_level
+          - bootstrap_validation
+      columns: []
+
+    - name: rocanalysis
+      title: ROC Analysis Results
+      type: Table
+      visible: (analysis_type:classification && roc_analysis && predicted_probabilities)
+      clearWith:
+          - actual_labels
+          - predicted_probabilities
+          - confidence_level
+      columns: []
+
+    - name: segmentationmetrics
+      title: Segmentation Quality Metrics
+      type: Table
+      visible: (analysis_type:segmentation)
+      clearWith:
+          - reference_segmentation
+          - predicted_segmentation
+      columns: []
+
+    - name: modelcomparison
+      title: Model Comparison Results
+      type: Table
+      visible: (analysis_type:comparison)
+      clearWith:
+          - actual_labels
+          - model1_predictions
+          - model2_predictions
+      columns: []
+
+    - name: roccomparison
+      title: ROC Curve Comparison
+      type: Table
+      visible: (analysis_type:comparison && roc_comparison && model1_probabilities && model2_probabilities)
+      clearWith:
+          - actual_labels
+          - model1_probabilities
+          - model2_probabilities
+      columns: []
+
+    - name: confusionmatrixplot
+      title: Confusion Matrix Heatmap
+      type: Image
+      width: 600
+      height: 500
+      visible: (analysis_type:classification && confusion_matrix_plot)
+      requiresData: true
+      clearWith:
+          - actual_labels
+          - predicted_labels
+
+    - name: rocplot
+      title: ROC Curve
+      type: Image
+      width: 600
+      height: 500
+      visible: (analysis_type:classification && roc_plot && predicted_probabilities)
+      requiresData: true
+      clearWith:
+          - actual_labels
+          - predicted_probabilities
+
+    - name: interpretation
+      title: Clinical Interpretation and Guidelines
+      type: Html
+      visible: true

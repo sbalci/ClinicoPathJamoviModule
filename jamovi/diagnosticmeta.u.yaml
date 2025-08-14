@@ -1,0 +1,116 @@
+---
+name: diagnosticmeta
+title: Diagnostic Test Meta-Analysis for Pathology
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: study
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: true_positives
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: false_positives
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: false_negatives
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: true_negatives
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: covariate
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 2
+    children:
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: bivariate_analysis
+
+              - type: CheckBox
+                name: hsroc_analysis
+
+              - type: CheckBox
+                name: heterogeneity_analysis
+
+              - type: CheckBox
+                name: meta_regression
+
+              - type: CheckBox
+                name: publication_bias
+
+              - type: CheckBox
+                name: show_individual_studies
+
+      - type: Label
+        label: Advanced Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: confidence_level
+                format: number
+                suffix: '%'
+
+              - type: ComboBox
+                name: method
+
+      - type: Label
+        label: Plots
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: forest_plot
+
+              - type: CheckBox
+                name: sroc_plot
+
+              - type: CheckBox
+                name: funnel_plot
+                enable: (publication_bias)

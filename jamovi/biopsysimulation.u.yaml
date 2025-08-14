@@ -1,0 +1,91 @@
+title: Biopsy Simulation Analysis
+name: biopsysimulation
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Whole Section Value
+        children:
+          - type: VariablesListBox
+            name: wholesection
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Biopsy Sample 1
+        children:
+          - type: VariablesListBox
+            name: biopsy1
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Biopsy Sample 2 (Optional)
+        children:
+          - type: VariablesListBox
+            name: biopsy2
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Biopsy Sample 3 (Optional)
+        children:
+          - type: VariablesListBox
+            name: biopsy3
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Biopsy Sample 4 (Optional)
+        children:
+          - type: VariablesListBox
+            name: biopsy4
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Additional Biopsy Samples
+        children:
+          - type: VariablesListBox
+            name: biopsies
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Spatial Region ID (Optional)
+        children:
+          - type: VariablesListBox
+            name: spatial_id
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: analysis_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: sampling_strategy
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cv_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: correlation_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_variability_plots
+      - type: CheckBox
+        name: variance_components
+      - type: CheckBox
+        name: power_analysis
+      - type: CheckBox
+        name: generate_recommendations

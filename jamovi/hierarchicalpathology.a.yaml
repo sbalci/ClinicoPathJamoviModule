@@ -1,0 +1,175 @@
+---
+name: hierarchicalpathology
+title: Hierarchical Mixed-Effects Models
+menuGroup: ClinicoPath
+menuSubgroup: Inferential
+menuTitle: Hierarchical Mixed-Effects Models
+menuSubtitle: Multi-level analysis for nested pathology data
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: |
+        Hierarchical (multilevel) mixed-effects models for analyzing nested 
+        pathology data structures. Essential for WSI analysis with Patient > 
+        Slide > ROI > Cell hierarchies, and prevents Type I errors from ignoring 
+        clustering effects.
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology')
+            
+            hierarchicalpathology(data = histopathology, 
+                                 dependent = measurement, 
+                                 level_3 = patient_id,
+                                 level_2 = slide_id,
+                                 level_1 = roi_id)
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: dependent
+      title: Dependent Variable
+      type: Variable
+      suggested: 
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: The dependent variable from `data`, variable must be numeric
+
+    - name: level_3
+      title: Level 3 (Highest)
+      type: Variable
+      suggested: 
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Highest level grouping variable (e.g., Patient ID, Institution)
+
+    - name: level_2
+      title: Level 2 (Intermediate)
+      type: Variable
+      suggested: 
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Intermediate level grouping variable (e.g., Slide ID, Sample ID)
+
+    - name: level_1
+      title: Level 1 (Lowest)
+      type: Variable
+      suggested: 
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Lowest level grouping variable (e.g., ROI ID, Field ID)
+
+    - name: covariates
+      title: Covariates (Fixed Effects)
+      type: Variables
+      suggested: 
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Optional covariates for fixed effects (age, treatment, etc.)
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+          - name: "linear"
+            title: "Linear (Continuous outcome)"
+          - name: "logistic"
+            title: "Logistic (Binary outcome)"
+          - name: "poisson"
+            title: "Poisson (Count outcome)"
+          - name: "negative_binomial"
+            title: "Negative Binomial (Overdispersed counts)"
+      default: "linear"
+      description:
+          R: Type of mixed-effects model based on outcome variable
+
+    - name: descriptives
+      title: Descriptive Statistics
+      type: Bool
+      default: true
+      description:
+          R: Show descriptive statistics by hierarchical level
+
+    - name: variance_components
+      title: Variance Components
+      type: Bool
+      default: true
+      description:
+          R: Calculate and display variance components
+
+    - name: icc_analysis
+      title: ICC Analysis
+      type: Bool
+      default: true
+      description:
+          R: Calculate Intraclass Correlation Coefficients
+
+    - name: random_effects
+      title: Random Effects Summary
+      type: Bool
+      default: true
+      description:
+          R: Display random effects variance and standard deviations
+
+    - name: model_comparison
+      title: Model Comparison
+      type: Bool
+      default: false
+      description:
+          R: Compare nested models with likelihood ratio tests
+
+    - name: diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: Generate diagnostic plots and residual analysis
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for parameter estimates and intervals
+
+    - name: optimizer
+      title: Optimizer
+      type: List
+      options:
+          - name: "bobyqa"
+            title: "BOBYQA"
+          - name: "Nelder_Mead"
+            title: "Nelder-Mead"
+          - name: "nlminb"
+            title: "nlminb"
+      default: "bobyqa"
+      description:
+          R: Optimization algorithm for model fitting
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: Maximum number of iterations for model convergence

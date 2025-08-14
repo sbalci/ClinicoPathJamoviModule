@@ -1,0 +1,177 @@
+---
+name: biopsysimulation
+title: Biopsy Simulation Analysis
+menuGroup: OncoPathologyT
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: wholesection
+      title: Whole Section Value
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            biomarker measurement from entire tissue section
+
+    - name: biopsy1
+      title: Biopsy Sample 1
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            first simulated biopsy measurement
+
+    - name: biopsy2
+      title: Biopsy Sample 2 (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            second simulated biopsy measurement
+
+    - name: biopsy3
+      title: Biopsy Sample 3 (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            third simulated biopsy measurement
+
+    - name: biopsy4
+      title: Biopsy Sample 4 (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            fourth simulated biopsy measurement
+
+    - name: biopsies
+      title: Additional Biopsy Samples
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            additional simulated biopsy measurements
+
+    - name: spatial_id
+      title: Spatial Region ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            identifier for spatial regions or tissue areas
+
+    - name: analysis_type
+      title: Analysis Focus
+      type: List
+      options:
+        - name: reproducibility
+          title: 'Reproducibility Assessment'
+        - name: bias
+          title: 'Sampling Bias Analysis'
+        - name: variability
+          title: 'Variance Component Analysis'
+        - name: comprehensive
+          title: 'Comprehensive Analysis'
+      default: comprehensive
+      description:
+          R: >
+            primary focus of biopsy simulation analysis
+
+    - name: sampling_strategy
+      title: Sampling Strategy
+      type: List
+      options:
+        - name: random
+          title: 'Random Sampling'
+        - name: systematic
+          title: 'Systematic Sampling'
+        - name: stratified
+          title: 'Stratified Sampling'
+        - name: unknown
+          title: 'Unknown/Mixed'
+      default: unknown
+      description:
+          R: >
+            biopsy sampling strategy used
+
+    - name: cv_threshold
+      title: CV Threshold for Acceptable Variability
+      type: Number
+      min: 5.0
+      max: 50.0
+      default: 20.0
+      description:
+          R: >
+            coefficient of variation threshold for acceptable sampling variability
+
+    - name: correlation_threshold
+      title: Minimum Acceptable Correlation
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.80
+      description:
+          R: >
+            minimum correlation between biopsy and whole section
+
+    - name: show_variability_plots
+      title: Show Variability Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            display plots showing sampling variability
+
+    - name: variance_components
+      title: Variance Component Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            perform variance component decomposition
+
+    - name: power_analysis
+      title: Power Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            perform power analysis for sample size recommendations
+
+    - name: generate_recommendations
+      title: Generate Sampling Recommendations
+      type: Bool
+      default: true
+      description:
+          R: >
+            provide recommendations for optimal sampling strategy
+
+...
