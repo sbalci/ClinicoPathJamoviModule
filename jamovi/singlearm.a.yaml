@@ -406,12 +406,21 @@ options:
 
 
     - name: showExplanations
-      title: "Show Educational Explanations"
+      title: "Show Analysis Explanations"
       type: Bool
       default: false
       description: >-
-        Display educational explanations alongside analysis results to help interpret
-        survival statistics, median survival, and person-time analysis.
+        Display detailed explanations for each analysis component to help
+        interpret the statistical methods and results.
+
+    - name: showSummaries
+      title: "Show Natural Language Summaries"
+      type: Bool
+      default: false
+      description: >-
+        Display natural language summaries alongside tables and plots. These
+        summaries provide plain-language interpretations of the statistical
+        results. Turn off to reduce visual clutter when summaries are not needed.
 
 ...
 

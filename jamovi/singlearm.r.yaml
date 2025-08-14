@@ -26,6 +26,7 @@ items:
     - name:  medianSummary
       title: Median Survival Summary and Table
       type:  Preformatted
+      visible: (showSummaries)
       clearWith:
           - outcome
           - outcomeLevel
@@ -99,6 +100,7 @@ items:
     - name:  survTableSummary
       title: '1, 3, 5-yr Survival Summary and Table'
       type:  Preformatted
+      visible: (showSummaries)
       clearWith:
           - outcome
           - outcomeLevel
@@ -210,7 +212,7 @@ items:
     - name: personTimeSummary
       title: 'Person-Time Summary'
       type: Html
-      visible: (person_time)
+      visible: (person_time && showSummaries)
       clearWith:
         - outcome
         - outcomeLevel
@@ -238,7 +240,18 @@ items:
         - outcomeLevel
         - overalltime
 
-
+    # Survival Plots Explanation
+    - name: survivalPlotsExplanation
+      title: Understanding Survival Curves and Plots
+      type: Html
+      visible: ((sc || ce || ch || kmunicate) && showExplanations)
+      clearWith:
+          - sc
+          - ce
+          - ch
+          - kmunicate
+          - outcome
+          - outcomeLevel
 
     - name: plot
       title: Survival Plot

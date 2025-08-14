@@ -12,170 +12,160 @@ items:
     - name: descriptives
       title: Descriptive Statistics
       type: Table
-      columns:
-        - name: group
-          title: Group
-          type: text
-        - name: n
-          title: N
-          type: integer
-        - name: median
-          title: Median
-          type: number
-        - name: iqr
-          title: IQR
-          type: number
-        - name: min_val
-          title: Min
-          type: number
-        - name: max_val
-          title: Max
-          type: number
-        - name: mean_rank
-          title: Mean Rank
-          type: number
-      visible: (descriptives)
       clearWith:
           - dependent
           - grouping
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: median
+            title: Median
+            type: number
+            format: zto,pvalue
+          - name: q1
+            title: Q1
+            type: number
+            format: zto,pvalue
+          - name: q3
+            title: Q3
+            type: number
+            format: zto,pvalue
+          - name: mean
+            title: Mean
+            type: number
+            format: zto,pvalue
+          - name: sd
+            title: SD
+            type: number
+            format: zto,pvalue
+          - name: min
+            title: Min
+            type: number
+            format: zto,pvalue
+          - name: max
+            title: Max
+            type: number
+            format: zto,pvalue
 
     - name: assumptions
-      title: Assumption Checking
+      title: Assumption Testing
       type: Table
-      columns:
-        - name: assumption
-          title: Assumption
-          type: text
-        - name: test
-          title: Test
-          type: text
-        - name: statistic
-          title: Statistic
-          type: text
-        - name: p_value
-          title: p
-          type: text
-        - name: conclusion
-          title: Conclusion
-          type: text
-        - name: interpretation
-          title: Interpretation
-          type: text
-      visible: (assumptions)
       clearWith:
           - dependent
           - grouping
+      columns:
+          - name: assumption
+            title: Assumption
+            type: text
+          - name: assessment
+            title: Assessment
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
 
-    - name: mannwhitney
-      title: Mann-Whitney U Test Results
+    - name: tests
+      title: Non-Parametric Tests
       type: Table
-      columns:
-        - name: comparison
-          title: Comparison
-          type: text
-        - name: n1
-          title: N₁
-          type: text
-        - name: n2
-          title: N₂  
-          type: text
-        - name: u_statistic
-          title: U
-          type: number
-        - name: z_statistic
-          title: Z
-          type: number
-        - name: p_value
-          title: p
-          type: number
-          format: zto,pvalue
-        - name: r_rb
-          title: r_rb
-          type: number
-        - name: r_rb_ci
-          title: 95% CI
-          type: text
-        - name: interpretation
-          title: Effect Size
-          type: text
-      visible: (mann_whitney)
       clearWith:
           - dependent
           - grouping
-          - effect_sizes
+          - exact_test
           - confidence_level
-
-    - name: kruskalwallis
-      title: Kruskal-Wallis Test Results
-      type: Table
       columns:
-        - name: test
-          title: Test
-          type: text
-        - name: df
-          title: df
-          type: integer
-        - name: chi_square
-          title: χ²
-          type: number
-        - name: p_value
-          title: p
-          type: number
-          format: zto,pvalue
-        - name: eta_squared
-          title: η²
-          type: number
-        - name: interpretation
-          title: Effect Size
-          type: text
-        - name: conclusion
-          title: Conclusion
-          type: text
-      visible: (kruskal_wallis)
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+            format: zto,pvalue
+          - name: df
+            title: df
+            type: number
+            format: zto,pvalue
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto,pvalue
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto,pvalue
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: effectsizes
+      title: Effect Size Summary
+      type: Table
       clearWith:
           - dependent
           - grouping
-          - effect_sizes
+          - confidence_level
+      columns:
+          - name: measure
+            title: Effect Size Measure
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
 
     - name: posthoc
-      title: Post Hoc Pairwise Comparisons (Dunn's Test)
+      title: Post Hoc Comparisons (Dunn's Test)
       type: Table
-      columns:
-        - name: comparison
-          title: Comparison
-          type: text
-        - name: z_statistic
-          title: Z
-          type: number
-        - name: p_value
-          title: p
-          type: number
-          format: zto,pvalue
-        - name: p_adjusted
-          title: p_adj
-          type: number
-          format: zto,pvalue
-        - name: effect_size
-          title: r_rb
-          type: text
-        - name: interpretation
-          title: Effect Size
-          type: text
-        - name: significance
-          title: Result
-          type: text
-      visible: (posthoc_dunn)
+      visible: (posthoc)
       clearWith:
           - dependent
           - grouping
-          - posthoc_dunn
-          - correction_method
-          - effect_sizes
+          - posthoc_method
+          - confidence_level
+      columns:
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: z_statistic
+            title: Z
+            type: number
+            format: zto,pvalue
+          - name: p_raw
+            title: p (raw)
+            type: number
+            format: zto,pvalue
+          - name: p_adjusted
+            title: p (adj)
+            type: number
+            format: zto,pvalue
+          - name: effect_size
+            title: Effect Size (r)
+            type: number
+            format: zto,pvalue
+          - name: significance
+            title: Sig
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
 
-    - name: boxplot
-      title: Distribution Comparison Plot
+    - name: distributionplot
+      title: Distribution Comparison
       type: Image
-      description: Box plots with violin plots showing group distributions
       width: 600
       height: 500
       visible: (show_plots)
@@ -184,12 +174,21 @@ items:
           - dependent
           - grouping
           - show_plots
-          - plot_type
+
+    - name: effectsizeplot
+      title: Effect Size Plot
+      type: Image
+      width: 600
+      height: 400
+      visible: (show_plots)
+      requiresData: true
+      clearWith:
+          - dependent
+          - grouping
+          - show_plots
+          - confidence_level
 
     - name: interpretation
       title: Clinical Interpretation and Guidelines
       type: Html
       visible: true
-      description: Clinical context and interpretation guidelines for non-parametric tests
-
-...
