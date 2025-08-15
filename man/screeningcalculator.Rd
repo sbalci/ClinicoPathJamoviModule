@@ -11,7 +11,13 @@ screeningcalculator(
   repeat2 = TRUE,
   repeat3 = TRUE,
   fnote = FALSE,
-  fagan = FALSE
+  fagan = FALSE,
+  samplesize = FALSE,
+  expected_sens = 0.85,
+  expected_spec = 0.8,
+  width_sens = 0.1,
+  width_spec = 0.1,
+  alpha_level = 0.05
 )
 }
 \arguments{
@@ -28,6 +34,18 @@ screeningcalculator(
 \item{fnote}{.}
 
 \item{fagan}{.}
+
+\item{samplesize}{.}
+
+\item{expected_sens}{.}
+
+\item{expected_spec}{.}
+
+\item{width_sens}{.}
+
+\item{width_spec}{.}
+
+\item{alpha_level}{.}
 }
 \value{
 A results object containing:
@@ -42,6 +60,7 @@ A results object containing:
 \code{results$plot2NN} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3PPP} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3NNN} \tab \tab \tab \tab \tab an image \cr
+\code{results$sampleSizeTable} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

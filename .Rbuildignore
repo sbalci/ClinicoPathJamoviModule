@@ -172,3 +172,6 @@
 ^.*\.mp4$
 ^doc$
 ^Meta$
+
+temp
+test_backups

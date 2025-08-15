@@ -1,0 +1,287 @@
+---
+name: missingdataexplorer
+title: Missing Data Pattern Explorer
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Missing Data Explorer
+menuSubtitle: Comprehensive missing data pattern analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive missing data pattern exploration and visualization for clinical research.
+        Analyzes missing data mechanisms, patterns, and correlations to inform imputation
+        strategies. Includes advanced diagnostics for missing completely at random (MCAR),
+        missing at random (MAR), and missing not at random (MNAR) assessments. Essential
+        for understanding missingness before imputation and for regulatory documentation
+        of missing data handling strategies.
+    R:
+        dontrun: false
+        usage: |
+            data('clinical_data')
+            
+            missingdataexplorer(
+                data = clinical_data,
+                analysis_vars = c("primary_endpoint", "biomarker", "demographics"),
+                group_var = "treatment_arm",
+                pattern_analysis = TRUE,
+                mechanism_testing = TRUE
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Variable Selection
+    - name: analysis_vars
+      title: Variables for Analysis
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Variables to include in missing data pattern analysis
+
+    - name: group_var
+      title: Grouping Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Grouping variable for comparing missingness patterns (e.g., treatment arm, study site)
+
+    - name: time_var
+      title: Time Variable (Optional)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Time variable for temporal missingness analysis (e.g., visit number, time since baseline)
+
+    - name: id_var
+      title: Subject ID (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Subject identifier for longitudinal missingness analysis
+
+    # Analysis Configuration
+    - name: pattern_analysis
+      title: Pattern Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze missing data patterns and frequencies
+
+    - name: mechanism_testing
+      title: Mechanism Testing
+      type: Bool
+      default: true
+      description:
+          R: Test missing data mechanisms (MCAR, MAR, MNAR)
+
+    - name: correlation_analysis
+      title: Missingness Correlation
+      type: Bool
+      default: true
+      description:
+          R: Analyze correlations between missingness indicators
+
+    - name: temporal_analysis
+      title: Temporal Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze missingness patterns over time
+
+    - name: group_comparison
+      title: Group Comparison
+      type: Bool
+      default: false
+      description:
+          R: Compare missingness patterns between groups
+
+    # MCAR Testing
+    - name: mcar_test
+      title: MCAR Testing Method
+      type: List
+      options:
+          - name: "little"
+            title: "Little's MCAR Test"
+          - name: "naniar"
+            title: "Naniar MCAR Tests"
+          - name: "both"
+            title: "Both Methods"
+      default: "little"
+      description:
+          R: Method for testing Missing Completely At Random assumption
+
+    # Pattern Analysis Options
+    - name: min_pattern_freq
+      title: Minimum Pattern Frequency
+      type: Number
+      min: 0.01
+      max: 0.5
+      default: 0.05
+      description:
+          R: Minimum frequency for reporting missing data patterns (5% = 0.05)
+
+    - name: max_patterns_display
+      title: Maximum Patterns to Display
+      type: Integer
+      min: 5
+      max: 50
+      default: 20
+      description:
+          R: Maximum number of missing data patterns to display in detail
+
+    # Visualization Options
+    - name: pattern_plot
+      title: Pattern Visualization
+      type: Bool
+      default: true
+      description:
+          R: Generate missing data pattern plots
+
+    - name: correlation_plot
+      title: Correlation Heatmap
+      type: Bool
+      default: true
+      description:
+          R: Generate missingness correlation heatmap
+
+    - name: temporal_plot
+      title: Temporal Plots
+      type: Bool
+      default: false
+      description:
+          R: Generate temporal missingness plots
+
+    - name: upset_plot
+      title: UpSet Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate UpSet plot for pattern visualization
+
+    - name: cumulative_plot
+      title: Cumulative Missingness Plot
+      type: Bool
+      default: false
+      description:
+          R: Generate cumulative missingness over variables plot
+
+    # Advanced Analysis
+    - name: monotonic_test
+      title: Test for Monotonic Patterns
+      type: Bool
+      default: true
+      description:
+          R: Test whether missingness follows monotonic patterns
+
+    - name: dropout_analysis
+      title: Dropout Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze dropout patterns in longitudinal data
+
+    - name: informative_missingness
+      title: Informative Missingness Test
+      type: Bool
+      default: true
+      description:
+          R: Test whether missingness is informative (related to outcomes)
+
+    # Quality Assessment
+    - name: completeness_threshold
+      title: Completeness Threshold
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.8
+      description:
+          R: Threshold for acceptable variable completeness (80% = 0.8)
+
+    - name: case_completeness
+      title: Case Completeness Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze completeness at the case/subject level
+
+    - name: variable_importance
+      title: Variable Importance for Missingness
+      type: Bool
+      default: true
+      description:
+          R: Assess which variables predict missingness in others
+
+    # Statistical Testing
+    - name: chi_square_test
+      title: Chi-Square Tests
+      type: Bool
+      default: true
+      description:
+          R: Chi-square tests for independence of missingness
+
+    - name: logistic_regression
+      title: Logistic Regression Analysis
+      type: Bool
+      default: false
+      description:
+          R: Logistic regression to predict missingness patterns
+
+    - name: survival_analysis
+      title: Time-to-Dropout Analysis
+      type: Bool
+      default: false
+      description:
+          R: Survival analysis for time to dropout/missingness
+
+    # Output Options
+    - name: detailed_patterns
+      title: Detailed Pattern Output
+      type: Bool
+      default: true
+      description:
+          R: Show detailed information for each missing data pattern
+
+    - name: summary_statistics
+      title: Summary Statistics
+      type: Bool
+      default: true
+      description:
+          R: Include comprehensive summary statistics
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: Provide clinical interpretation and recommendations
+
+    - name: export_patterns
+      title: Export Pattern Data
+      type: Bool
+      default: false
+      description:
+          R: Export missing data patterns for external analysis
+
+...

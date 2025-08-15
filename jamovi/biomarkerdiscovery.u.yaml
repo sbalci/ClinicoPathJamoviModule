@@ -1,0 +1,220 @@
+title: Biomarker Discovery Platform with ML Interpretability
+name: biomarkerdiscovery
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome & Time Variables
+        children:
+          - type: VariablesListBox
+            name: outcome_var
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: event_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Biomarker Variables
+        children:
+          - type: VariablesListBox
+            name: biomarker_vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+      - type: TargetLayoutBox
+        label: Clinical Variables (Optional)
+        children:
+          - type: VariablesListBox
+            name: clinical_vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+      - type: TargetLayoutBox
+        label: Identifiers & Batch
+        children:
+          - type: VariablesListBox
+            name: patient_id
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: batch_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Discovery Configuration
+        children:
+          - type: ComboBox
+            name: discovery_method
+          - type: ComboBox
+            name: outcome_type
+          - type: ComboBox
+            name: data_type
+          - type: TextBox
+            name: random_seed
+            format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Data Preprocessing
+        children:
+          - type: CheckBox
+            name: data_preprocessing
+          - type: ComboBox
+            name: normalization_method
+          - type: CheckBox
+            name: batch_correction
+          - type: ComboBox
+            name: batch_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Quality Control
+        children:
+          - type: CheckBox
+            name: quality_control
+          - type: CheckBox
+            name: filter_low_variance
+          - type: TextBox
+            name: variance_threshold
+            format: number
+            suffix: ' (0.0-1.0)'
+          - type: CheckBox
+            name: outlier_detection
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: missing_data_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Feature Selection
+        children:
+          - type: ComboBox
+            name: feature_selection_method
+          - type: TextBox
+            name: n_features_select
+            format: number
+            suffix: ' features'
+          - type: TextBox
+            name: fdr_threshold
+            format: number
+            suffix: ' (0.001-0.5)'
+          - type: TextBox
+            name: correlation_threshold
+            format: number
+            suffix: ' (0.5-0.99)'
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Training & Validation
+        children:
+          - type: ComboBox
+            name: validation_method
+          - type: TextBox
+            name: train_proportion
+            format: number
+            suffix: ' (0.5-0.9)'
+          - type: CheckBox
+            name: hyperparameter_tuning
+          - type: TextBox
+            name: n_bootstrap_samples
+            format: number
+            suffix: ' samples'
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Biomarker Analysis
+        children:
+          - type: CheckBox
+            name: biomarker_ranking
+          - type: CheckBox
+            name: stability_analysis
+          - type: CheckBox
+            name: clinical_performance
+          - type: CheckBox
+            name: signature_development
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Interpretability & Networks
+        children:
+          - type: CheckBox
+            name: interpretability
+          - type: CheckBox
+            name: shap_analysis
+          - type: CheckBox
+            name: lime_analysis
+          - type: CheckBox
+            name: feature_interaction
+          - type: CheckBox
+            name: partial_dependence
+          - type: CheckBox
+            name: biomarker_networks
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Pathway Analysis
+        children:
+          - type: CheckBox
+            name: pathway_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Clinical Translation
+        children:
+          - type: CheckBox
+            name: cutpoint_optimization
+          - type: CheckBox
+            name: risk_stratification
+          - type: CheckBox
+            name: nomogram_development
+          - type: CheckBox
+            name: decision_curve_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Validation & Robustness
+        children:
+          - type: CheckBox
+            name: external_validation
+          - type: CheckBox
+            name: biomarker_generalizability
+          - type: CheckBox
+            name: robustness_testing
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: CheckBox
+            name: detailed_results
+          - type: CheckBox
+            name: biomarker_report
+          - type: CheckBox
+            name: export_biomarkers
+          - type: CheckBox
+            name: save_signature
+          - type: CheckBox
+            name: regulatory_documentation

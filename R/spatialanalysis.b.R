@@ -344,14 +344,10 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             hotspot_table <- self$results$hotspots
             
             tryCatch({
-                # This would implement Getis-Ord Gi* statistics
-                # For now, provide a framework for hotspot detection
-                
                 x_coords <- data[[x_var]]
                 y_coords <- data[[y_var]]
                 
-                # Simple density-based hotspot detection
-                # Create grid for density estimation
+                # Basic density-based hotspot detection
                 x_range <- range(x_coords, na.rm = TRUE)
                 y_range <- range(y_coords, na.rm = TRUE)
                 
@@ -412,10 +408,264 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     interpretation="Proportion of study area classified as hotspots"
                 ))
                 
+                # Implement Getis-Ord Gi* statistics
+                private$.calculateGetisOrdGiStar(data, x_var, y_var, hotspot_table)
+                
+                # Add Morisita Index calculation
+                private$.calculateMorisitaIndex(data, x_var, y_var, hotspot_table)
+                
             }, error = function(e) {
                 hotspot_table$addRow(rowKey="error", values=list(
                     measure="Error",
                     value=paste("Analysis failed:", e$message),
+                    interpretation=""
+                ))
+            })
+        },
+        
+        .calculateGetisOrdGiStar = function(data, x_var, y_var, hotspot_table) {
+            tryCatch({
+                x_coords <- data[[x_var]]
+                y_coords <- data[[y_var]]
+                n <- length(x_coords)
+                
+                if (n < 10) {
+                    hotspot_table$addRow(rowKey="gi_star_error", values=list(
+                        measure="Getis-Ord Gi* Error",
+                        value="Insufficient points (<10) for Gi* calculation",
+                        interpretation="Need at least 10 points for reliable Gi* statistics"
+                    ))
+                    return()
+                }
+                
+                # Create distance matrix
+                coords_matrix <- cbind(x_coords, y_coords)
+                dist_matrix <- as.matrix(dist(coords_matrix))
+                
+                # Define distance threshold (use average nearest neighbor distance)
+                nn_distances <- apply(dist_matrix + diag(Inf, n), 1, min)
+                threshold_distance <- mean(nn_distances) * 2  # Use 2x average NN distance
+                
+                # Create spatial weights matrix (binary)
+                W <- ifelse(dist_matrix <= threshold_distance & dist_matrix > 0, 1, 0)
+                
+                # For point pattern data, use local density as the attribute value
+                # Create grid for local density calculation
+                x_range <- range(x_coords, na.rm = TRUE)
+                y_range <- range(y_coords, na.rm = TRUE)
+                
+                # Calculate local density for each point using kernel density
+                local_densities <- numeric(n)
+                
+                for (i in 1:n) {
+                    # Count neighbors within threshold distance
+                    neighbors <- which(dist_matrix[i, ] <= threshold_distance & dist_matrix[i, ] > 0)
+                    local_densities[i] <- length(neighbors) + 1  # Include the point itself
+                }
+                
+                # Calculate Getis-Ord Gi* for each point
+                gi_star_values <- numeric(n)
+                z_scores <- numeric(n)
+                
+                # Global statistics
+                x_bar <- mean(local_densities)
+                s_squared <- var(local_densities)
+                
+                for (i in 1:n) {
+                    # Include the point itself in Gi* calculation
+                    Wi_sum <- sum(W[i, ]) + 1  # Add 1 for the point itself
+                    Wij_xj_sum <- sum(W[i, ] * local_densities) + local_densities[i]  # Include point itself
+                    
+                    if (Wi_sum > 0) {
+                        gi_star_values[i] <- Wij_xj_sum / sum(local_densities)
+                        
+                        # Calculate z-score for significance testing
+                        if (s_squared > 0 && n > 1) {
+                            numerator <- Wij_xj_sum - x_bar * Wi_sum
+                            variance_gi <- s_squared * (n * Wi_sum - Wi_sum^2) / (n - 1)
+                            
+                            if (variance_gi > 0) {
+                                z_scores[i] <- numerator / sqrt(variance_gi)
+                            }
+                        }
+                    }
+                }
+                
+                # Identify significant hotspots and coldspots
+                alpha <- 0.05
+                z_critical <- qnorm(1 - alpha/2)
+                
+                hotspots <- which(z_scores > z_critical)
+                coldspots <- which(z_scores < -z_critical)
+                
+                # Summary statistics
+                n_hotspots_gi <- length(hotspots)
+                n_coldspots_gi <- length(coldspots)
+                max_gi_star <- max(gi_star_values, na.rm = TRUE)
+                min_gi_star <- min(gi_star_values, na.rm = TRUE)
+                max_z_score <- max(z_scores, na.rm = TRUE)
+                min_z_score <- min(z_scores, na.rm = TRUE)
+                
+                # Add results to table
+                hotspot_table$addRow(rowKey="gi_threshold", values=list(
+                    measure="Gi* Distance Threshold",
+                    value=round(threshold_distance, 2),
+                    interpretation="Spatial neighborhood distance for Gi* calculation"
+                ))
+                
+                hotspot_table$addRow(rowKey="gi_hotspots", values=list(
+                    measure="Gi* Hotspots",
+                    value=n_hotspots_gi,
+                    interpretation=paste("Points with significantly high local clustering (z >", round(z_critical, 2), ")")
+                ))
+                
+                hotspot_table$addRow(rowKey="gi_coldspots", values=list(
+                    measure="Gi* Coldspots",
+                    value=n_coldspots_gi,
+                    interpretation=paste("Points with significantly low local clustering (z <", round(-z_critical, 2), ")")
+                ))
+                
+                hotspot_table$addRow(rowKey="max_gi_star", values=list(
+                    measure="Maximum Gi*",
+                    value=round(max_gi_star, 4),
+                    interpretation="Highest local clustering statistic"
+                ))
+                
+                hotspot_table$addRow(rowKey="max_z_score", values=list(
+                    measure="Maximum Z-score",
+                    value=round(max_z_score, 2),
+                    interpretation="Most significant hotspot z-score"
+                ))
+                
+                if (min_z_score < -z_critical) {
+                    hotspot_table$addRow(rowKey="min_z_score", values=list(
+                        measure="Minimum Z-score",
+                        value=round(min_z_score, 2),
+                        interpretation="Most significant coldspot z-score"
+                    ))
+                }
+                
+                # Overall interpretation
+                if (n_hotspots_gi > 0 || n_coldspots_gi > 0) {
+                    interpretation <- paste("Detected", n_hotspots_gi, "significant hotspots and", n_coldspots_gi, "coldspots using Getis-Ord Gi* analysis")
+                } else {
+                    interpretation <- "No significant spatial clustering detected (random distribution)"
+                }
+                
+                hotspot_table$addRow(rowKey="gi_interpretation", values=list(
+                    measure="Gi* Overall Result",
+                    value=interpretation,
+                    interpretation="Statistical significance of spatial clustering patterns"
+                ))
+                
+            }, error = function(e) {
+                hotspot_table$addRow(rowKey="gi_star_error", values=list(
+                    measure="Getis-Ord Gi* Error",
+                    value=paste("Calculation failed:", e$message),
+                    interpretation=""
+                ))
+            })
+        },
+        
+        .calculateMorisitaIndex = function(data, x_var, y_var, hotspot_table) {
+            tryCatch({
+                x_coords <- data[[x_var]]
+                y_coords <- data[[y_var]]
+                
+                # Create grid for Morisita Index calculation
+                x_range <- range(x_coords, na.rm = TRUE)
+                y_range <- range(y_coords, na.rm = TRUE)
+                
+                # Divide study area into quadrats (use 10x10 grid for reasonable resolution)
+                n_quadrats_x <- 10
+                n_quadrats_y <- 10
+                
+                x_breaks <- seq(x_range[1], x_range[2], length.out = n_quadrats_x + 1)
+                y_breaks <- seq(y_range[1], y_range[2], length.out = n_quadrats_y + 1)
+                
+                # Count points in each quadrat
+                quadrat_counts <- matrix(0, n_quadrats_x, n_quadrats_y)
+                
+                for (i in 1:length(x_coords)) {
+                    x_idx <- findInterval(x_coords[i], x_breaks, rightmost.closed = TRUE)
+                    y_idx <- findInterval(y_coords[i], y_breaks, rightmost.closed = TRUE)
+                    
+                    # Ensure indices are within bounds
+                    x_idx <- max(1, min(x_idx, n_quadrats_x))
+                    y_idx <- max(1, min(y_idx, n_quadrats_y))
+                    
+                    quadrat_counts[x_idx, y_idx] <- quadrat_counts[x_idx, y_idx] + 1
+                }
+                
+                # Calculate Morisita Index
+                # I_M = q * (sum(n_i * (n_i - 1))) / (N * (N - 1))
+                # where q = number of quadrats, n_i = count in quadrat i, N = total points
+                
+                q <- n_quadrats_x * n_quadrats_y
+                N <- length(x_coords)
+                ni_values <- as.vector(quadrat_counts)
+                
+                if (N > 1) {
+                    numerator <- q * sum(ni_values * (ni_values - 1))
+                    denominator <- N * (N - 1)
+                    morisita_index <- numerator / denominator
+                    
+                    # Interpret Morisita Index
+                    interpretation <- if (morisita_index < 1) {
+                        "Dispersed distribution (regular spacing)"
+                    } else if (morisita_index > 1) {
+                        "Clustered distribution (aggregated)"
+                    } else {
+                        "Random distribution"
+                    }
+                    
+                    hotspot_table$addRow(rowKey="morisita_index", values=list(
+                        measure="Morisita Index",
+                        value=round(morisita_index, 4),
+                        interpretation=paste("Spatial dispersion measure:", interpretation)
+                    ))
+                    
+                    # Calculate standard Morisita Index (normalized)
+                    if (q > 1 && N > 1) {
+                        expected_morisita <- 1
+                        chi_sq_95 <- qchisq(0.975, df = q - 1)
+                        chi_sq_05 <- qchisq(0.025, df = q - 1)
+                        
+                        # Standardized Morisita Index
+                        if (morisita_index >= expected_morisita) {
+                            if (chi_sq_95 > N - 1) {
+                                standardized_morisita <- 0.5 + 0.5 * (morisita_index - expected_morisita) / ((chi_sq_95 - 1) / (N - 1) - expected_morisita)
+                            } else {
+                                standardized_morisita <- 0.5
+                            }
+                        } else {
+                            if (chi_sq_05 < N - 1) {
+                                standardized_morisita <- -0.5 + 0.5 * (morisita_index - expected_morisita) / (expected_morisita - (chi_sq_05 - 1) / (N - 1))
+                            } else {
+                                standardized_morisita <- -0.5
+                            }
+                        }
+                        
+                        std_interpretation <- if (abs(standardized_morisita) < 0.1) {
+                            "Random distribution"
+                        } else if (standardized_morisita > 0.1) {
+                            "Significantly clustered"
+                        } else {
+                            "Significantly dispersed"
+                        }
+                        
+                        hotspot_table$addRow(rowKey="standardized_morisita", values=list(
+                            measure="Standardized Morisita",
+                            value=round(standardized_morisita, 4),
+                            interpretation=paste("Range [-1,1]:", std_interpretation)
+                        ))
+                    }
+                }
+                
+            }, error = function(e) {
+                hotspot_table$addRow(rowKey="morisita_error", values=list(
+                    measure="Morisita Index Error",
+                    value=paste("Calculation failed:", e$message),
                     interpretation=""
                 ))
             })

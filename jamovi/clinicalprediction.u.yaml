@@ -1,0 +1,206 @@
+title: Clinical Prediction Models & ML Interpretability
+name: clinicalprediction
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome & Time Variables
+        children:
+          - type: VariablesListBox
+            name: outcome_var
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: event_var
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Predictor Variables
+        children:
+          - type: VariablesListBox
+            name: predictor_vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+
+      - type: TargetLayoutBox
+        label: Identifiers & Stratification
+        children:
+          - type: VariablesListBox
+            name: patient_id
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: stratify_var
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Configuration
+        children:
+          - type: ComboBox
+            name: model_type
+          - type: ComboBox
+            name: problem_type
+          - type: ComboBox
+            name: outcome_type
+          - type: TextBox
+            name: random_seed
+            format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Feature Engineering
+        children:
+          - type: CheckBox
+            name: feature_selection
+          - type: ComboBox
+            name: selection_method
+          - type: CheckBox
+            name: feature_engineering
+          - type: ComboBox
+            name: handle_missing
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Training & Validation
+        children:
+          - type: TextBox
+            name: train_proportion
+            format: number
+            suffix: " (0.5-0.9)"
+          - type: ComboBox
+            name: validation_method
+          - type: CheckBox
+            name: hyperparameter_tuning
+          - type: ComboBox
+            name: tuning_method
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Interpretability
+        children:
+          - type: CheckBox
+            name: interpretability
+          - type: CheckBox
+            name: shap_analysis
+          - type: CheckBox
+            name: lime_analysis
+          - type: CheckBox
+            name: permutation_importance
+          - type: CheckBox
+            name: partial_dependence
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Individual Explanations
+        children:
+          - type: CheckBox
+            name: individual_explanations
+          - type: TextBox
+            name: n_explanations
+            format: number
+            suffix: " patients"
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Performance Analysis
+        children:
+          - type: CheckBox
+            name: performance_metrics
+          - type: CheckBox
+            name: calibration_analysis
+          - type: CheckBox
+            name: clinical_metrics
+          - type: CheckBox
+            name: roc_analysis
+          - type: CheckBox
+            name: threshold_optimization
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Comparison
+        children:
+          - type: CheckBox
+            name: compare_models
+          - type: CheckBox
+            name: baseline_models
+          - type: CheckBox
+            name: ensemble_models
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Clinical Integration
+        children:
+          - type: CheckBox
+            name: risk_stratification
+          - type: TextBox
+            name: n_risk_groups
+            format: number
+            suffix: " groups"
+          - type: CheckBox
+            name: nomogram
+          - type: CheckBox
+            name: decision_curve
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Validation & Robustness
+        children:
+          - type: CheckBox
+            name: external_validation
+          - type: TextBox
+            name: bootstrap_ci
+            format: number
+            suffix: " samples"
+          - type: CheckBox
+            name: stability_analysis
+          - type: CheckBox
+            name: bias_analysis
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: CheckBox
+            name: detailed_output
+          - type: CheckBox
+            name: clinical_report
+          - type: CheckBox
+            name: save_model
+          - type: CheckBox
+            name: export_predictions
+          - type: CheckBox
+            name: regulatory_documentation
+
+...

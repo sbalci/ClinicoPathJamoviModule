@@ -1,0 +1,702 @@
+---
+name: qualityoflife
+title: Quality of Life Analysis & Patient-Centered Outcomes
+jrs: '1.1'
+
+items:
+    # QoL Overview and Configuration
+    - name: qol_overview
+      title: Quality of Life Analysis Overview
+      type: Table
+      columns:
+          - name: characteristic
+            title: "QoL Characteristic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+      clearWith:
+          - instrument_type
+          - scoring_algorithm
+
+    - name: domain_configuration
+      title: QoL Domain Configuration
+      type: Table
+      columns:
+          - name: domain
+            title: "QoL Domain"
+            type: text
+          - name: n_items
+            title: "N Items"
+            type: integer
+          - name: scoring_range
+            title: "Score Range"
+            type: text
+          - name: higher_better
+            title: "Higher = Better"
+            type: text
+          - name: mid_threshold
+            title: "MID Threshold"
+            type: number
+            format: zto
+
+    # Domain Score Results
+    - name: domain_scores
+      title: QoL Domain Score Summary
+      type: Table
+      columns:
+          - name: domain
+            title: "Domain"
+            type: text
+          - name: n_valid
+            title: "N Valid"
+            type: integer
+          - name: mean
+            title: "Mean"
+            type: number
+            format: zto
+          - name: sd
+            title: "SD"
+            type: number
+            format: zto
+          - name: median
+            title: "Median"
+            type: number
+            format: zto
+          - name: q25
+            title: "Q1"
+            type: number
+            format: zto
+          - name: q75
+            title: "Q3"
+            type: number
+            format: zto
+          - name: min
+            title: "Min"
+            type: number
+            format: zto
+          - name: max
+            title: "Max"
+            type: number
+            format: zto
+          - name: missing_percent
+            title: "Missing %"
+            type: number
+            format: pc
+
+    - name: summary_scores
+      title: Summary QoL Scores
+      type: Table
+      columns:
+          - name: summary_score
+            title: "Summary Score"
+            type: text
+          - name: mean
+            title: "Mean"
+            type: number
+            format: zto
+          - name: sd
+            title: "SD"
+            type: number
+            format: zto
+          - name: norm_comparison
+            title: "vs. Population Norm"
+            type: text
+          - name: clinical_interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Ceiling and Floor Effects
+    - name: ceiling_floor_effects
+      title: Ceiling and Floor Effects Analysis
+      type: Table
+      visible: (ceiling_floor_analysis)
+      columns:
+          - name: domain
+            title: "Domain"
+            type: text
+          - name: floor_effect_n
+            title: "Floor Effect N"
+            type: integer
+          - name: floor_effect_percent
+            title: "Floor Effect %"
+            type: number
+            format: pc
+          - name: ceiling_effect_n
+            title: "Ceiling Effect N"
+            type: integer
+          - name: ceiling_effect_percent
+            title: "Ceiling Effect %"
+            type: number
+            format: pc
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    # Population Norms Comparison
+    - name: population_norms
+      title: Population Norms Comparison
+      type: Table
+      visible: (population_norms_comparison)
+      columns:
+          - name: domain
+            title: "Domain"
+            type: text
+          - name: sample_mean
+            title: "Sample Mean"
+            type: number
+            format: zto
+          - name: population_mean
+            title: "Population Mean"
+            type: number
+            format: zto
+          - name: difference
+            title: "Difference"
+            type: number
+            format: zto
+          - name: effect_size
+            title: "Effect Size"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+          - name: clinical_significance
+            title: "Clinical Significance"
+            type: text
+
+    # Group Comparisons
+    - name: group_comparison_domains
+      title: Group Comparison - QoL Domains
+      type: Table
+      visible: (group_comparisons)
+      columns:
+          - name: domain
+            title: "Domain"
+            type: text
+          - name: group1_mean
+            title: "Group 1 Mean"
+            type: number
+            format: zto
+          - name: group2_mean
+            title: "Group 2 Mean"
+            type: number
+            format: zto
+          - name: mean_difference
+            title: "Mean Difference"
+            type: number
+            format: zto
+          - name: ci_lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: ci_upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+          - name: adjusted_p
+            title: "Adjusted P-value"
+            type: number
+            format: zto
+          - name: effect_size
+            title: "Effect Size"
+            type: number
+            format: zto
+          - name: exceeds_mid
+            title: "Exceeds MID"
+            type: text
+
+    - name: group_descriptives
+      title: Group Descriptive Statistics
+      type: Table
+      visible: (group_comparisons)
+      columns:
+          - name: group
+            title: "Group"
+            type: text
+          - name: domain
+            title: "Domain"
+            type: text
+          - name: n
+            title: "N"
+            type: integer
+          - name: mean
+            title: "Mean"
+            type: number
+            format: zto
+          - name: sd
+            title: "SD"
+            type: number
+            format: zto
+          - name: median
+            title: "Median"
+            type: number
+            format: zto
+          - name: iqr
+            title: "IQR"
+            type: text
+
+    # Longitudinal Analysis
+    - name: longitudinal_summary
+      title: Longitudinal QoL Summary
+      type: Table
+      visible: (longitudinal_analysis)
+      columns:
+          - name: domain
+            title: "Domain"
+            type: text
+          - name: time_point
+            title: "Time Point"
+            type: text
+          - name: n
+            title: "N"
+            type: integer
+          - name: mean
+            title: "Mean"
+            type: number
+            format: zto
+          - name: sd
+            title: "SD"
+            type: number
+            format: zto
+          - name: change_from_baseline
+            title: "Change from Baseline"
+            type: number
+            format: zto
+          - name: change_se
+            title: "SE of Change"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+
+    - name: change_analysis_results
+      title: QoL Change Analysis
+      type: Table
+      visible: (longitudinal_analysis && change_analysis != 'simple_change')
+      columns:
+          - name: domain
+            title: "Domain"
+            type: text
+          - name: baseline_mean
+            title: "Baseline Mean"
+            type: number
+            format: zto
+          - name: followup_mean
+            title: "Follow-up Mean"
+            type: number
+            format: zto
+          - name: mean_change
+            title: "Mean Change"
+            type: number
+            format: zto
+          - name: effect_size
+            title: "Effect Size"
+            type: number
+            format: zto
+          - name: reliable_change_n
+            title: "Reliable Change N"
+            type: integer
+          - name: reliable_change_percent
+            title: "Reliable Change %"
+            type: number
+            format: pc
+          - name: clinical_significance
+            title: "Clinical Significance"
+            type: text
+
+    # Health Utilities
+    - name: health_utilities_summary
+      title: Health Utilities Summary
+      type: Table
+      visible: (health_utilities)
+      columns:
+          - name: utility_measure
+            title: "Utility Measure"
+            type: text
+          - name: mean_utility
+            title: "Mean Utility"
+            type: number
+            format: zto
+          - name: sd_utility
+            title: "SD Utility"
+            type: number
+            format: zto
+          - name: median_utility
+            title: "Median Utility"
+            type: number
+            format: zto
+          - name: utility_range
+            title: "Range"
+            type: text
+          - name: disutility_cases
+            title: "Disutility Cases"
+            type: integer
+          - name: perfect_health_cases
+            title: "Perfect Health Cases"
+            type: integer
+
+    - name: qaly_results
+      title: Quality-Adjusted Life Years (QALYs)
+      type: Table
+      visible: (qaly_calculation)
+      columns:
+          - name: time_period
+            title: "Time Period"
+            type: text
+          - name: mean_qaly
+            title: "Mean QALY"
+            type: number
+            format: zto
+          - name: qaly_gained
+            title: "QALY Gained"
+            type: number
+            format: zto
+          - name: utility_change
+            title: "Utility Change"
+            type: number
+            format: zto
+          - name: qaly_interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Domain Correlations
+    - name: domain_correlations
+      title: QoL Domain Correlations
+      type: Table
+      visible: (domain_correlations)
+      columns:
+          - name: domain1
+            title: "Domain 1"
+            type: text
+          - name: domain2
+            title: "Domain 2"
+            type: text
+          - name: correlation
+            title: "Correlation"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+          - name: correlation_strength
+            title: "Strength"
+            type: text
+
+    - name: clinical_correlations
+      title: QoL-Clinical Variable Correlations
+      type: Table
+      visible: (clinical_correlations)
+      columns:
+          - name: qol_domain
+            title: "QoL Domain"
+            type: text
+          - name: clinical_variable
+            title: "Clinical Variable"
+            type: text
+          - name: correlation
+            title: "Correlation"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+          - name: clinical_interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Quality Control Results
+    - name: quality_control_results
+      title: Data Quality Control Assessment
+      type: Table
+      visible: (quality_control)
+      columns:
+          - name: quality_indicator
+            title: "Quality Indicator"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+          - name: threshold
+            title: "Acceptable Threshold"
+            type: text
+          - name: status
+            title: "Status"
+            type: text
+          - name: recommendation
+            title: "Recommendation"
+            type: text
+
+    - name: response_patterns
+      title: Response Pattern Analysis
+      type: Table
+      visible: (response_pattern_analysis)
+      columns:
+          - name: pattern_type
+            title: "Response Pattern"
+            type: text
+          - name: frequency
+            title: "Frequency"
+            type: integer
+          - name: percent
+            title: "Percent"
+            type: number
+            format: pc
+          - name: quality_concern
+            title: "Quality Concern"
+            type: text
+
+    # Minimally Important Differences
+    - name: mid_analysis
+      title: Minimally Important Difference Analysis
+      type: Table
+      visible: (minimally_important_difference)
+      columns:
+          - name: domain
+            title: "Domain"
+            type: text
+          - name: mid_threshold
+            title: "MID Threshold"
+            type: number
+            format: zto
+          - name: change_exceeds_mid_n
+            title: "Changes Exceeding MID (N)"
+            type: integer
+          - name: change_exceeds_mid_percent
+            title: "Changes Exceeding MID (%)"
+            type: number
+            format: pc
+          - name: deterioration_exceeds_mid_n
+            title: "Deterioration Exceeding MID (N)"
+            type: integer
+          - name: improvement_exceeds_mid_n
+            title: "Improvement Exceeding MID (N)"
+            type: integer
+          - name: clinical_interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Clinical Interpretation
+    - name: clinical_interpretation_summary
+      title: Clinical Interpretation Summary
+      type: Table
+      visible: (clinical_interpretation)
+      columns:
+          - name: qol_aspect
+            title: "QoL Aspect"
+            type: text
+          - name: finding
+            title: "Key Finding"
+            type: text
+          - name: clinical_significance
+            title: "Clinical Significance"
+            type: text
+          - name: patient_impact
+            title: "Patient Impact"
+            type: text
+          - name: recommendation
+            title: "Clinical Recommendation"
+            type: text
+
+    - name: severity_classification
+      title: QoL Severity Classification
+      type: Table
+      visible: (clinical_cutoffs)
+      columns:
+          - name: domain
+            title: "Domain"
+            type: text
+          - name: severe_impairment_n
+            title: "Severe Impairment N"
+            type: integer
+          - name: severe_impairment_percent
+            title: "Severe Impairment %"
+            type: number
+            format: pc
+          - name: moderate_impairment_n
+            title: "Moderate Impairment N"
+            type: integer
+          - name: moderate_impairment_percent
+            title: "Moderate Impairment %"
+            type: number
+            format: pc
+          - name: mild_impairment_n
+            title: "Mild Impairment N"
+            type: integer
+          - name: normal_function_n
+            title: "Normal Function N"
+            type: integer
+          - name: normal_function_percent
+            title: "Normal Function %"
+            type: number
+            format: pc
+
+    # Health Economic Results
+    - name: health_economics_summary
+      title: Health Economic Analysis Summary
+      type: Table
+      visible: (health_economics)
+      columns:
+          - name: economic_measure
+            title: "Economic Measure"
+            type: text
+          - name: value
+            title: "Value"
+            type: number
+            format: zto
+          - name: currency_unit
+            title: "Currency/Unit"
+            type: text
+          - name: time_frame
+            title: "Time Frame"
+            type: text
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: cost_effectiveness_results
+      title: Cost-Effectiveness Analysis
+      type: Table
+      visible: (cost_effectiveness)
+      columns:
+          - name: comparison
+            title: "Comparison"
+            type: text
+          - name: incremental_cost
+            title: "Incremental Cost"
+            type: number
+            format: zto
+          - name: incremental_qaly
+            title: "Incremental QALY"
+            type: number
+            format: zto
+          - name: icer
+            title: "ICER"
+            type: number
+            format: zto
+          - name: cost_effective
+            title: "Cost-Effective"
+            type: text
+          - name: probability_ce
+            title: "Probability Cost-Effective"
+            type: number
+            format: pc
+
+    # Regulatory Documentation
+    - name: regulatory_summary
+      title: Regulatory Compliance Documentation
+      type: Table
+      visible: (regulatory_documentation)
+      columns:
+          - name: regulatory_aspect
+            title: "Regulatory Aspect"
+            type: text
+          - name: compliance_status
+            title: "Compliance Status"
+            type: text
+          - name: documentation
+            title: "Documentation"
+            type: text
+          - name: recommendations
+            title: "Recommendations"
+            type: text
+
+    # Visualizations
+    - name: domain_scores_plot
+      title: QoL Domain Scores Distribution
+      type: Image
+      renderFun: .plot_domain_scores
+      clearWith:
+          - instrument_type
+
+    - name: summary_scores_plot
+      title: Summary QoL Scores Plot
+      type: Image
+      renderFun: .plot_summary_scores
+      clearWith:
+          - instrument_type
+          - scoring_algorithm
+
+    - name: population_comparison_plot
+      title: Population Norms Comparison
+      type: Image
+      visible: (population_norms_comparison)
+      renderFun: .plot_population_comparison
+      clearWith:
+          - reference_population
+
+    - name: group_comparison_plot
+      title: Group Comparison Plot
+      type: Image
+      visible: (group_comparisons)
+      renderFun: .plot_group_comparison
+      clearWith:
+          - group_var
+          - group_comparisons
+
+    - name: longitudinal_trajectory_plot
+      title: Longitudinal QoL Trajectories
+      type: Image
+      visible: (longitudinal_analysis)
+      renderFun: .plot_longitudinal_trajectories
+      clearWith:
+          - time_var
+          - longitudinal_analysis
+
+    - name: change_waterfall_plot
+      title: QoL Change Waterfall Plot
+      type: Image
+      visible: (longitudinal_analysis && change_analysis != 'simple_change')
+      renderFun: .plot_change_waterfall
+      clearWith:
+          - change_analysis
+
+    - name: domain_correlation_heatmap
+      title: Domain Correlation Heatmap
+      type: Image
+      visible: (domain_correlations)
+      renderFun: .plot_domain_correlations
+      clearWith:
+          - domain_correlations
+
+    - name: utilities_distribution_plot
+      title: Health Utilities Distribution
+      type: Image
+      visible: (health_utilities)
+      renderFun: .plot_utilities_distribution
+      clearWith:
+          - health_utilities
+          - utility_algorithm
+
+    - name: ceiling_floor_plot
+      title: Ceiling and Floor Effects Visualization
+      type: Image
+      visible: (ceiling_floor_analysis)
+      renderFun: .plot_ceiling_floor_effects
+      clearWith:
+          - ceiling_floor_analysis
+
+    - name: radar_plot
+      title: QoL Domain Profile (Radar Plot)
+      type: Image
+      renderFun: .plot_qol_radar
+      clearWith:
+          - instrument_type
+
+    - name: missing_data_pattern_plot
+      title: Missing Data Patterns
+      type: Image
+      renderFun: .plot_missing_patterns
+      clearWith:
+          - instrument_type
+
+...

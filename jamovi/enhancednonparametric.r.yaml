@@ -8,187 +8,397 @@ items:
       title: Getting Started
       type: Html
       visible: true
+      clearWith:
+          - deps
+          - group
+          - test_type
 
     - name: descriptives
-      title: Descriptive Statistics
+      title: Descriptive Statistics by Group
       type: Table
+      visible: (show_descriptives)
       clearWith:
-          - dependent
-          - grouping
+          - deps
+          - group
+          - test_type
       columns:
+          - name: variable
+            title: Variable
+            type: text
           - name: group
             title: Group
             type: text
           - name: n
             title: N
             type: integer
+          - name: missing
+            title: Missing
+            type: integer
           - name: median
             title: Median
             type: number
-            format: zto,pvalue
+            format: zto
           - name: q1
             title: Q1
             type: number
-            format: zto,pvalue
+            format: zto
           - name: q3
             title: Q3
             type: number
-            format: zto,pvalue
+            format: zto
+          - name: iqr
+            title: IQR
+            type: number
+            format: zto
           - name: mean
             title: Mean
             type: number
-            format: zto,pvalue
+            format: zto
           - name: sd
             title: SD
             type: number
-            format: zto,pvalue
+            format: zto
           - name: min
             title: Min
             type: number
-            format: zto,pvalue
+            format: zto
           - name: max
             title: Max
             type: number
-            format: zto,pvalue
+            format: zto
+          - name: outliers
+            title: Outliers
+            type: integer
 
-    - name: assumptions
-      title: Assumption Testing
+    - name: normality
+      title: Normality Assessment
       type: Table
+      visible: (normality_tests)
       clearWith:
-          - dependent
-          - grouping
+          - deps
+          - group
+          - test_type
       columns:
-          - name: assumption
-            title: Assumption
+          - name: variable
+            title: Variable
             type: text
-          - name: assessment
-            title: Assessment
+          - name: group
+            title: Group
             type: text
-          - name: recommendation
-            title: Recommendation
-            type: text
-
-    - name: tests
-      title: Non-Parametric Tests
-      type: Table
-      clearWith:
-          - dependent
-          - grouping
-          - exact_test
-          - confidence_level
-      columns:
           - name: test
             title: Test
             type: text
           - name: statistic
             title: Statistic
             type: number
-            format: zto,pvalue
-          - name: df
-            title: df
+            format: zto
+          - name: p
+            title: p-value
             type: number
             format: zto,pvalue
+          - name: conclusion
+            title: Conclusion
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+
+    - name: assumptions
+      title: Test Assumptions
+      type: Table
+      visible: (assumption_checks)
+      clearWith:
+          - deps
+          - group
+          - test_type
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: assumption
+            title: Assumption
+            type: text
+          - name: assessment
+            title: Assessment
+            type: text
+          - name: details
+            title: Details
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+
+    - name: tests
+      title: Non-Parametric Test Results
+      type: Table
+      clearWith:
+          - deps
+          - group
+          - test_type
+          - exact_test
+          - continuity_correction
+          - tie_correction
+          - confidence_level
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+            format: zto
+          - name: df
+            title: df
+            type: integer
           - name: p
-            title: p
+            title: p-value
             type: number
             format: zto,pvalue
           - name: effect_size
             title: Effect Size
             type: number
-            format: zto,pvalue
+            format: zto
+          - name: effect_measure
+            title: Measure
+            type: text
           - name: ci_lower
-            title: CI Lower
+            title: Lower CI
             type: number
-            format: zto,pvalue
+            format: zto
           - name: ci_upper
-            title: CI Upper
+            title: Upper CI
             type: number
-            format: zto,pvalue
+            format: zto
           - name: interpretation
             title: Interpretation
             type: text
 
     - name: effectsizes
-      title: Effect Size Summary
+      title: Effect Size Details
       type: Table
+      visible: (effect_size)
       clearWith:
-          - dependent
-          - grouping
+          - deps
+          - group
+          - test_type
           - confidence_level
       columns:
+          - name: variable
+            title: Variable
+            type: text
           - name: measure
             title: Effect Size Measure
             type: text
           - name: value
             title: Value
             type: number
-            format: zto,pvalue
+            format: zto
+          - name: ci_lower
+            title: Lower CI
+            type: number
+            format: zto
+          - name: ci_upper
+            title: Upper CI
+            type: number
+            format: zto
+          - name: magnitude
+            title: Magnitude
+            type: text
           - name: interpretation
             title: Interpretation
             type: text
 
     - name: posthoc
-      title: Post Hoc Comparisons (Dunn's Test)
+      title: Post Hoc Comparisons
       type: Table
-      visible: (posthoc)
+      visible: (posthoc != 'none')
       clearWith:
-          - dependent
-          - grouping
-          - posthoc_method
+          - deps
+          - group
+          - test_type
+          - posthoc
+          - posthoc_correction
           - confidence_level
       columns:
+          - name: variable
+            title: Variable
+            type: text
           - name: comparison
             title: Comparison
             type: text
-          - name: z_statistic
-            title: Z
+          - name: statistic
+            title: Test Statistic
             type: number
-            format: zto,pvalue
+            format: zto
           - name: p_raw
             title: p (raw)
             type: number
             format: zto,pvalue
           - name: p_adjusted
-            title: p (adj)
+            title: p (adjusted)
             type: number
             format: zto,pvalue
           - name: effect_size
-            title: Effect Size (r)
+            title: Effect Size
             type: number
-            format: zto,pvalue
+            format: zto
           - name: significance
-            title: Sig
+            title: Significance
             type: text
           - name: interpretation
             title: Interpretation
             type: text
 
     - name: distributionplot
-      title: Distribution Comparison
+      title: Distribution Comparison Plots
       type: Image
-      width: 600
-      height: 500
-      visible: (show_plots)
+      width: 800
+      height: 600
+      visible: (descriptive_plots)
       requiresData: true
+      renderFun: .distributionplot
       clearWith:
-          - dependent
-          - grouping
-          - show_plots
+          - deps
+          - group
+          - test_type
+          - descriptive_plots
+
+    - name: boxplot
+      title: Box Plots with Individual Points
+      type: Image
+      width: 800
+      height: 600
+      visible: (descriptive_plots)
+      requiresData: true
+      renderFun: .boxplot
+      clearWith:
+          - deps
+          - group
+          - descriptive_plots
+
+    - name: violinplot
+      title: Violin Plots
+      type: Image
+      width: 800
+      height: 600
+      visible: (descriptive_plots)
+      requiresData: true
+      renderFun: .violinplot
+      clearWith:
+          - deps
+          - group
+          - descriptive_plots
 
     - name: effectsizeplot
-      title: Effect Size Plot
+      title: Effect Size Visualization
       type: Image
-      width: 600
-      height: 400
-      visible: (show_plots)
+      width: 800
+      height: 500
+      visible: (effect_size && descriptive_plots)
       requiresData: true
+      renderFun: .effectsizeplot
       clearWith:
-          - dependent
-          - grouping
-          - show_plots
+          - deps
+          - group
+          - test_type
+          - effect_size
           - confidence_level
+          - descriptive_plots
 
-    - name: interpretation
-      title: Clinical Interpretation and Guidelines
+    - name: qqplot
+      title: Q-Q Plots for Normality Assessment
+      type: Image
+      width: 800
+      height: 600
+      visible: (normality_tests && descriptive_plots)
+      requiresData: true
+      renderFun: .qqplot
+      clearWith:
+          - deps
+          - group
+          - normality_tests
+          - descriptive_plots
+
+    # Explanation Sections
+    - name: methodExplanation
+      title: Understanding Non-Parametric Tests
       type: Html
-      visible: true
+      visible: (show_explanations)
+      clearWith:
+          - test_type
+          - show_explanations
+
+    - name: effectSizeExplanation
+      title: Understanding Effect Sizes
+      type: Html
+      visible: (effect_size && show_explanations)
+      clearWith:
+          - test_type
+          - effect_size
+          - show_explanations
+
+    - name: postHocExplanation
+      title: Understanding Post Hoc Testing
+      type: Html
+      visible: (posthoc != 'none' && show_explanations)
+      clearWith:
+          - posthoc
+          - posthoc_correction
+          - show_explanations
+
+    - name: assumptionExplanation
+      title: Understanding Test Assumptions
+      type: Html
+      visible: (assumption_checks && show_explanations)
+      clearWith:
+          - assumption_checks
+          - show_explanations
+
+    # Interpretation Sections
+    - name: resultInterpretation
+      title: Results Interpretation
+      type: Html
+      visible: (show_interpretation)
+      clearWith:
+          - deps
+          - group
+          - test_type
+          - show_interpretation
+
+    - name: clinicalInterpretation
+      title: Clinical Significance and Interpretation
+      type: Html
+      visible: (show_interpretation)
+      clearWith:
+          - deps
+          - group
+          - test_type
+          - effect_size
+          - show_interpretation
+
+    # Recommendations Section
+    - name: statisticalRecommendations
+      title: Statistical Recommendations
+      type: Html
+      visible: (show_recommendations)
+      clearWith:
+          - deps
+          - group
+          - test_type
+          - normality_tests
+          - assumption_checks
+          - show_recommendations
+
+refs:
+    - enhancednonparametric
+    - mannwhitney
+    - kruskalwallis
+    - wilcoxon
+    - dunn
+    - effectsize
+    - ClinicoPathJamoviModule
+
+...

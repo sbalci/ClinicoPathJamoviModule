@@ -1,0 +1,501 @@
+---
+name: patientreported
+title: Patient-Reported Outcomes & Quality of Life Analysis
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Patient-Reported Outcomes
+menuSubtitle: Comprehensive PRO analysis with psychometric validation
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive analysis of Patient-Reported Outcomes (PRO) and Quality of Life (QoL) data
+        for clinical research. Includes psychometric validation, score calculation, change analysis,
+        and clinical interpretation. Supports standardized instruments (SF-36, EORTC QLQ-C30, 
+        FACT-G, etc.) and custom questionnaires with missing data handling and longitudinal analysis.
+        Essential for patient-centered outcomes research and clinical trials.
+    R:
+        dontrun: false
+        usage: |
+            data('pro_data')
+            
+            patientreported(
+                data = pro_data,
+                scale_items = c("item1", "item2", "item3"),
+                patient_id = "patient_id",
+                time_var = "visit_number",
+                reliability_analysis = TRUE,
+                validity_analysis = TRUE
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Variable Selection
+    - name: scale_items
+      title: Scale Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items/questions that comprise the PRO scale or questionnaire
+
+    - name: patient_id
+      title: Patient ID
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Patient identifier for longitudinal analysis
+
+    - name: time_var
+      title: Time Variable (Optional)
+      type: Variable
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Time point variable for longitudinal PRO analysis (visit, week, etc.)
+
+    - name: group_var
+      title: Group Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Grouping variable for between-group PRO comparisons (treatment, disease stage, etc.)
+
+    - name: demographic_vars
+      title: Demographic Variables (Optional)
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Demographic variables for subgroup analysis and validation
+
+    # Scale Configuration
+    - name: scale_type
+      title: PRO Scale Type
+      type: List
+      options:
+          - name: "generic_qol"
+            title: "Generic Quality of Life"
+          - name: "disease_specific"
+            title: "Disease-Specific PRO"
+          - name: "symptom_scale"
+            title: "Symptom Assessment Scale"
+          - name: "functional_scale"
+            title: "Functional Assessment"
+          - name: "custom_scale"
+            title: "Custom PRO Scale"
+      default: "generic_qol"
+      description:
+          R: Type of PRO scale being analyzed
+
+    - name: instrument_name
+      title: Instrument Name
+      type: List
+      options:
+          - name: "sf36"
+            title: "SF-36 Health Survey"
+          - name: "eortc_qlq_c30"
+            title: "EORTC QLQ-C30"
+          - name: "fact_g"
+            title: "FACT-G"
+          - name: "promis"
+            title: "PROMIS Measures"
+          - name: "eq5d"
+            title: "EQ-5D"
+          - name: "karnofsky"
+            title: "Karnofsky Performance Status"
+          - name: "ecog"
+            title: "ECOG Performance Status"
+          - name: "custom"
+            title: "Custom Instrument"
+      default: "custom"
+      description:
+          R: Standardized PRO instrument being used
+
+    - name: scoring_method
+      title: Scoring Method
+      type: List
+      options:
+          - name: "sum_score"
+            title: "Sum Score"
+          - name: "mean_score"
+            title: "Mean Score"
+          - name: "standardized"
+            title: "Standardized Score (Z-score)"
+          - name: "percent_scale"
+            title: "Percent Scale (0-100)"
+          - name: "likert_scale"
+            title: "Likert Scale Analysis"
+          - name: "irt_score"
+            title: "Item Response Theory Score"
+      default: "sum_score"
+      description:
+          R: Method for calculating PRO scale scores
+
+    - name: reverse_coded_items
+      title: Reverse-Coded Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items that need to be reverse-coded before scoring
+
+    - name: response_scale_min
+      title: Response Scale Minimum
+      type: Number
+      min: 0
+      max: 10
+      default: 1
+      description:
+          R: Minimum value of the response scale (e.g., 1 for 1-5 Likert scale)
+
+    - name: response_scale_max
+      title: Response Scale Maximum
+      type: Number
+      min: 2
+      max: 100
+      default: 5
+      description:
+          R: Maximum value of the response scale (e.g., 5 for 1-5 Likert scale)
+
+    # Psychometric Analysis
+    - name: reliability_analysis
+      title: Reliability Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform reliability analysis (Cronbach's alpha, item-total correlations)
+
+    - name: validity_analysis
+      title: Validity Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform validity analysis (construct validity, concurrent validity)
+
+    - name: factor_analysis
+      title: Factor Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform exploratory and confirmatory factor analysis
+
+    - name: irt_analysis
+      title: Item Response Theory Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform IRT analysis for item characteristics and scale properties
+
+    - name: dimensionality_test
+      title: Dimensionality Testing
+      type: Bool
+      default: true
+      description:
+          R: Test scale dimensionality and factor structure
+
+    - name: measurement_invariance
+      title: Measurement Invariance
+      type: Bool
+      default: false
+      description:
+          R: Test measurement invariance across groups and time points
+
+    # Missing Data Handling
+    - name: missing_data_method
+      title: Missing Data Handling
+      type: List
+      options:
+          - name: "complete_cases"
+            title: "Complete Cases Only"
+          - name: "mean_imputation"
+            title: "Mean Imputation"
+          - name: "person_mean"
+            title: "Person-Specific Mean"
+          - name: "scale_mean"
+            title: "Scale-Specific Mean"
+          - name: "multiple_imputation"
+            title: "Multiple Imputation (MICE)"
+          - name: "pro_rata_scoring"
+            title: "Pro-Rata Scoring"
+      default: "pro_rata_scoring"
+      description:
+          R: Method for handling missing item responses
+
+    - name: min_items_required
+      title: Minimum Items Required
+      type: Number
+      min: 1
+      max: 50
+      default: 2
+      description:
+          R: Minimum number of non-missing items required for scale scoring
+
+    - name: missing_threshold
+      title: Missing Data Threshold
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.5
+      description:
+          R: Maximum proportion of missing items allowed for scoring (50% = 0.5)
+
+    # Clinical Interpretation
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: Provide clinical interpretation of PRO scores
+
+    - name: normative_comparison
+      title: Normative Comparison
+      type: Bool
+      default: false
+      description:
+          R: Compare scores to published normative data
+
+    - name: minimal_important_difference
+      title: Minimal Important Difference Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze changes relative to minimal important difference (MID)
+
+    - name: mid_value
+      title: MID Value
+      type: Number
+      min: 0.1
+      max: 50
+      default: 5
+      description:
+          R: Minimal important difference value for clinical significance
+
+    - name: ceiling_floor_effects
+      title: Ceiling/Floor Effects Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze ceiling and floor effects in PRO responses
+
+    # Longitudinal Analysis
+    - name: longitudinal_analysis
+      title: Longitudinal Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform longitudinal PRO analysis
+
+    - name: change_analysis
+      title: Change Analysis
+      type: List
+      options:
+          - name: "none"
+            title: "No Change Analysis"
+          - name: "simple_change"
+            title: "Simple Change Scores"
+          - name: "reliable_change"
+            title: "Reliable Change Index"
+          - name: "effect_size"
+            title: "Effect Size (Cohen's d)"
+          - name: "mixed_models"
+            title: "Mixed-Effects Models"
+      default: "simple_change"
+      description:
+          R: Method for analyzing PRO changes over time
+
+    - name: trajectory_analysis
+      title: Trajectory Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze PRO trajectories and patterns over time
+
+    - name: time_to_deterioration
+      title: Time to Deterioration Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze time to meaningful PRO deterioration
+
+    # Group Comparisons
+    - name: group_comparisons
+      title: Group Comparisons
+      type: Bool
+      default: false
+      description:
+          R: Compare PRO scores between groups
+
+    - name: comparison_method
+      title: Comparison Method
+      type: List
+      options:
+          - name: "t_test"
+            title: "T-test"
+          - name: "anova"
+            title: "ANOVA"
+          - name: "wilcoxon"
+            title: "Wilcoxon Test"
+          - name: "kruskal_wallis"
+            title: "Kruskal-Wallis Test"
+          - name: "mixed_models"
+            title: "Mixed-Effects Models"
+      default: "t_test"
+      description:
+          R: Statistical method for group comparisons
+
+    - name: effect_size_analysis
+      title: Effect Size Analysis
+      type: Bool
+      default: true
+      description:
+          R: Calculate effect sizes for group differences
+
+    - name: multiple_comparisons
+      title: Multiple Comparisons Correction
+      type: List
+      options:
+          - name: "none"
+            title: "No Correction"
+          - name: "bonferroni"
+            title: "Bonferroni"
+          - name: "holm"
+            title: "Holm"
+          - name: "fdr"
+            title: "False Discovery Rate"
+      default: "fdr"
+      description:
+          R: Method for multiple comparisons correction
+
+    # Advanced Analysis
+    - name: responder_analysis
+      title: Responder Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze proportion of patients with meaningful improvements
+
+    - name: responder_threshold
+      title: Responder Threshold
+      type: Number
+      min: 1
+      max: 50
+      default: 10
+      description:
+          R: Threshold for defining treatment responders
+
+    - name: anchor_based_analysis
+      title: Anchor-Based Analysis
+      type: Bool
+      default: false
+      description:
+          R: Use anchor variables to interpret PRO changes
+
+    - name: anchor_variables
+      title: Anchor Variables
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: External anchor variables for interpreting PRO changes
+
+    - name: distribution_based_analysis
+      title: Distribution-Based Analysis
+      type: Bool
+      default: true
+      description:
+          R: Use distribution-based methods for interpreting changes
+
+    # Quality Assessment
+    - name: data_quality_assessment
+      title: Data Quality Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess PRO data quality and completion patterns
+
+    - name: response_patterns
+      title: Response Pattern Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze response patterns and potential response bias
+
+    - name: acquiescence_analysis
+      title: Acquiescence Response Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze acquiescence and extreme response styles
+
+    # Output Options
+    - name: detailed_output
+      title: Detailed Output
+      type: Bool
+      default: true
+      description:
+          R: Include detailed psychometric and clinical analysis results
+
+    - name: summary_report
+      title: Summary Report
+      type: Bool
+      default: true
+      description:
+          R: Generate comprehensive PRO analysis summary report
+
+    - name: individual_profiles
+      title: Individual Patient Profiles
+      type: Bool
+      default: false
+      description:
+          R: Generate individual patient PRO profiles
+
+    - name: save_scores
+      title: Save Calculated Scores
+      type: Bool
+      default: false
+      description:
+          R: Save calculated PRO scores to dataset
+
+    - name: regulatory_documentation
+      title: Regulatory Documentation
+      type: Bool
+      default: true
+      description:
+          R: Include documentation for regulatory submissions
+
+...

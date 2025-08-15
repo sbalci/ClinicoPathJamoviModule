@@ -1,0 +1,123 @@
+name: pseudosurvival
+title: Pseudo-Observations Survival Methods
+jrs: '1.1'
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+      
+    - name: pseudo_summary
+      title: Pseudo-Observations Summary
+      type: Html
+      visible: true
+      
+    - name: regression_results
+      title: Regression Analysis Results
+      type: Html
+      visible: true
+      
+    - name: covariate_effects
+      title: Covariate Effects
+      type: Html
+      visible: true
+      
+    - name: rmst_analysis
+      title: RMST Analysis
+      type: Html
+      visible: (analysis_type == 'rmst_regression')
+      
+    - name: survival_probability_results
+      title: Survival Probability Results
+      type: Html
+      visible: (analysis_type == 'survival_probability')
+      
+    - name: group_comparisons
+      title: Group Comparisons
+      type: Html
+      visible: (rmst_comparison && analysis_type == 'rmst_regression')
+      
+    - name: model_diagnostics_summary
+      title: Model Diagnostics
+      type: Html
+      visible: (model_diagnostics)
+      
+    - name: sensitivity_results
+      title: Sensitivity Analysis
+      type: Html
+      visible: (sensitivity_analysis)
+      
+    - name: pseudo_observations_plot
+      title: Pseudo-Observations Distribution
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_pseudo_observations
+      visible: true
+      clearWith:
+          - time_var
+          - status_var
+          - analysis_type
+          - time_points
+          
+    - name: regression_plots
+      title: Regression Analysis Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_regression
+      visible: true
+      clearWith:
+          - covariates
+          - analysis_type
+          - regression_method
+          
+    - name: survival_curves_plot
+      title: Survival Probability Curves
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_survival_curves
+      visible: (survival_curves)
+      clearWith:
+          - time_var
+          - status_var
+          - covariates
+          - time_points
+          
+    - name: rmst_comparison_plot
+      title: RMST Comparison Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_rmst_comparison
+      visible: (rmst_comparison && analysis_type == 'rmst_regression')
+      clearWith:
+          - time_var
+          - status_var
+          - covariates
+          - tau_rmst
+          
+    - name: diagnostics_plots
+      title: Model Diagnostic Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_diagnostics
+      visible: (model_diagnostics)
+      clearWith:
+          - covariates
+          - regression_method
+          - robust_se
+          
+    - name: sensitivity_plot
+      title: Sensitivity Analysis Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_sensitivity
+      visible: (sensitivity_analysis)
+      clearWith:
+          - tau_rmst
+          - analysis_type
+          - covariates

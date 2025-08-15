@@ -12,7 +12,17 @@ items:
     - name: summary
       title: Spatial Summary Statistics
       type: Table
-      columns: []
+      columns:
+          - name: measure
+            title: Measure
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto
+          - name: description
+            title: Description
+            type: text
       description: Basic spatial metrics including point counts, density, and study area
       clearWith:
           - coords_x
@@ -23,7 +33,30 @@ items:
     - name: ripley
       title: Ripley's K-function Analysis
       type: Table
-      columns: []
+      columns:
+          - name: distance
+            title: Distance (r)
+            type: number
+            format: zto
+          - name: k_observed
+            title: K(r) Observed
+            type: number
+            format: zto
+          - name: k_theoretical
+            title: K(r) Theoretical
+            type: number
+            format: zto
+          - name: l_observed
+            title: L(r) Observed
+            type: number
+            format: zto
+          - name: l_theoretical
+            title: L(r) Theoretical
+            type: number
+            format: zto
+          - name: interpretation
+            title: Pattern
+            type: text
       description: Spatial clustering analysis at multiple distance scales
       visible: (perform_ripley)
       clearWith:
@@ -35,7 +68,29 @@ items:
     - name: nearestneighbor
       title: Nearest Neighbor Analysis
       type: Table
-      columns: []
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto
+          - name: expected
+            title: Expected
+            type: number
+            format: zto
+          - name: ratio
+            title: R
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
       description: Nearest neighbor distances and Clark-Evans randomness test
       visible: (perform_nnd)
       clearWith:
@@ -47,7 +102,17 @@ items:
     - name: hotspots
       title: Hotspot Detection Results
       type: Table
-      columns: []
+      columns:
+          - name: measure
+            title: Measure
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto
+          - name: interpretation
+            title: Interpretation
+            type: text
       description: Spatial hotspot analysis using kernel density estimation
       visible: (perform_hotspot)
       clearWith:
@@ -58,7 +123,31 @@ items:
     - name: interaction
       title: Multi-type Spatial Interaction
       type: Table
-      columns: []
+      columns:
+          - name: type_i
+            title: Type i
+            type: text
+          - name: type_j
+            title: Type j
+            type: text
+          - name: distance
+            title: Distance (r)
+            type: number
+            format: zto
+          - name: pcf_observed
+            title: g(r) Observed
+            type: number
+            format: zto
+          - name: pcf_theoretical
+            title: g(r) Expected
+            type: number
+            format: zto
+          - name: interaction_type
+            title: Interaction
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
       description: Cross-type spatial relationships and interaction patterns
       visible: (perform_interaction && cell_types)
       clearWith:

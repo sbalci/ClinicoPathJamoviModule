@@ -1,0 +1,490 @@
+---
+name:  clinicalcalculators
+title: Clinical Risk Calculators & Nomograms
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: calculator_type
+      title: Calculator Type
+      type: List
+      options:
+        - name: risk_score
+          title: Risk Score Calculator
+        - name: nomogram
+          title: Nomogram Generator
+        - name: decision_tree
+          title: Decision Tree Calculator
+        - name: survival_prediction
+          title: Survival Prediction Model
+        - name: diagnostic_probability
+          title: Diagnostic Probability Calculator
+        - name: treatment_benefit
+          title: Treatment Benefit Calculator
+        - name: biomarker_threshold
+          title: Biomarker Threshold Calculator
+        - name: clinical_index
+          title: Clinical Index Calculator
+        - name: prognostic_model
+          title: Prognostic Model Calculator
+        - name: screening_risk
+          title: Screening Risk Assessment
+      default: risk_score
+      description:
+          R: the type of clinical calculator to generate
+
+    - name: outcome_variable
+      title: Outcome Variable
+      type: Variable
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: primary outcome variable for the calculator
+
+    - name: predictor_variables
+      title: Predictor Variables
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: predictor variables for the risk model
+
+    - name: time_variable
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: time variable for survival analysis (if applicable)
+
+    - name: event_variable
+      title: Event Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: event/status variable for survival analysis (if applicable)
+
+    - name: stratification_variable
+      title: Stratification Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: variable for subgroup stratification (optional)
+
+    - name: model_type
+      title: Statistical Model
+      type: List
+      options:
+        - name: logistic_regression
+          title: Logistic Regression
+        - name: cox_regression
+          title: Cox Proportional Hazards
+        - name: linear_regression
+          title: Linear Regression
+        - name: random_forest
+          title: Random Forest
+        - name: gradient_boosting
+          title: Gradient Boosting
+        - name: neural_network
+          title: Neural Network
+        - name: ensemble_model
+          title: Ensemble Model
+        - name: bayesian_model
+          title: Bayesian Model
+      default: logistic_regression
+      description:
+          R: statistical model for the calculator
+
+    - name: validation_method
+      title: Validation Method
+      type: List
+      options:
+        - name: bootstrap
+          title: Bootstrap Validation
+        - name: cross_validation
+          title: Cross-Validation
+        - name: holdout
+          title: Holdout Validation
+        - name: external_validation
+          title: External Validation
+        - name: temporal_validation
+          title: Temporal Validation
+      default: bootstrap
+      description:
+          R: method for model validation
+
+    - name: risk_categories
+      title: Number of Risk Categories
+      type: Integer
+      min: 2
+      max: 10
+      default: 3
+      description:
+          R: number of risk categories for stratification
+
+    - name: risk_thresholds
+      title: Custom Risk Thresholds
+      type: String
+      default: ''
+      description:
+          R: custom risk thresholds (comma-separated percentages)
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+          R: confidence level for intervals
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: number of bootstrap samples for validation
+
+    - name: cv_folds
+      title: Cross-Validation Folds
+      type: Integer
+      min: 3
+      max: 20
+      default: 10
+      description:
+          R: number of folds for cross-validation
+
+    - name: include_nomogram
+      title: Generate Nomogram
+      type: Bool
+      default: true
+      description:
+          R: whether to generate a nomogram visualization
+
+    - name: include_calibration
+      title: Include Calibration Plot
+      type: Bool
+      default: true
+      description:
+          R: whether to include model calibration assessment
+
+    - name: include_discrimination
+      title: Include Discrimination Metrics
+      type: Bool
+      default: true
+      description:
+          R: whether to include discrimination analysis
+
+    - name: include_decision_curve
+      title: Include Decision Curve Analysis
+      type: Bool
+      default: true
+      description:
+          R: whether to include decision curve analysis
+
+    - name: include_net_benefit
+      title: Include Net Benefit Analysis
+      type: Bool
+      default: true
+      description:
+          R: whether to include net benefit calculations
+
+    - name: clinical_threshold_low
+      title: Low Clinical Threshold
+      type: Number
+      min: 0
+      max: 1
+      default: 0.1
+      description:
+          R: lower threshold for clinical decision making
+
+    - name: clinical_threshold_high
+      title: High Clinical Threshold
+      type: Number
+      min: 0
+      max: 1
+      default: 0.3
+      description:
+          R: upper threshold for clinical decision making
+
+    - name: feature_selection
+      title: Automatic Feature Selection
+      type: Bool
+      default: false
+      description:
+          R: whether to perform automatic feature selection
+
+    - name: feature_selection_method
+      title: Feature Selection Method
+      type: List
+      options:
+        - name: forward
+          title: Forward Selection
+        - name: backward
+          title: Backward Elimination
+        - name: stepwise
+          title: Stepwise Selection
+        - name: lasso
+          title: LASSO Regularization
+        - name: elastic_net
+          title: Elastic Net
+        - name: boruta
+          title: Boruta Algorithm
+        - name: rfe
+          title: Recursive Feature Elimination
+      default: stepwise
+      description:
+          R: method for automatic feature selection
+
+    - name: regularization_alpha
+      title: Regularization Alpha
+      type: Number
+      min: 0
+      max: 1
+      default: 1
+      description:
+          R: alpha parameter for elastic net (1=LASSO, 0=Ridge)
+
+    - name: missing_data_method
+      title: Missing Data Handling
+      type: List
+      options:
+        - name: complete_case
+          title: Complete Case Analysis
+        - name: mean_imputation
+          title: Mean Imputation
+        - name: median_imputation
+          title: Median Imputation
+        - name: mode_imputation
+          title: Mode Imputation
+        - name: mice
+          title: Multiple Imputation (MICE)
+        - name: knn_imputation
+          title: K-Nearest Neighbors
+        - name: random_forest_imputation
+          title: Random Forest Imputation
+      default: complete_case
+      description:
+          R: method for handling missing data
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: false
+      description:
+          R: whether to detect and handle outliers
+
+    - name: outlier_method
+      title: Outlier Detection Method
+      type: List
+      options:
+        - name: iqr
+          title: Interquartile Range
+        - name: zscore
+          title: Z-Score Method
+        - name: isolation_forest
+          title: Isolation Forest
+        - name: local_outlier
+          title: Local Outlier Factor
+        - name: mahalanobis
+          title: Mahalanobis Distance
+      default: iqr
+      description:
+          R: method for outlier detection
+
+    - name: calculator_name
+      title: Calculator Name
+      type: String
+      default: 'Clinical Risk Calculator'
+      description:
+          R: name for the clinical calculator
+
+    - name: calculator_description
+      title: Calculator Description
+      type: String
+      default: ''
+      description:
+          R: description of the calculator's purpose and application
+
+    - name: target_population
+      title: Target Population
+      type: String
+      default: ''
+      description:
+          R: description of the target patient population
+
+    - name: units_specification
+      title: Variable Units
+      type: String
+      default: ''
+      description:
+          R: units for variables (e.g., "age:years,weight:kg")
+
+    - name: reference_ranges
+      title: Reference Ranges
+      type: String
+      default: ''
+      description:
+          R: normal reference ranges for variables
+
+    - name: include_uncertainty
+      title: Include Uncertainty Quantification
+      type: Bool
+      default: true
+      description:
+          R: whether to include prediction uncertainty
+
+    - name: interactive_calculator
+      title: Generate Interactive Calculator
+      type: Bool
+      default: true
+      description:
+          R: whether to generate an interactive web calculator
+
+    - name: export_format
+      title: Export Format
+      type: List
+      options:
+        - name: html
+          title: HTML Interactive
+        - name: pdf
+          title: PDF Report
+        - name: shiny
+          title: Shiny Application
+        - name: r_package
+          title: R Package
+        - name: json
+          title: JSON Configuration
+        - name: excel
+          title: Excel Calculator
+      default: html
+      description:
+          R: format for exporting the calculator
+
+    - name: performance_metrics
+      title: Performance Metrics
+      type: List
+      options:
+        - name: basic
+          title: Basic Metrics
+        - name: comprehensive
+          title: Comprehensive
+        - name: clinical_focused
+          title: Clinical Focused
+        - name: research_focused
+          title: Research Focused
+      default: comprehensive
+      description:
+          R: level of performance metrics to include
+
+    - name: include_interpretation
+      title: Include Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: whether to include clinical interpretation guidelines
+
+    - name: interpretation_text
+      title: Custom Interpretation Text
+      type: String
+      default: ''
+      description:
+          R: custom text for result interpretation
+
+    - name: risk_communication
+      title: Risk Communication Format
+      type: List
+      options:
+        - name: percentage
+          title: Percentage (%)
+        - name: natural_frequency
+          title: Natural Frequency (X out of 100)
+        - name: odds_ratio
+          title: Odds Ratio
+        - name: icon_array
+          title: Icon Array
+        - name: multiple_formats
+          title: Multiple Formats
+      default: multiple_formats
+      description:
+          R: format for communicating risk to patients
+
+    - name: validation_data_source
+      title: Validation Data Source
+      type: String
+      default: ''
+      description:
+          R: source of external validation data (if applicable)
+
+    - name: regulatory_compliance
+      title: Regulatory Compliance
+      type: List
+      options:
+        - name: none
+          title: None Specified
+        - name: fda_guidance
+          title: FDA Guidance
+        - name: ema_guidance
+          title: EMA Guidance
+        - name: ce_marking
+          title: CE Marking Requirements
+        - name: iso_standards
+          title: ISO Standards
+        - name: clinical_practice
+          title: Clinical Practice Guidelines
+      default: none
+      description:
+          R: regulatory framework for compliance
+
+    - name: bias_assessment
+      title: Include Bias Assessment
+      type: Bool
+      default: true
+      description:
+          R: whether to include bias and fairness assessment
+
+    - name: subgroup_analysis
+      title: Include Subgroup Analysis
+      type: Bool
+      default: false
+      description:
+          R: whether to perform subgroup-specific analyses
+
+    - name: sensitivity_analysis
+      title: Include Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: whether to include sensitivity analysis
+
+    - name: implementation_guide
+      title: Include Implementation Guide
+      type: Bool
+      default: true
+      description:
+          R: whether to include clinical implementation guidelines

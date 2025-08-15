@@ -19,7 +19,7 @@ For detailed installation instructions, please see the [INSTALL.md](INSTALL.md) 
 
 ## Getting Started
 
-To get started with the ClinicoPathJamoviModule, please see the "Getting Started" vignette, which provides a comprehensive, step-by-step guide to using the package.
+To get started with the ClinicoPathJamoviModule, please see our comprehensive ["Getting Started" guide](https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/getting_started.html), which provides a step-by-step tutorial.
 
 ## Contributing
 

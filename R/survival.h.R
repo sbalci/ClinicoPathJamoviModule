@@ -50,6 +50,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             residual_diagnostics = FALSE,
             loglog = FALSE,
             showExplanations = FALSE,
+            showSummaries = FALSE,
             use_parametric = FALSE,
             parametric_distribution = "weibull",
             parametric_covariates = TRUE,
@@ -300,6 +301,10 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showExplanations",
                 showExplanations,
                 default=FALSE)
+            private$..showSummaries <- jmvcore::OptionBool$new(
+                "showSummaries",
+                showSummaries,
+                default=FALSE)
             private$..use_parametric <- jmvcore::OptionBool$new(
                 "use_parametric",
                 use_parametric,
@@ -407,6 +412,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..export_survival_data)
             self$.addOption(private$..loglog)
             self$.addOption(private$..showExplanations)
+            self$.addOption(private$..showSummaries)
             self$.addOption(private$..use_parametric)
             self$.addOption(private$..parametric_distribution)
             self$.addOption(private$..parametric_covariates)
@@ -467,6 +473,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         export_survival_data = function() private$..export_survival_data$value,
         loglog = function() private$..loglog$value,
         showExplanations = function() private$..showExplanations$value,
+        showSummaries = function() private$..showSummaries$value,
         use_parametric = function() private$..use_parametric$value,
         parametric_distribution = function() private$..parametric_distribution$value,
         parametric_covariates = function() private$..parametric_covariates$value,
@@ -526,6 +533,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..export_survival_data = NA,
         ..loglog = NA,
         ..showExplanations = NA,
+        ..showSummaries = NA,
         ..use_parametric = NA,
         ..parametric_distribution = NA,
         ..parametric_covariates = NA,
@@ -632,6 +640,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="medianSummary",
                 title="`Median Survival Summary and Table - ${explanatory}`",
+                visible="(showSummaries)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -702,6 +711,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="coxSummary",
                 title="`Cox Regression Summary and Table - ${explanatory}`",
+                visible="(showSummaries)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -805,6 +815,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="survTableSummary",
                 title="`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`",
+                visible="(showSummaries)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -999,7 +1010,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="rmstSummary",
                 title="RMST Interpretation",
-                visible="(rmst_analysis)",
+                visible="(rmst_analysis && showSummaries)",
                 clearWith=list(
                     "rmst_analysis",
                     "rmst_tau",
@@ -1077,6 +1088,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="pairwiseSummary",
                 title="`Pairwise Comparison Summary and Table - ${explanatory}`",
+                visible="(pw && showSummaries)",
                 clearWith=list(
                     "pw",
                     "explanatory",
@@ -1086,8 +1098,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent"),
-                visible="(pw)"))
+                    "multievent")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="pairwiseTable",
@@ -1595,6 +1606,10 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   hazards.
 #' @param showExplanations Display detailed explanations for each analysis
 #'   component to help interpret the statistical methods and results.
+#' @param showSummaries Display natural language summaries alongside tables
+#'   and plots. These summaries provide plain-language interpretations of the
+#'   statistical results. Turn off to reduce visual clutter when summaries are
+#'   not needed.
 #' @param use_parametric Enable parametric survival modeling using flexsurv
 #'   package. Provides alternative to Cox regression with explicit hazard
 #'   functions and extrapolation capabilities beyond observed follow-up.
@@ -1728,6 +1743,7 @@ survival <- function(
     residual_diagnostics = FALSE,
     loglog = FALSE,
     showExplanations = FALSE,
+    showSummaries = FALSE,
     use_parametric = FALSE,
     parametric_distribution = "weibull",
     parametric_covariates = TRUE,
@@ -1807,6 +1823,7 @@ survival <- function(
         residual_diagnostics = residual_diagnostics,
         loglog = loglog,
         showExplanations = showExplanations,
+        showSummaries = showSummaries,
         use_parametric = use_parametric,
         parametric_distribution = parametric_distribution,
         parametric_covariates = parametric_covariates,

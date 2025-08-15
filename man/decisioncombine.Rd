@@ -15,7 +15,13 @@ decisioncombine(
   test3,
   test3Positive,
   od = FALSE,
-  showIndividual = TRUE
+  showIndividual = TRUE,
+  exportCombinationPattern = FALSE,
+  showVisualization = TRUE,
+  plotType = "heatmap",
+  plotHeight = 600,
+  plotWidth = 800,
+  colorScheme = "clinical"
 )
 }
 \arguments{
@@ -41,6 +47,24 @@ decisioncombine(
 'false'.}
 
 \item{showIndividual}{.}
+
+\item{exportCombinationPattern}{Export a new variable to the data frame
+indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).}
+
+\item{showVisualization}{Display visualizations for test combination
+analysis.}
+
+\item{plotType}{Type of visualization to display. Heatmap shows combination
+patterns performance, ROC curves compare individual and combined tests,
+Decision tree shows test hierarchy, Venn diagram shows test overlaps,
+Forest plot shows diagnostic statistics with CI.}
+
+\item{plotHeight}{Height of the plot in pixels.}
+
+\item{plotWidth}{Width of the plot in pixels.}
+
+\item{colorScheme}{Color scheme for visualizations. Clinical uses red for
+negative and green for positive.}
 }
 \value{
 A results object containing:
@@ -54,6 +78,11 @@ A results object containing:
 \code{results$combStatsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$combStatsTableCI} \tab \tab \tab \tab \tab a table \cr
 \code{results$addCombinationPattern} \tab \tab \tab \tab \tab an output \cr
+\code{results$performanceHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$rocCurves} \tab \tab \tab \tab \tab an image \cr
+\code{results$decisionTree} \tab \tab \tab \tab \tab an image \cr
+\code{results$vennDiagram} \tab \tab \tab \tab \tab an image \cr
+\code{results$forestPlot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -49,9 +49,11 @@ A results object containing:
 }
 \description{
 Automatically selects and generates the most appropriate statistical
-visualization based on variable data types. Supports both independent and
-repeated measures designs with various plot types including violin plots,
-scatter plots, bar charts, and alluvial diagrams.
+visualization based on variable data types. Features enhanced error
+messages with contextual guidance, robust data validation, and
+comprehensive fallback options. Supports both independent and repeated
+measures designs with various plot types including violin plots, scatter
+plots, bar charts, and alluvial diagrams.
 }
 \examples{
 # Automatic plot selection for factor vs continuous variables
@@ -71,5 +73,11 @@ statsplot2(
     direction = "repeated",
     alluvsty = "t1"
 )
+
+# Enhanced error messages provide contextual guidance:
+# - Variable names and types in error messages
+# - Specific data requirement feedback
+# - Package installation instructions when needed
+# - Actionable suggestions for unsupported combinations
 
 }

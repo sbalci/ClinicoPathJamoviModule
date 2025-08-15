@@ -197,7 +197,20 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="summary",
                 title="Spatial Summary Statistics",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="description", 
+                        `title`="Description", 
+                        `type`="text")),
                 clearWith=list(
                     "coords_x",
                     "coords_y",
@@ -207,7 +220,36 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="ripley",
                 title="Ripley's K-function Analysis",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="distance", 
+                        `title`="Distance (r)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="k_observed", 
+                        `title`="K(r) Observed", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="k_theoretical", 
+                        `title`="K(r) Theoretical", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="l_observed", 
+                        `title`="L(r) Observed", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="l_theoretical", 
+                        `title`="L(r) Theoretical", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Pattern", 
+                        `type`="text")),
                 visible="(perform_ripley)",
                 clearWith=list(
                     "coords_x",
@@ -218,7 +260,35 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="nearestneighbor",
                 title="Nearest Neighbor Analysis",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="expected", 
+                        `title`="Expected", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ratio", 
+                        `title`="R", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
                 visible="(perform_nnd)",
                 clearWith=list(
                     "coords_x",
@@ -229,7 +299,20 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="hotspots",
                 title="Hotspot Detection Results",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
                 visible="(perform_hotspot)",
                 clearWith=list(
                     "coords_x",
@@ -239,7 +322,38 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="interaction",
                 title="Multi-type Spatial Interaction",
-                columns=list(),
+                columns=list(
+                    list(
+                        `name`="type_i", 
+                        `title`="Type i", 
+                        `type`="text"),
+                    list(
+                        `name`="type_j", 
+                        `title`="Type j", 
+                        `type`="text"),
+                    list(
+                        `name`="distance", 
+                        `title`="Distance (r)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="pcf_observed", 
+                        `title`="g(r) Observed", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="pcf_theoretical", 
+                        `title`="g(r) Expected", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interaction_type", 
+                        `title`="Interaction", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
                 visible="(perform_interaction && cell_types)",
                 clearWith=list(
                     "coords_x",

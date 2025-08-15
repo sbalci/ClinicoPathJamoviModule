@@ -1,0 +1,175 @@
+title: Advanced Multiple Imputation & Sensitivity Analysis
+name: advancedimputation
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables to Impute
+        children:
+          - type: VariablesListBox
+            name: imputation_vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+
+      - type: TargetLayoutBox
+        label: Auxiliary Variables
+        children:
+          - type: VariablesListBox
+            name: auxiliary_vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+
+      - type: TargetLayoutBox
+        label: Clustering & Identifiers
+        children:
+          - type: VariablesListBox
+            name: cluster_var
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: id_var
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Multilevel Variables
+        children:
+          - type: VariablesListBox
+            name: level1_vars
+            isTarget: true
+          - type: VariablesListBox
+            name: level2_vars
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Exclusions
+        children:
+          - type: VariablesListBox
+            name: exclude_vars
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Basic Configuration
+        children:
+          - type: TextBox
+            name: n_imputations
+            format: number
+            suffix: " datasets"
+          - type: TextBox
+            name: n_iterations
+            format: number
+            suffix: " iterations"
+          - type: TextBox
+            name: random_seed
+            format: number
+          - type: CheckBox
+            name: convergence_check
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Imputation Methods
+        children:
+          - type: ComboBox
+            name: imputation_method
+          - type: ComboBox
+            name: categorical_method
+          - type: TextBox
+            name: min_bucket_size
+            format: number
+            suffix: " donors"
+          - type: CheckBox
+            name: remove_collinear
+          - type: TextBox
+            name: collinearity_threshold
+            format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: MNAR Methods
+        children:
+          - type: CheckBox
+            name: mnar_methods
+          - type: ComboBox
+            name: mnar_type
+          - type: TextBox
+            name: delta_values
+            format: string
+            suffix: " (comma-separated)"
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Sensitivity Analysis
+        children:
+          - type: CheckBox
+            name: sensitivity_analysis
+          - type: ComboBox
+            name: sensitivity_methods
+          - type: CheckBox
+            name: cross_validation
+          - type: CheckBox
+            name: ampute_test
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Multilevel Imputation
+        children:
+          - type: CheckBox
+            name: multilevel_imputation
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Advanced Options
+        children:
+          - type: TextBox
+            name: ridge_penalty
+            format: number
+          - type: TextBox
+            name: passive_imputation
+            format: string
+            suffix: " (R expressions)"
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Diagnostics & Quality
+        children:
+          - type: CheckBox
+            name: diagnostic_plots
+          - type: CheckBox
+            name: imputation_quality
+          - type: CheckBox
+            name: pool_results
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: CheckBox
+            name: save_imputations
+          - type: CheckBox
+            name: show_detailed_output
+          - type: CheckBox
+            name: regulatory_report
+
+...

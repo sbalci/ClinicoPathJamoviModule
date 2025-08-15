@@ -516,7 +516,6 @@ items:
           - dxdate
           - tint
           - multievent
-      visible: (pw)
 
 
 

@@ -2792,31 +2792,172 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 
                 # Cox Regression Explanation
                 private$.setExplanationContent("coxRegressionExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
-                    <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cox Regression for Continuous Variables</h4>
-                    <p><strong>Cox Regression:</strong> Models the relationship between continuous predictors and survival time.</p>
-                    <ul>
-                        <li><strong>Hazard Ratio (HR):</strong> Risk increase/decrease per unit change in continuous variable</li>
-                        <li><strong>Linear Assumption:</strong> Assumes linear relationship between variable and log-hazard</li>
-                        <li><strong>Interpretation:</strong> HR > 1 indicates increased risk, HR < 1 indicates decreased risk</li>
-                        <li><strong>Confidence Intervals:</strong> Provide precision estimates for hazard ratios</li>
-                    </ul>
-                    <p><em>Clinical interpretation:</em> For each unit increase in the continuous variable, the hazard changes by a factor of HR.</p>
+                <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Cox Regression for Continuous Variables</h3>
+                    
+                    <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #2d3748; margin-top: 0;">What is Cox Regression with Continuous Variables?</h4>
+                        <p style="margin: 8px 0;">Cox regression with continuous variables analyzes how <strong>each unit increase</strong> in a continuous predictor (e.g., age, biomarker level) affects survival risk.</p>
+                        
+                        <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>💡 Key Concept:</strong> Unlike categorical variables, continuous variables provide a <strong>dose-response relationship</strong> - showing how risk changes smoothly across the entire range of values.
+                        </div>
+                    </div>
+                    
+                    <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #d68910; margin-top: 0;">🎯 Interpreting Hazard Ratios (HR)</h4>
+                        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                            <tr style="background-color: #fff3cd;">
+                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">HR Value</th>
+                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Meaning</th>
+                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Example</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR = 1.0</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">No effect</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Variable doesn\'t affect survival</td>
+                            </tr>
+                            <tr style="background-color: #fffbf0;">
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR > 1.0</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Increased risk</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">HR = 1.05: 5% higher risk per unit</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR < 1.0</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Decreased risk (protective)</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">HR = 0.95: 5% lower risk per unit</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #2e7d32; margin-top: 0;">📈 Clinical Examples</h4>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>Example 1: Age and Cancer Survival</strong>
+                            <p style="margin: 5px 0;">Age HR = 1.03 (95% CI: 1.01-1.05, p=0.001)</p>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li><strong>Interpretation:</strong> Each additional year of age increases death risk by 3%</li>
+                                <li><strong>10-year difference:</strong> 1.03^10 = 34% higher risk for 70 vs 60 years old</li>
+                                <li><strong>Significance:</strong> p<0.05 means this effect is statistically significant</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>Example 2: Biomarker Level</strong>
+                            <p style="margin: 5px 0;">Protein X HR = 0.98 (95% CI: 0.96-0.99, p=0.02)</p>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li><strong>Protective factor:</strong> Higher protein X levels reduce death risk by 2% per unit</li>
+                                <li><strong>Range effect:</strong> 20-point increase → 0.98^20 = 33% risk reduction</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+                        <strong>⚠️ Important Assumptions:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li><strong>Linear relationship:</strong> Effect is constant across all values (may not always be true)</li>
+                            <li><strong>Proportional hazards:</strong> Relative effect stays constant over time</li>
+                            <li><strong>Consider cut-offs:</strong> If relationship is non-linear, consider categorizing the variable</li>
+                        </ul>
+                    </div>
                 </div>
                 ')
                 
                 # Cut-off Point Analysis Explanation
                 private$.setExplanationContent("cutoffAnalysisExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
-                    <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cut-off Point Analysis</h4>
-                    <p><strong>Optimal Cut-off:</strong> Transforms continuous variable into binary groups for survival comparison.</p>
-                    <ul>
-                        <li><strong>Maximally Selected Rank Statistics:</strong> Finds cut-off with maximum group separation</li>
-                        <li><strong>Statistical Significance:</strong> Tests whether groups have significantly different survival</li>
-                        <li><strong>Binary Classification:</strong> Creates high-risk and low-risk groups</li>
-                        <li><strong>Clinical Utility:</strong> Enables simple risk stratification decisions</li>
-                    </ul>
-                    <p><em>Caution:</em> Cut-off selection can be data-dependent and may not generalize to other populations.</p>
+                <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h3 style="color: #2c5282; margin-top: 0;">✂️ Understanding Cut-off Point Analysis</h3>
+                    
+                    <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #2d3748; margin-top: 0;">What is Cut-off Point Analysis?</h4>
+                        <p style="margin: 8px 0;">Cut-off analysis transforms a <strong>continuous variable into binary groups</strong> (high vs low) by finding the optimal threshold that best separates patients with different survival outcomes.</p>
+                        
+                        <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>🎯 Goal:</strong> Find the value that creates two groups with the <strong>maximum survival difference</strong>
+                        </div>
+                    </div>
+                    
+                    <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #d68910; margin-top: 0;">📊 How It Works</h4>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>1. Maximally Selected Rank Statistics Method:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>Tests every possible cut-off value</li>
+                                <li>For each cut-off, performs survival comparison</li>
+                                <li>Selects cut-off with smallest p-value (biggest difference)</li>
+                                <li>Adjusts p-value for multiple testing</li>
+                            </ul>
+                        </div>
+                        
+                        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                            <tr style="background-color: #fff3cd;">
+                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Step</th>
+                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Process</th>
+                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Output</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>1. Testing</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Try multiple cut-offs</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Range of p-values</td>
+                            </tr>
+                            <tr style="background-color: #fffbf0;">
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>2. Selection</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Find minimum p-value</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Optimal cut-off value</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>3. Validation</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Multiple testing correction</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Adjusted p-value</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #2e7d32; margin-top: 0;">🏥 Clinical Benefits</h4>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>✅ Advantages:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li><strong>Simple decision-making:</strong> "High" vs "Low" is easier than continuous values</li>
+                                <li><strong>Risk stratification:</strong> Clear groups for treatment planning</li>
+                                <li><strong>Communication:</strong> Easy to explain to patients and colleagues</li>
+                                <li><strong>Guidelines:</strong> Can establish clinical thresholds</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>💡 Clinical Example:</strong>
+                            <p style="margin: 5px 0;">Biomarker X optimal cut-off = 25.3 ng/mL</p>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>High group (≥25.3): 40% 5-year survival</li>
+                                <li>Low group (<25.3): 75% 5-year survival</li>
+                                <li>Clinical use: "Patients with Biomarker X ≥25.3 need intensive monitoring"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="background-color: #ffebee; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #c62828; margin-top: 0;">⚠️ Important Limitations</h4>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li><strong>Data-dependent:</strong> Optimal cut-off may vary between studies</li>
+                            <li><strong>Information loss:</strong> Converting continuous to binary loses precision</li>
+                            <li><strong>Validation needed:</strong> Cut-off should be confirmed in independent datasets</li>
+                            <li><strong>Population-specific:</strong> May not apply to different populations</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+                        <strong>💡 Best Practices:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li>Validate cut-off in independent cohort when possible</li>
+                            <li>Consider clinical relevance, not just statistical significance</li>
+                            <li>Report both continuous and cut-off analyses</li>
+                            <li>Ensure adequate sample size in both groups</li>
+                        </ul>
+                    </div>
                 </div>
                 ')
                 
@@ -2877,6 +3018,87 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Schoenfeld Residuals:</strong> Test proportional hazards assumption</li>
                     </ul>
                     <p><em>Clinical interpretation:</em> Large residuals may indicate patients with unusual survival patterns requiring further investigation.</p>
+                </div>
+                ')
+                
+                # Survival Plots Explanation
+                private$.setExplanationContent("survivalPlotsExplanation", '
+                <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Survival Curves for Continuous Variables</h3>
+                    
+                    <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #2d3748; margin-top: 0;">📈 Survival Curves with Cut-offs</h4>
+                        <p style="margin: 8px 0;">When analyzing continuous variables, survival plots show <strong>separate curves for high vs low groups</strong> based on the optimal cut-off value.</p>
+                        
+                        <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>📖 How to Read the Plot:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li><strong>Two curves:</strong> High group (above cut-off) vs Low group (below cut-off)</li>
+                                <li><strong>Separation:</strong> Wider gap between curves = stronger prognostic effect</li>
+                                <li><strong>P-value:</strong> Tests whether group survival differs significantly</li>
+                                <li><strong>Risk tables:</strong> Show number of patients at each time point</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #d68910; margin-top: 0;">🔍 Curve Interpretation Patterns</h4>
+                        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                            <tr style="background-color: #fff3cd;">
+                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Pattern</th>
+                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Meaning</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>📏 Wide separation early</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Strong early prognostic effect</td>
+                            </tr>
+                            <tr style="background-color: #fffbf0;">
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>📈 Curves converge later</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Effect diminishes over time</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>↔ Parallel curves</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Consistent proportional hazards</td>
+                            </tr>
+                            <tr style="background-color: #fffbf0;">
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>✖ Crossing curves</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Time-dependent effects (complex interpretation)</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                        <h4 style="color: #2e7d32; margin-top: 0;">💡 Clinical Application Tips</h4>
+                        
+                        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>🎯 Risk Stratification:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>High group: May need more intensive monitoring/treatment</li>
+                                <li>Low group: Could be suitable for less intensive approaches</li>
+                                <li>Consider clinical context, not just statistical significance</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>📊 Biomarker Validation:</strong>
+                            <p style="margin: 5px 0;">Strong separation with p<0.001 suggests the biomarker could be clinically useful for:</p>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>Patient counseling about prognosis</li>
+                                <li>Treatment selection decisions</li>
+                                <li>Clinical trial stratification</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+                        <strong>⚠️ Important Considerations:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li><strong>Cut-off validation:</strong> Confirm cut-off value in independent dataset</li>
+                            <li><strong>Clinical relevance:</strong> Ensure the difference is clinically meaningful</li>
+                            <li><strong>Sample size:</strong> Both groups should have adequate numbers for reliable estimates</li>
+                            <li><strong>Follow-up:</strong> Longer follow-up provides more reliable late-time estimates</li>
+                        </ul>
+                    </div>
                 </div>
                 ')
             }

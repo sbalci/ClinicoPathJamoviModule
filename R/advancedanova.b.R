@@ -3,50 +3,50 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
     inherit = advancedanovaBase,
     private = list(
         .init = function() {
-            if (is.null(self$data) || is.null(self$options$dependent) || is.null(self$options$grouping)) {
-                self$results$instructions$setContent(
-                    "<html>
-                    <head>
-                    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
-                    </head>
-                    <body>
-                    <h3>Advanced ANOVA Suite</h3>
-                    <p><b>Data Requirements:</b></p>
-                    <p>This module provides comprehensive ANOVA analysis with proper post hoc testing, assumption checking, and effect sizes.</p>
-                    <ul>
-                    <li><b>Dependent Variable</b>: Continuous variable for analysis (e.g., biomarker expression, cell counts)</li>
-                    <li><b>Grouping Variable</b>: Categorical variable defining groups for comparison (≥2 groups)</li>
-                    </ul>
+            if (is.null(self$data) || is.null(self$options$dependent) || is.null(self$options$fixed)) {
+                self$results$instructions$setContent(paste0(
+                    "<html>",
+                    "<head>",
+                    "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>",
+                    "</head>",
+                    "<body>",
+                    "<h3>Advanced ANOVA Suite</h3>",
+                    "<p><b>Data Requirements:</b></p>",
+                    "<p>This module provides comprehensive ANOVA analysis with proper post hoc testing, assumption checking, and effect sizes.</p>",
+                    "<ul>",
+                    "<li><b>Dependent Variable</b>: Continuous variable for analysis (e.g., biomarker expression, cell counts)</li>",
+                    "<li><b>Grouping Variable</b>: Categorical variable defining groups for comparison (>= 2 groups)</li>",
+                    "</ul>",
                     
-                    <p><b>Available Analyses:</b></p>
-                    <ul>
-                    <li><b>One-Way ANOVA</b>: Compare means across multiple independent groups</li>
-                    <li><b>Comprehensive Post Hoc Tests</b>: Tukey HSD, Games-Howell, Dunnett's, Bonferroni</li>
-                    <li><b>Assumption Checking</b>: Normality, homogeneity of variance, independence</li>
-                    <li><b>Effect Sizes</b>: Eta-squared (η²), Omega-squared (ω²), Cohen's f</li>
-                    </ul>
+                    "<p><b>Available Analyses:</b></p>",
+                    "<ul>",
+                    "<li><b>One-Way ANOVA</b>: Compare means across multiple independent groups</li>",
+                    "<li><b>Comprehensive Post Hoc Tests</b>: Tukey HSD, Games-Howell, Dunnett's, Bonferroni</li>",
+                    "<li><b>Assumption Checking</b>: Normality, homogeneity of variance, independence</li>",
+                    "<li><b>Effect Sizes</b>: Eta-squared, Omega-squared, Cohen's f</li>",
+                    "</ul>",
                     
-                    <p><b>Key Features:</b></p>
-                    <ul>
-                    <li>Addresses the critical issue: 68% of studies fail proper multiple comparisons</li>
-                    <li>Multiple post hoc methods for different variance assumptions</li>
-                    <li>Comprehensive assumption diagnostics with recommendations</li>
-                    <li>Effect sizes with confidence intervals and power analysis</li>
-                    <li>Publication-ready output formatting</li>
-                    <li>Clinical interpretation guidelines</li>
-                    </ul>
+                    "<p><b>Key Features:</b></p>",
+                    "<ul>",
+                    "<li>Addresses the critical issue: 68% of studies fail proper multiple comparisons</li>",
+                    "<li>Multiple post hoc methods for different variance assumptions</li>",
+                    "<li>Comprehensive assumption diagnostics with recommendations</li>",
+                    "<li>Effect sizes with confidence intervals and power analysis</li>",
+                    "<li>Publication-ready output formatting</li>",
+                    "<li>Clinical interpretation guidelines</li>",
+                    "</ul>",
                     
-                    <p><b>Clinical Applications:</b></p>
-                    <ul>
-                    <li>Multi-group biomarker expression comparisons</li>
-                    <li>Tumor grade/stage analysis across multiple categories</li>
-                    <li>Treatment group efficacy studies</li>
-                    <li>Multi-center pathology validation studies</li>
-                    <li>Quality control across multiple laboratories</li>
-                    </ul>
-                    </body>
-                    </html>"
-                )
+                    "<p><b>Clinical Applications:</b></p>",
+                    "<ul>",
+                    "<li>Multi-group biomarker expression comparisons</li>",
+                    "<li>Tumor grade/stage analysis across multiple categories</li>",
+                    "<li>Treatment group efficacy studies</li>",
+                    "<li>Multi-center pathology validation studies</li>",
+                    "<li>Quality control across multiple laboratories</li>",
+                    "</ul>",
+                    "</body>",
+                    "</html>"
+                ))
                 return()
             }
         },
@@ -55,7 +55,7 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             # Get data and variables
             data <- self$data
             dependent <- self$options$dependent
-            grouping <- self$options$grouping
+            grouping <- self$options$fixed[[1]]  # Take first factor
             
             if (is.null(dependent) || is.null(grouping)) {
                 self$results$instructions$setContent(
@@ -115,33 +115,33 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 }
                 
                 # Main ANOVA analysis
-                if (self$options$anova_test) {
-                    private$.performANOVA(y_clean, group_clean)
-                }
+                private$.performANOVA(y_clean, group_clean)
                 
-                # Post hoc analysis (only if ANOVA is significant or forced)
+                # Post hoc analysis based on selected method
                 anova_result <- aov(y_clean ~ group_clean)
                 anova_summary <- summary(anova_result)
                 anova_p <- anova_summary[[1]][["Pr(>F)"]][1]
                 
-                if ((anova_p < 0.05 && self$options$auto_posthoc) || self$options$force_posthoc) {
+                posthoc_method <- self$options$posthoc_method
+                if (posthoc_method != "none" && (anova_p < 0.05 || TRUE)) {
+                    
                     # Tukey HSD
-                    if (self$options$tukey_hsd) {
+                    if (posthoc_method == "tukey" || posthoc_method == "all") {
                         private$.performTukeyHSD(y_clean, group_clean, anova_result)
                     }
                     
                     # Games-Howell (for unequal variances)
-                    if (self$options$games_howell) {
+                    if (posthoc_method == "games_howell" || posthoc_method == "all") {
                         private$.performGamesHowell(y_clean, group_clean)
                     }
                     
                     # Dunnett's test (if control group specified)
-                    if (self$options$dunnett_test && !is.null(self$options$control_group)) {
+                    if ((posthoc_method == "dunnett" || posthoc_method == "all") && !is.null(self$options$control_group) && self$options$control_group != "") {
                         private$.performDunnettTest(y_clean, group_clean)
                     }
                     
                     # Bonferroni correction
-                    if (self$options$bonferroni_test) {
+                    if (posthoc_method == "bonferroni" || posthoc_method == "all") {
                         private$.performBonferroni(y_clean, group_clean)
                     }
                 }
@@ -390,12 +390,12 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 ms="",
                 f_statistic="",
                 p_value="",
-                eta_squared=paste0("η² = ", round(eta_squared, 4), ", ω² = ", round(omega_squared, 4), ", f = ", round(cohens_f, 4)),
+                eta_squared=paste0("Eta-squared = ", round(eta_squared, 4), ", Omega-squared = ", round(omega_squared, 4), ", f = ", round(cohens_f, 4)),
                 interpretation=eta_interp
             ))
             
-            # Power analysis if requested
-            if (self$options$power_analysis && requireNamespace("pwr", quietly = TRUE)) {
+            # Power analysis if requested (simplified for now)
+            if (FALSE && requireNamespace("pwr", quietly = TRUE)) {
                 tryCatch({
                     # Calculate observed power
                     n_per_group <- length(y_data) / nlevels(group_data)
@@ -847,20 +847,20 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 "</ul>",
                 
                 "<h4>Effect Size Interpretation Guidelines</h4>",
-                "<p><b>For Eta-Squared (η²) - Proportion of Variance Explained:</b></p>",
+                "<p><b>For Eta-Squared - Proportion of Variance Explained:</b></p>",
                 "<ul>",
-                "<li>η² < 0.01: Small effect (1% of variance)</li>",
-                "<li>0.01 ≤ η² < 0.06: Medium effect (1-6% of variance)</li>",
-                "<li>0.06 ≤ η² < 0.14: Large effect (6-14% of variance)</li>",
-                "<li>η² ≥ 0.14: Very large effect (≥14% of variance)</li>",
+                "<li>Eta-squared < 0.01: Small effect (1% of variance)</li>",
+                "<li>0.01 <= Eta-squared < 0.06: Medium effect (1-6% of variance)</li>",
+                "<li>0.06 <= Eta-squared < 0.14: Large effect (6-14% of variance)</li>",
+                "<li>Eta-squared >= 0.14: Very large effect (>=14% of variance)</li>",
                 "</ul>",
                 
                 "<p><b>For Cohen's d (Pairwise Effect Sizes):</b></p>",
                 "<ul>",
                 "<li>|d| < 0.2: Negligible difference</li>",
-                "<li>0.2 ≤ |d| < 0.5: Small difference</li>",
-                "<li>0.5 ≤ |d| < 0.8: Medium difference</li>",
-                "<li>|d| ≥ 0.8: Large difference</li>",
+                "<li>0.2 <= |d| < 0.5: Small difference</li>",
+                "<li>0.5 <= |d| < 0.8: Medium difference</li>",
+                "<li>|d| >= 0.8: Large difference</li>",
                 "</ul>",
                 
                 "<h4>Clinical Applications in Pathology</h4>",
@@ -885,7 +885,7 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 "<p><b>Essential Elements:</b></p>",
                 "<ul>",
                 "<li>Report F-statistic, degrees of freedom, and exact p-value</li>",
-                "<li>Include effect sizes (η², ω²) with confidence intervals</li>",
+                "<li>Include effect sizes (Eta-squared, Omega-squared) with confidence intervals</li>",
                 "<li>State which post hoc test was used and why</li>",
                 "<li>Report all pairwise comparisons with adjusted p-values</li>",
                 "<li>Include group means, standard deviations, and sample sizes</li>",
@@ -895,7 +895,7 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 "<h4>Power Analysis Considerations</h4>",
                 "<ul>",
                 "<li><b>Observed Power:</b> Power to detect the observed effect size</li>",
-                "<li><b>Adequate Power:</b> Generally ≥0.80 for reliable conclusions</li>",
+                "<li><b>Adequate Power:</b> Generally >= 0.80 for reliable conclusions</li>",
                 "<li><b>Low Power:</b> Consider larger sample sizes or more sensitive measures</li>",
                 "<li><b>Post-hoc Power:</b> Interpret cautiously; better to plan power a priori</li>",
                 "</ul>",

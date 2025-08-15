@@ -1,0 +1,424 @@
+---
+name: outbreakanalysis
+title: Outbreak Analysis & Epidemiological Investigation
+jrs: '1.1'
+
+items:
+    - name: outbreak_overview
+      title: Outbreak Investigation Overview
+      type: Table
+      columns:
+          - name: characteristic
+            title: Characteristic
+            type: text
+          - name: value
+            title: Value
+            type: text
+
+    - name: descriptive_summary
+      title: Descriptive Summary Statistics
+      type: Table
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: cases_n
+            title: Cases (N)
+            type: integer
+          - name: cases_percent
+            title: Cases (%)
+            type: number
+            format: pc
+          - name: non_cases_n
+            title: Non-Cases (N)
+            type: integer
+          - name: non_cases_percent
+            title: Non-Cases (%)
+            type: number
+            format: pc
+          - name: total_n
+            title: Total (N)
+            type: integer
+          - name: attack_rate
+            title: Attack Rate
+            type: number
+            format: pc
+          - name: attack_rate_ci
+            title: Attack Rate 95% CI
+            type: text
+
+    - name: risk_factor_analysis
+      title: Risk Factor Analysis Results
+      type: Table
+      visible: (risk_factor_analysis)
+      columns:
+          - name: exposure
+            title: Exposure/Risk Factor
+            type: text
+          - name: exposed_cases
+            title: Exposed Cases
+            type: integer
+          - name: exposed_total
+            title: Exposed Total
+            type: integer
+          - name: unexposed_cases
+            title: Unexposed Cases
+            type: integer
+          - name: unexposed_total
+            title: Unexposed Total
+            type: integer
+          - name: attack_rate_exposed
+            title: AR Exposed (%)
+            type: number
+            format: pc
+          - name: attack_rate_unexposed
+            title: AR Unexposed (%)
+            type: number
+            format: pc
+          - name: relative_risk
+            title: Relative Risk
+            type: number
+            format: zto
+          - name: rr_ci_lower
+            title: RR 95% CI Lower
+            type: number
+            format: zto
+          - name: rr_ci_upper
+            title: RR 95% CI Upper
+            type: number
+            format: zto
+          - name: odds_ratio
+            title: Odds Ratio
+            type: number
+            format: zto
+          - name: or_ci_lower
+            title: OR 95% CI Lower
+            type: number
+            format: zto
+          - name: or_ci_upper
+            title: OR 95% CI Upper
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: adjusted_p
+            title: Adjusted p-value
+            type: number
+            format: zto,pvalue
+
+    - name: temporal_analysis
+      title: Temporal Pattern Analysis
+      type: Table
+      visible: (temporal_analysis)
+      columns:
+          - name: time_period
+            title: Time Period
+            type: text
+          - name: cases_n
+            title: Number of Cases
+            type: integer
+          - name: cumulative_cases
+            title: Cumulative Cases
+            type: integer
+          - name: incidence_rate
+            title: Incidence Rate
+            type: number
+            format: zto
+          - name: doubling_time
+            title: Doubling Time (days)
+            type: number
+            format: zto
+
+    - name: epidemic_curve_stats
+      title: Epidemic Curve Characteristics
+      type: Table
+      visible: (temporal_analysis)
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: spatial_analysis_results
+      title: Spatial Analysis Results
+      type: Table
+      visible: (spatial_analysis && location_var)
+      columns:
+          - name: location
+            title: Location
+            type: text
+          - name: cases_n
+            title: Cases
+            type: integer
+          - name: population
+            title: Population
+            type: integer
+          - name: attack_rate
+            title: Attack Rate (%)
+            type: number
+            format: pc
+          - name: relative_risk
+            title: Relative Risk
+            type: number
+            format: zto
+          - name: rr_ci_lower
+            title: RR 95% CI Lower
+            type: number
+            format: zto
+          - name: rr_ci_upper
+            title: RR 95% CI Upper
+            type: number
+            format: zto
+          - name: clustering_index
+            title: Clustering Index
+            type: number
+            format: zto
+
+    - name: dose_response_analysis
+      title: Dose-Response Analysis
+      type: Table
+      visible: (dose_response_analysis)
+      columns:
+          - name: exposure_level
+            title: Exposure Level
+            type: text
+          - name: cases_n
+            title: Cases
+            type: integer
+          - name: total_n
+            title: Total
+            type: integer
+          - name: attack_rate
+            title: Attack Rate (%)
+            type: number
+            format: pc
+          - name: odds_ratio
+            title: Odds Ratio
+            type: number
+            format: zto
+          - name: or_ci_lower
+            title: OR 95% CI Lower
+            type: number
+            format: zto
+          - name: or_ci_upper
+            title: OR 95% CI Upper
+            type: number
+            format: zto
+          - name: trend_p_value
+            title: Trend p-value
+            type: number
+            format: zto,pvalue
+
+    - name: stratified_analysis_results
+      title: Stratified Analysis Results
+      type: Table
+      visible: (stratified_analysis)
+      columns:
+          - name: stratum
+            title: Stratum
+            type: text
+          - name: exposure
+            title: Exposure
+            type: text
+          - name: relative_risk
+            title: Relative Risk
+            type: number
+            format: zto
+          - name: rr_ci_lower
+            title: RR 95% CI Lower
+            type: number
+            format: zto
+          - name: rr_ci_upper
+            title: RR 95% CI Upper
+            type: number
+            format: zto
+          - name: homogeneity_p
+            title: Homogeneity p-value
+            type: number
+            format: zto,pvalue
+
+    - name: incubation_period_stats
+      title: Incubation Period Analysis
+      type: Table
+      visible: (incubation_period && exposure_date_var)
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: days
+            title: Days
+            type: number
+            format: zto
+          - name: hours
+            title: Hours
+            type: number
+            format: zto
+          - name: interpretation
+            title: Clinical Interpretation
+            type: text
+
+    - name: case_definition_analysis
+      title: Case Definition Performance
+      type: Table
+      visible: (case_definition)
+      columns:
+          - name: criterion
+            title: Case Definition Criterion
+            type: text
+          - name: sensitivity
+            title: Sensitivity (%)
+            type: number
+            format: pc
+          - name: specificity
+            title: Specificity (%)
+            type: number
+            format: pc
+          - name: ppv
+            title: PPV (%)
+            type: number
+            format: pc
+          - name: npv
+            title: NPV (%)
+            type: number
+            format: pc
+          - name: cases_identified
+            title: Cases Identified
+            type: integer
+
+    - name: data_quality_report
+      title: Data Quality Assessment
+      type: Table
+      visible: (data_quality_assessment)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: completeness
+            title: Completeness (%)
+            type: number
+            format: pc
+          - name: missing_n
+            title: Missing (N)
+            type: integer
+          - name: invalid_n
+            title: Invalid Values (N)
+            type: integer
+          - name: quality_grade
+            title: Quality Grade
+            type: text
+
+    - name: power_analysis_results
+      title: Statistical Power Analysis
+      type: Table
+      visible: (power_calculation)
+      columns:
+          - name: exposure
+            title: Exposure
+            type: text
+          - name: effect_size
+            title: Observed Effect Size
+            type: number
+            format: zto
+          - name: power
+            title: Statistical Power
+            type: number
+            format: pc
+          - name: sample_size_current
+            title: Current Sample Size
+            type: integer
+          - name: sample_size_80_power
+            title: N for 80% Power
+            type: integer
+          - name: interpretation
+            title: Power Interpretation
+            type: text
+
+    - name: surveillance_indicators
+      title: Surveillance Quality Indicators
+      type: Table
+      visible: (surveillance_indicators)
+      columns:
+          - name: indicator
+            title: Surveillance Indicator
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: target
+            title: Target/Standard
+            type: text
+          - name: performance
+            title: Performance Assessment
+            type: text
+
+    - name: epidemic_curve_plot
+      title: Epidemic Curve
+      type: Image
+      visible: (epidemic_curve_plot && date_onset)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: attack_rate_plot
+      title: Attack Rate Comparison
+      type: Image
+      visible: (attack_rate_plot)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: risk_factor_forest_plot
+      title: Risk Factors Forest Plot
+      type: Image
+      visible: (risk_factor_plot && risk_factor_analysis)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: spatial_distribution_plot
+      title: Spatial Distribution Map
+      type: Image
+      visible: (spatial_plot && spatial_analysis && location_var)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: dose_response_plot
+      title: Dose-Response Relationship
+      type: Image
+      visible: (dose_response_analysis)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: outbreak_timeline_plot
+      title: Outbreak Investigation Timeline
+      type: Image
+      visible: (temporal_analysis)
+      width: 800
+      height: 300
+      requiresData: true
+
+    - name: comprehensive_report
+      title: Comprehensive Outbreak Investigation Report
+      type: Html
+      visible: (comprehensive_report)
+      clearWith:
+          - case_status
+          - exposure_vars
+          - date_onset
+
+    - name: public_health_summary
+      title: Public Health Action Summary
+      type: Html
+      visible: (public_health_summary)
+      clearWith:
+          - case_status
+          - exposure_vars

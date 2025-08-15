@@ -1,0 +1,482 @@
+---
+name: screeningevaluation
+title: Screening Program Evaluation & Performance Analysis
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Screening Evaluation
+menuSubtitle: Comprehensive screening program performance assessment
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive evaluation of screening programs and diagnostic test performance from tabular
+        screening data. Analyzes screening outcomes, program effectiveness, population coverage,
+        diagnostic accuracy, and cost-effectiveness. Essential for public health screening program
+        assessment, quality improvement, and evidence-based screening policy development using
+        standardized epidemiological methods and performance indicators.
+    R:
+        dontrun: false
+        usage: |
+            data('screening_data')
+            
+            screeningevaluation(
+                data = screening_data,
+                screening_result = "screen_positive",
+                disease_status = "true_disease",
+                age_var = "age",
+                screening_round = "round_number"
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Core Variables for Tabular Screening Data
+    - name: screening_result
+      title: Screening Test Result
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Binary screening test result (positive/negative)
+
+    - name: disease_status
+      title: True Disease Status
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: True disease status from gold standard or follow-up
+
+    - name: participant_id
+      title: Participant ID
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Unique identifier for screening participants
+
+    - name: age_var
+      title: Age Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Age of screening participants
+
+    - name: sex_var
+      title: Sex Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Sex/gender of screening participants
+
+    - name: screening_date
+      title: Screening Date
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Date of screening test
+
+    - name: screening_round
+      title: Screening Round
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Screening round number (for repeated screening)
+
+    - name: risk_factors
+      title: Risk Factor Variables
+      type: Variables
+      suggested:
+          - nominal
+          - continuous
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Risk factor variables for stratified analysis
+
+    - name: location_var
+      title: Location/Site Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Geographic location or screening site
+
+    # Screening Program Configuration
+    - name: screening_type
+      title: Screening Program Type
+      type: List
+      options:
+          - name: "population_based"
+            title: "Population-Based Screening"
+          - name: "opportunistic"
+            title: "Opportunistic Screening"
+          - name: "high_risk"
+            title: "High-Risk Screening"
+          - name: "workplace"
+            title: "Workplace Screening"
+          - name: "mass_screening"
+            title: "Mass Screening Campaign"
+      default: "population_based"
+      description:
+          R: Type of screening program
+
+    - name: target_disease
+      title: Target Disease/Condition
+      type: List
+      options:
+          - name: "cancer"
+            title: "Cancer Screening"
+          - name: "cardiovascular"
+            title: "Cardiovascular Disease"
+          - name: "diabetes"
+            title: "Diabetes/Prediabetes"
+          - name: "infectious"
+            title: "Infectious Disease"
+          - name: "chronic_disease"
+            title: "Chronic Disease"
+          - name: "other"
+            title: "Other Condition"
+      default: "cancer"
+      description:
+          R: Target disease or condition being screened
+
+    - name: screening_test_type
+      title: Screening Test Type
+      type: List
+      options:
+          - name: "laboratory"
+            title: "Laboratory Test"
+          - name: "imaging"
+            title: "Imaging Study"
+          - name: "clinical_exam"
+            title: "Clinical Examination"
+          - name: "questionnaire"
+            title: "Questionnaire/Survey"
+          - name: "biomarker"
+            title: "Biomarker Test"
+      default: "laboratory"
+      description:
+          R: Type of screening test used
+
+    # Analysis Options
+    - name: diagnostic_accuracy
+      title: Diagnostic Accuracy Analysis
+      type: Bool
+      default: true
+      description:
+          R: Calculate diagnostic accuracy measures from tabular data
+
+    - name: program_coverage
+      title: Program Coverage Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze screening program coverage and participation
+
+    - name: detection_rates
+      title: Detection Rate Analysis
+      type: Bool
+      default: true
+      description:
+          R: Calculate disease detection rates by subgroups
+
+    - name: interval_cancer_analysis
+      title: Interval Cancer Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze interval cancers (for cancer screening programs)
+
+    - name: lead_time_analysis
+      title: Lead Time Analysis
+      type: Bool
+      default: false
+      description:
+          R: Estimate lead time and lead time bias
+
+    - name: length_bias_analysis
+      title: Length Bias Analysis
+      type: Bool
+      default: false
+      description:
+          R: Assess potential length bias in screening
+
+    # Stratified Analysis
+    - name: age_stratified_analysis
+      title: Age-Stratified Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform analysis stratified by age groups
+
+    - name: age_group_breaks
+      title: Age Group Boundaries
+      type: String
+      default: "40,50,60,70,80"
+      description:
+          R: Age boundaries for stratified analysis (comma-separated)
+
+    - name: risk_stratified_analysis
+      title: Risk-Stratified Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform analysis stratified by risk factors
+
+    - name: geographic_analysis
+      title: Geographic Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze screening performance by geographic location
+
+    # Performance Metrics
+    - name: calculate_predictive_values
+      title: Calculate Predictive Values
+      type: Bool
+      default: true
+      description:
+          R: Calculate positive and negative predictive values
+
+    - name: likelihood_ratios
+      title: Likelihood Ratios
+      type: Bool
+      default: true
+      description:
+          R: Calculate likelihood ratios and post-test probabilities
+
+    - name: roc_analysis
+      title: ROC Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform ROC curve analysis (for continuous test results)
+
+    - name: optimal_cutpoint
+      title: Optimal Cutpoint Analysis
+      type: Bool
+      default: false
+      description:
+          R: Determine optimal cutpoint for continuous screening tests
+
+    # Quality Indicators
+    - name: quality_indicators
+      title: Screening Quality Indicators
+      type: Bool
+      default: true
+      description:
+          R: Calculate standard screening quality indicators
+
+    - name: participation_rates
+      title: Participation Rate Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze participation rates and demographic factors
+
+    - name: recall_rates
+      title: Recall Rate Analysis
+      type: Bool
+      default: true
+      description:
+          R: Calculate recall rates for further investigation
+
+    - name: completion_rates
+      title: Follow-up Completion Rates
+      type: Bool
+      default: true
+      description:
+          R: Analyze completion of recommended follow-up
+
+    # Cost-Effectiveness Analysis
+    - name: cost_effectiveness
+      title: Cost-Effectiveness Analysis
+      type: Bool
+      default: false
+      description:
+          R: Basic cost-effectiveness analysis
+
+    - name: cost_per_case_detected
+      title: Cost per Case Detected
+      type: Bool
+      default: false
+      description:
+          R: Calculate cost per case detected
+
+    - name: screening_cost_var
+      title: Screening Cost Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Variable containing screening costs per individual
+
+    - name: followup_cost_var
+      title: Follow-up Cost Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Variable containing follow-up diagnostic costs
+
+    # Time-to-Event Analysis
+    - name: time_to_diagnosis
+      title: Time to Diagnosis Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze time from screening to diagnosis
+
+    - name: diagnosis_date_var
+      title: Diagnosis Date Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Date of disease diagnosis
+
+    - name: survival_analysis
+      title: Survival Analysis
+      type: Bool
+      default: false
+      description:
+          R: Compare survival between screen-detected and symptomatic cases
+
+    - name: survival_time_var
+      title: Survival Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Time to death or last follow-up
+
+    - name: death_indicator
+      title: Death Indicator Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Death indicator (0=alive, 1=dead)
+
+    # Advanced Analysis
+    - name: overdiagnosis_analysis
+      title: Overdiagnosis Analysis
+      type: Bool
+      default: false
+      description:
+          R: Assess potential overdiagnosis in screening program
+
+    - name: false_positive_impact
+      title: False Positive Impact Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze impact of false positive results
+
+    - name: screening_adherence
+      title: Screening Adherence Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze adherence to screening recommendations
+
+    # Visualization Options
+    - name: performance_plots
+      title: Performance Visualization
+      type: Bool
+      default: true
+      description:
+          R: Generate diagnostic performance plots
+
+    - name: coverage_plots
+      title: Coverage Visualization
+      type: Bool
+      default: true
+      description:
+          R: Generate coverage and participation plots
+
+    - name: trend_analysis_plots
+      title: Trend Analysis Plots
+      type: Bool
+      default: false
+      description:
+          R: Generate time trend analysis plots
+
+    # Reporting Options
+    - name: comprehensive_report
+      title: Comprehensive Screening Report
+      type: Bool
+      default: true
+      description:
+          R: Generate comprehensive screening evaluation report
+
+    - name: quality_assurance_report
+      title: Quality Assurance Report
+      type: Bool
+      default: true
+      description:
+          R: Generate quality assurance and improvement report
+
+    - name: public_health_indicators
+      title: Public Health Indicators Report
+      type: Bool
+      default: true
+      description:
+          R: Generate public health screening indicators report
+
+    - name: international_standards
+      title: International Standards Compliance
+      type: Bool
+      default: true
+      description:
+          R: Assess compliance with international screening standards
+
+    # Export Options
+    - name: export_for_registry
+      title: Export for Cancer Registry
+      type: Bool
+      default: false
+      description:
+          R: Export results in cancer registry compatible format

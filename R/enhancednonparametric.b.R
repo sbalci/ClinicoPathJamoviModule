@@ -11,8 +11,8 @@ enhancednonparametricClass <- R6::R6Class(
             # Initialize instructions
             private$.populateInstructions()
             
-            if (is.null(self$options$dependent) || 
-                is.null(self$options$grouping)) {
+            if (is.null(self$options$deps) || length(self$options$deps) == 0 ||
+                is.null(self$options$group)) {
                 return()
             }
             
@@ -22,55 +22,67 @@ enhancednonparametricClass <- R6::R6Class(
         
         .run = function() {
             
-            if (is.null(self$options$dependent) || 
-                is.null(self$options$grouping)) {
+            if (is.null(self$options$deps) || length(self$options$deps) == 0 ||
+                is.null(self$options$group)) {
                 return()
             }
             
-            # Get and validate data
-            data <- private$.cleanData()
-            if (is.null(data)) return()
-            
-            # Run descriptive statistics
-            private$.populateDescriptives(data)
-            
-            # Run assumption checking
-            private$.populateAssumptions(data)
-            
-            # Run main non-parametric tests
-            private$.populateTests(data)
-            
-            # Run post hoc tests if applicable
-            if (self$options$posthoc && length(unique(data$grouping)) > 2) {
-                private$.populatePostHoc(data)
+            # Process each dependent variable
+            for (dep_var in self$options$deps) {
+                
+                # Get and validate data for this variable
+                data <- private$.cleanData(dep_var)
+                if (is.null(data)) next
+                
+                # Run descriptive statistics
+                private$.populateDescriptives(data, dep_var)
+                
+                # Run normality tests
+                if (self$options$normality_tests) {
+                    private$.populateNormality(data, dep_var)
+                }
+                
+                # Run assumption checking
+                if (self$options$assumption_checks) {
+                    private$.populateAssumptions(data, dep_var)
+                }
+                
+                # Run main non-parametric tests
+                private$.populateTests(data, dep_var)
+                
+                # Run post hoc tests if applicable
+                if (self$options$posthoc != 'none' && length(unique(data$grouping)) > 2) {
+                    private$.populatePostHoc(data, dep_var)
+                }
+                
+                # Run effect sizes
+                if (self$options$effect_size) {
+                    private$.populateEffectSizes(data, dep_var)
+                }
             }
-            
-            # Run effect sizes
-            private$.populateEffectSizes(data)
             
             # Create plots if requested
-            if (self$options$show_plots) {
-                private$.prepareDistributionPlot(data)
-                private$.prepareEffectSizePlot(data)
+            if (self$options$descriptive_plots) {
+                private$.preparePlots()
             }
             
-            # Add clinical interpretation
-            private$.populateInterpretation()
+            # Add explanations and interpretations
+            private$.populateExplanations()
+            private$.populateInterpretations()
         },
         
-        .cleanData = function() {
+        .cleanData = function(dep_var) {
             
-            dependent <- self$options$dependent
-            grouping <- self$options$grouping
+            grouping <- self$options$group
             
-            if (length(dependent) == 0 || length(grouping) == 0) {
+            if (is.null(dep_var) || is.null(grouping)) {
                 return(NULL)
             }
             
             data <- self$data
             
             # Extract variables
-            dep_data <- jmvcore::toNumeric(data[[dependent]])
+            dep_data <- jmvcore::toNumeric(data[[dep_var]])
             group_data <- data[[grouping]]
             
             # Remove missing values
@@ -84,6 +96,7 @@ enhancednonparametricClass <- R6::R6Class(
             clean_data <- data.frame(
                 dependent = dep_data[complete_cases],
                 grouping = as.factor(group_data[complete_cases]),
+                dep_var_name = dep_var,
                 stringsAsFactors = FALSE
             )
             
@@ -98,10 +111,10 @@ enhancednonparametricClass <- R6::R6Class(
         
         .initializeTables = function() {
             
-            grouping <- self$options$grouping
+            grouping <- self$options$group
             data <- self$data
             
-            if (length(grouping) == 0) return()
+            if (is.null(grouping)) return()
             
             groups <- levels(as.factor(data[[grouping]]))
             n_groups <- length(groups)

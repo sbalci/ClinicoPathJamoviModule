@@ -1,0 +1,563 @@
+---
+name: clinicalprediction
+title: Clinical Prediction Models & ML Interpretability
+jrs: '1.1'
+
+items:
+    # Summary Information
+    - name: overview
+      title: Model Overview
+      type: Table
+      columns:
+          - name: metric
+            title: ""
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+      clearWith:
+          - outcome_var
+          - predictor_vars
+          - model_type
+
+    - name: dataset_info
+      title: Dataset Information
+      type: Table
+      columns:
+          - name: characteristic
+            title: "Characteristic"
+            type: text
+          - name: training
+            title: "Training Set"
+            type: text
+          - name: validation
+            title: "Validation Set"
+            type: text
+      clearWith:
+          - outcome_var
+          - train_proportion
+
+    # Feature Selection Results
+    - name: feature_selection_results
+      title: Feature Selection Results
+      type: Table
+      visible: (feature_selection)
+      columns:
+          - name: feature
+            title: "Feature"
+            type: text
+          - name: selected
+            title: "Selected"
+            type: text
+          - name: importance_score
+            title: "Importance Score"
+            type: number
+            format: zto
+          - name: selection_frequency
+            title: "Selection Frequency"
+            type: number
+            format: pc
+          - name: rank
+            title: "Rank"
+            type: integer
+      clearWith:
+          - predictor_vars
+          - selection_method
+          - feature_selection
+
+    - name: feature_engineering_summary
+      title: Feature Engineering Summary
+      type: Table
+      visible: (feature_engineering)
+      columns:
+          - name: original_features
+            title: "Original Features"
+            type: integer
+          - name: engineered_features
+            title: "Engineered Features"
+            type: integer
+          - name: final_features
+            title: "Final Features"
+            type: integer
+          - name: transformation_applied
+            title: "Transformations Applied"
+            type: text
+
+    # Model Performance
+    - name: performance_summary
+      title: Model Performance Summary
+      type: Table
+      columns:
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: training
+            title: "Training"
+            type: number
+            format: zto
+          - name: validation
+            title: "Validation"
+            type: number
+            format: zto
+          - name: ci_lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: ci_upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+      clearWith:
+          - model_type
+          - validation_method
+
+    - name: classification_metrics
+      title: Classification Performance Metrics
+      type: Table
+      visible: (problem_type:classification)
+      columns:
+          - name: threshold
+            title: "Threshold"
+            type: number
+            format: zto
+          - name: sensitivity
+            title: "Sensitivity"
+            type: number
+            format: zto
+          - name: specificity
+            title: "Specificity"
+            type: number
+            format: zto
+          - name: ppv
+            title: "PPV"
+            type: number
+            format: zto
+          - name: npv
+            title: "NPV"
+            type: number
+            format: zto
+          - name: f1_score
+            title: "F1 Score"
+            type: number
+            format: zto
+          - name: youden_index
+            title: "Youden Index"
+            type: number
+            format: zto
+
+    - name: survival_metrics
+      title: Survival Prediction Metrics
+      type: Table
+      visible: (problem_type:survival)
+      columns:
+          - name: time_point
+            title: "Time Point"
+            type: text
+          - name: c_index
+            title: "C-Index"
+            type: number
+            format: zto
+          - name: brier_score
+            title: "Brier Score"
+            type: number
+            format: zto
+          - name: auc_timepoint
+            title: "Time-specific AUC"
+            type: number
+            format: zto
+          - name: calibration_slope
+            title: "Calibration Slope"
+            type: number
+            format: zto
+
+    # Model Interpretability Results
+    - name: feature_importance
+      title: Feature Importance Analysis
+      type: Table
+      visible: (interpretability)
+      columns:
+          - name: feature
+            title: "Feature"
+            type: text
+          - name: importance
+            title: "Importance"
+            type: number
+            format: zto
+          - name: importance_rank
+            title: "Rank"
+            type: integer
+          - name: shap_mean
+            title: "Mean |SHAP|"
+            type: number
+            format: zto
+          - name: permutation_importance
+            title: "Permutation Importance"
+            type: number
+            format: zto
+          - name: direction
+            title: "Direction"
+            type: text
+
+    - name: shap_summary
+      title: SHAP Values Summary
+      type: Table
+      visible: (shap_analysis)
+      columns:
+          - name: feature
+            title: "Feature"
+            type: text
+          - name: shap_mean_abs
+            title: "Mean |SHAP|"
+            type: number
+            format: zto
+          - name: shap_std
+            title: "SHAP Std"
+            type: number
+            format: zto
+          - name: positive_impact
+            title: "Positive Impact %"
+            type: number
+            format: pc
+          - name: negative_impact
+            title: "Negative Impact %"
+            type: number
+            format: pc
+
+    - name: individual_explanations
+      title: Individual Prediction Explanations
+      type: Table
+      visible: (individual_explanations)
+      columns:
+          - name: patient_id
+            title: "Patient ID"
+            type: text
+          - name: predicted_probability
+            title: "Predicted Probability"
+            type: number
+            format: zto
+          - name: actual_outcome
+            title: "Actual Outcome"
+            type: text
+          - name: top_positive_feature
+            title: "Top Positive Feature"
+            type: text
+          - name: top_negative_feature
+            title: "Top Negative Feature"
+            type: text
+          - name: explanation_confidence
+            title: "Explanation Confidence"
+            type: number
+            format: zto
+
+    # Model Comparison
+    - name: model_comparison
+      title: Model Comparison
+      type: Table
+      visible: (compare_models)
+      columns:
+          - name: model_type
+            title: "Model Type"
+            type: text
+          - name: auc_roc
+            title: "AUC-ROC"
+            type: number
+            format: zto
+          - name: accuracy
+            title: "Accuracy"
+            type: number
+            format: zto
+          - name: f1_score
+            title: "F1 Score"
+            type: number
+            format: zto
+          - name: calibration_slope
+            title: "Calibration Slope"
+            type: number
+            format: zto
+          - name: brier_score
+            title: "Brier Score"
+            type: number
+            format: zto
+          - name: training_time
+            title: "Training Time (s)"
+            type: number
+
+    # Clinical Application
+    - name: risk_stratification
+      title: Risk Stratification Analysis
+      type: Table
+      visible: (risk_stratification)
+      columns:
+          - name: risk_group
+            title: "Risk Group"
+            type: text
+          - name: risk_range
+            title: "Risk Range"
+            type: text
+          - name: n_patients
+            title: "N Patients"
+            type: integer
+          - name: event_rate
+            title: "Event Rate"
+            type: number
+            format: pc
+          - name: mean_risk_score
+            title: "Mean Risk Score"
+            type: number
+            format: zto
+          - name: clinical_interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    - name: decision_curve_analysis
+      title: Decision Curve Analysis
+      type: Table
+      visible: (decision_curve)
+      columns:
+          - name: threshold
+            title: "Threshold"
+            type: number
+            format: zto
+          - name: net_benefit_model
+            title: "Net Benefit (Model)"
+            type: number
+            format: zto
+          - name: net_benefit_all
+            title: "Net Benefit (Treat All)"
+            type: number
+            format: zto
+          - name: net_benefit_none
+            title: "Net Benefit (Treat None)"
+            type: number
+            format: zto
+
+    # Validation & Robustness
+    - name: cross_validation_results
+      title: Cross-Validation Results
+      type: Table
+      columns:
+          - name: fold
+            title: "Fold"
+            type: integer
+          - name: auc_roc
+            title: "AUC-ROC"
+            type: number
+            format: zto
+          - name: accuracy
+            title: "Accuracy"
+            type: number
+            format: zto
+          - name: sensitivity
+            title: "Sensitivity"
+            type: number
+            format: zto
+          - name: specificity
+            title: "Specificity"
+            type: number
+            format: zto
+          - name: calibration_slope
+            title: "Calibration Slope"
+            type: number
+            format: zto
+
+    - name: stability_analysis
+      title: Model Stability Analysis
+      type: Table
+      visible: (stability_analysis)
+      columns:
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: mean_performance
+            title: "Mean Performance"
+            type: number
+            format: zto
+          - name: std_performance
+            title: "Std Performance"
+            type: number
+            format: zto
+          - name: cv_performance
+            title: "CV Performance"
+            type: number
+            format: zto
+          - name: stability_index
+            title: "Stability Index"
+            type: number
+            format: zto
+
+    - name: bias_fairness_analysis
+      title: Bias and Fairness Analysis
+      type: Table
+      visible: (bias_analysis)
+      columns:
+          - name: demographic_group
+            title: "Demographic Group"
+            type: text
+          - name: n_patients
+            title: "N Patients"
+            type: integer
+          - name: auc_roc
+            title: "AUC-ROC"
+            type: number
+            format: zto
+          - name: calibration_slope
+            title: "Calibration Slope"
+            type: number
+            format: zto
+          - name: equalized_odds
+            title: "Equalized Odds"
+            type: number
+            format: zto
+          - name: demographic_parity
+            title: "Demographic Parity"
+            type: number
+            format: zto
+
+    # Hyperparameter Tuning Results
+    - name: hyperparameter_results
+      title: Hyperparameter Optimization Results
+      type: Table
+      visible: (hyperparameter_tuning)
+      columns:
+          - name: parameter
+            title: "Parameter"
+            type: text
+          - name: optimal_value
+            title: "Optimal Value"
+            type: text
+          - name: search_range
+            title: "Search Range"
+            type: text
+          - name: importance
+            title: "Parameter Importance"
+            type: number
+            format: zto
+
+    # Clinical Interpretation
+    - name: clinical_interpretation
+      title: Clinical Interpretation and Recommendations
+      type: Table
+      visible: (clinical_report)
+      columns:
+          - name: aspect
+            title: "Aspect"
+            type: text
+          - name: finding
+            title: "Finding"
+            type: text
+          - name: clinical_implication
+            title: "Clinical Implication"
+            type: text
+          - name: recommendation
+            title: "Recommendation"
+            type: text
+
+    - name: regulatory_summary
+      title: Regulatory Documentation Summary
+      type: Table
+      visible: (regulatory_documentation)
+      columns:
+          - name: requirement
+            title: "Regulatory Requirement"
+            type: text
+          - name: status
+            title: "Compliance Status"
+            type: text
+          - name: documentation
+            title: "Documentation"
+            type: text
+          - name: notes
+            title: "Notes"
+            type: text
+
+    # Visualizations
+    - name: roc_plot
+      title: ROC Curve Analysis
+      type: Image
+      visible: (roc_analysis)
+      renderFun: .plot_roc
+      clearWith:
+          - model_type
+          - outcome_var
+
+    - name: calibration_plot
+      title: Calibration Plot
+      type: Image
+      visible: (calibration_analysis)
+      renderFun: .plot_calibration
+      clearWith:
+          - model_type
+          - outcome_var
+
+    - name: feature_importance_plot
+      title: Feature Importance Plot
+      type: Image
+      visible: (interpretability)
+      renderFun: .plot_feature_importance
+      clearWith:
+          - predictor_vars
+          - model_type
+
+    - name: shap_summary_plot
+      title: SHAP Summary Plot
+      type: Image
+      visible: (shap_analysis)
+      renderFun: .plot_shap_summary
+      clearWith:
+          - predictor_vars
+          - model_type
+
+    - name: shap_dependence_plot
+      title: SHAP Partial Dependence Plots
+      type: Image
+      visible: (partial_dependence && shap_analysis)
+      renderFun: .plot_shap_dependence
+      clearWith:
+          - predictor_vars
+          - model_type
+
+    - name: decision_curve_plot
+      title: Decision Curve Analysis Plot
+      type: Image
+      visible: (decision_curve)
+      renderFun: .plot_decision_curve
+      clearWith:
+          - model_type
+          - outcome_var
+
+    - name: risk_distribution_plot
+      title: Risk Score Distribution
+      type: Image
+      visible: (risk_stratification)
+      renderFun: .plot_risk_distribution
+      clearWith:
+          - model_type
+          - outcome_var
+
+    - name: model_comparison_plot
+      title: Model Comparison Plot
+      type: Image
+      visible: (compare_models)
+      renderFun: .plot_model_comparison
+      clearWith:
+          - model_type
+
+    - name: stability_plot
+      title: Model Stability Visualization
+      type: Image
+      visible: (stability_analysis)
+      renderFun: .plot_stability
+      clearWith:
+          - validation_method
+          - model_type
+
+    - name: nomogram_plot
+      title: Clinical Nomogram
+      type: Image
+      visible: (nomogram)
+      renderFun: .plot_nomogram
+      clearWith:
+          - predictor_vars
+          - model_type
+
+...

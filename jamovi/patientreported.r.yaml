@@ -1,0 +1,618 @@
+---
+name: patientreported
+title: Patient-Reported Outcomes & Quality of Life Analysis
+jrs: '1.1'
+
+items:
+    # Scale Overview and Configuration
+    - name: scale_overview
+      title: PRO Scale Overview
+      type: Table
+      columns:
+          - name: characteristic
+            title: "Scale Characteristic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+      clearWith:
+          - scale_items
+          - instrument_name
+
+    - name: data_summary
+      title: Data Summary
+      type: Table
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: overall
+            title: "Overall"
+            type: text
+          - name: by_group
+            title: "By Group"
+            type: text
+      clearWith:
+          - scale_items
+          - group_var
+
+    # Item-Level Analysis
+    - name: item_statistics
+      title: Item-Level Statistics
+      type: Table
+      columns:
+          - name: item
+            title: "Item"
+            type: text
+          - name: n_responses
+            title: "N Responses"
+            type: integer
+          - name: mean
+            title: "Mean"
+            type: number
+            format: zto
+          - name: sd
+            title: "SD"
+            type: number
+            format: zto
+          - name: median
+            title: "Median"
+            type: number
+            format: zto
+          - name: missing_percent
+            title: "Missing %"
+            type: number
+            format: pc
+          - name: floor_effect
+            title: "Floor Effect %"
+            type: number
+            format: pc
+          - name: ceiling_effect
+            title: "Ceiling Effect %"
+            type: number
+            format: pc
+
+    - name: item_correlations
+      title: Inter-Item Correlations
+      type: Table
+      columns:
+          - name: item1
+            title: "Item 1"
+            type: text
+          - name: item2
+            title: "Item 2"
+            type: text
+          - name: correlation
+            title: "Correlation"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+
+    # Reliability Analysis
+    - name: reliability_results
+      title: Reliability Analysis Results
+      type: Table
+      visible: (reliability_analysis)
+      columns:
+          - name: reliability_measure
+            title: "Reliability Measure"
+            type: text
+          - name: value
+            title: "Value"
+            type: number
+            format: zto
+          - name: ci_lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: ci_upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: item_reliability
+      title: Item-Total Statistics
+      type: Table
+      visible: (reliability_analysis)
+      columns:
+          - name: item
+            title: "Item"
+            type: text
+          - name: item_total_correlation
+            title: "Item-Total Correlation"
+            type: number
+            format: zto
+          - name: corrected_item_total
+            title: "Corrected Item-Total"
+            type: number
+            format: zto
+          - name: alpha_if_deleted
+            title: "α if Item Deleted"
+            type: number
+            format: zto
+          - name: item_discrimination
+            title: "Discrimination"
+            type: text
+
+    # Validity Analysis
+    - name: validity_results
+      title: Validity Analysis Results
+      type: Table
+      visible: (validity_analysis)
+      columns:
+          - name: validity_type
+            title: "Validity Type"
+            type: text
+          - name: test_statistic
+            title: "Test Statistic"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+          - name: effect_size
+            title: "Effect Size"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: factor_analysis_results
+      title: Factor Analysis Results
+      type: Table
+      visible: (factor_analysis)
+      columns:
+          - name: factor
+            title: "Factor"
+            type: text
+          - name: eigenvalue
+            title: "Eigenvalue"
+            type: number
+            format: zto
+          - name: variance_explained
+            title: "Variance Explained %"
+            type: number
+            format: pc
+          - name: cumulative_variance
+            title: "Cumulative Variance %"
+            type: number
+            format: pc
+
+    - name: factor_loadings
+      title: Factor Loadings
+      type: Table
+      visible: (factor_analysis)
+      columns:
+          - name: item
+            title: "Item"
+            type: text
+          - name: factor1
+            title: "Factor 1"
+            type: number
+            format: zto
+          - name: factor2
+            title: "Factor 2"
+            type: number
+            format: zto
+          - name: factor3
+            title: "Factor 3"
+            type: number
+            format: zto
+          - name: communality
+            title: "Communality"
+            type: number
+            format: zto
+
+    # Scale Scoring Results
+    - name: scale_scores
+      title: Scale Score Summary
+      type: Table
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    - name: score_distribution
+      title: Score Distribution
+      type: Table
+      columns:
+          - name: score_range
+            title: "Score Range"
+            type: text
+          - name: frequency
+            title: "Frequency"
+            type: integer
+          - name: percent
+            title: "Percent"
+            type: number
+            format: pc
+          - name: cumulative_percent
+            title: "Cumulative %"
+            type: number
+            format: pc
+
+    # Group Comparisons
+    - name: group_comparison_results
+      title: Group Comparison Results
+      type: Table
+      visible: (group_comparisons)
+      columns:
+          - name: group1
+            title: "Group 1"
+            type: text
+          - name: group2
+            title: "Group 2"
+            type: text
+          - name: mean_diff
+            title: "Mean Difference"
+            type: number
+            format: zto
+          - name: ci_lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: ci_upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+          - name: effect_size
+            title: "Effect Size (Cohen's d)"
+            type: number
+            format: zto
+          - name: clinical_significance
+            title: "Clinical Significance"
+            type: text
+
+    - name: group_descriptives
+      title: Group Descriptive Statistics
+      type: Table
+      visible: (group_comparisons)
+      columns:
+          - name: group
+            title: "Group"
+            type: text
+          - name: n
+            title: "N"
+            type: integer
+          - name: mean
+            title: "Mean"
+            type: number
+            format: zto
+          - name: sd
+            title: "SD"
+            type: number
+            format: zto
+          - name: median
+            title: "Median"
+            type: number
+            format: zto
+          - name: iqr
+            title: "IQR"
+            type: text
+          - name: min
+            title: "Min"
+            type: number
+            format: zto
+          - name: max
+            title: "Max"
+            type: number
+            format: zto
+
+    # Longitudinal Analysis
+    - name: longitudinal_results
+      title: Longitudinal Analysis Results
+      type: Table
+      visible: (longitudinal_analysis)
+      columns:
+          - name: time_point
+            title: "Time Point"
+            type: text
+          - name: n
+            title: "N"
+            type: integer
+          - name: mean
+            title: "Mean"
+            type: number
+            format: zto
+          - name: sd
+            title: "SD"
+            type: number
+            format: zto
+          - name: change_from_baseline
+            title: "Change from Baseline"
+            type: number
+            format: zto
+          - name: change_se
+            title: "SE of Change"
+            type: number
+            format: zto
+          - name: effect_size
+            title: "Effect Size"
+            type: number
+            format: zto
+          - name: clinical_significance
+            title: "Clinically Significant"
+            type: text
+
+    - name: change_analysis_results
+      title: Change Analysis Results
+      type: Table
+      visible: (longitudinal_analysis && change_analysis != 'none')
+      columns:
+          - name: patient_id
+            title: "Patient ID"
+            type: text
+          - name: baseline_score
+            title: "Baseline Score"
+            type: number
+            format: zto
+          - name: follow_up_score
+            title: "Follow-up Score"
+            type: number
+            format: zto
+          - name: change_score
+            title: "Change Score"
+            type: number
+            format: zto
+          - name: reliable_change
+            title: "Reliable Change"
+            type: text
+          - name: clinical_significance
+            title: "Clinical Significance"
+            type: text
+
+    # Clinical Interpretation
+    - name: clinical_interpretation_results
+      title: Clinical Interpretation
+      type: Table
+      visible: (clinical_interpretation)
+      columns:
+          - name: interpretation_aspect
+            title: "Clinical Aspect"
+            type: text
+          - name: finding
+            title: "Finding"
+            type: text
+          - name: clinical_meaning
+            title: "Clinical Meaning"
+            type: text
+          - name: recommendation
+            title: "Recommendation"
+            type: text
+
+    - name: minimal_important_difference_results
+      title: Minimal Important Difference Analysis
+      type: Table
+      visible: (minimal_important_difference)
+      columns:
+          - name: comparison
+            title: "Comparison"
+            type: text
+          - name: mean_change
+            title: "Mean Change"
+            type: number
+            format: zto
+          - name: mid_threshold
+            title: "MID Threshold"
+            type: number
+            format: zto
+          - name: exceeds_mid
+            title: "Exceeds MID"
+            type: text
+          - name: percent_responders
+            title: "% Responders"
+            type: number
+            format: pc
+          - name: clinical_interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    # Data Quality Assessment
+    - name: data_quality_results
+      title: Data Quality Assessment
+      type: Table
+      visible: (data_quality_assessment)
+      columns:
+          - name: quality_indicator
+            title: "Quality Indicator"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+          - name: threshold
+            title: "Acceptable Threshold"
+            type: text
+          - name: status
+            title: "Status"
+            type: text
+          - name: recommendation
+            title: "Recommendation"
+            type: text
+
+    - name: missing_data_patterns
+      title: Missing Data Patterns
+      type: Table
+      columns:
+          - name: missing_pattern
+            title: "Missing Pattern"
+            type: text
+          - name: frequency
+            title: "Frequency"
+            type: integer
+          - name: percent
+            title: "Percent"
+            type: number
+            format: pc
+          - name: items_missing
+            title: "Items Missing"
+            type: text
+
+    # Response Pattern Analysis
+    - name: response_patterns
+      title: Response Pattern Analysis
+      type: Table
+      visible: (response_patterns)
+      columns:
+          - name: pattern_type
+            title: "Response Pattern"
+            type: text
+          - name: frequency
+            title: "Frequency"
+            type: integer
+          - name: percent
+            title: "Percent"
+            type: number
+            format: pc
+          - name: potential_issue
+            title: "Potential Issue"
+            type: text
+
+    # Responder Analysis
+    - name: responder_analysis_results
+      title: Responder Analysis Results
+      type: Table
+      visible: (responder_analysis)
+      columns:
+          - name: response_category
+            title: "Response Category"
+            type: text
+          - name: n_patients
+            title: "N Patients"
+            type: integer
+          - name: percent
+            title: "Percent"
+            type: number
+            format: pc
+          - name: mean_change
+            title: "Mean Change"
+            type: number
+            format: zto
+          - name: ci_lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: ci_upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+
+    # Regulatory Documentation
+    - name: regulatory_summary
+      title: Regulatory Documentation Summary
+      type: Table
+      visible: (regulatory_documentation)
+      columns:
+          - name: regulatory_aspect
+            title: "Regulatory Aspect"
+            type: text
+          - name: status
+            title: "Status"
+            type: text
+          - name: documentation
+            title: "Documentation"
+            type: text
+          - name: recommendations
+            title: "Recommendations"
+            type: text
+
+    # Visualizations
+    - name: item_distribution_plot
+      title: Item Response Distribution
+      type: Image
+      renderFun: .plot_item_distribution
+      clearWith:
+          - scale_items
+
+    - name: scale_distribution_plot
+      title: Scale Score Distribution
+      type: Image
+      renderFun: .plot_scale_distribution
+      clearWith:
+          - scale_items
+          - scoring_method
+
+    - name: reliability_plot
+      title: Reliability Analysis Plot
+      type: Image
+      visible: (reliability_analysis)
+      renderFun: .plot_reliability
+      clearWith:
+          - reliability_analysis
+
+    - name: factor_plot
+      title: Factor Analysis Scree Plot
+      type: Image
+      visible: (factor_analysis)
+      renderFun: .plot_factor_analysis
+      clearWith:
+          - factor_analysis
+
+    - name: group_comparison_plot
+      title: Group Comparison Plot
+      type: Image
+      visible: (group_comparisons)
+      renderFun: .plot_group_comparison
+      clearWith:
+          - group_var
+          - group_comparisons
+
+    - name: longitudinal_plot
+      title: Longitudinal Trajectories
+      type: Image
+      visible: (longitudinal_analysis)
+      renderFun: .plot_longitudinal
+      clearWith:
+          - time_var
+          - longitudinal_analysis
+
+    - name: change_plot
+      title: Change Analysis Plot
+      type: Image
+      visible: (longitudinal_analysis && change_analysis != 'none')
+      renderFun: .plot_change_analysis
+      clearWith:
+          - change_analysis
+          - time_var
+
+    - name: responder_plot
+      title: Responder Analysis Plot
+      type: Image
+      visible: (responder_analysis)
+      renderFun: .plot_responder_analysis
+      clearWith:
+          - responder_analysis
+
+    - name: missing_data_plot
+      title: Missing Data Visualization
+      type: Image
+      renderFun: .plot_missing_data
+      clearWith:
+          - scale_items
+
+    - name: correlation_heatmap
+      title: Inter-Item Correlation Heatmap
+      type: Image
+      renderFun: .plot_correlation_heatmap
+      clearWith:
+          - scale_items
+
+...

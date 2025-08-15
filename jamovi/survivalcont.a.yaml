@@ -1,7 +1,7 @@
 ---
 name:  survivalcont
 title: Survival Analysis for Continuous Variable
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cut-off & Univariate Survival Analysis'
 version: '0.0.31'
@@ -469,13 +469,21 @@ options:
         in the log-log plot suggest that proportional hazards assumption holds.
 
     - name: showExplanations
-      title: "Show Educational Explanations"
+      title: "Show Analysis Explanations"
       type: Bool
       default: false
       description: >-
-        Display educational explanations for each analysis type to help interpret 
-        survival analysis results, cut-off point analysis, Cox regression, and multiple 
-        cutoffs analysis.
+        Display detailed explanations for each analysis component to help
+        interpret the statistical methods and results.
+
+    - name: showSummaries
+      title: "Show Natural Language Summaries"
+      type: Bool
+      default: false
+      description: >-
+        Display natural language summaries alongside tables and plots. These
+        summaries provide plain-language interpretations of the statistical
+        results. Turn off to reduce visual clutter when summaries are not needed.
 
 
 

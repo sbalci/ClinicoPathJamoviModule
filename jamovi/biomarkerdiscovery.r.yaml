@@ -1,0 +1,622 @@
+---
+name: biomarkerdiscovery
+title: Biomarker Discovery Platform with ML Interpretability
+jrs: '1.1'
+
+items:
+    # Discovery Overview
+    - name: discovery_overview
+      title: Biomarker Discovery Overview
+      type: Table
+      columns:
+          - name: characteristic
+            title: "Characteristic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+      clearWith:
+          - outcome_var
+          - biomarker_vars
+          - discovery_method
+
+    - name: data_summary
+      title: Dataset Summary
+      type: Table
+      columns:
+          - name: data_aspect
+            title: "Data Aspect"
+            type: text
+          - name: original
+            title: "Original"
+            type: text
+          - name: after_preprocessing
+            title: "After Preprocessing"
+            type: text
+          - name: final_analysis
+            title: "Final Analysis"
+            type: text
+      clearWith:
+          - biomarker_vars
+          - data_preprocessing
+
+    # Quality Control Results
+    - name: quality_control_summary
+      title: Quality Control Summary
+      type: Table
+      visible: (quality_control)
+      columns:
+          - name: qc_metric
+            title: "QC Metric"
+            type: text
+          - name: threshold
+            title: "Threshold"
+            type: text
+          - name: passed
+            title: "Passed"
+            type: integer
+          - name: failed
+            title: "Failed"
+            type: integer
+          - name: action_taken
+            title: "Action Taken"
+            type: text
+
+    - name: outlier_analysis
+      title: Outlier Analysis Results
+      type: Table
+      visible: (outlier_detection)
+      columns:
+          - name: sample_id
+            title: "Sample ID"
+            type: text
+          - name: outlier_score
+            title: "Outlier Score"
+            type: number
+            format: zto
+          - name: outlier_type
+            title: "Outlier Type"
+            type: text
+          - name: affected_biomarkers
+            title: "Affected Biomarkers"
+            type: integer
+          - name: recommendation
+            title: "Recommendation"
+            type: text
+
+    # Feature Selection Results
+    - name: feature_selection_summary
+      title: Feature Selection Summary
+      type: Table
+      columns:
+          - name: selection_step
+            title: "Selection Step"
+            type: text
+          - name: features_input
+            title: "Features Input"
+            type: integer
+          - name: features_output
+            title: "Features Selected"
+            type: integer
+          - name: selection_criteria
+            title: "Selection Criteria"
+            type: text
+          - name: threshold_used
+            title: "Threshold Used"
+            type: text
+
+    - name: selected_biomarkers
+      title: Selected Biomarkers
+      type: Table
+      columns:
+          - name: biomarker
+            title: "Biomarker"
+            type: text
+          - name: importance_score
+            title: "Importance Score"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+          - name: fdr_adjusted_p
+            title: "FDR Adjusted P"
+            type: number
+            format: zto
+          - name: effect_size
+            title: "Effect Size"
+            type: number
+            format: zto
+          - name: stability_index
+            title: "Stability Index"
+            type: number
+            format: zto
+          - name: clinical_relevance
+            title: "Clinical Relevance"
+            type: text
+
+    # Model Performance
+    - name: discovery_performance
+      title: Biomarker Discovery Performance
+      type: Table
+      columns:
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: training
+            title: "Training"
+            type: number
+            format: zto
+          - name: validation
+            title: "Cross-Validation"
+            type: number
+            format: zto
+          - name: bootstrap_mean
+            title: "Bootstrap Mean"
+            type: number
+            format: zto
+          - name: ci_lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: ci_upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+
+    - name: signature_performance
+      title: Biomarker Signature Performance
+      type: Table
+      visible: (signature_development)
+      columns:
+          - name: signature_name
+            title: "Signature"
+            type: text
+          - name: n_biomarkers
+            title: "N Biomarkers"
+            type: integer
+          - name: auc_roc
+            title: "AUC-ROC"
+            type: number
+            format: zto
+          - name: sensitivity
+            title: "Sensitivity"
+            type: number
+            format: zto
+          - name: specificity
+            title: "Specificity"
+            type: number
+            format: zto
+          - name: accuracy
+            title: "Accuracy"
+            type: number
+            format: zto
+          - name: clinical_impact
+            title: "Clinical Impact Score"
+            type: number
+            format: zto
+
+    # Biomarker Ranking & Stability
+    - name: biomarker_ranking
+      title: Comprehensive Biomarker Ranking
+      type: Table
+      visible: (biomarker_ranking)
+      columns:
+          - name: rank
+            title: "Rank"
+            type: integer
+          - name: biomarker
+            title: "Biomarker"
+            type: text
+          - name: composite_score
+            title: "Composite Score"
+            type: number
+            format: zto
+          - name: statistical_significance
+            title: "Statistical Score"
+            type: number
+            format: zto
+          - name: effect_size_score
+            title: "Effect Size Score"
+            type: number
+            format: zto
+          - name: stability_score
+            title: "Stability Score"
+            type: number
+            format: zto
+          - name: clinical_utility_score
+            title: "Clinical Utility Score"
+            type: number
+            format: zto
+
+    - name: stability_analysis_results
+      title: Biomarker Selection Stability
+      type: Table
+      visible: (stability_analysis)
+      columns:
+          - name: biomarker
+            title: "Biomarker"
+            type: text
+          - name: selection_frequency
+            title: "Selection Frequency"
+            type: number
+            format: pc
+          - name: rank_stability
+            title: "Rank Stability"
+            type: number
+            format: zto
+          - name: coefficient_stability
+            title: "Coefficient Stability"
+            type: number
+            format: zto
+          - name: stability_classification
+            title: "Stability Class"
+            type: text
+
+    # Interpretability Results
+    - name: shap_biomarker_importance
+      title: SHAP Biomarker Importance
+      type: Table
+      visible: (shap_analysis)
+      columns:
+          - name: biomarker
+            title: "Biomarker"
+            type: text
+          - name: mean_shap_value
+            title: "Mean |SHAP|"
+            type: number
+            format: zto
+          - name: shap_std
+            title: "SHAP Std Dev"
+            type: number
+            format: zto
+          - name: positive_impact_freq
+            title: "Positive Impact %"
+            type: number
+            format: pc
+          - name: negative_impact_freq
+            title: "Negative Impact %"
+            type: number
+            format: pc
+          - name: shap_rank
+            title: "SHAP Rank"
+            type: integer
+
+    - name: biomarker_interactions
+      title: Biomarker Interaction Analysis
+      type: Table
+      visible: (feature_interaction)
+      columns:
+          - name: biomarker_1
+            title: "Biomarker 1"
+            type: text
+          - name: biomarker_2
+            title: "Biomarker 2"
+            type: text
+          - name: interaction_strength
+            title: "Interaction Strength"
+            type: number
+            format: zto
+          - name: interaction_type
+            title: "Interaction Type"
+            type: text
+          - name: clinical_relevance
+            title: "Clinical Relevance"
+            type: text
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+
+    # Clinical Translation
+    - name: optimal_cutpoints
+      title: Optimal Cutpoint Analysis
+      type: Table
+      visible: (cutpoint_optimization)
+      columns:
+          - name: biomarker
+            title: "Biomarker"
+            type: text
+          - name: optimal_cutpoint
+            title: "Optimal Cutpoint"
+            type: number
+            format: zto
+          - name: method
+            title: "Optimization Method"
+            type: text
+          - name: sensitivity
+            title: "Sensitivity"
+            type: number
+            format: zto
+          - name: specificity
+            title: "Specificity"
+            type: number
+            format: zto
+          - name: youden_index
+            title: "Youden Index"
+            type: number
+            format: zto
+          - name: clinical_interpretation
+            title: "Clinical Interpretation"
+            type: text
+
+    - name: risk_stratification_results
+      title: Risk Stratification Analysis
+      type: Table
+      visible: (risk_stratification)
+      columns:
+          - name: risk_group
+            title: "Risk Group"
+            type: text
+          - name: biomarker_score_range
+            title: "Biomarker Score Range"
+            type: text
+          - name: n_patients
+            title: "N Patients"
+            type: integer
+          - name: event_rate
+            title: "Event Rate"
+            type: number
+            format: pc
+          - name: hazard_ratio
+            title: "Hazard Ratio"
+            type: number
+            format: zto
+          - name: ci_lower
+            title: "HR 95% CI Lower"
+            type: number
+            format: zto
+          - name: ci_upper
+            title: "HR 95% CI Upper"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+
+    - name: decision_curve_results
+      title: Decision Curve Analysis Results
+      type: Table
+      visible: (decision_curve_analysis)
+      columns:
+          - name: threshold_probability
+            title: "Threshold Probability"
+            type: number
+            format: zto
+          - name: net_benefit_biomarkers
+            title: "Net Benefit (Biomarkers)"
+            type: number
+            format: zto
+          - name: net_benefit_treat_all
+            title: "Net Benefit (Treat All)"
+            type: number
+            format: zto
+          - name: net_benefit_treat_none
+            title: "Net Benefit (Treat None)"
+            type: number
+            format: zto
+          - name: clinical_impact
+            title: "Clinical Impact"
+            type: text
+
+    # Pathway Analysis
+    - name: pathway_enrichment
+      title: Pathway Enrichment Analysis
+      type: Table
+      visible: (pathway_analysis)
+      columns:
+          - name: pathway_name
+            title: "Pathway"
+            type: text
+          - name: pathway_id
+            title: "Pathway ID"
+            type: text
+          - name: n_biomarkers
+            title: "N Biomarkers"
+            type: integer
+          - name: enrichment_score
+            title: "Enrichment Score"
+            type: number
+            format: zto
+          - name: p_value
+            title: "P-value"
+            type: number
+            format: zto
+          - name: fdr_p_value
+            title: "FDR P-value"
+            type: number
+            format: zto
+          - name: biomarkers_in_pathway
+            title: "Biomarkers in Pathway"
+            type: text
+
+    # Validation Results
+    - name: cross_validation_results
+      title: Cross-Validation Results
+      type: Table
+      columns:
+          - name: fold
+            title: "Fold"
+            type: integer
+          - name: n_biomarkers_selected
+            title: "N Biomarkers"
+            type: integer
+          - name: auc_roc
+            title: "AUC-ROC"
+            type: number
+            format: zto
+          - name: accuracy
+            title: "Accuracy"
+            type: number
+            format: zto
+          - name: sensitivity
+            title: "Sensitivity"
+            type: number
+            format: zto
+          - name: specificity
+            title: "Specificity"
+            type: number
+            format: zto
+          - name: biomarker_overlap
+            title: "Biomarker Overlap %"
+            type: number
+            format: pc
+
+    - name: generalizability_assessment
+      title: Generalizability Assessment
+      type: Table
+      visible: (biomarker_generalizability)
+      columns:
+          - name: assessment_aspect
+            title: "Assessment Aspect"
+            type: text
+          - name: current_study
+            title: "Current Study"
+            type: text
+          - name: generalization_potential
+            title: "Generalization Potential"
+            type: text
+          - name: risk_factors
+            title: "Risk Factors"
+            type: text
+          - name: recommendations
+            title: "Recommendations"
+            type: text
+
+    # Clinical Interpretation
+    - name: clinical_interpretation
+      title: Clinical Interpretation and Recommendations
+      type: Table
+      visible: (biomarker_report)
+      columns:
+          - name: aspect
+            title: "Clinical Aspect"
+            type: text
+          - name: finding
+            title: "Key Finding"
+            type: text
+          - name: clinical_significance
+            title: "Clinical Significance"
+            type: text
+          - name: actionability
+            title: "Actionability"
+            type: text
+          - name: recommendation
+            title: "Recommendation"
+            type: text
+
+    - name: regulatory_summary
+      title: Regulatory Documentation Summary
+      type: Table
+      visible: (regulatory_documentation)
+      columns:
+          - name: regulatory_aspect
+            title: "Regulatory Aspect"
+            type: text
+          - name: compliance_status
+            title: "Compliance Status"
+            type: text
+          - name: documentation
+            title: "Documentation"
+            type: text
+          - name: recommendations
+            title: "Recommendations"
+            type: text
+
+    # Visualizations
+    - name: biomarker_importance_plot
+      title: Biomarker Importance Plot
+      type: Image
+      renderFun: .plot_biomarker_importance
+      clearWith:
+          - biomarker_vars
+          - discovery_method
+
+    - name: roc_comparison_plot
+      title: ROC Curve Comparison
+      type: Image
+      renderFun: .plot_roc_comparison
+      clearWith:
+          - outcome_var
+          - signature_development
+
+    - name: shap_summary_plot
+      title: SHAP Summary Plot
+      type: Image
+      visible: (shap_analysis)
+      renderFun: .plot_shap_summary
+      clearWith:
+          - biomarker_vars
+          - shap_analysis
+
+    - name: shap_dependence_plot
+      title: SHAP Partial Dependence Plots
+      type: Image
+      visible: (partial_dependence && shap_analysis)
+      renderFun: .plot_shap_dependence
+      clearWith:
+          - biomarker_vars
+          - partial_dependence
+
+    - name: stability_plot
+      title: Biomarker Selection Stability
+      type: Image
+      visible: (stability_analysis)
+      renderFun: .plot_stability
+      clearWith:
+          - validation_method
+          - stability_analysis
+
+    - name: biomarker_correlation_plot
+      title: Selected Biomarker Correlation Matrix
+      type: Image
+      renderFun: .plot_biomarker_correlation
+      clearWith:
+          - biomarker_vars
+
+    - name: risk_stratification_plot
+      title: Risk Stratification Visualization
+      type: Image
+      visible: (risk_stratification)
+      renderFun: .plot_risk_stratification
+      clearWith:
+          - risk_stratification
+          - outcome_var
+
+    - name: decision_curve_plot
+      title: Decision Curve Analysis Plot
+      type: Image
+      visible: (decision_curve_analysis)
+      renderFun: .plot_decision_curve
+      clearWith:
+          - decision_curve_analysis
+
+    - name: pathway_network_plot
+      title: Pathway Network Visualization
+      type: Image
+      visible: (pathway_analysis && biomarker_networks)
+      renderFun: .plot_pathway_network
+      clearWith:
+          - pathway_analysis
+          - biomarker_networks
+
+    - name: biomarker_distribution_plot
+      title: Biomarker Distribution by Outcome
+      type: Image
+      renderFun: .plot_biomarker_distribution
+      clearWith:
+          - biomarker_vars
+          - outcome_var
+
+    - name: nomogram_plot
+      title: Biomarker Nomogram
+      type: Image
+      visible: (nomogram_development)
+      renderFun: .plot_nomogram
+      clearWith:
+          - nomogram_development
+          - selected_biomarkers
+
+...

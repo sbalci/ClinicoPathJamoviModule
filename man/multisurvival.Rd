@@ -68,6 +68,7 @@ multisurvival(
   spline_df = 3,
   spline_type = "pspline",
   showExplanations = FALSE,
+  showSummaries = FALSE,
   ml_method = "none",
   ml_validation = "cv",
   ml_cv_folds = 5,
@@ -295,9 +296,13 @@ allow more flexible time-varying effects but may lead to overfitting.}
 smooth functions with automatic smoothness selection. Natural splines are
 constrained to be linear at the boundaries.}
 
-\item{showExplanations}{Display educational explanations for each analysis
-type to help interpret  multivariable survival analysis results, Cox
-regression, adjusted survival  curves, nomograms, and model diagnostics.}
+\item{showExplanations}{Display detailed explanations for each analysis
+component to help interpret the statistical methods and results.}
+
+\item{showSummaries}{Display natural language summaries alongside tables
+and plots. These summaries provide plain-language interpretations of the
+statistical results. Turn off to reduce visual clutter when summaries are
+not needed.}
 
 \item{ml_method}{Machine learning survival analysis method}
 
@@ -355,6 +360,13 @@ A results object containing:
 \code{results$nomogramExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$ml_variable_importance} \tab \tab \tab \tab \tab a table \cr
+\code{results$ml_performance_metrics} \tab \tab \tab \tab \tab a html \cr
+\code{results$ml_feature_selection_results} \tab \tab \tab \tab \tab a table \cr
+\code{results$ml_ensemble_summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$ml_prediction_intervals} \tab \tab \tab \tab \tab a table \cr
+\code{results$ml_cross_validation_summary} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

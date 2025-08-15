@@ -1,0 +1,537 @@
+---
+name: treatmenteffects
+title: Causal Inference & Treatment Effects Analysis
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Treatment Effects Analysis
+menuSubtitle: Causal inference with propensity scores and IPTW
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive causal inference analysis for estimating treatment effects in observational studies.
+        Implements propensity score methods, inverse probability of treatment weighting (IPTW),
+        matching techniques, and doubly robust estimation. Includes covariate balance assessment,
+        sensitivity analysis, and causal effect estimation with confidence intervals. Essential for
+        comparative effectiveness research, real-world evidence studies, and observational research
+        where randomized controlled trials are not feasible.
+    R:
+        dontrun: false
+        usage: |
+            data('treatment_data')
+            
+            treatmenteffects(
+                data = treatment_data,
+                treatment_var = "treatment",
+                outcome_var = "outcome",
+                covariates = c("age", "sex", "baseline_severity"),
+                causal_method = "propensity_score",
+                estimand = "ate"
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Variable Selection
+    - name: treatment_var
+      title: Treatment Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Binary treatment variable (treated vs. control)
+
+    - name: outcome_var
+      title: Outcome Variable
+      type: Variable
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Primary outcome variable of interest
+
+    - name: covariates
+      title: Covariates/Confounders
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Confounding variables to adjust for in causal analysis
+
+    - name: patient_id
+      title: Patient ID (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Patient identifier for tracking matched pairs
+
+    - name: time_var
+      title: Time Variable (For Survival)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Time to event variable for survival outcomes
+
+    - name: event_var
+      title: Event Variable (For Survival)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Event indicator for survival outcomes
+
+    - name: cluster_var
+      title: Cluster Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Clustering variable (e.g., hospital, physician) for robust standard errors
+
+    # Causal Method Configuration
+    - name: causal_method
+      title: Causal Inference Method
+      type: List
+      options:
+          - name: "propensity_score"
+            title: "Propensity Score Methods"
+          - name: "inverse_weighting"
+            title: "Inverse Probability Treatment Weighting (IPTW)"
+          - name: "matching"
+            title: "Matching Methods"
+          - name: "doubly_robust"
+            title: "Doubly Robust Estimation"
+          - name: "instrumental_variable"
+            title: "Instrumental Variables"
+          - name: "regression_discontinuity"
+            title: "Regression Discontinuity"
+          - name: "difference_in_differences"
+            title: "Difference-in-Differences"
+      default: "propensity_score"
+      description:
+          R: Primary method for causal inference
+
+    - name: outcome_type
+      title: Outcome Type
+      type: List
+      options:
+          - name: "continuous"
+            title: "Continuous Outcome"
+          - name: "binary"
+            title: "Binary Outcome"
+          - name: "survival"
+            title: "Time-to-Event Outcome"
+          - name: "count"
+            title: "Count Outcome"
+      default: "continuous"
+      description:
+          R: Type of outcome variable
+
+    - name: estimand
+      title: Target Estimand
+      type: List
+      options:
+          - name: "ate"
+            title: "Average Treatment Effect (ATE)"
+          - name: "att"
+            title: "Average Treatment Effect on Treated (ATT)"
+          - name: "atc"
+            title: "Average Treatment Effect on Controls (ATC)"
+          - name: "ate_subgroup"
+            title: "Conditional Average Treatment Effect"
+      default: "ate"
+      description:
+          R: Target causal estimand
+
+    # Propensity Score Configuration
+    - name: ps_method
+      title: Propensity Score Estimation
+      type: List
+      options:
+          - name: "logistic"
+            title: "Logistic Regression"
+          - name: "probit"
+            title: "Probit Regression"
+          - name: "gam"
+            title: "Generalized Additive Models (GAM)"
+          - name: "random_forest"
+            title: "Random Forest"
+          - name: "gradient_boosting"
+            title: "Gradient Boosting"
+          - name: "super_learner"
+            title: "Super Learner Ensemble"
+      default: "logistic"
+      description:
+          R: Method for estimating propensity scores
+
+    - name: ps_specification
+      title: PS Model Specification
+      type: List
+      options:
+          - name: "main_effects"
+            title: "Main Effects Only"
+          - name: "interactions"
+            title: "Include Interactions"
+          - name: "polynomial"
+            title: "Polynomial Terms"
+          - name: "splines"
+            title: "Spline Terms"
+          - name: "automated"
+            title: "Automated Selection"
+      default: "main_effects"
+      description:
+          R: Complexity of propensity score model
+
+    - name: balance_threshold
+      title: Covariate Balance Threshold
+      type: Number
+      min: 0.05
+      max: 0.25
+      default: 0.1
+      description:
+          R: Maximum standardized mean difference for adequate balance
+
+    # Matching Configuration
+    - name: matching_method
+      title: Matching Method
+      type: List
+      options:
+          - name: "nearest_neighbor"
+            title: "Nearest Neighbor Matching"
+          - name: "optimal"
+            title: "Optimal Matching"
+          - name: "genetic"
+            title: "Genetic Matching"
+          - name: "coarsened_exact"
+            title: "Coarsened Exact Matching (CEM)"
+          - name: "mahalanobis"
+            title: "Mahalanobis Distance Matching"
+          - name: "propensity_caliper"
+            title: "Propensity Score Caliper Matching"
+      default: "nearest_neighbor"
+      description:
+          R: Specific matching algorithm to use
+
+    - name: matching_ratio
+      title: Matching Ratio
+      type: List
+      options:
+          - name: "1to1"
+            title: "1:1 Matching"
+          - name: "1to2"
+            title: "1:2 Matching"
+          - name: "1to3"
+            title: "1:3 Matching"
+          - name: "1to5"
+            title: "1:5 Matching"
+          - name: "variable"
+            title: "Variable Ratio"
+      default: "1to1"
+      description:
+          R: Ratio of controls to treated units
+
+    - name: caliper_width
+      title: Caliper Width
+      type: Number
+      min: 0.01
+      max: 0.5
+      default: 0.2
+      description:
+          R: Maximum distance for matching (in standard deviations)
+
+    - name: replacement_matching
+      title: Matching with Replacement
+      type: Bool
+      default: false
+      description:
+          R: Allow controls to be matched to multiple treated units
+
+    # IPTW Configuration
+    - name: weight_trimming
+      title: Weight Trimming
+      type: Bool
+      default: true
+      description:
+          R: Trim extreme propensity score weights
+
+    - name: trim_quantiles
+      title: Trim Quantiles
+      type: Number
+      min: 0.01
+      max: 0.1
+      default: 0.05
+      description:
+          R: Quantiles for weight trimming (e.g., 0.05 = trim top/bottom 5%)
+
+    - name: stabilized_weights
+      title: Stabilized Weights
+      type: Bool
+      default: true
+      description:
+          R: Use stabilized inverse probability weights
+
+    - name: weight_normalization
+      title: Weight Normalization
+      type: List
+      options:
+          - name: "none"
+            title: "No Normalization"
+          - name: "sum_to_n"
+            title: "Sum to Sample Size"
+          - name: "mean_one"
+            title: "Mean Equals One"
+      default: "sum_to_n"
+      description:
+          R: Method for normalizing weights
+
+    # Outcome Model Configuration
+    - name: outcome_model
+      title: Outcome Model
+      type: List
+      options:
+          - name: "linear"
+            title: "Linear Regression"
+          - name: "logistic"
+            title: "Logistic Regression"
+          - name: "cox"
+            title: "Cox Proportional Hazards"
+          - name: "poisson"
+            title: "Poisson Regression"
+          - name: "gam"
+            title: "Generalized Additive Model"
+          - name: "random_forest"
+            title: "Random Forest"
+          - name: "super_learner"
+            title: "Super Learner"
+      default: "linear"
+      description:
+          R: Model for outcome regression
+
+    - name: include_ps_in_outcome
+      title: Include PS in Outcome Model
+      type: Bool
+      default: true
+      description:
+          R: Include propensity score in outcome model (doubly robust)
+
+    # Balance Assessment
+    - name: balance_assessment
+      title: Covariate Balance Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess covariate balance before and after adjustment
+
+    - name: balance_methods
+      title: Balance Assessment Methods
+      type: List
+      options:
+          - name: "standardized_differences"
+            title: "Standardized Mean Differences"
+          - name: "variance_ratios"
+            title: "Variance Ratios"
+          - name: "ks_statistics"
+            title: "Kolmogorov-Smirnov Statistics"
+          - name: "emd"
+            title: "Earth Mover's Distance"
+          - name: "all_methods"
+            title: "All Methods"
+      default: "standardized_differences"
+      description:
+          R: Methods for assessing covariate balance
+
+    - name: overlap_assessment
+      title: Overlap Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess propensity score overlap between treatment groups
+
+    # Sensitivity Analysis
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform sensitivity analysis for unmeasured confounding
+
+    - name: sensitivity_method
+      title: Sensitivity Analysis Method
+      type: List
+      options:
+          - name: "rosenbaum_bounds"
+            title: "Rosenbaum Bounds"
+          - name: "bias_functions"
+            title: "Bias Functions"
+          - name: "e_values"
+            title: "E-values"
+          - name: "placebo_tests"
+            title: "Placebo Tests"
+          - name: "multiple_methods"
+            title: "Multiple Methods"
+      default: "rosenbaum_bounds"
+      description:
+          R: Method for sensitivity analysis
+
+    - name: gamma_values
+      title: Gamma Values for Sensitivity
+      type: String
+      default: "1.1,1.2,1.3,1.5,2.0"
+      description:
+          R: Gamma values for Rosenbaum bounds (comma-separated)
+
+    # Advanced Methods
+    - name: heterogeneous_effects
+      title: Heterogeneous Treatment Effects
+      type: Bool
+      default: false
+      description:
+          R: Analyze treatment effect heterogeneity
+
+    - name: effect_modifiers
+      title: Effect Modifier Variables
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Variables for subgroup analysis and effect modification
+
+    - name: causal_tree
+      title: Causal Tree Analysis
+      type: Bool
+      default: false
+      description:
+          R: Use causal trees to identify effect heterogeneity
+
+    - name: causal_forest
+      title: Causal Forest Analysis
+      type: Bool
+      default: false
+      description:
+          R: Use causal random forests for individualized treatment effects
+
+    # Instrumental Variables
+    - name: instrument_var
+      title: Instrumental Variable
+      type: Variable
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Instrumental variable for IV analysis
+
+    - name: iv_method
+      title: IV Estimation Method
+      type: List
+      options:
+          - name: "two_stage_least_squares"
+            title: "Two-Stage Least Squares (2SLS)"
+          - name: "limited_information"
+            title: "Limited Information Maximum Likelihood"
+          - name: "generalized_method_moments"
+            title: "Generalized Method of Moments"
+      default: "two_stage_least_squares"
+      description:
+          R: Method for instrumental variable estimation
+
+    # Validation and Diagnostics
+    - name: model_diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: Perform comprehensive model diagnostics
+
+    - name: bootstrap_inference
+      title: Bootstrap Inference
+      type: Bool
+      default: true
+      description:
+          R: Use bootstrap for confidence intervals
+
+    - name: n_bootstrap
+      title: Bootstrap Samples
+      type: Integer
+      min: 100
+      max: 2000
+      default: 1000
+      description:
+          R: Number of bootstrap samples
+
+    - name: cross_validation
+      title: Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: Use cross-validation for model selection
+
+    # Output Options
+    - name: comprehensive_report
+      title: Comprehensive Report
+      type: Bool
+      default: true
+      description:
+          R: Generate comprehensive causal inference report
+
+    - name: individual_effects
+      title: Individual Treatment Effects
+      type: Bool
+      default: false
+      description:
+          R: Estimate individual treatment effects
+
+    - name: save_weights
+      title: Save Propensity Weights
+      type: Bool
+      default: false
+      description:
+          R: Save propensity scores and weights to dataset
+
+    - name: save_matched_data
+      title: Save Matched Dataset
+      type: Bool
+      default: false
+      description:
+          R: Save matched dataset for further analysis
+
+    - name: regulatory_documentation
+      title: Regulatory Documentation
+      type: Bool
+      default: true
+      description:
+          R: Include regulatory compliance documentation
+
+...

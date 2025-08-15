@@ -1,0 +1,430 @@
+---
+name: advancedimputation
+title: Advanced Multiple Imputation & Sensitivity Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Getting Started
+      type: Html
+      description: Instructions for advanced multiple imputation and sensitivity analysis
+      visible: true
+
+    - name: missing_summary
+      title: Missing Data Summary
+      type: Table
+      description: Overview of missing data patterns and completeness
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: n_missing
+            title: N Missing
+            type: integer
+          - name: pct_missing
+            title: Missing %
+            type: number
+            format: pc
+          - name: pattern_id
+            title: Pattern ID
+            type: integer
+          - name: imputation_method
+            title: Method
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+      clearWith:
+          - imputation_vars
+          - auxiliary_vars
+
+    - name: convergence_assessment
+      title: Convergence Assessment
+      type: Table
+      description: MICE convergence diagnostics and statistics
+      visible: (convergence_check)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: iteration
+            title: Iteration
+            type: integer
+          - name: between_variance
+            title: Between Variance
+            type: number
+            format: zto
+          - name: within_variance
+            title: Within Variance
+            type: number
+            format: zto
+          - name: total_variance
+            title: Total Variance
+            type: number
+            format: zto
+          - name: rhat
+            title: R-hat
+            type: number
+            format: zto
+          - name: convergence_status
+            title: Status
+            type: text
+      clearWith:
+          - n_imputations
+          - n_iterations
+
+    - name: imputation_summary
+      title: Imputation Results Summary
+      type: Table
+      description: Summary of completed imputations across methods
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: n_imputations
+            title: N Imputations
+            type: integer
+          - name: mean_observed
+            title: Mean (Observed)
+            type: number
+            format: zto
+          - name: mean_imputed
+            title: Mean (Imputed)
+            type: number
+            format: zto
+          - name: sd_observed
+            title: SD (Observed)
+            type: number
+            format: zto
+          - name: sd_imputed
+            title: SD (Imputed)
+            type: number
+            format: zto
+          - name: quality_score
+            title: Quality Score
+            type: number
+            format: zto
+      clearWith:
+          - imputation_vars
+          - imputation_method
+
+    - name: sensitivity_results
+      title: Sensitivity Analysis Results
+      type: Table
+      description: Results across different imputation methods and assumptions
+      visible: (sensitivity_analysis)
+      columns:
+          - name: method
+            title: Method/Assumption
+            type: text
+          - name: scenario
+            title: Scenario
+            type: text
+          - name: n_complete
+            title: N Complete
+            type: integer
+          - name: primary_estimate
+            title: Primary Estimate
+            type: number
+            format: zto
+          - name: standard_error
+            title: SE
+            type: number
+            format: zto
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto
+          - name: sensitivity_flag
+            title: Sensitivity
+            type: text
+      clearWith:
+          - sensitivity_methods
+          - mnar_methods
+
+    - name: mnar_analysis
+      title: MNAR Sensitivity Analysis
+      type: Table
+      description: Missing Not At Random sensitivity analysis results
+      visible: (mnar_methods)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: delta_value
+            title: Delta Value
+            type: number
+            format: zto
+          - name: mnar_method
+            title: MNAR Method
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+            format: zto
+          - name: se
+            title: SE
+            type: number
+            format: zto
+          - name: change_pct
+            title: Change (%)
+            type: number
+            format: zto
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - mnar_type
+          - delta_values
+
+    - name: multilevel_results
+      title: Multilevel Imputation Results
+      type: Table
+      description: Results for nested/multilevel imputation
+      visible: (multilevel_imputation)
+      columns:
+          - name: level
+            title: Level
+            type: text
+          - name: variable
+            title: Variable
+            type: text
+          - name: icc_observed
+            title: ICC (Observed)
+            type: number
+            format: zto
+          - name: icc_imputed
+            title: ICC (Imputed)
+            type: number
+            format: zto
+          - name: level_variance
+            title: Level Variance
+            type: number
+            format: zto
+          - name: quality_assessment
+            title: Quality
+            type: text
+      clearWith:
+          - cluster_var
+          - level1_vars
+          - level2_vars
+
+    - name: quality_assessment
+      title: Imputation Quality Assessment
+      type: Table
+      description: Comprehensive quality evaluation of imputations
+      visible: (imputation_quality)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: distributional_match
+            title: Distribution Match
+            type: text
+          - name: correlation_preservation
+            title: Correlation Preservation
+            type: number
+            format: zto
+          - name: variance_ratio
+            title: Variance Ratio
+            type: number
+            format: zto
+          - name: outlier_detection
+            title: Outlier Count
+            type: integer
+          - name: plausibility_score
+            title: Plausibility Score
+            type: number
+            format: zto
+          - name: overall_quality
+            title: Overall Quality
+            type: text
+      clearWith:
+          - imputation_vars
+
+    - name: cross_validation_results
+      title: Cross-Validation Results
+      type: Table
+      description: Cross-validation performance of imputation methods
+      visible: (cross_validation)
+      columns:
+          - name: method
+            title: Method
+            type: text
+          - name: variable
+            title: Variable
+            type: text
+          - name: fold
+            title: Fold
+            type: integer
+          - name: rmse
+            title: RMSE
+            type: number
+            format: zto
+          - name: mae
+            title: MAE
+            type: number
+            format: zto
+          - name: correlation
+            title: Correlation
+            type: number
+            format: zto
+          - name: rank
+            title: Rank
+            type: integer
+      clearWith:
+          - imputation_method
+          - categorical_method
+
+    - name: amputation_test_results
+      title: Amputation Test Results
+      type: Table
+      description: Performance assessment using artificial missingness
+      visible: (ampute_test)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: missingness_pct
+            title: Missingness %
+            type: number
+            format: pc
+          - name: recovery_rate
+            title: Recovery Rate
+            type: number
+            format: pc
+          - name: bias
+            title: Bias
+            type: number
+            format: zto
+          - name: coverage
+            title: Coverage
+            type: number
+            format: pc
+          - name: performance_grade
+            title: Grade
+            type: text
+      clearWith:
+          - imputation_method
+
+    - name: pooled_estimates
+      title: Pooled Analysis Results
+      type: Table
+      description: Results pooled across imputations using Rubin's rules
+      visible: (pool_results)
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+            format: zto
+          - name: se
+            title: SE
+            type: number
+            format: zto
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto
+          - name: df
+            title: df
+            type: number
+            format: zto
+          - name: fmi
+            title: FMI
+            type: number
+            format: zto
+          - name: lambda
+            title: Lambda
+            type: number
+            format: zto
+      clearWith:
+          - n_imputations
+
+    - name: convergence_plot
+      title: Convergence Diagnostic Plots
+      type: Image
+      width: 900
+      height: 600
+      description: MICE convergence trace plots and diagnostics
+      visible: (diagnostic_plots && convergence_check)
+      requiresData: true
+      clearWith:
+          - n_iterations
+          - imputation_vars
+
+    - name: distribution_plot
+      title: Observed vs Imputed Distributions
+      type: Image
+      width: 900
+      height: 600
+      description: Comparison of observed and imputed value distributions
+      visible: (diagnostic_plots)
+      requiresData: true
+      clearWith:
+          - imputation_vars
+          - imputation_method
+
+    - name: pattern_plot
+      title: Missing Data Pattern Plot
+      type: Image
+      width: 800
+      height: 600
+      description: Visual representation of missing data patterns
+      visible: (diagnostic_plots)
+      requiresData: true
+      clearWith:
+          - imputation_vars
+
+    - name: sensitivity_plot
+      title: Sensitivity Analysis Plot
+      type: Image
+      width: 800
+      height: 600
+      description: Visualization of sensitivity analysis results
+      visible: (diagnostic_plots && sensitivity_analysis)
+      requiresData: true
+      clearWith:
+          - sensitivity_methods
+          - mnar_methods
+
+    - name: quality_plot
+      title: Imputation Quality Plot
+      type: Image
+      width: 800
+      height: 600
+      description: Quality assessment visualization across variables
+      visible: (diagnostic_plots && imputation_quality)
+      requiresData: true
+      clearWith:
+          - imputation_vars
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation & Recommendations
+      type: Html
+      description: Clinical context and imputation recommendations
+      visible: (show_detailed_output)
+
+    - name: regulatory_report
+      title: Regulatory Compliance Report
+      type: Html
+      description: Comprehensive report for regulatory submissions
+      visible: (regulatory_report)
+
+    - name: methods_documentation
+      title: Methods Documentation
+      type: Html
+      description: Detailed documentation of imputation methods and assumptions
+      visible: (show_detailed_output)
+
+...

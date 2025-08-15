@@ -1,0 +1,268 @@
+name: frailtysurvival
+title: Frailty & Random Effects Survival Models
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '0.0.3'
+jas: '1.2'
+description:
+    main: |
+        Frailty and random effects survival models for clustered data analysis.
+        Includes gamma frailty, shared frailty, and correlated frailty models
+        for multi-center studies, family studies, and recurrent events.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Multi-center survival with shared frailty
+            frailtysurvival(
+                data = multicenter_data,
+                time_var = followup_time,
+                status_var = death_event,
+                cluster_var = center_id,
+                covariates = c("age", "stage", "treatment"),
+                frailty_type = "shared"
+            )
+
+options:
+    - name: time_var
+      title: Survival Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Time to event or censoring
+          R: |
+              Survival time variable
+
+    - name: status_var
+      title: Event Status Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description:
+          ui: Event indicator (0=censored, 1=event)
+          R: |
+              Event status indicator variable
+
+    - name: cluster_var
+      title: Cluster Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, id]
+      description:
+          ui: Clustering variable (e.g., center, family, patient)
+          R: |
+              Variable defining clusters for frailty modeling
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          ui: Predictive variables for survival
+          R: |
+              Covariates to include in the survival model
+
+    - name: strata_vars
+      title: Stratification Variables
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: null
+      description:
+          ui: Variables for stratified analysis
+          R: |
+              Variables for stratifying the baseline hazard
+
+    - name: frailty_type
+      title: Frailty Model Type
+      type: List
+      options:
+          - name: shared
+            title: Shared Frailty
+          - name: correlated
+            title: Correlated Frailty
+          - name: nested
+            title: Nested Frailty
+          - name: additive
+            title: Additive Frailty
+          - name: multiplicative
+            title: Multiplicative Frailty
+      default: shared
+      description:
+          ui: Type of frailty model specification
+          R: |
+              Frailty model type for cluster dependencies
+
+    - name: frailty_distribution
+      title: Frailty Distribution
+      type: List
+      options:
+          - name: gamma
+            title: Gamma Distribution
+          - name: lognormal
+            title: Log-Normal Distribution
+          - name: positive_stable
+            title: Positive Stable
+          - name: inverse_gaussian
+            title: Inverse Gaussian
+      default: gamma
+      description:
+          ui: Distribution for frailty terms
+          R: |
+              Probability distribution for frailty effects
+
+    - name: estimation_method
+      title: Estimation Method
+      type: List
+      options:
+          - name: penalized_likelihood
+            title: Penalized Likelihood
+          - name: em_algorithm
+            title: EM Algorithm
+          - name: laplace_approximation
+            title: Laplace Approximation
+          - name: mcmc
+            title: MCMC (Bayesian)
+      default: penalized_likelihood
+      description:
+          ui: Method for parameter estimation
+          R: |
+              Statistical estimation approach
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          ui: Confidence level for intervals
+          R: |
+              Confidence level for parameter estimates
+
+    - name: baseline_hazard
+      title: Baseline Hazard
+      type: List
+      options:
+          - name: cox
+            title: Cox Proportional Hazards
+          - name: weibull
+            title: Weibull
+          - name: exponential
+            title: Exponential
+          - name: gompertz
+            title: Gompertz
+          - name: lognormal
+            title: Log-Normal
+      default: cox
+      description:
+          ui: Baseline hazard specification
+          R: |
+              Baseline hazard function choice
+
+    - name: random_effects
+      title: Additional Random Effects
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor, id]
+      default: null
+      description:
+          ui: Additional random effects beyond frailty
+          R: |
+              Additional random effects variables
+
+    - name: test_frailty
+      title: Test for Frailty
+      type: Bool
+      default: true
+      description:
+          ui: Test for the presence of frailty effects
+          R: |
+              Whether to test for significant frailty
+
+    - name: variance_components
+      title: Variance Components Analysis
+      type: Bool
+      default: true
+      description:
+          ui: Estimate and report variance components
+          R: |
+              Whether to analyze variance components
+
+    - name: cluster_diagnostics
+      title: Cluster Diagnostics
+      type: Bool
+      default: true
+      description:
+          ui: Provide cluster-level diagnostic plots
+          R: |
+              Whether to generate cluster diagnostics
+
+    - name: prediction_intervals
+      title: Prediction Intervals
+      type: Bool
+      default: false
+      description:
+          ui: Calculate prediction intervals for new clusters
+          R: |
+              Whether to compute prediction intervals
+
+    - name: survival_curves
+      title: Cluster-Specific Survival Curves
+      type: Bool
+      default: true
+      description:
+          ui: Plot survival curves by cluster
+          R: |
+              Whether to plot cluster-specific curves
+
+    - name: residual_analysis
+      title: Residual Analysis
+      type: Bool
+      default: true
+      description:
+          ui: Perform residual analysis and diagnostics
+          R: |
+              Whether to include residual analysis
+
+    - name: model_comparison
+      title: Model Comparison
+      type: Bool
+      default: true
+      description:
+          ui: Compare frailty vs standard Cox model
+          R: |
+              Whether to compare with standard models
+
+    - name: mcmc_iterations
+      title: MCMC Iterations
+      type: Integer
+      default: 10000
+      min: 1000
+      max: 50000
+      description:
+          ui: Number of MCMC iterations (if MCMC selected)
+          R: |
+              MCMC sampling iterations
+
+    - name: burnin_samples
+      title: Burn-in Samples
+      type: Integer
+      default: 2000
+      min: 500
+      max: 20000
+      description:
+          ui: Number of burn-in samples for MCMC
+          R: |
+              MCMC burn-in period
+
+    - name: convergence_diagnostics
+      title: Convergence Diagnostics
+      type: Bool
+      default: true
+      description:
+          ui: MCMC convergence assessment (if applicable)
+          R: |
+              Whether to assess MCMC convergence

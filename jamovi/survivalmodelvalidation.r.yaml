@@ -1,0 +1,322 @@
+name: survivalmodelvalidation
+title: Enhanced Survival Model Validation
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      description: Analysis instructions and overview
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      description: Summary of the survival model being validated
+      visible: true
+
+    - name: performanceMetrics
+      title: Performance Metrics
+      type: Table
+      description: Comprehensive model performance metrics
+      visible: true
+      refs: [riskRegression, survival, timeROC]
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - validation_type
+        - performance_metrics
+      columns:
+        - name: metric
+          title: 'Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: calibrationMetrics
+      title: Calibration Assessment
+      type: Table
+      description: Model calibration metrics and tests
+      visible: (calibration_assessment)
+      refs: [rms, pec]
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - calibration_method
+      columns:
+        - name: method
+          title: 'Calibration Method'
+          type: text
+        - name: statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: 'Conclusion'
+          type: text
+
+    - name: validationResults
+      title: Validation Results
+      type: Table
+      description: Detailed validation results by method
+      visible: true
+      refs: [rms, boot]
+      clearWith:
+        - validation_type
+        - bootstrap_samples
+        - cv_folds
+      columns:
+        - name: validation_method
+          title: 'Validation Method'
+          type: text
+        - name: apparent_performance
+          title: 'Apparent Performance'
+          type: number
+          format: zto
+        - name: validated_performance
+          title: 'Validated Performance'  
+          type: number
+          format: zto
+        - name: optimism
+          title: 'Optimism'
+          type: number
+          format: zto
+        - name: corrected_performance
+          title: 'Bias-Corrected Performance'
+          type: number
+          format: zto
+
+    - name: discriminationAnalysis
+      title: Discrimination Analysis
+      type: Html
+      description: Model discrimination assessment
+      visible: true
+      refs: [survival, timeROC]
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - prediction_times
+
+    - name: calibrationAnalysis
+      title: Calibration Analysis
+      type: Html
+      description: Detailed calibration assessment
+      visible: (calibration_assessment)
+      refs: [rms, survival]
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - calibration_method
+
+    - name: subgroupAnalysis
+      title: Subgroup Validation
+      type: Table
+      description: Performance across subgroups
+      visible: (subgroup_validation)
+      refs: [survival]
+      clearWith:
+        - stratification_var
+        - time_var
+        - status_var
+      columns:
+        - name: subgroup
+          title: 'Subgroup'
+          type: text
+        - name: n_patients
+          title: 'N Patients'
+          type: integer
+        - name: n_events
+          title: 'N Events'
+          type: integer
+        - name: c_index
+          title: 'C-index'
+          type: number
+          format: zto
+        - name: c_index_ci
+          title: '95% CI'
+          type: text
+        - name: calibration_slope
+          title: 'Calibration Slope'
+          type: number
+          format: zto
+
+    - name: decisionCurveResults
+      title: Decision Curve Analysis
+      type: Table
+      description: Clinical decision-making utility assessment
+      visible: (decision_curve_analysis)
+      refs: [dcurves, rmda]
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - net_benefit_range
+      columns:
+        - name: threshold
+          title: 'Risk Threshold'
+          type: number
+          format: zto
+        - name: net_benefit
+          title: 'Net Benefit'
+          type: number
+          format: zto
+        - name: net_benefit_all
+          title: 'Net Benefit (Treat All)'
+          type: number
+          format: zto
+        - name: net_benefit_none
+          title: 'Net Benefit (Treat None)'
+          type: number
+          format: zto
+
+    - name: clinicalImpact
+      title: Clinical Impact Assessment
+      type: Html
+      description: Clinical relevance and impact metrics
+      visible: (clinical_impact_metrics)
+      refs: [rmda, dcurves]
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+
+    - name: discriminationPlot
+      title: Discrimination Assessment Plot
+      type: Image
+      description: Discrimination visualization
+      visible: (discrimination_plots)
+      refs: [ggplot2, survminer]
+      width: 600
+      height: 400
+      renderFun: .plotDiscrimination
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - prediction_times
+
+    - name: calibrationPlot
+      title: Calibration Plot
+      type: Image
+      description: Calibration assessment visualization
+      visible: (calibration_plots)
+      refs: [ggplot2, rms]
+      width: 600
+      height: 400
+      renderFun: .plotCalibration
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - calibration_method
+
+    - name: rocCurvePlot
+      title: Time-Dependent ROC Curves
+      type: Image
+      description: Time-dependent ROC curve visualization
+      visible: (roc_curves)
+      refs: [timeROC, ggplot2]
+      width: 600
+      height: 400
+      renderFun: .plotROCCurves
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - prediction_times
+
+    - name: predictionErrorPlot
+      title: Prediction Error Curves
+      type: Image
+      description: Prediction error assessment
+      visible: (prediction_error_plots)
+      refs: [pec, ggplot2]
+      width: 600
+      height: 400
+      renderFun: .plotPredictionError
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - prediction_times
+
+    - name: riskDistributionPlot
+      title: Risk Score Distribution
+      type: Image
+      description: Risk score distribution by outcome
+      visible: (risk_distribution_plots)
+      refs: [ggplot2, survival]
+      width: 600
+      height: 400
+      renderFun: .plotRiskDistribution
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+
+    - name: decisionCurvePlot
+      title: Decision Curve Analysis Plot
+      type: Image
+      description: Decision curve visualization
+      visible: (decision_curve_analysis)
+      refs: [dcurves, ggplot2]
+      width: 600
+      height: 400
+      renderFun: .plotDecisionCurve
+      clearWith:
+        - time_var
+        - status_var
+        - risk_score
+        - net_benefit_range
+
+    - name: validationReport
+      title: Comprehensive Validation Report
+      type: Html
+      description: Structured validation report
+      visible: true
+      refs: [knitr, rmarkdown]
+      clearWith:
+        - validation_type
+        - performance_metrics
+        - reporting_guidelines
+
+    - name: methodologicalNotes
+      title: Methodological Notes
+      type: Html
+      description: Detailed methodology and interpretation guidance
+      visible: true
+
+    - name: recommendations
+      title: Recommendations
+      type: Html
+      description: Clinical and methodological recommendations
+      visible: true
+
+    - name: diagnostics
+      title: Validation Diagnostics
+      type: Html
+      description: Diagnostic information and warnings
+      visible: true
+
+...

@@ -1,0 +1,413 @@
+name: clinicalnomograms
+title: Clinical Nomograms & Risk Calculators
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      description: Analysis instructions and overview
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      description: Summary of the fitted model for nomogram
+      visible: true
+
+    - name: variableSelection
+      title: Variable Selection Results
+      type: Table
+      description: Results of variable selection process
+      visible: true
+      refs: [leaps, glmnet]
+      clearWith:
+        - covariates
+        - model_selection
+      columns:
+        - name: variable
+          title: 'Variable'
+          type: text
+        - name: coefficient
+          title: 'Coefficient'
+          type: number
+          format: zto
+        - name: se
+          title: 'Standard Error'
+          type: number
+          format: zto
+        - name: z_value
+          title: 'Z-value'
+          type: number
+          format: zto
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: selected
+          title: 'Selected'
+          type: text
+
+    - name: modelPerformance
+      title: Model Performance
+      type: Table
+      description: Model performance metrics
+      visible: (performance_metrics)
+      refs: [rms, survival]
+      clearWith:
+        - time_var
+        - status_var
+        - covariates
+        - validation_method
+      columns:
+        - name: metric
+          title: 'Performance Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: nomogramEquation
+      title: Model Equation
+      type: Html
+      description: Mathematical equation underlying the nomogram
+      visible: (model_equation)
+      refs: [rms]
+      clearWith:
+        - covariates
+        - nomogram_type
+
+    - name: riskCalculatorTable
+      title: Risk Calculator Reference Table
+      type: Table
+      description: Reference table for risk calculation
+      visible: (risk_calculator)
+      refs: [rms]
+      clearWith:
+        - covariates
+        - prediction_times
+        - points_scale
+      columns:
+        - name: variable
+          title: 'Variable'
+          type: text
+        - name: level
+          title: 'Level/Value'
+          type: text
+        - name: points
+          title: 'Points'
+          type: number
+        - name: coefficient
+          title: 'Coefficient'
+          type: number
+          format: zto
+
+    - name: riskGroupAnalysis
+      title: Risk Group Analysis
+      type: Table
+      description: Risk stratification analysis
+      visible: (risk_groups)
+      refs: [survival]
+      clearWith:
+        - risk_thresholds
+        - time_var
+        - status_var
+      columns:
+        - name: risk_group
+          title: 'Risk Group'
+          type: text
+        - name: n_patients
+          title: 'N Patients'
+          type: integer
+        - name: n_events
+          title: 'N Events'
+          type: integer
+        - name: event_rate
+          title: 'Event Rate (%)'
+          type: number
+          format: zto
+        - name: median_survival
+          title: 'Median Survival'
+          type: number
+          format: zto
+        - name: survival_1yr
+          title: '1-Year Survival (%)'
+          type: number
+          format: zto
+        - name: survival_5yr
+          title: '5-Year Survival (%)'
+          type: number
+          format: zto
+
+    - name: calibrationResults
+      title: Calibration Assessment
+      type: Table
+      description: Model calibration analysis
+      visible: (calibration_assessment)
+      refs: [rms, survival]
+      clearWith:
+        - time_var
+        - status_var
+        - covariates
+        - validation_method
+      columns:
+        - name: time_point
+          title: 'Time Point'
+          type: number
+          format: zto
+        - name: slope
+          title: 'Calibration Slope'
+          type: number
+          format: zto
+        - name: intercept
+          title: 'Calibration Intercept'
+          type: number
+          format: zto
+        - name: chi_square
+          title: 'χ² Statistic'
+          type: number
+          format: zto
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+
+    - name: discriminationResults
+      title: Discrimination Assessment
+      type: Table
+      description: Model discrimination analysis
+      visible: (discrimination_assessment)
+      refs: [survival, timeROC]
+      clearWith:
+        - time_var
+        - status_var
+        - covariates
+        - prediction_times
+      columns:
+        - name: metric
+          title: 'Discrimination Metric'
+          type: text
+        - name: time_point
+          title: 'Time Point'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+
+    - name: decisionCurveResults
+      title: Decision Curve Analysis
+      type: Table
+      description: Clinical utility assessment
+      visible: (decision_curve_analysis)
+      refs: [dcurves, rmda]
+      clearWith:
+        - time_var
+        - status_var
+        - covariates
+      columns:
+        - name: threshold
+          title: 'Risk Threshold'
+          type: number
+          format: zto
+        - name: net_benefit
+          title: 'Net Benefit'
+          type: number
+          format: zto
+        - name: net_benefit_all
+          title: 'Net Benefit (Treat All)'
+          type: number
+          format: zto
+        - name: net_benefit_none
+          title: 'Net Benefit (Treat None)'
+          type: number
+          format: zto
+
+    - name: variableImportance
+      title: Variable Importance
+      type: Table
+      description: Relative importance of predictor variables
+      visible: (variable_importance)
+      refs: [rms]
+      clearWith:
+        - covariates
+        - nomogram_type
+      columns:
+        - name: variable
+          title: 'Variable'
+          type: text
+        - name: importance
+          title: 'Importance Score'
+          type: number
+          format: zto
+        - name: rank
+          title: 'Rank'
+          type: integer
+        - name: contribution
+          title: 'Contribution (%)'
+          type: number
+          format: zto
+
+    - name: clinicalScenarios
+      title: Clinical Scenarios
+      type: Html
+      description: Example clinical scenarios with risk calculations
+      visible: (clinical_scenarios)
+      refs: [rms]
+      clearWith:
+        - covariates
+        - prediction_times
+
+    - name: nomogramPlot
+      title: Clinical Nomogram
+      type: Image
+      description: Visual nomogram for risk assessment
+      visible: true
+      refs: [rms, regplot]
+      width: 800
+      height: 600
+      renderFun: .plotNomogram
+      clearWith:
+        - covariates
+        - nomogram_type
+        - points_scale
+        - nomogram_title
+
+    - name: calibrationPlot
+      title: Calibration Plot
+      type: Image
+      description: Calibration assessment visualization
+      visible: (calibration_assessment)
+      refs: [rms, ggplot2]
+      width: 600
+      height: 400
+      renderFun: .plotCalibration
+      clearWith:
+        - time_var
+        - status_var
+        - covariates
+        - validation_method
+
+    - name: discriminationPlot
+      title: Discrimination Plot
+      type: Image
+      description: ROC curves and discrimination assessment
+      visible: (discrimination_assessment)
+      refs: [timeROC, ggplot2]
+      width: 600
+      height: 400
+      renderFun: .plotDiscrimination
+      clearWith:
+        - time_var
+        - status_var
+        - covariates
+        - prediction_times
+
+    - name: decisionCurvePlot
+      title: Decision Curve Analysis Plot
+      type: Image
+      description: Clinical utility visualization
+      visible: (decision_curve_analysis)
+      refs: [dcurves, ggplot2]
+      width: 600
+      height: 400
+      renderFun: .plotDecisionCurve
+      clearWith:
+        - time_var
+        - status_var
+        - covariates
+
+    - name: riskGroupPlot
+      title: Risk Group Survival Curves
+      type: Image
+      description: Survival curves by risk groups
+      visible: (risk_groups)
+      refs: [survival, survminer]
+      width: 600
+      height: 400
+      renderFun: .plotRiskGroups
+      clearWith:
+        - time_var
+        - status_var
+        - risk_thresholds
+
+    - name: variableImportancePlot
+      title: Variable Importance Plot
+      type: Image
+      description: Variable importance visualization
+      visible: (variable_importance)
+      refs: [ggplot2]
+      width: 600
+      height: 400
+      renderFun: .plotVariableImportance
+      clearWith:
+        - covariates
+        - nomogram_type
+
+    - name: interactiveNomogram
+      title: Interactive Nomogram
+      type: Html
+      description: Interactive web-based nomogram calculator
+      visible: (interactive_nomogram)
+      refs: [DT, plotly, shiny]
+      clearWith:
+        - covariates
+        - nomogram_type
+        - prediction_times
+
+    - name: validationReport
+      title: Validation Report
+      type: Html
+      description: Comprehensive model validation report
+      visible: true
+      refs: [rms, knitr]
+      clearWith:
+        - validation_method
+        - bootstrap_samples
+        - cv_folds
+
+    - name: implementationGuide
+      title: Clinical Implementation Guide
+      type: Html
+      description: Guidance for clinical implementation
+      visible: (clinical_implementation)
+      clearWith:
+        - nomogram_type
+        - reporting_guidelines
+
+    - name: reportingChecklist
+      title: Reporting Guidelines Checklist
+      type: Html
+      description: Structured reporting checklist
+      visible: true
+      refs: [tripod, remark]
+      clearWith:
+        - reporting_guidelines
+
+    - name: diagnostics
+      title: Model Diagnostics
+      type: Html
+      description: Diagnostic information and warnings
+      visible: true
+
+...

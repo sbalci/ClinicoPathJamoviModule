@@ -558,6 +558,8 @@ children:
     children:
       - type: CheckBox
         name: showExplanations
+      - type: CheckBox
+        name: showSummaries
   - type: LayoutBox
     margin: large
     children:

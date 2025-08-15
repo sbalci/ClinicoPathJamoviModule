@@ -1,0 +1,360 @@
+---
+name: advancedimputation
+title: Advanced Multiple Imputation & Sensitivity Analysis
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Advanced MICE Imputation
+menuSubtitle: Advanced MICE with sensitivity analysis for clinical research
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced multiple imputation by chained equations (MICE) with comprehensive
+        sensitivity analysis for clinical research applications. Includes nested imputation
+        for multilevel data, missing not at random (MNAR) imputation methods, and
+        comprehensive sensitivity testing for missing data assumptions. Essential for
+        regulatory-compliant clinical research where missing data handling must be
+        thoroughly documented and validated.
+    R:
+        dontrun: false
+        usage: |
+            data('clinical_trial_data')
+            
+            advancedimputation(
+                data = clinical_trial_data,
+                imputation_vars = c("primary_endpoint", "biomarker", "age"),
+                auxiliary_vars = c("baseline_score", "treatment_group"),
+                sensitivity_analysis = TRUE,
+                mnar_methods = TRUE
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Variable Selection
+    - name: imputation_vars
+      title: Variables to Impute
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Variables with missing values to be imputed
+
+    - name: auxiliary_vars
+      title: Auxiliary Variables
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Complete or mostly complete variables to assist imputation
+
+    - name: cluster_var
+      title: Cluster Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Clustering variable for nested/multilevel imputation (e.g., study site, patient ID)
+
+    - name: id_var
+      title: Subject ID (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Subject identifier for tracking observations across imputations
+
+    # Imputation Configuration
+    - name: n_imputations
+      title: Number of Imputations
+      type: Integer
+      min: 3
+      max: 100
+      default: 10
+      description:
+          R: Number of imputed datasets to create (recommended 5-20 for analysis, 100+ for final results)
+
+    - name: n_iterations
+      title: MICE Iterations
+      type: Integer
+      min: 1
+      max: 100
+      default: 10
+      description:
+          R: Number of MICE iterations per imputation (increase for convergence)
+
+    - name: convergence_check
+      title: Convergence Monitoring
+      type: Bool
+      default: true
+      description:
+          R: Monitor and assess MICE convergence with diagnostic plots and statistics
+
+    # Advanced Imputation Methods
+    - name: imputation_method
+      title: Primary Imputation Method
+      type: List
+      options:
+          - name: "pmm"
+            title: "Predictive Mean Matching (PMM)"
+          - name: "norm"
+            title: "Bayesian Linear Regression"
+          - name: "norm.boot"
+            title: "Linear Regression with Bootstrap"
+          - name: "norm.nob"
+            title: "Linear Regression (No Bootstrap)"
+          - name: "mean"
+            title: "Unconditional Mean Imputation"
+          - name: "2l.norm"
+            title: "Two-Level Normal Imputation"
+          - name: "2l.pmm"
+            title: "Two-Level PMM"
+          - name: "quadratic"
+            title: "Quadratic Regression"
+          - name: "rf"
+            title: "Random Forest"
+      default: "pmm"
+      description:
+          R: Primary method for continuous variables
+
+    - name: categorical_method
+      title: Categorical Imputation Method
+      type: List
+      options:
+          - name: "logreg"
+            title: "Logistic Regression"
+          - name: "polyreg"
+            title: "Polytomous Regression"
+          - name: "polr"
+            title: "Proportional Odds Model"
+          - name: "lda"
+            title: "Linear Discriminant Analysis"
+          - name: "2l.bin"
+            title: "Two-Level Binary"
+          - name: "rf"
+            title: "Random Forest"
+      default: "logreg"
+      description:
+          R: Method for categorical variables
+
+    # MNAR (Missing Not At Random) Methods
+    - name: mnar_methods
+      title: MNAR Imputation Methods
+      type: Bool
+      default: false
+      description:
+          R: Include Missing Not At Random imputation methods
+
+    - name: mnar_type
+      title: MNAR Approach
+      type: List
+      options:
+          - name: "delta_adjustment"
+            title: "Delta Adjustment Method"
+          - name: "pattern_mixture"
+            title: "Pattern Mixture Models"
+          - name: "selection_model"
+            title: "Selection Models"
+          - name: "reference_based"
+            title: "Reference-Based Imputation"
+      default: "delta_adjustment"
+      description:
+          R: Type of MNAR imputation approach
+
+    - name: delta_values
+      title: Delta Values (MNAR)
+      type: String
+      default: "0"
+      description:
+          R: Comma-separated delta values for MNAR sensitivity analysis (e.g., "0, -0.5, -1")
+
+    # Sensitivity Analysis
+    - name: sensitivity_analysis
+      title: Comprehensive Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform extensive sensitivity analysis for missing data assumptions
+
+    - name: sensitivity_methods
+      title: Sensitivity Analysis Methods
+      type: List
+      options:
+          - name: "multiple_methods"
+            title: "Multiple Imputation Methods"
+          - name: "parameter_variation"
+            title: "Parameter Variation"
+          - name: "assumption_testing"
+            title: "Assumption Testing"
+          - name: "all"
+            title: "All Methods"
+      default: "all"
+      description:
+          R: Type of sensitivity analysis to perform
+
+    # Multilevel/Nested Imputation
+    - name: multilevel_imputation
+      title: Multilevel Imputation
+      type: Bool
+      default: false
+      description:
+          R: Use multilevel imputation for nested/clustered data
+
+    - name: level1_vars
+      title: Level 1 Variables
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Individual-level variables for multilevel imputation
+
+    - name: level2_vars
+      title: Level 2 Variables
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Cluster-level variables for multilevel imputation
+
+    # Quality Control
+    - name: min_bucket_size
+      title: Minimum Donor Pool Size
+      type: Integer
+      min: 1
+      max: 20
+      default: 5
+      description:
+          R: Minimum number of donors for PMM (prevents poor matching)
+
+    - name: exclude_vars
+      title: Variables to Exclude
+      type: Variables
+      description:
+          R: Variables to exclude from imputation model (but keep in dataset)
+
+    - name: passive_imputation
+      title: Passive Imputation Variables
+      type: String
+      description:
+          R: R expressions for passive imputation (e.g., "bmi ~ I(weight/height^2)")
+
+    # Advanced Options
+    - name: ridge_penalty
+      title: Ridge Regression Penalty
+      type: Number
+      min: 0
+      max: 1
+      default: 0.00001
+      description:
+          R: Ridge penalty for numerical stability in regression imputation
+
+    - name: remove_collinear
+      title: Remove Collinear Variables
+      type: Bool
+      default: true
+      description:
+          R: Automatically remove highly collinear variables from imputation model
+
+    - name: collinearity_threshold
+      title: Collinearity Threshold
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: Correlation threshold for removing collinear variables
+
+    # Diagnostics and Validation
+    - name: diagnostic_plots
+      title: Diagnostic Plots
+      type: Bool
+      default: true
+      description:
+          R: Generate convergence and diagnostic plots
+
+    - name: imputation_quality
+      title: Imputation Quality Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess quality of imputations vs observed data
+
+    - name: cross_validation
+      title: Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: Perform cross-validation of imputation methods
+
+    - name: ampute_test
+      title: Amputation Test
+      type: Bool
+      default: false
+      description:
+          R: Test imputation performance using artificial missingness
+
+    # Output Options
+    - name: save_imputations
+      title: Save Imputed Datasets
+      type: Bool
+      default: false
+      description:
+          R: Save completed imputed datasets for further analysis
+
+    - name: pool_results
+      title: Pool Analysis Results
+      type: Bool
+      default: true
+      description:
+          R: Pool results across imputations using Rubin's rules
+
+    - name: show_detailed_output
+      title: Detailed Output
+      type: Bool
+      default: true
+      description:
+          R: Show detailed imputation summaries and diagnostics
+
+    - name: regulatory_report
+      title: Regulatory Compliance Report
+      type: Bool
+      default: false
+      description:
+          R: Generate regulatory-compliant missing data analysis report
+
+    # Random Seed
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      description:
+          R: Set random seed for reproducible results
+
+...

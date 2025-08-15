@@ -41,7 +41,8 @@ decisionpanel(
   prevalence = 0,
   crossValidate = FALSE,
   nFolds = 5,
-  seed = 12345
+  seed = 12345,
+  showProgress = TRUE
 )
 }
 \arguments{
@@ -131,6 +132,9 @@ strategies.}
 
 \item{seed}{Random seed for reproducibility in bootstrap and
 cross-validation.}
+
+\item{showProgress}{Display progress indicators for long-running operations
+like bootstrap and cross-validation.}
 }
 \value{
 A results object containing:

@@ -1,0 +1,309 @@
+---
+name: clinicaltrialdesign
+title: Clinical Trial Design & Power Analysis
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Clinical Trial Design
+menuSubtitle: Comprehensive power analysis for clinical trials
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive power analysis and sample size calculation for clinical trial design.
+        Covers the most common clinical trial types with appropriate statistical tests,
+        effect size calculations, and regulatory considerations for clinical research.
+        
+        Supports randomized controlled trials (RCTs), equivalence trials, non-inferiority
+        trials, superiority trials, and observational studies with proper power calculations.
+    R:
+        dontrun: false
+        usage: |
+            data('your_data')
+            
+            clinicaltrialdesign(
+                trial_type = "superiority",
+                outcome_type = "continuous", 
+                test_type = "two_sample_ttest",
+                effect_size = 0.5,
+                alpha = 0.05,
+                power = 0.80
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame (optional for power calculations)
+
+    - name: trial_type
+      title: Trial Design Type
+      type: List
+      options:
+          - name: "superiority"
+            title: "Superiority Trial"
+          - name: "non_inferiority"
+            title: "Non-Inferiority Trial"
+          - name: "equivalence"
+            title: "Equivalence Trial"
+          - name: "pilot"
+            title: "Pilot/Feasibility Study"
+      default: "superiority"
+      description:
+          R: Type of clinical trial design for appropriate power calculations
+
+    - name: outcome_type
+      title: Primary Outcome Type
+      type: List
+      options:
+          - name: "continuous"
+            title: "Continuous (e.g., blood pressure, biomarker levels)"
+          - name: "binary"
+            title: "Binary (e.g., response rate, mortality)"
+          - name: "categorical"
+            title: "Categorical (e.g., tumor grade, severity)"
+          - name: "time_to_event"
+            title: "Time-to-Event (e.g., survival, disease-free survival)"
+      default: "continuous"
+      description:
+          R: Type of primary outcome variable determining appropriate statistical test
+
+    - name: test_type
+      title: Statistical Test
+      type: List
+      options:
+          - name: "two_sample_ttest"
+            title: "Two-Sample t-test (Treatment vs Control)"
+          - name: "one_sample_ttest"
+            title: "One-Sample t-test (Single Group vs Reference)"
+          - name: "paired_ttest"
+            title: "Paired t-test (Before vs After)"
+          - name: "anova_oneway"
+            title: "One-Way ANOVA (Multiple Groups)"
+          - name: "two_proportions"
+            title: "Two Proportions Test (Binary Outcomes)"
+          - name: "one_proportion"
+            title: "One Proportion Test (Single Group Rate)"
+          - name: "chi_square"
+            title: "Chi-Square Test (Categorical Associations)"
+          - name: "correlation"
+            title: "Correlation Analysis"
+          - name: "mcnemar"
+            title: "McNemar Test (Paired Binary)"
+      default: "two_sample_ttest"
+      description:
+          R: Statistical test appropriate for the outcome type and study design
+
+    - name: calculation_type
+      title: Calculate
+      type: List
+      options:
+          - name: "power"
+            title: "Statistical Power"
+          - name: "sample_size"
+            title: "Required Sample Size"
+          - name: "effect_size"
+            title: "Detectable Effect Size"
+      default: "sample_size"
+      description:
+          R: What to calculate - power, sample size, or detectable effect size
+
+    # Basic Parameters
+    - name: alpha
+      title: Type I Error Rate (α)
+      type: Number
+      min: 0.001
+      max: 0.5
+      default: 0.05
+      description:
+          R: Significance level (typically 0.05 for superiority, 0.025 for non-inferiority)
+
+    - name: power
+      title: Statistical Power (1-β)
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.80
+      description:
+          R: Desired statistical power (typically 0.80 or 0.90)
+
+    - name: sample_size
+      title: Total Sample Size
+      type: Integer
+      min: 10
+      max: 100000
+      default: 100
+      description:
+          R: Total sample size for power calculation
+
+    # Effect Size Parameters
+    - name: effect_size
+      title: Effect Size (Cohen's d)
+      type: Number
+      min: 0.1
+      max: 5.0
+      default: 0.5
+      description:
+          R: Standardized effect size (Cohen's d for continuous outcomes)
+
+    - name: mean_difference
+      title: Mean Difference
+      type: Number
+      default: 1.0
+      description:
+          R: Expected difference in means between groups
+
+    - name: common_sd
+      title: Common Standard Deviation
+      type: Number
+      min: 0.1
+      default: 2.0
+      description:
+          R: Pooled standard deviation for continuous outcomes
+
+    - name: proportion1
+      title: Proportion Group 1
+      type: Number
+      min: 0.001
+      max: 0.999
+      default: 0.30
+      description:
+          R: Expected proportion in control/reference group
+
+    - name: proportion2
+      title: Proportion Group 2  
+      type: Number
+      min: 0.001
+      max: 0.999
+      default: 0.50
+      description:
+          R: Expected proportion in treatment/experimental group
+
+    # Study Design Parameters
+    - name: allocation_ratio
+      title: Allocation Ratio (Treatment:Control)
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1.0
+      description:
+          R: Ratio of treatment to control group sizes (1 = equal allocation)
+
+    - name: two_sided
+      title: Two-Sided Test
+      type: Bool
+      default: true
+      description:
+          R: Use two-sided statistical test (recommended for most trials)
+
+    - name: continuity_correction
+      title: Continuity Correction
+      type: Bool
+      default: true
+      description:
+          R: Apply continuity correction for proportion tests
+
+    # Non-inferiority/Equivalence Parameters
+    - name: margin
+      title: Non-Inferiority/Equivalence Margin
+      type: Number
+      min: 0
+      default: 0.1
+      description:
+          R: Non-inferiority or equivalence margin (absolute difference)
+
+    - name: margin_type
+      title: Margin Type
+      type: List
+      options:
+          - name: "absolute"
+            title: "Absolute Difference"
+          - name: "relative"
+            title: "Relative Difference (%)"
+      default: "absolute"
+      description:
+          R: Type of margin for non-inferiority/equivalence testing
+
+    # Advanced Options
+    - name: dropout_rate
+      title: Expected Dropout Rate (%)
+      type: Number
+      min: 0
+      max: 50
+      default: 10
+      description:
+          R: Expected dropout/loss to follow-up rate for sample size inflation
+
+    - name: interim_analyses
+      title: Number of Interim Analyses
+      type: Integer
+      min: 0
+      max: 5
+      default: 0
+      description:
+          R: Number of planned interim analyses (affects alpha spending)
+
+    - name: multiple_comparisons
+      title: Multiple Comparisons Adjustment
+      type: List
+      options:
+          - name: "none"
+            title: "No Adjustment"
+          - name: "bonferroni"
+            title: "Bonferroni Correction"
+          - name: "holm"
+            title: "Holm-Bonferroni"
+          - name: "sidak"
+            title: "Šidák Correction"
+      default: "none"
+      description:
+          R: Adjustment for multiple testing (when applicable)
+
+    # Analysis Options
+    - name: show_assumptions
+      title: Show Statistical Assumptions
+      type: Bool
+      default: true
+      description:
+          R: Display assumptions for the selected statistical test
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: Include clinical interpretation and regulatory considerations
+
+    - name: show_sensitivity
+      title: Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform sensitivity analysis across parameter ranges
+
+    - name: show_plots
+      title: Generate Power Curves
+      type: Bool
+      default: true
+      description:
+          R: Generate power/sample size relationship plots
+
+    - name: regulatory_context
+      title: Regulatory Context
+      type: List
+      options:
+          - name: "fda"
+            title: "FDA Guidelines (US)"
+          - name: "ema"
+            title: "EMA Guidelines (EU)"
+          - name: "ich"
+            title: "ICH Guidelines (International)"
+          - name: "other"
+            title: "Other/General"
+      default: "ich"
+      description:
+          R: Regulatory context for power analysis considerations
+
+...

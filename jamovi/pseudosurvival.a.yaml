@@ -1,0 +1,255 @@
+name: pseudosurvival
+title: Pseudo-Observations Survival Methods
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '0.0.3'
+jas: '1.2'
+description:
+    main: |
+        Pseudo-observations methods for direct modeling of survival probabilities 
+        and restricted mean survival time (RMST). Enables regression analysis of 
+        survival probability at specific time points and RMST with standard 
+        statistical methods.
+    R:
+        dontrun: false
+        usage: |
+            # Example: RMST regression with covariates
+            pseudosurvival(
+                data = cancer_data,
+                time_var = survival_time,
+                status_var = death_status,
+                covariates = c("age", "stage", "treatment"),
+                analysis_type = "rmst_regression",
+                tau_rmst = 60
+            )
+
+options:
+    - name: time_var
+      title: Survival Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Time to event or censoring
+          R: |
+              Survival time variable
+
+    - name: status_var
+      title: Event Status Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description:
+          ui: Event indicator (0=censored, 1=event)
+          R: |
+              Event status indicator variable
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          ui: Predictive variables for regression analysis
+          R: |
+              Covariates to include in the pseudo-regression model
+
+    - name: stratification_vars
+      title: Stratification Variables
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: null
+      description:
+          ui: Variables for stratified analysis
+          R: |
+              Variables for stratifying the analysis
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+          - name: survival_probability
+            title: Survival Probability Regression
+          - name: rmst_regression
+            title: RMST Regression
+          - name: cumulative_incidence
+            title: Cumulative Incidence Regression
+          - name: life_years_lost
+            title: Life Years Lost
+          - name: quantile_regression
+            title: Survival Quantile Regression
+      default: survival_probability
+      description:
+          ui: Type of pseudo-observation analysis
+          R: |
+              Analysis approach using pseudo-observations
+
+    - name: time_points
+      title: Time Points for Analysis
+      type: String
+      default: "12,24,36,60"
+      description:
+          ui: Comma-separated time points for survival probability (months)
+          R: |
+              Time points for pseudo-observation calculation
+
+    - name: tau_rmst
+      title: Tau for RMST
+      type: Number
+      default: 60
+      min: 1
+      max: 1000
+      description:
+          ui: Restriction time for RMST calculation
+          R: |
+              Maximum follow-up time for RMST analysis
+
+    - name: quantile_probs
+      title: Survival Quantiles
+      type: String
+      default: "0.25,0.5,0.75"
+      description:
+          ui: Comma-separated survival quantiles for regression
+          R: |
+              Survival quantiles for pseudo-observation analysis
+
+    - name: jackknife_method
+      title: Jackknife Method
+      type: List
+      options:
+          - name: standard
+            title: Standard Jackknife
+          - name: robust
+            title: Robust Jackknife
+          - name: cluster_jackknife
+            title: Cluster Jackknife
+      default: standard
+      description:
+          ui: Jackknife approach for pseudo-observation calculation
+          R: |
+              Method for computing pseudo-observations
+
+    - name: regression_method
+      title: Regression Method
+      type: List
+      options:
+          - name: ols
+            title: Ordinary Least Squares
+          - name: gee
+            title: Generalized Estimating Equations
+          - name: robust
+            title: Robust Regression
+          - name: weighted
+            title: Weighted Regression
+      default: ols
+      description:
+          ui: Regression method for pseudo-observations
+          R: |
+              Statistical method for pseudo-observation regression
+
+    - name: cluster_var
+      title: Cluster Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, id]
+      default: null
+      description:
+          ui: Clustering variable for correlated data
+          R: |
+              Variable defining clusters for GEE or cluster jackknife
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          ui: Confidence level for intervals
+          R: |
+              Confidence level for parameter estimates
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 500
+      min: 100
+      max: 2000
+      description:
+          ui: Number of bootstrap samples for inference
+          R: |
+              Bootstrap resamples for standard error estimation
+
+    - name: robust_se
+      title: Robust Standard Errors
+      type: Bool
+      default: false
+      description:
+          ui: Use robust/sandwich standard errors
+          R: |
+              Whether to compute robust standard errors
+
+    - name: model_diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          ui: Generate regression diagnostic plots and statistics
+          R: |
+              Whether to include model diagnostics
+
+    - name: prediction_intervals
+      title: Prediction Intervals
+      type: Bool
+      default: false
+      description:
+          ui: Calculate prediction intervals for new observations
+          R: |
+              Whether to compute prediction intervals
+
+    - name: survival_curves
+      title: Survival Probability Curves
+      type: Bool
+      default: true
+      description:
+          ui: Plot estimated survival probability curves
+          R: |
+              Whether to plot survival probability curves
+
+    - name: rmst_comparison
+      title: RMST Group Comparison
+      type: Bool
+      default: true
+      description:
+          ui: Compare RMST between groups
+          R: |
+              Whether to perform RMST group comparisons
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          ui: Perform sensitivity analysis for tau selection
+          R: |
+              Whether to perform sensitivity analysis
+
+    - name: competing_risks
+      title: Competing Risks Analysis
+      type: Bool
+      default: false
+      description:
+          ui: Account for competing risks in analysis
+          R: |
+              Whether to include competing risks modeling
+
+    - name: weighted_analysis
+      title: Weighted Analysis
+      type: Bool
+      default: false
+      description:
+          ui: Use inverse probability weighting
+          R: |
+              Whether to apply inverse probability weighting

@@ -1,0 +1,127 @@
+title: Clinical Trial Design & Power Analysis
+name: clinicaltrialdesign
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Trial Design Configuration
+        children:
+          - type: ComboBox
+            name: trial_type
+          - type: ComboBox
+            name: outcome_type
+          - type: ComboBox
+            name: test_type
+          - type: ComboBox
+            name: calculation_type
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Statistical Parameters
+        children:
+          - type: TextBox
+            name: alpha
+            format: number
+            suffix: " (α)"
+          - type: TextBox
+            name: power
+            format: number
+            suffix: " (1-β)"
+          - type: TextBox
+            name: sample_size
+            format: number
+            suffix: " subjects"
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Effect Size Parameters
+        children:
+          - type: TextBox
+            name: effect_size
+            format: number
+            suffix: " (Cohen's d)"
+          - type: TextBox
+            name: mean_difference
+            format: number
+          - type: TextBox
+            name: common_sd
+            format: number
+          - type: TextBox
+            name: proportion1
+            format: number
+            suffix: " (0-1)"
+          - type: TextBox
+            name: proportion2
+            format: number
+            suffix: " (0-1)"
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Study Design Parameters
+        children:
+          - type: TextBox
+            name: allocation_ratio
+            format: number
+            suffix: " (T:C ratio)"
+          - type: CheckBox
+            name: two_sided
+          - type: CheckBox
+            name: continuity_correction
+          - type: TextBox
+            name: dropout_rate
+            format: number
+            suffix: " %"
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Non-Inferiority/Equivalence
+        children:
+          - type: TextBox
+            name: margin
+            format: number
+          - type: ComboBox
+            name: margin_type
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Advanced Options
+        children:
+          - type: TextBox
+            name: interim_analyses
+            format: number
+            suffix: " analyses"
+          - type: ComboBox
+            name: multiple_comparisons
+          - type: ComboBox
+            name: regulatory_context
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: CheckBox
+            name: show_assumptions
+          - type: CheckBox
+            name: show_interpretation
+          - type: CheckBox
+            name: show_sensitivity
+          - type: CheckBox
+            name: show_plots
+
+...

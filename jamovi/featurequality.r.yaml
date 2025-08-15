@@ -1,0 +1,319 @@
+---
+name: featurequality
+title: Feature Quality Assessment
+jrs: '1.1'
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+
+    - name: progress
+      title: Analysis Progress
+      type: Html
+      visible: true
+
+    - name: quality_summary
+      title: Quality Assessment Summary
+      type: Table
+      columns:
+          - name: feature
+            title: Feature
+            type: text
+          - name: quality_score
+            title: Quality Score
+            type: number
+            format: zto
+          - name: missing_pct
+            title: Missing %
+            type: number
+            format: pc
+          - name: outliers_pct
+            title: Outliers %
+            type: number
+            format: pc
+          - name: normality_p
+            title: Normality p-value
+            type: number
+            format: zto,pvalue
+          - name: skewness
+            title: Skewness
+            type: number
+            format: zto
+          - name: kurtosis
+            title: Kurtosis
+            type: number
+            format: zto
+          - name: variance
+            title: Variance
+            type: number
+            format: zto
+          - name: recommendation
+            title: Recommendation
+            type: text
+
+    - name: missing_data_analysis
+      title: Missing Data Analysis
+      type: Table
+      visible: (missing_data_analysis)
+      columns:
+          - name: feature
+            title: Feature
+            type: text
+          - name: missing_count
+            title: Missing Count
+            type: integer
+          - name: missing_percent
+            title: Missing %
+            type: number
+            format: pc
+          - name: missing_pattern
+            title: Missing Pattern
+            type: text
+          - name: impact_assessment
+            title: Impact Assessment
+            type: text
+
+    - name: distribution_analysis
+      title: Distribution Analysis
+      type: Table
+      visible: (distribution_analysis)
+      columns:
+          - name: feature
+            title: Feature
+            type: text
+          - name: mean
+            title: Mean
+            type: number
+            format: zto
+          - name: median
+            title: Median
+            type: number
+            format: zto
+          - name: sd
+            title: SD
+            type: number
+            format: zto
+          - name: min
+            title: Min
+            type: number
+            format: zto
+          - name: max
+            title: Max
+            type: number
+            format: zto
+          - name: q25
+            title: Q25
+            type: number
+            format: zto
+          - name: q75
+            title: Q75
+            type: number
+            format: zto
+          - name: distribution_type
+            title: Distribution Type
+            type: text
+
+    - name: outlier_analysis
+      title: Outlier Analysis
+      type: Table
+      visible: (outlier_detection)
+      columns:
+          - name: feature
+            title: Feature
+            type: text
+          - name: method
+            title: Detection Method
+            type: text
+          - name: outlier_count
+            title: Outlier Count
+            type: integer
+          - name: outlier_percent
+            title: Outlier %
+            type: number
+            format: pc
+          - name: lower_bound
+            title: Lower Bound
+            type: number
+            format: zto
+          - name: upper_bound
+            title: Upper Bound
+            type: number
+            format: zto
+          - name: severity
+            title: Severity
+            type: text
+
+    - name: correlation_analysis
+      title: Feature Correlation Analysis
+      type: Table
+      visible: (correlation_analysis)
+      columns:
+          - name: feature1
+            title: Feature 1
+            type: text
+          - name: feature2
+            title: Feature 2
+            type: text
+          - name: correlation
+            title: Correlation
+            type: number
+            format: zto
+          - name: p_value
+            title: P-value
+            type: number
+            format: zto,pvalue
+          - name: significance
+            title: Significance
+            type: text
+          - name: redundancy_risk
+            title: Redundancy Risk
+            type: text
+
+    - name: variance_analysis
+      title: Variance Analysis
+      type: Table
+      visible: (variance_analysis)
+      columns:
+          - name: feature
+            title: Feature
+            type: text
+          - name: variance
+            title: Variance
+            type: number
+            format: zto
+          - name: coefficient_variation
+            title: CV
+            type: number
+            format: zto
+          - name: variance_category
+            title: Variance Category
+            type: text
+          - name: information_content
+            title: Information Content
+            type: text
+
+    - name: normality_analysis
+      title: Normality Testing
+      type: Table
+      visible: (normality_testing)
+      columns:
+          - name: feature
+            title: Feature
+            type: text
+          - name: test_method
+            title: Test Method
+            type: text
+          - name: statistic
+            title: Test Statistic
+            type: number
+            format: zto
+          - name: p_value
+            title: P-value
+            type: number
+            format: zto,pvalue
+          - name: normality_conclusion
+            title: Normality Conclusion
+            type: text
+          - name: transformation_suggestion
+            title: Transformation Suggestion
+            type: text
+
+    - name: feature_importance
+      title: Feature Importance Analysis
+      type: Table
+      visible: (feature_importance)
+      columns:
+          - name: feature
+            title: Feature
+            type: text
+          - name: importance_score
+            title: Importance Score
+            type: number
+            format: zto
+          - name: importance_rank
+            title: Rank
+            type: integer
+          - name: relative_importance
+            title: Relative Importance %
+            type: number
+            format: pc
+          - name: clinical_relevance
+            title: Clinical Relevance
+            type: text
+
+    - name: transformation_recommendations
+      title: Transformation Recommendations
+      type: Table
+      visible: (data_transformation)
+      columns:
+          - name: feature
+            title: Feature
+            type: text
+          - name: current_issue
+            title: Current Issue
+            type: text
+          - name: recommended_transformation
+            title: Recommended Transformation
+            type: text
+          - name: expected_improvement
+            title: Expected Improvement
+            type: text
+          - name: implementation_notes
+            title: Implementation Notes
+            type: text
+
+    - name: overall_recommendations
+      title: Overall Quality Recommendations
+      type: Html
+      visible: true
+
+    - name: clinical_interpretation
+      title: Clinical Context Interpretation
+      type: Html
+      visible: (clinical_context)
+
+    - name: distribution_plot
+      title: Feature Distributions
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .distributionPlot
+      visible: (plot_distributions)
+      requiresData: true
+
+    - name: correlation_plot
+      title: Feature Correlation Heatmap
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .correlationPlot
+      visible: (plot_correlations)
+      requiresData: true
+
+    - name: outlier_plot
+      title: Outlier Detection Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .outlierPlot
+      visible: (plot_outliers)
+      requiresData: true
+
+    - name: missing_plot
+      title: Missing Data Pattern Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .missingPlot
+      visible: (plot_missing)
+      requiresData: true
+
+    - name: quality_dashboard
+      title: Quality Assessment Dashboard
+      type: Image
+      width: 1000
+      height: 800
+      renderFun: .qualityDashboard
+      visible: (detailed_plots)
+      requiresData: true
