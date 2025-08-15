@@ -1,0 +1,206 @@
+title: Treatment Effect Meta-Analysis
+name: treatmentmeta
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Study Identifier
+        children:
+          - type: VariablesListBox
+            name: study_id
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: emptyspace
+          - type: VariablesListBox
+            name: year
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: emptyspace
+
+      - type: TargetLayoutBox
+        label: Continuous Outcomes
+        children:
+          - type: VariablesListBox
+            name: mean_treatment
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: sd_treatment
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: n_treatment
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: mean_control
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: sd_control
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: n_control
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Binary Outcomes
+        children:
+          - type: VariablesListBox
+            name: events_treatment
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: events_control
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Pre-calculated Effects
+        children:
+          - type: VariablesListBox
+            name: effect_size
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: standard_error
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: ci_lower
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: ci_upper
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Survival Outcomes
+        children:
+          - type: VariablesListBox
+            name: hazard_ratio
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: log_hr_se
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Correlation
+        children:
+          - type: VariablesListBox
+            name: correlation
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: sample_size
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Moderators/Subgroups
+        children:
+          - type: VariablesListBox
+            name: subgroup_var
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: moderator_vars
+            isTarget: true
+          - type: VariablesListBox
+            name: quality_score
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Analysis Configuration
+        children:
+          - type: ComboBox
+            name: outcome_type
+          - type: ComboBox
+            name: effect_measure
+          - type: ComboBox
+            name: model_type
+          - type: TextBox
+            name: confidence_level
+            format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Heterogeneity & Subgroups
+        children:
+          - type: CheckBox
+            name: heterogeneity_test
+          - type: CheckBox
+            name: prediction_interval
+          - type: CheckBox
+            name: subgroup_test
+          - type: CheckBox
+            name: sensitivity_analysis
+          - type: CheckBox
+            name: influence_diagnostics
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Publication Bias
+        children:
+          - type: CheckBox
+            name: publication_bias
+          - type: CheckBox
+            name: funnel_plot
+          - type: CheckBox
+            name: eggers_test
+          - type: CheckBox
+            name: trim_fill
+          - type: CheckBox
+            name: pcurve
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Quality & Advanced Options
+        children:
+          - type: CheckBox
+            name: weight_by_quality
+          - type: CheckBox
+            name: small_study_correction
+          - type: CheckBox
+            name: bayesian_analysis
+          - type: CheckBox
+            name: cumulative_meta
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: CheckBox
+            name: forest_plot
+          - type: CheckBox
+            name: baujat_plot
+          - type: CheckBox
+            name: radial_plot
+          - type: CheckBox
+            name: show_weights
+          - type: CheckBox
+            name: show_interpretation
+
+...

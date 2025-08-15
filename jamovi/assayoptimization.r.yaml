@@ -1,0 +1,128 @@
+name: assayoptimization
+title: Assay Optimization & Experimental Design
+jrs: '1.1'
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+      
+    - name: design_summary
+      title: Experimental Design Summary
+      type: Html
+      visible: true
+      
+    - name: power_analysis
+      title: Power Analysis Results
+      type: Html
+      visible: (power_analysis)
+      
+    - name: optimization_results
+      title: Optimization Results
+      type: Html
+      visible: true
+      
+    - name: factor_effects
+      title: Factor Effects Analysis
+      type: Html
+      visible: true
+      
+    - name: response_surface_summary
+      title: Response Surface Model Summary
+      type: Html
+      visible: (response_surface)
+      
+    - name: quality_control_summary
+      title: Quality Control Analysis
+      type: Html
+      visible: (quality_control)
+      
+    - name: validation_metrics
+      title: Method Validation Results
+      type: Html
+      visible: (method_validation)
+      
+    - name: design_plot
+      title: Experimental Design Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_design
+      visible: true
+      clearWith:
+          - factors
+          - design_type
+          - blocking_vars
+          
+    - name: effects_plot
+      title: Factor Effects Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_effects
+      visible: true
+      clearWith:
+          - response_var
+          - factors
+          - design_type
+          
+    - name: response_surface_plot
+      title: Response Surface Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_response_surface
+      visible: (response_surface && contour_plots)
+      clearWith:
+          - response_var
+          - factors
+          - optimization_goal
+          
+    - name: optimization_plot
+      title: Optimization Path
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_optimization
+      visible: (optimization_plots)
+      clearWith:
+          - response_var
+          - factors
+          - optimization_goal
+          
+    - name: control_chart
+      title: Quality Control Charts
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_control_chart
+      visible: (quality_control)
+      clearWith:
+          - response_var
+          - control_charts
+          - blocking_vars
+          
+    - name: diagnostic_plots
+      title: Model Diagnostic Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_diagnostics
+      visible: true
+      clearWith:
+          - response_var
+          - factors
+          - design_type
+          
+    - name: power_plot
+      title: Power Analysis Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_power
+      visible: (power_analysis)
+      clearWith:
+          - alpha_level
+          - power_level
+          - effect_size
+          - replicates

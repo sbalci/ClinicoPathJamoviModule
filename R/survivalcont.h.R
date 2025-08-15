@@ -50,7 +50,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             stratified_cox = FALSE,
             strata_variable = NULL,
             loglog = FALSE,
-            showExplanations = FALSE, ...) {
+            showExplanations = FALSE,
+            showSummaries = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -292,6 +293,10 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "showExplanations",
                 showExplanations,
                 default=FALSE)
+            private$..showSummaries <- jmvcore::OptionBool$new(
+                "showSummaries",
+                showSummaries,
+                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -342,6 +347,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..strata_variable)
             self$.addOption(private$..loglog)
             self$.addOption(private$..showExplanations)
+            self$.addOption(private$..showSummaries)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -392,7 +398,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         stratified_cox = function() private$..stratified_cox$value,
         strata_variable = function() private$..strata_variable$value,
         loglog = function() private$..loglog$value,
-        showExplanations = function() private$..showExplanations$value),
+        showExplanations = function() private$..showExplanations$value,
+        showSummaries = function() private$..showSummaries$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -442,7 +449,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..stratified_cox = NA,
         ..strata_variable = NA,
         ..loglog = NA,
-        ..showExplanations = NA)
+        ..showExplanations = NA,
+        ..showSummaries = NA)
 )
 
 survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -484,7 +492,8 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         multipleCutoffsExplanation = function() private$.items[["multipleCutoffsExplanation"]],
         personTimeExplanation = function() private$.items[["personTimeExplanation"]],
         rmstExplanation = function() private$.items[["rmstExplanation"]],
-        residualDiagnosticsExplanation = function() private$.items[["residualDiagnosticsExplanation"]]),
+        residualDiagnosticsExplanation = function() private$.items[["residualDiagnosticsExplanation"]],
+        survivalPlotsExplanation = function() private$.items[["survivalPlotsExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -508,6 +517,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="coxSummary",
                 title="`Cox Regression Summary and Table - ${contexpl}`",
+                visible="(showSummaries)",
                 clearWith=list(
                     "sc",
                     "endplot",
@@ -639,7 +649,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="personTimeSummary",
                 title="Person-Time Summary",
-                visible="(person_time)",
+                visible="(person_time && showSummaries)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -704,7 +714,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="rmstSummary",
                 title="RMST Interpretation",
-                visible="(rmst_analysis)",
+                visible="(rmst_analysis && showSummaries)",
                 clearWith=list(
                     "rmst_analysis",
                     "rmst_tau",
@@ -832,7 +842,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="medianSummary",
                 title="`Median Survival Summary and Table - ${contexpl}`",
-                visible="(findcut)",
+                visible="(findcut && showSummaries)",
                 clearWith=list(
                     "sc",
                     "endplot",
@@ -908,7 +918,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="survTableSummary",
                 title="`1, 3, 5-yr Survival Summary and Table  - ${contexpl}`",
-                visible="(findcut)",
+                visible="(findcut && showSummaries)",
                 clearWith=list(
                     "sc",
                     "endplot",
@@ -1446,6 +1456,18 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 clearWith=list(
                     "residual_diagnostics",
                     "contexpl",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survivalPlotsExplanation",
+                title="Understanding Survival Curves and Plots",
+                visible="((sc || ce || ch || kmunicate) && showExplanations)",
+                clearWith=list(
+                    "sc",
+                    "ce",
+                    "ch",
+                    "kmunicate",
+                    "contexpl",
                     "outcome")))}))
 
 survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1587,9 +1609,12 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param loglog Enable log-log plot for assessing proportional hazards
 #'   assumption. Parallel lines  in the log-log plot suggest that proportional
 #'   hazards assumption holds.
-#' @param showExplanations Display educational explanations for each analysis
-#'   type to help interpret  survival analysis results, cut-off point analysis,
-#'   Cox regression, and multiple  cutoffs analysis.
+#' @param showExplanations Display detailed explanations for each analysis
+#'   component to help interpret the statistical methods and results.
+#' @param showSummaries Display natural language summaries alongside tables
+#'   and plots. These summaries provide plain-language interpretations of the
+#'   statistical results. Turn off to reduce visual clutter when summaries are
+#'   not needed.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1628,6 +1653,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1683,7 +1709,8 @@ survivalcont <- function(
     stratified_cox = FALSE,
     strata_variable,
     loglog = FALSE,
-    showExplanations = FALSE) {
+    showExplanations = FALSE,
+    showSummaries = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survivalcont requires jmvcore to be installed (restart may be required)")
@@ -1750,7 +1777,8 @@ survivalcont <- function(
         stratified_cox = stratified_cox,
         strata_variable = strata_variable,
         loglog = loglog,
-        showExplanations = showExplanations)
+        showExplanations = showExplanations,
+        showSummaries = showSummaries)
 
     analysis <- survivalcontClass$new(
         options = options,

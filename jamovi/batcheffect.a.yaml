@@ -1,0 +1,179 @@
+---
+name: batcheffect
+title: Batch Effect Control & Quality Assessment
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Batch Effect Control
+menuSubtitle: Advanced quality control for tabular data
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced batch effect detection and correction for tabular data analysis.
+        Essential for digital pathology and multi-institutional studies where
+        technical variation can confound biological signals ("garbage in, garbage out").
+        
+        Implements PCA visualization, ComBat correction, feature quality assessment,
+        and comprehensive quality control metrics for high-dimensional data.
+    R:
+        dontrun: false
+        usage: |
+            data('your_data')
+            
+            batcheffect(data = your_data,
+                       features = feature_variables,
+                       batch_var = batch_id,
+                       biological_var = treatment_group,
+                       perform_pca = TRUE,
+                       perform_combat = TRUE)
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: features
+      title: Feature Variables
+      type: Variables
+      suggested: 
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Numeric feature variables to assess for batch effects (e.g., biomarkers, image features)
+
+    - name: batch_var
+      title: Batch Variable
+      type: Variable
+      suggested: 
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Categorical variable indicating batch/technical groups (e.g., institution, date, instrument)
+
+    - name: biological_var
+      title: Biological Variable (Optional)
+      type: Variable
+      suggested: 
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Optional biological grouping variable to preserve during batch correction
+
+    - name: perform_pca
+      title: PCA Batch Detection
+      type: Bool
+      default: true
+      description:
+          R: Perform Principal Component Analysis to visualize batch effects
+
+    - name: perform_combat
+      title: ComBat Batch Correction
+      type: Bool
+      default: true
+      description:
+          R: Apply ComBat correction to remove batch effects while preserving biological variation
+
+    - name: feature_quality
+      title: Feature Quality Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess individual feature quality including distribution analysis and outlier detection
+
+    - name: redundancy_analysis
+      title: Redundancy Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze feature redundancy and correlation structure
+
+    - name: variance_threshold
+      title: Low Variance Filter Threshold
+      type: Number
+      min: 0
+      max: 1
+      default: 0.01
+      description:
+          R: Threshold for removing low-variance features (0 = no filtering)
+
+    - name: correlation_threshold
+      title: High Correlation Threshold
+      type: Number
+      min: 0.5
+      max: 1
+      default: 0.95
+      description:
+          R: Threshold for identifying highly correlated redundant features
+
+    - name: outlier_method
+      title: Outlier Detection Method
+      type: List
+      options:
+          - name: "iqr"
+            title: "IQR Method"
+          - name: "zscore"
+            title: "Z-Score Method"
+          - name: "robust"
+            title: "Robust (MAD-based)"
+          - name: "isolation_forest"
+            title: "Isolation Forest"
+      default: "robust"
+      description:
+          R: Method for outlier detection in feature quality assessment
+
+    - name: outlier_threshold
+      title: Outlier Threshold
+      type: Number
+      min: 1
+      max: 5
+      default: 3
+      description:
+          R: Threshold for outlier detection (standard deviations or IQR multiplier)
+
+    - name: pca_components
+      title: Number of PCA Components
+      type: Integer
+      min: 2
+      max: 10
+      default: 3
+      description:
+          R: Number of principal components to compute and visualize
+
+    - name: missing_threshold
+      title: Missing Data Threshold (%)
+      type: Number
+      min: 0
+      max: 100
+      default: 20
+      description:
+          R: Maximum percentage of missing values allowed per feature
+
+    - name: show_plots
+      title: Generate Plots
+      type: Bool
+      default: true
+      description:
+          R: Generate diagnostic plots including PCA plots and quality assessments
+
+    - name: combat_parametric
+      title: ComBat Parametric
+      type: Bool
+      default: true
+      description:
+          R: Use parametric ComBat (faster) vs non-parametric (more robust)
+
+    - name: save_corrected
+      title: Save Corrected Data
+      type: Bool
+      default: false
+      description:
+          R: Add ComBat-corrected features to the dataset
+
+...

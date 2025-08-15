@@ -1,0 +1,432 @@
+---
+name: screeningevaluation
+title: Screening Program Evaluation & Performance Analysis
+jrs: '1.1'
+
+items:
+    - name: screening_overview
+      title: Screening Program Overview
+      type: Table
+      columns:
+          - name: characteristic
+            title: Characteristic
+            type: text
+          - name: value
+            title: Value
+            type: text
+
+    - name: diagnostic_accuracy_summary
+      title: Diagnostic Accuracy Summary
+      type: Table
+      visible: (diagnostic_accuracy)
+      columns:
+          - name: measure
+            title: Diagnostic Measure
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto
+          - name: ci_lower
+            title: 95% CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: 95% CI Upper
+            type: number
+            format: zto
+          - name: interpretation
+            title: Clinical Interpretation
+            type: text
+
+    - name: program_coverage
+      title: Program Coverage & Participation
+      type: Table
+      visible: (program_coverage)
+      columns:
+          - name: coverage_type
+            title: Coverage Type
+            type: text
+          - name: numerator
+            title: Numerator
+            type: integer
+          - name: denominator
+            title: Denominator
+            type: integer
+          - name: percentage
+            title: Percentage (%)
+            type: number
+            format: pc
+          - name: target_percentage
+            title: Target (%)
+            type: number
+            format: pc
+          - name: performance_status
+            title: Performance Status
+            type: text
+
+    - name: detection_rates
+      title: Disease Detection Rates
+      type: Table
+      visible: (detection_rates)
+      columns:
+          - name: subgroup
+            title: Subgroup
+            type: text
+          - name: screened_n
+            title: Screened (N)
+            type: integer
+          - name: cases_detected
+            title: Cases Detected
+            type: integer
+          - name: detection_rate
+            title: Detection Rate (per 1000)
+            type: number
+            format: zto
+          - name: dr_ci_lower
+            title: DR 95% CI Lower
+            type: number
+            format: zto
+          - name: dr_ci_upper
+            title: DR 95% CI Upper
+            type: number
+            format: zto
+          - name: expected_rate
+            title: Expected Rate
+            type: number
+            format: zto
+
+    - name: age_stratified_results
+      title: Age-Stratified Analysis Results
+      type: Table
+      visible: (age_stratified_analysis)
+      columns:
+          - name: age_group
+            title: Age Group
+            type: text
+          - name: sensitivity
+            title: Sensitivity (%)
+            type: number
+            format: pc
+          - name: specificity
+            title: Specificity (%)
+            type: number
+            format: pc
+          - name: ppv
+            title: PPV (%)
+            type: number
+            format: pc
+          - name: npv
+            title: NPV (%)
+            type: number
+            format: pc
+          - name: detection_rate
+            title: Detection Rate
+            type: number
+            format: zto
+          - name: participation_rate
+            title: Participation (%)
+            type: number
+            format: pc
+
+    - name: quality_indicators
+      title: Screening Quality Indicators
+      type: Table
+      visible: (quality_indicators)
+      columns:
+          - name: indicator
+            title: Quality Indicator
+            type: text
+          - name: observed_value
+            title: Observed Value
+            type: text
+          - name: target_value
+            title: Target Value
+            type: text
+          - name: performance_level
+            title: Performance Level
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+
+    - name: recall_analysis
+      title: Recall Rate Analysis
+      type: Table
+      visible: (recall_rates)
+      columns:
+          - name: recall_category
+            title: Recall Category
+            type: text
+          - name: recalled_n
+            title: Recalled (N)
+            type: integer
+          - name: total_screened
+            title: Total Screened
+            type: integer
+          - name: recall_rate
+            title: Recall Rate (%)
+            type: number
+            format: pc
+          - name: acceptable_range
+            title: Acceptable Range (%)
+            type: text
+          - name: cancer_detection_rate_recalled
+            title: CDR in Recalled (%)
+            type: number
+            format: pc
+
+    - name: interval_cancer_results
+      title: Interval Cancer Analysis
+      type: Table
+      visible: (interval_cancer_analysis)
+      columns:
+          - name: time_period
+            title: Time Period (months)
+            type: text
+          - name: interval_cancers
+            title: Interval Cancers
+            type: integer
+          - name: screen_detected_cancers
+            title: Screen-Detected Cancers
+            type: integer
+          - name: interval_cancer_rate
+            title: Interval Cancer Rate (%)
+            type: number
+            format: pc
+          - name: sensitivity_estimate
+            title: Sensitivity Estimate (%)
+            type: number
+            format: pc
+
+    - name: cost_effectiveness_summary
+      title: Cost-Effectiveness Analysis
+      type: Table
+      visible: (cost_effectiveness)
+      columns:
+          - name: cost_component
+            title: Cost Component
+            type: text
+          - name: cost_per_person
+            title: Cost per Person Screened
+            type: number
+            format: zto
+          - name: cost_per_case_detected
+            title: Cost per Case Detected
+            type: number
+            format: zto
+          - name: incremental_cost
+            title: Incremental Cost
+            type: number
+            format: zto
+          - name: cost_effectiveness_ratio
+            title: Cost-Effectiveness Ratio
+            type: number
+            format: zto
+
+    - name: geographic_analysis
+      title: Geographic Performance Analysis
+      type: Table
+      visible: (geographic_analysis && location_var)
+      columns:
+          - name: location
+            title: Location/Site
+            type: text
+          - name: participation_rate
+            title: Participation (%)
+            type: number
+            format: pc
+          - name: detection_rate
+            title: Detection Rate
+            type: number
+            format: zto
+          - name: recall_rate
+            title: Recall Rate (%)
+            type: number
+            format: pc
+          - name: ppv
+            title: PPV (%)
+            type: number
+            format: pc
+          - name: performance_score
+            title: Overall Performance Score
+            type: number
+            format: zto
+
+    - name: time_trends
+      title: Time Trend Analysis
+      type: Table
+      visible: (screening_date)
+      columns:
+          - name: time_period
+            title: Time Period
+            type: text
+          - name: participation_rate
+            title: Participation (%)
+            type: number
+            format: pc
+          - name: detection_rate
+            title: Detection Rate
+            type: number
+            format: zto
+          - name: recall_rate
+            title: Recall Rate (%)
+            type: number
+            format: pc
+          - name: trend_direction
+            title: Trend
+            type: text
+
+    - name: overdiagnosis_assessment
+      title: Overdiagnosis Assessment
+      type: Table
+      visible: (overdiagnosis_analysis)
+      columns:
+          - name: assessment_method
+            title: Assessment Method
+            type: text
+          - name: estimated_overdiagnosis
+            title: Estimated Overdiagnosis (%)
+            type: number
+            format: pc
+          - name: confidence_interval
+            title: 95% CI
+            type: text
+          - name: interpretation
+            title: Clinical Interpretation
+            type: text
+
+    - name: survival_comparison
+      title: Survival Comparison
+      type: Table
+      visible: (survival_analysis)
+      columns:
+          - name: detection_mode
+            title: Detection Mode
+            type: text
+          - name: cases_n
+            title: Cases (N)
+            type: integer
+          - name: median_survival
+            title: Median Survival (months)
+            type: number
+            format: zto
+          - name: survival_5yr
+            title: 5-Year Survival (%)
+            type: number
+            format: pc
+          - name: hazard_ratio
+            title: Hazard Ratio
+            type: number
+            format: zto
+          - name: hr_ci_lower
+            title: HR 95% CI Lower
+            type: number
+            format: zto
+          - name: hr_ci_upper
+            title: HR 95% CI Upper
+            type: number
+            format: zto
+
+    - name: adherence_analysis
+      title: Screening Adherence Analysis
+      type: Table
+      visible: (screening_adherence)
+      columns:
+          - name: adherence_measure
+            title: Adherence Measure
+            type: text
+          - name: adherent_n
+            title: Adherent (N)
+            type: integer
+          - name: total_eligible
+            title: Total Eligible
+            type: integer
+          - name: adherence_rate
+            title: Adherence Rate (%)
+            type: number
+            format: pc
+          - name: factors_associated
+            title: Associated Factors
+            type: text
+
+    - name: diagnostic_performance_plot
+      title: Diagnostic Performance Visualization
+      type: Image
+      visible: (performance_plots)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: coverage_participation_plot
+      title: Coverage and Participation Analysis
+      type: Image
+      visible: (coverage_plots)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: detection_rate_plot
+      title: Detection Rates by Subgroup
+      type: Image
+      visible: (detection_rates)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: age_stratified_plot
+      title: Age-Stratified Performance
+      type: Image
+      visible: (age_stratified_analysis)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: time_trend_plot
+      title: Performance Trends Over Time
+      type: Image
+      visible: (trend_analysis_plots && screening_date)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: roc_curve_plot
+      title: ROC Curve Analysis
+      type: Image
+      visible: (roc_analysis)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: cost_effectiveness_plot
+      title: Cost-Effectiveness Analysis Plot
+      type: Image
+      visible: (cost_effectiveness)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: comprehensive_report
+      title: Comprehensive Screening Evaluation Report
+      type: Html
+      visible: (comprehensive_report)
+      clearWith:
+          - screening_result
+          - disease_status
+          - screening_type
+
+    - name: quality_assurance_report
+      title: Quality Assurance & Improvement Report
+      type: Html
+      visible: (quality_assurance_report)
+      clearWith:
+          - screening_result
+          - disease_status
+
+    - name: public_health_report
+      title: Public Health Indicators Report
+      type: Html
+      visible: (public_health_indicators)
+      clearWith:
+          - screening_result
+          - disease_status

@@ -1,0 +1,283 @@
+name: assayoptimization
+title: Assay Optimization & Experimental Design
+menuGroup: ClinicoPath
+menuSubgroup: Experimental Design
+version: '0.0.3'
+jas: '1.2'
+description:
+    main: |
+        Laboratory assay optimization and experimental design for clinical research.
+        Includes power calculations, sample size determination, design optimization,
+        and quality control for laboratory assays.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Optimize PCR assay design
+            assayoptimization(
+                data = pcr_data,
+                response_var = concentration,
+                factors = c("primer_conc", "temperature", "cycles"),
+                optimization_goal = "maximize_efficiency",
+                design_type = "factorial"
+            )
+
+options:
+    - name: response_var
+      title: Response Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Primary assay response (e.g., concentration, signal intensity)
+          R: |
+              Primary assay response variable for optimization
+
+    - name: factors
+      title: Experimental Factors
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      description:
+          ui: Experimental factors to optimize (e.g., temperature, concentration)
+          R: |
+              List of experimental factors for optimization
+
+    - name: blocking_vars
+      title: Blocking Variables
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: null
+      description:
+          ui: Variables for blocking (e.g., batch, plate, operator)
+          R: |
+              Variables for experimental blocking
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description:
+          ui: Additional variables to adjust for
+          R: |
+              Covariates to include in the analysis
+
+    - name: design_type
+      title: Experimental Design Type
+      type: List
+      options:
+          - name: factorial
+            title: Full Factorial
+          - name: fractional
+            title: Fractional Factorial
+          - name: central_composite
+            title: Central Composite Design
+          - name: box_behnken
+            title: Box-Behnken Design
+          - name: optimal
+            title: D-Optimal Design
+          - name: plackett_burman
+            title: Plackett-Burman Design
+      default: factorial
+      description:
+          ui: Type of experimental design for optimization
+          R: |
+              Experimental design approach for factor optimization
+
+    - name: optimization_goal
+      title: Optimization Goal
+      type: List
+      options:
+          - name: maximize_response
+            title: Maximize Response
+          - name: minimize_response
+            title: Minimize Response
+          - name: target_value
+            title: Target Specific Value
+          - name: minimize_variance
+            title: Minimize Variance
+          - name: maximize_efficiency
+            title: Maximize Efficiency
+          - name: pareto_optimal
+            title: Multi-objective Optimization
+      default: maximize_response
+      description:
+          ui: Optimization objective for the assay
+          R: |
+              Goal for assay optimization
+
+    - name: target_value
+      title: Target Response Value
+      type: Number
+      default: 1
+      description:
+          ui: Target value when using target optimization
+          R: |
+              Target response value for optimization
+
+    - name: power_analysis
+      title: Power Analysis
+      type: Bool
+      default: true
+      description:
+          ui: Perform power and sample size calculations
+          R: |
+              Whether to perform power analysis
+
+    - name: alpha_level
+      title: Significance Level
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.1
+      description:
+          ui: Type I error rate for statistical tests
+          R: |
+              Significance level for hypothesis testing
+
+    - name: power_level
+      title: Desired Power
+      type: Number
+      default: 0.8
+      min: 0.5
+      max: 0.99
+      description:
+          ui: Desired statistical power for the experiment
+          R: |
+              Target power for the experimental design
+
+    - name: effect_size
+      title: Expected Effect Size
+      type: Number
+      default: 0.5
+      min: 0.1
+      max: 5
+      description:
+          ui: Expected standardized effect size
+          R: |
+              Expected effect size for power calculations
+
+    - name: replicates
+      title: Number of Replicates
+      type: Integer
+      default: 3
+      min: 1
+      max: 20
+      description:
+          ui: Number of experimental replicates
+          R: |
+              Number of replicates per experimental condition
+
+    - name: randomization
+      title: Randomization Method
+      type: List
+      options:
+          - name: complete
+            title: Complete Randomization
+          - name: block
+            title: Block Randomization
+          - name: systematic
+            title: Systematic Randomization
+          - name: stratified
+            title: Stratified Randomization
+      default: complete
+      description:
+          ui: Method for randomizing experimental units
+          R: |
+              Randomization strategy for the experiment
+
+    - name: quality_control
+      title: Quality Control Analysis
+      type: Bool
+      default: true
+      description:
+          ui: Include quality control charts and analysis
+          R: |
+              Whether to include QC analysis
+
+    - name: control_charts
+      title: Control Chart Types
+      type: List
+      options:
+          - name: xbar_r
+            title: X-bar and R Charts
+          - name: xbar_s
+            title: X-bar and S Charts
+          - name: individual_mr
+            title: Individual and Moving Range
+          - name: cusum
+            title: CUSUM Charts
+          - name: ewma
+            title: EWMA Charts
+      default: xbar_r
+      description:
+          ui: Type of statistical control charts
+          R: |
+              Control chart methodology for QC
+
+    - name: robust_methods
+      title: Robust Statistical Methods
+      type: Bool
+      default: false
+      description:
+          ui: Use robust statistical methods resistant to outliers
+          R: |
+              Whether to use robust statistical approaches
+
+    - name: response_surface
+      title: Response Surface Analysis
+      type: Bool
+      default: true
+      description:
+          ui: Fit response surface models for optimization
+          R: |
+              Whether to perform response surface methodology
+
+    - name: contour_plots
+      title: Generate Contour Plots
+      type: Bool
+      default: true
+      description:
+          ui: Create contour plots for factor interactions
+          R: |
+              Whether to generate contour plots
+
+    - name: optimization_plots
+      title: Optimization Visualization
+      type: Bool
+      default: true
+      description:
+          ui: Create optimization and diagnostic plots
+          R: |
+              Whether to generate optimization plots
+
+    - name: export_design
+      title: Export Design Matrix
+      type: Bool
+      default: false
+      description:
+          ui: Export the experimental design matrix
+          R: |
+              Whether to export the design matrix
+
+    - name: method_validation
+      title: Method Validation
+      type: Bool
+      default: false
+      description:
+          ui: Include method validation metrics
+          R: |
+              Whether to include validation analysis
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          ui: Confidence level for intervals
+          R: |
+              Confidence level for statistical intervals

@@ -227,3 +227,5 @@ children:
     children:
       - type: CheckBox
         name: showExplanations
+      - type: CheckBox
+        name: showSummaries

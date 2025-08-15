@@ -344,6 +344,8 @@ children:
                 label: Show Analysis Explanations
               - type: CheckBox
                 name: use_parametric
+              - type: CheckBox
+                name: showSummaries
   - type: LayoutBox
     margin: large
     children:

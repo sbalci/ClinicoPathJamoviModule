@@ -4720,16 +4720,92 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         
         # Multivariable Cox Regression Explanation
         private$.setExplanationContent("multivariableCoxExplanation", '
-        <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
-            <h4 style="margin-top: 0; color: #2c3e50;">Understanding Multivariable Cox Regression</h4>
-            <p><strong>Multivariable Analysis:</strong> Simultaneously evaluates multiple risk factors for their independent effects on survival.</p>
-            <ul>
-                <li><strong>Adjusted Hazard Ratios:</strong> Risk estimates after controlling for other variables in the model</li>
-                <li><strong>Independent Effects:</strong> Shows the effect of each variable while holding others constant</li>
-                <li><strong>Model Building:</strong> Allows identification of the most important prognostic factors</li>
-                <li><strong>Confounding Control:</strong> Accounts for relationships between predictor variables</li>
-            </ul>
-            <p><em>Clinical interpretation:</em> Provides a comprehensive view of which factors independently influence patient survival.</p>
+        <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+            <h3 style="color: #2c5282; margin-top: 0;">🔬 Understanding Multivariable Cox Regression</h3>
+            
+            <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <h4 style="color: #2d3748; margin-top: 0;">What is Multivariable Survival Analysis?</h4>
+                <p style="margin: 8px 0;">Multivariable Cox regression analyzes <strong>multiple risk factors simultaneously</strong> to identify which factors independently affect survival when all others are held constant.</p>
+                
+                <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>🎯 Key Advantage:</strong> Separates the <strong>independent effect</strong> of each variable from the effects of other variables
+                </div>
+            </div>
+            
+            <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <h4 style="color: #d68910; margin-top: 0;">📊 Adjusted vs Unadjusted Hazard Ratios</h4>
+                <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                    <tr style="background-color: #fff3cd;">
+                        <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Type</th>
+                        <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">What It Shows</th>
+                        <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Use</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Unadjusted HR</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ffc107;">Raw association with survival</td>
+                        <td style="padding: 8px; border: 1px solid #ffc107;">Initial screening of factors</td>
+                    </tr>
+                    <tr style="background-color: #fffbf0;">
+                        <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Adjusted HR</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ffc107;">Independent effect after controlling for other variables</td>
+                        <td style="padding: 8px; border: 1px solid #ffc107;">True prognostic value</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <h4 style="color: #2e7d32; margin-top: 0;">💡 Clinical Examples</h4>
+                
+                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>Example: Cancer Survival Model</strong>
+                    <p style="margin: 8px 0;"><strong>Variables:</strong> Age, Stage, Grade, Treatment</p>
+                    <table style="width: 100%; margin: 5px 0;">
+                        <tr><td><strong>Age:</strong></td><td>Adjusted HR = 1.02 (p=0.01)</td></tr>
+                        <tr><td><strong>Stage III vs I:</strong></td><td>Adjusted HR = 2.5 (p<0.001)</td></tr>
+                        <tr><td><strong>High grade:</strong></td><td>Adjusted HR = 1.8 (p=0.003)</td></tr>
+                        <tr><td><strong>Treatment B:</strong></td><td>Adjusted HR = 0.7 (p=0.02)</td></tr>
+                    </table>
+                    <p style="margin: 8px 0;"><strong>Interpretation:</strong> Stage is the strongest independent predictor, even after accounting for age, grade, and treatment.</p>
+                </div>
+                
+                <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>🔍 Confounding Example:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li><strong>Unadjusted:</strong> Age HR = 1.05 (appears strongly associated)</li>
+                        <li><strong>Adjusted for stage:</strong> Age HR = 1.01 (much weaker effect)</li>
+                        <li><strong>Reason:</strong> Older patients tend to have more advanced disease</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="background-color: #e3f2fd; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <h4 style="color: #1976d2; margin-top: 0;">🎯 Model Building Strategy</h4>
+                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>1. Variable Selection:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li>Include clinically important variables</li>
+                        <li>Consider statistical significance (p<0.05 or p<0.1)</li>
+                        <li>Check for multicollinearity</li>
+                    </ul>
+                    
+                    <strong>2. Model Assessment:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li>Concordance index (C-index): >0.7 indicates good discrimination</li>
+                        <li>Proportional hazards assumption testing</li>
+                        <li>Model calibration assessment</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
+                <strong>💡 Clinical Applications:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li><strong>Prognostic models:</strong> Identify independent risk factors</li>
+                    <li><strong>Treatment decisions:</strong> Assess benefit after controlling for confounders</li>
+                    <li><strong>Risk stratification:</strong> Combine multiple factors into risk scores</li>
+                    <li><strong>Research:</strong> Control for baseline differences between groups</li>
+                </ul>
+            </div>
         </div>
         ')
         
@@ -4805,6 +4881,112 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 <li><strong>Robust Estimates:</strong> Provides more accurate hazard ratios when baseline risks differ</li>
             </ul>
             <p><em>When to use:</em> When proportional hazards assumption is violated due to different baseline hazards between groups.</p>
+        </div>
+        ')
+        
+        # Survival Plots Explanation
+        private$.setExplanationContent("survivalPlotsExplanation", '
+        <div class="explanation-box" style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 10px 0;">
+            <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Adjusted Survival Curves and Hazard Ratio Plots</h3>
+            
+            <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <h4 style="color: #2e7d32; margin-top: 0;">🎯 Adjusted Survival Curves</h4>
+                <p style="margin: 8px 0;">Adjusted survival curves show survival probabilities after <strong>controlling for confounding variables</strong>, providing a fair comparison between groups.</p>
+                
+                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>Key Features:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li><strong>Covariate-adjusted:</strong> Controls for differences in patient characteristics</li>
+                        <li><strong>Population-averaged:</strong> Shows survival for typical patients with average risk factors</li>
+                        <li><strong>Isolates group effect:</strong> Separates the true effect of the grouping variable</li>
+                        <li><strong>Clinical relevance:</strong> Provides realistic survival estimates for clinical decision-making</li>
+                    </ul>
+                </div>
+                
+                <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>📈 Interpretation Guide:</strong>
+                    <table style="width: 100%; border-collapse: collapse; margin: 5px 0;">
+                        <tr style="background-color: #bbdefb;">
+                            <th style="padding: 8px; text-align: left; border: 1px solid #2196f3;">Curve Pattern</th>
+                            <th style="padding: 8px; text-align: left; border: 1px solid #2196f3;">Clinical Meaning</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #2196f3;">Steep early decline</td>
+                            <td style="padding: 8px; border: 1px solid #2196f3;">High early mortality risk</td>
+                        </tr>
+                        <tr style="background-color: #f3f8ff;">
+                            <td style="padding: 8px; border: 1px solid #2196f3;">Plateau phase</td>
+                            <td style="padding: 8px; border: 1px solid #2196f3;">Stable survival period with low event rate</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #2196f3;">Wide confidence bands</td>
+                            <td style="padding: 8px; border: 1px solid #2196f3;">Uncertainty due to small sample size or high censoring</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div style="background-color: #fff3e0; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <h4 style="color: #d68910; margin-top: 0;">🎯 Hazard Ratio (Forest) Plots</h4>
+                <p style="margin: 8px 0;">Forest plots visualize <strong>hazard ratios and confidence intervals</strong> for multiple variables simultaneously, enabling quick assessment of relative risk factors.</p>
+                
+                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>Reading Forest Plots:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li><strong>Vertical line at HR=1:</strong> Line of no effect (reference)</li>
+                        <li><strong>Points to the right (HR>1):</strong> Increased hazard (worse survival)</li>
+                        <li><strong>Points to the left (HR<1):</strong> Decreased hazard (better survival)</li>
+                        <li><strong>Horizontal lines:</strong> 95% confidence intervals for each HR</li>
+                        <li><strong>Crossing HR=1:</strong> Non-significant effect (p>0.05)</li>
+                    </ul>
+                </div>
+                
+                <div style="background-color: #fef5e7; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>🔍 Clinical Example - Cancer Study:</strong>
+                    <table style="width: 100%; margin: 5px 0;">
+                        <tr><td><strong>Age (per year):</strong></td><td>HR = 1.02 [0.99-1.05] → Minimal age effect</td></tr>
+                        <tr><td><strong>Stage III vs I:</strong></td><td>HR = 3.2 [2.1-4.8] → Strong predictor of poor survival</td></tr>
+                        <tr><td><strong>Treatment B vs A:</strong></td><td>HR = 0.6 [0.4-0.9] → Protective treatment effect</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div style="background-color: #e6f7ff; padding: 12px; border-radius: 5px; margin: 10px 0;">
+                <h4 style="color: #1976d2; margin-top: 0;">⚕️ Clinical Applications</h4>
+                
+                <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>1. Treatment Comparison:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li>Adjusted curves eliminate confounding by patient characteristics</li>
+                        <li>Shows true treatment effect independent of baseline differences</li>
+                        <li>Critical for observational studies with treatment selection bias</li>
+                    </ul>
+                    
+                    <strong>2. Prognostic Modeling:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li>Identifies independent risk factors from forest plots</li>
+                        <li>Quantifies relative importance of different predictors</li>
+                        <li>Builds comprehensive prognostic models</li>
+                    </ul>
+                    
+                    <strong>3. Risk Stratification:</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li>Combines multiple risk factors for patient classification</li>
+                        <li>Guides treatment intensity decisions</li>
+                        <li>Enables personalized survival predictions</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #9c27b0;">
+                <strong>💡 Best Practices:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li><strong>Always report confidence intervals:</strong> Shows precision of estimates</li>
+                    <li><strong>Check proportional hazards:</strong> Ensure model assumptions are met</li>
+                    <li><strong>Consider clinical significance:</strong> Statistical significance ≠ clinical importance</li>
+                    <li><strong>Validate findings:</strong> Test models in independent populations when possible</li>
+                </ul>
+            </div>
         </div>
         ')
       }

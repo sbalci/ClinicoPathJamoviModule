@@ -18,7 +18,37 @@ items:
       clearWith:
           - dependent
           - fixed
-      columns: []
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: mean
+            title: Mean
+            type: number
+            format: zto
+          - name: sd
+            title: SD
+            type: number
+            format: zto
+          - name: median
+            title: Median
+            type: number
+            format: zto
+          - name: min_val
+            title: Min
+            type: number
+            format: zto
+          - name: max_val
+            title: Max
+            type: number
+            format: zto
+          - name: se
+            title: SE
+            type: number
+            format: zto
 
     - name: assumptions
       title: Assumption Checking
@@ -29,7 +59,27 @@ items:
           - dependent
           - fixed
           - model_type
-      columns: []
+      columns:
+          - name: assumption
+            title: Assumption
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: conclusion
+            title: Conclusion
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
 
     - name: anova
       title: ANOVA Results
@@ -40,32 +90,214 @@ items:
           - fixed
           - model_type
           - effect_sizes
-      columns: []
+      columns:
+          - name: source
+            title: Source
+            type: text
+          - name: ss
+            title: Sum of Squares
+            type: number
+            format: zto
+          - name: df
+            title: df
+            type: integer
+          - name: ms
+            title: Mean Square
+            type: number
+            format: zto
+          - name: f_statistic
+            title: F
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: eta_squared
+            title: Effect Sizes
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
 
-    - name: posthoc
-      title: Post Hoc Comparisons
+    - name: tukey
+      title: Tukey HSD Post Hoc Test
       type: Table
-      description: Pairwise comparisons with multiple correction
-      visible: (posthoc_method)
+      description: Tukey Honestly Significant Difference test results
+      visible: (posthoc_method:tukey || posthoc_method:all)
+      clearWith:
+          - dependent
+          - fixed
+          - posthoc_method
+          - alpha_level
+      columns:
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: mean_diff
+            title: Mean Difference
+            type: number
+            format: zto
+          - name: ci_lower
+            title: Lower CI
+            type: number
+            format: zto
+          - name: ci_upper
+            title: Upper CI
+            type: number
+            format: zto
+          - name: p_adjusted
+            title: Adjusted p
+            type: number
+            format: zto,pvalue
+          - name: cohens_d
+            title: Cohen's d
+            type: number
+            format: zto
+          - name: interpretation
+            title: Effect Size
+            type: text
+          - name: significance
+            title: Significance
+            type: text
+
+    - name: gameshowell
+      title: Games-Howell Post Hoc Test
+      type: Table
+      description: Games-Howell test for unequal variances
+      visible: (posthoc_method:games_howell || posthoc_method:all)
+      clearWith:
+          - dependent
+          - fixed
+          - posthoc_method
+          - alpha_level
+      columns:
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: mean_diff
+            title: Mean Difference
+            type: number
+            format: zto
+          - name: se_diff
+            title: SE Difference
+            type: number
+            format: zto
+          - name: t_statistic
+            title: t-statistic
+            type: number
+            format: zto
+          - name: p_adjusted
+            title: Adjusted p
+            type: number
+            format: zto,pvalue
+          - name: cohens_d
+            title: Cohen's d
+            type: number
+            format: zto
+          - name: interpretation
+            title: Effect Size
+            type: text
+          - name: significance
+            title: Significance
+            type: text
+
+    - name: dunnett
+      title: Dunnett's Test vs Control
+      type: Table
+      description: Dunnett's test comparing treatments to control
+      visible: (posthoc_method:dunnett || posthoc_method:all)
       clearWith:
           - dependent
           - fixed
           - posthoc_method
           - control_group
           - alpha_level
-      columns: []
+      columns:
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+            format: zto
+          - name: std_error
+            title: SE
+            type: number
+            format: zto
+          - name: t_statistic
+            title: t-statistic
+            type: number
+            format: zto
+          - name: p_adjusted
+            title: Adjusted p
+            type: number
+            format: zto,pvalue
+          - name: cohens_d
+            title: Cohen's d
+            type: number
+            format: zto
+          - name: interpretation
+            title: Effect Size
+            type: text
+          - name: significance
+            title: Significance
+            type: text
 
-    - name: effectsizes
-      title: Effect Sizes
+    - name: bonferroni
+      title: Bonferroni Post Hoc Test
       type: Table
-      description: Comprehensive effect size measures
-      visible: (effect_sizes)
+      description: Bonferroni-corrected pairwise comparisons
+      visible: (posthoc_method:bonferroni || posthoc_method:all)
       clearWith:
           - dependent
           - fixed
-          - effect_sizes
-          - confidence_level
-      columns: []
+          - posthoc_method
+          - alpha_level
+      columns:
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: mean_diff
+            title: Mean Difference
+            type: number
+            format: zto
+          - name: pooled_se
+            title: Pooled SE
+            type: number
+            format: zto
+          - name: t_statistic
+            title: t-statistic
+            type: number
+            format: zto
+          - name: p_adjusted
+            title: Adjusted p
+            type: number
+            format: zto,pvalue
+          - name: cohens_d
+            title: Cohen's d
+            type: number
+            format: zto
+          - name: interpretation
+            title: Effect Size
+            type: text
+          - name: significance
+            title: Significance
+            type: text
+
+    - name: anovaplot
+      title: ANOVA Comparison Plot
+      type: Image
+      width: 800
+      height: 600
+      description: Violin plots with boxplots and group means
+      visible: (show_plots)
+      requiresData: true
+      renderFun: .anovaplot
+      clearWith:
+          - dependent
+          - fixed
+          - show_plots
 
     - name: diagnosticplot
       title: Diagnostic Plots

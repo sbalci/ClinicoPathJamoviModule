@@ -1,0 +1,471 @@
+---
+name: treatmentmeta
+title: Treatment Effect Meta-Analysis
+menuGroup: Frequencies
+menuSubgroup: Meta-Analysis
+menuTitle: Treatment Effect Meta-Analysis
+menuSubtitle: Comprehensive meta-analysis for clinical interventions
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive meta-analysis for treatment effects in clinical research.
+        Supports continuous outcomes (mean differences, standardized mean differences),
+        binary outcomes (risk ratios, odds ratios, risk differences), and time-to-event
+        outcomes (hazard ratios). Includes fixed-effect, random-effects, and Bayesian
+        meta-analysis approaches with comprehensive heterogeneity assessment and
+        publication bias evaluation.
+    R:
+        dontrun: false
+        usage: |
+            data('meta_studies')
+            
+            treatmentmeta(
+                data = meta_studies,
+                study_id = study,
+                effect_measure = "SMD",
+                outcome_type = "continuous",
+                model_type = "random"
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Study Identification
+    - name: study_id
+      title: Study Identifier
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Variable containing study names or identifiers
+
+    - name: year
+      title: Publication Year (Optional)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Year of publication for chronological analyses
+
+    # Outcome Type Selection
+    - name: outcome_type
+      title: Outcome Type
+      type: List
+      options:
+          - name: "continuous"
+            title: "Continuous (Mean Differences)"
+          - name: "binary"
+            title: "Binary (Risk/Odds Ratios)"
+          - name: "correlation"
+            title: "Correlation Coefficients"
+          - name: "survival"
+            title: "Time-to-Event (Hazard Ratios)"
+          - name: "generic"
+            title: "Generic (Pre-calculated Effects)"
+      default: "continuous"
+      description:
+          R: Type of outcome measure for meta-analysis
+
+    # Continuous Outcome Variables
+    - name: mean_treatment
+      title: Treatment Group Mean
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Mean outcome in treatment group (continuous outcomes)
+
+    - name: sd_treatment
+      title: Treatment Group SD
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Standard deviation in treatment group
+
+    - name: n_treatment
+      title: Treatment Group N
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Sample size in treatment group
+
+    - name: mean_control
+      title: Control Group Mean
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Mean outcome in control group (continuous outcomes)
+
+    - name: sd_control
+      title: Control Group SD
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Standard deviation in control group
+
+    - name: n_control
+      title: Control Group N
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Sample size in control group
+
+    # Binary Outcome Variables
+    - name: events_treatment
+      title: Events in Treatment Group
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Number of events in treatment group (binary outcomes)
+
+    - name: events_control
+      title: Events in Control Group
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Number of events in control group
+
+    # Correlation Variables
+    - name: correlation
+      title: Correlation Coefficient
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Correlation coefficient (r) for correlation meta-analysis
+
+    - name: sample_size
+      title: Sample Size (Correlation)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Total sample size for correlation studies
+
+    # Generic Effect Size Variables
+    - name: effect_size
+      title: Effect Size
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Pre-calculated effect size (generic meta-analysis)
+
+    - name: standard_error
+      title: Standard Error
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Standard error of effect size
+
+    - name: ci_lower
+      title: CI Lower Bound
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Lower bound of confidence interval
+
+    - name: ci_upper
+      title: CI Upper Bound
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Upper bound of confidence interval
+
+    # Survival Outcome Variables
+    - name: hazard_ratio
+      title: Hazard Ratio
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Hazard ratio for survival outcomes
+
+    - name: log_hr_se
+      title: Log HR Standard Error
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Standard error of log hazard ratio
+
+    # Analysis Options
+    - name: effect_measure
+      title: Effect Measure
+      type: List
+      options:
+          - name: "MD"
+            title: "Mean Difference"
+          - name: "SMD"
+            title: "Standardized Mean Difference (Cohen's d)"
+          - name: "ROM"
+            title: "Ratio of Means"
+          - name: "RR"
+            title: "Risk Ratio"
+          - name: "OR"
+            title: "Odds Ratio"
+          - name: "RD"
+            title: "Risk Difference"
+          - name: "HR"
+            title: "Hazard Ratio"
+          - name: "ZCOR"
+            title: "Fisher's Z (Correlation)"
+      default: "SMD"
+      description:
+          R: Effect size measure for meta-analysis
+
+    - name: model_type
+      title: Meta-Analysis Model
+      type: List
+      options:
+          - name: "fixed"
+            title: "Fixed-Effect Model"
+          - name: "random"
+            title: "Random-Effects Model (REML)"
+          - name: "random_dl"
+            title: "Random-Effects (DerSimonian-Laird)"
+          - name: "random_pm"
+            title: "Random-Effects (Paule-Mandel)"
+          - name: "random_hksj"
+            title: "Random-Effects (Hartung-Knapp-Sidik-Jonkman)"
+      default: "random"
+      description:
+          R: Statistical model for pooling effect sizes
+
+    # Heterogeneity Options
+    - name: heterogeneity_test
+      title: Heterogeneity Assessment
+      type: Bool
+      default: true
+      description:
+          R: Perform heterogeneity tests (Q, I², τ²)
+
+    - name: prediction_interval
+      title: Prediction Interval
+      type: Bool
+      default: true
+      description:
+          R: Calculate prediction interval for future studies
+
+    # Subgroup Analysis
+    - name: subgroup_var
+      title: Subgroup Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Categorical variable for subgroup analysis
+
+    - name: subgroup_test
+      title: Test Subgroup Differences
+      type: Bool
+      default: true
+      description:
+          R: Test for differences between subgroups
+
+    # Meta-Regression
+    - name: moderator_vars
+      title: Moderator Variables
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Variables for meta-regression analysis
+
+    # Sensitivity Analysis
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform leave-one-out sensitivity analysis
+
+    - name: influence_diagnostics
+      title: Influence Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: Calculate influence measures and outlier detection
+
+    # Publication Bias
+    - name: publication_bias
+      title: Publication Bias Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess publication bias using multiple methods
+
+    - name: funnel_plot
+      title: Funnel Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate funnel plot for visual bias assessment
+
+    - name: eggers_test
+      title: Egger's Test
+      type: Bool
+      default: true
+      description:
+          R: Perform Egger's regression test for asymmetry
+
+    - name: trim_fill
+      title: Trim and Fill
+      type: Bool
+      default: true
+      description:
+          R: Apply trim and fill method for bias adjustment
+
+    - name: pcurve
+      title: P-Curve Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform p-curve analysis for evidential value
+
+    # Quality Assessment
+    - name: quality_score
+      title: Study Quality Score (Optional)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Quality assessment score (e.g., Jadad, Cochrane RoB)
+
+    - name: weight_by_quality
+      title: Weight by Quality
+      type: Bool
+      default: false
+      description:
+          R: Weight studies by quality score in analysis
+
+    # Advanced Options
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.999
+      default: 0.95
+      description:
+          R: Confidence level for intervals
+
+    - name: small_study_correction
+      title: Small Study Correction
+      type: Bool
+      default: true
+      description:
+          R: Apply corrections for small study effects
+
+    - name: bayesian_analysis
+      title: Bayesian Meta-Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform Bayesian meta-analysis (requires additional packages)
+
+    # Output Options
+    - name: forest_plot
+      title: Forest Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate forest plot of results
+
+    - name: baujat_plot
+      title: Baujat Plot
+      type: Bool
+      default: false
+      description:
+          R: Generate Baujat plot for heterogeneity contribution
+
+    - name: radial_plot
+      title: Radial Plot
+      type: Bool
+      default: false
+      description:
+          R: Generate radial (Galbraith) plot
+
+    - name: cumulative_meta
+      title: Cumulative Meta-Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform cumulative meta-analysis by year
+
+    - name: show_weights
+      title: Show Study Weights
+      type: Bool
+      default: true
+      description:
+          R: Display individual study weights in output
+
+    - name: show_interpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: Include clinical interpretation and recommendations
+
+...

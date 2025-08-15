@@ -294,6 +294,8 @@ children:
                         isTarget: true
               - type: CheckBox
                 name: showExplanations
+              - type: CheckBox
+                name: showSummaries
       - type: Label
         label: Restricted Mean Survival Time
         children:

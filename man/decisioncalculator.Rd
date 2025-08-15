@@ -13,7 +13,18 @@ decisioncalculator(
   pprob = 0.3,
   fnote = FALSE,
   ci = FALSE,
-  fagan = FALSE
+  fagan = FALSE,
+  multiplecuts = FALSE,
+  cutoff1 = "Conservative",
+  tp1 = 85,
+  fp1 = 10,
+  tn1 = 190,
+  fn1 = 15,
+  cutoff2 = "Aggressive",
+  tp2 = 95,
+  fp2 = 25,
+  tn2 = 175,
+  fn2 = 5
 )
 }
 \arguments{
@@ -35,6 +46,28 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 \item{ci}{.}
 
 \item{fagan}{.}
+
+\item{multiplecuts}{.}
+
+\item{cutoff1}{.}
+
+\item{tp1}{.}
+
+\item{fp1}{.}
+
+\item{tn1}{.}
+
+\item{fn1}{.}
+
+\item{cutoff2}{.}
+
+\item{tp2}{.}
+
+\item{fp2}{.}
+
+\item{tn2}{.}
+
+\item{fn2}{.}
 }
 \value{
 A results object containing:
@@ -45,6 +78,7 @@ A results object containing:
 \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
+\code{results$multipleCutoffTable} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

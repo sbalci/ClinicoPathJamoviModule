@@ -1,0 +1,444 @@
+---
+name: bayesianclinical
+title: Bayesian Clinical Analysis & Decision Making
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Bayesian Clinical Analysis
+menuSubtitle: Bayesian methods for clinical research and decision making
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive Bayesian analysis for clinical research and medical decision making using tabular
+        clinical data. Implements Bayesian hypothesis testing, parameter estimation, predictive modeling,
+        and decision analysis. Provides intuitive interpretation of evidence, uncertainty quantification,
+        and clinical decision support. Essential for evidence-based medicine, clinical guidelines, and
+        personalized treatment decisions with proper uncertainty communication.
+    R:
+        dontrun: false
+        usage: |
+            data('clinical_data')
+            
+            bayesianclinical(
+                data = clinical_data,
+                outcome_var = "treatment_success",
+                treatment_var = "treatment_group",
+                covariates = c("age", "severity", "comorbidity")
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Core Variables for Tabular Clinical Data
+    - name: outcome_var
+      title: Primary Outcome Variable
+      type: Variable
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Primary clinical outcome of interest
+
+    - name: treatment_var
+      title: Treatment Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Treatment group or intervention variable
+
+    - name: covariates
+      title: Covariate Variables
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Clinical covariates and baseline characteristics
+
+    - name: patient_id
+      title: Patient ID
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Patient identifier for hierarchical models
+
+    - name: time_var
+      title: Time Variable (Optional)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Time variable for longitudinal Bayesian analysis
+
+    - name: center_var
+      title: Center/Site Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Center or site variable for hierarchical models
+
+    # Analysis Type Configuration
+    - name: analysis_type
+      title: Bayesian Analysis Type
+      type: List
+      options:
+          - name: "treatment_effect"
+            title: "Treatment Effect Analysis"
+          - name: "diagnostic_test"
+            title: "Diagnostic Test Evaluation"
+          - name: "predictive_modeling"
+            title: "Bayesian Predictive Modeling"
+          - name: "dose_response"
+            title: "Dose-Response Modeling"
+          - name: "survival_analysis"
+            title: "Bayesian Survival Analysis"
+          - name: "meta_analysis"
+            title: "Bayesian Meta-Analysis"
+      default: "treatment_effect"
+      description:
+          R: Type of Bayesian analysis to perform
+
+    - name: outcome_type
+      title: Outcome Data Type
+      type: List
+      options:
+          - name: "continuous"
+            title: "Continuous Outcome"
+          - name: "binary"
+            title: "Binary Outcome"
+          - name: "count"
+            title: "Count Outcome"
+          - name: "ordinal"
+            title: "Ordinal Outcome"
+          - name: "time_to_event"
+            title: "Time-to-Event Outcome"
+      default: "continuous"
+      description:
+          R: Type of outcome variable
+
+    # Prior Specification
+    - name: prior_type
+      title: Prior Distribution Type
+      type: List
+      options:
+          - name: "noninformative"
+            title: "Non-informative Priors"
+          - name: "weakly_informative"
+            title: "Weakly Informative Priors"
+          - name: "informative"
+            title: "Informative Priors"
+          - name: "skeptical"
+            title: "Skeptical Priors"
+          - name: "enthusiastic"
+            title: "Enthusiastic Priors"
+          - name: "custom"
+            title: "Custom Prior Specification"
+      default: "weakly_informative"
+      description:
+          R: Type of prior distributions to use
+
+    - name: prior_mean
+      title: Prior Mean (for effect size)
+      type: Number
+      default: 0
+      description:
+          R: Prior mean for treatment effect or main parameter
+
+    - name: prior_sd
+      title: Prior Standard Deviation
+      type: Number
+      min: 0.01
+      max: 10
+      default: 1
+      description:
+          R: Prior standard deviation for main parameter
+
+    - name: historical_data_weight
+      title: Historical Data Weight
+      type: Number
+      min: 0
+      max: 1
+      default: 0.1
+      description:
+          R: Weight for historical data in prior (0=no weight, 1=full weight)
+
+    # MCMC Configuration
+    - name: mcmc_chains
+      title: MCMC Chains
+      type: Integer
+      min: 1
+      max: 8
+      default: 4
+      description:
+          R: Number of MCMC chains
+
+    - name: mcmc_iterations
+      title: MCMC Iterations
+      type: Integer
+      min: 1000
+      max: 20000
+      default: 2000
+      description:
+          R: Number of MCMC iterations per chain
+
+    - name: mcmc_warmup
+      title: Warmup Iterations
+      type: Integer
+      min: 500
+      max: 10000
+      default: 1000
+      description:
+          R: Number of warmup (burn-in) iterations
+
+    - name: mcmc_thinning
+      title: Thinning Interval
+      type: Integer
+      min: 1
+      max: 20
+      default: 1
+      description:
+          R: Thinning interval for MCMC samples
+
+    # Bayesian Inference Options
+    - name: credible_interval
+      title: Credible Interval Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+          R: Level for Bayesian credible intervals
+
+    - name: rope_lower
+      title: ROPE Lower Bound
+      type: Number
+      default: -0.1
+      description:
+          R: Lower bound for Region of Practical Equivalence (ROPE)
+
+    - name: rope_upper
+      title: ROPE Upper Bound
+      type: Number
+      default: 0.1
+      description:
+          R: Upper bound for Region of Practical Equivalence (ROPE)
+
+    - name: minimum_effect_size
+      title: Minimum Clinically Important Effect
+      type: Number
+      default: 0.2
+      description:
+          R: Minimum effect size considered clinically important
+
+    # Decision Analysis Options
+    - name: decision_analysis
+      title: Bayesian Decision Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform Bayesian decision analysis with utilities
+
+    - name: benefit_utility
+      title: Treatment Benefit Utility
+      type: Number
+      default: 1.0
+      description:
+          R: Utility value for treatment benefit
+
+    - name: harm_utility
+      title: Treatment Harm Utility
+      type: Number
+      default: -0.5
+      description:
+          R: Utility value for treatment harm (negative)
+
+    - name: cost_consideration
+      title: Include Cost Analysis
+      type: Bool
+      default: false
+      description:
+          R: Include cost considerations in decision analysis
+
+    # Model Validation
+    - name: model_diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: Perform MCMC diagnostics and model validation
+
+    - name: convergence_diagnostics
+      title: Convergence Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: Check MCMC convergence (R-hat, ESS, etc.)
+
+    - name: posterior_predictive_checks
+      title: Posterior Predictive Checks
+      type: Bool
+      default: true
+      description:
+          R: Perform posterior predictive model checking
+
+    - name: leave_one_out_cv
+      title: Leave-One-Out Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: Perform LOO-CV for model comparison
+
+    # Advanced Bayesian Methods
+    - name: hierarchical_modeling
+      title: Hierarchical Modeling
+      type: Bool
+      default: false
+      description:
+          R: Use hierarchical/multilevel Bayesian models
+
+    - name: mixture_modeling
+      title: Mixture Modeling
+      type: Bool
+      default: false
+      description:
+          R: Use Bayesian mixture models for heterogeneity
+
+    - name: nonparametric_methods
+      title: Nonparametric Bayesian Methods
+      type: Bool
+      default: false
+      description:
+          R: Use nonparametric Bayesian approaches
+
+    - name: adaptive_design
+      title: Adaptive Design Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform adaptive trial design analysis
+
+    # Comparative Analysis
+    - name: model_comparison
+      title: Bayesian Model Comparison
+      type: Bool
+      default: false
+      description:
+          R: Compare multiple Bayesian models
+
+    - name: bayes_factor_analysis
+      title: Bayes Factor Analysis
+      type: Bool
+      default: true
+      description:
+          R: Calculate Bayes factors for hypothesis testing
+
+    - name: evidence_thresholds
+      title: Evidence Threshold Classification
+      type: Bool
+      default: true
+      description:
+          R: Classify evidence strength using standard thresholds
+
+    # Uncertainty Quantification
+    - name: probability_statements
+      title: Clinical Probability Statements
+      type: Bool
+      default: true
+      description:
+          R: Generate clinically relevant probability statements
+
+    - name: prediction_intervals
+      title: Prediction Intervals
+      type: Bool
+      default: true
+      description:
+          R: Calculate Bayesian prediction intervals
+
+    - name: sensitivity_to_priors
+      title: Prior Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: Assess sensitivity to prior specifications
+
+    # Visualization Options
+    - name: posterior_plots
+      title: Posterior Distribution Plots
+      type: Bool
+      default: true
+      description:
+          R: Generate posterior distribution visualizations
+
+    - name: trace_plots
+      title: MCMC Trace Plots
+      type: Bool
+      default: true
+      description:
+          R: Generate MCMC trace plots for diagnostics
+
+    - name: forest_plots
+      title: Bayesian Forest Plots
+      type: Bool
+      default: false
+      description:
+          R: Generate Bayesian forest plots for meta-analysis
+
+    - name: decision_plots
+      title: Decision Analysis Plots
+      type: Bool
+      default: false
+      description:
+          R: Generate decision analysis visualization
+
+    # Reporting Options
+    - name: comprehensive_report
+      title: Comprehensive Bayesian Report
+      type: Bool
+      default: true
+      description:
+          R: Generate comprehensive Bayesian analysis report
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: Provide clinical interpretation of Bayesian results
+
+    - name: regulatory_documentation
+      title: Regulatory Documentation
+      type: Bool
+      default: false
+      description:
+          R: Include regulatory-compliant documentation
+
+    - name: layman_summary
+      title: Layman Summary
+      type: Bool
+      default: true
+      description:
+          R: Provide plain language summary of results

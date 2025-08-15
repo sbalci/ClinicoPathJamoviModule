@@ -1,0 +1,155 @@
+name: recurrentsurvival
+title: Recurrent Event Survival Analysis
+jrs: '1.1'
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+      
+    - name: data_summary
+      title: Recurrent Event Data Summary
+      type: Html
+      visible: true
+      
+    - name: model_results
+      title: Model Estimation Results
+      type: Html
+      visible: true
+      
+    - name: covariate_effects
+      title: Covariate Effects
+      type: Html
+      visible: true
+      
+    - name: recurrence_estimates
+      title: Recurrence Function Estimates
+      type: Html
+      visible: true
+      
+    - name: gap_time_summary
+      title: Gap Time Analysis
+      type: Html
+      visible: true
+      
+    - name: terminal_event_summary
+      title: Terminal Event Analysis
+      type: Html
+      visible: (terminal_event)
+      
+    - name: frailty_estimates
+      title: Frailty Parameter Estimates
+      type: Html
+      visible: (model_type == 'frailty_gamma' || model_type == 'frailty_lognormal')
+      
+    - name: model_diagnostics_summary
+      title: Model Diagnostics
+      type: Html
+      visible: (model_diagnostics)
+      
+    - name: goodness_of_fit_results
+      title: Goodness of Fit Tests
+      type: Html
+      visible: (goodness_of_fit)
+      
+    - name: event_frequency_table
+      title: Event Frequency Distribution
+      type: Html
+      visible: true
+      
+    - name: recurrence_plots
+      title: Recurrence Function Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_recurrence_functions
+      visible: (recurrence_plots)
+      clearWith:
+          - subject_id
+          - event_time
+          - model_type
+          - covariates
+          
+    - name: gap_time_plots
+      title: Gap Time Distribution Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_gap_time_distributions
+      visible: (gap_time_plots)
+      clearWith:
+          - subject_id
+          - event_time
+          - time_scale
+          
+    - name: cumulative_hazard_plot
+      title: Cumulative Hazard Function
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_cumulative_hazard
+      visible: (cumulative_hazard)
+      clearWith:
+          - subject_id
+          - event_time
+          - model_type
+          - baseline_hazard_smooth
+          
+    - name: event_timeline_plot
+      title: Event Timeline Visualization
+      type: Image
+      width: 1000
+      height: 600
+      renderFun: .plot_event_timeline
+      visible: true
+      clearWith:
+          - subject_id
+          - event_time
+          - event_type
+          - terminal_event
+          
+    - name: residual_plots
+      title: Residual Diagnostic Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_residuals
+      visible: (model_diagnostics)
+      clearWith:
+          - model_type
+          - covariates
+          - time_scale
+          
+    - name: frailty_distribution_plot
+      title: Frailty Distribution Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_frailty_distribution
+      visible: (model_type == 'frailty_gamma' || model_type == 'frailty_lognormal')
+      clearWith:
+          - frailty_distribution
+          - model_type
+          
+    - name: multistate_diagram
+      title: Multi-State Model Diagram
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_multistate_diagram
+      visible: (model_type == 'msm_model')
+      clearWith:
+          - event_type
+          - terminal_event
+          
+    - name: model_comparison_plot
+      title: Model Comparison
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_model_comparison
+      visible: (goodness_of_fit)
+      clearWith:
+          - model_type
+          - time_scale
+          - covariates

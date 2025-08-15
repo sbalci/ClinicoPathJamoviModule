@@ -1,0 +1,430 @@
+---
+name: treatmentmeta
+title: Treatment Effect Meta-Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Getting Started
+      type: Html
+      description: Instructions for treatment effect meta-analysis
+      visible: true
+
+    - name: data_summary
+      title: Data Summary
+      type: Table
+      description: Overview of included studies and data quality
+      columns:
+          - name: metric
+            title: Metric
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: details
+            title: Details
+            type: text
+      clearWith:
+          - study_id
+          - outcome_type
+
+    - name: pooled_effects
+      title: Pooled Effect Estimates
+      type: Table
+      description: Overall meta-analysis results with confidence and prediction intervals
+      columns:
+          - name: model
+            title: Model
+            type: text
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto
+          - name: se
+            title: SE
+            type: number
+            format: zto
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto
+          - name: z_value
+            title: Z-value
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - effect_measure
+          - model_type
+
+    - name: individual_studies
+      title: Individual Study Results
+      type: Table
+      description: Effect sizes and weights for each study
+      columns:
+          - name: study
+            title: Study
+            type: text
+          - name: year
+            title: Year
+            type: integer
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto
+          - name: se
+            title: SE
+            type: number
+            format: zto
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto
+          - name: weight_fixed
+            title: Weight (Fixed)
+            type: number
+            format: pc
+          - name: weight_random
+            title: Weight (Random)
+            type: number
+            format: pc
+      clearWith:
+          - study_id
+          - effect_measure
+
+    - name: heterogeneity
+      title: Heterogeneity Assessment
+      type: Table
+      description: Tests and measures of between-study heterogeneity
+      visible: (heterogeneity_test)
+      columns:
+          - name: measure
+            title: Heterogeneity Measure
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: ci_lower
+            title: CI Lower
+            type: text
+          - name: ci_upper
+            title: CI Upper
+            type: text
+          - name: p_value
+            title: p-value
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - model_type
+
+    - name: subgroup_analysis
+      title: Subgroup Analysis
+      type: Table
+      description: Meta-analysis results by subgroup
+      visible: (subgroup_var)
+      columns:
+          - name: subgroup
+            title: Subgroup
+            type: text
+          - name: n_studies
+            title: N Studies
+            type: integer
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: i_squared
+            title: I² (%)
+            type: number
+            format: pc
+      clearWith:
+          - subgroup_var
+          - subgroup_test
+
+    - name: subgroup_test
+      title: Test for Subgroup Differences
+      type: Table
+      description: Statistical test for differences between subgroups
+      visible: (subgroup_var && subgroup_test)
+      columns:
+          - name: test
+            title: Test
+            type: text
+          - name: q_statistic
+            title: Q-statistic
+            type: number
+            format: zto
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - subgroup_var
+
+    - name: meta_regression
+      title: Meta-Regression Results
+      type: Table
+      description: Moderator analysis using meta-regression
+      visible: (moderator_vars)
+      columns:
+          - name: moderator
+            title: Moderator
+            type: text
+          - name: coefficient
+            title: Coefficient
+            type: number
+            format: zto
+          - name: se
+            title: SE
+            type: number
+            format: zto
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto
+          - name: z_value
+            title: Z-value
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+      clearWith:
+          - moderator_vars
+
+    - name: sensitivity
+      title: Sensitivity Analysis
+      type: Table
+      description: Leave-one-out sensitivity analysis results
+      visible: (sensitivity_analysis)
+      columns:
+          - name: omitted_study
+            title: Omitted Study
+            type: text
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto
+          - name: i_squared
+            title: I² (%)
+            type: number
+            format: pc
+          - name: change_pct
+            title: Change (%)
+            type: number
+            format: zto
+      clearWith:
+          - study_id
+
+    - name: influence
+      title: Influence Diagnostics
+      type: Table
+      description: Identification of influential studies and outliers
+      visible: (influence_diagnostics)
+      columns:
+          - name: study
+            title: Study
+            type: text
+          - name: dffits
+            title: DFFITS
+            type: number
+            format: zto
+          - name: cooks_d
+            title: Cook's D
+            type: number
+            format: zto
+          - name: hatvalues
+            title: Hat Values
+            type: number
+            format: zto
+          - name: residual
+            title: Residual
+            type: number
+            format: zto
+          - name: outlier
+            title: Outlier
+            type: text
+      clearWith:
+          - study_id
+
+    - name: publication_bias_tests
+      title: Publication Bias Tests
+      type: Table
+      description: Statistical tests for publication bias
+      visible: (publication_bias)
+      columns:
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+      clearWith:
+          - effect_measure
+
+    - name: trim_fill_results
+      title: Trim and Fill Analysis
+      type: Table
+      description: Adjusted estimates after trim and fill correction
+      visible: (trim_fill)
+      columns:
+          - name: analysis
+            title: Analysis
+            type: text
+          - name: n_studies
+            title: N Studies
+            type: integer
+          - name: n_filled
+            title: N Filled
+            type: integer
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto
+          - name: change_pct
+            title: Change (%)
+            type: number
+            format: zto
+      clearWith:
+          - model_type
+
+    - name: forest_plot
+      title: Forest Plot
+      type: Image
+      width: 900
+      height: 600
+      description: Forest plot showing individual and pooled effect sizes
+      visible: (forest_plot)
+      requiresData: true
+      clearWith:
+          - study_id
+          - effect_measure
+          - model_type
+
+    - name: funnel_plot
+      title: Funnel Plot
+      type: Image
+      width: 600
+      height: 600
+      description: Funnel plot for assessing publication bias
+      visible: (funnel_plot)
+      requiresData: true
+      clearWith:
+          - study_id
+          - effect_measure
+
+    - name: baujat_plot
+      title: Baujat Plot
+      type: Image
+      width: 600
+      height: 600
+      description: Contribution to heterogeneity vs influence on pooled estimate
+      visible: (baujat_plot)
+      requiresData: true
+      clearWith:
+          - study_id
+          - model_type
+
+    - name: radial_plot
+      title: Radial Plot
+      type: Image
+      width: 600
+      height: 600
+      description: Galbraith radial plot for heterogeneity assessment
+      visible: (radial_plot)
+      requiresData: true
+      clearWith:
+          - study_id
+          - effect_measure
+
+    - name: cumulative_plot
+      title: Cumulative Meta-Analysis
+      type: Image
+      width: 800
+      height: 600
+      description: Cumulative meta-analysis plot over time
+      visible: (cumulative_meta && year)
+      requiresData: true
+      clearWith:
+          - study_id
+          - year
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation & Recommendations
+      type: Html
+      description: Clinical context and evidence synthesis
+      visible: (show_interpretation)
+
+    - name: methods_section
+      title: Methods Section Template
+      type: Html
+      description: Template text for publication methods section
+      visible: (show_interpretation)
+
+...

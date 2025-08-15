@@ -1,0 +1,216 @@
+title: Patient-Reported Outcomes & Quality of Life Analysis
+name: patientreported
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Scale Items
+        children:
+          - type: VariablesListBox
+            name: scale_items
+            isTarget: true
+            itemDropBehaviour: emptyspace
+
+      - type: TargetLayoutBox
+        label: Patient & Time Variables
+        children:
+          - type: VariablesListBox
+            name: patient_id
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: group_var
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Reverse-Coded Items
+        children:
+          - type: VariablesListBox
+            name: reverse_coded_items
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Demographic Variables
+        children:
+          - type: VariablesListBox
+            name: demographic_vars
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Anchor Variables
+        children:
+          - type: VariablesListBox
+            name: anchor_variables
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Scale Configuration
+        children:
+          - type: ComboBox
+            name: scale_type
+          - type: ComboBox
+            name: instrument_name
+          - type: ComboBox
+            name: scoring_method
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Response Scale Properties
+        children:
+          - type: TextBox
+            name: response_scale_min
+            format: number
+            suffix: " (minimum)"
+          - type: TextBox
+            name: response_scale_max
+            format: number
+            suffix: " (maximum)"
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Missing Data Handling
+        children:
+          - type: ComboBox
+            name: missing_data_method
+          - type: TextBox
+            name: min_items_required
+            format: number
+            suffix: " items"
+          - type: TextBox
+            name: missing_threshold
+            format: number
+            suffix: " (0.0-1.0)"
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Psychometric Analysis
+        children:
+          - type: CheckBox
+            name: reliability_analysis
+          - type: CheckBox
+            name: validity_analysis
+          - type: CheckBox
+            name: factor_analysis
+          - type: CheckBox
+            name: irt_analysis
+          - type: CheckBox
+            name: dimensionality_test
+          - type: CheckBox
+            name: measurement_invariance
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Clinical Interpretation
+        children:
+          - type: CheckBox
+            name: clinical_interpretation
+          - type: CheckBox
+            name: normative_comparison
+          - type: CheckBox
+            name: minimal_important_difference
+          - type: TextBox
+            name: mid_value
+            format: number
+            suffix: " (MID value)"
+          - type: CheckBox
+            name: ceiling_floor_effects
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Group Comparisons
+        children:
+          - type: CheckBox
+            name: group_comparisons
+          - type: ComboBox
+            name: comparison_method
+          - type: CheckBox
+            name: effect_size_analysis
+          - type: ComboBox
+            name: multiple_comparisons
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Longitudinal Analysis
+        children:
+          - type: CheckBox
+            name: longitudinal_analysis
+          - type: ComboBox
+            name: change_analysis
+          - type: CheckBox
+            name: trajectory_analysis
+          - type: CheckBox
+            name: time_to_deterioration
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Advanced Analysis
+        children:
+          - type: CheckBox
+            name: responder_analysis
+          - type: TextBox
+            name: responder_threshold
+            format: number
+            suffix: " (threshold)"
+          - type: CheckBox
+            name: anchor_based_analysis
+          - type: CheckBox
+            name: distribution_based_analysis
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Data Quality Assessment
+        children:
+          - type: CheckBox
+            name: data_quality_assessment
+          - type: CheckBox
+            name: response_patterns
+          - type: CheckBox
+            name: acquiescence_analysis
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: CheckBox
+            name: detailed_output
+          - type: CheckBox
+            name: summary_report
+          - type: CheckBox
+            name: individual_profiles
+          - type: CheckBox
+            name: save_scores
+          - type: CheckBox
+            name: regulatory_documentation
+
+...

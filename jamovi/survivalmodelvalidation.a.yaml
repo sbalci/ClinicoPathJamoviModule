@@ -1,0 +1,414 @@
+name: survivalmodelvalidation
+title: Enhanced Survival Model Validation
+menuGroup: ClinicoPath Survival
+menuSubgroup: Advanced Validation
+menuSubtitle: 'Comprehensive Model Performance Assessment'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive validation toolkit for survival models including calibration assessment, 
+        prediction performance metrics, bootstrap validation, and external validation frameworks.
+        Essential for developing reliable prognostic models.
+    R:
+        dontrun: true
+        usage: |
+            # Example: Cox model validation
+            survivalmodelvalidation(
+                data = clinical_data,
+                time = followup_months,
+                status = death_event,
+                risk_score = predicted_risk,
+                validation_type = "internal_bootstrap"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time_var
+      title: 'Time Variable'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Follow-up time variable
+          R: >
+            Time to event or censoring
+
+    - name: status_var
+      title: 'Event Status'
+      type: Variable
+      suggested: [ nominal, continuous ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Event status (0 = censored, 1 = event)
+          R: >
+            Event indicator variable
+
+    - name: risk_score
+      title: 'Risk Score/Prediction'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Predicted risk score or linear predictor from survival model
+          R: >
+            Model predictions to validate
+
+    - name: covariates
+      title: 'Model Covariates'
+      type: Variables
+      suggested: [ continuous, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Variables used in the original survival model
+          R: >
+            Covariates for model fitting/validation
+
+    - name: stratification_var
+      title: 'Stratification Variable'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Variable for stratified validation analysis
+          R: >
+            Stratification factor
+
+    - name: validation_type
+      title: 'Validation Type'
+      type: List
+      options:
+        - name: internal_bootstrap
+          title: Internal Bootstrap Validation
+        - name: cross_validation
+          title: Cross-Validation
+        - name: temporal_validation
+          title: Temporal Validation
+        - name: external_validation
+          title: External Validation
+        - name: geographic_validation
+          title: Geographic Validation
+      default: internal_bootstrap
+      description:
+          ui: >
+            Type of validation approach
+          R: >
+            Validation methodology
+
+    - name: model_type
+      title: 'Survival Model Type'
+      type: List
+      options:
+        - name: cox_ph
+          title: Cox Proportional Hazards
+        - name: aft_model
+          title: Accelerated Failure Time
+        - name: parametric_surv
+          title: Parametric Survival
+        - name: machine_learning
+          title: Machine Learning Model
+        - name: ensemble_model
+          title: Ensemble Model
+      default: cox_ph
+      description:
+          ui: >
+            Type of survival model being validated
+          R: >
+            Model class specification
+
+    - name: performance_metrics
+      title: 'Performance Metrics'
+      type: List
+      options:
+        - name: concordance_index
+          title: Concordance Index (C-index)
+        - name: time_dependent_auc
+          title: Time-Dependent AUC
+        - name: prediction_error
+          title: Prediction Error Curves
+        - name: integrated_brier
+          title: Integrated Brier Score
+        - name: net_reclassification
+          title: Net Reclassification Improvement
+        - name: all_metrics
+          title: All Performance Metrics
+      default: all_metrics
+      description:
+          ui: >
+            Performance metrics to calculate
+          R: >
+            Metrics for model assessment
+
+    - name: calibration_assessment
+      title: 'Calibration Assessment'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform calibration analysis (predicted vs observed)
+          R: >
+            Enable calibration evaluation
+
+    - name: calibration_method
+      title: 'Calibration Method'
+      type: List
+      options:
+        - name: decile_based
+          title: Decile-Based Calibration
+        - name: smooth_calibration
+          title: Smooth Calibration Curve
+        - name: hosmer_lemeshow
+          title: Hosmer-Lemeshow Test
+        - name: greenwood_nam
+          title: Greenwood-Nam-D'Agostino Test
+      default: decile_based
+      description:
+          ui: >
+            Method for calibration assessment
+          R: >
+            Calibration evaluation approach
+
+    - name: bootstrap_samples
+      title: 'Bootstrap Samples'
+      type: Number
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          ui: >
+            Number of bootstrap samples for validation
+          R: >
+            Bootstrap iteration count
+
+    - name: cv_folds
+      title: 'Cross-Validation Folds'
+      type: Number
+      min: 3
+      max: 20
+      default: 10
+      description:
+          ui: >
+            Number of folds for cross-validation
+          R: >
+            CV fold specification
+
+    - name: prediction_times
+      title: 'Prediction Time Points'
+      type: String
+      default: "1,3,5,10"
+      description:
+          ui: >
+            Time points for prediction assessment (comma-separated)
+          R: >
+            Times for time-dependent metrics
+
+    - name: confidence_level
+      title: 'Confidence Level'
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          ui: >
+            Confidence level for intervals
+          R: >
+            CI level
+
+    - name: optimism_correction
+      title: 'Optimism Correction'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Apply optimism correction for internal validation
+          R: >
+            Correct for overfitting bias
+
+    - name: shrinkage_estimation
+      title: 'Shrinkage Factor Estimation'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Estimate shrinkage factor for model calibration
+          R: >
+            Calculate shrinkage coefficient
+
+    - name: discrimination_plots
+      title: 'Discrimination Plots'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Create discrimination assessment plots
+          R: >
+            Generate discrimination visualizations
+
+    - name: calibration_plots
+      title: 'Calibration Plots'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Create calibration assessment plots
+          R: >
+            Generate calibration visualizations
+
+    - name: roc_curves
+      title: 'Time-Dependent ROC Curves'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Create time-dependent ROC curves
+          R: >
+            Generate ROC visualizations
+
+    - name: prediction_error_plots
+      title: 'Prediction Error Plots'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Create prediction error curves
+          R: >
+            Generate error curve plots
+
+    - name: risk_distribution_plots
+      title: 'Risk Distribution Plots'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Plot risk score distributions by outcome
+          R: >
+            Generate risk distribution plots
+
+    - name: model_comparison
+      title: 'Model Comparison'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Compare multiple models (requires multiple risk scores)
+          R: >
+            Enable model comparison analysis
+
+    - name: decision_curve_analysis
+      title: 'Decision Curve Analysis'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform decision curve analysis for clinical utility
+          R: >
+            Evaluate clinical decision-making utility
+
+    - name: net_benefit_range
+      title: 'Net Benefit Threshold Range'
+      type: String
+      default: "0.01,0.99"
+      description:
+          ui: >
+            Range of threshold probabilities for decision analysis
+          R: >
+            Threshold range for net benefit
+
+    - name: external_data_source
+      title: 'External Validation Data'
+      type: String
+      default: ""
+      description:
+          ui: >
+            Path to external validation dataset (if applicable)
+          R: >
+            External validation data source
+
+    - name: transportability_analysis
+      title: 'Transportability Analysis'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Assess model transportability across populations
+          R: >
+            Evaluate population transportability
+
+    - name: subgroup_validation
+      title: 'Subgroup Validation'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Perform validation within subgroups
+          R: >
+            Enable subgroup-specific validation
+
+    - name: temporal_trends
+      title: 'Temporal Trend Analysis'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Analyze temporal trends in model performance
+          R: >
+            Assess time-based performance changes
+
+    - name: missing_data_sensitivity
+      title: 'Missing Data Sensitivity'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Assess sensitivity to missing data patterns
+          R: >
+            Evaluate missing data impact
+
+    - name: clinical_impact_metrics
+      title: 'Clinical Impact Metrics'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate clinically relevant impact measures
+          R: >
+            Assess clinical decision impact
+
+    - name: reporting_guidelines
+      title: 'Reporting Guidelines'
+      type: List
+      options:
+        - name: tripod
+          title: TRIPOD Guidelines
+        - name: remark
+          title: REMARK Guidelines  
+        - name: stard
+          title: STARD Guidelines
+        - name: custom
+          title: Custom Reporting
+      default: tripod
+      description:
+          ui: >
+            Reporting guideline compliance
+          R: >
+            Structured reporting format
+
+    - name: export_validation_report
+      title: 'Export Validation Report'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Export comprehensive validation report
+          R: >
+            Generate exportable report

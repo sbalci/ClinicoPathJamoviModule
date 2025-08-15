@@ -1,0 +1,221 @@
+title: Quality of Life Analysis & Patient-Centered Outcomes
+name: qualityoflife
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Physical Functioning Domains
+        children:
+          - type: VariablesListBox
+            name: physical_function_items
+            isTarget: true
+          - type: VariablesListBox
+            name: role_physical_items
+            isTarget: true
+          - type: VariablesListBox
+            name: bodily_pain_items
+            isTarget: true
+          - type: VariablesListBox
+            name: general_health_items
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Mental Health Domains
+        children:
+          - type: VariablesListBox
+            name: mental_health_items
+            isTarget: true
+          - type: VariablesListBox
+            name: role_emotional_items
+            isTarget: true
+          - type: VariablesListBox
+            name: vitality_items
+            isTarget: true
+          - type: VariablesListBox
+            name: social_function_items
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Additional QoL Domains
+        children:
+          - type: VariablesListBox
+            name: symptom_items
+            isTarget: true
+          - type: VariablesListBox
+            name: functional_items
+            isTarget: true
+          - type: VariablesListBox
+            name: global_qol_items
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Patient & Study Variables
+        children:
+          - type: VariablesListBox
+            name: patient_id
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: group_var
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Clinical & Cost Variables
+        children:
+          - type: VariablesListBox
+            name: clinical_vars
+            isTarget: true
+          - type: VariablesListBox
+            name: cost_variables
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Instrument Configuration
+        children:
+          - type: ComboBox
+            name: instrument_type
+          - type: ComboBox
+            name: scoring_algorithm
+          - type: ComboBox
+            name: reference_population
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Missing Data & Quality Control
+        children:
+          - type: TextBox
+            name: missing_domain_threshold
+            format: number
+            suffix: " (0.1-1.0)"
+          - type: ComboBox
+            name: imputation_method
+          - type: CheckBox
+            name: quality_control
+          - type: CheckBox
+            name: response_pattern_analysis
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Clinical Interpretation
+        children:
+          - type: CheckBox
+            name: clinical_interpretation
+          - type: CheckBox
+            name: minimally_important_difference
+          - type: TextBox
+            name: mid_values
+            format: string
+            suffix: " (comma-separated)"
+          - type: CheckBox
+            name: ceiling_floor_analysis
+          - type: CheckBox
+            name: clinical_cutoffs
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Health Utilities & Economics
+        children:
+          - type: CheckBox
+            name: health_utilities
+          - type: ComboBox
+            name: utility_algorithm
+          - type: CheckBox
+            name: health_economics
+          - type: CheckBox
+            name: qaly_calculation
+          - type: CheckBox
+            name: cost_effectiveness
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Group Comparisons
+        children:
+          - type: CheckBox
+            name: group_comparisons
+          - type: ComboBox
+            name: comparison_domains
+          - type: ComboBox
+            name: statistical_test
+          - type: ComboBox
+            name: multiple_testing_correction
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Longitudinal Analysis
+        children:
+          - type: CheckBox
+            name: longitudinal_analysis
+          - type: ComboBox
+            name: change_analysis
+          - type: CheckBox
+            name: baseline_adjustment
+          - type: CheckBox
+            name: time_to_deterioration
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Advanced Analysis
+        children:
+          - type: CheckBox
+            name: domain_correlations
+          - type: CheckBox
+            name: clinical_correlations
+          - type: CheckBox
+            name: predictive_modeling
+          - type: CheckBox
+            name: factor_analysis
+          - type: CheckBox
+            name: clustering_analysis
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Population Comparisons
+        children:
+          - type: CheckBox
+            name: population_norms_comparison
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: CheckBox
+            name: comprehensive_report
+          - type: CheckBox
+            name: domain_profiles
+          - type: CheckBox
+            name: save_domain_scores
+          - type: CheckBox
+            name: save_utility_scores
+          - type: CheckBox
+            name: regulatory_documentation
+
+...

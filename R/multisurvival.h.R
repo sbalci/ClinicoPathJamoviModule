@@ -68,6 +68,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             spline_df = 3,
             spline_type = "pspline",
             showExplanations = FALSE,
+            showSummaries = FALSE,
             ml_method = "none",
             ml_validation = "cv",
             ml_cv_folds = 5,
@@ -420,6 +421,10 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showExplanations",
                 showExplanations,
                 default=FALSE)
+            private$..showSummaries <- jmvcore::OptionBool$new(
+                "showSummaries",
+                showSummaries,
+                default=FALSE)
             private$..ml_method <- jmvcore::OptionList$new(
                 "ml_method",
                 ml_method,
@@ -541,6 +546,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..spline_df)
             self$.addOption(private$..spline_type)
             self$.addOption(private$..showExplanations)
+            self$.addOption(private$..showSummaries)
             self$.addOption(private$..ml_method)
             self$.addOption(private$..ml_validation)
             self$.addOption(private$..ml_cv_folds)
@@ -619,6 +625,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         spline_df = function() private$..spline_df$value,
         spline_type = function() private$..spline_type$value,
         showExplanations = function() private$..showExplanations$value,
+        showSummaries = function() private$..showSummaries$value,
         ml_method = function() private$..ml_method$value,
         ml_validation = function() private$..ml_validation$value,
         ml_cv_folds = function() private$..ml_cv_folds$value,
@@ -696,6 +703,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..spline_df = NA,
         ..spline_type = NA,
         ..showExplanations = NA,
+        ..showSummaries = NA,
         ..ml_method = NA,
         ..ml_validation = NA,
         ..ml_cv_folds = NA,
@@ -745,6 +753,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         nomogramExplanation = function() private$.items[["nomogramExplanation"]],
         personTimeExplanation = function() private$.items[["personTimeExplanation"]],
         stratifiedAnalysisExplanation = function() private$.items[["stratifiedAnalysisExplanation"]],
+        survivalPlotsExplanation = function() private$.items[["survivalPlotsExplanation"]],
         ml_variable_importance = function() private$.items[["ml_variable_importance"]],
         ml_performance_metrics = function() private$.items[["ml_performance_metrics"]],
         ml_feature_selection_results = function() private$.items[["ml_feature_selection_results"]],
@@ -863,7 +872,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="personTimeSummary",
                 title="Person-Time Summary",
-                visible="(person_time)",
+                visible="(person_time && showSummaries)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -1017,7 +1026,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="riskScoreTable",
                 title="Risk Score Summary",
-                visible="(calculateRiskScore)",
+                visible="(calculateRiskScore && showSummaries)",
                 rows=0,
                 columns=list(
                     list(
@@ -1198,7 +1207,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="tree_summary",
                 title="Survival Decision Tree Summary",
-                visible="(use_tree)",
+                visible="(use_tree && showSummaries)",
                 clearWith=list(
                     "use_tree",
                     "min_node",
@@ -1302,6 +1311,15 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "use_stratify",
                     "stratvar",
                     "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survivalPlotsExplanation",
+                title="Understanding Adjusted Survival Curves and Plots",
+                visible="((ac || hr) && showExplanations)",
+                clearWith=list(
+                    "ac",
+                    "hr",
+                    "outcome")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ml_variable_importance",
@@ -1368,7 +1386,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="ml_ensemble_summary",
                 title="Ensemble Model Summary",
-                visible="(ml_method == 'ensemble')",
+                visible="(ml_method == 'ensemble' && showSummaries)",
                 clearWith=list(
                     "ml_method",
                     "ml_ensemble_weights",
@@ -1685,9 +1703,12 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param spline_type Type of spline basis to use. Penalized splines provide
 #'   smooth functions with automatic smoothness selection. Natural splines are
 #'   constrained to be linear at the boundaries.
-#' @param showExplanations Display educational explanations for each analysis
-#'   type to help interpret  multivariable survival analysis results, Cox
-#'   regression, adjusted survival  curves, nomograms, and model diagnostics.
+#' @param showExplanations Display detailed explanations for each analysis
+#'   component to help interpret the statistical methods and results.
+#' @param showSummaries Display natural language summaries alongside tables
+#'   and plots. These summaries provide plain-language interpretations of the
+#'   statistical results. Turn off to reduce visual clutter when summaries are
+#'   not needed.
 #' @param ml_method Machine learning survival analysis method
 #' @param ml_validation Model validation approach
 #' @param ml_cv_folds CV fold count
@@ -1733,6 +1754,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$nomogramExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ml_variable_importance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ml_performance_metrics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ml_feature_selection_results} \tab \tab \tab \tab \tab a table \cr
@@ -1812,6 +1834,7 @@ multisurvival <- function(
     spline_df = 3,
     spline_type = "pspline",
     showExplanations = FALSE,
+    showSummaries = FALSE,
     ml_method = "none",
     ml_validation = "cv",
     ml_cv_folds = 5,
@@ -1924,6 +1947,7 @@ multisurvival <- function(
         spline_df = spline_df,
         spline_type = spline_type,
         showExplanations = showExplanations,
+        showSummaries = showSummaries,
         ml_method = ml_method,
         ml_validation = ml_validation,
         ml_cv_folds = ml_cv_folds,

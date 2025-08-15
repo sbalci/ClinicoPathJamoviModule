@@ -1,0 +1,474 @@
+---
+name: clinicalprediction
+title: Clinical Prediction Models & ML Interpretability
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Clinical Prediction Models
+menuSubtitle: ML models with SHAP/LIME interpretability
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Develop and validate clinical prediction models using machine learning algorithms
+        with interpretability analysis. Includes comprehensive model comparison, feature
+        selection, cross-validation, and explainable AI through SHAP and LIME methods.
+        Designed for clinical research applications with regulatory compliance features
+        for model validation and documentation.
+    R:
+        dontrun: false
+        usage: |
+            data('clinical_data')
+            
+            clinicalprediction(
+                data = clinical_data,
+                outcome_var = "mortality",
+                predictor_vars = c("age", "biomarker", "stage"),
+                model_type = "random_forest",
+                interpretability = TRUE,
+                validation_method = "cv_10fold"
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Variable Selection
+    - name: outcome_var
+      title: Outcome Variable
+      type: Variable
+      suggested:
+          - nominal
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Target variable for prediction (binary, continuous, or survival)
+
+    - name: predictor_vars
+      title: Predictor Variables
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Variables to use as predictors in the model
+
+    - name: patient_id
+      title: Patient ID (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Patient identifier for tracking predictions
+
+    - name: time_var
+      title: Time Variable (For Survival)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Time to event variable for survival prediction models
+
+    - name: event_var
+      title: Event Variable (For Survival)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Event indicator for survival prediction models
+
+    - name: stratify_var
+      title: Stratification Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Variable for stratified sampling and validation
+
+    # Model Configuration
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+          - name: "random_forest"
+            title: "Random Forest"
+          - name: "gradient_boosting"
+            title: "Gradient Boosting (XGBoost)"
+          - name: "logistic_regression"
+            title: "Logistic Regression"
+          - name: "cox_regression"
+            title: "Cox Regression"
+          - name: "svm"
+            title: "Support Vector Machine"
+          - name: "neural_network"
+            title: "Neural Network"
+          - name: "ensemble"
+            title: "Ensemble Methods"
+      default: "random_forest"
+      description:
+          R: Type of machine learning model to fit
+
+    - name: problem_type
+      title: Problem Type
+      type: List
+      options:
+          - name: "classification"
+            title: "Classification"
+          - name: "regression"
+            title: "Regression"
+          - name: "survival"
+            title: "Survival Analysis"
+      default: "classification"
+      description:
+          R: Type of prediction problem
+
+    - name: outcome_type
+      title: Outcome Type
+      type: List
+      options:
+          - name: "binary"
+            title: "Binary Outcome"
+          - name: "multiclass"
+            title: "Multi-class Outcome"
+          - name: "continuous"
+            title: "Continuous Outcome"
+          - name: "time_to_event"
+            title: "Time-to-Event"
+      default: "binary"
+      description:
+          R: Specific type of outcome variable
+
+    # Feature Engineering
+    - name: feature_selection
+      title: Feature Selection
+      type: Bool
+      default: true
+      description:
+          R: Perform automated feature selection
+
+    - name: selection_method
+      title: Feature Selection Method
+      type: List
+      options:
+          - name: "recursive_fe"
+            title: "Recursive Feature Elimination"
+          - name: "lasso"
+            title: "LASSO Regularization"
+          - name: "mutual_info"
+            title: "Mutual Information"
+          - name: "boruta"
+            title: "Boruta Algorithm"
+          - name: "stability"
+            title: "Stability Selection"
+      default: "recursive_fe"
+      description:
+          R: Method for automatic feature selection
+
+    - name: feature_engineering
+      title: Feature Engineering
+      type: Bool
+      default: true
+      description:
+          R: Perform automated feature engineering
+
+    - name: handle_missing
+      title: Missing Data Handling
+      type: List
+      options:
+          - name: "complete_cases"
+            title: "Complete Cases Only"
+          - name: "mean_median"
+            title: "Mean/Median Imputation"
+          - name: "knn_imputation"
+            title: "KNN Imputation"
+          - name: "mice_imputation"
+            title: "MICE Imputation"
+      default: "mice_imputation"
+      description:
+          R: Method for handling missing data
+
+    # Model Training
+    - name: train_proportion
+      title: Training Set Proportion
+      type: Number
+      min: 0.5
+      max: 0.9
+      default: 0.7
+      description:
+          R: Proportion of data for training (70% = 0.7)
+
+    - name: validation_method
+      title: Validation Method
+      type: List
+      options:
+          - name: "holdout"
+            title: "Holdout Validation"
+          - name: "cv_5fold"
+            title: "5-Fold Cross-Validation"
+          - name: "cv_10fold"
+            title: "10-Fold Cross-Validation"
+          - name: "bootstrap"
+            title: "Bootstrap Validation"
+          - name: "temporal"
+            title: "Temporal Validation"
+      default: "cv_10fold"
+      description:
+          R: Method for model validation
+
+    - name: hyperparameter_tuning
+      title: Hyperparameter Tuning
+      type: Bool
+      default: true
+      description:
+          R: Perform automated hyperparameter optimization
+
+    - name: tuning_method
+      title: Tuning Method
+      type: List
+      options:
+          - name: "grid_search"
+            title: "Grid Search"
+          - name: "random_search"
+            title: "Random Search"
+          - name: "bayesian"
+            title: "Bayesian Optimization"
+      default: "random_search"
+      description:
+          R: Method for hyperparameter tuning
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      min: 1
+      max: 999999
+      default: 42
+      description:
+          R: Random seed for reproducibility
+
+    # Model Interpretability
+    - name: interpretability
+      title: Model Interpretability
+      type: Bool
+      default: true
+      description:
+          R: Generate model interpretability analysis
+
+    - name: shap_analysis
+      title: SHAP Analysis
+      type: Bool
+      default: true
+      description:
+          R: Generate SHAP (SHapley Additive exPlanations) values
+
+    - name: lime_analysis
+      title: LIME Analysis
+      type: Bool
+      default: false
+      description:
+          R: Generate LIME (Local Interpretable Model-agnostic Explanations)
+
+    - name: permutation_importance
+      title: Permutation Importance
+      type: Bool
+      default: true
+      description:
+          R: Calculate permutation feature importance
+
+    - name: partial_dependence
+      title: Partial Dependence Plots
+      type: Bool
+      default: true
+      description:
+          R: Generate partial dependence plots for key features
+
+    - name: individual_explanations
+      title: Individual Predictions Explanation
+      type: Bool
+      default: false
+      description:
+          R: Explain individual predictions using SHAP/LIME
+
+    - name: n_explanations
+      title: Number of Individual Explanations
+      type: Integer
+      min: 1
+      max: 100
+      default: 10
+      description:
+          R: Number of individual predictions to explain in detail
+
+    # Performance Metrics
+    - name: performance_metrics
+      title: Performance Metrics
+      type: Bool
+      default: true
+      description:
+          R: Calculate comprehensive performance metrics
+
+    - name: calibration_analysis
+      title: Calibration Analysis
+      type: Bool
+      default: true
+      description:
+          R: Assess model calibration
+
+    - name: clinical_metrics
+      title: Clinical Decision Metrics
+      type: Bool
+      default: true
+      description:
+          R: Calculate clinical decision analysis metrics
+
+    - name: roc_analysis
+      title: ROC Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform ROC curve analysis with confidence intervals
+
+    - name: threshold_optimization
+      title: Threshold Optimization
+      type: Bool
+      default: true
+      description:
+          R: Optimize prediction threshold for clinical use
+
+    # Model Comparison
+    - name: compare_models
+      title: Model Comparison
+      type: Bool
+      default: false
+      description:
+          R: Compare multiple model types
+
+    - name: baseline_models
+      title: Include Baseline Models
+      type: Bool
+      default: true
+      description:
+          R: Include simple baseline models for comparison
+
+    - name: ensemble_models
+      title: Ensemble Methods
+      type: Bool
+      default: false
+      description:
+          R: Create ensemble of best performing models
+
+    # Clinical Integration
+    - name: risk_stratification
+      title: Risk Stratification
+      type: Bool
+      default: true
+      description:
+          R: Create risk stratification groups
+
+    - name: n_risk_groups
+      title: Number of Risk Groups
+      type: Integer
+      min: 2
+      max: 10
+      default: 3
+      description:
+          R: Number of risk stratification groups (e.g., low/medium/high)
+
+    - name: nomogram
+      title: Generate Nomogram
+      type: Bool
+      default: true
+      description:
+          R: Create clinical nomogram for risk calculation
+
+    - name: decision_curve
+      title: Decision Curve Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform decision curve analysis for clinical utility
+
+    # Validation & Robustness
+    - name: external_validation
+      title: External Validation Ready
+      type: Bool
+      default: true
+      description:
+          R: Prepare model for external validation
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Integer
+      min: 100
+      max: 2000
+      default: 1000
+      description:
+          R: Number of bootstrap samples for confidence intervals
+
+    - name: stability_analysis
+      title: Model Stability Analysis
+      type: Bool
+      default: true
+      description:
+          R: Assess model stability across different samples
+
+    - name: bias_analysis
+      title: Bias and Fairness Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze model bias across demographic groups
+
+    # Output Options
+    - name: detailed_output
+      title: Detailed Output
+      type: Bool
+      default: true
+      description:
+          R: Include detailed model diagnostics and explanations
+
+    - name: clinical_report
+      title: Clinical Report
+      type: Bool
+      default: true
+      description:
+          R: Generate clinical interpretation report
+
+    - name: save_model
+      title: Save Trained Model
+      type: Bool
+      default: false
+      description:
+          R: Save trained model for future predictions
+
+    - name: export_predictions
+      title: Export Predictions
+      type: Bool
+      default: false
+      description:
+          R: Export individual predictions with probabilities
+
+    - name: regulatory_documentation
+      title: Regulatory Documentation
+      type: Bool
+      default: true
+      description:
+          R: Include documentation for regulatory submission
+
+...

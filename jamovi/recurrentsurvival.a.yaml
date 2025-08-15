@@ -1,0 +1,328 @@
+name: recurrentsurvival
+title: Recurrent Event Survival Analysis
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '0.0.1'
+jas: '1.2'
+description:
+    main: |
+        Recurrent event survival analysis for subjects who can experience multiple 
+        events over time. Common in cancer recurrence, infections, hospitalizations, 
+        and chronic disease episodes. Handles gap time, calendar time, and counting 
+        process formulations.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Cancer recurrence analysis
+            recurrentsurvival(
+                data = cancer_data,
+                subject_id = patient_id,
+                event_time = recurrence_time,
+                event_type = recurrence_type,
+                terminal_event = death,
+                covariates = c("age", "stage", "treatment"),
+                model_type = "ag_model"
+            )
+
+options:
+    - name: subject_id
+      title: Subject ID Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          ui: Unique identifier for each subject
+          R: |
+              Variable identifying unique subjects who can have multiple events
+
+    - name: event_time
+      title: Event Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Time to recurrent event occurrence
+          R: |
+              Time variable for recurrent event occurrence
+
+    - name: event_status
+      title: Event Status
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      default: null
+      description:
+          ui: Event indicator (1=event, 0=censored)
+          R: |
+              Event status indicator for recurrent events
+
+    - name: terminal_event
+      title: Terminal Event Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description:
+          ui: Time to terminal event (death, study end)
+          R: |
+              Terminal event that stops the recurrence process
+
+    - name: terminal_status
+      title: Terminal Event Status
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      default: null
+      description:
+          ui: Terminal event indicator (1=terminal event, 0=censored)
+          R: |
+              Status indicator for terminal event
+
+    - name: event_type
+      title: Event Type
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: null
+      description:
+          ui: Type or category of recurrent event
+          R: |
+              Classification of different types of recurrent events
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          ui: Predictive variables for regression analysis
+          R: |
+              Covariates to include in the recurrent event model
+
+    - name: stratification_vars
+      title: Stratification Variables
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: null
+      description:
+          ui: Variables for stratified analysis
+          R: |
+              Variables for stratifying the baseline hazard
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+          - name: ag_model
+            title: Andersen-Gill Model
+          - name: pwp_cp
+            title: PWP Conditional Process
+          - name: pwp_gt
+            title: PWP Gap Time
+          - name: msm_model
+            title: Multi-State Model
+          - name: frailty_gamma
+            title: Frailty Model (Gamma)
+          - name: frailty_lognormal
+            title: Frailty Model (Log-Normal)
+          - name: counting_process
+            title: Counting Process
+      default: ag_model
+      description:
+          ui: Statistical model for recurrent event analysis
+          R: |
+              Model specification for recurrent event data
+
+    - name: time_scale
+      title: Time Scale
+      type: List
+      options:
+          - name: gap_time
+            title: Gap Time (Time Since Last Event)
+          - name: calendar_time
+            title: Calendar Time (Time Since Start)
+          - name: counting_process
+            title: Counting Process Formulation
+      default: gap_time
+      description:
+          ui: Time scale formulation for analysis
+          R: |
+              Time scale specification for recurrent events
+
+    - name: frailty_distribution
+      title: Frailty Distribution
+      type: List
+      options:
+          - name: gamma
+            title: Gamma Distribution
+          - name: lognormal
+            title: Log-Normal Distribution
+          - name: gaussian
+            title: Gaussian Distribution
+          - name: stable
+            title: Stable Distribution
+      default: gamma
+      description:
+          ui: Distribution for frailty (random effects)
+          R: |
+              Distribution assumption for frailty terms
+
+    - name: robust_variance
+      title: Robust Variance Estimation
+      type: Bool
+      default: true
+      description:
+          ui: Use robust sandwich variance estimator
+          R: |
+              Whether to use robust variance estimation
+
+    - name: cluster_variable
+      title: Cluster Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: null
+      description:
+          ui: Clustering variable for variance estimation
+          R: |
+              Variable for clustering in variance estimation
+
+    - name: baseline_hazard_smooth
+      title: Baseline Hazard Smoothing
+      type: Bool
+      default: false
+      description:
+          ui: Apply smoothing to baseline hazard estimate
+          R: |
+              Whether to smooth the baseline hazard function
+
+    - name: smoothing_bandwidth
+      title: Smoothing Bandwidth
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+      description:
+          ui: Bandwidth parameter for smoothing
+          R: |
+              Bandwidth for baseline hazard smoothing
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          ui: Confidence level for intervals
+          R: |
+              Confidence level for parameter estimates
+
+    - name: max_events
+      title: Maximum Events per Subject
+      type: Integer
+      default: 10
+      min: 2
+      max: 50
+      description:
+          ui: Maximum number of events to consider per subject
+          R: |
+              Upper limit on events per subject for analysis
+
+    - name: terminal_competing
+      title: Terminal Event as Competing Risk
+      type: Bool
+      default: true
+      description:
+          ui: Treat terminal event as competing risk
+          R: |
+              Whether to model terminal event as competing risk
+
+    - name: recurrence_plots
+      title: Plot Recurrence Functions
+      type: Bool
+      default: true
+      description:
+          ui: Generate recurrence function plots
+          R: |
+              Whether to plot recurrence functions
+
+    - name: gap_time_plots
+      title: Plot Gap Time Distributions
+      type: Bool
+      default: false
+      description:
+          ui: Generate gap time distribution plots
+          R: |
+              Whether to plot gap time distributions
+
+    - name: cumulative_hazard
+      title: Plot Cumulative Hazard
+      type: Bool
+      default: true
+      description:
+          ui: Generate cumulative hazard function plots
+          R: |
+              Whether to plot cumulative hazard functions
+
+    - name: model_diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          ui: Perform model diagnostic analysis
+          R: |
+              Whether to include model diagnostics
+
+    - name: goodness_of_fit
+      title: Goodness of Fit Tests
+      type: Bool
+      default: true
+      description:
+          ui: Perform goodness-of-fit testing
+          R: |
+              Whether to test model goodness-of-fit
+
+    - name: prediction_times
+      title: Prediction Time Points
+      type: String
+      default: "12,24,36,60"
+      description:
+          ui: Comma-separated time points for predictions (months)
+          R: |
+              Time points for recurrence probability predictions
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 200
+      min: 50
+      max: 1000
+      description:
+          ui: Bootstrap samples for uncertainty estimation
+          R: |
+              Number of bootstrap resamples
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      default: 0.0001
+      min: 0.00001
+      max: 0.01
+      description:
+          ui: Tolerance for algorithm convergence
+          R: |
+              Convergence criterion for iterative algorithms
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Integer
+      default: 500
+      min: 50
+      max: 2000
+      description:
+          ui: Maximum iterations for estimation algorithms
+          R: |
+              Maximum number of algorithm iterations

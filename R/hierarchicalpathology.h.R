@@ -205,7 +205,49 @@ hierarchicalpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "level_3",
                     "level_2",
                     "level_1"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="level", 
+                        `title`="Hierarchical Level", 
+                        `type`="text"),
+                    list(
+                        `name`="n_obs", 
+                        `title`="N Obs", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_groups", 
+                        `title`="N Groups", 
+                        `type`="integer"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="min_val", 
+                        `title`="Min", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="max_val", 
+                        `title`="Max", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="median", 
+                        `title`="Median", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="iqr", 
+                        `title`="IQR", 
+                        `type`="number", 
+                        `format`="zto"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelresults",
@@ -217,7 +259,46 @@ hierarchicalpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "level_1",
                     "covariates",
                     "model_type"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Term", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="t_value", 
+                        `title`="t-value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper CI", 
+                        `type`="number", 
+                        `format`="zto"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="randomeffects",
@@ -229,7 +310,25 @@ hierarchicalpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "level_2",
                     "level_1",
                     "model_type"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Random Effect", 
+                        `type`="text"),
+                    list(
+                        `name`="variance", 
+                        `title`="Variance", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="std_dev", 
+                        `title`="Std.Dev", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="correlation", 
+                        `title`="Correlation", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="variancecomponents",
@@ -241,7 +340,25 @@ hierarchicalpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "level_2",
                     "level_1",
                     "model_type"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="component", 
+                        `title`="Component", 
+                        `type`="text"),
+                    list(
+                        `name`="variance", 
+                        `title`="Variance", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percent %", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="description", 
+                        `title`="Description", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="icc",
@@ -253,7 +370,30 @@ hierarchicalpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "level_2",
                     "level_1",
                     "model_type"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="icc_type", 
+                        `title`="ICC Type", 
+                        `type`="text"),
+                    list(
+                        `name`="icc_value", 
+                        `title`="ICC Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelcomparison",
@@ -266,7 +406,44 @@ hierarchicalpathologyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "level_1",
                     "covariates",
                     "model_type"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="aic", 
+                        `title`="AIC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="bic", 
+                        `title`="BIC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="loglik", 
+                        `title`="logLik", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="chi_sq", 
+                        `title`="\u03C7\u00B2", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="chi_df", 
+                        `title`="\u03C7\u00B2 df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticplot",

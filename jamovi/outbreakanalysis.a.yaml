@@ -1,0 +1,395 @@
+---
+name: outbreakanalysis
+title: Outbreak Analysis & Epidemiological Investigation
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Outbreak Analysis
+menuSubtitle: Comprehensive epidemiological outbreak investigation
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive outbreak analysis and epidemiological investigation for infectious disease surveillance
+        and public health research. Analyzes tabular outbreak data to identify attack rates, risk factors,
+        epidemic curves, case-control associations, and spatial-temporal patterns. Essential for outbreak
+        investigation, surveillance analysis, and epidemiological research with robust statistical methods
+        for public health decision-making and intervention planning.
+    R:
+        dontrun: false
+        usage: |
+            data('outbreak_data')
+            
+            outbreakanalysis(
+                data = outbreak_data,
+                case_status = "case",
+                exposure_vars = c("food_a", "food_b", "water"),
+                date_onset = "onset_date",
+                location_var = "location"
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Variable Selection
+    - name: case_status
+      title: Case Status Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Binary variable indicating case (1) vs control (0) or case vs non-case
+
+    - name: exposure_vars
+      title: Exposure Variables
+      type: Variables
+      suggested:
+          - nominal
+          - continuous
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Variables representing potential exposures or risk factors
+
+    - name: date_onset
+      title: Onset Date Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Date of symptom onset or case identification
+
+    - name: location_var
+      title: Location Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Geographic location or administrative unit
+
+    - name: person_id
+      title: Person ID (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Unique identifier for each individual
+
+    - name: age_var
+      title: Age Variable (Optional)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Age of individuals for demographic analysis
+
+    - name: sex_var
+      title: Sex Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Sex/gender variable for demographic analysis
+
+    - name: additional_vars
+      title: Additional Variables
+      type: Variables
+      suggested:
+          - nominal
+          - continuous
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Additional variables for descriptive analysis
+
+    # Analysis Configuration
+    - name: outbreak_type
+      title: Outbreak Investigation Type
+      type: List
+      options:
+          - name: "point_source"
+            title: "Point Source Outbreak"
+          - name: "continuing_source"
+            title: "Continuing Common Source"
+          - name: "propagated"
+            title: "Person-to-Person Propagated"
+          - name: "mixed"
+            title: "Mixed Outbreak"
+          - name: "unknown"
+            title: "Unknown Pattern"
+      default: "unknown"
+      description:
+          R: Type of outbreak pattern expected
+
+    - name: analysis_type
+      title: Analysis Approach
+      type: List
+      options:
+          - name: "descriptive"
+            title: "Descriptive Analysis Only"
+          - name: "case_control"
+            title: "Case-Control Analysis"
+          - name: "cohort"
+            title: "Cohort Analysis"
+          - name: "combined"
+            title: "Combined Analysis"
+      default: "combined"
+      description:
+          R: Primary analytical approach for outbreak investigation
+
+    - name: epidemic_curve_unit
+      title: Epidemic Curve Time Unit
+      type: List
+      options:
+          - name: "day"
+            title: "Daily"
+          - name: "week"
+            title: "Weekly"
+          - name: "month"
+            title: "Monthly"
+          - name: "hour"
+            title: "Hourly"
+          - name: "auto"
+            title: "Automatic"
+      default: "auto"
+      description:
+          R: Time unit for epidemic curve construction
+
+    # Statistical Analysis Options
+    - name: attack_rate_analysis
+      title: Attack Rate Analysis
+      type: Bool
+      default: true
+      description:
+          R: Calculate attack rates and 95% confidence intervals
+
+    - name: risk_factor_analysis
+      title: Risk Factor Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform risk factor analysis with odds ratios and relative risks
+
+    - name: dose_response_analysis
+      title: Dose-Response Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze dose-response relationships for quantitative exposures
+
+    - name: temporal_analysis
+      title: Temporal Pattern Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze temporal patterns and epidemic curve characteristics
+
+    - name: spatial_analysis
+      title: Spatial Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform spatial analysis and clustering detection
+
+    # Statistical Test Configuration
+    - name: statistical_tests
+      title: Statistical Tests
+      type: List
+      options:
+          - name: "chi_square"
+            title: "Chi-Square Test"
+          - name: "fisher_exact"
+            title: "Fisher's Exact Test"
+          - name: "mcnemar"
+            title: "McNemar's Test (Matched)"
+          - name: "mantel_haenszel"
+            title: "Mantel-Haenszel Test"
+          - name: "all_tests"
+            title: "All Appropriate Tests"
+      default: "all_tests"
+      description:
+          R: Statistical tests for association analysis
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for confidence intervals
+
+    - name: multiple_testing_correction
+      title: Multiple Testing Correction
+      type: List
+      options:
+          - name: "none"
+            title: "No Correction"
+          - name: "bonferroni"
+            title: "Bonferroni Correction"
+          - name: "holm"
+            title: "Holm Method"
+          - name: "fdr"
+            title: "False Discovery Rate"
+      default: "holm"
+      description:
+          R: Multiple testing correction method
+
+    # Advanced Analysis Options
+    - name: stratified_analysis
+      title: Stratified Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform stratified analysis by demographic variables
+
+    - name: stratification_vars
+      title: Stratification Variables
+      type: Variables
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Variables for stratified analysis
+
+    - name: case_definition
+      title: Case Definition Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze case definition sensitivity and specificity
+
+    - name: incubation_period
+      title: Incubation Period Analysis
+      type: Bool
+      default: false
+      description:
+          R: Calculate incubation period statistics
+
+    - name: exposure_date_var
+      title: Exposure Date Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Date of exposure for incubation period calculation
+
+    # Visualization Options
+    - name: epidemic_curve_plot
+      title: Epidemic Curve Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate epidemic curve visualization
+
+    - name: attack_rate_plot
+      title: Attack Rate Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate attack rate comparison plots
+
+    - name: risk_factor_plot
+      title: Risk Factor Forest Plot
+      type: Bool
+      default: true
+      description:
+          R: Generate forest plot of risk factors
+
+    - name: spatial_plot
+      title: Spatial Distribution Plot
+      type: Bool
+      default: false
+      description:
+          R: Generate spatial distribution maps
+
+    # Advanced Options
+    - name: power_calculation
+      title: Power Calculation
+      type: Bool
+      default: false
+      description:
+          R: Calculate statistical power for detected associations
+
+    - name: sample_size_calculation
+      title: Sample Size Recommendations
+      type: Bool
+      default: false
+      description:
+          R: Provide sample size recommendations for future studies
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform sensitivity analysis for case definitions
+
+    # Output Options
+    - name: comprehensive_report
+      title: Comprehensive Outbreak Report
+      type: Bool
+      default: true
+      description:
+          R: Generate comprehensive outbreak investigation report
+
+    - name: public_health_summary
+      title: Public Health Summary
+      type: Bool
+      default: true
+      description:
+          R: Generate public health summary with recommendations
+
+    - name: surveillance_indicators
+      title: Surveillance Quality Indicators
+      type: Bool
+      default: false
+      description:
+          R: Calculate surveillance system quality indicators
+
+    - name: data_quality_assessment
+      title: Data Quality Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess data completeness and quality issues
+
+    # Reporting Standards
+    - name: strobe_compliance
+      title: STROBE Compliance
+      type: Bool
+      default: true
+      description:
+          R: Ensure STROBE guideline compliance for epidemiological reporting
+
+    - name: export_for_epiinfo
+      title: Export for EpiInfo Format
+      type: Bool
+      default: false
+      description:
+          R: Export results in EpiInfo compatible format

@@ -50,7 +50,8 @@ survivalcont(
   stratified_cox = FALSE,
   strata_variable,
   loglog = FALSE,
-  showExplanations = FALSE
+  showExplanations = FALSE,
+  showSummaries = FALSE
 )
 }
 \arguments{
@@ -214,9 +215,13 @@ groups or populations.}
 assumption. Parallel lines  in the log-log plot suggest that proportional
 hazards assumption holds.}
 
-\item{showExplanations}{Display educational explanations for each analysis
-type to help interpret  survival analysis results, cut-off point analysis,
-Cox regression, and multiple  cutoffs analysis.}
+\item{showExplanations}{Display detailed explanations for each analysis
+component to help interpret the statistical methods and results.}
+
+\item{showSummaries}{Display natural language summaries alongside tables
+and plots. These summaries provide plain-language interpretations of the
+statistical results. Turn off to reduce visual clutter when summaries are
+not needed.}
 }
 \value{
 A results object containing:
@@ -257,6 +262,7 @@ A results object containing:
 \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

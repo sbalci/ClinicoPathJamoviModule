@@ -1,0 +1,127 @@
+name: intervalsurvival
+title: Interval-Censored Survival Analysis
+jrs: '1.1'
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+      
+    - name: data_summary
+      title: Interval-Censored Data Summary
+      type: Html
+      visible: true
+      
+    - name: model_results
+      title: Model Estimation Results
+      type: Html
+      visible: true
+      
+    - name: covariate_effects
+      title: Covariate Effects
+      type: Html
+      visible: true
+      
+    - name: survival_estimates
+      title: Survival Function Estimates
+      type: Html
+      visible: true
+      
+    - name: hazard_estimates
+      title: Hazard Function Estimates
+      type: Html
+      visible: (hazard_function)
+      
+    - name: model_diagnostics_summary
+      title: Model Diagnostics
+      type: Html
+      visible: (model_diagnostics)
+      
+    - name: goodness_of_fit_results
+      title: Goodness of Fit Tests
+      type: Html
+      visible: (goodness_of_fit)
+      
+    - name: model_comparison_table
+      title: Model Comparison
+      type: Html
+      visible: (model_comparison)
+      
+    - name: residual_summary
+      title: Residual Analysis
+      type: Html
+      visible: (residual_analysis)
+      
+    - name: survival_curves_plot
+      title: Survival Probability Curves
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_survival_curves
+      visible: (survival_curves)
+      clearWith:
+          - left_time
+          - right_time
+          - model_type
+          - covariates
+          
+    - name: hazard_plot
+      title: Hazard Function Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_hazard_function
+      visible: (hazard_function)
+      clearWith:
+          - left_time
+          - right_time
+          - model_type
+          - baseline_hazard_smooth
+          
+    - name: interval_plot
+      title: Interval Censoring Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_intervals
+      visible: true
+      clearWith:
+          - left_time
+          - right_time
+          - status_var
+          
+    - name: residual_plots
+      title: Residual Diagnostic Plots
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_residuals
+      visible: (residual_analysis)
+      clearWith:
+          - model_type
+          - covariates
+          - estimation_method
+          
+    - name: model_comparison_plot
+      title: Model Comparison Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_model_comparison
+      visible: (model_comparison)
+      clearWith:
+          - left_time
+          - right_time
+          - covariates
+          
+    - name: convergence_plot
+      title: Convergence Diagnostics
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_convergence
+      visible: (estimation_method == 'mcmc')
+      clearWith:
+          - mcmc_iterations
+          - mcmc_burnin
+          - convergence_tolerance

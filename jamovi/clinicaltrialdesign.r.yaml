@@ -1,0 +1,250 @@
+---
+name: clinicaltrialdesign
+title: Clinical Trial Design & Power Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Getting Started
+      type: Html
+      description: Instructions for clinical trial design and power analysis
+      visible: true
+
+    - name: design_summary
+      title: Trial Design Summary
+      type: Table
+      description: Summary of trial design parameters and recommendations
+      columns:
+          - name: parameter
+            title: Design Parameter
+            type: text
+          - name: value
+            title: Selected Value
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+          - name: rationale
+            title: Rationale
+            type: text
+      clearWith:
+          - trial_type
+          - outcome_type
+          - test_type
+
+    - name: power_results
+      title: Power Analysis Results
+      type: Table
+      description: Primary power analysis calculations and results
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: input_value
+            title: Input Value
+            type: text
+          - name: calculated_value
+            title: Calculated Value
+            type: text
+          - name: confidence_interval
+            title: 95% CI
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - calculation_type
+          - alpha
+          - power
+          - effect_size
+          - sample_size
+
+    - name: sample_size_breakdown
+      title: Sample Size Breakdown
+      type: Table
+      description: Detailed sample size calculations with adjustments
+      visible: (calculation_type:sample_size)
+      columns:
+          - name: component
+            title: Sample Size Component
+            type: text
+          - name: per_group
+            title: Per Group
+            type: integer
+          - name: total
+            title: Total
+            type: integer
+          - name: adjustment_factor
+            title: Adjustment Factor
+            type: number
+            format: zto
+          - name: rationale
+            title: Rationale
+            type: text
+      clearWith:
+          - sample_size
+          - allocation_ratio
+          - dropout_rate
+          - interim_analyses
+
+    - name: effect_size_analysis
+      title: Effect Size Analysis
+      type: Table
+      description: Effect size calculations and clinical significance assessment
+      columns:
+          - name: effect_measure
+            title: Effect Measure
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto
+          - name: magnitude
+            title: Magnitude
+            type: text
+          - name: clinical_significance
+            title: Clinical Significance
+            type: text
+          - name: statistical_significance
+            title: Statistical Significance
+            type: text
+      clearWith:
+          - effect_size
+          - mean_difference
+          - proportion1
+          - proportion2
+
+    - name: assumptions_check
+      title: Statistical Assumptions
+      type: Table
+      description: Key assumptions for the selected statistical test
+      visible: (show_assumptions)
+      columns:
+          - name: assumption
+            title: Assumption
+            type: text
+          - name: description
+            title: Description
+            type: text
+          - name: assessment_method
+            title: Assessment Method
+            type: text
+          - name: violation_impact
+            title: Impact if Violated
+            type: text
+          - name: alternatives
+            title: Alternative Tests
+            type: text
+      clearWith:
+          - test_type
+          - outcome_type
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Table
+      description: Power/sample size sensitivity across parameter ranges
+      visible: (show_sensitivity)
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: low_value
+            title: Low Value
+            type: text
+          - name: base_value
+            title: Base Value
+            type: text
+          - name: high_value
+            title: High Value
+            type: text
+          - name: impact_assessment
+            title: Impact Assessment
+            type: text
+      clearWith:
+          - effect_size
+          - power
+          - alpha
+          - dropout_rate
+
+    - name: regulatory_considerations
+      title: Regulatory Considerations
+      type: Table
+      description: Regulatory guidance and compliance considerations
+      visible: (show_interpretation)
+      columns:
+          - name: regulatory_aspect
+            title: Regulatory Aspect
+            type: text
+          - name: requirement
+            title: Requirement/Guideline
+            type: text
+          - name: compliance_status
+            title: Compliance Status
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+          - name: reference
+            title: Reference
+            type: text
+      clearWith:
+          - regulatory_context
+          - trial_type
+          - alpha
+          - power
+
+    - name: power_curve
+      title: Power Curve Analysis
+      type: Image
+      width: 800
+      height: 600
+      description: Power curves showing relationship between sample size and statistical power
+      visible: (show_plots)
+      requiresData: false
+      clearWith:
+          - effect_size
+          - alpha
+          - test_type
+          - allocation_ratio
+
+    - name: effect_size_plot
+      title: Effect Size Visualization
+      type: Image  
+      width: 800
+      height: 600
+      description: Effect size distribution and clinical significance thresholds
+      visible: (show_plots)
+      requiresData: false
+      clearWith:
+          - effect_size
+          - mean_difference
+          - common_sd
+          - outcome_type
+
+    - name: sample_size_plot
+      title: Sample Size Requirements
+      type: Image
+      width: 800
+      height: 600
+      description: Sample size requirements across different effect sizes and power levels
+      visible: (show_plots && calculation_type:sample_size)
+      requiresData: false
+      clearWith:
+          - power
+          - alpha
+          - effect_size
+          - dropout_rate
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation & Guidelines
+      type: Html
+      description: Clinical context, interpretation guidelines, and next steps
+      visible: (show_interpretation)
+
+    - name: study_protocol_template
+      title: Study Protocol Template
+      type: Html
+      description: Template sections for study protocol statistical analysis plan
+      visible: (show_interpretation)
+
+...

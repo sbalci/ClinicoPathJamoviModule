@@ -1,0 +1,285 @@
+name: intervalsurvival
+title: Interval-Censored Survival Analysis
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '0.0.3'
+jas: '1.2'
+description:
+    main: |
+        Interval-censored survival analysis for data where the exact event time 
+        is unknown but falls within an interval. Common in periodic follow-up 
+        studies, screening programs, and clinical trials with scheduled visits.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Tumor progression between visits
+            intervalsurvival(
+                data = oncology_data,
+                left_time = last_negative_visit,
+                right_time = first_positive_visit,
+                covariates = c("age", "stage", "treatment"),
+                model_type = "aft_weibull"
+            )
+
+options:
+    - name: left_time
+      title: Left Interval Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Lower bound of the interval (last known event-free time)
+          R: |
+              Left boundary of the censoring interval
+
+    - name: right_time
+      title: Right Interval Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Upper bound of the interval (first time event detected)
+          R: |
+              Right boundary of the censoring interval
+
+    - name: status_var
+      title: Censoring Status Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      default: null
+      description:
+          ui: Type of censoring (0=right, 1=interval, 2=left, 3=exact)
+          R: |
+              Censoring status indicator variable
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          ui: Predictive variables for regression analysis
+          R: |
+              Covariates to include in the survival model
+
+    - name: stratification_vars
+      title: Stratification Variables
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: null
+      description:
+          ui: Variables for stratified analysis
+          R: |
+              Variables for stratifying the baseline hazard
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+          - name: cox_ph
+            title: Cox Proportional Hazards
+          - name: aft_weibull
+            title: AFT Weibull
+          - name: aft_lognormal
+            title: AFT Log-Normal
+          - name: aft_loglogistic
+            title: AFT Log-Logistic
+          - name: aft_exponential
+            title: AFT Exponential
+          - name: aft_gamma
+            title: AFT Gamma
+          - name: nonparametric
+            title: Non-parametric (Turnbull)
+      default: aft_weibull
+      description:
+          ui: Statistical model for interval-censored data
+          R: |
+              Model specification for interval-censored survival
+
+    - name: estimation_method
+      title: Estimation Method
+      type: List
+      options:
+          - name: npmle
+            title: Non-parametric MLE (Turnbull)
+          - name: em_algorithm
+            title: EM Algorithm
+          - name: newton_raphson
+            title: Newton-Raphson
+          - name: mcmc
+            title: MCMC (Bayesian)
+      default: em_algorithm
+      description:
+          ui: Parameter estimation approach
+          R: |
+              Method for parameter estimation
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          ui: Confidence level for intervals
+          R: |
+              Confidence level for parameter estimates
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      default: 0.0001
+      min: 0.00001
+      max: 0.01
+      description:
+          ui: Tolerance for algorithm convergence
+          R: |
+              Convergence criterion for iterative algorithms
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Integer
+      default: 500
+      min: 50
+      max: 2000
+      description:
+          ui: Maximum iterations for estimation algorithms
+          R: |
+              Maximum number of algorithm iterations
+
+    - name: baseline_hazard_smooth
+      title: Baseline Hazard Smoothing
+      type: Bool
+      default: false
+      description:
+          ui: Apply smoothing to baseline hazard estimate
+          R: |
+              Whether to smooth the baseline hazard function
+
+    - name: smoothing_bandwidth
+      title: Smoothing Bandwidth
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+      description:
+          ui: Bandwidth parameter for smoothing
+          R: |
+              Bandwidth for baseline hazard smoothing
+
+    - name: survival_curves
+      title: Plot Survival Curves
+      type: Bool
+      default: true
+      description:
+          ui: Generate survival probability curves
+          R: |
+              Whether to plot survival curves
+
+    - name: hazard_function
+      title: Plot Hazard Function
+      type: Bool
+      default: false
+      description:
+          ui: Generate hazard function plots
+          R: |
+              Whether to plot hazard functions
+
+    - name: model_diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          ui: Perform model diagnostic analysis
+          R: |
+              Whether to include model diagnostics
+
+    - name: residual_analysis
+      title: Residual Analysis
+      type: Bool
+      default: true
+      description:
+          ui: Generate residual plots and statistics
+          R: |
+              Whether to perform residual analysis
+
+    - name: goodness_of_fit
+      title: Goodness of Fit Tests
+      type: Bool
+      default: true
+      description:
+          ui: Perform goodness-of-fit testing
+          R: |
+              Whether to test model goodness-of-fit
+
+    - name: model_comparison
+      title: Model Comparison
+      type: Bool
+      default: false
+      description:
+          ui: Compare different model specifications
+          R: |
+              Whether to compare multiple models
+
+    - name: prediction_times
+      title: Prediction Time Points
+      type: String
+      default: "12,24,36,60"
+      description:
+          ui: Comma-separated time points for predictions (months)
+          R: |
+              Time points for survival probability predictions
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 200
+      min: 50
+      max: 1000
+      description:
+          ui: Bootstrap samples for uncertainty estimation
+          R: |
+              Number of bootstrap resamples
+
+    - name: mcmc_iterations
+      title: MCMC Iterations
+      type: Integer
+      default: 5000
+      min: 1000
+      max: 20000
+      description:
+          ui: MCMC sampling iterations (if MCMC selected)
+          R: |
+              MCMC sampling iterations
+
+    - name: mcmc_burnin
+      title: MCMC Burn-in
+      type: Integer
+      default: 1000
+      min: 200
+      max: 5000
+      description:
+          ui: MCMC burn-in samples (if MCMC selected)
+          R: |
+              MCMC burn-in period
+
+    - name: imputation_method
+      title: Missing Time Imputation
+      type: List
+      options:
+          - name: midpoint
+            title: Interval Midpoint
+          - name: random
+            title: Random Within Interval
+          - name: conditional_mean
+            title: Conditional Mean
+          - name: multiple_imputation
+            title: Multiple Imputation
+      default: midpoint
+      description:
+          ui: Method for handling missing interval bounds
+          R: |
+              Imputation approach for incomplete intervals

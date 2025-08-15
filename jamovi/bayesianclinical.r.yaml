@@ -1,0 +1,349 @@
+---
+name: bayesianclinical
+title: Bayesian Clinical Analysis & Decision Making
+jrs: '1.1'
+
+items:
+    - name: bayesian_overview
+      title: Bayesian Analysis Overview
+      type: Table
+      columns:
+          - name: characteristic
+            title: Characteristic
+            type: text
+          - name: value
+            title: Value
+            type: text
+
+    - name: posterior_summary
+      title: Posterior Parameter Summary
+      type: Table
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: mean
+            title: Posterior Mean
+            type: number
+            format: zto
+          - name: sd
+            title: Posterior SD
+            type: number
+            format: zto
+          - name: ci_lower
+            title: 95% CrI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: 95% CrI Upper
+            type: number
+            format: zto
+          - name: prob_positive
+            title: P(β > 0)
+            type: number
+            format: pc
+          - name: prob_meaningful
+            title: P(|β| > MID)
+            type: number
+            format: pc
+
+    - name: treatment_effect_analysis
+      title: Bayesian Treatment Effect Analysis
+      type: Table
+      visible: (analysis_type:treatment_effect)
+      columns:
+          - name: comparison
+            title: Treatment Comparison
+            type: text
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto
+          - name: ci_lower
+            title: 95% CrI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: 95% CrI Upper
+            type: number
+            format: zto
+          - name: prob_superiority
+            title: P(Treatment > Control)
+            type: number
+            format: pc
+          - name: prob_equivalence
+            title: P(ROPE)
+            type: number
+            format: pc
+          - name: clinical_interpretation
+            title: Clinical Interpretation
+            type: text
+
+    - name: bayes_factors
+      title: Bayes Factor Analysis
+      type: Table
+      visible: (bayes_factor_analysis)
+      columns:
+          - name: hypothesis
+            title: Hypothesis
+            type: text
+          - name: bayes_factor
+            title: Bayes Factor
+            type: number
+            format: zto
+          - name: log_bf
+            title: log(BF)
+            type: number
+            format: zto
+          - name: evidence_strength
+            title: Evidence Strength
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: model_diagnostics_summary
+      title: MCMC Diagnostics Summary
+      type: Table
+      visible: (model_diagnostics)
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: rhat
+            title: R-hat
+            type: number
+            format: zto
+          - name: ess_bulk
+            title: ESS (Bulk)
+            type: integer
+          - name: ess_tail
+            title: ESS (Tail)
+            type: integer
+          - name: mcmc_se
+            title: MCMC SE
+            type: number
+            format: zto
+          - name: convergence_status
+            title: Convergence
+            type: text
+
+    - name: prior_posterior_comparison
+      title: Prior vs Posterior Comparison
+      type: Table
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: prior_mean
+            title: Prior Mean
+            type: number
+            format: zto
+          - name: prior_sd
+            title: Prior SD
+            type: number
+            format: zto
+          - name: posterior_mean
+            title: Posterior Mean
+            type: number
+            format: zto
+          - name: posterior_sd
+            title: Posterior SD
+            type: number
+            format: zto
+          - name: learning_ratio
+            title: Learning Ratio
+            type: number
+            format: zto
+
+    - name: decision_analysis_results
+      title: Bayesian Decision Analysis
+      type: Table
+      visible: (decision_analysis)
+      columns:
+          - name: decision_option
+            title: Decision Option
+            type: text
+          - name: expected_utility
+            title: Expected Utility
+            type: number
+            format: zto
+          - name: probability_optimal
+            title: P(Optimal)
+            type: number
+            format: pc
+          - name: value_of_information
+            title: Value of Information
+            type: number
+            format: zto
+          - name: recommendation
+            title: Recommendation
+            type: text
+
+    - name: predictive_intervals
+      title: Bayesian Prediction Intervals
+      type: Table
+      visible: (prediction_intervals)
+      columns:
+          - name: prediction_type
+            title: Prediction Type
+            type: text
+          - name: predicted_value
+            title: Predicted Value
+            type: number
+            format: zto
+          - name: pi_lower
+            title: 95% PI Lower
+            type: number
+            format: zto
+          - name: pi_upper
+            title: 95% PI Upper
+            type: number
+            format: zto
+          - name: prediction_se
+            title: Prediction SE
+            type: number
+            format: zto
+
+    - name: sensitivity_to_priors
+      title: Prior Sensitivity Analysis
+      type: Table
+      visible: (sensitivity_to_priors)
+      columns:
+          - name: prior_specification
+            title: Prior Specification
+            type: text
+          - name: posterior_mean
+            title: Posterior Mean
+            type: number
+            format: zto
+          - name: posterior_sd
+            title: Posterior SD
+            type: number
+            format: zto
+          - name: relative_change
+            title: Relative Change (%)
+            type: number
+            format: pc
+          - name: robustness_assessment
+            title: Robustness
+            type: text
+
+    - name: probability_statements
+      title: Clinical Probability Statements
+      type: Table
+      visible: (probability_statements)
+      columns:
+          - name: clinical_question
+            title: Clinical Question
+            type: text
+          - name: probability
+            title: Probability
+            type: number
+            format: pc
+          - name: credible_interval
+            title: 95% Credible Interval
+            type: text
+          - name: clinical_significance
+            title: Clinical Significance
+            type: text
+
+    - name: model_comparison
+      title: Bayesian Model Comparison
+      type: Table
+      visible: (model_comparison)
+      columns:
+          - name: model
+            title: Model
+            type: text
+          - name: loo_ic
+            title: LOO-IC
+            type: number
+            format: zto
+          - name: loo_se
+            title: LOO-IC SE
+            type: number
+            format: zto
+          - name: waic
+            title: WAIC
+            type: number
+            format: zto
+          - name: model_weight
+            title: Model Weight
+            type: number
+            format: pc
+          - name: relative_performance
+            title: Relative Performance
+            type: text
+
+    - name: posterior_distribution_plot
+      title: Posterior Distributions
+      type: Image
+      visible: (posterior_plots)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: trace_plots
+      title: MCMC Trace Plots
+      type: Image
+      visible: (trace_plots)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: prior_posterior_plot
+      title: Prior vs Posterior Comparison Plot
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: bayesian_forest_plot
+      title: Bayesian Forest Plot
+      type: Image
+      visible: (forest_plots)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: decision_analysis_plot
+      title: Decision Analysis Visualization
+      type: Image
+      visible: (decision_plots && decision_analysis)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: predictive_checks_plot
+      title: Posterior Predictive Checks
+      type: Image
+      visible: (posterior_predictive_checks)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: comprehensive_report
+      title: Comprehensive Bayesian Analysis Report
+      type: Html
+      visible: (comprehensive_report)
+      clearWith:
+          - outcome_var
+          - treatment_var
+          - analysis_type
+
+    - name: clinical_interpretation_report
+      title: Clinical Interpretation & Summary
+      type: Html
+      visible: (clinical_interpretation)
+      clearWith:
+          - outcome_var
+          - treatment_var
+
+    - name: layman_summary_report
+      title: Plain Language Summary
+      type: Html
+      visible: (layman_summary)
+      clearWith:
+          - outcome_var
+          - treatment_var

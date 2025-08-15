@@ -1,0 +1,525 @@
+---
+name: biomarkerdiscovery
+title: Biomarker Discovery Platform with ML Interpretability
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Biomarker Discovery
+menuSubtitle: ML-powered biomarker identification with SHAP/LIME
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive biomarker discovery and validation platform using machine learning
+        algorithms with interpretability analysis. Includes feature selection, biomarker
+        ranking, pathway analysis, and clinical validation metrics. Designed for omics
+        data analysis with regulatory compliance features for biomarker development
+        and clinical translation.
+    R:
+        dontrun: false
+        usage: |
+            data('biomarker_data')
+            
+            biomarkerdiscovery(
+                data = biomarker_data,
+                outcome_var = "response",
+                biomarker_vars = c("gene1", "gene2", "protein1"),
+                discovery_method = "elastic_net",
+                validation_method = "bootstrap",
+                interpretability = TRUE
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Variable Selection
+    - name: outcome_var
+      title: Outcome Variable
+      type: Variable
+      suggested:
+          - nominal
+          - continuous
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Primary outcome variable for biomarker discovery
+
+    - name: biomarker_vars
+      title: Biomarker Variables
+      type: Variables
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Potential biomarker variables (genes, proteins, metabolites, etc.)
+
+    - name: clinical_vars
+      title: Clinical Variables (Optional)
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Clinical variables to include in the analysis (age, stage, etc.)
+
+    - name: batch_var
+      title: Batch Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Batch or study identifier for batch effect correction
+
+    - name: patient_id
+      title: Patient ID (Optional)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Patient identifier for tracking
+
+    - name: time_var
+      title: Time Variable (For Survival)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Time to event variable for survival biomarker analysis
+
+    - name: event_var
+      title: Event Variable (For Survival)
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Event indicator for survival biomarker analysis
+
+    # Discovery Configuration
+    - name: discovery_method
+      title: Discovery Method
+      type: List
+      options:
+          - name: "elastic_net"
+            title: "Elastic Net Regularization"
+          - name: "random_forest"
+            title: "Random Forest"
+          - name: "gradient_boosting"
+            title: "Gradient Boosting"
+          - name: "svm_rfe"
+            title: "SVM with Recursive Feature Elimination"
+          - name: "univariate"
+            title: "Univariate Screening"
+          - name: "multivariate"
+            title: "Multivariate Analysis"
+          - name: "ensemble"
+            title: "Ensemble Methods"
+      default: "elastic_net"
+      description:
+          R: Method for biomarker discovery and selection
+
+    - name: outcome_type
+      title: Outcome Type
+      type: List
+      options:
+          - name: "binary"
+            title: "Binary Outcome"
+          - name: "continuous"
+            title: "Continuous Outcome"
+          - name: "survival"
+            title: "Time-to-Event"
+          - name: "multiclass"
+            title: "Multi-class Outcome"
+      default: "binary"
+      description:
+          R: Type of outcome variable
+
+    - name: data_type
+      title: Data Type
+      type: List
+      options:
+          - name: "genomics"
+            title: "Genomics (Gene Expression)"
+          - name: "proteomics"
+            title: "Proteomics"
+          - name: "metabolomics"
+            title: "Metabolomics"
+          - name: "clinical"
+            title: "Clinical Variables"
+          - name: "mixed_omics"
+            title: "Mixed Omics Data"
+      default: "genomics"
+      description:
+          R: Type of biomarker data being analyzed
+
+    # Preprocessing Options
+    - name: data_preprocessing
+      title: Data Preprocessing
+      type: Bool
+      default: true
+      description:
+          R: Perform data preprocessing and normalization
+
+    - name: normalization_method
+      title: Normalization Method
+      type: List
+      options:
+          - name: "z_score"
+            title: "Z-score Standardization"
+          - name: "min_max"
+            title: "Min-Max Scaling"
+          - name: "robust"
+            title: "Robust Scaling"
+          - name: "quantile"
+            title: "Quantile Normalization"
+          - name: "log_transform"
+            title: "Log Transformation"
+      default: "z_score"
+      description:
+          R: Method for data normalization
+
+    - name: batch_correction
+      title: Batch Correction
+      type: Bool
+      default: false
+      description:
+          R: Perform batch effect correction
+
+    - name: batch_method
+      title: Batch Correction Method
+      type: List
+      options:
+          - name: "combat"
+            title: "ComBat"
+          - name: "limma"
+            title: "limma removeBatchEffect"
+          - name: "pca"
+            title: "PCA-based Correction"
+      default: "combat"
+      description:
+          R: Method for batch effect correction
+
+    - name: filter_low_variance
+      title: Filter Low Variance Features
+      type: Bool
+      default: true
+      description:
+          R: Remove features with low variance
+
+    - name: variance_threshold
+      title: Variance Threshold
+      type: Number
+      min: 0.0
+      max: 1.0
+      default: 0.1
+      description:
+          R: Minimum variance threshold for feature filtering
+
+    # Feature Selection
+    - name: feature_selection_method
+      title: Feature Selection Method
+      type: List
+      options:
+          - name: "univariate_stats"
+            title: "Univariate Statistical Tests"
+          - name: "correlation_filter"
+            title: "Correlation-based Filter"
+          - name: "mutual_information"
+            title: "Mutual Information"
+          - name: "recursive_elimination"
+            title: "Recursive Feature Elimination"
+          - name: "stability_selection"
+            title: "Stability Selection"
+          - name: "boruta"
+            title: "Boruta Algorithm"
+      default: "univariate_stats"
+      description:
+          R: Method for initial feature selection
+
+    - name: n_features_select
+      title: Number of Features to Select
+      type: Integer
+      min: 1
+      max: 1000
+      default: 50
+      description:
+          R: Maximum number of features to select for analysis
+
+    - name: fdr_threshold
+      title: FDR Threshold
+      type: Number
+      min: 0.001
+      max: 0.5
+      default: 0.05
+      description:
+          R: False discovery rate threshold for multiple testing correction
+
+    - name: correlation_threshold
+      title: Correlation Threshold
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.9
+      description:
+          R: Correlation threshold for removing highly correlated features
+
+    # Model Training & Validation
+    - name: validation_method
+      title: Validation Method
+      type: List
+      options:
+          - name: "cv_10fold"
+            title: "10-Fold Cross-Validation"
+          - name: "cv_5fold"
+            title: "5-Fold Cross-Validation"
+          - name: "bootstrap"
+            title: "Bootstrap Validation"
+          - name: "holdout"
+            title: "Holdout Validation"
+          - name: "nested_cv"
+            title: "Nested Cross-Validation"
+      default: "cv_10fold"
+      description:
+          R: Method for model validation
+
+    - name: train_proportion
+      title: Training Set Proportion
+      type: Number
+      min: 0.5
+      max: 0.9
+      default: 0.7
+      description:
+          R: Proportion of data for training (70% = 0.7)
+
+    - name: hyperparameter_tuning
+      title: Hyperparameter Tuning
+      type: Bool
+      default: true
+      description:
+          R: Perform hyperparameter optimization
+
+    - name: n_bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      min: 100
+      max: 2000
+      default: 1000
+      description:
+          R: Number of bootstrap samples for confidence intervals
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      min: 1
+      max: 999999
+      default: 42
+      description:
+          R: Random seed for reproducibility
+
+    # Biomarker Evaluation
+    - name: biomarker_ranking
+      title: Biomarker Ranking
+      type: Bool
+      default: true
+      description:
+          R: Rank biomarkers by importance and clinical relevance
+
+    - name: stability_analysis
+      title: Stability Analysis
+      type: Bool
+      default: true
+      description:
+          R: Assess biomarker selection stability across resampling
+
+    - name: clinical_performance
+      title: Clinical Performance Metrics
+      type: Bool
+      default: true
+      description:
+          R: Calculate clinical performance metrics for biomarkers
+
+    - name: signature_development
+      title: Biomarker Signature Development
+      type: Bool
+      default: true
+      description:
+          R: Develop multi-biomarker signatures
+
+    - name: pathway_analysis
+      title: Pathway Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform pathway enrichment analysis for discovered biomarkers
+
+    # Interpretability & Explainability
+    - name: interpretability
+      title: Model Interpretability
+      type: Bool
+      default: true
+      description:
+          R: Generate interpretability analysis using SHAP/LIME
+
+    - name: shap_analysis
+      title: SHAP Analysis
+      type: Bool
+      default: true
+      description:
+          R: Generate SHAP values for biomarker explanation
+
+    - name: lime_analysis
+      title: LIME Analysis
+      type: Bool
+      default: false
+      description:
+          R: Generate LIME explanations for individual predictions
+
+    - name: feature_interaction
+      title: Feature Interaction Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze interactions between biomarkers
+
+    - name: partial_dependence
+      title: Partial Dependence Analysis
+      type: Bool
+      default: true
+      description:
+          R: Generate partial dependence plots for key biomarkers
+
+    - name: biomarker_networks
+      title: Biomarker Network Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze biomarker co-expression and interaction networks
+
+    # Clinical Translation
+    - name: cutpoint_optimization
+      title: Optimal Cutpoint Analysis
+      type: Bool
+      default: true
+      description:
+          R: Find optimal cutpoints for biomarker classification
+
+    - name: risk_stratification
+      title: Risk Stratification
+      type: Bool
+      default: true
+      description:
+          R: Create risk stratification based on biomarker signatures
+
+    - name: nomogram_development
+      title: Nomogram Development
+      type: Bool
+      default: true
+      description:
+          R: Develop clinical nomogram incorporating biomarkers
+
+    - name: decision_curve_analysis
+      title: Decision Curve Analysis
+      type: Bool
+      default: true
+      description:
+          R: Assess clinical utility using decision curve analysis
+
+    # External Validation
+    - name: external_validation
+      title: External Validation Ready
+      type: Bool
+      default: true
+      description:
+          R: Prepare biomarkers for external validation
+
+    - name: biomarker_generalizability
+      title: Generalizability Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess biomarker generalizability across populations
+
+    - name: robustness_testing
+      title: Robustness Testing
+      type: Bool
+      default: true
+      description:
+          R: Test biomarker robustness to data perturbations
+
+    # Quality Control
+    - name: quality_control
+      title: Quality Control Analysis
+      type: Bool
+      default: true
+      description:
+          R: Comprehensive quality control for biomarker data
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: true
+      description:
+          R: Detect and handle outliers in biomarker data
+
+    - name: missing_data_analysis
+      title: Missing Data Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze and handle missing biomarker data
+
+    # Output Options
+    - name: detailed_results
+      title: Detailed Results
+      type: Bool
+      default: true
+      description:
+          R: Include comprehensive analysis results
+
+    - name: biomarker_report
+      title: Biomarker Discovery Report
+      type: Bool
+      default: true
+      description:
+          R: Generate comprehensive biomarker discovery report
+
+    - name: export_biomarkers
+      title: Export Selected Biomarkers
+      type: Bool
+      default: false
+      description:
+          R: Export list of discovered biomarkers
+
+    - name: save_signature
+      title: Save Biomarker Signature
+      type: Bool
+      default: false
+      description:
+          R: Save trained biomarker signature model
+
+    - name: regulatory_documentation
+      title: Regulatory Documentation
+      type: Bool
+      default: true
+      description:
+          R: Include documentation for regulatory submission
+
+...

@@ -1,0 +1,200 @@
+---
+name: batcheffect
+title: Batch Effect Control & Quality Assessment
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Getting Started
+      type: Html
+      description: Instructions for batch effect analysis and quality control
+      visible: true
+
+    - name: summary
+      title: Data Quality Summary
+      type: Table
+      description: Overall summary of data quality and batch effect assessment
+      columns:
+          - name: metric
+            title: Quality Metric
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: status
+            title: Status
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+      clearWith:
+          - features
+          - batch_var
+          - biological_var
+
+    - name: batch_detection
+      title: Batch Effect Detection Results
+      type: Table
+      description: Statistical tests and metrics for batch effect detection
+      columns:
+          - name: test
+            title: Test/Metric
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: effect_size
+            title: Effect Size
+            type: number
+            format: zto
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - features
+          - batch_var
+          - perform_pca
+
+    - name: feature_quality
+      title: Feature Quality Assessment
+      type: Table
+      description: Quality metrics for individual features
+      visible: (feature_quality)
+      columns:
+          - name: feature
+            title: Feature
+            type: text
+          - name: missing_pct
+            title: Missing %
+            type: number
+            format: zto
+          - name: variance
+            title: Variance
+            type: number
+            format: zto
+          - name: outliers
+            title: Outliers
+            type: integer
+          - name: distribution
+            title: Distribution
+            type: text
+          - name: quality_score
+            title: Quality Score
+            type: number
+            format: zto
+          - name: recommendation
+            title: Recommendation
+            type: text
+      clearWith:
+          - features
+          - outlier_method
+          - variance_threshold
+
+    - name: redundancy
+      title: Feature Redundancy Analysis
+      type: Table
+      description: Analysis of highly correlated and redundant features
+      visible: (redundancy_analysis)
+      columns:
+          - name: feature_pair
+            title: Feature Pair
+            type: text
+          - name: correlation
+            title: Correlation
+            type: number
+            format: zto
+          - name: vif
+            title: VIF
+            type: number
+            format: zto
+          - name: redundancy_type
+            title: Redundancy Type
+            type: text
+          - name: recommendation
+            title: Recommendation
+            type: text
+      clearWith:
+          - features
+          - correlation_threshold
+
+    - name: combat_results
+      title: ComBat Correction Results
+      type: Table
+      description: Results and effectiveness of ComBat batch correction
+      visible: (perform_combat)
+      columns:
+          - name: metric
+            title: Metric
+            type: text
+          - name: before_correction
+            title: Before Correction
+            type: number
+            format: zto
+          - name: after_correction
+            title: After Correction
+            type: number
+            format: zto
+          - name: improvement
+            title: Improvement %
+            type: number
+            format: zto
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - features
+          - batch_var
+          - biological_var
+          - perform_combat
+
+    - name: pca_plot
+      title: PCA Batch Effect Visualization
+      type: Image
+      width: 800
+      height: 600
+      description: PCA plots showing batch effects before and after correction
+      visible: (show_plots && perform_pca)
+      requiresData: true
+      clearWith:
+          - features
+          - batch_var
+          - biological_var
+          - pca_components
+
+    - name: quality_plot
+      title: Feature Quality Plots
+      type: Image
+      width: 800
+      height: 600
+      description: Distribution and quality assessment plots for features
+      visible: (show_plots && feature_quality)
+      requiresData: true
+      clearWith:
+          - features
+          - outlier_method
+          - missing_threshold
+
+    - name: correlation_plot
+      title: Feature Correlation Heatmap
+      type: Image
+      width: 800
+      height: 600
+      description: Correlation matrix heatmap for redundancy analysis
+      visible: (show_plots && redundancy_analysis)
+      requiresData: true
+      clearWith:
+          - features
+          - correlation_threshold
+
+    - name: interpretation
+      title: Clinical Interpretation and Guidelines
+      type: Html
+      description: Clinical context and quality control recommendations
+      visible: true
+
+...

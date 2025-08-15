@@ -1,0 +1,233 @@
+---
+name: featurequality
+title: Feature Quality Assessment
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Feature Quality Assessment
+menuSubtitle: Comprehensive quality control analysis for clinical data features
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive feature quality assessment for clinical and pathology research data. Provides
+        essential data quality control including missing data analysis, outlier detection, distribution
+        analysis, correlation assessment, and variance evaluation. Implements multiple quality metrics
+        with clinical interpretation and actionable recommendations. Critical for ensuring data integrity
+        before statistical analysis and meeting regulatory standards for clinical research.
+    R:
+        dontrun: false
+        usage: |
+            data('clinical_data')
+            
+            featurequality(
+                data = clinical_data,
+                features = c("biomarker1", "biomarker2", "age", "severity"),
+                outlier_detection = TRUE,
+                correlation_analysis = TRUE
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+
+    - name: features
+      title: Features to Analyze
+      type: Variables
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+
+    - name: group_var
+      title: Grouping Variable (Optional)
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      default: null
+
+    - name: analysis_scope
+      title: Analysis Scope
+      type: List
+      options:
+          - name: basic
+            title: Basic Quality Assessment
+          - name: comprehensive
+            title: Comprehensive Analysis
+          - name: advanced
+            title: Advanced Quality Control
+      default: comprehensive
+
+    - name: missing_data_analysis
+      title: Missing Data Analysis
+      type: Bool
+      default: true
+
+    - name: distribution_analysis
+      title: Distribution Analysis
+      type: Bool
+      default: true
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: true
+
+    - name: outlier_method
+      title: Outlier Detection Method
+      type: List
+      options:
+          - name: iqr
+            title: Interquartile Range (IQR)
+          - name: zscore
+            title: Z-Score Method
+          - name: modified_zscore
+            title: Modified Z-Score (MAD)
+          - name: isolation_forest
+            title: Isolation Forest
+          - name: multiple
+            title: Multiple Methods
+      default: multiple
+
+    - name: outlier_threshold
+      title: Outlier Threshold
+      type: Number
+      min: 1.5
+      max: 4.0
+      default: 3.0
+
+    - name: correlation_analysis
+      title: Feature Correlation Analysis
+      type: Bool
+      default: true
+
+    - name: correlation_threshold
+      title: High Correlation Threshold
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.8
+
+    - name: variance_analysis
+      title: Variance Analysis
+      type: Bool
+      default: true
+
+    - name: low_variance_threshold
+      title: Low Variance Threshold
+      type: Number
+      min: 0.001
+      max: 0.1
+      default: 0.01
+
+    - name: normality_testing
+      title: Normality Testing
+      type: Bool
+      default: true
+
+    - name: normality_method
+      title: Normality Test Method
+      type: List
+      options:
+          - name: shapiro
+            title: Shapiro-Wilk Test
+          - name: anderson
+            title: Anderson-Darling Test
+          - name: kolmogorov
+            title: Kolmogorov-Smirnov Test
+          - name: multiple
+            title: Multiple Tests
+      default: multiple
+
+    - name: skewness_analysis
+      title: Skewness & Kurtosis Analysis
+      type: Bool
+      default: true
+
+    - name: feature_importance
+      title: Feature Importance Analysis
+      type: Bool
+      default: false
+
+    - name: importance_method
+      title: Importance Method
+      type: List
+      options:
+          - name: random_forest
+            title: Random Forest
+          - name: correlation
+            title: Correlation-based
+          - name: mutual_info
+            title: Mutual Information
+          - name: chi_square
+            title: Chi-Square Test
+      default: random_forest
+
+    - name: data_transformation
+      title: Suggest Data Transformations
+      type: Bool
+      default: true
+
+    - name: quality_score
+      title: Overall Quality Scoring
+      type: Bool
+      default: true
+
+    - name: detailed_plots
+      title: Detailed Quality Plots
+      type: Bool
+      default: true
+
+    - name: plot_distributions
+      title: Distribution Plots
+      type: Bool
+      default: true
+
+    - name: plot_correlations
+      title: Correlation Heatmap
+      type: Bool
+      default: true
+
+    - name: plot_outliers
+      title: Outlier Visualization
+      type: Bool
+      default: true
+
+    - name: plot_missing
+      title: Missing Data Patterns
+      type: Bool
+      default: true
+
+    - name: export_recommendations
+      title: Export Quality Recommendations
+      type: Bool
+      default: false
+
+    - name: clinical_context
+      title: Clinical Context Analysis
+      type: Bool
+      default: true
+
+    - name: batch_processing
+      title: Batch Feature Processing
+      type: Bool
+      default: true
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      min: 1
+      max: 10000
+      default: 123

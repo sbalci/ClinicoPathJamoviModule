@@ -1,0 +1,219 @@
+title: Screening Program Evaluation & Performance Analysis
+name: screeningevaluation
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Screening Test Result
+        children:
+          - type: VariablesListBox
+            name: screening_result
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: True Disease Status
+        children:
+          - type: VariablesListBox
+            name: disease_status
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Participant ID
+        children:
+          - type: VariablesListBox
+            name: participant_id
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Age Variable
+        children:
+          - type: VariablesListBox
+            name: age_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Sex Variable
+        children:
+          - type: VariablesListBox
+            name: sex_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Screening Date
+        children:
+          - type: VariablesListBox
+            name: screening_date
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Screening Round
+        children:
+          - type: VariablesListBox
+            name: screening_round
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Risk Factor Variables
+        children:
+          - type: VariablesListBox
+            name: risk_factors
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Location/Site Variable
+        children:
+          - type: VariablesListBox
+            name: location_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: screening_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: target_disease
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: screening_test_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: diagnostic_accuracy
+      - type: CheckBox
+        name: program_coverage
+      - type: CheckBox
+        name: detection_rates
+      - type: CheckBox
+        name: interval_cancer_analysis
+      - type: CheckBox
+        name: lead_time_analysis
+      - type: CheckBox
+        name: length_bias_analysis
+      - type: CheckBox
+        name: age_stratified_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: age_group_breaks
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: risk_stratified_analysis
+      - type: CheckBox
+        name: geographic_analysis
+      - type: CheckBox
+        name: calculate_predictive_values
+      - type: CheckBox
+        name: likelihood_ratios
+      - type: CheckBox
+        name: roc_analysis
+      - type: CheckBox
+        name: optimal_cutpoint
+      - type: CheckBox
+        name: quality_indicators
+      - type: CheckBox
+        name: participation_rates
+      - type: CheckBox
+        name: recall_rates
+      - type: CheckBox
+        name: completion_rates
+      - type: CheckBox
+        name: cost_effectiveness
+      - type: CheckBox
+        name: cost_per_case_detected
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Screening Cost Variable
+        children:
+          - type: VariablesListBox
+            name: screening_cost_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Follow-up Cost Variable
+        children:
+          - type: VariablesListBox
+            name: followup_cost_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: time_to_diagnosis
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Diagnosis Date Variable
+        children:
+          - type: VariablesListBox
+            name: diagnosis_date_var
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: survival_analysis
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Survival Time Variable
+        children:
+          - type: VariablesListBox
+            name: survival_time_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Death Indicator Variable
+        children:
+          - type: VariablesListBox
+            name: death_indicator
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: overdiagnosis_analysis
+      - type: CheckBox
+        name: false_positive_impact
+      - type: CheckBox
+        name: screening_adherence
+      - type: CheckBox
+        name: performance_plots
+      - type: CheckBox
+        name: coverage_plots
+      - type: CheckBox
+        name: trend_analysis_plots
+      - type: CheckBox
+        name: comprehensive_report
+      - type: CheckBox
+        name: quality_assurance_report
+      - type: CheckBox
+        name: public_health_indicators
+      - type: CheckBox
+        name: international_standards
+      - type: CheckBox
+        name: export_for_registry

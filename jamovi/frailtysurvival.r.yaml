@@ -1,0 +1,121 @@
+name: frailtysurvival
+title: Frailty & Random Effects Survival Models
+jrs: '1.1'
+items:
+    - name: instructions
+      title: Analysis Instructions
+      type: Html
+      visible: true
+      
+    - name: model_summary
+      title: Frailty Model Summary
+      type: Html
+      visible: true
+      
+    - name: frailty_effects
+      title: Frailty Effects Analysis
+      type: Html
+      visible: true
+      
+    - name: variance_components_table
+      title: Variance Components
+      type: Html
+      visible: (variance_components)
+      
+    - name: covariate_effects
+      title: Covariate Effects
+      type: Html
+      visible: true
+      
+    - name: frailty_test
+      title: Test for Frailty Effects
+      type: Html
+      visible: (test_frailty)
+      
+    - name: model_comparison_table
+      title: Model Comparison
+      type: Html
+      visible: (model_comparison)
+      
+    - name: cluster_summary
+      title: Cluster-Level Summary
+      type: Html
+      visible: (cluster_diagnostics)
+      
+    - name: convergence_summary
+      title: Convergence Diagnostics
+      type: Html
+      visible: (convergence_diagnostics && estimation_method == 'mcmc')
+      
+    - name: survival_curves_plot
+      title: Cluster-Specific Survival Curves
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_survival_curves
+      visible: (survival_curves)
+      clearWith:
+          - time_var
+          - status_var
+          - cluster_var
+          - frailty_type
+          
+    - name: frailty_distribution_plot
+      title: Frailty Distribution
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_frailty_distribution
+      visible: true
+      clearWith:
+          - cluster_var
+          - frailty_type
+          - frailty_distribution
+          
+    - name: cluster_effects_plot
+      title: Cluster Effects Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_cluster_effects
+      visible: (cluster_diagnostics)
+      clearWith:
+          - cluster_var
+          - frailty_type
+          
+    - name: residual_plots
+      title: Model Residuals
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_residuals
+      visible: (residual_analysis)
+      clearWith:
+          - time_var
+          - status_var
+          - covariates
+          - frailty_type
+          
+    - name: variance_components_plot
+      title: Variance Components Visualization
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_variance_components
+      visible: (variance_components)
+      clearWith:
+          - cluster_var
+          - random_effects
+          - frailty_type
+          
+    - name: mcmc_diagnostics_plot
+      title: MCMC Diagnostics
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plot_mcmc_diagnostics
+      visible: (convergence_diagnostics && estimation_method == 'mcmc')
+      clearWith:
+          - estimation_method
+          - mcmc_iterations
+          - burnin_samples

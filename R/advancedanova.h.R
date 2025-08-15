@@ -187,8 +187,11 @@ advancedanovaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         descriptives = function() private$.items[["descriptives"]],
         assumptions = function() private$.items[["assumptions"]],
         anova = function() private$.items[["anova"]],
-        posthoc = function() private$.items[["posthoc"]],
-        effectsizes = function() private$.items[["effectsizes"]],
+        tukey = function() private$.items[["tukey"]],
+        gameshowell = function() private$.items[["gameshowell"]],
+        dunnett = function() private$.items[["dunnett"]],
+        bonferroni = function() private$.items[["bonferroni"]],
+        anovaplot = function() private$.items[["anovaplot"]],
         diagnosticplot = function() private$.items[["diagnosticplot"]],
         meansplot = function() private$.items[["meansplot"]],
         interpretation = function() private$.items[["interpretation"]]),
@@ -212,7 +215,45 @@ advancedanovaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "dependent",
                     "fixed"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="median", 
+                        `title`="Median", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="min_val", 
+                        `title`="Min", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="max_val", 
+                        `title`="Max", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="zto"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="assumptions",
@@ -222,7 +263,33 @@ advancedanovaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dependent",
                     "fixed",
                     "model_type"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="assumption", 
+                        `title`="Assumption", 
+                        `type`="text"),
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="conclusion", 
+                        `title`="Conclusion", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="anova",
@@ -232,30 +299,249 @@ advancedanovaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fixed",
                     "model_type",
                     "effect_sizes"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="source", 
+                        `title`="Source", 
+                        `type`="text"),
+                    list(
+                        `name`="ss", 
+                        `title`="Sum of Squares", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="ms", 
+                        `title`="Mean Square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="f_statistic", 
+                        `title`="F", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="eta_squared", 
+                        `title`="Effect Sizes", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="posthoc",
-                title="Post Hoc Comparisons",
-                visible="(posthoc_method)",
+                name="tukey",
+                title="Tukey HSD Post Hoc Test",
+                visible="(posthoc_method:tukey || posthoc_method:all)",
+                clearWith=list(
+                    "dependent",
+                    "fixed",
+                    "posthoc_method",
+                    "alpha_level"),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="mean_diff", 
+                        `title`="Mean Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_adjusted", 
+                        `title`="Adjusted p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="cohens_d", 
+                        `title`="Cohen's d", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Effect Size", 
+                        `type`="text"),
+                    list(
+                        `name`="significance", 
+                        `title`="Significance", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="gameshowell",
+                title="Games-Howell Post Hoc Test",
+                visible="(posthoc_method:games_howell || posthoc_method:all)",
+                clearWith=list(
+                    "dependent",
+                    "fixed",
+                    "posthoc_method",
+                    "alpha_level"),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="mean_diff", 
+                        `title`="Mean Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="se_diff", 
+                        `title`="SE Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="t_statistic", 
+                        `title`="t-statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_adjusted", 
+                        `title`="Adjusted p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="cohens_d", 
+                        `title`="Cohen's d", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Effect Size", 
+                        `type`="text"),
+                    list(
+                        `name`="significance", 
+                        `title`="Significance", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="dunnett",
+                title="Dunnett's Test vs Control",
+                visible="(posthoc_method:dunnett || posthoc_method:all)",
                 clearWith=list(
                     "dependent",
                     "fixed",
                     "posthoc_method",
                     "control_group",
                     "alpha_level"),
-                columns=list()))
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="std_error", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="t_statistic", 
+                        `title`="t-statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_adjusted", 
+                        `title`="Adjusted p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="cohens_d", 
+                        `title`="Cohen's d", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Effect Size", 
+                        `type`="text"),
+                    list(
+                        `name`="significance", 
+                        `title`="Significance", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="effectsizes",
-                title="Effect Sizes",
-                visible="(effect_sizes)",
+                name="bonferroni",
+                title="Bonferroni Post Hoc Test",
+                visible="(posthoc_method:bonferroni || posthoc_method:all)",
                 clearWith=list(
                     "dependent",
                     "fixed",
-                    "effect_sizes",
-                    "confidence_level"),
-                columns=list()))
+                    "posthoc_method",
+                    "alpha_level"),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="mean_diff", 
+                        `title`="Mean Difference", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="pooled_se", 
+                        `title`="Pooled SE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="t_statistic", 
+                        `title`="t-statistic", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="p_adjusted", 
+                        `title`="Adjusted p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="cohens_d", 
+                        `title`="Cohen's d", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Effect Size", 
+                        `type`="text"),
+                    list(
+                        `name`="significance", 
+                        `title`="Significance", 
+                        `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="anovaplot",
+                title="ANOVA Comparison Plot",
+                width=800,
+                height=600,
+                visible="(show_plots)",
+                requiresData=TRUE,
+                renderFun=".anovaplot",
+                clearWith=list(
+                    "dependent",
+                    "fixed",
+                    "show_plots")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticplot",
@@ -350,8 +636,11 @@ advancedanovaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$descriptives} \tab \tab \tab \tab \tab Descriptive statistics for each group \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab Tests of ANOVA assumptions \cr
 #'   \code{results$anova} \tab \tab \tab \tab \tab Main ANOVA results with effect sizes \cr
-#'   \code{results$posthoc} \tab \tab \tab \tab \tab Pairwise comparisons with multiple correction \cr
-#'   \code{results$effectsizes} \tab \tab \tab \tab \tab Comprehensive effect size measures \cr
+#'   \code{results$tukey} \tab \tab \tab \tab \tab Tukey Honestly Significant Difference test results \cr
+#'   \code{results$gameshowell} \tab \tab \tab \tab \tab Games-Howell test for unequal variances \cr
+#'   \code{results$dunnett} \tab \tab \tab \tab \tab Dunnett's test comparing treatments to control \cr
+#'   \code{results$bonferroni} \tab \tab \tab \tab \tab Bonferroni-corrected pairwise comparisons \cr
+#'   \code{results$anovaplot} \tab \tab \tab \tab \tab Violin plots with boxplots and group means \cr
 #'   \code{results$diagnosticplot} \tab \tab \tab \tab \tab Residual plots and assumption checking \cr
 #'   \code{results$meansplot} \tab \tab \tab \tab \tab Group means with confidence intervals \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab Clinical context and interpretation guidelines \cr

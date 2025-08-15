@@ -1,0 +1,300 @@
+---
+name: treatmenteffects
+title: Causal Inference & Treatment Effects Analysis
+jrs: '1.1'
+
+items:
+    - name: overview
+      title: Treatment Effects Analysis Overview
+      type: Table
+      columns:
+          - name: characteristic
+            title: Characteristic
+            type: text
+          - name: value
+            title: Value
+            type: text
+
+    - name: treatment_effect_estimates
+      title: Treatment Effect Estimates
+      type: Table
+      columns:
+          - name: estimand
+            title: Estimand
+            type: text
+          - name: estimate
+            title: Effect Estimate
+            type: number
+            format: zto
+          - name: std_error
+            title: Standard Error
+            type: number
+            format: zto
+          - name: ci_lower
+            title: 95% CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: 95% CI Upper
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Clinical Interpretation
+            type: text
+
+    - name: balance_assessment
+      title: Covariate Balance Assessment
+      type: Table
+      visible: (balance_assessment)
+      columns:
+          - name: covariate
+            title: Covariate
+            type: text
+          - name: treatment_mean
+            title: Treatment Mean
+            type: number
+            format: zto
+          - name: control_mean
+            title: Control Mean
+            type: number
+            format: zto
+          - name: std_diff_unadj
+            title: Std Diff (Unadj)
+            type: number
+            format: zto
+          - name: std_diff_adj
+            title: Std Diff (Adj)
+            type: number
+            format: zto
+          - name: balance_status
+            title: Balance Status
+            type: text
+
+    - name: propensity_summary
+      title: Propensity Score Summary
+      type: Table
+      visible: (causal_method:propensity_score || causal_method:inverse_weighting || causal_method:matching)
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: ps_mean
+            title: PS Mean
+            type: number
+            format: zto
+          - name: ps_sd
+            title: PS SD
+            type: number
+            format: zto
+          - name: ps_min
+            title: PS Min
+            type: number
+            format: zto
+          - name: ps_max
+            title: PS Max
+            type: number
+            format: zto
+
+    - name: matching_summary
+      title: Matching Summary
+      type: Table
+      visible: (causal_method:matching)
+      columns:
+          - name: match_type
+            title: Match Type
+            type: text
+          - name: matched_pairs
+            title: Matched Pairs
+            type: integer
+          - name: unmatched_treated
+            title: Unmatched Treated
+            type: integer
+          - name: unmatched_control
+            title: Unmatched Control
+            type: integer
+          - name: matching_ratio
+            title: Matching Ratio
+            type: text
+          - name: caliper_width
+            title: Caliper Width
+            type: number
+            format: zto
+
+    - name: weight_summary
+      title: IPTW Weight Summary
+      type: Table
+      visible: (causal_method:inverse_weighting)
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: weight_mean
+            title: Weight Mean
+            type: number
+            format: zto
+          - name: weight_sd
+            title: Weight SD
+            type: number
+            format: zto
+          - name: weight_min
+            title: Weight Min
+            type: number
+            format: zto
+          - name: weight_max
+            title: Weight Max
+            type: number
+            format: zto
+          - name: extreme_weights
+            title: Extreme Weights (>10)
+            type: integer
+
+    - name: model_diagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (model_diagnostics)
+      columns:
+          - name: diagnostic
+            title: Diagnostic
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Table
+      visible: (sensitivity_analysis)
+      columns:
+          - name: gamma
+            title: Gamma
+            type: number
+            format: zto
+          - name: lower_bound
+            title: Lower Bound
+            type: number
+            format: zto
+          - name: upper_bound
+            title: Upper Bound
+            type: number
+            format: zto
+          - name: p_value_lower
+            title: p-value (Lower)
+            type: number
+            format: zto,pvalue
+          - name: p_value_upper
+            title: p-value (Upper)
+            type: number
+            format: zto,pvalue
+          - name: conclusion
+            title: Conclusion
+            type: text
+
+    - name: heterogeneity_analysis
+      title: Treatment Effect Heterogeneity
+      type: Table
+      visible: (heterogeneous_effects)
+      columns:
+          - name: subgroup
+            title: Subgroup
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: effect_estimate
+            title: Effect Estimate
+            type: number
+            format: zto
+          - name: ci_lower
+            title: 95% CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: 95% CI Upper
+            type: number
+            format: zto
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+
+    - name: individual_effects
+      title: Individual Treatment Effects
+      type: Table
+      visible: (individual_effects)
+      columns:
+          - name: patient_id
+            title: Patient ID
+            type: text
+          - name: observed_outcome
+            title: Observed Outcome
+            type: number
+            format: zto
+          - name: predicted_treated
+            title: Predicted if Treated
+            type: number
+            format: zto
+          - name: predicted_control
+            title: Predicted if Control
+            type: number
+            format: zto
+          - name: individual_effect
+            title: Individual Effect
+            type: number
+            format: zto
+          - name: confidence
+            title: Confidence
+            type: text
+
+    - name: overlap_plot
+      title: Propensity Score Overlap
+      type: Image
+      visible: (overlap_assessment)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: balance_plot
+      title: Covariate Balance Plot
+      type: Image
+      visible: (balance_assessment)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: effect_plot
+      title: Treatment Effects Forest Plot
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: sensitivity_plot
+      title: Sensitivity Analysis Plot
+      type: Image
+      visible: (sensitivity_analysis)
+      width: 600
+      height: 400
+      requiresData: true
+
+    - name: causal_report
+      title: Comprehensive Causal Inference Report
+      type: Html
+      visible: (comprehensive_report)
+      clearWith:
+          - treatment_var
+          - outcome_var
+          - covariates
+          - causal_method

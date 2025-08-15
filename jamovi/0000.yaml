@@ -276,6 +276,257 @@ analyses:
       Perfect for clinical research data quality control and preprocessing.
     ribbon: analyses
     category: analyses
+  - title: Batch Effect Control & Quality Assessment
+    name: batcheffect
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Batch Effect Control
+    menuSubtitle: Advanced quality control for tabular data
+    description: >-
+      Advanced batch effect detection and correction for tabular data analysis.
+
+      Essential for digital pathology and multi-institutional studies where
+
+      technical variation can confound biological signals ("garbage in, garbage
+      out").
+    ribbon: analyses
+    category: analyses
+  - title: Clinical Trial Design & Power Analysis
+    name: clinicaltrialdesign
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Clinical Trial Design
+    menuSubtitle: Comprehensive power analysis for clinical trials
+    description: >-
+      Comprehensive power analysis and sample size calculation for clinical
+      trial design.
+
+      Covers the most common clinical trial types with appropriate statistical
+      tests,
+
+      effect size calculations, and regulatory considerations for clinical
+      research.
+    ribbon: analyses
+    category: analyses
+  - title: Missing Data Pattern Explorer
+    name: missingdataexplorer
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Missing Data Explorer
+    menuSubtitle: Comprehensive missing data pattern analysis
+    description: >
+      Comprehensive missing data pattern exploration and visualization for
+      clinical research.
+
+      Analyzes missing data mechanisms, patterns, and correlations to inform
+      imputation
+
+      strategies. Includes advanced diagnostics for missing completely at random
+      (MCAR),
+
+      missing at random (MAR), and missing not at random (MNAR) assessments.
+      Essential
+
+      for understanding missingness before imputation and for regulatory
+      documentation
+
+      of missing data handling strategies.
+    ribbon: analyses
+    category: analyses
+  - title: Advanced Multiple Imputation & Sensitivity Analysis
+    name: advancedimputation
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Advanced MICE Imputation
+    menuSubtitle: Advanced MICE with sensitivity analysis for clinical research
+    description: >
+      Advanced multiple imputation by chained equations (MICE) with
+      comprehensive
+
+      sensitivity analysis for clinical research applications. Includes nested
+      imputation
+
+      for multilevel data, missing not at random (MNAR) imputation methods, and
+
+      comprehensive sensitivity testing for missing data assumptions. Essential
+      for
+
+      regulatory-compliant clinical research where missing data handling must be
+
+      thoroughly documented and validated.
+    ribbon: analyses
+    category: analyses
+  - title: Clinical Prediction Models & ML Interpretability
+    name: clinicalprediction
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Clinical Prediction Models
+    menuSubtitle: ML models with SHAP/LIME interpretability
+    description: >
+      Develop and validate clinical prediction models using machine learning
+      algorithms
+
+      with interpretability analysis. Includes comprehensive model comparison,
+      feature
+
+      selection, cross-validation, and explainable AI through SHAP and LIME
+      methods.
+
+      Designed for clinical research applications with regulatory compliance
+      features
+
+      for model validation and documentation.
+    ribbon: analyses
+    category: analyses
+  - title: Biomarker Discovery Platform with ML Interpretability
+    name: biomarkerdiscovery
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Biomarker Discovery
+    menuSubtitle: ML-powered biomarker identification with SHAP/LIME
+    description: >
+      Comprehensive biomarker discovery and validation platform using machine
+      learning
+
+      algorithms with interpretability analysis. Includes feature selection,
+      biomarker
+
+      ranking, pathway analysis, and clinical validation metrics. Designed for
+      omics
+
+      data analysis with regulatory compliance features for biomarker
+      development
+
+      and clinical translation.
+    ribbon: analyses
+    category: analyses
+  - title: Patient-Reported Outcomes & Quality of Life Analysis
+    name: patientreported
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Patient-Reported Outcomes
+    menuSubtitle: Comprehensive PRO analysis with psychometric validation
+    description: >
+      Comprehensive analysis of Patient-Reported Outcomes (PRO) and Quality of
+      Life (QoL) data
+
+      for clinical research. Includes psychometric validation, score
+      calculation, change analysis,
+
+      and clinical interpretation. Supports standardized instruments (SF-36,
+      EORTC QLQ-C30, 
+
+      FACT-G, etc.) and custom questionnaires with missing data handling and
+      longitudinal analysis.
+
+      Essential for patient-centered outcomes research and clinical trials.
+    ribbon: analyses
+    category: analyses
+  - title: Quality of Life Analysis & Patient-Centered Outcomes
+    name: qualityoflife
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Quality of Life Analysis
+    menuSubtitle: Comprehensive QoL assessment with clinical interpretation
+    description: >
+      Specialized Quality of Life (QoL) analysis for clinical research and
+      patient care.
+
+      Comprehensive assessment of health-related quality of life using
+      standardized instruments
+
+      (SF-36, EORTC QLQ-C30, FACT, EQ-5D) with domain-specific scoring, clinical
+      interpretation,
+
+      and longitudinal change analysis. Includes utilities calculation,
+      preference-based measures,
+
+      and health economic outcomes. Essential for clinical trials,
+      patient-centered care, and
+
+      health technology assessment.
+    ribbon: analyses
+    category: analyses
+  - title: Causal Inference & Treatment Effects Analysis
+    name: treatmenteffects
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Treatment Effects Analysis
+    menuSubtitle: Causal inference with propensity scores and IPTW
+    description: >
+      Comprehensive causal inference analysis for estimating treatment effects
+      in observational studies.
+
+      Implements propensity score methods, inverse probability of treatment
+      weighting (IPTW),
+
+      matching techniques, and doubly robust estimation. Includes covariate
+      balance assessment,
+
+      sensitivity analysis, and causal effect estimation with confidence
+      intervals. Essential for
+
+      comparative effectiveness research, real-world evidence studies, and
+      observational research
+
+      where randomized controlled trials are not feasible.
+    ribbon: analyses
+    category: analyses
+  - title: Outbreak Analysis & Epidemiological Investigation
+    name: outbreakanalysis
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Outbreak Analysis
+    menuSubtitle: Comprehensive epidemiological outbreak investigation
+    description: >
+      Comprehensive outbreak analysis and epidemiological investigation for
+      infectious disease surveillance
+
+      and public health research. Analyzes tabular outbreak data to identify
+      attack rates, risk factors,
+
+      epidemic curves, case-control associations, and spatial-temporal patterns.
+      Essential for outbreak
+
+      investigation, surveillance analysis, and epidemiological research with
+      robust statistical methods
+
+      for public health decision-making and intervention planning.
+    ribbon: analyses
+    category: analyses
+  - title: Screening Program Evaluation & Performance Analysis
+    name: screeningevaluation
+    ns: ClinicoPath
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Screening Evaluation
+    menuSubtitle: Comprehensive screening program performance assessment
+    description: >
+      Comprehensive evaluation of screening programs and diagnostic test
+      performance from tabular
+
+      screening data. Analyzes screening outcomes, program effectiveness,
+      population coverage,
+
+      diagnostic accuracy, and cost-effectiveness. Essential for public health
+      screening program
+
+      assessment, quality improvement, and evidence-based screening policy
+      development using
+
+      standardized epidemiological methods and performance indicators.
+    ribbon: analyses
+    category: analyses
   - title: Statistical Distribution Generator
     name: tidydensity
     ns: ClinicoPath
@@ -621,7 +872,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -638,7 +889,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -655,7 +906,7 @@ analyses:
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
@@ -664,7 +915,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -683,7 +934,7 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
@@ -2065,12 +2316,19 @@ analyses:
     name: enhancednonparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPath Descriptives
     menuTitle: Enhanced Non-Parametric Tests
-    description: |
-      Enhanced Mann-Whitney U and Kruskal-Wallis tests with comprehensive
-      effect size calculations, assumption checking, and post hoc analysis. 
-      Essential for pathology research with non-normal data.
+    description: >-
+      Performs enhanced non-parametric statistical tests specifically designed
+      for digital pathology and biomarker analysis. This module provides
+      comprehensive non-parametric testing with proper effect size calculations,
+      assumption checking, and post hoc analysis - addressing critical gaps
+      identified in 30% of pathology studies that use these methods. Includes
+      enhanced  Mann-Whitney U tests, Kruskal-Wallis tests with Dunn's post hoc
+      testing, and proper  multiple comparison corrections commonly needed in
+      biomarker expression analysis.
+    menuSubgroup: Advanced Statistical Tests
+    menuSubtitle: Enhanced Non-Parametric Tests with Effect Sizes and Post Hoc Analysis
   - title: Advanced ANOVA Suite
     name: advancedanova
     ns: ClinicoPath
@@ -2123,6 +2381,30 @@ analyses:
       where 
 
       25% of pathology studies use categorical analysis incorrectly.
+  - title: Treatment Effect Meta-Analysis
+    name: treatmentmeta
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Frequencies
+    menuSubgroup: Meta-Analysis
+    menuTitle: Treatment Effect Meta-Analysis
+    menuSubtitle: Comprehensive meta-analysis for clinical interventions
+    description: >
+      Comprehensive meta-analysis for treatment effects in clinical research.
+
+      Supports continuous outcomes (mean differences, standardized mean
+      differences),
+
+      binary outcomes (risk ratios, odds ratios, risk differences), and
+      time-to-event
+
+      outcomes (hazard ratios). Includes fixed-effect, random-effects, and
+      Bayesian
+
+      meta-analysis approaches with comprehensive heterogeneity assessment and
+
+      publication bias evaluation.
+    ribbon: analyses
   - title: Diagnostic Test Meta-Analysis for Pathology
     name: diagnosticmeta
     ns: ClinicoPath
@@ -2172,6 +2454,156 @@ analyses:
       composition 
 
       pattern analysis, and optimal threshold identification.
+  - title: Bayesian Clinical Analysis & Decision Making
+    name: bayesianclinical
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Bayesian Clinical Analysis
+    menuSubtitle: Bayesian methods for clinical research and decision making
+    description: >
+      Comprehensive Bayesian analysis for clinical research and medical decision
+      making using tabular
+
+      clinical data. Implements Bayesian hypothesis testing, parameter
+      estimation, predictive modeling,
+
+      and decision analysis. Provides intuitive interpretation of evidence,
+      uncertainty quantification,
+
+      and clinical decision support. Essential for evidence-based medicine,
+      clinical guidelines, and
+
+      personalized treatment decisions with proper uncertainty communication.
+  - title: Feature Quality Assessment
+    name: featurequality
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Feature Quality Assessment
+    menuSubtitle: Comprehensive quality control analysis for clinical data features
+    description: >
+      Comprehensive feature quality assessment for clinical and pathology
+      research data. Provides
+
+      essential data quality control including missing data analysis, outlier
+      detection, distribution
+
+      analysis, correlation assessment, and variance evaluation. Implements
+      multiple quality metrics
+
+      with clinical interpretation and actionable recommendations. Critical for
+      ensuring data integrity
+
+      before statistical analysis and meeting regulatory standards for clinical
+      research.
+  - title: Assay Optimization & Experimental Design
+    name: assayoptimization
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Experimental Design
+    menuTitle: Assay Optimization & Experimental Design
+    description: >
+      Laboratory assay optimization and experimental design for clinical
+      research.
+
+      Includes power calculations, sample size determination, design
+      optimization,
+
+      and quality control for laboratory assays.
+  - title: Frailty & Random Effects Survival Models
+    name: frailtysurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Frailty & Random Effects Survival Models
+    description: |
+      Frailty and random effects survival models for clustered data analysis.
+      Includes gamma frailty, shared frailty, and correlated frailty models
+      for multi-center studies, family studies, and recurrent events.
+  - title: Pseudo-Observations Survival Methods
+    name: pseudosurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Pseudo-Observations Survival Methods
+    description: |
+      Pseudo-observations methods for direct modeling of survival probabilities 
+      and restricted mean survival time (RMST). Enables regression analysis of 
+      survival probability at specific time points and RMST with standard 
+      statistical methods.
+  - title: Interval-Censored Survival Analysis
+    name: intervalsurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Interval-Censored Survival Analysis
+    description: |
+      Interval-censored survival analysis for data where the exact event time 
+      is unknown but falls within an interval. Common in periodic follow-up 
+      studies, screening programs, and clinical trials with scheduled visits.
+  - title: Recurrent Event Survival Analysis
+    name: recurrentsurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Recurrent Event Survival Analysis
+    description: >
+      Recurrent event survival analysis for subjects who can experience
+      multiple 
+
+      events over time. Common in cancer recurrence, infections,
+      hospitalizations, 
+
+      and chronic disease episodes. Handles gap time, calendar time, and
+      counting 
+
+      process formulations.
+  - title: Clinical Risk Calculators & Nomograms
+    name: clinicalcalculators
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuTitle: Clinical Risk Calculators & Nomograms
+  - title: Enhanced Survival Model Validation
+    name: survivalmodelvalidation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath Survival
+    menuSubgroup: Advanced Validation
+    menuTitle: Enhanced Survival Model Validation
+    menuSubtitle: Comprehensive Model Performance Assessment
+    description: >
+      Comprehensive validation toolkit for survival models including calibration
+      assessment, 
+
+      prediction performance metrics, bootstrap validation, and external
+      validation frameworks.
+
+      Essential for developing reliable prognostic models.
+  - title: Clinical Nomograms & Risk Calculators
+    name: clinicalnomograms
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath Survival
+    menuSubgroup: Clinical Translation
+    menuTitle: Clinical Nomograms & Risk Calculators
+    menuSubtitle: Prognostic Tools for Clinical Practice
+    description: >
+      Comprehensive toolkit for developing clinical nomograms, risk score
+      calculators, 
+
+      and decision support tools. Transforms statistical models into practical
+      clinical 
+
+      instruments for personalized risk assessment and treatment planning.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

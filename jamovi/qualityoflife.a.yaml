@@ -1,0 +1,599 @@
+---
+name: qualityoflife
+title: Quality of Life Analysis & Patient-Centered Outcomes
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Quality of Life Analysis
+menuSubtitle: Comprehensive QoL assessment with clinical interpretation
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Specialized Quality of Life (QoL) analysis for clinical research and patient care.
+        Comprehensive assessment of health-related quality of life using standardized instruments
+        (SF-36, EORTC QLQ-C30, FACT, EQ-5D) with domain-specific scoring, clinical interpretation,
+        and longitudinal change analysis. Includes utilities calculation, preference-based measures,
+        and health economic outcomes. Essential for clinical trials, patient-centered care, and
+        health technology assessment.
+    R:
+        dontrun: false
+        usage: |
+            data('qol_data')
+
+            qualityoflife(
+                data = qol_data,
+                qol_domains = list(
+                    physical = c("pf1", "pf2", "pf3"),
+                    mental = c("mh1", "mh2", "mh3")
+                ),
+                patient_id = "patient_id",
+                instrument_type = "sf36"
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # QoL Domain Configuration
+    - name: physical_function_items
+      title: Physical Function Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items measuring physical functioning domain
+
+    - name: role_physical_items
+      title: Role-Physical Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items measuring role limitations due to physical problems
+
+    - name: bodily_pain_items
+      title: Bodily Pain Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items measuring bodily pain domain
+
+    - name: general_health_items
+      title: General Health Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items measuring general health perceptions
+
+    - name: vitality_items
+      title: Vitality/Energy Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items measuring vitality and energy levels
+
+    - name: social_function_items
+      title: Social Function Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items measuring social functioning domain
+
+    - name: role_emotional_items
+      title: Role-Emotional Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items measuring role limitations due to emotional problems
+
+    - name: mental_health_items
+      title: Mental Health Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items measuring mental health domain
+
+    # Additional QoL Domains
+    - name: symptom_items
+      title: Symptom Scale Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Items measuring disease-specific symptoms
+
+    - name: functional_items
+      title: Additional Functional Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Additional functional assessment items
+
+    - name: global_qol_items
+      title: Global QoL Items
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Global quality of life assessment items
+
+    # Patient and Time Variables
+    - name: patient_id
+      title: Patient ID
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Patient identifier for longitudinal analysis
+
+    - name: time_var
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Time point variable (visit, week, month)
+
+    - name: group_var
+      title: Group Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Grouping variable for comparisons (treatment, disease stage)
+
+    - name: clinical_vars
+      title: Clinical Variables
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Clinical variables for correlation and validation
+
+    # Instrument Configuration
+    - name: instrument_type
+      title: QoL Instrument
+      type: List
+      options:
+          - name: "sf36"
+            title: "SF-36 Health Survey"
+          - name: "sf12"
+            title: "SF-12 Health Survey"
+          - name: "eortc_qlq_c30"
+            title: "EORTC QLQ-C30"
+          - name: "fact_g"
+            title: "FACT-G"
+          - name: "fact_specific"
+            title: "Disease-Specific FACT"
+          - name: "eq5d"
+            title: "EQ-5D"
+          - name: "eq5d5l"
+            title: "EQ-5D-5L"
+          - name: "whoqol_bref"
+            title: "WHOQOL-BREF"
+          - name: "qlq_modules"
+            title: "EORTC QLQ Modules"
+          - name: "custom"
+            title: "Custom QoL Instrument"
+      default: "sf36"
+      description:
+          R: Type of QoL instrument being analyzed
+
+    - name: scoring_algorithm
+      title: Scoring Algorithm
+      type: List
+      options:
+          - name: "standard"
+            title: "Standard Scoring"
+          - name: "norm_based"
+            title: "Norm-Based Scoring"
+          - name: "irt_scoring"
+            title: "IRT-Based Scoring"
+          - name: "preference_based"
+            title: "Preference-Based Utilities"
+      default: "standard"
+      description:
+          R: Scoring algorithm for QoL domains
+
+    - name: reference_population
+      title: Reference Population
+      type: List
+      options:
+          - name: "general_us"
+            title: "US General Population"
+          - name: "general_uk"
+            title: "UK General Population"
+          - name: "age_matched"
+            title: "Age-Matched Norms"
+          - name: "disease_specific"
+            title: "Disease-Specific Norms"
+          - name: "none"
+            title: "No Reference Population"
+      default: "general_us"
+      description:
+          R: Reference population for norm-based scoring
+
+    # Missing Data and Quality Control
+    - name: missing_domain_threshold
+      title: Missing Domain Threshold
+      type: Number
+      min: 0.1
+      max: 1.0
+      default: 0.5
+      description:
+          R: Maximum missing proportion for domain scoring (50% = 0.5)
+
+    - name: imputation_method
+      title: Missing Data Imputation
+      type: List
+      options:
+          - name: "none"
+            title: "No Imputation"
+          - name: "person_mean"
+            title: "Person-Specific Mean"
+          - name: "domain_mean"
+            title: "Domain-Specific Mean"
+          - name: "regression"
+            title: "Regression Imputation"
+          - name: "multiple_imputation"
+            title: "Multiple Imputation"
+      default: "person_mean"
+      description:
+          R: Method for handling missing QoL data
+
+    - name: quality_control
+      title: Quality Control Assessment
+      type: Bool
+      default: true
+      description:
+          R: Perform QoL data quality control checks
+
+    - name: response_pattern_analysis
+      title: Response Pattern Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze response patterns and validity
+
+    # Clinical Interpretation
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: Provide clinical interpretation of QoL scores
+
+    - name: minimally_important_difference
+      title: MID Analysis
+      type: Bool
+      default: true
+      description:
+          R: Apply minimally important difference thresholds
+
+    - name: mid_values
+      title: Custom MID Values
+      type: String
+      default: ""
+      description:
+          R: Custom MID values for domains (comma-separated, e.g., "5,10,3")
+
+    - name: ceiling_floor_analysis
+      title: Ceiling/Floor Effects
+      type: Bool
+      default: true
+      description:
+          R: Analyze ceiling and floor effects by domain
+
+    - name: health_utilities
+      title: Health Utilities Calculation
+      type: Bool
+      default: false
+      description:
+          R: Calculate health utility values for health economics
+
+    - name: utility_algorithm
+      title: Utility Algorithm
+      type: List
+      options:
+          - name: "sf6d"
+            title: "SF-6D"
+          - name: "eq5d_uk"
+            title: "EQ-5D UK Tariff"
+          - name: "eq5d_us"
+            title: "EQ-5D US Tariff"
+          - name: "hui3"
+            title: "Health Utilities Index 3"
+          - name: "custom"
+            title: "Custom Utilities"
+      default: "sf6d"
+      description:
+          R: Algorithm for health utility calculation
+
+    # Longitudinal Analysis
+    - name: longitudinal_analysis
+      title: Longitudinal QoL Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform longitudinal QoL analysis
+
+    - name: change_analysis
+      title: QoL Change Analysis
+      type: List
+      options:
+          - name: "simple_change"
+            title: "Simple Change Scores"
+          - name: "reliable_change"
+            title: "Reliable Change Index"
+          - name: "effect_size"
+            title: "Effect Size Analysis"
+          - name: "mixed_models"
+            title: "Mixed-Effects Models"
+          - name: "trajectory_analysis"
+            title: "Trajectory Analysis"
+      default: "simple_change"
+      description:
+          R: Method for analyzing QoL changes over time
+
+    - name: baseline_adjustment
+      title: Baseline Adjustment
+      type: Bool
+      default: true
+      description:
+          R: Adjust for baseline QoL differences in change analysis
+
+    - name: time_to_deterioration
+      title: Time to Deterioration
+      type: Bool
+      default: false
+      description:
+          R: Analyze time to meaningful QoL deterioration
+
+    # Group Comparisons
+    - name: group_comparisons
+      title: Between-Group Comparisons
+      type: Bool
+      default: false
+      description:
+          R: Compare QoL between groups
+
+    - name: comparison_domains
+      title: Domains for Comparison
+      type: List
+      options:
+          - name: "all_domains"
+            title: "All QoL Domains"
+          - name: "summary_scores"
+            title: "Summary Scores Only"
+          - name: "selected_domains"
+            title: "User-Selected Domains"
+      default: "all_domains"
+      description:
+          R: QoL domains to include in group comparisons
+
+    - name: statistical_test
+      title: Statistical Test
+      type: List
+      options:
+          - name: "t_test"
+            title: "T-test"
+          - name: "wilcoxon"
+            title: "Wilcoxon Test"
+          - name: "anova"
+            title: "ANOVA"
+          - name: "kruskal_wallis"
+            title: "Kruskal-Wallis"
+          - name: "ancova"
+            title: "ANCOVA"
+          - name: "mixed_models"
+            title: "Mixed-Effects Models"
+      default: "t_test"
+      description:
+          R: Statistical test for group comparisons
+
+    - name: multiple_testing_correction
+      title: Multiple Testing Correction
+      type: List
+      options:
+          - name: "none"
+            title: "No Correction"
+          - name: "bonferroni"
+            title: "Bonferroni"
+          - name: "holm"
+            title: "Holm"
+          - name: "fdr"
+            title: "False Discovery Rate"
+          - name: "hochberg"
+            title: "Hochberg"
+      default: "fdr"
+      description:
+          R: Multiple testing correction method
+
+    # Advanced Analysis
+    - name: domain_correlations
+      title: Domain Correlation Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze correlations between QoL domains
+
+    - name: clinical_correlations
+      title: Clinical Variable Correlations
+      type: Bool
+      default: false
+      description:
+          R: Correlate QoL domains with clinical variables
+
+    - name: predictive_modeling
+      title: Predictive Modeling
+      type: Bool
+      default: false
+      description:
+          R: Build predictive models for QoL outcomes
+
+    - name: factor_analysis
+      title: Factor Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform factor analysis of QoL domains
+
+    - name: clustering_analysis
+      title: Patient Clustering
+      type: Bool
+      default: false
+      description:
+          R: Cluster patients based on QoL profiles
+
+    # Health Economics
+    - name: health_economics
+      title: Health Economic Analysis
+      type: Bool
+      default: false
+      description:
+          R: Calculate health economic outcomes
+
+    - name: qaly_calculation
+      title: QALY Calculation
+      type: Bool
+      default: false
+      description:
+          R: Calculate Quality-Adjusted Life Years
+
+    - name: cost_effectiveness
+      title: Cost-Effectiveness Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform cost-effectiveness analysis (requires cost data)
+
+    - name: cost_variables
+      title: Cost Variables
+      type: Variables
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Cost variables for health economic analysis
+
+    # Reporting and Output
+    - name: comprehensive_report
+      title: Comprehensive QoL Report
+      type: Bool
+      default: true
+      description:
+          R: Generate comprehensive QoL analysis report
+
+    - name: domain_profiles
+      title: Individual Domain Profiles
+      type: Bool
+      default: false
+      description:
+          R: Generate individual patient QoL domain profiles
+
+    - name: population_norms_comparison
+      title: Population Norms Comparison
+      type: Bool
+      default: true
+      description:
+          R: Compare scores to population normative data
+
+    - name: clinical_cutoffs
+      title: Clinical Cutoff Analysis
+      type: Bool
+      default: true
+      description:
+          R: Apply clinical cutoffs and severity classifications
+
+    - name: save_domain_scores
+      title: Save Domain Scores
+      type: Bool
+      default: false
+      description:
+          R: Save calculated domain scores to dataset
+
+    - name: save_utility_scores
+      title: Save Utility Scores
+      type: Bool
+      default: false
+      description:
+          R: Save calculated utility scores to dataset
+
+    - name: regulatory_documentation
+      title: Regulatory Documentation
+      type: Bool
+      default: true
+      description:
+          R: Include regulatory compliance documentation
+
+...

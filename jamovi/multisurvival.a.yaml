@@ -1,7 +1,7 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '0.0.3'
@@ -1002,13 +1002,21 @@ options:
           at the boundaries.
 
     - name: showExplanations
-      title: "Show Educational Explanations"
+      title: "Show Analysis Explanations"
       type: Bool
       default: false
       description: >-
-        Display educational explanations for each analysis type to help interpret 
-        multivariable survival analysis results, Cox regression, adjusted survival 
-        curves, nomograms, and model diagnostics.
+        Display detailed explanations for each analysis component to help
+        interpret the statistical methods and results.
+
+    - name: showSummaries
+      title: "Show Natural Language Summaries"
+      type: Bool
+      default: false
+      description: >-
+        Display natural language summaries alongside tables and plots. These
+        summaries provide plain-language interpretations of the statistical
+        results. Turn off to reduce visual clutter when summaries are not needed.
 
     # Machine Learning Survival Methods
     - name: ml_method

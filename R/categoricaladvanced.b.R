@@ -2,8 +2,8 @@
 
 #' @import jmvcore
 #' @import R6
-#' @importFrom vcd assocstats cramersV
-#' @importFrom DescTools CramerV Phi CohenW Lambda GoodmanKruskalTau GoodmanKruskalGamma
+#' @importFrom vcd assocstats
+#' @importFrom DescTools CramerV Phi Lambda GoodmanKruskalTau GoodmanKruskalGamma ContCoef
 #' @importFrom stats chisq.test fisher.test residuals xtabs
 #' @importFrom utils capture.output
 #' @export
