@@ -11,7 +11,7 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -22,36 +22,11 @@ items:
     #   title: mydataview
     #   type:  Preformatted
 
-
-    - name:  medianSummary
-      title: Median Survival Summary and Table
+    - name:  medianHeading
+      title: Median Survival Analysis
       type:  Preformatted
-      visible: (showSummaries)
-      clearWith:
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
+      
 
-    - name: medianSurvivalExplanation
-      title: 'Understanding Median Survival Analysis'
-      type: Html
-      visible: (showExplanations)
-      clearWith:
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-
-    # - name:  medianSummary2
-    #   title: medianSummary2
-    #   type:  Preformatted
 
     - name:  medianTable
       title: Median Survival Table
@@ -90,40 +65,56 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
 
 
-    - name:  survTableSummary
-      title: '1, 3, 5-yr Survival Summary and Table'
+
+    - name:  medianSummary
+      title: Median Survival Analysis Natural Language Summary
       type:  Preformatted
       visible: (showSummaries)
       clearWith:
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
+          - showExplanations
 
-    - name: survivalProbabilityExplanation
-      title: 'Understanding Survival Probabilities'
+
+    - name:  medianHeading3
+      title: Median Survival Analysis Explanations
+      type:  Preformatted
+      visible: (showExplanations)
+
+
+    - name: medianSurvivalExplanation
+      title: 'Understanding Median Survival Analysis'
       type: Html
       visible: (showExplanations)
       clearWith:
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
+          - showExplanations
 
 
+
+
+    - name:  survTableHeading
+      title: '1, 3, 5 year Survival Table'
+      type:  Preformatted
+      
 
 
     - name:  survTable
@@ -157,11 +148,55 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
+          - showExplanations
+
+
+
+    - name:  survTableSummary
+      title: '1, 3, 5-yr Survival Natural Language Summary'
+      type:  Preformatted
+      visible: (showSummaries)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - showExplanations
+
+
+    - name:  survTableHeading3
+      title: Survival Table Explanations
+      type:  Preformatted
+      visible: (showExplanations)
+      
+    - name: survivalProbabilityExplanation
+      title: 'Understanding Survival Probabilities'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - showExplanations
+
+
+
+    - name:  personTimeHeading
+      title: Person-Time Analysis
+      type:  Preformatted
+      visible: (person_time)
 
 
     - name: personTimeTable
@@ -203,11 +238,18 @@ items:
         - person_time
         - outcome
         - outcomeLevel
-        - overalltime
         - fudate
         - dxdate
         - tint
         - multievent
+        - showExplanations
+
+
+    - name:  personTimeHeading2
+      title: Person-Time Analysis Natural Language Summary
+      type:  Preformatted
+      visible: (person_time)
+
 
     - name: personTimeSummary
       title: 'Person-Time Summary'
@@ -222,11 +264,15 @@ items:
         - person_time
         - outcome
         - outcomeLevel
-        - overalltime
         - fudate
         - dxdate
         - tint
         - multievent
+
+    - name:  personTimeHeading3
+      title: Person-Time Analysis Explanations
+      type:  Preformatted
+      visible: (person_time && showExplanations)
 
     - name: personTimeExplanation
       title: 'Understanding Person-Time Analysis'
@@ -238,20 +284,10 @@ items:
         - time_intervals
         - outcome
         - outcomeLevel
-        - overalltime
+        - elapsedtime
+        - showExplanations
 
-    # Survival Plots Explanation
-    - name: survivalPlotsExplanation
-      title: Understanding Survival Curves and Plots
-      type: Html
-      visible: ((sc || ce || ch || kmunicate) && showExplanations)
-      clearWith:
-          - sc
-          - ce
-          - ch
-          - kmunicate
-          - outcome
-          - outcomeLevel
+
 
     - name: plot
       title: Survival Plot
@@ -271,7 +307,7 @@ items:
           - censored
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -298,7 +334,7 @@ items:
           - censored
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -324,7 +360,7 @@ items:
           - censored
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -347,7 +383,7 @@ items:
           - sas
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -355,6 +391,170 @@ items:
       refs:
           - KMunicate
           - KMunicate2
+
+
+    - name:  survivalPlotsHeading3
+      title: Survival Plots Explanations
+      type:  Preformatted
+      visible: ((sc || ce || ch || kmunicate) && showExplanations)
+
+    # Survival Plots Explanation
+    - name: survivalPlotsExplanation
+      title: Understanding Survival Curves and Plots
+      type: Html
+      visible: ((sc || ce || ch || kmunicate) && showExplanations)
+      clearWith:
+          - sc
+          - ce
+          - ch
+          - kmunicate
+          - outcome
+          - outcomeLevel
+
+
+
+    # Baseline Hazard Analysis Outputs
+    - name:  baselineHazardHeading
+      title: Baseline Hazard Analysis
+      type:  Preformatted
+      visible: (baseline_hazard)
+
+    - name: baselineHazardTable
+      title: 'Baseline Hazard Estimates'
+      type: Table
+      visible: (baseline_hazard)
+      rows: 0
+      columns:
+        - name: time
+          title: "Time"
+          type: number
+          format: zto
+        - name: hazard
+          title: "Hazard Rate"
+          type: number
+          format: zto
+        - name: hazard_lower
+          title: "Lower"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: hazard_upper
+          title: "Upper"
+          superTitle: '95% CI'
+          type: number
+          format: zto
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+        - baseline_hazard
+
+    - name: baselineHazardPlot
+      title: 'Baseline Hazard Function'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .baselineHazardPlot
+      visible: (baseline_hazard)
+      requiresData: true
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+        - baseline_hazard
+
+    - name: smoothedHazardPlot
+      title: 'Smoothed Hazard Function'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .smoothedHazardPlot
+      visible: (hazard_smoothing)
+      requiresData: true
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+        - hazard_smoothing
+
+    - name: baselineHazardSummary
+      title: 'Baseline Hazard Analysis Summary'
+      type: Html
+      visible: (baseline_hazard && showSummaries)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
+        - multievent
+        - baseline_hazard
+        - showSummaries
+
+    - name:  baselineHazardHeading3
+      title: Baseline Hazard Analysis Explanations
+      type:  Preformatted
+      visible: (baseline_hazard && showExplanations)
+
+    - name: baselineHazardExplanation
+      title: 'Understanding Baseline Hazard Analysis'
+      type: Html
+      visible: (baseline_hazard && showExplanations)
+      clearWith:
+        - baseline_hazard
+        - showExplanations
+
+
+    # Advanced Diagnostics Outputs
+    - name:  dataQualityHeading
+      title: Data Quality Assessment
+      type:  Preformatted
+      visible: (advancedDiagnostics)
+
+    - name: dataQualityTable
+      title: 'Data Quality Metrics'
+      type: Table
+      visible: (advancedDiagnostics)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: assessment
+          title: "Assessment"
+          type: text
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - advancedDiagnostics
+
+    - name: dataQualitySummary
+      title: 'Data Quality Assessment Summary'
+      type: Html
+      visible: (advancedDiagnostics && showSummaries)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - advancedDiagnostics
+        - showSummaries
 
 
     - name: calculatedtime

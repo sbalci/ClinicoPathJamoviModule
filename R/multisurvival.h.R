@@ -721,8 +721,10 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        multivariableCoxHeading = function() private$.items[["multivariableCoxHeading"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
+        personTimeHeading = function() private$.items[["personTimeHeading"]],
         personTimeTable = function() private$.items[["personTimeTable"]],
         personTimeSummary = function() private$.items[["personTimeSummary"]],
         plot = function() private$.items[["plot"]],
@@ -732,6 +734,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plotKM = function() private$.items[["plotKM"]],
         risk_score_analysis = function() private$.items[["risk_score_analysis"]],
         risk_score_analysis2 = function() private$.items[["risk_score_analysis2"]],
+        riskScoreHeading = function() private$.items[["riskScoreHeading"]],
         riskScoreTable = function() private$.items[["riskScoreTable"]],
         riskScoreMetrics = function() private$.items[["riskScoreMetrics"]],
         riskGroupPlot = function() private$.items[["riskGroupPlot"]],
@@ -740,19 +743,24 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         outcomeredefined = function() private$.items[["outcomeredefined"]],
         addRiskScore = function() private$.items[["addRiskScore"]],
         addRiskGroup = function() private$.items[["addRiskGroup"]],
+        adjustedSurvivalHeading = function() private$.items[["adjustedSurvivalHeading"]],
         plot_adj = function() private$.items[["plot_adj"]],
+        nomogramHeading = function() private$.items[["nomogramHeading"]],
         plot_nomogram = function() private$.items[["plot_nomogram"]],
         nomogram_display = function() private$.items[["nomogram_display"]],
         mydataview_survivaldecisiontree = function() private$.items[["mydataview_survivaldecisiontree"]],
+        survivalTreeHeading = function() private$.items[["survivalTreeHeading"]],
         tree_summary = function() private$.items[["tree_summary"]],
         tree_plot = function() private$.items[["tree_plot"]],
         node_survival_plots = function() private$.items[["node_survival_plots"]],
         multivariableCoxExplanation = function() private$.items[["multivariableCoxExplanation"]],
+        multivariableCoxHeading3 = function() private$.items[["multivariableCoxHeading3"]],
         adjustedSurvivalExplanation = function() private$.items[["adjustedSurvivalExplanation"]],
         riskScoreExplanation = function() private$.items[["riskScoreExplanation"]],
         nomogramExplanation = function() private$.items[["nomogramExplanation"]],
         personTimeExplanation = function() private$.items[["personTimeExplanation"]],
         stratifiedAnalysisExplanation = function() private$.items[["stratifiedAnalysisExplanation"]],
+        survivalPlotsHeading3 = function() private$.items[["survivalPlotsHeading3"]],
         survivalPlotsExplanation = function() private$.items[["survivalPlotsExplanation"]],
         ml_variable_importance = function() private$.items[["ml_variable_importance"]],
         ml_performance_metrics = function() private$.items[["ml_performance_metrics"]],
@@ -786,6 +794,10 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="multivariableCoxHeading",
+                title="Multivariable Cox Regression"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
@@ -816,6 +828,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="personTimeHeading",
+                title="Person-Time Analysis",
+                visible="(person_time)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="personTimeTable",
@@ -1022,6 +1039,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "explanatory",
                     "contexpl",
                     "numRiskGroups")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="riskScoreHeading",
+                title="Risk Score Analysis",
+                visible="(calculateRiskScore)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="riskScoreTable",
@@ -1154,6 +1176,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "tint",
                     "multievent",
                     "addRiskGroup")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="adjustedSurvivalHeading",
+                title="Adjusted Survival Analysis",
+                visible="(ac)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_adj",
@@ -1184,6 +1211,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "pplot",
                     "censored",
                     "medianline")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="nomogramHeading",
+                title="Nomogram Analysis",
+                visible="(showNomogram)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_nomogram",
@@ -1203,6 +1235,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="mydataview_survivaldecisiontree",
                 title="mydataview_survivaldecisiontree",
                 visible="(FALSE)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survivalTreeHeading",
+                title="Survival Decision Tree",
+                visible="(use_tree)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tree_summary",
@@ -1266,6 +1303,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "explanatory",
                     "contexpl",
                     "outcome")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="multivariableCoxHeading3",
+                title="Multivariable Cox Explanations",
+                visible="(showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="adjustedSurvivalExplanation",
@@ -1311,6 +1353,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "use_stratify",
                     "stratvar",
                     "outcome")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survivalPlotsHeading3",
+                title="Survival Plots Explanations",
+                visible="((ac || hr) && showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="survivalPlotsExplanation",
@@ -1722,8 +1769,10 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -1733,6 +1782,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$risk_score_analysis} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$risk_score_analysis2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$riskScoreHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$riskScoreTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$riskScoreMetrics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskGroupPlot} \tab \tab \tab \tab \tab an image \cr
@@ -1741,19 +1791,24 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$addRiskScore} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$adjustedSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$nomogramHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$mydataview_survivaldecisiontree} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$survivalTreeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tree_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$node_survival_plots} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$multivariableCoxExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multivariableCoxHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$adjustedSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskScoreExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nomogramExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ml_variable_importance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ml_performance_metrics} \tab \tab \tab \tab \tab a html \cr

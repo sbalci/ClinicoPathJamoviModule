@@ -35,7 +35,10 @@ items:
     #   title: medianSummary2
     #   type:  Preformatted
 
-
+    - name:  medianSurvivalHeading
+      title: Median Survival Analysis
+      type:  Preformatted
+      
 
     # Median Survival Explanation
     - name: medianSurvivalExplanation
@@ -45,6 +48,11 @@ items:
       clearWith:
           - explanatory
           - outcome
+
+    - name:  medianSurvivalHeading3
+      title: Median Survival Analysis Explanations
+      type:  Preformatted
+      visible: (showExplanations)
 
     - name:  medianSummary
       # title: Median Survival Summary and Table
@@ -113,6 +121,10 @@ items:
           - tint
           - multievent
 
+    - name:  coxRegressionHeading
+      title: Cox Regression Analysis
+      type:  Preformatted
+      
 
     # Cox Regression Explanation
     - name: coxRegressionExplanation
@@ -122,6 +134,11 @@ items:
       clearWith:
           - explanatory
           - outcome
+
+    - name:  coxRegressionHeading3
+      title: Cox Regression Analysis Explanations
+      type:  Preformatted
+      visible: (showExplanations)
 
     - name:  coxSummary
       # title: Cox Regression Summary and Table
@@ -228,6 +245,10 @@ items:
           - tint
           - multievent
 
+    - name:  survivalTablesHeading
+      title: Survival Probability Tables
+      type:  Preformatted
+      
 
     # Survival Tables Explanation
     - name: survivalTablesExplanation
@@ -237,6 +258,11 @@ items:
       clearWith:
           - explanatory
           - outcome
+
+    - name:  survivalTablesHeading3
+      title: Survival Tables Explanations
+      type:  Preformatted
+      visible: (showExplanations)
 
     - name:  survTableSummary
       # title: '1, 3, 5-yr Survival Summary and Table'
@@ -301,6 +327,11 @@ items:
           - tint
           - multievent
 
+    - name:  personTimeHeading
+      title: Person-Time Analysis
+      type:  Preformatted
+      visible: (person_time)
+      
 
     # Person-Time Analysis Explanation
     - name: personTimeExplanation
@@ -375,6 +406,12 @@ items:
         - dxdate
         - tint
         - multievent
+
+    - name:  rmstHeading
+      title: RMST Analysis
+      type:  Preformatted
+      visible: (rmst_analysis)
+      
 
     # RMST Analysis Explanation
     - name: rmstExplanation
@@ -550,6 +587,10 @@ items:
           - padjust
 
 
+    - name:  survivalPlotsHeading3
+      title: Survival Plots Explanations
+      type:  Preformatted
+      visible: ((sc || ce || ch || kmunicate || loglog) && showExplanations)
 
     # Survival Plots Explanation
     - name: survivalPlotsExplanation

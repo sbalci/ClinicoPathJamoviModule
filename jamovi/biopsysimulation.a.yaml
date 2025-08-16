@@ -1,7 +1,7 @@
 ---
 name: biopsysimulation
 title: Biopsy Simulation Analysis
-menuGroup: OncoPathologyT
+menuGroup: OncoPathologyD
 version: '1.0.0'
 jas: '1.2'
 

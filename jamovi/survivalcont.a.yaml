@@ -1,7 +1,7 @@
 ---
 name:  survivalcont
 title: Survival Analysis for Continuous Variable
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cut-off & Univariate Survival Analysis'
 version: '0.0.31'
@@ -135,9 +135,10 @@ options:
       type: String
       default: '12, 36, 60'
       description: >-
-        Specify the cutpoints at which to divide the continuous explanatory variable into
-        groups for survival analysis. Separate multiple cutpoints with commas (e.g., "12,
-        36, 60").
+        Specify the time points for survival probability calculations. The default "12, 36, 60" 
+        represents 1, 3, and 5 years (compatible with literature standards). You can customize 
+        these values by entering your own comma-separated time points (e.g., "6, 18, 30" for 
+        6 months, 18 months, 30 months). Use "default" to restore standard 1,3,5-year analysis.
 
 
     - name: timetypedata

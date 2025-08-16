@@ -1,7 +1,7 @@
 ---
 name:  singlearm
 title: Single Arm Survival
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Survival for whole group, no explanatory factor'
 version: '0.0.31'
@@ -28,20 +28,6 @@ description:
 
 
 options:
-
-    # - name: lang
-    #   title: Language
-    #   type: List
-    #   options:
-    #     - title: English
-    #       name: English
-    #     - title: Türkçe
-    #       name: Türkçe
-    #     - title: Deutsch
-    #       name: Deutsch
-    #   default: English
-    #   description:
-    #       R: select language
 
     - name: data
       type: Data
@@ -401,6 +387,22 @@ options:
         Specify the multiplier for incidence rates (e.g., 100 for rates per 100 person-years,
         1000 for rates per 1000 person-years).
 
+    - name: baseline_hazard
+      title: "Baseline Hazard Analysis"
+      type: Bool
+      default: false
+      description: >-
+        Estimate and plot the baseline hazard function to assess how the
+        instantaneous risk of events changes over time in your study population.
+
+    - name: hazard_smoothing
+      title: "Smoothed Hazard Function"
+      type: Bool
+      default: false
+      description: >-
+        Generate smoothed hazard rate estimates to better visualize patterns
+        in event risk over time and assess proportional hazards assumptions.
+
 
 
 
@@ -421,6 +423,16 @@ options:
         Display natural language summaries alongside tables and plots. These
         summaries provide plain-language interpretations of the statistical
         results. Turn off to reduce visual clutter when summaries are not needed.
+
+    - name: advancedDiagnostics
+      title: "Advanced Diagnostics & Quality Assessment"
+      type: Bool
+      default: false
+      description: >-
+        Enable advanced diagnostic features including enhanced data quality 
+        assessment, performance optimizations with caching, and improved error 
+        reporting. This provides additional insights into data reliability and 
+        analysis quality without affecting core results.
 
 ...
 

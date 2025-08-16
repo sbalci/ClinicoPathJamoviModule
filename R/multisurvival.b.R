@@ -14,6 +14,69 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       # init ----
       .init = function() {
+        # Initialize all explanation and summary outputs to FALSE first
+        self$results$personTimeSummary$setVisible(FALSE)
+        self$results$riskScoreTable$setVisible(FALSE)
+        self$results$tree_summary$setVisible(FALSE)
+        self$results$ml_ensemble_summary$setVisible(FALSE)
+        self$results$multivariableCoxExplanation$setVisible(FALSE)
+        self$results$adjustedSurvivalExplanation$setVisible(FALSE)
+        self$results$riskScoreExplanation$setVisible(FALSE)
+        self$results$nomogramExplanation$setVisible(FALSE)
+        self$results$personTimeExplanation$setVisible(FALSE)
+        self$results$stratifiedAnalysisExplanation$setVisible(FALSE)
+        self$results$survivalPlotsExplanation$setVisible(FALSE)
+
+        # Handle showSummaries visibility
+        if (self$options$showSummaries) {
+            # Conditional summaries - require both showSummaries AND their specific option
+            if (self$options$person_time) {
+                self$results$personTimeSummary$setVisible(TRUE)
+            }
+            if (self$options$calculateRiskScore) {
+                self$results$riskScoreTable$setVisible(TRUE)
+            }
+            if (self$options$use_tree) {
+                self$results$tree_summary$setVisible(TRUE)
+            }
+            if (self$options$ml_method == 'ensemble') {
+                self$results$ml_ensemble_summary$setVisible(TRUE)
+            }
+        }
+
+        # Handle showExplanations visibility
+        if (self$options$showExplanations) {
+            # Section headings for explanations
+            self$results$multivariableCoxHeading3$setVisible(TRUE)
+            
+            # Explanation content
+            self$results$multivariableCoxExplanation$setVisible(TRUE)
+            
+            # Conditional explanations - require both showExplanations AND their specific option
+            if (self$options$ac) {
+                self$results$adjustedSurvivalExplanation$setVisible(TRUE)
+            }
+            if (self$options$calculateRiskScore) {
+                self$results$riskScoreExplanation$setVisible(TRUE)
+            }
+            if (self$options$showNomogram) {
+                self$results$nomogramExplanation$setVisible(TRUE)
+            }
+            if (self$options$person_time) {
+                self$results$personTimeExplanation$setVisible(TRUE)
+            }
+            if (self$options$use_stratify) {
+                self$results$stratifiedAnalysisExplanation$setVisible(TRUE)
+            }
+            
+            # Survival plots explanation requires showExplanations AND at least one plot
+            if (self$options$ac || self$options$hr) {
+                self$results$survivalPlotsHeading3$setVisible(TRUE)
+                self$results$survivalPlotsExplanation$setVisible(TRUE)
+            }
+        }
+
+        # Handle plot sizing (existing logic preserved)
         explanatory_len <- length(self$options$explanatory)
         contexpl_len <- length(self$options$contexpl)
 
@@ -23,10 +86,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         } else {
           self$results$plot8$setVisible(FALSE)
         }
-
-
-
-
       }
 
       # getData ----
@@ -1334,7 +1393,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
             # Add checkpoint for responsiveness
             if (i %% 5 == 0) {
-              private$.checkpoint(FALSE)
+              private$.checkpoint()
             }
 
             # Filter data for this interval

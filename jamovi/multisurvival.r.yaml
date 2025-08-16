@@ -29,6 +29,11 @@ items:
     #   title: mydataview_cox
     #   type:  Preformatted
 
+    - name:  multivariableCoxHeading
+      title: Multivariable Cox Regression
+      type:  Preformatted
+      
+
     - name:  text
       title: Multivariable Survival
       type:  Html
@@ -69,6 +74,12 @@ items:
     # - name:  mydataview_personTimeAnalysis
     #   title: mydataview_personTimeAnalysis
     #   type:  Preformatted
+
+    - name:  personTimeHeading
+      title: Person-Time Analysis
+      type:  Preformatted
+      visible: (person_time)
+      
 
     - name: personTimeTable
       title: 'Person-Time Analysis'
@@ -364,6 +375,11 @@ items:
           - numRiskGroups
           # - use_modelSelection
 
+    - name:  riskScoreHeading
+      title: Risk Score Analysis
+      type:  Preformatted
+      visible: (calculateRiskScore)
+      
 
     - name: riskScoreTable
       title: Risk Score Summary
@@ -519,8 +535,11 @@ items:
     #   title: mydataview_calculateAdjustedStats
     #   type:  Preformatted
 
-
-
+    - name:  adjustedSurvivalHeading
+      title: Adjusted Survival Analysis
+      type:  Preformatted
+      visible: (ac)
+      
 
     - name: plot_adj
       title: Adjusted Survival Plot
@@ -564,6 +583,11 @@ items:
     #   title: mydataview_nomogram
     #   type:  Preformatted
 
+    - name:  nomogramHeading
+      title: Nomogram Analysis
+      type:  Preformatted
+      visible: (showNomogram)
+      
 
     - name: plot_nomogram
       title: Nomogram
@@ -587,6 +611,11 @@ items:
       type:  Preformatted
       visible: (FALSE)
 
+    - name:  survivalTreeHeading
+      title: Survival Decision Tree
+      type:  Preformatted
+      visible: (use_tree)
+      
 
     - name: tree_summary
       title: 'Survival Decision Tree Summary'
@@ -1067,6 +1096,11 @@ items:
           - contexpl
           - outcome
 
+    - name:  multivariableCoxHeading3
+      title: Multivariable Cox Explanations
+      type:  Preformatted
+      visible: (showExplanations)
+
     # Adjusted Survival Curves Explanation
     - name: adjustedSurvivalExplanation
       title: 'Understanding Adjusted Survival Curves'
@@ -1116,6 +1150,11 @@ items:
           - use_stratify
           - stratvar
           - outcome
+
+    - name:  survivalPlotsHeading3
+      title: Survival Plots Explanations
+      type:  Preformatted
+      visible: ((ac || hr) && showExplanations)
 
     # Survival Plots Explanation
     - name: survivalPlotsExplanation

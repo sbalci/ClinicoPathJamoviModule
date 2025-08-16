@@ -222,10 +222,32 @@ children:
           - type: TextBox
             name: rate_multiplier
             format: number
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Hazard Analysis
+    collapsed: true
     children:
-      - type: CheckBox
-        name: showExplanations
-      - type: CheckBox
-        name: showSummaries
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: baseline_hazard
+          - type: CheckBox
+            name: hazard_smoothing
+  - type: CollapseBox
+    label: Detailed Output
+    collapsed: false
+    children:
+      - type: Label
+        label: Display Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showSummaries
+                label: Show Natural Language Summaries
+              - type: CheckBox
+                name: showExplanations
+                label: Show Analysis Explanations
+              - type: CheckBox
+                name: advancedDiagnostics
