@@ -18,6 +18,11 @@ items:
     #   type:  Preformatted
 
 
+    - name:  oddsRatioHeading
+      title: Odds Ratio Analysis
+      type:  Preformatted
+      
+
     - name:  text
       title: Odds Ratio Table
       type:  Html
@@ -60,6 +65,12 @@ items:
     #   type: Preformatted
     #   visible: (showNomogram)
 
+    - name:  nomogramHeading
+      title: Nomogram Analysis
+      type:  Preformatted
+      visible: (showNomogram)
+      
+
     - name: plot_nomogram
       title: Nomogram
       type: Image
@@ -73,6 +84,11 @@ items:
       title: "Nomogram"
       type: Html
       visible: (showNomogram)
+
+    - name:  oddsRatioHeading3
+      title: Odds Ratio Analysis Explanations
+      type:  Preformatted
+      visible: (showExplanations)
 
     # Odds Ratio Analysis Explanation
     - name: oddsRatioExplanation

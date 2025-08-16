@@ -71,6 +71,34 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .nom_object = NULL,
 
+        # init ----
+        .init = function() {
+            # Initialize all explanation outputs to FALSE first
+            self$results$oddsRatioExplanation$setVisible(FALSE)
+            self$results$riskMeasuresExplanation$setVisible(FALSE)
+            self$results$diagnosticTestExplanation$setVisible(FALSE)
+            self$results$nomogramAnalysisExplanation$setVisible(FALSE)
+
+            # Handle showExplanations visibility
+            if (self$options$showExplanations) {
+                # Section headings for explanations
+                self$results$oddsRatioHeading3$setVisible(TRUE)
+                
+                # Explanation content
+                self$results$oddsRatioExplanation$setVisible(TRUE)
+                self$results$riskMeasuresExplanation$setVisible(TRUE)
+                self$results$diagnosticTestExplanation$setVisible(TRUE)
+                
+                # Nomogram explanation requires both showExplanations AND showNomogram
+                if (self$options$showNomogram) {
+                    self$results$nomogramAnalysisExplanation$setVisible(TRUE)
+                }
+            }
+
+            # Note: Tables and plots remain visible based on data availability and their specific options
+            # Nomogram plots are controlled by showNomogram option in the .r.yaml
+        },
+
         # Enhanced input validation for data quality and user inputs
         # Returns validation results with errors, warnings, and informational messages
         .validateInputs = function(mydata, dependent_var, explanatory_vars, user_outcome_level = NULL) {

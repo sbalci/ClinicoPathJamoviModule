@@ -38,8 +38,11 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             person_time = FALSE,
             time_intervals = "12, 36, 60",
             rate_multiplier = 100,
+            baseline_hazard = FALSE,
+            hazard_smoothing = FALSE,
             showExplanations = FALSE,
-            showSummaries = FALSE, ...) {
+            showSummaries = FALSE,
+            advancedDiagnostics = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -212,6 +215,14 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "rate_multiplier",
                 rate_multiplier,
                 default=100)
+            private$..baseline_hazard <- jmvcore::OptionBool$new(
+                "baseline_hazard",
+                baseline_hazard,
+                default=FALSE)
+            private$..hazard_smoothing <- jmvcore::OptionBool$new(
+                "hazard_smoothing",
+                hazard_smoothing,
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -219,6 +230,10 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showSummaries <- jmvcore::OptionBool$new(
                 "showSummaries",
                 showSummaries,
+                default=FALSE)
+            private$..advancedDiagnostics <- jmvcore::OptionBool$new(
+                "advancedDiagnostics",
+                advancedDiagnostics,
                 default=FALSE)
 
             self$.addOption(private$..elapsedtime)
@@ -255,8 +270,11 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..person_time)
             self$.addOption(private$..time_intervals)
             self$.addOption(private$..rate_multiplier)
+            self$.addOption(private$..baseline_hazard)
+            self$.addOption(private$..hazard_smoothing)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showSummaries)
+            self$.addOption(private$..advancedDiagnostics)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -293,8 +311,11 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         person_time = function() private$..person_time$value,
         time_intervals = function() private$..time_intervals$value,
         rate_multiplier = function() private$..rate_multiplier$value,
+        baseline_hazard = function() private$..baseline_hazard$value,
+        hazard_smoothing = function() private$..hazard_smoothing$value,
         showExplanations = function() private$..showExplanations$value,
-        showSummaries = function() private$..showSummaries$value),
+        showSummaries = function() private$..showSummaries$value,
+        advancedDiagnostics = function() private$..advancedDiagnostics$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -330,8 +351,11 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..person_time = NA,
         ..time_intervals = NA,
         ..rate_multiplier = NA,
+        ..baseline_hazard = NA,
+        ..hazard_smoothing = NA,
         ..showExplanations = NA,
-        ..showSummaries = NA)
+        ..showSummaries = NA,
+        ..advancedDiagnostics = NA)
 )
 
 singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -339,20 +363,38 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        medianSummary = function() private$.items[["medianSummary"]],
-        medianSurvivalExplanation = function() private$.items[["medianSurvivalExplanation"]],
+        medianHeading = function() private$.items[["medianHeading"]],
         medianTable = function() private$.items[["medianTable"]],
-        survTableSummary = function() private$.items[["survTableSummary"]],
-        survivalProbabilityExplanation = function() private$.items[["survivalProbabilityExplanation"]],
+        medianSummary = function() private$.items[["medianSummary"]],
+        medianHeading3 = function() private$.items[["medianHeading3"]],
+        medianSurvivalExplanation = function() private$.items[["medianSurvivalExplanation"]],
+        survTableHeading = function() private$.items[["survTableHeading"]],
         survTable = function() private$.items[["survTable"]],
+        survTableSummary = function() private$.items[["survTableSummary"]],
+        survTableHeading3 = function() private$.items[["survTableHeading3"]],
+        survivalProbabilityExplanation = function() private$.items[["survivalProbabilityExplanation"]],
+        personTimeHeading = function() private$.items[["personTimeHeading"]],
         personTimeTable = function() private$.items[["personTimeTable"]],
+        personTimeHeading2 = function() private$.items[["personTimeHeading2"]],
         personTimeSummary = function() private$.items[["personTimeSummary"]],
+        personTimeHeading3 = function() private$.items[["personTimeHeading3"]],
         personTimeExplanation = function() private$.items[["personTimeExplanation"]],
-        survivalPlotsExplanation = function() private$.items[["survivalPlotsExplanation"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
         plot6 = function() private$.items[["plot6"]],
+        survivalPlotsHeading3 = function() private$.items[["survivalPlotsHeading3"]],
+        survivalPlotsExplanation = function() private$.items[["survivalPlotsExplanation"]],
+        baselineHazardHeading = function() private$.items[["baselineHazardHeading"]],
+        baselineHazardTable = function() private$.items[["baselineHazardTable"]],
+        baselineHazardPlot = function() private$.items[["baselineHazardPlot"]],
+        smoothedHazardPlot = function() private$.items[["smoothedHazardPlot"]],
+        baselineHazardSummary = function() private$.items[["baselineHazardSummary"]],
+        baselineHazardHeading3 = function() private$.items[["baselineHazardHeading3"]],
+        baselineHazardExplanation = function() private$.items[["baselineHazardExplanation"]],
+        dataQualityHeading = function() private$.items[["dataQualityHeading"]],
+        dataQualityTable = function() private$.items[["dataQualityTable"]],
+        dataQualitySummary = function() private$.items[["dataQualitySummary"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
         outcomeredefined = function() private$.items[["outcomeredefined"]]),
     private = list(),
@@ -376,37 +418,15 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="medianSummary",
-                title="Median Survival Summary and Table",
-                visible="(showSummaries)",
-                clearWith=list(
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="medianSurvivalExplanation",
-                title="Understanding Median Survival Analysis",
-                visible="(showExplanations)",
-                clearWith=list(
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent")))
+                name="medianHeading",
+                title="Median Survival Analysis"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="medianTable",
@@ -446,37 +466,48 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="survTableSummary",
-                title="1, 3, 5-yr Survival Summary and Table",
+                name="medianSummary",
+                title="Median Survival Analysis Natural Language Summary",
                 visible="(showSummaries)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "showExplanations")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="medianHeading3",
+                title="Median Survival Analysis Explanations",
+                visible="(showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="survivalProbabilityExplanation",
-                title="Understanding Survival Probabilities",
+                name="medianSurvivalExplanation",
+                title="Understanding Median Survival Analysis",
                 visible="(showExplanations)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "showExplanations")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survTableHeading",
+                title="1, 3, 5 year Survival Table"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="survTable",
@@ -515,11 +546,50 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "showExplanations")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survTableSummary",
+                title="1, 3, 5-yr Survival Natural Language Summary",
+                visible="(showSummaries)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "showExplanations")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survTableHeading3",
+                title="Survival Table Explanations",
+                visible="(showExplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survivalProbabilityExplanation",
+                title="Understanding Survival Probabilities",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "showExplanations")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="personTimeHeading",
+                title="Person-Time Analysis",
+                visible="(person_time)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="personTimeTable",
@@ -566,11 +636,16 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "person_time",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "showExplanations")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="personTimeHeading2",
+                title="Person-Time Analysis Natural Language Summary",
+                visible="(person_time)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeSummary",
@@ -585,11 +660,15 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "person_time",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="personTimeHeading3",
+                title="Person-Time Analysis Explanations",
+                visible="(person_time && showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeExplanation",
@@ -601,19 +680,8 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "time_intervals",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="survivalPlotsExplanation",
-                title="Understanding Survival Curves and Plots",
-                visible="((sc || ce || ch || kmunicate) && showExplanations)",
-                clearWith=list(
-                    "sc",
-                    "ce",
-                    "ch",
-                    "kmunicate",
-                    "outcome",
-                    "outcomeLevel")))
+                    "elapsedtime",
+                    "showExplanations")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -633,7 +701,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "censored",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -658,7 +726,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "censored",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -682,7 +750,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "censored",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -703,7 +771,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sas",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -711,6 +779,170 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "KMunicate",
                     "KMunicate2")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survivalPlotsHeading3",
+                title="Survival Plots Explanations",
+                visible="((sc || ce || ch || kmunicate) && showExplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survivalPlotsExplanation",
+                title="Understanding Survival Curves and Plots",
+                visible="((sc || ce || ch || kmunicate) && showExplanations)",
+                clearWith=list(
+                    "sc",
+                    "ce",
+                    "ch",
+                    "kmunicate",
+                    "outcome",
+                    "outcomeLevel")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="baselineHazardHeading",
+                title="Baseline Hazard Analysis",
+                visible="(baseline_hazard)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="baselineHazardTable",
+                title="Baseline Hazard Estimates",
+                visible="(baseline_hazard)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="time", 
+                        `title`="Time", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="hazard", 
+                        `title`="Hazard Rate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="hazard_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="hazard_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "baseline_hazard")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="baselineHazardPlot",
+                title="Baseline Hazard Function",
+                width=600,
+                height=450,
+                renderFun=".baselineHazardPlot",
+                visible="(baseline_hazard)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "baseline_hazard")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="smoothedHazardPlot",
+                title="Smoothed Hazard Function",
+                width=600,
+                height=450,
+                renderFun=".smoothedHazardPlot",
+                visible="(hazard_smoothing)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "hazard_smoothing")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="baselineHazardSummary",
+                title="Baseline Hazard Analysis Summary",
+                visible="(baseline_hazard && showSummaries)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "baseline_hazard",
+                    "showSummaries")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="baselineHazardHeading3",
+                title="Baseline Hazard Analysis Explanations",
+                visible="(baseline_hazard && showExplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="baselineHazardExplanation",
+                title="Understanding Baseline Hazard Analysis",
+                visible="(baseline_hazard && showExplanations)",
+                clearWith=list(
+                    "baseline_hazard",
+                    "showExplanations")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="dataQualityHeading",
+                title="Data Quality Assessment",
+                visible="(advancedDiagnostics)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="dataQualityTable",
+                title="Data Quality Metrics",
+                visible="(advancedDiagnostics)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="assessment", 
+                        `title`="Assessment", 
+                        `type`="text")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "advancedDiagnostics")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dataQualitySummary",
+                title="Data Quality Assessment Summary",
+                visible="(advancedDiagnostics && showSummaries)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "advancedDiagnostics",
+                    "showSummaries")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedtime",
@@ -881,29 +1113,57 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   60+.
 #' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
 #'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
+#' @param baseline_hazard Estimate and plot the baseline hazard function to
+#'   assess how the instantaneous risk of events changes over time in your study
+#'   population.
+#' @param hazard_smoothing Generate smoothed hazard rate estimates to better
+#'   visualize patterns in event risk over time and assess proportional hazards
+#'   assumptions.
 #' @param showExplanations Display detailed explanations for each analysis
 #'   component to help interpret the statistical methods and results.
 #' @param showSummaries Display natural language summaries alongside tables
 #'   and plots. These summaries provide plain-language interpretations of the
 #'   statistical results. Turn off to reduce visual clutter when summaries are
 #'   not needed.
+#' @param advancedDiagnostics Enable advanced diagnostic features including
+#'   enhanced data quality  assessment, performance optimizations with caching,
+#'   and improved error  reporting. This provides additional insights into data
+#'   reliability and  analysis quality without affecting core results.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$medianHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$survivalProbabilityExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$medianHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$survTableHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$survivalProbabilityExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$personTimeHeading2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$baselineHazardHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$baselineHazardTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$baselineHazardPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$smoothedHazardPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$baselineHazardSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$baselineHazardHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$baselineHazardExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$dataQualityHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$dataQualityTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$dataQualitySummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 #' }
@@ -949,8 +1209,11 @@ singlearm <- function(
     person_time = FALSE,
     time_intervals = "12, 36, 60",
     rate_multiplier = 100,
+    baseline_hazard = FALSE,
+    hazard_smoothing = FALSE,
     showExplanations = FALSE,
-    showSummaries = FALSE) {
+    showSummaries = FALSE,
+    advancedDiagnostics = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("singlearm requires jmvcore to be installed (restart may be required)")
@@ -1001,8 +1264,11 @@ singlearm <- function(
         person_time = person_time,
         time_intervals = time_intervals,
         rate_multiplier = rate_multiplier,
+        baseline_hazard = baseline_hazard,
+        hazard_smoothing = hazard_smoothing,
         showExplanations = showExplanations,
-        showSummaries = showSummaries)
+        showSummaries = showSummaries,
+        advancedDiagnostics = advancedDiagnostics)
 
     analysis <- singlearmClass$new(
         options = options,

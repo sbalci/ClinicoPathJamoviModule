@@ -150,12 +150,175 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
             # init ----
             .init = function() {
-                if (!self$options$findcut) {
-                    # Disable other tables
-                    self$results$medianSummary$setVisible(FALSE)
-                    self$results$medianTable$setVisible(FALSE)
-                    self$results$survTableSummary$setVisible(FALSE)
-                    self$results$survTable$setVisible(FALSE)
+                # Initialize all outputs to FALSE first (following singlearm pattern)
+                # Core Cox Regression outputs
+                self$results$coxRegressionHeading$setVisible(FALSE)
+                self$results$coxSummary$setVisible(FALSE)
+                self$results$coxTable$setVisible(FALSE)
+                self$results$tCoxtext2$setVisible(FALSE)
+                self$results$coxRegressionHeading3$setVisible(FALSE)
+                self$results$coxRegressionExplanation$setVisible(FALSE)
+                
+                # Person-time analysis outputs
+                self$results$personTimeHeading$setVisible(FALSE)
+                self$results$personTimeTable$setVisible(FALSE)
+                self$results$personTimeSummary$setVisible(FALSE)
+                self$results$personTimeExplanation$setVisible(FALSE)
+                
+                # RMST analysis outputs
+                self$results$rmstHeading$setVisible(FALSE)
+                self$results$rmstTable$setVisible(FALSE)
+                self$results$rmstSummary$setVisible(FALSE)
+                self$results$rmstExplanation$setVisible(FALSE)
+                
+                # Residuals analysis outputs
+                self$results$residualsTable$setVisible(FALSE)
+                self$results$residualsPlot$setVisible(FALSE)
+                self$results$residualDiagnosticsExplanation$setVisible(FALSE)
+                
+                # Cut-off analysis outputs
+                self$results$cutoffAnalysisHeading$setVisible(FALSE)
+                self$results$rescutTable$setVisible(FALSE)
+                self$results$cutoffAnalysisHeading3$setVisible(FALSE)
+                self$results$cutoffAnalysisExplanation$setVisible(FALSE)
+                self$results$plot4$setVisible(FALSE)
+                self$results$plot5$setVisible(FALSE)
+                self$results$medianSummary$setVisible(FALSE)
+                self$results$medianTable$setVisible(FALSE)
+                self$results$survTableSummary$setVisible(FALSE)
+                self$results$survTable$setVisible(FALSE)
+                
+                # Multiple cut-offs outputs
+                self$results$multipleCutTable$setVisible(FALSE)
+                self$results$multipleMedianTable$setVisible(FALSE)
+                self$results$multipleCutoffsExplanation$setVisible(FALSE)
+                self$results$multipleSurvTable$setVisible(FALSE)
+                self$results$plotMultipleCutoffs$setVisible(FALSE)
+                self$results$plotMultipleSurvival$setVisible(FALSE)
+                
+                # Survival plots outputs
+                self$results$plot2$setVisible(FALSE)
+                self$results$plot3$setVisible(FALSE)
+                self$results$plot6$setVisible(FALSE)
+                self$results$plot7$setVisible(FALSE)
+                self$results$survivalPlotsHeading3$setVisible(FALSE)
+                self$results$survivalPlotsExplanation$setVisible(FALSE)
+                self$results$loglogPlotExplanation$setVisible(FALSE)
+                
+                # Always show Cox Regression heading and table when data is present
+                self$results$coxRegressionHeading$setVisible(TRUE)
+                self$results$coxTable$setVisible(TRUE)
+                self$results$tCoxtext2$setVisible(TRUE)
+                
+                # Handle showSummaries visibility
+                if (self$options$showSummaries) {
+                    self$results$coxSummary$setVisible(TRUE)
+                    
+                    # Conditional summaries - require both showSummaries AND their specific option
+                    if (self$options$person_time) {
+                        self$results$personTimeSummary$setVisible(TRUE)
+                    }
+                    if (self$options$rmst_analysis) {
+                        self$results$rmstSummary$setVisible(TRUE)
+                    }
+                    if (self$options$findcut) {
+                        self$results$medianSummary$setVisible(TRUE)
+                        self$results$survTableSummary$setVisible(TRUE)
+                    }
+                }
+                
+                # Handle showExplanations visibility
+                if (self$options$showExplanations) {
+                    # Cox regression explanation is always shown with explanations
+                    self$results$coxRegressionHeading3$setVisible(TRUE)
+                    self$results$coxRegressionExplanation$setVisible(TRUE)
+                    
+                    # Conditional explanations - require both showExplanations AND their specific option
+                    if (self$options$findcut) {
+                        self$results$cutoffAnalysisHeading3$setVisible(TRUE)
+                        self$results$cutoffAnalysisExplanation$setVisible(TRUE)
+                    }
+                    if (self$options$multiple_cutoffs) {
+                        self$results$multipleCutoffsExplanation$setVisible(TRUE)
+                    }
+                    if (self$options$person_time) {
+                        self$results$personTimeExplanation$setVisible(TRUE)
+                    }
+                    if (self$options$rmst_analysis) {
+                        self$results$rmstExplanation$setVisible(TRUE)
+                    }
+                    if (self$options$residual_diagnostics) {
+                        self$results$residualDiagnosticsExplanation$setVisible(TRUE)
+                    }
+                    if (self$options$loglog) {
+                        self$results$loglogPlotExplanation$setVisible(TRUE)
+                    }
+                    
+                    # Survival plots explanation requires showExplanations AND at least one plot
+                    if (self$options$sc || self$options$ce || self$options$ch || self$options$kmunicate) {
+                        self$results$survivalPlotsHeading3$setVisible(TRUE)
+                        self$results$survivalPlotsExplanation$setVisible(TRUE)
+                    }
+                }
+                
+                # Handle person_time visibility
+                if (self$options$person_time) {
+                    self$results$personTimeHeading$setVisible(TRUE)
+                    self$results$personTimeTable$setVisible(TRUE)
+                }
+                
+                # Handle RMST analysis visibility
+                if (self$options$rmst_analysis) {
+                    self$results$rmstHeading$setVisible(TRUE)
+                    self$results$rmstTable$setVisible(TRUE)
+                }
+                
+                # Handle residual diagnostics visibility
+                if (self$options$residual_diagnostics) {
+                    self$results$residualsTable$setVisible(TRUE)
+                    self$results$residualsPlot$setVisible(TRUE)
+                }
+                
+                # Handle findcut visibility
+                if (self$options$findcut) {
+                    self$results$cutoffAnalysisHeading$setVisible(TRUE)
+                    self$results$rescutTable$setVisible(TRUE)
+                    self$results$plot4$setVisible(TRUE)
+                    self$results$medianTable$setVisible(TRUE)
+                    self$results$survTable$setVisible(TRUE)
+                    
+                    # Show survival plot if requested
+                    if (self$options$sc) {
+                        self$results$plot5$setVisible(TRUE)
+                    }
+                }
+                
+                # Handle multiple cutoffs visibility
+                if (self$options$multiple_cutoffs) {
+                    self$results$multipleCutTable$setVisible(TRUE)
+                    self$results$multipleMedianTable$setVisible(TRUE)
+                    self$results$multipleSurvTable$setVisible(TRUE)
+                    self$results$plotMultipleCutoffs$setVisible(TRUE)
+                    
+                    if (self$options$sc) {
+                        self$results$plotMultipleSurvival$setVisible(TRUE)
+                    }
+                }
+                
+                # Handle plot visibility based on their options
+                if (self$options$findcut) {
+                    if (self$options$ce) {
+                        self$results$plot2$setVisible(TRUE)
+                    }
+                    if (self$options$ch) {
+                        self$results$plot3$setVisible(TRUE)
+                    }
+                    if (self$options$kmunicate) {
+                        self$results$plot6$setVisible(TRUE)
+                    }
+                    if (self$options$loglog) {
+                        self$results$plot7$setVisible(TRUE)
+                    }
                 }
             }
 
@@ -558,7 +721,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 #         )
                 #     )
                 # }, error = function(e) {
-                #     # If mydataview_multipleCutoffs1 doesn't exist, try the console
+                #     # If mydataview_multipleCutoffs1 does not exist, try the console
                 #     message("Debug: .run method called but mydataview_multipleCutoffs1 not available")
                 # })
 
@@ -609,16 +772,29 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
 
-                ## Empty data ----
+                ## Input Validation and Data Checks ----
 
+                # Enhanced input validation using helper method
                 if (nrow(self$data) == 0)
                     stop('Data contains no (complete) rows')
-
 
                 private$.checkpoint()
 
                 # Get Clean Data ----
                 results <- private$.cleandata()
+                
+                # Additional validation after data cleaning
+                if (!is.null(results$cleanData)) {
+                    private$.validateInputs(
+                        data = results$cleanData,
+                        time_var = results$name1time,
+                        outcome_var = results$name2outcome,
+                        contexpl_var = results$name3contexpl
+                    )
+                    
+                    # Memory usage monitoring for large datasets
+                    private$.checkMemoryUsage(results$cleanData)
+                }
                 
                 # Debug: Check if we have results after cleandata
                 # self$results$mydataview_multipleCutoffs1$setContent(
@@ -830,9 +1006,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
             # Educational Explanations ----
-            if (self$options$showExplanations) {
-                private$.addExplanations()
-            }
+            # Always add explanation content - visibility is controlled by YAML conditions
+            private$.addExplanations()
 
             }
 
@@ -1175,17 +1350,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 private$.checkpoint()
 
 
-                # survival table 1,3,5-yr survival ----
+                # survival table with flexible time points (preserving 1,3,5-yr default) ----
 
-                utimes <- self$options$cutp
-
-                utimes <- strsplit(utimes, ",")
-                utimes <- purrr::reduce(utimes, as.vector)
-                utimes <- as.numeric(utimes)
-
-                if (length(utimes) == 0) {
-                    utimes <- c(12, 36, 60)
-                }
+                # Use enhanced parsing method with 1,3,5 year defaults
+                utimes <- private$.parseSurvivalTimePoints(self$options$cutp)
 
                 results <- private$.cleandata()
 
@@ -1342,18 +1510,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 time_intervals <- sort(unique(time_intervals))
 
                 if (length(time_intervals) > 0) {
-                    # Create time intervals
-                    breaks <- c(0, time_intervals, max(mydata[[mytime]]) * 1.1)
+                    # Create time intervals with configurable multiplier
+                    max_time_extended <- private$.calculateTimeIntervals(mydata[[mytime]])
+                    breaks <- c(0, time_intervals, max_time_extended)
 
                     # Loop through intervals
                     for (i in 1:(length(breaks)-1)) {
                         start_time <- breaks[i]
                         end_time <- breaks[i+1]
 
-                        # Add checkpoint for responsiveness
-                        if (i %% 5 == 0) {
-                            private$.checkpoint(FALSE)
-                        }
+                        # Add checkpoint for responsiveness using configurable frequency
+                        private$.performCheckpoint(i)
 
                         # Filter data for this interval
                         if (i == 1) {
@@ -2192,8 +2359,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 survtable <- self$results$multipleSurvTable
                 survtable$deleteRows()  # Clear existing rows
                 
-                # Calculate survival at 1, 3, 5 years (12, 36, 60 months)
-                time_points <- c(12, 36, 60)
+                # Calculate survival at flexible time points (defaults to 1, 3, 5 years)
+                time_points <- private$.parseSurvivalTimePoints(self$options$cutp)
                 
                 for (group_name in names(multicut_results$group_stats)) {
                     stats <- multicut_results$group_stats[[group_name]]
@@ -2781,15 +2948,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Educational Explanations ----
             ,
             .addExplanations = function() {
-                # Helper function to set explanation content
-                private$.setExplanationContent <- function(result_name, content) {
-                    tryCatch({
-                        self$results[[result_name]]$setContent(content)
-                    }, error = function(e) {
-                        # Silently ignore if result doesn't exist
-                    })
-                }
-                
                 # Cox Regression Explanation
                 private$.setExplanationContent("coxRegressionExplanation", '
                 <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
@@ -2815,7 +2973,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             <tr>
                                 <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR = 1.0</strong></td>
                                 <td style="padding: 8px; border: 1px solid #ffc107;">No effect</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Variable doesn\'t affect survival</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Variable does not affect survival</td>
                             </tr>
                             <tr style="background-color: #fffbf0;">
                                 <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR > 1.0</strong></td>
@@ -3101,6 +3259,104 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     </div>
                 </div>
                 ')
+            },
+            
+            # === EXTRACTED HELPER METHODS FOR MAINTAINABILITY ===
+            
+            # Helper function to safely set explanation content
+            .setExplanationContent = function(result_name, content) {
+                tryCatch({
+                    self$results[[result_name]]$setContent(content)
+                }, error = function(e) {
+                    # Silently ignore if result does not exist
+                })
+            },
+            
+            # Input validation helper - prevents common data issues
+            .validateInputs = function(data, time_var, outcome_var, contexpl_var) {
+                if (is.null(data) || nrow(data) == 0) {
+                    stop('Data contains no (complete) rows')
+                }
+                
+                if (any(is.na(data[[time_var]]))) {
+                    stop("Time variable contains missing values. Please remove or impute missing data before analysis.")
+                }
+                
+                if (any(data[[time_var]] <= 0, na.rm = TRUE)) {
+                    stop("Time variable contains zero or negative values. Survival times must be positive.")
+                }
+                
+                if (any(is.na(data[[outcome_var]]))) {
+                    stop("Outcome variable contains missing values. Please remove or impute missing data before analysis.")
+                }
+                
+                if (!is.null(contexpl_var) && any(is.na(data[[contexpl_var]]))) {
+                    warning("Continuous explanatory variable contains missing values. These observations will be excluded from analysis.")
+                }
+                
+                # Check for sufficient sample size
+                if (nrow(data) < 20) {
+                    warning("Small sample size (n < 20). Results may be unreliable.")
+                }
+                
+                return(TRUE)
+            },
+            
+            # Memory monitoring for large datasets
+            .checkMemoryUsage = function(data, warn_threshold = 50000) {
+                n_rows <- nrow(data)
+                
+                if (n_rows > warn_threshold) {
+                    memory_usage <- format(object.size(data), units = "MB")
+                    message(sprintf("Processing large dataset: %d rows, ~%s memory usage", 
+                                  n_rows, memory_usage))
+                    
+                    if (n_rows > 100000) {
+                        message("Consider using data sampling or chunking for very large datasets")
+                    }
+                }
+                
+                return(n_rows)
+            },
+            
+            # Configurable checkpoint frequency for responsiveness
+            .performCheckpoint = function(iteration, frequency = 5) {
+                if (iteration %% frequency == 0) {
+                    private$.checkpoint(FALSE)
+                }
+            },
+            
+            # Enhanced survival time points parsing with flexible options
+            .parseSurvivalTimePoints = function(cutp_string, default_points = c(12, 36, 60)) {
+                if (is.null(cutp_string) || cutp_string == "" || cutp_string == "default") {
+                    return(default_points)
+                }
+                
+                # Parse comma-separated values
+                time_points <- tryCatch({
+                    as.numeric(unlist(strsplit(cutp_string, "[,\\\\s]+")))
+                }, error = function(e) {
+                    warning(paste("Could not parse survival time points:", e$message, 
+                                "Using default values (1, 3, 5 years)"))
+                    return(default_points)
+                })
+                
+                # Remove invalid values
+                time_points <- time_points[!is.na(time_points) & time_points > 0]
+                
+                if (length(time_points) == 0) {
+                    warning("No valid time points specified. Using default values (1, 3, 5 years)")
+                    return(default_points)
+                }
+                
+                # Sort and return unique values
+                return(sort(unique(time_points)))
+            },
+            
+            # Flexible interval calculation with configurable multiplier
+            .calculateTimeIntervals = function(time_var, max_multiplier = 1.1) {
+                max_time <- max(time_var, na.rm = TRUE)
+                return(max_time * max_multiplier)
             }
         )
     )

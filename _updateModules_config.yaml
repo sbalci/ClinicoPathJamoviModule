@@ -8,19 +8,19 @@
 
 # Global settings
 global:
-  new_version: "0.0.31.04"  # New version number for the modules
-  new_date: "2025-08-15" # New date for the modules
+  new_version: "0.0.31.05"  # New version number for the modules
+  new_date: "2025-08-16" # New date for the modules
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
 # Operation modes
 modes:
-  quick: true # Quick mode to install main module
+  quick: false # Quick mode to install main module
   check: false
   extended: true
   webpage: false
   commit_modules: false
   WIP: false
-  TEST: false  # Enable TEST mode for development/testing purposes
+  TEST: true  # Enable TEST mode for development/testing purposes
 
   # File copying control modes
   copy_vignettes: false       # Enable/disable vignette file copying

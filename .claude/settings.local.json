@@ -64,7 +64,12 @@
       "Bash(# Count opening and closing braces in the class definition\ngrep -o \"\"[{}]\"\" /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/statsplot2.b.R | sort | uniq -c)",
       "WebFetch(domain:academic.oup.com)",
       "Bash(touch:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(for opt in analysistype awd awod byplot calculatedtime ce censored ch ci95 cutp data dod dooc dxdate elapsedtime endplot fudate kmunicate landmark medianline multievent outcome outcomeLevel outcomeredefined person_time rate_multiplier risktable sc showExplanations showSummaries time_intervals timetypedata timetypeoutput tint uselandmark ybegin_plot yend_plot)",
+      "Bash(do echo -n \"$opt: \")",
+      "Bash(done)",
+      "Bash(for output in todo medianTable medianSummary medianSurvivalExplanation survTable survTableSummary survivalProbabilityExplanation personTimeTable personTimeSummary personTimeExplanation personTimeHeading2 plot plot2 plot3 plot6 survivalPlotsExplanation calculatedtime outcomeredefined)",
+      "Bash(do echo -n \"$output: \")"
     ],
     "deny": []
   }

@@ -1,0 +1,183 @@
+name: smoothhazard
+title: Smooth Hazard Estimation & Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Smooth Hazard Analysis Instructions
+      type: Html
+      description: Instructions and guidance for smooth hazard estimation
+
+    - name: data_summary
+      title: Data Summary
+      type: Html
+      description: Summary of input data and analysis parameters
+
+    - name: hazard_estimates
+      title: Hazard Function Estimates
+      type: Table
+      description: Estimated hazard function values at specified time points
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - bandwidth
+        - time_grid
+        - covariates
+        - strata_var
+      columns:
+        - name: time
+          title: Time
+          type: number
+        - name: hazard
+          title: Hazard Rate
+          type: number
+        - name: lower_ci
+          title: Lower CI
+          type: number
+        - name: upper_ci
+          title: Upper CI
+          type: number
+        - name: cumulative_hazard
+          title: Cumulative Hazard
+          type: number
+
+    - name: hazard_summary
+      title: Hazard Function Summary
+      type: Html
+      description: Summary statistics for the estimated hazard function
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - bandwidth
+        - hazard_summary
+
+    - name: bandwidth_selection
+      title: Bandwidth Selection Results
+      type: Html
+      description: Results from bandwidth selection procedure
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - bandwidth_method
+
+    - name: hazard_plot
+      title: Hazard Function Plot
+      type: Image
+      width: 600
+      height: 450
+      description: Plot of the estimated hazard function over time
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - bandwidth
+        - kernel_type
+        - confidence_bands
+        - strata_var
+
+    - name: cumulative_hazard_plot
+      title: Cumulative Hazard Plot
+      type: Image
+      width: 600
+      height: 450
+      description: Plot of the estimated cumulative hazard function
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - bandwidth
+        - cumulative_hazard_plot
+
+    - name: comparison_plot
+      title: Method Comparison Plot
+      type: Image
+      width: 600
+      height: 450
+      description: Comparison of different smoothing methods
+      clearWith:
+        - time_var
+        - status_var
+        - comparison_plot
+        - bandwidth
+
+    - name: diagnostic_plots
+      title: Diagnostic Plots
+      type: Image
+      width: 600
+      height: 450
+      description: Diagnostic plots for bandwidth selection
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - diagnostic_plots
+
+    - name: peak_analysis
+      title: Hazard Peak Analysis
+      type: Html
+      description: Analysis of hazard function peaks and inflection points
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - bandwidth
+        - peak_analysis
+
+    - name: model_comparison
+      title: Model Comparison Results
+      type: Html
+      description: Comparison with parametric survival models
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - model_comparison
+
+    - name: bootstrap_results
+      title: Bootstrap Results
+      type: Html
+      description: Bootstrap confidence interval results
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - bootstrap_ci
+        - bootstrap_samples
+
+    - name: hazard_export
+      title: Exported Hazard Estimates
+      type: Table
+      description: Detailed hazard function estimates for export
+      clearWith:
+        - time_var
+        - status_var
+        - method
+        - export_hazard
+        - time_grid
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: hazard_estimate
+          title: Hazard Estimate
+          type: number
+        - name: lower_ci
+          title: Lower CI
+          type: number
+        - name: upper_ci
+          title: Upper CI
+          type: number
+        - name: cumulative_hazard
+          title: Cumulative Hazard
+          type: number
+        - name: method
+          title: Method
+          type: text
+        - name: bandwidth
+          title: Bandwidth
+          type: number
+
+...

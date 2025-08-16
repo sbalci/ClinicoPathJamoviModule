@@ -1,0 +1,242 @@
+name: smoothhazard
+title: Smooth Hazard Estimation & Analysis
+menuGroup: ClinicoPath Survival
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time_var
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time to event or censoring variable
+
+    - name: status_var
+      title: Event Status Variable  
+      type: Variable
+      suggested:
+        - ordinal
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Event status variable (1=event, 0=censored)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+        - continuous
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Covariates for stratified hazard estimation
+
+    - name: strata_var
+      title: Stratification Variable
+      type: Variable
+      suggested:
+        - ordinal
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Variable for stratified analysis
+
+    - name: method
+      title: Smoothing Method
+      type: List
+      options:
+        - name: kernel
+          title: Kernel Smoothing (muhaz)
+        - name: bspline
+          title: B-spline Smoothing (bshazard)  
+        - name: kernsmooth
+          title: Kernel Density (kerdiest)
+        - name: locpoly
+          title: Local Polynomial
+      default: kernel
+      description:
+          R: >
+            Method for hazard function smoothing
+
+    - name: bandwidth
+      title: Bandwidth
+      type: Number
+      default: 0
+      min: 0
+      description:
+          R: >
+            Bandwidth parameter for smoothing (0 = automatic selection)
+
+    - name: bandwidth_method
+      title: Bandwidth Selection
+      type: List
+      options:
+        - name: automatic
+          title: Automatic Selection
+        - name: global
+          title: Global Bandwidth
+        - name: local
+          title: Local Bandwidth
+        - name: pilot
+          title: Pilot Bandwidth
+      default: automatic
+      description:
+          R: >
+            Method for bandwidth selection
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.999
+      description:
+          R: >
+            Confidence level for confidence intervals
+
+    - name: time_grid
+      title: Time Grid Points
+      type: Number
+      default: 50
+      min: 10
+      max: 200
+      description:
+          R: >
+            Number of time points for hazard estimation
+
+    - name: boundary_correction
+      title: Boundary Correction
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply boundary correction for hazard estimation
+
+    - name: kernel_type
+      title: Kernel Type
+      type: List
+      options:
+        - name: epanechnikov
+          title: Epanechnikov
+        - name: biweight
+          title: Biweight
+        - name: rectangular
+          title: Rectangular
+        - name: triangular
+          title: Triangular
+        - name: gaussian
+          title: Gaussian
+      default: epanechnikov
+      description:
+          R: >
+            Kernel function for smoothing
+
+    - name: hazard_plot
+      title: Hazard Function Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate hazard function plot
+
+    - name: cumulative_hazard_plot
+      title: Cumulative Hazard Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate cumulative hazard function plot
+
+    - name: confidence_bands
+      title: Confidence Bands
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include confidence bands in plots
+
+    - name: comparison_plot
+      title: Method Comparison Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare different smoothing methods
+
+    - name: diagnostic_plots
+      title: Diagnostic Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate diagnostic plots for bandwidth selection
+
+    - name: hazard_summary
+      title: Hazard Summary Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Summary statistics for estimated hazard function
+
+    - name: peak_analysis
+      title: Hazard Peak Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Identify and analyze hazard function peaks
+
+    - name: model_comparison
+      title: Model Comparison
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare with parametric models
+
+    - name: export_hazard
+      title: Export Hazard Estimates
+      type: Bool
+      default: false
+      description:
+          R: >
+            Export hazard function estimates to results
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use bootstrap for confidence interval estimation
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      default: 500
+      min: 100
+      max: 2000
+      description:
+          R: >
+            Number of bootstrap samples for confidence intervals
+
+...

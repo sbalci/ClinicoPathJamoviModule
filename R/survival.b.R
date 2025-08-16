@@ -207,18 +207,186 @@ survivalClass <- if (requireNamespace('jmvcore'))
         private = list(
 
             .init = function() {
+                # Initialize all outputs to FALSE first (following singlearm pattern)
+                # Core survival analysis outputs
+                self$results$medianSurvivalHeading$setVisible(FALSE)
+                self$results$medianSurvivalExplanation$setVisible(FALSE)
+                self$results$medianSurvivalHeading3$setVisible(FALSE)
+                self$results$medianSummary$setVisible(FALSE)
+                self$results$medianTable$setVisible(FALSE)
+                
+                # Cox regression outputs
+                self$results$coxRegressionHeading$setVisible(FALSE)
+                self$results$coxRegressionExplanation$setVisible(FALSE)
+                self$results$coxRegressionHeading3$setVisible(FALSE)
+                self$results$coxSummary$setVisible(FALSE)
+                self$results$coxTable$setVisible(FALSE)
+                self$results$tCoxtext2$setVisible(FALSE)
+                self$results$cox_ph$setVisible(FALSE)
+                self$results$plot8$setVisible(FALSE)
+                
+                # Survival tables outputs
+                self$results$survivalTablesHeading$setVisible(FALSE)
+                self$results$survivalTablesExplanation$setVisible(FALSE)
+                self$results$survivalTablesHeading3$setVisible(FALSE)
+                self$results$survTableSummary$setVisible(FALSE)
+                self$results$survTable$setVisible(FALSE)
+                
+                # Survival plots outputs
+                self$results$plot$setVisible(FALSE)
+                self$results$plot2$setVisible(FALSE)
+                self$results$plot3$setVisible(FALSE)
+                self$results$plot4$setVisible(FALSE)
+                self$results$plot5$setVisible(FALSE)
+                self$results$plot6$setVisible(FALSE)
+                self$results$plot7$setVisible(FALSE)
+                self$results$survivalPlotsHeading3$setVisible(FALSE)
+                self$results$survivalPlotsExplanation$setVisible(FALSE)
+                
+                # Person-time analysis outputs
+                self$results$personTimeHeading$setVisible(FALSE)
+                self$results$personTimeTable$setVisible(FALSE)
+                self$results$personTimeSummary$setVisible(FALSE)
+                self$results$personTimeExplanation$setVisible(FALSE)
+                
+                # RMST analysis outputs
+                self$results$rmstHeading$setVisible(FALSE)
+                self$results$rmstTable$setVisible(FALSE)
+                self$results$rmstSummary$setVisible(FALSE)
+                self$results$rmstExplanation$setVisible(FALSE)
+                
+                # Residuals analysis outputs
+                self$results$residualsTable$setVisible(FALSE)
+                self$results$residualsPlot$setVisible(FALSE)
+                self$results$residualDiagnosticsExplanation$setVisible(FALSE)
+                
+                # Pairwise comparison outputs
+                self$results$pwHeading$setVisible(FALSE)
+                self$results$pwTable$setVisible(FALSE)
+                self$results$pairwiseSummary$setVisible(FALSE)
+                
+                # Parametric models outputs
+                self$results$parametricModelsHeading$setVisible(FALSE)
+                self$results$parametricModelsTable$setVisible(FALSE)
+                self$results$parametricModelsExplanation$setVisible(FALSE)
+                
+                # Always show core survival analysis elements when data is present
+                self$results$medianSurvivalHeading$setVisible(TRUE)
+                self$results$medianTable$setVisible(TRUE)
+                self$results$coxRegressionHeading$setVisible(TRUE)
+                self$results$coxTable$setVisible(TRUE)
+                self$results$tCoxtext2$setVisible(TRUE)
+                self$results$survivalTablesHeading$setVisible(TRUE)
+                self$results$survTable$setVisible(TRUE)
+                
+                # Handle showSummaries visibility
+                if (self$options$showSummaries) {
+                    self$results$medianSummary$setVisible(TRUE)
+                    self$results$coxSummary$setVisible(TRUE)
+                    self$results$survTableSummary$setVisible(TRUE)
+                    
+                    # Conditional summaries - require both showSummaries AND their specific option
+                    if (self$options$person_time) {
+                        self$results$personTimeSummary$setVisible(TRUE)
+                    }
+                    if (self$options$rmst_analysis) {
+                        self$results$rmstSummary$setVisible(TRUE)
+                    }
+                    if (self$options$pw) {
+                        self$results$pairwiseSummary$setVisible(TRUE)
+                    }
+                }
 
+                # Handle showExplanations visibility  
+                if (self$options$showExplanations) {
+                    # Core explanations and headings
+                    self$results$medianSurvivalHeading3$setVisible(TRUE)
+                    self$results$medianSurvivalExplanation$setVisible(TRUE)
+                    self$results$coxRegressionHeading3$setVisible(TRUE)
+                    self$results$coxRegressionExplanation$setVisible(TRUE)
+                    self$results$survivalTablesHeading3$setVisible(TRUE)
+                    self$results$survivalTablesExplanation$setVisible(TRUE)
+                    
+                    # Conditional explanations - require both showExplanations AND their specific option
+                    if (self$options$person_time) {
+                        self$results$personTimeExplanation$setVisible(TRUE)
+                    }
+                    if (self$options$rmst_analysis) {
+                        self$results$rmstExplanation$setVisible(TRUE)
+                    }
+                    if (self$options$residual_diagnostics) {
+                        self$results$residualDiagnosticsExplanation$setVisible(TRUE)
+                    }
+                    if (self$options$use_parametric) {
+                        self$results$parametricModelsExplanation$setVisible(TRUE)
+                    }
+                    
+                    # Survival plots explanation requires showExplanations AND at least one plot
+                    if (self$options$sc || self$options$ce || self$options$ch || 
+                        self$options$kmunicate || self$options$loglog) {
+                        self$results$survivalPlotsHeading3$setVisible(TRUE)
+                        self$results$survivalPlotsExplanation$setVisible(TRUE)
+                    }
+                }
+                
+                # Handle person_time visibility
+                if (self$options$person_time) {
+                    self$results$personTimeHeading$setVisible(TRUE)
+                    self$results$personTimeTable$setVisible(TRUE)
+                }
+                
+                # Handle RMST analysis visibility
+                if (self$options$rmst_analysis) {
+                    self$results$rmstHeading$setVisible(TRUE)
+                    self$results$rmstTable$setVisible(TRUE)
+                }
+                
+                # Handle residual diagnostics visibility
+                if (self$options$residual_diagnostics) {
+                    self$results$residualsTable$setVisible(TRUE)
+                    self$results$residualsPlot$setVisible(TRUE)
+                }
+                
+                # Handle pairwise comparison visibility
+                if (self$options$pw) {
+                    self$results$pwHeading$setVisible(TRUE)
+                    self$results$pwTable$setVisible(TRUE)
+                }
+                
+                # Handle parametric models visibility
+                if (self$options$use_parametric) {
+                    self$results$parametricModelsHeading$setVisible(TRUE)
+                    self$results$parametricModelsTable$setVisible(TRUE)
+                }
+                
+                # Handle Cox PH visibility
                 if (self$options$ph_cox) {
-                    # Disable tables
                     self$results$cox_ph$setVisible(TRUE)
+                    self$results$plot8$setVisible(TRUE)
                 }
-
-                if (!(self$options$ph_cox)) {
-                    # Disable tables
-                    self$results$cox_ph$setVisible(FALSE)
+                
+                # Handle plot visibility based on their options
+                if (self$options$sc) {
+                    self$results$plot$setVisible(TRUE)
                 }
-
-
+                if (self$options$ce) {
+                    self$results$plot2$setVisible(TRUE)
+                }
+                if (self$options$ch) {
+                    self$results$plot3$setVisible(TRUE)
+                }
+                if (self$options$kmunicate) {
+                    self$results$plot4$setVisible(TRUE)
+                }
+                if (self$options$loglog) {
+                    self$results$plot5$setVisible(TRUE)
+                }
+                if (self$options$residual_diagnostics) {
+                    self$results$plot6$setVisible(TRUE)
+                }
+                if (self$options$use_parametric) {
+                    self$results$plot7$setVisible(TRUE)
+                }
             }
             ,
 
@@ -1604,7 +1772,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                         # Add checkpoint for responsiveness
                         if (i %% 5 == 0) {
-                            private$.checkpoint(FALSE)
+                            private$.checkpoint()
                         }
 
                         # Filter data for this interval

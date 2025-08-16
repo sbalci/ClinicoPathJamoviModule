@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.03
+version: 0.0.31.05
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-14'
+date: '2025-08-16'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -111,7 +111,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -125,7 +125,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -138,7 +138,7 @@ analyses:
   - title: Genomic Landscape Visualization
     name: ggoncoplot
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: Molecular Pathology Plots
     menuTitle: Genomic Landscape Visualization
     description: >-
@@ -192,7 +192,7 @@ analyses:
   - title: Clinical Hemodynamic Monitoring
     name: clinmon
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Clinical Hemodynamic Monitoring
     menuSubtitle: Hemodynamic Indices from Continuous Monitoring
@@ -584,7 +584,7 @@ analyses:
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: ClinicoPath Biomarker Analysis
     menuTitle: Biomarker Response Association
     description: >-
@@ -735,7 +735,7 @@ analyses:
   - title: CONSORT Flowchart
     name: consort
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: ClinicoPath Reports
     menuTitle: CONSORT Flowchart
     ribbon: analyses
@@ -743,7 +743,7 @@ analyses:
   - title: Study Flowchart
     name: flowchart
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: ClinicoPath Reports
     menuTitle: Study Flowchart
     ribbon: analyses
@@ -772,7 +772,7 @@ analyses:
   - title: IHC Expression Analysis
     name: ihcstats
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: IHC Analysis
     menuTitle: IHC Expression Analysis
     ribbon: analyses
@@ -872,7 +872,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -906,7 +906,7 @@ analyses:
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
@@ -983,7 +983,7 @@ analyses:
   - title: Date Field Correction
     name: datecorrection
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: Data Preparation
     menuTitle: Date Field Correction
     menuSubtitle: Multi-Package Date Standardization
@@ -2274,13 +2274,13 @@ analyses:
     name: biopsysimulation
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuTitle: Biopsy Simulation Analysis
   - title: Digital Pathology Validation
     name: digitalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuTitle: Digital Pathology Validation
   - title: Haralick Texture Analysis
     name: haralicktexture
@@ -2298,7 +2298,7 @@ analyses:
     name: multiplexanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuTitle: Multiplex Immunofluorescence Analysis
   - title: Pathology Agreement Analysis
     name: pathologyagreement
@@ -2310,7 +2310,7 @@ analyses:
     name: spatialanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuTitle: Spatial Statistics from Coordinates
   - title: Enhanced Non-Parametric Tests
     name: enhancednonparametric
@@ -2604,6 +2604,12 @@ analyses:
       clinical 
 
       instruments for personalized risk assessment and treatment planning.
+  - title: Smooth Hazard Estimation & Analysis
+    name: smoothhazard
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath Survival
+    menuTitle: Smooth Hazard Estimation & Analysis
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
