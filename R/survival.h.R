@@ -38,7 +38,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ci95 = FALSE,
             risktable = FALSE,
             censored = FALSE,
-            pplot = TRUE,
+            pplot = FALSE,
             medianline = "none",
             person_time = FALSE,
             time_intervals = "12, 36, 60",
@@ -245,7 +245,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..pplot <- jmvcore::OptionBool$new(
                 "pplot",
                 pplot,
-                default=TRUE)
+                default=FALSE)
             private$..medianline <- jmvcore::OptionList$new(
                 "medianline",
                 medianline,
@@ -554,43 +554,44 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
         medianSurvivalHeading = function() private$.items[["medianSurvivalHeading"]],
-        medianSurvivalExplanation = function() private$.items[["medianSurvivalExplanation"]],
-        medianSurvivalHeading3 = function() private$.items[["medianSurvivalHeading3"]],
         medianSummary = function() private$.items[["medianSummary"]],
         medianTable = function() private$.items[["medianTable"]],
+        medianSurvivalHeading3 = function() private$.items[["medianSurvivalHeading3"]],
+        medianSurvivalExplanation = function() private$.items[["medianSurvivalExplanation"]],
         coxRegressionHeading = function() private$.items[["coxRegressionHeading"]],
-        coxRegressionExplanation = function() private$.items[["coxRegressionExplanation"]],
-        coxRegressionHeading3 = function() private$.items[["coxRegressionHeading3"]],
         coxSummary = function() private$.items[["coxSummary"]],
         coxTable = function() private$.items[["coxTable"]],
         tCoxtext2 = function() private$.items[["tCoxtext2"]],
+        coxRegressionHeading3 = function() private$.items[["coxRegressionHeading3"]],
+        coxRegressionExplanation = function() private$.items[["coxRegressionExplanation"]],
         cox_ph = function() private$.items[["cox_ph"]],
         plot8 = function() private$.items[["plot8"]],
         survivalTablesHeading = function() private$.items[["survivalTablesHeading"]],
-        survivalTablesExplanation = function() private$.items[["survivalTablesExplanation"]],
-        survivalTablesHeading3 = function() private$.items[["survivalTablesHeading3"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
         survTable = function() private$.items[["survTable"]],
+        survivalTablesHeading3 = function() private$.items[["survivalTablesHeading3"]],
+        survivalTablesExplanation = function() private$.items[["survivalTablesExplanation"]],
         personTimeHeading = function() private$.items[["personTimeHeading"]],
-        personTimeExplanation = function() private$.items[["personTimeExplanation"]],
         personTimeTable = function() private$.items[["personTimeTable"]],
         personTimeSummary = function() private$.items[["personTimeSummary"]],
+        personTimeExplanation = function() private$.items[["personTimeExplanation"]],
         rmstHeading = function() private$.items[["rmstHeading"]],
-        rmstExplanation = function() private$.items[["rmstExplanation"]],
         rmstTable = function() private$.items[["rmstTable"]],
         rmstSummary = function() private$.items[["rmstSummary"]],
+        rmstExplanation = function() private$.items[["rmstExplanation"]],
         residualDiagnosticsExplanation = function() private$.items[["residualDiagnosticsExplanation"]],
         residualsTable = function() private$.items[["residualsTable"]],
         survivalExport = function() private$.items[["survivalExport"]],
         survivalExportSummary = function() private$.items[["survivalExportSummary"]],
-        pairwiseSummary = function() private$.items[["pairwiseSummary"]],
+        pairwiseComparisonHeading = function() private$.items[["pairwiseComparisonHeading"]],
         pairwiseTable = function() private$.items[["pairwiseTable"]],
-        survivalPlotsHeading3 = function() private$.items[["survivalPlotsHeading3"]],
-        survivalPlotsExplanation = function() private$.items[["survivalPlotsExplanation"]],
+        pairwiseSummary = function() private$.items[["pairwiseSummary"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
         plot6 = function() private$.items[["plot6"]],
+        survivalPlotsHeading3 = function() private$.items[["survivalPlotsHeading3"]],
+        survivalPlotsExplanation = function() private$.items[["survivalPlotsExplanation"]],
         plot7 = function() private$.items[["plot7"]],
         residualsPlot = function() private$.items[["residualsPlot"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
@@ -632,7 +633,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -641,19 +642,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="medianSurvivalHeading",
                 title="Median Survival Analysis"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="medianSurvivalExplanation",
-                title="Understanding Median Survival Analysis",
-                visible="(showExplanations)",
-                clearWith=list(
-                    "explanatory",
-                    "outcome")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="medianSurvivalHeading3",
-                title="Median Survival Analysis Explanations",
-                visible="(showExplanations)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSummary",
@@ -663,7 +651,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -712,28 +700,28 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="coxRegressionHeading",
-                title="Cox Regression Analysis"))
+                name="medianSurvivalHeading3",
+                title="Median Survival Analysis Explanations",
+                visible="(showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="coxRegressionExplanation",
-                title="Understanding Cox Regression Analysis",
+                name="medianSurvivalExplanation",
+                title="Understanding Median Survival Analysis",
                 visible="(showExplanations)",
                 clearWith=list(
                     "explanatory",
                     "outcome")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="coxRegressionHeading3",
-                title="Cox Regression Analysis Explanations",
-                visible="(showExplanations)"))
+                name="coxRegressionHeading",
+                title="Cox Regression Analysis"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="coxSummary",
@@ -743,7 +731,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -774,7 +762,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -788,12 +776,25 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent",
                     "contexpl")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="coxRegressionHeading3",
+                title="Cox Regression Analysis Explanations",
+                visible="(showExplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="coxRegressionExplanation",
+                title="Understanding Cox Regression Analysis",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="cox_ph",
@@ -803,7 +804,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -825,7 +826,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -834,19 +835,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="survivalTablesHeading",
                 title="Survival Probability Tables"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="survivalTablesExplanation",
-                title="Understanding Survival Probability Tables",
-                visible="(showExplanations)",
-                clearWith=list(
-                    "explanatory",
-                    "outcome")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="survivalTablesHeading3",
-                title="Survival Tables Explanations",
-                visible="(showExplanations)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survTableSummary",
@@ -856,7 +844,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -904,25 +892,29 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
+                name="survivalTablesHeading3",
+                title="Survival Tables Explanations",
+                visible="(showExplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survivalTablesExplanation",
+                title="Understanding Survival Probability Tables",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
                 name="personTimeHeading",
                 title="Person-Time Analysis",
                 visible="(person_time)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="personTimeExplanation",
-                title="Understanding Person-Time Analysis",
-                visible="(person_time && showExplanations)",
-                clearWith=list(
-                    "person_time",
-                    "explanatory",
-                    "outcome")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="personTimeTable",
@@ -969,7 +961,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "person_time",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -988,25 +980,25 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "person_time",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="personTimeExplanation",
+                title="Understanding Person-Time Analysis",
+                visible="(person_time && showExplanations)",
+                clearWith=list(
+                    "person_time",
+                    "explanatory",
+                    "outcome")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="rmstHeading",
                 title="RMST Analysis",
                 visible="(rmst_analysis)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="rmstExplanation",
-                title="Understanding Restricted Mean Survival Time (RMST)",
-                visible="(rmst_analysis && showExplanations)",
-                clearWith=list(
-                    "rmst_analysis",
-                    "explanatory",
-                    "outcome")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rmstTable",
@@ -1064,6 +1056,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="rmstExplanation",
+                title="Understanding Restricted Mean Survival Time (RMST)",
+                visible="(rmst_analysis && showExplanations)",
+                clearWith=list(
+                    "rmst_analysis",
+                    "explanatory",
+                    "outcome")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="residualDiagnosticsExplanation",
@@ -1132,19 +1133,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcomeLevel")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="pairwiseSummary",
-                title="`Pairwise Comparison Summary and Table - ${explanatory}`",
-                visible="(pw && showSummaries)",
-                clearWith=list(
-                    "pw",
-                    "explanatory",
-                    "outcome",
-                    "outcomeLevel",
-                    "overalltime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent")))
+                name="pairwiseComparisonHeading",
+                title="Pairwise Comparison Analysis",
+                visible="(pw)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="pairwiseTable",
@@ -1170,7 +1161,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -1179,22 +1170,19 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "padjust")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="survivalPlotsHeading3",
-                title="Survival Plots Explanations",
-                visible="((sc || ce || ch || kmunicate || loglog) && showExplanations)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="survivalPlotsExplanation",
-                title="Understanding Survival Curves and Plots",
-                visible="((sc || ce || ch || kmunicate || loglog) && showExplanations)",
+                name="pairwiseSummary",
+                title="`Pairwise Comparison Summary and Table - ${explanatory}`",
+                visible="(pw && showSummaries)",
                 clearWith=list(
-                    "sc",
-                    "ce",
-                    "ch",
-                    "kmunicate",
-                    "loglog",
+                    "pw",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -1216,7 +1204,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -1244,7 +1232,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -1270,7 +1258,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -1293,7 +1281,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -1301,6 +1289,24 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "KMunicate",
                     "KMunicate2")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survivalPlotsHeading3",
+                title="Survival Plots Explanations",
+                visible="((sc || ce || ch || kmunicate || loglog) && showExplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survivalPlotsExplanation",
+                title="Understanding Survival Curves and Plots",
+                visible="((sc || ce || ch || kmunicate || loglog) && showExplanations)",
+                clearWith=list(
+                    "sc",
+                    "ce",
+                    "ch",
+                    "kmunicate",
+                    "loglog",
+                    "explanatory",
+                    "outcome")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot7",
@@ -1317,7 +1323,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -1347,7 +1353,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "tint",
                     "dxdate",
                     "fudate",
-                    "overalltime",
+                    "elapsedtime",
                     "calculatedtime")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -1699,43 +1705,44 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$medianSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$medianSurvivalHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$medianSurvivalHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survivalTablesHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$survivalTablesExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$survivalTablesHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$survivalTablesHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$survivalTablesExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$rmstHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$rmstTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rmstSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survivalExport} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$survivalExportSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$pairwiseComparisonHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$residualsPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
@@ -1791,7 +1798,7 @@ survival <- function(
     ci95 = FALSE,
     risktable = FALSE,
     censored = FALSE,
-    pplot = TRUE,
+    pplot = FALSE,
     medianline = "none",
     person_time = FALSE,
     time_intervals = "12, 36, 60",

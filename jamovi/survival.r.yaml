@@ -19,7 +19,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -38,21 +38,6 @@ items:
     - name:  medianSurvivalHeading
       title: Median Survival Analysis
       type:  Preformatted
-      
-
-    # Median Survival Explanation
-    - name: medianSurvivalExplanation
-      title: Understanding Median Survival Analysis
-      type: Html
-      visible: (showExplanations)
-      clearWith:
-          - explanatory
-          - outcome
-
-    - name:  medianSurvivalHeading3
-      title: Median Survival Analysis Explanations
-      type:  Preformatted
-      visible: (showExplanations)
 
     - name:  medianSummary
       # title: Median Survival Summary and Table
@@ -63,14 +48,11 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
-
-
-
 
     - name:  medianTable
       # title: Median Survival Table
@@ -115,30 +97,38 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
 
-    - name:  coxRegressionHeading
-      title: Cox Regression Analysis
+    # Median Survival Explanation
+    - name:  medianSurvivalHeading3
+      title: Median Survival Analysis Explanations
       type:  Preformatted
-      
+      visible: (showExplanations)
 
-    # Cox Regression Explanation
-    - name: coxRegressionExplanation
-      title: Understanding Cox Regression Analysis
+    - name: medianSurvivalExplanation
+      title: Understanding Median Survival Analysis
       type: Html
       visible: (showExplanations)
       clearWith:
           - explanatory
           - outcome
 
-    - name:  coxRegressionHeading3
-      title: Cox Regression Analysis Explanations
+
+
+
+
+
+
+
+    - name:  coxRegressionHeading
+      title: Cox Regression Analysis
       type:  Preformatted
-      visible: (showExplanations)
+      
+
 
     - name:  coxSummary
       # title: Cox Regression Summary and Table
@@ -149,7 +139,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -182,7 +172,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -198,12 +188,31 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
           - contexpl
+
+
+
+    - name:  coxRegressionHeading3
+      title: Cox Regression Analysis Explanations
+      type:  Preformatted
+      visible: (showExplanations)
+
+    # Cox Regression Explanation
+    - name: coxRegressionExplanation
+      title: Understanding Cox Regression Analysis
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
+
+
+
 
 
 
@@ -215,7 +224,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -239,30 +248,17 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
 
+
     - name:  survivalTablesHeading
       title: Survival Probability Tables
       type:  Preformatted
-      
 
-    # Survival Tables Explanation
-    - name: survivalTablesExplanation
-      title: Understanding Survival Probability Tables
-      type: Html
-      visible: (showExplanations)
-      clearWith:
-          - explanatory
-          - outcome
-
-    - name:  survivalTablesHeading3
-      title: Survival Tables Explanations
-      type:  Preformatted
-      visible: (showExplanations)
 
     - name:  survTableSummary
       # title: '1, 3, 5-yr Survival Summary and Table'
@@ -273,11 +269,13 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
+
+
 
 
     # - name:  tableview
@@ -321,27 +319,39 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
           - multievent
+
+
+
+
+    # Survival Tables Explanation
+    - name:  survivalTablesHeading3
+      title: Survival Tables Explanations
+      type:  Preformatted
+      visible: (showExplanations)
+
+    - name: survivalTablesExplanation
+      title: Understanding Survival Probability Tables
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
+
+
+
+
+
 
     - name:  personTimeHeading
       title: Person-Time Analysis
       type:  Preformatted
       visible: (person_time)
       
-
-    # Person-Time Analysis Explanation
-    - name: personTimeExplanation
-      title: Understanding Person-Time Analysis
-      type: Html
-      visible: (person_time && showExplanations)
-      clearWith:
-          - person_time
-          - explanatory
-          - outcome
 
     - name: personTimeTable
       title: 'Person-Time Analysis'
@@ -382,7 +392,7 @@ items:
         - person_time
         - outcome
         - outcomeLevel
-        - overalltime
+        - elapsedtime
         - fudate
         - dxdate
         - tint
@@ -401,11 +411,24 @@ items:
         - person_time
         - outcome
         - outcomeLevel
-        - overalltime
+        - elapsedtime
         - fudate
         - dxdate
         - tint
         - multievent
+
+
+    # Person-Time Analysis Explanation
+    - name: personTimeExplanation
+      title: Understanding Person-Time Analysis
+      type: Html
+      visible: (person_time && showExplanations)
+      clearWith:
+          - person_time
+          - explanatory
+          - outcome
+
+
 
     - name:  rmstHeading
       title: RMST Analysis
@@ -413,15 +436,7 @@ items:
       visible: (rmst_analysis)
       
 
-    # RMST Analysis Explanation
-    - name: rmstExplanation
-      title: Understanding Restricted Mean Survival Time (RMST)
-      type: Html
-      visible: (rmst_analysis && showExplanations)
-      clearWith:
-          - rmst_analysis
-          - explanatory
-          - outcome
+
 
     - name: rmstTable
       title: 'Restricted Mean Survival Time'
@@ -473,6 +488,20 @@ items:
         - outcome
         - outcomeLevel
         - elapsedtime
+
+
+
+    # RMST Analysis Explanation
+    - name: rmstExplanation
+      title: Understanding Restricted Mean Survival Time (RMST)
+      type: Html
+      visible: (rmst_analysis && showExplanations)
+      clearWith:
+          - rmst_analysis
+          - explanatory
+          - outcome
+
+
 
     # Residual Diagnostics Explanation
     - name: residualDiagnosticsExplanation
@@ -538,23 +567,10 @@ items:
 
 
 
-    - name:  pairwiseSummary
-      # title: Pairwise Comparison Summary and Table
-      title: '`Pairwise Comparison Summary and Table - ${explanatory}`'
+    - name:  pairwiseComparisonHeading
+      title: Pairwise Comparison Analysis
       type:  Preformatted
-      visible: (pw && showSummaries)
-      clearWith:
-          - pw
-          - explanatory
-          - outcome
-          - outcomeLevel
-          - overalltime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-
-
+      visible: (pw)
 
 
     - name:  pairwiseTable
@@ -578,7 +594,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -587,24 +603,27 @@ items:
           - padjust
 
 
-    - name:  survivalPlotsHeading3
-      title: Survival Plots Explanations
-      type:  Preformatted
-      visible: ((sc || ce || ch || kmunicate || loglog) && showExplanations)
 
-    # Survival Plots Explanation
-    - name: survivalPlotsExplanation
-      title: Understanding Survival Curves and Plots
-      type: Html
-      visible: ((sc || ce || ch || kmunicate || loglog) && showExplanations)
+    - name:  pairwiseSummary
+      # title: Pairwise Comparison Summary and Table
+      title: '`Pairwise Comparison Summary and Table - ${explanatory}`'
+      type:  Preformatted
+      visible: (pw && showSummaries)
       clearWith:
-          - sc
-          - ce
-          - ch
-          - kmunicate
-          - loglog
+          - pw
           - explanatory
           - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+
+
+
+
+
 
     - name: plot
       title: '`Survival Plot - ${explanatory}`'
@@ -626,7 +645,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -656,7 +675,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -684,7 +703,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -709,7 +728,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -717,6 +736,33 @@ items:
       refs:
           - KMunicate
           - KMunicate2
+
+
+    - name:  survivalPlotsHeading3
+      title: Survival Plots Explanations
+      type:  Preformatted
+      visible: ((sc || ce || ch || kmunicate || loglog) && showExplanations)
+
+    # Survival Plots Explanation
+    - name: survivalPlotsExplanation
+      title: Understanding Survival Curves and Plots
+      type: Html
+      visible: ((sc || ce || ch || kmunicate || loglog) && showExplanations)
+      clearWith:
+          - sc
+          - ce
+          - ch
+          - kmunicate
+          - loglog
+          - explanatory
+          - outcome
+
+
+
+
+
+
+
 
     - name: plot7
       title: '`Log-Log Plot - ${explanatory}`'
@@ -733,7 +779,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -765,7 +811,7 @@ items:
           - tint
           - dxdate
           - fudate
-          - overalltime
+          - elapsedtime
           - calculatedtime
 
 

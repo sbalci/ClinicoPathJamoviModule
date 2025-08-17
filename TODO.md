@@ -1,6 +1,20 @@
 # ClinicoPath Development Roadmap
 
-- in vartree function, variable names with emptyspaces cannot be used.
+
+current singlearm init function visibility logic, heading logic, explanation logic, and natural language summary logic are working well. Apply the same logic to multisurvival function.
+check if the tables and plots coappear with natural language summaries. MAke sure that the natural language summaries appear when user selects it.
+check if relevant headings are present. add headings as necessary
+add educational explanatory outputs
+Do not make breaking changes.
+
+
+current singlearm init function visibility logic, heading logic, explanation logic, and natural language summary logic are working well. Apply the same logic to oddsratio function.
+check if the tables and plots coappear with natural language summaries. MAke sure that the natural language summaries appear when user selects it.
+check if relevant headings are present. add headings as necessary
+add educational explanatory outputs
+Do not make breaking changes.
+
+
 
 ### 3. Comprehensive Survival Analysis Roadmap (CRAN Task View Implementation)
 
