@@ -307,6 +307,9 @@ children:
           - type: ComboBox
             name: ac_method
             enable: (ac)
+      - type: Label
+        label: Advanced Options
+        children: []
   - type: CollapseBox
     label: Stratification Variables
     collapsed: true
@@ -553,47 +556,111 @@ children:
                   - type: ComboBox
                     name: spline_type
                     enable: (false && use_splines)
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Model Selection and Validation
+    collapsed: true
     children:
-      - type: CheckBox
-        name: showExplanations
-      - type: CheckBox
-        name: showSummaries
-  - type: LayoutBox
-    margin: large
+      - type: Label
+        label: >-
+          These features are being tested and will be activated in further
+          releases
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Method Selection
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: ComboBox
+                    name: ml_method
+          - type: Label
+            label: Model Validation
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: ComboBox
+                    name: ml_validation
+                    enable: (ml_method != 'none')
+                  - type: TextBox
+                    name: ml_cv_folds
+                    format: number
+                    enable: (ml_method != 'none' && ml_validation == 'cv')
+          - type: Label
+            label: Feature Analysis
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: ml_feature_selection
+                    enable: (ml_method != 'none')
+                  - type: CheckBox
+                    name: ml_importance
+                    enable: (ml_method != 'none')
+          - type: Label
+            label: Model Evaluation
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: ml_performance
+                    enable: (ml_method != 'none')
+                  - type: CheckBox
+                    name: ml_calibration
+                    enable: (ml_method != 'none')
+                  - type: CheckBox
+                    name: ml_shap
+                    enable: (ml_method != 'none')
+  - type: CollapseBox
+    label: Advanced Features
+    collapsed: true
     children:
-      - type: ComboBox
-        name: ml_method
-  - type: LayoutBox
-    margin: large
+      - type: Label
+        label: >-
+          These features are being tested and will be activated in further
+          releases
+      - type: Label
+        label: Advanced Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: ml_hyperparameter_tuning
+                enable: (ml_method != 'none')
+              - type: TextBox
+                name: ml_ensemble_weights
+                format: string
+                enable: (ml_method == 'ensemble')
+  - type: CollapseBox
+    label: Model Selection
+    collapsed: true
     children:
-      - type: ComboBox
-        name: ml_validation
-  - type: LayoutBox
-    margin: large
+      - type: Label
+        label: >-
+          These features are being tested and will be activated in further
+          releases
+      - type: Label
+        label: Variable Selection
+        children: []
+      - type: Label
+        label: Selection Parameters
+        children: []
+  - type: CollapseBox
+    label: Output and Display Options
+    collapsed: true
     children:
-      - type: TextBox
-        name: ml_cv_folds
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: ml_feature_selection
-      - type: CheckBox
-        name: ml_importance
-      - type: CheckBox
-        name: ml_calibration
-      - type: CheckBox
-        name: ml_performance
-      - type: CheckBox
-        name: ml_shap
-      - type: CheckBox
-        name: ml_hyperparameter_tuning
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: ml_ensemble_weights
-        format: string
+      - type: Label
+        label: Educational Content
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showExplanations
+              - type: CheckBox
+                name: showSummaries

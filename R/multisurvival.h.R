@@ -72,10 +72,10 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             ml_method = "none",
             ml_validation = "cv",
             ml_cv_folds = 5,
-            ml_feature_selection = TRUE,
-            ml_importance = TRUE,
-            ml_calibration = TRUE,
-            ml_performance = TRUE,
+            ml_feature_selection = FALSE,
+            ml_importance = FALSE,
+            ml_calibration = FALSE,
+            ml_performance = FALSE,
             ml_shap = FALSE,
             ml_hyperparameter_tuning = FALSE,
             ml_ensemble_weights = "equal", ...) {
@@ -92,17 +92,20 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..tint <- jmvcore::OptionBool$new(
                 "tint",
                 tint,
                 default=FALSE)
             private$..dxdate <- jmvcore::OptionVariable$new(
                 "dxdate",
-                dxdate)
+                dxdate,
+                default=NULL)
             private$..fudate <- jmvcore::OptionVariable$new(
                 "fudate",
-                fudate)
+                fudate,
+                default=NULL)
             private$..timetypedata <- jmvcore::OptionList$new(
                 "timetypedata",
                 timetypedata,
@@ -143,7 +146,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "continuous"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
@@ -185,14 +189,16 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..contexpl <- jmvcore::OptionVariables$new(
                 "contexpl",
                 contexpl,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..multievent <- jmvcore::OptionBool$new(
                 "multievent",
                 multievent,
@@ -284,7 +290,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..ac_method <- jmvcore::OptionList$new(
                 "ac_method",
                 ac_method,
@@ -309,7 +316,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..person_time <- jmvcore::OptionBool$new(
                 "person_time",
                 person_time,
@@ -361,7 +369,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default="wide")
             private$..time_dep_vars <- jmvcore::OptionVariables$new(
                 "time_dep_vars",
-                time_dep_vars)
+                time_dep_vars,
+                default=NULL)
             private$..change_times <- jmvcore::OptionString$new(
                 "change_times",
                 change_times,
@@ -372,10 +381,12 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default="_t{time}")
             private$..start_time_var <- jmvcore::OptionVariable$new(
                 "start_time_var",
-                start_time_var)
+                start_time_var,
+                default=NULL)
             private$..stop_time_var <- jmvcore::OptionVariable$new(
                 "stop_time_var",
-                stop_time_var)
+                stop_time_var,
+                default=NULL)
             private$..use_frailty <- jmvcore::OptionBool$new(
                 "use_frailty",
                 use_frailty,
@@ -387,7 +398,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..frailty_distribution <- jmvcore::OptionList$new(
                 "frailty_distribution",
                 frailty_distribution,
@@ -402,7 +414,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default=FALSE)
             private$..spline_vars <- jmvcore::OptionVariables$new(
                 "spline_vars",
-                spline_vars)
+                spline_vars,
+                default=NULL)
             private$..spline_df <- jmvcore::OptionInteger$new(
                 "spline_df",
                 spline_df,
@@ -454,19 +467,19 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..ml_feature_selection <- jmvcore::OptionBool$new(
                 "ml_feature_selection",
                 ml_feature_selection,
-                default=TRUE)
+                default=FALSE)
             private$..ml_importance <- jmvcore::OptionBool$new(
                 "ml_importance",
                 ml_importance,
-                default=TRUE)
+                default=FALSE)
             private$..ml_calibration <- jmvcore::OptionBool$new(
                 "ml_calibration",
                 ml_calibration,
-                default=TRUE)
+                default=FALSE)
             private$..ml_performance <- jmvcore::OptionBool$new(
                 "ml_performance",
                 ml_performance,
-                default=TRUE)
+                default=FALSE)
             private$..ml_shap <- jmvcore::OptionBool$new(
                 "ml_shap",
                 ml_shap,
@@ -724,9 +737,13 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         multivariableCoxHeading = function() private$.items[["multivariableCoxHeading"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
+        multivariableCoxSummaryHeading = function() private$.items[["multivariableCoxSummaryHeading"]],
+        multivariableCoxSummary = function() private$.items[["multivariableCoxSummary"]],
         personTimeHeading = function() private$.items[["personTimeHeading"]],
         personTimeTable = function() private$.items[["personTimeTable"]],
+        personTimeSummaryHeading = function() private$.items[["personTimeSummaryHeading"]],
         personTimeSummary = function() private$.items[["personTimeSummary"]],
+        survivalPlotsHeading = function() private$.items[["survivalPlotsHeading"]],
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
         cox_ph = function() private$.items[["cox_ph"]],
@@ -735,7 +752,9 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         risk_score_analysis = function() private$.items[["risk_score_analysis"]],
         risk_score_analysis2 = function() private$.items[["risk_score_analysis2"]],
         riskScoreHeading = function() private$.items[["riskScoreHeading"]],
+        riskScoreSummaryHeading = function() private$.items[["riskScoreSummaryHeading"]],
         riskScoreTable = function() private$.items[["riskScoreTable"]],
+        riskScoreSummary = function() private$.items[["riskScoreSummary"]],
         riskScoreMetrics = function() private$.items[["riskScoreMetrics"]],
         riskGroupPlot = function() private$.items[["riskGroupPlot"]],
         stratificationExplanation = function() private$.items[["stratificationExplanation"]],
@@ -745,11 +764,16 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         addRiskGroup = function() private$.items[["addRiskGroup"]],
         adjustedSurvivalHeading = function() private$.items[["adjustedSurvivalHeading"]],
         plot_adj = function() private$.items[["plot_adj"]],
+        adjustedSurvivalSummaryHeading = function() private$.items[["adjustedSurvivalSummaryHeading"]],
+        adjustedSurvivalSummary = function() private$.items[["adjustedSurvivalSummary"]],
         nomogramHeading = function() private$.items[["nomogramHeading"]],
         plot_nomogram = function() private$.items[["plot_nomogram"]],
         nomogram_display = function() private$.items[["nomogram_display"]],
+        nomogramSummaryHeading = function() private$.items[["nomogramSummaryHeading"]],
+        nomogramSummary = function() private$.items[["nomogramSummary"]],
         mydataview_survivaldecisiontree = function() private$.items[["mydataview_survivaldecisiontree"]],
         survivalTreeHeading = function() private$.items[["survivalTreeHeading"]],
+        treeSummaryHeading = function() private$.items[["treeSummaryHeading"]],
         tree_summary = function() private$.items[["tree_summary"]],
         tree_plot = function() private$.items[["tree_plot"]],
         node_survival_plots = function() private$.items[["node_survival_plots"]],
@@ -787,7 +811,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "explanatory",
                     "contexpl",
                     "fudate",
@@ -806,7 +830,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "explanatory",
                     "contexpl",
                     "fudate",
@@ -821,7 +845,27 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="multivariableCoxSummaryHeading",
+                title="Natural Language Summary",
+                visible="(showSummaries)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multivariableCoxSummary",
+                title="",
+                visible="(showSummaries)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
                     "explanatory",
                     "contexpl",
                     "fudate",
@@ -879,16 +923,21 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "person_time",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent",
                     "person_time")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="personTimeSummaryHeading",
+                title="Person-Time Natural Language Summary",
+                visible="(person_time && showSummaries)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeSummary",
-                title="Person-Time Summary",
+                title="",
                 visible="(person_time && showSummaries)",
                 clearWith=list(
                     "outcome",
@@ -899,12 +948,17 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "person_time",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent",
                     "person_time")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="survivalPlotsHeading",
+                title="Survival Plots",
+                visible="(hr || km || ac)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -920,7 +974,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "sty",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "explanatory",
                     "contexpl",
                     "fudate",
@@ -942,7 +996,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "sty",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "explanatory",
                     "contexpl",
                     "fudate",
@@ -958,7 +1012,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -980,7 +1034,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -1004,7 +1058,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "risktable",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "explanatory",
                     "contexpl",
                     "fudate",
@@ -1044,6 +1098,11 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="riskScoreHeading",
                 title="Risk Score Analysis",
                 visible="(calculateRiskScore)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="riskScoreSummaryHeading",
+                title="Risk Score Natural Language Summary",
+                visible="(calculateRiskScore && showSummaries)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="riskScoreTable",
@@ -1078,6 +1137,16 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "explanatory",
                     "contexpl",
                     "numRiskGroups")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="riskScoreSummary",
+                title="",
+                visible="(calculateRiskScore && showSummaries)",
+                clearWith=list(
+                    "calculateRiskScore",
+                    "outcome",
+                    "explanatory",
+                    "contexpl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="riskScoreMetrics",
@@ -1149,7 +1218,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "calculateRiskScore",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "explanatory",
                     "contexpl",
                     "fudate",
@@ -1168,7 +1237,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "calculateRiskScore",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "explanatory",
                     "contexpl",
                     "fudate",
@@ -1200,7 +1269,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "byplot",
                     "outcome",
                     "outcomeLevel",
-                    "overalltime",
+                    "elapsedtime",
                     "explanatory",
                     "contexpl",
                     "fudate",
@@ -1211,6 +1280,20 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "pplot",
                     "censored",
                     "medianline")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="adjustedSurvivalSummaryHeading",
+                title="Adjusted Survival Natural Language Summary",
+                visible="(ac && showSummaries)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="adjustedSurvivalSummary",
+                title="",
+                visible="(ac && showSummaries)",
+                clearWith=list(
+                    "ac",
+                    "adjexplanatory",
+                    "outcome")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="nomogramHeading",
@@ -1232,6 +1315,20 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(showNomogram)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
+                name="nomogramSummaryHeading",
+                title="Nomogram Natural Language Summary",
+                visible="(showNomogram && showSummaries)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nomogramSummary",
+                title="",
+                visible="(showNomogram && showSummaries)",
+                clearWith=list(
+                    "showNomogram",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
                 name="mydataview_survivaldecisiontree",
                 title="mydataview_survivaldecisiontree",
                 visible="(FALSE)"))
@@ -1240,10 +1337,15 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="survivalTreeHeading",
                 title="Survival Decision Tree",
                 visible="(use_tree)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="treeSummaryHeading",
+                title="Decision Tree Natural Language Summary",
+                visible="(use_tree && showSummaries)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tree_summary",
-                title="Survival Decision Tree Summary",
+                title="",
                 visible="(use_tree && showSummaries)",
                 clearWith=list(
                     "use_tree",
@@ -1398,7 +1500,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(ml_method != 'cox')",
                 clearWith=list(
                     "ml_method",
-                    "ml_validation_method",
+                    "ml_validation",
                     "ml_cv_folds",
                     "outcome")))
             self$add(jmvcore::Table$new(
@@ -1472,10 +1574,10 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="ml_cross_validation_summary",
                 title="Cross-Validation Performance",
-                visible="(ml_method != 'cox' && ml_validation_method == 'cv')",
+                visible="(ml_method != 'cox' && ml_validation == 'cv')",
                 clearWith=list(
                     "ml_method",
-                    "ml_validation_method",
+                    "ml_validation",
                     "ml_cv_folds",
                     "outcome")))}))
 
@@ -1772,9 +1874,13 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multivariableCoxSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$personTimeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survivalPlotsHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1783,7 +1889,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$risk_score_analysis} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$risk_score_analysis2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskScoreHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$riskScoreSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$riskScoreTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$riskScoreSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskScoreMetrics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskGroupPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$stratificationExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -1793,11 +1901,16 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$adjustedSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$adjustedSurvivalSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$adjustedSurvivalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nomogramHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$nomogramSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$mydataview_survivaldecisiontree} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survivalTreeHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$treeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tree_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$node_survival_plots} \tab \tab \tab \tab \tab an image \cr
@@ -1827,23 +1940,23 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 multisurvival <- function(
     data,
-    elapsedtime,
+    elapsedtime = NULL,
     tint = FALSE,
-    dxdate,
-    fudate,
+    dxdate = NULL,
+    fudate = NULL,
     timetypedata = "ymd",
     timetypeoutput = "months",
     uselandmark = FALSE,
     landmark = 3,
-    outcome,
+    outcome = NULL,
     outcomeLevel,
     dod,
     dooc,
     awd,
     awod,
     analysistype = "overall",
-    explanatory,
-    contexpl,
+    explanatory = NULL,
+    contexpl = NULL,
     multievent = FALSE,
     hr = FALSE,
     sty = "t1",
@@ -1861,11 +1974,11 @@ multisurvival <- function(
     numRiskGroups = "four",
     plotRiskGroups = FALSE,
     ac = FALSE,
-    adjexplanatory,
+    adjexplanatory = NULL,
     ac_method = "average",
     showNomogram = FALSE,
     use_stratify = FALSE,
-    stratvar,
+    stratvar = NULL,
     person_time = FALSE,
     time_intervals = "12, 36, 60",
     rate_multiplier = 100,
@@ -1876,16 +1989,16 @@ multisurvival <- function(
     show_terminal_nodes = FALSE,
     use_time_dependent = FALSE,
     td_format = "wide",
-    time_dep_vars,
+    time_dep_vars = NULL,
     change_times = "6, 12, 18",
     td_suffix_pattern = "_t{time}",
-    start_time_var,
-    stop_time_var,
+    start_time_var = NULL,
+    stop_time_var = NULL,
     use_frailty = FALSE,
-    frailty_var,
+    frailty_var = NULL,
     frailty_distribution = "gamma",
     use_splines = FALSE,
-    spline_vars,
+    spline_vars = NULL,
     spline_df = 3,
     spline_type = "pspline",
     showExplanations = FALSE,
@@ -1893,10 +2006,10 @@ multisurvival <- function(
     ml_method = "none",
     ml_validation = "cv",
     ml_cv_folds = 5,
-    ml_feature_selection = TRUE,
-    ml_importance = TRUE,
-    ml_calibration = TRUE,
-    ml_performance = TRUE,
+    ml_feature_selection = FALSE,
+    ml_importance = FALSE,
+    ml_calibration = FALSE,
+    ml_performance = FALSE,
     ml_shap = FALSE,
     ml_hyperparameter_tuning = FALSE,
     ml_ensemble_weights = "equal") {

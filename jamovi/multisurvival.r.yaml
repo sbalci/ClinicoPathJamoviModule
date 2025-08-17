@@ -12,7 +12,7 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - explanatory
           - contexpl
           - fudate
@@ -41,7 +41,7 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - explanatory
           - contexpl
           - fudate
@@ -58,7 +58,7 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - explanatory
           - contexpl
           - fudate
@@ -66,6 +66,27 @@ items:
           - tint
           - multievent
           # - use_modelSelection
+
+    # Multivariable Cox Summary (right after main analysis)
+    - name: multivariableCoxSummaryHeading
+      title: 'Natural Language Summary'
+      type: Preformatted
+      visible: (showSummaries)
+
+    - name: multivariableCoxSummary
+      title: ''
+      type: Html
+      visible: (showSummaries)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
       
 
 
@@ -120,7 +141,7 @@ items:
         - person_time
         - outcome
         - outcomeLevel
-        - overalltime
+        - elapsedtime
         - fudate
         - dxdate
         - tint
@@ -128,8 +149,14 @@ items:
         # - use_modelSelection
         - person_time
 
+    # Person-Time Summary (right after person-time analysis)
+    - name: personTimeSummaryHeading
+      title: 'Person-Time Natural Language Summary'
+      type: Preformatted
+      visible: (person_time && showSummaries)
+
     - name: personTimeSummary
-      title: 'Person-Time Summary'
+      title: ''
       type: Html
       visible: (person_time && showSummaries)
       clearWith:
@@ -141,7 +168,7 @@ items:
         - person_time
         - outcome
         - outcomeLevel
-        - overalltime
+        - elapsedtime
         - fudate
         - dxdate
         - tint
@@ -153,6 +180,12 @@ items:
 
 
 
+
+    # Survival Plots Section
+    - name: survivalPlotsHeading
+      title: 'Survival Plots'
+      type: Preformatted
+      visible: (hr || km || ac)
 
     - name: plot
       title: Hazards Regression Plot
@@ -168,7 +201,7 @@ items:
           - sty
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - explanatory
           - contexpl
           - fudate
@@ -189,7 +222,7 @@ items:
     #   clearWith:
     #       - explanatory
     #       - outcome
-    #       - overalltime
+    #       - elapsedtime
     #   visible: (sty:t2)
     #   refs: ggstatsplot
       # clearWith:
@@ -211,7 +244,7 @@ items:
           - sty
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - explanatory
           - contexpl
           - fudate
@@ -229,7 +262,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -253,7 +286,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - fudate
           - dxdate
           - tint
@@ -303,7 +336,7 @@ items:
           - risktable
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - explanatory
           - contexpl
           - fudate
@@ -336,7 +369,7 @@ items:
     #       - risktable
     #       - outcome
     #       - outcomeLevel
-    #       - overalltime
+    #       - elapsedtime
     #       - explanatory
     #       - contexpl
     #       - fudate
@@ -381,6 +414,12 @@ items:
       visible: (calculateRiskScore)
       
 
+    # Risk Score Summary (right after risk score analysis)
+    - name: riskScoreSummaryHeading
+      title: 'Risk Score Natural Language Summary'
+      type: Preformatted
+      visible: (calculateRiskScore && showSummaries)
+
     - name: riskScoreTable
       title: Risk Score Summary
       type: Table
@@ -410,6 +449,16 @@ items:
           - contexpl
           - numRiskGroups
           # - use_modelSelection
+
+    - name: riskScoreSummary
+      title: ''
+      type: Html
+      visible: (calculateRiskScore && showSummaries)
+      clearWith:
+          - calculateRiskScore
+          - outcome
+          - explanatory
+          - contexpl
 
 
     - name: riskScoreMetrics
@@ -496,7 +545,7 @@ items:
           - calculateRiskScore
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - explanatory
           - contexpl
           - fudate
@@ -516,7 +565,7 @@ items:
           - calculateRiskScore
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - explanatory
           - contexpl
           - fudate
@@ -559,7 +608,7 @@ items:
           - byplot
           - outcome
           - outcomeLevel
-          - overalltime
+          - elapsedtime
           - explanatory
           - contexpl
           - fudate
@@ -571,6 +620,21 @@ items:
           - censored
           - medianline
           # - use_modelSelection
+
+    # Adjusted Survival Summary (right after adjusted survival analysis)
+    - name: adjustedSurvivalSummaryHeading
+      title: 'Adjusted Survival Natural Language Summary'
+      type: Preformatted
+      visible: (ac && showSummaries)
+
+    - name: adjustedSurvivalSummary
+      title: ''
+      type: Html
+      visible: (ac && showSummaries)
+      clearWith:
+          - ac
+          - adjexplanatory
+          - outcome
 
 
 # Nomogram
@@ -603,6 +667,21 @@ items:
       type: Html
       visible: (showNomogram)
 
+    # Nomogram Summary (right after nomogram analysis)
+    - name: nomogramSummaryHeading
+      title: 'Nomogram Natural Language Summary'
+      type: Preformatted
+      visible: (showNomogram && showSummaries)
+
+    - name: nomogramSummary
+      title: ''
+      type: Html
+      visible: (showNomogram && showSummaries)
+      clearWith:
+          - showNomogram
+          - explanatory
+          - outcome
+
 # Survival Decision Tree ----
 
 
@@ -617,8 +696,14 @@ items:
       visible: (use_tree)
       
 
+    # Survival Decision Tree Summary (right after tree analysis)
+    - name: treeSummaryHeading
+      title: 'Decision Tree Natural Language Summary'
+      type: Preformatted
+      visible: (use_tree && showSummaries)
+
     - name: tree_summary
-      title: 'Survival Decision Tree Summary'
+      title: ''
       type: Html
       visible: (use_tree && showSummaries)
       clearWith:
@@ -686,7 +771,7 @@ items:
     #   clearWith:
     #       - outcome
     #       - outcomeLevel
-    #       - overalltime
+    #       - elapsedtime
     #       - explanatory
     #       - contexpl
     #       - fudate
@@ -707,7 +792,7 @@ items:
     #   clearWith:
     #       - outcome
     #       - outcomeLevel
-    #       - overalltime
+    #       - elapsedtime
     #       - explanatory
     #       - contexpl
     #       - fudate
@@ -729,7 +814,7 @@ items:
     #   clearWith:
     #       - outcome
     #       - outcomeLevel
-    #       - overalltime
+    #       - elapsedtime
     #       - explanatory
     #       - contexpl
     #       - fudate
@@ -752,7 +837,7 @@ items:
     #   clearWith:
     #       - outcome
     #       - outcomeLevel
-    #       - overalltime
+    #       - elapsedtime
     #       - explanatory
     #       - contexpl
     #       - fudate
@@ -1017,7 +1102,7 @@ items:
     #   clearWith:
     #       - outcome
     #       - outcomeLevel
-    #       - overalltime
+    #       - elapsedtime
     #       - explanatory
     #       - contexpl
     #       - fudate
@@ -1038,7 +1123,7 @@ items:
     #   clearWith:
     #       - outcome
     #       - outcomeLevel
-    #       - overalltime
+    #       - elapsedtime
     #       - explanatory
     #       - contexpl
     #       - fudate
@@ -1074,7 +1159,7 @@ items:
     #   clearWith:
     #       - outcome
     #       - outcomeLevel
-    #       - overalltime
+    #       - elapsedtime
     #       - explanatory
     #       - contexpl
     #       - fudate
@@ -1194,7 +1279,7 @@ items:
       visible: (ml_method != 'cox')
       clearWith:
           - ml_method
-          - ml_validation_method
+          - ml_validation
           - ml_cv_folds
           - outcome
 
@@ -1259,10 +1344,10 @@ items:
     - name: ml_cross_validation_summary
       title: 'Cross-Validation Performance'
       type: Html
-      visible: (ml_method != 'cox' && ml_validation_method == 'cv')
+      visible: (ml_method != 'cox' && ml_validation == 'cv')
       clearWith:
           - ml_method
-          - ml_validation_method
+          - ml_validation
           - ml_cv_folds
           - outcome
 

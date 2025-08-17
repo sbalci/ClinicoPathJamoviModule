@@ -98,9 +98,11 @@ of cancer patients.}
 "Competing Risk" analysis accounts for competing risks that may prevent the
 event of interest from occurring.}
 
-\item{cutp}{Specify the cutpoints at which to divide the continuous
-explanatory variable into groups for survival analysis. Separate multiple
-cutpoints with commas (e.g., "12, 36, 60").}
+\item{cutp}{Specify the time points for survival probability calculations.
+The default "12, 36, 60"  represents 1, 3, and 5 years (compatible with
+literature standards). You can customize  these values by entering your own
+comma-separated time points (e.g., "6, 18, 30" for  6 months, 18 months, 30
+months). Use "default" to restore standard 1,3,5-year analysis.}
 
 \item{timetypedata}{select the time type in data}
 
@@ -227,15 +229,26 @@ not needed.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
+\code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$rmstHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$rmstTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$rmstSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$cutoffAnalysisHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$rescutTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$cutoffAnalysisHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$cutoffAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot5} \tab \tab \tab \tab \tab an image \cr
 \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
@@ -245,24 +258,21 @@ A results object containing:
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+\code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
+\code{results$loglogPlotExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualsPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 \code{results$calculatedcutoff} \tab \tab \tab \tab \tab an output \cr
 \code{results$multipleCutTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$multipleMedianTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$multipleCutoffsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$multipleSurvTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plotMultipleCutoffs} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotMultipleSurvival} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedmulticut} \tab \tab \tab \tab \tab an output \cr
-\code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$cutoffAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$multipleCutoffsExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
