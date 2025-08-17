@@ -74,7 +74,8 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Default Arguments - Enhanced with modern vtree parameters
-            xsplitspaces <- TRUE
+            # splitspaces removed - variable names preserved by direct passing
+            xsplitspaces <- FALSE
             xprune <- list()
             xprunebelow <- list()
             xkeep <- list()
@@ -117,11 +118,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- jmvcore::select(df = mydata,
                                       columnNames = c(myvars, percvar, summaryvar))
 
-            # Prepare Formula
-            formula <- jmvcore::constructFormula(terms = self$options$vars)
-            myvars1 <- jmvcore::decomposeFormula(formula = formula)
-            myvars1 <- unlist(myvars1)
-            myvars1 <- paste0(myvars1, collapse = " ")
+            # Prepare Variables - Use raw variable names to preserve spaces
+            # vtree expects a vector of variable names, so use self$options$vars directly
+            myvars1 <- self$options$vars
 
             # Handle Percentage Variable - Enhanced percentage handling
             if (!is.null(self$options$percvar) && !is.null(self$options$percvarLevel)) {
@@ -281,6 +280,32 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             interpretation <- paste0(interpretation,
                                      "• Tree structure helps identify patterns and relationships in categorical data<br>")
             return(interpretation)
+        },
+        
+        # Custom R syntax generation to handle variable names with spaces
+        .getRSyntax = function() {
+            # Get the default syntax
+            syntax <- super$.getRSyntax()
+            
+            # Fix variable names with spaces by backticking them
+            if (!is.null(self$options$vars) && length(self$options$vars) > 0) {
+                # Process each variable name to add backticks if they contain spaces
+                vars_fixed <- sapply(self$options$vars, function(var) {
+                    if (grepl(" ", var)) {
+                        return(paste0("`", var, "`"))
+                    } else {
+                        return(var)
+                    }
+                })
+                
+                # Create properly formatted variable list
+                vars_syntax <- paste0("c(", paste(paste0('"', vars_fixed, '"'), collapse = ", "), ")")
+                
+                # Replace the problematic vars() call with proper c() syntax
+                syntax <- gsub("vars\\s*=\\s*vars\\([^)]+\\)", paste0("vars = ", vars_syntax), syntax)
+            }
+            
+            return(syntax)
         }
     )
 )

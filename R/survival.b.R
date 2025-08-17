@@ -207,6 +207,32 @@ survivalClass <- if (requireNamespace('jmvcore'))
         private = list(
 
             .init = function() {
+                # Hide all outputs first - this ensures they're hidden even if we return early
+                # Hide all heading/explanation outputs
+                self$results$medianSurvivalHeading$setVisible(FALSE)
+                self$results$medianSurvivalExplanation$setVisible(FALSE)
+                self$results$medianSurvivalHeading3$setVisible(FALSE)
+                self$results$coxRegressionHeading$setVisible(FALSE)
+                self$results$coxRegressionExplanation$setVisible(FALSE)
+                self$results$coxRegressionHeading3$setVisible(FALSE)
+                self$results$survivalTablesHeading$setVisible(FALSE)
+                self$results$survivalTablesExplanation$setVisible(FALSE)
+                self$results$survivalTablesHeading3$setVisible(FALSE)
+                self$results$survivalPlotsHeading3$setVisible(FALSE)
+                self$results$survivalPlotsExplanation$setVisible(FALSE)
+                
+                # Early validation check - if essential variables are missing, show todo and return
+                if (is.null(self$options$outcome) || 
+                    is.null(self$options$explanatory) || 
+                    (is.null(self$options$elapsedtime) && 
+                     (!self$options$tint || is.null(self$options$dxdate) || is.null(self$options$fudate)))) {
+                    
+                    # Show todo message (other outputs already hidden above)
+                    self$results$todo$setVisible(TRUE)
+                    private$.todo()
+                    return()
+                }
+                
                 # Initialize all outputs to FALSE first (following singlearm pattern)
                 # Core survival analysis outputs
                 self$results$medianSurvivalHeading$setVisible(FALSE)
@@ -232,14 +258,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 self$results$survTableSummary$setVisible(FALSE)
                 self$results$survTable$setVisible(FALSE)
                 
-                # Survival plots outputs
+                # Survival plots outputs (only reference existing plots)
                 self$results$plot$setVisible(FALSE)
                 self$results$plot2$setVisible(FALSE)
                 self$results$plot3$setVisible(FALSE)
-                self$results$plot4$setVisible(FALSE)
-                self$results$plot5$setVisible(FALSE)
                 self$results$plot6$setVisible(FALSE)
                 self$results$plot7$setVisible(FALSE)
+                self$results$plot8$setVisible(FALSE)
                 self$results$survivalPlotsHeading3$setVisible(FALSE)
                 self$results$survivalPlotsExplanation$setVisible(FALSE)
                 
@@ -261,13 +286,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 self$results$residualDiagnosticsExplanation$setVisible(FALSE)
                 
                 # Pairwise comparison outputs
-                self$results$pwHeading$setVisible(FALSE)
-                self$results$pwTable$setVisible(FALSE)
+                self$results$pairwiseComparisonHeading$setVisible(FALSE)
                 self$results$pairwiseSummary$setVisible(FALSE)
+                self$results$pairwiseTable$setVisible(FALSE)
                 
                 # Parametric models outputs
-                self$results$parametricModelsHeading$setVisible(FALSE)
-                self$results$parametricModelsTable$setVisible(FALSE)
+                self$results$parametricModelComparison$setVisible(FALSE)
+                self$results$parametricModelSummary$setVisible(FALSE)
+                self$results$parametricDiagnostics$setVisible(FALSE)
+                self$results$parametricSurvivalPlot$setVisible(FALSE)
+                self$results$hazardFunctionPlot$setVisible(FALSE)
+                self$results$extrapolationPlot$setVisible(FALSE)
+                self$results$extrapolationTable$setVisible(FALSE)
                 self$results$parametricModelsExplanation$setVisible(FALSE)
                 
                 # Always show core survival analysis elements when data is present
@@ -293,6 +323,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         self$results$rmstSummary$setVisible(TRUE)
                     }
                     if (self$options$pw) {
+                        self$results$pairwiseComparisonHeading$setVisible(TRUE)
                         self$results$pairwiseSummary$setVisible(TRUE)
                     }
                 }
@@ -349,14 +380,33 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Handle pairwise comparison visibility
                 if (self$options$pw) {
-                    self$results$pwHeading$setVisible(TRUE)
-                    self$results$pwTable$setVisible(TRUE)
+                    self$results$pairwiseComparisonHeading$setVisible(TRUE)
+                    self$results$pairwiseSummary$setVisible(TRUE)
+                    self$results$pairwiseTable$setVisible(TRUE)
                 }
                 
                 # Handle parametric models visibility
                 if (self$options$use_parametric) {
-                    self$results$parametricModelsHeading$setVisible(TRUE)
-                    self$results$parametricModelsTable$setVisible(TRUE)
+                    self$results$parametricModelSummary$setVisible(TRUE)
+                    if (self$options$compare_distributions) {
+                        self$results$parametricModelComparison$setVisible(TRUE)
+                    }
+                    if (self$options$parametric_diagnostics) {
+                        self$results$parametricDiagnostics$setVisible(TRUE)
+                    }
+                    if (self$options$parametric_survival_plots) {
+                        self$results$parametricSurvivalPlot$setVisible(TRUE)
+                    }
+                    if (self$options$hazard_plots) {
+                        self$results$hazardFunctionPlot$setVisible(TRUE)
+                    }
+                    if (self$options$parametric_extrapolation) {
+                        self$results$extrapolationPlot$setVisible(TRUE)
+                        self$results$extrapolationTable$setVisible(TRUE)
+                    }
+                    if (self$options$showExplanations) {
+                        self$results$parametricModelsExplanation$setVisible(TRUE)
+                    }
                 }
                 
                 # Handle Cox PH visibility
@@ -376,16 +426,20 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     self$results$plot3$setVisible(TRUE)
                 }
                 if (self$options$kmunicate) {
-                    self$results$plot4$setVisible(TRUE)
-                }
-                if (self$options$loglog) {
-                    self$results$plot5$setVisible(TRUE)
-                }
-                if (self$options$residual_diagnostics) {
                     self$results$plot6$setVisible(TRUE)
                 }
-                if (self$options$use_parametric) {
+                if (self$options$loglog) {
                     self$results$plot7$setVisible(TRUE)
+                }
+                if (self$options$residual_diagnostics) {
+                    self$results$residualsPlot$setVisible(TRUE)
+                }
+                if (self$options$use_parametric) {
+                    # Parametric plots handled in parametric section
+                    self$results$parametricSurvivalPlot$setVisible(TRUE)
+                    if (self$options$hazard_plots) {
+                        self$results$hazardFunctionPlot$setVisible(TRUE)
+                    }
                 }
             }
             ,
@@ -471,6 +525,113 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
             }
 
+            # Input Validation ----
+            ,
+            .validateInputs = function() {
+                # Check required variables
+                if (is.null(self$options$outcome)) {
+                    jmvcore::reject("Outcome variable is required. Please select a variable that indicates whether an event occurred (e.g., death, recurrence).", code="missing_outcome")
+                }
+                
+                if (is.null(self$options$explanatory)) {
+                    jmvcore::reject("Explanatory variable is required. Please select a categorical variable to compare survival between groups.", code="missing_explanatory")
+                }
+                
+                # Check time variables
+                time_provided <- !is.null(self$options$elapsedtime)
+                dates_provided <- self$options$tint && !is.null(self$options$dxdate) && !is.null(self$options$fudate)
+                
+                if (!time_provided && !dates_provided) {
+                    jmvcore::reject("Time information is required. Either provide a survival time variable or enable date calculation with diagnosis and follow-up dates.", code="missing_time")
+                }
+                
+                if (self$options$tint && (is.null(self$options$dxdate) || is.null(self$options$fudate))) {
+                    jmvcore::reject("When using dates to calculate survival time, both diagnosis date and follow-up date are required.", code="incomplete_dates")
+                }
+                
+                # Check multievent configuration
+                if (self$options$multievent) {
+                    if (is.null(self$options$dod) && is.null(self$options$dooc)) {
+                        jmvcore::reject("When using multiple event levels, at least one event type (Dead of Disease or Dead of Other) must be specified.", code="missing_multievent")
+                    }
+                }
+                
+                # Check data availability
+                if (nrow(self$data) == 0) {
+                    jmvcore::reject("No data available for analysis. Please check your dataset.", code="empty_data")
+                }
+                
+                return(TRUE)
+            }
+
+            # Optimized Table Population Helper ----
+            ,
+            .populateTableSafely = function(table_result, data_frame, column_mapping) {
+                # Generic helper to reduce code duplication in table population
+                # Uses explicit column mapping for type safety and better performance
+                tryCatch({
+                    if (is.null(data_frame) || nrow(data_frame) == 0) {
+                        return(invisible(NULL))
+                    }
+                    
+                    for (i in seq_len(nrow(data_frame))) {
+                        row_values <- list()
+                        
+                        # Map columns using provided mapping
+                        for (col_name in names(column_mapping)) {
+                            source_col <- column_mapping[[col_name]]
+                            if (source_col %in% names(data_frame)) {
+                                row_values[[col_name]] <- data_frame[[source_col]][i]
+                            } else {
+                                row_values[[col_name]] <- NA
+                            }
+                        }
+                        
+                        table_result$addRow(rowKey = i, values = row_values)
+                        
+                        # Add checkpoint for large tables (every 100 rows)
+                        if (i %% 100 == 0) {
+                            private$.checkpoint()
+                        }
+                    }
+                }, error = function(e) {
+                    # Log error but don't break the analysis
+                    warning(paste("Table population failed:", e$message))
+                })
+            }
+            
+            # Safe Analysis Wrapper ----
+            ,
+            .safeAnalysis = function(analysis_func, error_message = "Analysis step failed") {
+                # Wrapper for safer analysis execution with better error recovery
+                tryCatch({
+                    analysis_func()
+                    TRUE
+                }, error = function(e) {
+                    # Cleanup memory and reset state on error
+                    gc(verbose = FALSE)
+                    private$.resetErrorState()
+                    warning(paste(error_message, ":", e$message))
+                    FALSE
+                })
+            },
+            
+            .resetErrorState = function() {
+                # Hide conditional outputs on error to prevent inconsistent state
+                self$results$plot$setVisible(FALSE)
+                self$results$plot2$setVisible(FALSE)
+                self$results$plot3$setVisible(FALSE)
+                self$results$plot6$setVisible(FALSE)
+                self$results$plot7$setVisible(FALSE)
+                self$results$plot8$setVisible(FALSE)
+                self$results$pairwiseTable$setVisible(FALSE)
+                self$results$personTimeTable$setVisible(FALSE)
+                self$results$rmstTable$setVisible(FALSE)
+                # Clear any large objects from memory
+                if (exists('.large_objects', envir = private)) {
+                    rm(.large_objects, envir = private)
+                }
+            }
 
             # Define Survival Time ----
             ,
@@ -520,15 +681,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         mydata[["start"]] <- date_parser(mydata[[dxdate]])
                         mydata[["end"]] <- date_parser(mydata[[fudate]])
                     } else {
-                        stop(paste0("Unknown date format: ", timetypedata, 
-                                  ". Supported formats are: ", 
-                                  paste(names(lubridate_functions), collapse = ", ")))
+                        stop(sprintf("Unknown date format: %s. Supported formats are: %s",
+                                   timetypedata, 
+                                   paste(names(lubridate_functions), collapse = ", ")))
                     }
 
 
                     if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
-                        stop(paste0("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: ", self$options$timetypedata)
-                        )
+                        stop(sprintf("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: %s", self$options$timetypedata))
                     }
 
                     timetypeoutput <-
@@ -578,13 +738,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (inherits(outcome1, contin)) {
                         unique_values <- unique(outcome1[!is.na(outcome1)])
                         if (!(length(unique_values) == 2 && all(unique_values %in% c(0, 1)))) {
-                            stop(
-                                paste0('Outcome variable must be binary (0/1) for survival analysis.\n',
-                                      '- Use 0 for censored observations (alive/disease-free)\n',
-                                      '- Use 1 for events (death/recurrence)\n',
-                                      'Current values found: ', paste(unique_values, collapse = ", "),
-                                      '\n\nFor multi-state outcomes, enable "Multiple Event Levels" option.')
-                            )
+                            stop(sprintf(
+                                'Outcome variable must be binary (0/1) for survival analysis.\n- Use 0 for censored observations (alive/disease-free)\n- Use 1 for events (death/recurrence)\nCurrent values found: %s\n\nFor multi-state outcomes, enable "Multiple Event Levels" option.',
+                                paste(unique_values, collapse = ", ")
+                            ))
 
                         }
 
@@ -600,14 +757,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             )
 
                     } else {
-                        stop(
-                            paste0('Invalid outcome variable format.\n',
-                                  'For survival analysis, the outcome variable must be:\n',
-                                  '- Binary numeric (0/1): 0=censored, 1=event\n',
-                                  '- Factor variable: Select appropriate event level\n',
-                                  '\nCurrent variable type: ', class(outcome1)[1], '\n',
-                                  'For complex outcomes with multiple states, enable "Multiple Event Levels" option.')
-                        )
+                        stop(sprintf(
+                            'Invalid outcome variable format.\nFor survival analysis, the outcome variable must be:\n- Binary numeric (0/1): 0=censored, 1=event\n- Factor variable: Select appropriate event level\n\nCurrent variable type: %s\nFor complex outcomes with multiple states, enable "Multiple Event Levels" option.',
+                            class(outcome1)[1]
+                        ))
 
                     }
 
@@ -696,6 +849,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Clean Data For Analysis ----
             ,
             .cleandata = function() {
+                # Memory management for large datasets
+                if (nrow(self$data) > 10000) {
+                    # Force garbage collection before processing large datasets
+                    gc(verbose = FALSE)
+                }
 
             labelled_data <- private$.getData()
 
@@ -809,36 +967,125 @@ survivalClass <- if (requireNamespace('jmvcore'))
             }
 
 
-            # Run Analysis ----
+            # Core Analysis Components ----
+            ,
+            .runCoreAnalysis = function(results) {
+                # Run core survival analysis components
+                private$.safeAnalysis(function() {
+                    private$.medianSurv(results)
+                }, "Median survival analysis failed")
+                private$.checkpoint()
+                
+                private$.safeAnalysis(function() {
+                    private$.cox(results)
+                }, "Cox regression analysis failed")
+                private$.checkpoint()
+                
+                private$.safeAnalysis(function() {
+                    private$.survTable(results)
+                }, "Survival table generation failed")
+                private$.checkpoint()
+            }
+            
+            # Optional Analysis Components ----
+            ,
+            .runOptionalAnalyses = function(results) {
+                # RMST Analysis
+                if (self$options$rmst_analysis) {
+                    private$.safeAnalysis(function() {
+                        rmst_tau <- if (is.null(self$options$rmst_tau) || self$options$rmst_tau <= 0) {
+                            NULL  # Use default (75th percentile)
+                        } else {
+                            self$options$rmst_tau
+                        }
+                        
+                        rmst_results <- private$.calculateRMST(results, tau = rmst_tau)
+                        
+                        if (!is.null(rmst_results$table)) {
+                            # Use helper function for table population
+                            column_mapping <- list(
+                                group = "Group",
+                                rmst = "RMST", 
+                                se = "SE",
+                                ci_lower = "CI_Lower",
+                                ci_upper = "CI_Upper",
+                                tau = "Tau"
+                            )
+                            private$.populateTableSafely(
+                                self$results$rmstTable, 
+                                rmst_results$table, 
+                                column_mapping
+                            )
+                            
+                            # Add interpretation
+                            self$results$rmstSummary$setContent(rmst_results$interpretation)
+                        }
+                    }, "RMST analysis failed")
+                    private$.checkpoint()
+                }
+                
+                # Parametric Survival Models
+                if (self$options$use_parametric) {
+                    private$.safeAnalysis(function() {
+                        private$.parametricSurvival(results)
+                    }, "Parametric survival analysis failed")
+                    private$.checkpoint()
+                }
+                
+                # Pairwise Comparisons
+                if (self$options$pw) {
+                    private$.safeAnalysis(function() {
+                        private$.pairwise(results)
+                    }, "Pairwise comparison analysis failed")
+                    private$.checkpoint()
+                }
+                
+                # Person-Time Analysis
+                if (self$options$person_time) {
+                    private$.safeAnalysis(function() {
+                        private$.personTimeAnalysis(results)
+                    }, "Person-time analysis failed")
+                    private$.checkpoint()
+                }
+            }
+            
+            # Data Export and Finalization ----
+            ,
+            .finalizeResults = function(results) {
+                # Handle data exports and final result population
+                private$.safeAnalysis(function() {
+                    private$.exportSurvivalData(results)
+                }, "Survival data export failed")
+                
+                # Add Calculated Time to Data
+                if (self$options$tint && self$options$calculatedtime && 
+                    self$results$calculatedtime$isNotFilled()) {
+                    self$results$calculatedtime$setRowNums(results$cleanData$row_names)
+                    self$results$calculatedtime$setValues(results$cleanData$CalculatedTime)
+                }
+                
+                # Add Redefined Outcome to Data
+                if (self$options$multievent && self$options$outcomeredefined && 
+                    self$results$outcomeredefined$isNotFilled()) {
+                    self$results$outcomeredefined$setRowNums(results$cleanData$row_names)
+                    self$results$outcomeredefined$setValues(results$cleanData$CalculatedOutcome)
+                }
+                
+                # Populate explanations if enabled
+                private$.populateExplanations()
+            }
+
+            # Main Run Function (Refactored) ----
             ,
             .run = function() {
 
-                # Errors, Warnings ----
-
-                ## No variable todo ----
-
-                ## Define subconditions ----
-
-                subcondition1a <- !is.null(self$options$outcome)
-                subcondition1b1 <- self$options$multievent
-                subcondition1b2 <- !is.null(self$options$dod)
-                subcondition1b3 <- !is.null(self$options$dooc)
-                # subcondition1b4 <- !is.null(self$options$awd)
-                # subcondition1b5 <- !is.null(self$options$awod)
-                subcondition2a <- !is.null(self$options$elapsedtime)
-                subcondition2b1 <- self$options$tint
-                subcondition2b2 <- !is.null(self$options$dxdate)
-                subcondition2b3 <- !is.null(self$options$fudate)
-                condition3 <- !is.null(self$options$explanatory)
-
-
-                condition1 <- subcondition1a && !subcondition1b1 || subcondition1b1 && subcondition1b2 || subcondition1b1 && subcondition1b3
-
-                condition2 <- subcondition2b1 && subcondition2b2 && subcondition2b3 || subcondition2a && !subcondition2b1 && !subcondition2b2 && !subcondition2b3
-
-                not_continue_analysis <- !(condition1 && condition2 && condition3)
-
-                if (not_continue_analysis) {
+                # Input Validation ----
+                validation_result <- tryCatch({
+                    private$.validateInputs()
+                    self$results$todo$setVisible(FALSE)
+                    TRUE
+                }, error = function(e) {
+                    # If validation fails, show todo and hide results
                     private$.todo()
                     self$results$medianSummary$setVisible(FALSE)
                     self$results$medianTable$setVisible(FALSE)
@@ -856,16 +1103,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     self$results$plot3$setVisible(FALSE)
                     self$results$plot6$setVisible(FALSE)
                     self$results$todo$setVisible(TRUE)
+                    FALSE
+                })
+                
+                # Return early if validation failed
+                if (validation_result != TRUE) {
                     return()
-                } else {
-                    self$results$todo$setVisible(FALSE)
                 }
-
-
-                # Empty data ----
-
-                if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
 
                 # Get Clean Data ----
                 results <- private$.cleandata()
@@ -945,6 +1189,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$person_time) {
                     private$.personTimeAnalysis(results)
                 }
+                
+                ## Additional Model Diagnostics ----
+                # Note: residual diagnostics are handled within .cox() function
+                # when self$options$residual_diagnostics is TRUE
 
 
 
@@ -1090,7 +1338,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 medianTable <- self$results$medianTable
                 data_frame <- results2table
                 for (i in seq_along(data_frame[, 1, drop = T])) {
-                    medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
+                    # Map columns explicitly to match schema
+                    row_values <- list(
+                        factor = data_frame$factor[i],
+                        records = if ("records" %in% names(data_frame)) data_frame$records[i] else NA,
+                        events = if ("events" %in% names(data_frame)) data_frame$events[i] else NA,
+                        rmean = if ("rmean" %in% names(data_frame)) data_frame$rmean[i] else NA,
+                        se_rmean = if ("se_rmean" %in% names(data_frame)) data_frame$se_rmean[i] else NA,
+                        median = if ("median" %in% names(data_frame)) data_frame$median[i] else NA,
+                        x0_95lcl = if ("x0_95lcl" %in% names(data_frame)) data_frame$x0_95lcl[i] else NA,
+                        x0_95ucl = if ("x0_95ucl" %in% names(data_frame)) data_frame$x0_95ucl[i] else NA
+                    )
+                    medianTable$addRow(rowKey = i, values = row_values)
                 }
 
 
@@ -1260,7 +1519,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                        "HR_multivariable")
 
                 for (i in seq_along(data_frame[, 1, drop = T])) {
-                    coxTable$addRow(rowKey = i, values = c(data_frame[i,]))
+                    # Map columns explicitly to match schema
+                    row_values <- list(
+                        Explanatory = if ("Explanatory" %in% names(data_frame)) data_frame$Explanatory[i] else NA,
+                        Levels = if ("Levels" %in% names(data_frame)) data_frame$Levels[i] else NA,
+                        all = if ("all" %in% names(data_frame)) data_frame$all[i] else NA,
+                        HR_univariable = if ("HR_univariable" %in% names(data_frame)) data_frame$HR_univariable[i] else NA
+                    )
+                    coxTable$addRow(rowKey = i, values = row_values)
                 }
 
 
@@ -1573,7 +1839,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 data_frame <- km_fit_df
                 for (i in seq_along(data_frame[, 1, drop = T])) {
-                    survTable$addRow(rowKey = i, values = c(data_frame[i,]))
+                    # Map columns explicitly to match schema
+                    row_values <- list(
+                        strata = if ("strata" %in% names(data_frame)) data_frame$strata[i] else NA,
+                        time = if ("time" %in% names(data_frame)) data_frame$time[i] else NA,
+                        n.risk = if ("n.risk" %in% names(data_frame)) data_frame$`n.risk`[i] else NA,
+                        n.event = if ("n.event" %in% names(data_frame)) data_frame$`n.event`[i] else NA,
+                        surv = if ("surv" %in% names(data_frame)) data_frame$surv[i] else NA,
+                        lower = if ("lower" %in% names(data_frame)) data_frame$lower[i] else NA,
+                        upper = if ("upper" %in% names(data_frame)) data_frame$upper[i] else NA
+                    )
+                    survTable$addRow(rowKey = i, values = row_values)
                 }
 
 
@@ -1660,7 +1936,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         private$.checkpoint()  # Add checkpoint here
                     }
 
-                    pairwiseTable$addRow(rowKey = i, values = c(data_frame[i,]))
+                    # Map columns explicitly to match schema
+                    row_values <- list(
+                        rowname = if ("rowname" %in% names(data_frame)) data_frame$rowname[i] else NA,
+                        name = if ("name" %in% names(data_frame)) data_frame$name[i] else NA,
+                        value = if ("value" %in% names(data_frame)) data_frame$value[i] else NA
+                    )
+                    pairwiseTable$addRow(rowKey = i, values = row_values)
                 }
 
                 thefactor <-
