@@ -10,6 +10,7 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             outcome = NULL,
             outcomeLevel = NULL,
             showNomogram = FALSE,
+            showSummaries = FALSE,
             showExplanations = FALSE, ...) {
 
             super$initialize(
@@ -43,6 +44,10 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showNomogram",
                 showNomogram,
                 default=FALSE)
+            private$..showSummaries <- jmvcore::OptionBool$new(
+                "showSummaries",
+                showSummaries,
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -52,6 +57,7 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..showNomogram)
+            self$.addOption(private$..showSummaries)
             self$.addOption(private$..showExplanations)
         }),
     active = list(
@@ -59,12 +65,14 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
         showNomogram = function() private$..showNomogram$value,
+        showSummaries = function() private$..showSummaries$value,
         showExplanations = function() private$..showExplanations$value),
     private = list(
         ..explanatory = NA,
         ..outcome = NA,
         ..outcomeLevel = NA,
         ..showNomogram = NA,
+        ..showSummaries = NA,
         ..showExplanations = NA)
 )
 
@@ -76,14 +84,20 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         oddsRatioHeading = function() private$.items[["oddsRatioHeading"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
+        oddsRatioSummaryHeading = function() private$.items[["oddsRatioSummaryHeading"]],
+        oddsRatioSummary = function() private$.items[["oddsRatioSummary"]],
+        oddsRatioPlotHeading = function() private$.items[["oddsRatioPlotHeading"]],
         plot = function() private$.items[["plot"]],
-        nomogramHeading = function() private$.items[["nomogramHeading"]],
-        plot_nomogram = function() private$.items[["plot_nomogram"]],
-        nomogram = function() private$.items[["nomogram"]],
-        oddsRatioHeading3 = function() private$.items[["oddsRatioHeading3"]],
+        oddsRatioExplanationHeading = function() private$.items[["oddsRatioExplanationHeading"]],
         oddsRatioExplanation = function() private$.items[["oddsRatioExplanation"]],
         riskMeasuresExplanation = function() private$.items[["riskMeasuresExplanation"]],
         diagnosticTestExplanation = function() private$.items[["diagnosticTestExplanation"]],
+        nomogramHeading = function() private$.items[["nomogramHeading"]],
+        plot_nomogram = function() private$.items[["plot_nomogram"]],
+        nomogram = function() private$.items[["nomogram"]],
+        nomogramSummaryHeading = function() private$.items[["nomogramSummaryHeading"]],
+        nomogramSummary = function() private$.items[["nomogramSummary"]],
+        nomogramExplanationHeading = function() private$.items[["nomogramExplanationHeading"]],
         nomogramAnalysisExplanation = function() private$.items[["nomogramAnalysisExplanation"]]),
     private = list(),
     public=list(
@@ -120,11 +134,28 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
-                title=""))
+                title="Model Performance Metrics"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="oddsRatioSummaryHeading",
+                title="Natural Language Summary",
+                visible="(showSummaries)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="oddsRatioSummary",
+                title="",
+                visible="(showSummaries)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="oddsRatioPlotHeading",
+                title="Odds Ratio Plot"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Odds Ratio Plot",
+                title="",
                 width=600,
                 height=450,
                 renderFun=".plot",
@@ -134,26 +165,7 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcome")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="nomogramHeading",
-                title="Nomogram Analysis",
-                visible="(showNomogram)"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot_nomogram",
-                title="Nomogram",
-                width=800,
-                height=600,
-                requiresData=TRUE,
-                renderFun=".plot_nomogram",
-                visible="(showNomogram)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="nomogram",
-                title="Nomogram",
-                visible="(showNomogram)"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="oddsRatioHeading3",
+                name="oddsRatioExplanationHeading",
                 title="Odds Ratio Analysis Explanations",
                 visible="(showExplanations)"))
             self$add(jmvcore::Html$new(
@@ -180,10 +192,47 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="nomogramHeading",
+                title="Nomogram Analysis",
+                visible="(showNomogram)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot_nomogram",
+                title="Nomogram",
+                width=800,
+                height=600,
+                requiresData=TRUE,
+                renderFun=".plot_nomogram",
+                visible="(showNomogram)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nomogram",
+                title="Nomogram Details",
+                visible="(showNomogram)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="nomogramSummaryHeading",
+                title="Nomogram Analysis Summary",
+                visible="(showNomogram && showSummaries)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="nomogramSummary",
+                title="",
+                visible="(showNomogram && showSummaries)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="nomogramExplanationHeading",
+                title="Understanding Nomogram Analysis",
+                visible="(showNomogram && showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="nomogramAnalysisExplanation",
-                title="Understanding Nomogram Analysis",
+                title="",
                 visible="(showNomogram && showExplanations)",
                 clearWith=list(
                     "showNomogram",
@@ -228,6 +277,9 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showNomogram Display an interactive nomogram for converting pre-test
 #'   to post-test  probabilities using likelihood ratios calculated from the
 #'   data.
+#' @param showSummaries Display natural language interpretations of the
+#'   results to help understand the clinical significance of odds ratios,
+#'   confidence intervals, and diagnostic metrics.
 #' @param showExplanations Display educational explanations for each analysis
 #'   type to help interpret  odds ratios, risk ratios, diagnostic test
 #'   performance, ROC analysis,  and likelihood ratios.
@@ -237,14 +289,20 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$oddsRatioHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$oddsRatioSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$oddsRatioSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$oddsRatioPlotHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$nomogramHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$oddsRatioHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$oddsRatioExplanationHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$oddsRatioExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskMeasuresExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$diagnosticTestExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$nomogramHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$nomogramSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$nomogramExplanationHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$nomogramAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
@@ -255,6 +313,7 @@ oddsratio <- function(
     outcome,
     outcomeLevel,
     showNomogram = FALSE,
+    showSummaries = FALSE,
     showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -275,6 +334,7 @@ oddsratio <- function(
         outcome = outcome,
         outcomeLevel = outcomeLevel,
         showNomogram = showNomogram,
+        showSummaries = showSummaries,
         showExplanations = showExplanations)
 
     analysis <- oddsratioClass$new(

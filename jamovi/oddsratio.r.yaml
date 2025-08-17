@@ -4,7 +4,7 @@ title: Odds Ratio Table and Plot
 jrs:   '1.1'
 
 items:
-
+    # Welcome/Todo Message
     - name:  todo
       title: To Do
       type:  Html
@@ -12,16 +12,10 @@ items:
           - explanatory
           - outcome
 
-
-    # - name:  textmydata
-    #   title: 'textmydata'
-    #   type:  Preformatted
-
-
+    # === MAIN ODDS RATIO ANALYSIS ===
     - name:  oddsRatioHeading
       title: Odds Ratio Analysis
       type:  Preformatted
-      
 
     - name:  text
       title: Odds Ratio Table
@@ -31,13 +25,30 @@ items:
           - outcome
 
     - name:  text2
-      title: ''
+      title: Model Performance Metrics
       type:  Html
 
+    # Natural Language Summary (right after main analysis)
+    - name: oddsRatioSummaryHeading
+      title: Natural Language Summary
+      type: Preformatted
+      visible: (showSummaries)
 
+    - name: oddsRatioSummary
+      title: ''
+      type: Html
+      visible: (showSummaries)
+      clearWith:
+          - explanatory
+          - outcome
+
+    # Plot Section
+    - name: oddsRatioPlotHeading
+      title: Odds Ratio Plot
+      type: Preformatted
 
     - name: plot
-      title: Odds Ratio Plot
+      title: ''
       type: Image
       width:  600
       height: 450
@@ -47,29 +58,41 @@ items:
           - explanatory
           - outcome
 
+    # Odds Ratio Explanations (right after odds ratio analysis)
+    - name: oddsRatioExplanationHeading
+      title: Odds Ratio Analysis Explanations
+      type: Preformatted
+      visible: (showExplanations)
 
-    # - name: plot2
-    #   title: Odds Ratio Plot
-    #   type: Image
-    #   width:  800
-    #   height: 600
-    #   renderFun: .plot2
-    #   requiresData: true
-    #   clearWith:
-    #       - explanatory
-    #       - outcome
+    - name: oddsRatioExplanation
+      title: 'Understanding Odds Ratio Analysis'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
 
+    - name: riskMeasuresExplanation
+      title: 'Understanding Risk Measures'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
 
-    # - name: mydataview_nomogram
-    #   title: "Model Details"
-    #   type: Preformatted
-    #   visible: (showNomogram)
+    - name: diagnosticTestExplanation
+      title: 'Understanding Diagnostic Test Performance'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - explanatory
+          - outcome
 
+    # === NOMOGRAM ANALYSIS ===
     - name:  nomogramHeading
       title: Nomogram Analysis
       type:  Preformatted
       visible: (showNomogram)
-      
 
     - name: plot_nomogram
       title: Nomogram
@@ -81,45 +104,32 @@ items:
       visible: (showNomogram)
 
     - name: nomogram
-      title: "Nomogram"
+      title: "Nomogram Details"
       type: Html
       visible: (showNomogram)
 
-    - name:  oddsRatioHeading3
-      title: Odds Ratio Analysis Explanations
-      type:  Preformatted
-      visible: (showExplanations)
+    # Nomogram Summary (right after nomogram analysis)
+    - name: nomogramSummaryHeading
+      title: 'Nomogram Analysis Summary'
+      type: Preformatted
+      visible: (showNomogram && showSummaries)
 
-    # Odds Ratio Analysis Explanation
-    - name: oddsRatioExplanation
-      title: 'Understanding Odds Ratio Analysis'
+    - name: nomogramSummary
+      title: ''
       type: Html
-      visible: (showExplanations)
+      visible: (showNomogram && showSummaries)
       clearWith:
           - explanatory
           - outcome
 
-    # Risk Measures Explanation
-    - name: riskMeasuresExplanation
-      title: 'Understanding Risk Measures'
-      type: Html
-      visible: (showExplanations)
-      clearWith:
-          - explanatory
-          - outcome
-
-    # Diagnostic Test Performance Explanation
-    - name: diagnosticTestExplanation
-      title: 'Understanding Diagnostic Test Performance'
-      type: Html
-      visible: (showExplanations)
-      clearWith:
-          - explanatory
-          - outcome
-
-    # Nomogram Analysis Explanation
-    - name: nomogramAnalysisExplanation
+    # Nomogram Explanations (right after nomogram analysis)
+    - name: nomogramExplanationHeading
       title: 'Understanding Nomogram Analysis'
+      type: Preformatted
+      visible: (showNomogram && showExplanations)
+
+    - name: nomogramAnalysisExplanation
+      title: ''
       type: Html
       visible: (showNomogram && showExplanations)
       clearWith:
