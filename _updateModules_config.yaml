@@ -20,7 +20,7 @@ modes:
   webpage: false
   commit_modules: false
   WIP: false
-  TEST: false  # Enable TEST mode for development/testing purposes
+  TEST: true  # Enable TEST mode for development/testing purposes
 
   # File copying control modes
   copy_vignettes: false       # Enable/disable vignette file copying
@@ -94,7 +94,7 @@ vignette_folders:
 # Module definitions
 modules:
   jjstatsplot:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
     menuGroup_pattern: "menuGroup: JJStatsPlot$"
     menuGroup_pattern_wip: "menuGroup: JJStatsPlot"
@@ -138,7 +138,7 @@ modules:
       - "jamovi"
 
   meddecide:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
     menuGroup_pattern: "menuGroup: meddecide$"
     menuGroup_pattern_wip: "menuGroup: meddecide"
@@ -182,7 +182,7 @@ modules:
       - "tests/testthat"
 
   jsurvival:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     menuGroup_pattern: "menuGroup: Survival$"
     menuGroup_pattern_wip: "menuGroup: Survival"
@@ -220,7 +220,7 @@ modules:
       - "jamovi"
 
   ClinicoPathDescriptives:
-    enabled: true
+    enabled: false
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     menuGroup_pattern: "menuGroup: Exploration$"
     menuGroup_pattern_wip: "menuGroup: Exploration"

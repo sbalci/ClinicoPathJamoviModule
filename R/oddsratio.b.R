@@ -71,31 +71,61 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .nom_object = NULL,
 
+        # Memory cleanup ----
+        .finalize = function() {
+            private$.nom_object <- NULL
+            super$.finalize()
+        },
+
         # init ----
         .init = function() {
-            # Initialize all explanation outputs to FALSE first
+            # Initialize main outputs to FALSE first
+            self$results$text$setVisible(FALSE)
+            self$results$text2$setVisible(FALSE)
+            self$results$plot$setVisible(FALSE)
+            
+            # Initialize summary outputs and headings
+            self$results$oddsRatioSummaryHeading$setVisible(FALSE)
+            self$results$oddsRatioSummary$setVisible(FALSE)
+            self$results$nomogramSummaryHeading$setVisible(FALSE)
+            self$results$nomogramSummary$setVisible(FALSE)
+            
+            # Initialize explanation outputs and headings
+            self$results$oddsRatioExplanationHeading$setVisible(FALSE)
             self$results$oddsRatioExplanation$setVisible(FALSE)
             self$results$riskMeasuresExplanation$setVisible(FALSE)
             self$results$diagnosticTestExplanation$setVisible(FALSE)
+            self$results$nomogramExplanationHeading$setVisible(FALSE)
             self$results$nomogramAnalysisExplanation$setVisible(FALSE)
+
+            # Handle showSummaries visibility
+            if (self$options$showSummaries) {
+                self$results$oddsRatioSummaryHeading$setVisible(TRUE)
+                self$results$oddsRatioSummary$setVisible(TRUE)
+                
+                # Nomogram summary requires both showSummaries AND showNomogram
+                if (self$options$showNomogram) {
+                    self$results$nomogramSummaryHeading$setVisible(TRUE)
+                    self$results$nomogramSummary$setVisible(TRUE)
+                }
+            }
 
             # Handle showExplanations visibility
             if (self$options$showExplanations) {
-                # Section headings for explanations
-                self$results$oddsRatioHeading3$setVisible(TRUE)
-                
-                # Explanation content
+                # Odds ratio explanation section
+                self$results$oddsRatioExplanationHeading$setVisible(TRUE)
                 self$results$oddsRatioExplanation$setVisible(TRUE)
                 self$results$riskMeasuresExplanation$setVisible(TRUE)
                 self$results$diagnosticTestExplanation$setVisible(TRUE)
                 
                 # Nomogram explanation requires both showExplanations AND showNomogram
                 if (self$options$showNomogram) {
+                    self$results$nomogramExplanationHeading$setVisible(TRUE)
                     self$results$nomogramAnalysisExplanation$setVisible(TRUE)
                 }
             }
 
-            # Note: Tables and plots remain visible based on data availability and their specific options
+            # Note: Main analysis outputs (text, text2, plot) will be set visible in .run() after validation
             # Nomogram plots are controlled by showNomogram option in the .r.yaml
         },
 
@@ -152,12 +182,15 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 paste("Outcome variable is severely imbalanced (", round(min_proportion * 100, 1), "% in minority class). Consider using specialized methods for imbalanced data.", sep=""))
                         }
                         
-                        # Validate user-specified outcome level
-                        if (!is.null(user_outcome_level)) {
-                            if (!user_outcome_level %in% outcome_levels) {
-                                validation_results$warnings <- c(validation_results$warnings,
-                                    paste("Specified positive outcome level '", user_outcome_level, "' not found in outcome variable. Available levels: ", paste(outcome_levels, collapse=", "), sep=""))
-                            }
+                        # Require and validate user-specified outcome level
+                        if (is.null(user_outcome_level)) {
+                            validation_results$errors <- c(validation_results$errors,
+                                "Please select the positive outcome level from the dropdown menu below the outcome variable.")
+                            validation_results$should_stop <- TRUE
+                        } else if (!user_outcome_level %in% outcome_levels) {
+                            validation_results$errors <- c(validation_results$errors,
+                                paste("Specified positive outcome level '", user_outcome_level, "' not found in outcome variable. Available levels: ", paste(outcome_levels, collapse=", "), sep=""))
+                            validation_results$should_stop <- TRUE
                         }
                         
                         validation_results$info <- c(validation_results$info,
@@ -288,11 +321,40 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$plot$setVisible(FALSE)
                 return()
 
+            } else if (is.null(self$options$outcomeLevel)) {
+                
+                # Require outcome level selection
+                todo <- glue::glue("
+                    <br><b>Positive Outcome Level Required</b>
+                    <br><br>
+                    Please select which level of your outcome variable represents the 'positive' case
+                    (e.g., 'Dead', 'Event', 'Yes', 'Positive').
+                    <br><br>
+                    This is required for correct calculation of:
+                    <br>• Odds ratios interpretation
+                    <br>• Likelihood ratios
+                    <br>• Sensitivity and specificity
+                    <br>• Diagnostic test performance metrics
+                    <br><br>
+                    Use the dropdown menu below the outcome variable to make your selection.
+                ")
+                
+                html <- self$results$todo
+                html$setContent(todo)
+                self$results$text$setVisible(FALSE)
+                self$results$text2$setVisible(FALSE)
+                self$results$plot$setVisible(FALSE)
+                return()
+                
             } else {
 
-                # Empty message when all variables selected
-
+                # Empty message when all variables selected and set main outputs visible
                 todo <- ""
+                
+                # Set main analysis outputs visible after validation passes
+                self$results$text$setVisible(TRUE)
+                self$results$text2$setVisible(TRUE)
+                self$results$plot$setVisible(TRUE)
 
                 # glue::glue("Analysis based on:
                 # <br>
@@ -435,105 +497,23 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                # outcomeLevel <- self$options$outcomeLevel
-                # outcome_name <- self$options$outcome
-
-                # outcome1 <- self$data[[outcome_name]]
-
-                # mydata[["outcome2"]] <-
-                #     ifelse(
-                #         test = outcome1 == outcomeLevel,
-                #         yes = "Event",
-                #         no = "NoEvent"
-                #     )
-
-
-                # mydata[[outcome_name]] <-
-                #     ifelse(
-                #         test = outcome1 == outcomeLevel,
-                #         yes = "Event",
-                #         no = "NoEvent"
-                #     )
+                # Main analysis execution starts here
 
 
 
 
 
-                # self$results$textmydata$setContent(
-                #     list(
-                #         outcomeLevel,
-                #         outcome_name,
-                #         outcome1,
-                #         head(mydata)
-                #         )
-                # )
 
 
 
-                # Check if outcome variable is suitable or stop
-                # myoutcome2 <- self$options$outcome
-                # myoutcome2 <- self$data[[myoutcome2]]
-                # myoutcome2 <- na.omit(myoutcome2)
-
-                # if (class(myoutcome2) == "factor")
-                #     stop("Please use a continuous variable for outcome.")
-                #
-                # if (any(myoutcome2 != 0 & myoutcome2 != 1))
-                #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
 
 
-                # formula2 <- as.vector(self$options$explanatory)
-
-                # formulaR <- jmvcore::constructFormula(terms =
-                #                                           # outcome_name
-                #                                       self$options$outcome
-                #                                       )
-
-                # formulaR2 <- jmvcore::composeTerm(components = outcome_name)
-
-                # formulaR3 <- as.vector(self$options$outcome)
-
-                # formulaL <- jmvcore::composeTerms(listOfComponents =
-                #                                       self$options$explanatory)
-
-                # formulaL <- as.vector(formulaL)
 
 
-                # formula2 <- jmvcore::constructFormula(terms = formulaL)
-
-                # formulaL2 <- jmvcore::constructFormula(terms =
-                #                                       self$options$explanatory)
-
-                # formulaR <- jmvcore::toNumeric(formulaR)
 
 
-                # glm(depdendent ~ explanatory, family="binomial")
-
-                # finalfit::finalfit(.data = mydata,
-                #                    dependent = formulaR,
-                #                    explanatory = formula2,
-                #                    metrics = TRUE
-                #                    ) -> tOdds
 
 
-                # self$results$textmydata$setContent(
-                #     list(
-                #         head = head(mydata),
-                #         names_data = names(mydata),
-                #         all_labels = all_labels,
-                #         explanatory_variable_names = explanatory_variable_names,
-                #         dependent_variable_name_from_label = dependent_variable_name_from_label,
-                #         formulaDependent = formulaDependent,
-                #         formulaExplanatory = formulaExplanatory
-                #         # formula2 = formula2,
-                #         # formulaR = formulaR,
-                #         # formulaL = formulaL,
-                #         # formulaL2 = formulaL2,
-                #         # formulaR3,
-                #         ,
-                #         tOdds
-                #     )
-                # )
 
 
                 text2 <- glue::glue("
@@ -557,6 +537,12 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                              align = c("l", "l", "r", "r", "r", "r"),
                              format = "html")
                 self$results$text$setContent(results1)
+                
+                # Generate natural language summary if requested
+                if (self$options$showSummaries) {
+                    oddsRatioSummary <- private$.generateOddsRatioSummary(tOdds, formulaDependent, formulaExplanatory)
+                    self$results$oddsRatioSummary$setContent(oddsRatioSummary)
+                }
 
 
 
@@ -585,6 +571,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         explanatory_variable_names[1],  # Start with first variable
                         self$options$outcomeLevel  # User-specified positive outcome level
                     )
+                    
+                    # Check if likelihood ratio calculation failed
+                    if (!is.null(lr_results$error) && lr_results$error) {
+                        stop(lr_results$message)
+                    }
 
                     # Create diagnostic metrics text with explanatory information
                     metrics_text <- glue::glue("
@@ -725,27 +716,19 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             predictor_levels <- levels(predictor)
             outcome_levels <- levels(outcome)
             
-            # Determine positive outcome level
-            if (!is.null(user_positive_outcome) && user_positive_outcome %in% outcome_levels) {
-                # User specified positive outcome level
-                positive_outcome_level <- user_positive_outcome
-                positive_outcome_idx <- which(outcome_levels == positive_outcome_level)
-                outcome_determination_method <- "User-specified"
-            } else {
-                # Fallback to automatic detection
-                positive_outcome_indicators <- c("Dead", "Event", "Positive", "Yes", "Present", "Recurrence", "1", "TRUE")
-                positive_outcome_idx <- which(outcome_levels %in% positive_outcome_indicators)
-                
-                if (length(positive_outcome_idx) == 1) {
-                    positive_outcome_level <- outcome_levels[positive_outcome_idx]
-                    outcome_determination_method <- "Automatic detection"
-                } else {
-                    # Default to second level (alphabetically last)
-                    positive_outcome_idx <- 2
-                    positive_outcome_level <- outcome_levels[positive_outcome_idx]
-                    outcome_determination_method <- "Default (second level alphabetically)"
-                }
+            # Require user to specify positive outcome level
+            if (is.null(user_positive_outcome) || !user_positive_outcome %in% outcome_levels) {
+                return(list(
+                    error = TRUE,
+                    message = paste("Please select the positive outcome level. Available levels:", 
+                                   paste(outcome_levels, collapse=", "))
+                ))
             }
+            
+            # Use user-specified positive outcome level
+            positive_outcome_level <- user_positive_outcome
+            positive_outcome_idx <- which(outcome_levels == positive_outcome_level)
+            outcome_determination_method <- "User-specified"
             
             # Determine positive predictor level (usually second level alphabetically)
             positive_predictor_indicators <- c("Positive", "Yes", "Present", "Exposed", "1", "TRUE", "Bad")
@@ -872,8 +855,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .createNomogram = function(fit, dd) {
             if (is.null(fit)) return(NULL)
 
-            private$.checkpoint()
-
             # Create nomogram
             nom <- try({
                 rms::nomogram(fit,
@@ -888,235 +869,15 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Create HTML content for display
                 html_content <- private$.createNomogramDisplay(nom)
                 self$results$nomogram$setContent(html_content)
-            }
-
-            # Save model summary and nomogram info for debugging
-            # self$results$mydataview_nomogram$setContent(
-            #     list(
-            #         model_summary = summary(fit),
-            #         nomogram = if(!inherits(nom, "try-error")) nom else NULL,
-            #         error = if(inherits(nom, "try-error")) attr(nom, "condition") else NULL
-            #     )
-            # )
-
-
-            },
-
-
-        # Generates HTML content for nomogram display with interactive styling
-        .createNomogramDisplay = function(nom) {
-            if(is.null(private$.nom_object)) {
-                return(FALSE)
-            }
-
-            # Capture the nomogram output
-            nom_output <- capture.output(print(nom))
-
-            # Extract technical details
-            tech_details <- c()
-            i <- 1
-            while(i <= length(nom_output) && !grepl("Points$", nom_output[i])) {
-                if(nzchar(nom_output[i])) {
-                    tech_details <- c(tech_details, nom_output[i])
+                
+                # Generate natural language summary if requested
+                if (self$options$showSummaries) {
+                    nomogramSummary <- private$.generateNomogramSummary(nom, fit, dd)
+                    self$results$nomogramSummary$setContent(nomogramSummary)
                 }
-                i <- i + 1
             }
+        },
 
-            # Initialize data structures
-            sections <- list()
-            current_section <- NULL
-            current_lines <- character(0)
-            risk_table <- NULL
-
-            # Process each line
-            while(i <= length(nom_output)) {
-                line <- nom_output[i]
-
-                # Check for new section or risk table
-                if(grepl("Total Points Predicted", line)) {
-                    # We've hit the risk table - save current section and start collecting risk data
-                    if(!is.null(current_section)) {
-                        sections[[current_section]] <- current_lines
-                    }
-                    risk_table <- c(line)  # Start risk table with header
-                    while(i < length(nom_output) && nzchar(trimws(nom_output[i + 1]))) {
-                        i <- i + 1
-                        risk_table <- c(risk_table, nom_output[i])
-                    }
-                    current_section <- NULL
-                    current_lines <- character(0)
-                } else if(grepl("Points$", line) && !grepl("Total Points", line)) {
-                    # New variable section
-                    if(!is.null(current_section)) {
-                        sections[[current_section]] <- current_lines
-                    }
-                    current_section <- trimws(sub("Points$", "", line))
-                    current_lines <- character(0)
-                } else if(nzchar(trimws(line))) {
-                    current_lines <- c(current_lines, line)
-                }
-                i <- i + 1
-            }
-
-            # Add final section if exists
-            if(!is.null(current_section) && length(current_lines) > 0) {
-                sections[[current_section]] <- current_lines
-            }
-
-            # Create HTML content
-            html_content <- paste0('
-    <style>
-        .nomogram-container {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 8px;
-        }
-        .tech-details {
-            font-family: "Roboto Mono", monospace;
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 15px 0;
-            color: #666;
-        }
-        .instructions {
-            background-color: #e8f5e9;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-        }
-        .inputs-section {
-            margin-top: 30px;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        .variable-section {
-            margin: 15px 0;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-left: 4px solid #2196f3;
-            border-radius: 4px;
-        }
-        .section-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .values {
-            font-family: "Roboto Mono", monospace;
-            white-space: pre-wrap;
-            line-height: 1.5;
-            color: #34495e;
-            padding-left: 20px;
-        }
-        .outputs-section {
-            margin-top: 30px;
-            background-color: #fff3e0;
-            border: 1px solid #ffe0b2;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        .prediction-section {
-            background-color: #fff3e0;
-            border-left: 4px solid #ff9800;
-            padding: 20px;
-        }
-        .notes {
-            background-color: #fffde7;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 4px;
-        }
-        .risk-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 10px;
-            font-family: "Roboto Mono", monospace;
-        }
-        .risk-table th, .risk-table td {
-            padding: 8px 16px;
-            text-align: right;
-            border-bottom: 1px solid #ddd;
-        }
-        .risk-table th {
-            font-weight: 600;
-            background-color: #fff3e0;
-            text-align: center;
-        }
-        .risk-header {
-            padding: 10px 0;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #ff9800;
-            font-weight: 600;
-        }
-    </style>
-    <div class="nomogram-container">
-        <h2>Nomogram Scoring Guide</h2>
-
-        <div class="tech-details">
-            ', paste(tech_details, collapse="<br>"), '
-        </div>
-
-        <div class="instructions">
-            <h3>How to Use This Nomogram:</h3>
-            <ol>
-                <li>For each variable below, find your patient\'s value</li>
-                <li>Read across to the Points scale to determine points for that variable</li>
-                <li>Add up total points from all variables</li>
-                <li>Use total points to find predicted risk in the Risk Prediction section</li>
-            </ol>
-        </div>
-
-        <div class="inputs-section">
-            <h3>Input Variables</h3>')
-
-            # Add variable sections
-            for(section_name in names(sections)) {
-                html_content <- paste0(html_content, '
-            <div class="variable-section">
-                <div class="section-title">', section_name, '</div>
-                <div class="values">',
-                                       paste(sections[[section_name]], collapse="<br>"),
-                                       '</div>
-            </div>')
-            }
-
-            # Add risk prediction section
-            html_content <- paste0(html_content, '
-        </div>
-
-        <div class="outputs-section">
-            <h3>Risk Prediction</h3>
-            <div class="prediction-section">
-                <div class="risk-header">Points to Risk Conversion</div>
-                <div class="values">',
-                                   if(!is.null(risk_table)) paste(risk_table, collapse="<br>") else "",
-                                   '</div>
-            </div>
-        </div>
-
-        <div class="notes">
-            <h3>Important Notes:</h3>
-            <ul>
-                <li>For continuous variables, interpolate between given values</li>
-                <li>For categorical variables, use exact points shown</li>
-                <li>The predicted risk is based on total points from all variables</li>
-                <li>Risk predictions are estimates and should be used in conjunction with clinical judgment</li>
-            </ul>
-        </div>
-    </div>')
-
-            return(html_content)
-        }
-
-        ,
         # Plots the nomogram using base R graphics
         .plot_nomogram = function(image, ggtheme, theme, ...) {
             if(is.null(private$.nom_object)) {
@@ -1205,87 +966,175 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-#         ,
-#
-#         .plot2 = function(image, ggtheme, theme, ...) {
-#
-#             # plotData <- image$state
-#
-#             if (nrow(self$data) == 0)
-#                 stop('Data contains no (complete) rows')
-#
-#             if (is.null(self$options$explanatory) || is.null(self$options$outcome))
-#                 return()
-#
-#             # Check if outcome variable is suitable or stop
-#             myoutcome2 <- self$options$outcome
-#             myoutcome2 <- self$data[[myoutcome2]]
-#             myoutcome2 <- na.omit(myoutcome2)
-#
-#             if (class(myoutcome2) == "factor")
-#                 stop("Please use a continuous variable for outcome.")
-#
-#             if (any(myoutcome2 != 0 & myoutcome2 != 1))
-#                 stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
-#
-#
-#
-#
-#             mydata <- self$data
-#
-#             formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
-#
-#             formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
-#
-#             formulaR <- jmvcore::toNumeric(formulaR)
-#
-#             formula <- paste0(formula2, ' ~ ', formulaR)
-#
-#             formula <- as.formula(formula)
-#
-#             # https://indrajeetpatil.github.io/ggstatsplot/articles/web_only/ggcoefstats.html#generalized-linear-model-glm-
-#
-#
-#         # model
-#         mod <-
-#             stats::glm(
-#                 formula = formula,
-#                 data = mydata,
-#                 # weights = df$Freq,
-#                 family = stats::binomial(link = "logit")
-#             )
-#
-#         # plot
-#         plot <- ggstatsplot::ggcoefstats(
-#             x = mod,
-#             ggtheme = ggthemes::theme_economist_white(),
-#             ggstatsplot.layer = FALSE,
-#             title = "generalized linear model (glm)",
-#             vline.args = list(color = "red", linetype = "solid"),
-#             stats.label.color = c("orangered", "dodgerblue")
-#         )
-#
-#         print(plot)
-#         TRUE
-#
-# }
-#
-#
 
+        # Natural Language Summary Generation ----
+        ,
+        .generateOddsRatioSummary = function(tOdds, formulaDependent, formulaExplanatory) {
+            tryCatch({
+                # Extract the OR table and metrics
+                or_table <- tOdds[[1]]
+                metrics <- tOdds[[2]]
+                
+                # Count significant predictors
+                significant_count <- 0
+                total_predictors <- 0
+                strongest_predictor <- NULL
+                strongest_or <- 0
+                
+                # Parse the table to identify significant predictors
+                if (!is.null(or_table) && nrow(or_table) > 0) {
+                    for (i in 1:nrow(or_table)) {
+                        if (!is.na(or_table[i, "p"]) && or_table[i, "p"] != "") {
+                            p_value <- as.numeric(or_table[i, "p"])
+                            if (!is.na(p_value)) {
+                                total_predictors <- total_predictors + 1
+                                if (p_value < 0.05) {
+                                    significant_count <- significant_count + 1
+                                    # Track strongest predictor
+                                    or_value <- or_table[i, "OR"]
+                                    if (!is.na(or_value) && or_value != "" && or_value != "-") {
+                                        or_numeric <- as.numeric(or_value)
+                                        if (!is.na(or_numeric)) {
+                                            # Calculate effect size (distance from 1.0)
+                                            effect_size <- abs(log(or_numeric))
+                                            if (effect_size > abs(log(strongest_or + 0.001))) {
+                                                strongest_or <- or_numeric
+                                                strongest_predictor <- or_table[i, 1]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                # Generate summary text
+                summary_html <- paste0(
+                    '<div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">',
+                    '<h4 style="color: #2c5282; margin-top: 0;">📊 Odds Ratio Analysis Summary</h4>',
+                    '<p style="margin: 10px 0;"><strong>Analysis Overview:</strong> Logistic regression was performed to examine the relationship between ',
+                    length(strsplit(formulaExplanatory, " \\+ ")[[1]]), ' explanatory variable(s) and the outcome <em>', formulaDependent, '</em>.</p>'
+                )
+                
+                # Add findings summary
+                if (significant_count > 0) {
+                    summary_html <- paste0(summary_html,
+                        '<p style="margin: 10px 0;"><strong>Key Findings:</strong></p>',
+                        '<ul style="margin: 5px 0; padding-left: 20px;">',
+                        '<li>', significant_count, ' out of ', total_predictors, ' predictor(s) showed statistically significant associations (p < 0.05)</li>'
+                    )
+                    
+                    if (!is.null(strongest_predictor)) {
+                        interpretation <- if (strongest_or > 1) {
+                            paste0('increased odds (OR = ', round(strongest_or, 2), ')')
+                        } else {
+                            paste0('decreased odds (OR = ', round(strongest_or, 2), ')')
+                        }
+                        summary_html <- paste0(summary_html,
+                            '<li>Strongest association: <em>', strongest_predictor, '</em> with ', interpretation, '</li>'
+                        )
+                    }
+                    
+                    summary_html <- paste0(summary_html, '</ul>')
+                } else if (total_predictors > 0) {
+                    summary_html <- paste0(summary_html,
+                        '<p style="margin: 10px 0;"><strong>Key Findings:</strong> None of the ', total_predictors, 
+                        ' predictor(s) showed statistically significant associations with the outcome (all p ≥ 0.05).</p>'
+                    )
+                } else {
+                    summary_html <- paste0(summary_html,
+                        '<p style="margin: 10px 0;"><strong>Note:</strong> Unable to extract predictor information from the analysis.</p>'
+                    )
+                }
+                
+                # Add model performance metrics if available
+                if (!is.null(metrics)) {
+                    summary_html <- paste0(summary_html,
+                        '<p style="margin: 10px 0;"><strong>Model Performance:</strong> ', metrics, '</p>'
+                    )
+                }
+                
+                # Add interpretation guide
+                summary_html <- paste0(summary_html,
+                    '<div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin-top: 10px;">',
+                    '<strong>💡 Interpretation Guide:</strong>',
+                    '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">',
+                    '<li>OR > 1: Factor increases the odds of the outcome</li>',
+                    '<li>OR < 1: Factor decreases the odds of the outcome</li>',
+                    '<li>OR = 1: No association between factor and outcome</li>',
+                    '<li>95% CI not crossing 1.0 indicates statistical significance</li>',
+                    '</ul>',
+                    '</div>',
+                    '</div>'
+                )
+                
+                return(summary_html)
+                
+            }, error = function(e) {
+                return('<p style="color: #721c24;">Unable to generate summary. Please check the analysis results.</p>')
+            })
+        }
+        ,
+        .generateNomogramSummary = function(nom, fit, mydata) {
+            tryCatch({
+                # Extract model information
+                n_subjects <- nrow(mydata)
+                n_predictors <- length(fit$coefficients) - 1  # Exclude intercept
+                
+                # Generate summary
+                summary_html <- paste0(
+                    '<div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0;">',
+                    '<h4 style="color: #856404; margin-top: 0;">📈 Nomogram Analysis Summary</h4>',
+                    '<p style="margin: 10px 0;">A diagnostic nomogram has been generated based on the logistic regression model with ',
+                    n_predictors, ' predictor(s) and ', n_subjects, ' subjects.</p>',
+                    
+                    '<p style="margin: 10px 0;"><strong>How to Use the Nomogram:</strong></p>',
+                    '<ol style="margin: 5px 0; padding-left: 25px;">',
+                    '<li>Find your patient\'s value for each predictor variable on its scale</li>',
+                    '<li>Draw a vertical line up to the "Points" axis to get the points for that predictor</li>',
+                    '<li>Sum all points from all predictors to get the "Total Points"</li>',
+                    '<li>Draw a vertical line down from the Total Points to find the predicted probability</li>',
+                    '</ol>',
+                    
+                    '<div style="background-color: #ffeaa7; padding: 10px; border-radius: 5px; margin-top: 10px;">',
+                    '<strong>⚠️ Clinical Note:</strong> This nomogram provides probability estimates based on the current dataset. ',
+                    'External validation is recommended before clinical implementation. Consider local prevalence rates and ',
+                    'clinical context when interpreting results.',
+                    '</div>',
+                    '</div>'
+                )
+                
+                return(summary_html)
+                
+            }, error = function(e) {
+                return('<p style="color: #721c24;">Unable to generate nomogram summary. Please check the analysis results.</p>')
+            })
+        }
+        ,
+        .createNomogramDisplay = function(nom) {
+            # Create HTML display for the nomogram information
+            html_content <- '<div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">'
+            html_content <- paste0(html_content, '<h4 style="color: #495057; margin-top: 0;">Nomogram Information</h4>')
+            html_content <- paste0(html_content, '<p>The nomogram plot above provides a visual tool for risk prediction based on the logistic regression model.</p>')
+            html_content <- paste0(html_content, '<p><strong>Components:</strong></p>')
+            html_content <- paste0(html_content, '<ul style="margin: 5px 0; padding-left: 20px;">')
+            html_content <- paste0(html_content, '<li><strong>Points:</strong> Top scale showing point values for each predictor</li>')
+            html_content <- paste0(html_content, '<li><strong>Predictor Scales:</strong> Individual scales for each variable in the model</li>')
+            html_content <- paste0(html_content, '<li><strong>Total Points:</strong> Sum of all individual predictor points</li>')
+            html_content <- paste0(html_content, '<li><strong>Predicted Probability:</strong> Bottom scale showing the predicted outcome probability</li>')
+            html_content <- paste0(html_content, '</ul>')
+            html_content <- paste0(html_content, '</div>')
+            
+            return(html_content)
+        }
+        
         # Educational Explanations ----
         ,
         .addExplanations = function() {
-            # Helper function to set explanation content
-            private$.setExplanationContent <- function(result_name, content) {
-                tryCatch({
-                    self$results[[result_name]]$setContent(content)
-                }, error = function(e) {
-                    # Silently ignore if result doesn't exist
-                })
-            }
-            
             # Odds Ratio Analysis Explanation
-            private$.setExplanationContent("oddsRatioExplanation", '
+            tryCatch({
+                self$results$oddsRatioExplanation$setContent('
             <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
                 <h4 style="margin-top: 0; color: #2c3e50;">Understanding Odds Ratio Analysis</h4>
                 <p><strong>Odds Ratio (OR):</strong> Measures the strength of association between risk factors and binary outcomes.</p>
@@ -1299,8 +1148,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             </div>
             ')
             
+            }, error = function(e) {
+                # Silently ignore if result doesn't exist
+            })
+            
             # Risk Measures Explanation
-            private$.setExplanationContent("riskMeasuresExplanation", '
+            tryCatch({
+                self$results$riskMeasuresExplanation$setContent('
             <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
                 <h4 style="margin-top: 0; color: #2c3e50;">Understanding Risk Measures</h4>
                 <p><strong>Risk Measures:</strong> Different ways to quantify the relationship between risk factors and outcomes.</p>
@@ -1314,8 +1168,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             </div>
             ')
             
+            }, error = function(e) {
+                # Silently ignore if result doesn't exist
+            })
+            
             # Diagnostic Test Performance Explanation
-            private$.setExplanationContent("diagnosticTestExplanation", '
+            tryCatch({
+                self$results$diagnosticTestExplanation$setContent('
             <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
                 <h4 style="margin-top: 0; color: #2c3e50;">Understanding Diagnostic Test Performance</h4>
                 <p><strong>Diagnostic Metrics:</strong> Evaluate how well a test distinguishes between disease and non-disease states.</p>
@@ -1330,8 +1189,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             </div>
             ')
             
+            }, error = function(e) {
+                # Silently ignore if result doesn't exist
+            })
+            
             # Nomogram Analysis Explanation
-            private$.setExplanationContent("nomogramAnalysisExplanation", '
+            tryCatch({
+                self$results$nomogramAnalysisExplanation$setContent('
             <div style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
                 <h4 style="margin-top: 0; color: #721c24;">Understanding Nomogram Analysis</h4>
                 <p><strong>Diagnostic Nomogram:</strong> Visual tool for converting likelihood ratios to post-test probabilities.</p>
@@ -1344,6 +1208,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <p><em>Usage:</em> Draw a line from pre-test probability through likelihood ratio to find post-test probability.</p>
             </div>
             ')
+            
+            }, error = function(e) {
+                # Silently ignore if result doesn't exist
+            })
         }
 
 
