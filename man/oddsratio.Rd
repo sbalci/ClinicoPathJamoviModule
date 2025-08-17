@@ -10,6 +10,7 @@ oddsratio(
   outcome,
   outcomeLevel,
   showNomogram = FALSE,
+  showSummaries = FALSE,
   showExplanations = FALSE
 )
 }
@@ -28,6 +29,10 @@ use the second level alphabetically.}
 to post-test  probabilities using likelihood ratios calculated from the
 data.}
 
+\item{showSummaries}{Display natural language interpretations of the
+results to help understand the clinical significance of odds ratios,
+confidence intervals, and diagnostic metrics.}
+
 \item{showExplanations}{Display educational explanations for each analysis
 type to help interpret  odds ratios, risk ratios, diagnostic test
 performance, ROC analysis,  and likelihood ratios.}
@@ -36,14 +41,23 @@ performance, ROC analysis,  and likelihood ratios.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$oddsRatioHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$oddsRatioSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$oddsRatioSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$oddsRatioPlotHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
-\code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
+\code{results$oddsRatioExplanationHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$oddsRatioExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskMeasuresExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$diagnosticTestExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogramHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogramSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogramExplanationHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$nomogramAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 }

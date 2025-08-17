@@ -38,7 +38,7 @@ survival(
   ci95 = FALSE,
   risktable = FALSE,
   censored = FALSE,
-  pplot = TRUE,
+  pplot = FALSE,
   medianline = "none",
   person_time = FALSE,
   time_intervals = "12, 36, 60",
@@ -242,35 +242,45 @@ A results object containing:
 \tabular{llllll}{
 \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$medianSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$medianSurvivalHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
+\code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
-\code{results$survivalTablesExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalTablesHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalTablesHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survivalTablesExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$rmstHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$rmstTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$rmstSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$survivalExport} \tab \tab \tab \tab \tab an output \cr
 \code{results$survivalExportSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$pairwiseComparisonHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+\code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 \code{results$residualsPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr

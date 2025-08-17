@@ -1,7 +1,7 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: SurvivalT
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '0.0.3'
@@ -126,6 +126,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description:
         R: >
           The numeric variable representing follow-up time until the event or last observation.
@@ -144,6 +145,7 @@ options:
     - name: dxdate
       title: 'Diagnosis Date'
       type: Variable
+      default: NULL
       description:
         R: >
           Date of diagnosis. Required if `tint` = true.
@@ -152,6 +154,7 @@ options:
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
+      default: NULL
       description:
         R: >
           Follow-up date or date of last observation. Required if `tint` = true.
@@ -241,6 +244,7 @@ options:
       type: Variable
       suggested: [ ordinal, nominal, continuous ]
       permitted: [ factor, numeric ]
+      default: NULL
       description:
         R: >
           The outcome variable. Typically indicates event status (e.g., death, recurrence).
@@ -327,6 +331,7 @@ options:
       type: Variables
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      default: NULL
       description:
         R: >
           Categorical explanatory (predictor) variables included in the Cox model.
@@ -338,6 +343,7 @@ options:
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: NULL
       description:
         R: >
           Continuous explanatory (predictor) variables included in the Cox model.
@@ -549,6 +555,7 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      default: NULL
 
     - name: ac_method
       title: Adjustment Method
@@ -739,6 +746,7 @@ options:
       type: Variables
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      default: NULL
       description:
         R: >
           Variables used for stratification. When proportional hazards are not met,
@@ -878,6 +886,7 @@ options:
     - name: time_dep_vars
       title: Time-Dependent Variables
       type: Variables
+      default: NULL
       description:
         R: >
           Variables that change values over time. In wide format, these are baseline variables
@@ -906,6 +915,7 @@ options:
     - name: start_time_var
       title: Start Time Variable
       type: Variable
+      default: NULL
       description:
         R: >
           For long format only: Variable indicating the start time of each interval.
@@ -914,6 +924,7 @@ options:
     - name: stop_time_var
       title: Stop Time Variable  
       type: Variable
+      default: NULL
       description:
         R: >
           For long format only: Variable indicating the stop time of each interval.
@@ -934,6 +945,7 @@ options:
       type: Variable
       suggested: [ nominal, ordinal ]
       permitted: [ factor ]
+      default: NULL
       description:
         R: >
           Clustering variable for the frailty term (e.g., hospital, family, or study center).
@@ -968,6 +980,7 @@ options:
     - name: spline_vars
       title: Variables with Time-Varying Effects
       type: Variables
+      default: NULL
       description:
         R: >
           Variables to model with time-varying coefficients using splines. These are variables
@@ -1076,7 +1089,7 @@ options:
     - name: ml_feature_selection
       title: 'Feature Selection'
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Perform automatic feature selection
@@ -1086,7 +1099,7 @@ options:
     - name: ml_importance
       title: 'Variable Importance'
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Calculate and display variable importance scores
@@ -1096,7 +1109,7 @@ options:
     - name: ml_calibration
       title: 'Calibration Plot'
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Display calibration plot for predictions
@@ -1106,7 +1119,7 @@ options:
     - name: ml_performance
       title: 'Performance Metrics'
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Calculate C-index, IBS, and other performance metrics

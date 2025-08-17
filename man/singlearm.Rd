@@ -38,8 +38,11 @@ singlearm(
   person_time = FALSE,
   time_intervals = "12, 36, 60",
   rate_multiplier = 100,
+  baseline_hazard = FALSE,
+  hazard_smoothing = FALSE,
   showExplanations = FALSE,
-  showSummaries = FALSE
+  showSummaries = FALSE,
+  advancedDiagnostics = FALSE
 )
 }
 \arguments{
@@ -183,6 +186,14 @@ For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 \item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
 100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
 
+\item{baseline_hazard}{Estimate and plot the baseline hazard function to
+assess how the instantaneous risk of events changes over time in your study
+population.}
+
+\item{hazard_smoothing}{Generate smoothed hazard rate estimates to better
+visualize patterns in event risk over time and assess proportional hazards
+assumptions.}
+
 \item{showExplanations}{Display detailed explanations for each analysis
 component to help interpret the statistical methods and results.}
 
@@ -190,25 +201,48 @@ component to help interpret the statistical methods and results.}
 and plots. These summaries provide plain-language interpretations of the
 statistical results. Turn off to reduce visual clutter when summaries are
 not needed.}
+
+\item{advancedDiagnostics}{Enable advanced diagnostic features including
+enhanced data quality  assessment, performance optimizations with caching,
+and improved error  reporting. This provides additional insights into data
+reliability and  analysis quality without affecting core results.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$medianHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$survivalProbabilityExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$medianHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$survTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survTableHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survivalProbabilityExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$personTimeHeading2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
+\code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$baselineHazardHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$baselineHazardTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$baselineHazardPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$smoothedHazardPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$baselineHazardSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$baselineHazardHeading3} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$baselineHazardExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$dataQualityHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$dataQualityTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$dataQualitySummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 }

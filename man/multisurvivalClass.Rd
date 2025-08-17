@@ -2,12 +2,52 @@
 % Please edit documentation in R/multisurvival.b.R
 \name{multisurvivalClass}
 \alias{multisurvivalClass}
-\title{Multivariable Survival Analysis}
+\title{Multivariable Survival Analysis Implementation}
 \description{
-Multivariable Survival Analysis
-
-Multivariable Survival Analysis
+Backend implementation class for comprehensive multivariable survival analysis.
+This R6 class provides the core functionality for the multisurvival jamovi module,
+handling Cox proportional hazards regression, risk stratification, machine learning
+survival methods, and advanced survival modeling techniques.
 }
+\details{
+The multisurvivalClass implements a modular architecture with the following components:
+
+\strong{Core Analysis Engine:}
+\itemize{
+\item Input validation and data preparation
+\item Cox proportional hazards modeling
+\item Competing risks and cause-specific survival
+\item Time-dependent covariate handling
+}
+
+\strong{Advanced Methods:}
+\itemize{
+\item Stratified analysis for non-proportional hazards
+\item Frailty models for clustered data
+\item Spline-based time-varying effects
+\item Machine learning survival algorithms
+}
+
+\strong{Risk Assessment:}
+\itemize{
+\item Prognostic risk score calculation
+\item Risk group stratification
+\item Nomogram generation
+\item Decision tree analysis
+}
+
+\strong{Visualization & Output:}
+\itemize{
+\item Forest plots and survival curves
+\item Person-time analysis
+\item Natural language summaries
+\item Educational explanations
+}
+}
+\seealso{
+\code{\link{multisurvival}} for the main user interface function
+}
+\keyword{internal}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::multisurvivalBase} -> \code{multisurvivalClass}
 }

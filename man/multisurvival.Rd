@@ -6,23 +6,23 @@
 \usage{
 multisurvival(
   data,
-  elapsedtime,
+  elapsedtime = NULL,
   tint = FALSE,
-  dxdate,
-  fudate,
+  dxdate = NULL,
+  fudate = NULL,
   timetypedata = "ymd",
   timetypeoutput = "months",
   uselandmark = FALSE,
   landmark = 3,
-  outcome,
+  outcome = NULL,
   outcomeLevel,
   dod,
   dooc,
   awd,
   awod,
   analysistype = "overall",
-  explanatory,
-  contexpl,
+  explanatory = NULL,
+  contexpl = NULL,
   multievent = FALSE,
   hr = FALSE,
   sty = "t1",
@@ -40,11 +40,11 @@ multisurvival(
   numRiskGroups = "four",
   plotRiskGroups = FALSE,
   ac = FALSE,
-  adjexplanatory,
+  adjexplanatory = NULL,
   ac_method = "average",
   showNomogram = FALSE,
   use_stratify = FALSE,
-  stratvar,
+  stratvar = NULL,
   person_time = FALSE,
   time_intervals = "12, 36, 60",
   rate_multiplier = 100,
@@ -55,16 +55,16 @@ multisurvival(
   show_terminal_nodes = FALSE,
   use_time_dependent = FALSE,
   td_format = "wide",
-  time_dep_vars,
+  time_dep_vars = NULL,
   change_times = "6, 12, 18",
   td_suffix_pattern = "_t{time}",
-  start_time_var,
-  stop_time_var,
+  start_time_var = NULL,
+  stop_time_var = NULL,
   use_frailty = FALSE,
-  frailty_var,
+  frailty_var = NULL,
   frailty_distribution = "gamma",
   use_splines = FALSE,
-  spline_vars,
+  spline_vars = NULL,
   spline_df = 3,
   spline_type = "pspline",
   showExplanations = FALSE,
@@ -72,10 +72,10 @@ multisurvival(
   ml_method = "none",
   ml_validation = "cv",
   ml_cv_folds = 5,
-  ml_feature_selection = TRUE,
-  ml_importance = TRUE,
-  ml_calibration = TRUE,
-  ml_performance = TRUE,
+  ml_feature_selection = FALSE,
+  ml_importance = FALSE,
+  ml_calibration = FALSE,
+  ml_performance = FALSE,
   ml_shap = FALSE,
   ml_hyperparameter_tuning = FALSE,
   ml_ensemble_weights = "equal"
@@ -328,10 +328,16 @@ not needed.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$multivariableCoxSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$personTimeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalPlotsHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
@@ -339,7 +345,10 @@ A results object containing:
 \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
 \code{results$risk_score_analysis} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$risk_score_analysis2} \tab \tab \tab \tab \tab a html \cr
+\code{results$riskScoreHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$riskScoreSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$riskScoreTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$riskScoreSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskScoreMetrics} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskGroupPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$stratificationExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -347,19 +356,29 @@ A results object containing:
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 \code{results$addRiskScore} \tab \tab \tab \tab \tab an output \cr
 \code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
+\code{results$adjustedSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
+\code{results$adjustedSurvivalSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$adjustedSurvivalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogramHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogramSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$mydataview_survivaldecisiontree} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$survivalTreeHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$treeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$tree_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$node_survival_plots} \tab \tab \tab \tab \tab an image \cr
 \code{results$multivariableCoxExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$multivariableCoxHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$adjustedSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskScoreExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$nomogramExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$ml_variable_importance} \tab \tab \tab \tab \tab a table \cr
 \code{results$ml_performance_metrics} \tab \tab \tab \tab \tab a html \cr
