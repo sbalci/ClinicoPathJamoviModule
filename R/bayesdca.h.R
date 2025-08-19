@@ -386,7 +386,7 @@ bayesdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "bayesdca",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = bayesdcaResults$new(options=options),
                 data = data,

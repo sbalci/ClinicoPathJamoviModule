@@ -225,3 +225,6 @@ When updating documentation links in README.Rmd, ensure they point to these subm
 
 - If there are errors similar to following, use Gemini CLI with the `-p` flag to analyze large codebases or multiple files that exceed the context limits of Claude. details are in @CLAUDE-GEMINI.md  
   - "Context low" or "Context window exceeded" or "Error: File content (40897 tokens) exceeds maximum allowed tokens (25000). Please use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific content."
+- in .u.yaml Label is not allowed to have the additional property "visible"
+- in .u.yaml description is not allowed
+- in .a.yaml type: Level is not allowed to have default

@@ -76,6 +76,19 @@ children:
               - type: CheckBox
                 name: weightedAUC
                 label: Calculate weighted AUC
+              - type: CheckBox
+                name: clinicalDecisionRule
+                label: Include clinical decision rule
+              - type: TextBox
+                name: decisionRuleThreshold
+                format: number
+                label: Decision rule threshold
+                enable: (clinicalDecisionRule)
+              - type: TextBox
+                name: decisionRuleLabel
+                format: string
+                label: Decision rule label
+                enable: (clinicalDecisionRule)
 
   # Output Options
   - type: CollapseBox

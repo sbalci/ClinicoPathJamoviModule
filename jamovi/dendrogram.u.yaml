@@ -80,3 +80,9 @@ children:
       - type: TextBox
         name: nClusters
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: maxLabels
+        format: number

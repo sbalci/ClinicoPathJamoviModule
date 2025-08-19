@@ -2,9 +2,9 @@
 ---
 name:  dendrogram
 title: Dendrogram
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Drafts
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 options:
@@ -138,4 +138,11 @@ options:
       min: 2
       max: 10
       default: 3
+
+    - name: maxLabels
+      title: Maximum labels to show
+      type: Number
+      min: 0
+      max: 200
+      default: 50
 ...

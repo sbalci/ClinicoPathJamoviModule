@@ -30,7 +30,10 @@ decisioncurve(
   ciLevel = 0.95,
   showOptimalThreshold = TRUE,
   compareModels = FALSE,
-  weightedAUC = FALSE
+  weightedAUC = FALSE,
+  clinicalDecisionRule = FALSE,
+  decisionRuleThreshold = 0.15,
+  decisionRuleLabel = "Clinical Rule"
 )
 }
 \arguments{
@@ -99,6 +102,15 @@ probabilities for each model.}
 performance.}
 
 \item{weightedAUC}{Calculate weighted area under the decision curve.}
+
+\item{clinicalDecisionRule}{Add clinical decision rule analysis and
+comparison with models.}
+
+\item{decisionRuleThreshold}{Threshold probability for clinical decision
+rule (e.g., "screen if risk > 15\\%").}
+
+\item{decisionRuleLabel}{Label for the clinical decision rule in plots and
+tables.}
 }
 \value{
 A results object containing:

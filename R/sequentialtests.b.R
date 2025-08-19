@@ -1,7 +1,8 @@
 #' @title Sequential Testing Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#'
+#' @importFrom ggplot2 ggplot aes geom_text geom_line geom_point labs theme_void theme element_blank scale_x_continuous scale_y_continuous annotate
+#' @importFrom gridExtra grid.arrange
 
 sequentialtestsClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
@@ -875,6 +876,45 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
 
             .plot_nomogram = function(image, ggtheme, ...) {
+                # Check if required packages are available
+                if (!requireNamespace("ggplot2", quietly = TRUE) || !requireNamespace("gridExtra", quietly = TRUE)) {
+                    # Create simple informative plot when packages unavailable
+                    plotData <- image$state
+                    
+                    info_plot <- ggplot2::ggplot() +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.7), 
+                            label = "Sequential Testing Nomogram", 
+                            size = 6, 
+                            fontface = "bold"
+                        ) +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.5), 
+                            label = paste0(
+                                "Strategy: ", plotData$Strategy, "\n",
+                                "Combined Sensitivity: ", round(plotData$Combined_Sens * 100, 1), "%\n",
+                                "Combined Specificity: ", round(plotData$Combined_Spec * 100, 1), "%\n",
+                                "Combined PPV: ", round(plotData$Combined_PPV * 100, 1), "%"
+                            ), 
+                            size = 4
+                        ) +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.2), 
+                            label = "Full nomogram requires ggplot2 and gridExtra packages", 
+                            size = 3, 
+                            color = "gray50"
+                        ) +
+                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                        ggplot2::theme_void() +
+                        ggplot2::theme(
+                            panel.background = ggplot2::element_rect(fill = "white"),
+                            plot.background = ggplot2::element_rect(fill = "white")
+                        )
+                    
+                    print(info_plot)
+                    return(TRUE)
+                }
+                
                 plotData <- image$state
 
                 # Extract values
@@ -885,273 +925,164 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 test2_spec <- plotData$Test2_Spec
                 strategy <- plotData$Strategy
 
-                # Calculate LRs for first test
+                # Calculate LRs for both tests
                 test1_plr <- test1_sens / (1 - test1_spec)
                 test1_nlr <- (1 - test1_sens) / test1_spec
-
-                # Calculate post-test probability after first test
-                test1_pos_odds <- (prevalence / (1 - prevalence)) * test1_plr
-                test1_neg_odds <- (prevalence / (1 - prevalence)) * test1_nlr
-
-                test1_pos_post_prob <- test1_pos_odds / (1 + test1_pos_odds)
-                test1_neg_post_prob <- test1_neg_odds / (1 + test1_neg_odds)
-
-                # Calculate LRs for second test
-                test2_plr <- test2_sens / (1 - test2_spec)
+                test2_plr <- test2_sens / (1 - test2_spec)  
                 test2_nlr <- (1 - test2_sens) / test2_spec
 
-                # Set up graphics device
-                grDevices::dev.new(width=12, height=8, noRStudioGD = TRUE)
+                # Create modern ggplot2-based nomogram visualization
+                tryCatch({
+                    # Create strategy flow diagram
+                    flow_plot <- private$.createFlowDiagram(plotData, strategy)
+                    
+                    # Create summary statistics plot
+                    stats_plot <- private$.createStatsPlot(plotData)
+                    
+                    # Create probability transformation plot
+                    prob_plot <- private$.createProbabilityPlot(plotData, prevalence, test1_plr, test1_nlr, test2_plr, test2_nlr)
+                    
+                    # Create formula explanation plot
+                    formula_plot <- private$.createFormulaPlot(plotData, strategy)
+                    
+                    # Combine all plots using gridExtra
+                    combined_plot <- gridExtra::grid.arrange(
+                        flow_plot, stats_plot,
+                        prob_plot, formula_plot,
+                        ncol = 2, nrow = 2,
+                        top = paste("Sequential Testing Analysis:", plotData$Strategy)
+                    )
+                    
+                    print(combined_plot)
+                    return(TRUE)
+                    
+                }, error = function(e) {
+                    # Fallback to simple text-based visualization
+                    simple_plot <- ggplot2::ggplot() +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.8), 
+                            label = "Sequential Testing Results", 
+                            size = 6, 
+                            fontface = "bold"
+                        ) +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.6), 
+                            label = paste0(
+                                "Strategy: ", plotData$Strategy, "\n",
+                                "Test 1: ", plotData$Test1_Name, " (", round(plotData$Test1_Sens*100,1), "%, ", round(plotData$Test1_Spec*100,1), "%)\n",
+                                "Test 2: ", plotData$Test2_Name, " (", round(plotData$Test2_Sens*100,1), "%, ", round(plotData$Test2_Spec*100,1), "%)\n\n",
+                                "Combined Performance:\n",
+                                "Sensitivity: ", round(plotData$Combined_Sens*100,1), "%\n",
+                                "Specificity: ", round(plotData$Combined_Spec*100,1), "%\n",
+                                "PPV: ", round(plotData$Combined_PPV*100,1), "%\n",
+                                "NPV: ", round(plotData$Combined_NPV*100,1), "%"
+                            ), 
+                            size = 4,
+                            hjust = 0.5
+                        ) +
+                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                        ggplot2::theme_void()
+                    
+                    print(simple_plot)
+                    return(TRUE)
+                })
+            },
 
-                # Use layout to create a 2x2 grid with appropriate spacing
-                layout_matrix <- matrix(c(1, 2, 3, 4), nrow=2, byrow=TRUE)
-                layout(layout_matrix, widths=c(1, 1), heights=c(1, 1))
-
-                # Create a custom Fagan nomogram function
-                create_nomogram <- function(title, pretest_prob, plr, nlr, ylim_pre=c(0.001, 0.999),
-                                            ylim_post=c(0.001, 0.999), highlight_pretest=TRUE, highlight_posttest=TRUE) {
-                    # Convert probabilities to percentages for display
-                    pretest_prob_pct <- pretest_prob * 100
-
-                    # Calculate post-test probabilities
-                    pos_post_odds <- (pretest_prob / (1 - pretest_prob)) * plr
-                    neg_post_odds <- (pretest_prob / (1 - pretest_prob)) * nlr
-
-                    pos_post_prob <- pos_post_odds / (1 + pos_post_odds)
-                    neg_post_prob <- neg_post_odds / (1 + neg_post_odds)
-
-                    pos_post_prob_pct <- pos_post_prob * 100
-                    neg_post_prob_pct <- neg_post_prob * 100
-
-                    # Create the nomogram plot
-                    par(mar=c(4, 4, 4, 4))
-
-                    # Set up the plot area
-                    plot(0, 0, type="n", xlim=c(0, 100), ylim=c(0, 100),
-                         xlab="", ylab="", main=title, axes=FALSE)
-
-                    # Draw the three vertical axes
-                    axis(2, at=seq(1, 99, by=5), labels=seq(1, 99, by=5), las=1, pos=10)
-                    axis(4, at=seq(1, 99, by=5), labels=seq(1, 99, by=5), las=1, pos=90)
-
-                    # Custom labels for LR axis
-                    lr_values <- c(1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001)
-                    lr_positions <- rep(NA, length(lr_values))
-
-                    for (i in 1:length(lr_values)) {
-                        lr <- lr_values[i]
-                        p <- 0.5  # Use a fixed pre-test probability for mapping
-                        post_odds <- (p / (1 - p)) * lr
-                        post_p <- post_odds / (1 + post_odds)
-
-                        y_pos <- (post_p * 99) + 0.5  # Scale to plot coordinates
-                        lr_positions[i] <- y_pos
-                    }
-
-                    # Add LR axis
-                    axis(3, at=50, labels="Likelihood Ratio", pos=50, tick=FALSE)
-                    text(50, lr_positions, labels=lr_values, cex=0.7)
-
-                    # Add axis labels
-                    mtext("Pre-test Probability (%)", side=2, line=2.5)
-                    mtext("Post-test Probability (%)", side=4, line=2.5)
-
-                    # Draw the nomogram lines
-                    pretest_y <- (pretest_prob * 99) + 0.5
-                    pos_post_y <- (pos_post_prob * 99) + 0.5
-                    neg_post_y <- (neg_post_prob * 99) + 0.5
-
-                    # Draw the positive LR line
-                    lines(c(10, 50, 90), c(pretest_y, 50, pos_post_y), col="red", lwd=2)
-
-                    # Draw the negative LR line
-                    lines(c(10, 50, 90), c(pretest_y, 50, neg_post_y), col="blue", lwd=2)
-
-                    # Highlight the pre-test probability
-                    if (highlight_pretest) {
-                        points(10, pretest_y, pch=19, col="black", cex=1.5)
-                        text(5, pretest_y, paste0(round(pretest_prob_pct, 1), "%"), cex=0.8)
-                    }
-
-                    # Highlight the post-test probabilities
-                    if (highlight_posttest) {
-                        points(90, pos_post_y, pch=19, col="red", cex=1.5)
-                        text(95, pos_post_y, paste0(round(pos_post_prob_pct, 1), "%"), cex=0.8)
-
-                        points(90, neg_post_y, pch=19, col="blue", cex=1.5)
-                        text(95, neg_post_y, paste0(round(neg_post_prob_pct, 1), "%"), cex=0.8)
-                    }
-
-                    # Return the post-test probabilities
-                    return(list(positive=pos_post_prob, negative=neg_post_prob))
-                }
-
-                # Now create the sequence of nomograms based on strategy
+            # Helper functions for modular plot creation
+            .createFlowDiagram = function(plotData, strategy) {
+                # Create flow diagram based on strategy
                 if (strategy == "serial_positive") {
-                    # For serial testing of positives:
-                    # 1. First test with prevalence as pre-test probability
-                    test1_results <- create_nomogram(
-                        paste0("Step 1: ", plotData$Test1_Name, " (Screening Test)"),
-                        prevalence, test1_plr, test1_nlr
+                    flow_data <- data.frame(
+                        x = c(1, 2, 3, 2.5, 2.5),
+                        y = c(5, 5, 5, 4, 6), 
+                        label = c("Start", plotData$Test1_Name, "Result", "Test2 if +", "Final")
                     )
-
-                    # 2. Second test with positive post-test probability from first test as pre-test
-                    create_nomogram(
-                        paste0("Step 2: ", plotData$Test2_Name, " (For Test 1 Positives Only)"),
-                        test1_results$positive, test2_plr, test2_nlr
-                    )
-
-                    # 3. Overall result showing combined effect (empty plot for text)
-                    plot(0, 0, type="n", axes=FALSE, xlab="", ylab="",
-                         main="Serial Testing Strategy (Testing Positives)")
-                    text(0.5, 0.8, "Combined Effect:", pos=4)
-                    text(0.5, 0.7, paste0("- Combined Sensitivity: ", round(plotData$Combined_Sens*100, 1), "%"), pos=4)
-                    text(0.5, 0.6, paste0("- Combined Specificity: ", round(plotData$Combined_Spec*100, 1), "%"), pos=4)
-                    text(0.5, 0.5, paste0("- Combined PPV: ", round(plotData$Combined_PPV*100, 1), "%"), pos=4)
-                    text(0.5, 0.4, paste0("- Combined NPV: ", round(plotData$Combined_NPV*100, 1), "%"), pos=4)
-                    text(0.5, 0.2, "A patient tests positive only if", pos=4)
-                    text(0.5, 0.1, "positive on both tests", pos=4)
-
-                    # 4. Sequential flow diagram
-                    plot(0, 0, type="n", xlim=c(0, 100), ylim=c(0, 100), axes=FALSE, xlab="", ylab="",
-                         main="Sequential Testing Flow")
-
-                    # Draw the flow diagram
-                    arrows(20, 80, 45, 80, lwd=2, length=0.1)
-                    arrows(55, 80, 80, 80, lwd=2, length=0.1)
-                    arrows(50, 70, 50, 50, lwd=2, length=0.1)
-
-                    # Add labels for the flow
-                    text(10, 80, "Start", cex=1.2)
-                    text(50, 85, paste0(plotData$Test1_Name), cex=1.2)
-                    text(90, 80, "Final Diagnosis", cex=1.2)
-
-                    # Add branches
-                    text(60, 70, "Test 1 (+)", cex=1)
-                    text(60, 50, paste0(plotData$Test2_Name), cex=1.2)
-                    text(40, 70, "Test 1 (-)", cex=1)
-                    text(30, 60, "Negative", cex=1, col="blue")
-
-                    # Add final outcomes
-                    arrows(50, 40, 40, 30, lwd=2, length=0.1)
-                    arrows(50, 40, 60, 30, lwd=2, length=0.1)
-                    text(40, 25, "Test 2 (-)\nNegative", cex=1, col="blue")
-                    text(60, 25, "Test 2 (+)\nPositive", cex=1, col="red")
-
                 } else if (strategy == "serial_negative") {
-                    # For serial testing of negatives:
-                    # 1. First test with prevalence as pre-test probability
-                    test1_results <- create_nomogram(
-                        paste0("Step 1: ", plotData$Test1_Name, " (Initial Test)"),
-                        prevalence, test1_plr, test1_nlr
+                    flow_data <- data.frame(
+                        x = c(1, 2, 3, 2.5, 2.5),
+                        y = c(5, 5, 5, 4, 6),
+                        label = c("Start", plotData$Test1_Name, "Result", "Test2 if -", "Final")
                     )
-
-                    # 2. Second test with negative post-test probability from first test as pre-test
-                    create_nomogram(
-                        paste0("Step 2: ", plotData$Test2_Name, " (For Test 1 Negatives Only)"),
-                        test1_results$negative, test2_plr, test2_nlr
+                } else {
+                    flow_data <- data.frame(
+                        x = c(1, 2, 2, 3),
+                        y = c(5, 6, 4, 5),
+                        label = c("Start", plotData$Test1_Name, plotData$Test2_Name, "Combined")
                     )
-
-                    # 3. Overall result showing combined effect (empty plot for text)
-                    plot(0, 0, type="n", axes=FALSE, xlab="", ylab="",
-                         main="Serial Testing Strategy (Testing Negatives)")
-                    text(0.5, 0.8, "Combined Effect:", pos=4)
-                    text(0.5, 0.7, paste0("- Combined Sensitivity: ", round(plotData$Combined_Sens*100, 1), "%"), pos=4)
-                    text(0.5, 0.6, paste0("- Combined Specificity: ", round(plotData$Combined_Spec*100, 1), "%"), pos=4)
-                    text(0.5, 0.5, paste0("- Combined PPV: ", round(plotData$Combined_PPV*100, 1), "%"), pos=4)
-                    text(0.5, 0.4, paste0("- Combined NPV: ", round(plotData$Combined_NPV*100, 1), "%"), pos=4)
-                    text(0.5, 0.2, "A patient tests positive if", pos=4)
-                    text(0.5, 0.1, "positive on either test", pos=4)
-
-                    # 4. Sequential flow diagram
-                    plot(0, 0, type="n", xlim=c(0, 100), ylim=c(0, 100), axes=FALSE, xlab="", ylab="",
-                         main="Sequential Testing Flow")
-
-                    # Draw the flow diagram
-                    arrows(20, 80, 45, 80, lwd=2, length=0.1)
-                    arrows(55, 80, 80, 80, lwd=2, length=0.1)
-                    arrows(50, 70, 50, 50, lwd=2, length=0.1)
-
-                    # Add labels for the flow
-                    text(10, 80, "Start", cex=1.2)
-                    text(50, 85, paste0(plotData$Test1_Name), cex=1.2)
-                    text(90, 80, "Final Diagnosis", cex=1.2)
-
-                    # Add branches
-                    text(60, 70, "Test 1 (+)", cex=1)
-                    text(60, 60, "Positive", cex=1, col="red")
-                    text(40, 70, "Test 1 (-)", cex=1)
-                    text(50, 50, paste0(plotData$Test2_Name), cex=1.2)
-
-                    # Add final outcomes
-                    arrows(50, 40, 40, 30, lwd=2, length=0.1)
-                    arrows(50, 40, 60, 30, lwd=2, length=0.1)
-                    text(40, 25, "Test 2 (-)\nNegative", cex=1, col="blue")
-                    text(60, 25, "Test 2 (+)\nPositive", cex=1, col="red")
-
-                } else if (strategy == "parallel") {
-                    # For parallel testing:
-                    # 1. First test with prevalence as pre-test probability
-                    test1_results <- create_nomogram(
-                        paste0("Step 1: ", plotData$Test1_Name),
-                        prevalence, test1_plr, test1_nlr
-                    )
-
-                    # 2. Second test also with prevalence as pre-test probability
-                    test2_results <- create_nomogram(
-                        paste0("Step 2: ", plotData$Test2_Name, " (Parallel Test)"),
-                        prevalence, test2_plr, test2_nlr
-                    )
-
-                    # 3. Overall result showing combined effect (empty plot for text)
-                    plot(0, 0, type="n", axes=FALSE, xlab="", ylab="",
-                         main="Parallel Testing Strategy")
-                    text(0.5, 0.8, "Combined Effect:", pos=4)
-                    text(0.5, 0.7, paste0("- Combined Sensitivity: ", round(plotData$Combined_Sens*100, 1), "%"), pos=4)
-                    text(0.5, 0.6, paste0("- Combined Specificity: ", round(plotData$Combined_Spec*100, 1), "%"), pos=4)
-                    text(0.5, 0.5, paste0("- Combined PPV: ", round(plotData$Combined_PPV*100, 1), "%"), pos=4)
-                    text(0.5, 0.4, paste0("- Combined NPV: ", round(plotData$Combined_NPV*100, 1), "%"), pos=4)
-                    text(0.5, 0.2, "A patient tests positive if", pos=4)
-                    text(0.5, 0.1, "positive on either test", pos=4)
-
-                    # 4. Parallel flow diagram
-                    plot(0, 0, type="n", xlim=c(0, 100), ylim=c(0, 100), axes=FALSE, xlab="", ylab="",
-                         main="Parallel Testing Flow")
-
-                    # Draw the flow diagram
-                    arrows(10, 80, 30, 80, lwd=2, length=0.1)
-
-                    # Split to parallel tests
-                    arrows(30, 80, 50, 90, lwd=2, length=0.1)
-                    arrows(30, 80, 50, 70, lwd=2, length=0.1)
-
-                    # From tests to interpretation
-                    arrows(50, 90, 70, 80, lwd=2, length=0.1)
-                    arrows(50, 70, 70, 80, lwd=2, length=0.1)
-
-                    # To final result
-                    arrows(70, 80, 90, 80, lwd=2, length=0.1)
-
-                    # Add labels
-                    text(10, 85, "Start", cex=1.2)
-                    text(50, 95, paste0(plotData$Test1_Name), cex=1.2)
-                    text(50, 65, paste0(plotData$Test2_Name), cex=1.2)
-                    text(70, 85, "Interpretation\n(OR logic)", cex=1.2)
-                    text(90, 85, "Result", cex=1.2)
-
-                    # Add outcomes
-                    text(90, 75, "Positive if either\ntest is positive", cex=1, col="red")
-                    text(90, 65, "Negative only if\nboth tests negative", cex=1, col="blue")
                 }
+                
+                ggplot2::ggplot(flow_data, ggplot2::aes(x = x, y = y)) +
+                    ggplot2::geom_point(size = 8, color = "steelblue") +
+                    ggplot2::geom_text(ggplot2::aes(label = label), size = 3, color = "white", fontface = "bold") +
+                    ggplot2::labs(title = paste("Testing Flow:", strategy)) +
+                    ggplot2::theme_void() +
+                    ggplot2::xlim(0.5, 3.5) +
+                    ggplot2::ylim(3, 7)
+            },
 
-                # Capture the plot
-                result <- grDevices::recordPlot()
+            .createStatsPlot = function(plotData) {
+                # Create summary statistics visualization
+                stats_data <- data.frame(
+                    Metric = c("Sensitivity", "Specificity", "PPV", "NPV"),
+                    Value = c(plotData$Combined_Sens, plotData$Combined_Spec, 
+                             plotData$Combined_PPV, plotData$Combined_NPV) * 100,
+                    Test = "Combined"
+                )
+                
+                ggplot2::ggplot(stats_data, ggplot2::aes(x = Metric, y = Value, fill = Metric)) +
+                    ggplot2::geom_col(alpha = 0.7) +
+                    ggplot2::geom_text(ggplot2::aes(label = paste0(round(Value, 1), "%")), 
+                                      vjust = -0.5, fontface = "bold") +
+                    ggplot2::labs(title = "Combined Test Performance", 
+                                 y = "Percentage (%)", x = "") +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(legend.position = "none") +
+                    ggplot2::ylim(0, 100)
+            },
 
-                # Close the device
-                grDevices::dev.off()
+            .createProbabilityPlot = function(plotData, prevalence, test1_plr, test1_nlr, test2_plr, test2_nlr) {
+                # Create probability transformation visualization
+                prob_data <- data.frame(
+                    Stage = c("Pre-test", "After Test 1+", "After Test 2+", "Pre-test", "After Test 1-", "After Test 2-"),
+                    Probability = c(
+                        prevalence * 100,
+                        # Positive pathway
+                        (prevalence * test1_plr / (1 - prevalence + prevalence * test1_plr)) * 100,
+                        plotData$Combined_PPV * 100,
+                        # Negative pathway  
+                        prevalence * 100,
+                        (prevalence * test1_nlr / (1 - prevalence + prevalence * test1_nlr)) * 100,
+                        (1 - plotData$Combined_NPV) * 100
+                    ),
+                    Pathway = rep(c("Positive", "Negative"), each = 3),
+                    Step = rep(1:3, 2)
+                )
+                
+                ggplot2::ggplot(prob_data, ggplot2::aes(x = Step, y = Probability, color = Pathway)) +
+                    ggplot2::geom_line(size = 2) +
+                    ggplot2::geom_point(size = 4) +
+                    ggplot2::labs(title = "Probability Transformation", 
+                                 x = "Testing Step", y = "Disease Probability (%)") +
+                    ggplot2::theme_minimal()
+            },
 
-                # Return the plot
-                return(result)
+            .createFormulaPlot = function(plotData, strategy) {
+                # Create formula explanation
+                if (strategy == "serial_positive") {
+                    formula_text <- "Serial Positive:\nSens = Se1 × Se2\nSpec = Sp1 + (1-Sp1) × Sp2"
+                } else if (strategy == "serial_negative") {
+                    formula_text <- "Serial Negative:\nSens = Se1 + (1-Se1) × Se2\nSpec = Sp1 × Sp2"
+                } else {
+                    formula_text <- "Parallel Testing:\nSens = Se1 + Se2 - Se1×Se2\nSpec = Sp1 × Sp2"
+                }
+                
+                ggplot2::ggplot() +
+                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, label = formula_text), 
+                                      size = 5, fontface = "bold") +
+                    ggplot2::labs(title = "Mathematical Formulas") +
+                    ggplot2::theme_void() +
+                    ggplot2::xlim(0, 1) +
+                    ggplot2::ylim(0, 1)
             }
 
 

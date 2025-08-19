@@ -1,10 +1,10 @@
 ---
 name: tree
 title: Medical Decision Tree Analysis
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Advanced Clinical Decision Trees
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

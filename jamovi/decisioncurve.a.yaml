@@ -4,7 +4,7 @@ title: Decision Curve Analysis
 menuGroup: meddecideT
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:
@@ -258,5 +258,31 @@ options:
       description:
           R: >
             Calculate weighted area under the decision curve.
+
+    - name: clinicalDecisionRule
+      title: Clinical Decision Rule Integration
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add clinical decision rule analysis and comparison with models.
+
+    - name: decisionRuleThreshold
+      title: Decision Rule Threshold
+      type: Number
+      default: 0.15
+      min: 0.001
+      max: 0.999
+      description:
+          R: >
+            Threshold probability for clinical decision rule (e.g., "screen if risk > 15%").
+
+    - name: decisionRuleLabel
+      title: Decision Rule Label
+      type: String
+      default: "Clinical Rule"
+      description:
+          R: >
+            Label for the clinical decision rule in plots and tables.
 
 ...

@@ -298,7 +298,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "sequentialtests",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = sequentialtestsResults$new(options=options),
                 data = data,

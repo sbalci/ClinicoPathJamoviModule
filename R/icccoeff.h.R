@@ -296,7 +296,7 @@ icccoeffBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "icccoeff",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = icccoeffResults$new(options=options),
                 data = data,

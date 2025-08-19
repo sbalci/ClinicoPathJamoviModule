@@ -85,7 +85,6 @@ items:
       title: Model Fit Statistics
       type: Table
       visible: (method=="latent_class")
-      rows: 1
       columns:
         - name: statistic
           title: Statistic

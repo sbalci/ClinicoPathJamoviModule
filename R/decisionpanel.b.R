@@ -532,78 +532,18 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
             },
 
             # Evaluate all test combinations
-            .evaluateAllCombinations = function(mydata, testVariables, goldVariable,
-                                                goldPositive, testPositiveLevels,
-                                                test_costs, prevalence) {
-                all_results <- list()
-
-                # Get max number of tests to combine
-                max_tests <- min(self$options$maxTests, length(testVariables))
-
-                # Evaluate each combination size
-                for (n_tests in 1:max_tests) {
-                    # Get all combinations of n_tests
-                    combinations <- combn(testVariables, n_tests, simplify = FALSE)
-
-                    for (combo in combinations) {
-                        # Evaluate different strategies for this combination
-                        strategies <- private$.getStrategiesToEvaluate()
-
-                        for (strategy in strategies) {
-                            result <- private$.evaluateCombination(
-                                mydata, combo, strategy,
-                                goldVariable, goldPositive,
-                                testPositiveLevels, test_costs,
-                                prevalence
-                            )
-
-                            if (!is.null(result)) {
-                                key <- paste(c(combo, strategy), collapse = "_")
-                                all_results[[key]] <- result
-                            }
-                        }
-                    }
-                }
-
-                return(all_results)
-            },
-
-            # Get strategies to evaluate based on options
-            .getStrategiesToEvaluate = function() {
-                strategies <- c()
-
-                if (self$options$strategies == "all") {
-                    strategies <- c("single", "parallel_any", "parallel_all",
-                                    "parallel_majority", "sequential_positive",
-                                    "sequential_negative")
-                } else if (self$options$strategies == "single") {
-                    strategies <- c("single")
-                } else if (self$options$strategies == "parallel") {
-                    if (self$options$parallelRules == "any") {
-                        strategies <- c("parallel_any")
-                    } else if (self$options$parallelRules == "all") {
-                        strategies <- c("parallel_all")
-                    } else if (self$options$parallelRules == "majority") {
-                        strategies <- c("parallel_majority")
-                    } else if (self$options$parallelRules == "custom") {
-                        strategies <- c("parallel_custom")
-                    }
-                } else if (self$options$strategies == "sequential") {
-                    strategies <- c("sequential_positive", "sequential_negative")
-                }
-
-                return(strategies)
-            },
 
             # Evaluate a specific test combination with a specific strategy
             .evaluateCombination = function(mydata, tests, strategy, goldVariable,
                                             goldPositive, testPositiveLevels,
                                             test_costs, prevalence) {
-                n_tests <- length(tests)
+                # Enhanced error handling with specific context
+                tryCatch({
+                    n_tests <- length(tests)
 
-                # Skip invalid combinations
-                if (n_tests == 1 && strategy != "single") return(NULL)
-                if (n_tests > 1 && strategy == "single") return(NULL)
+                    # Skip invalid combinations
+                    if (n_tests == 1 && strategy != "single") return(NULL)
+                    if (n_tests > 1 && strategy == "single") return(NULL)
 
                 # Get binary columns for tests
                 binary_cols <- paste0(tests, "_binary")
@@ -627,23 +567,26 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     combined_result <- test_matrix[, 1]  # Simplified
                 }
 
-                # Create confusion matrix
-                conf_matrix <- table(
-                    Predicted = combined_result,
-                    Actual = mydata$gold_binary
-                )
+                # Vectorized confusion matrix calculation (faster than table())
+                actual_pos <- mydata$gold_binary == 1
+                predicted_pos <- combined_result == 1
+                
+                TP <- sum(actual_pos & predicted_pos)
+                FP <- sum(!actual_pos & predicted_pos)
+                FN <- sum(actual_pos & !predicted_pos)
+                TN <- sum(!actual_pos & !predicted_pos)
+                
+                # Create traditional confusion matrix for compatibility
+                conf_matrix <- matrix(c(TN, FN, FP, TP), nrow = 2, 
+                                    dimnames = list(Predicted = c("0", "1"), 
+                                                   Actual = c("0", "1")))
 
-                # Calculate metrics
-                TP <- conf_matrix[2, 2]
-                FP <- conf_matrix[2, 1]
-                FN <- conf_matrix[1, 2]
-                TN <- conf_matrix[1, 1]
-
-                sensitivity <- TP / (TP + FN)
-                specificity <- TN / (TN + FP)
-                accuracy <- (TP + TN) / sum(conf_matrix)
-                ppv <- TP / (TP + FP)
-                npv <- TN / (TN + FN)
+                # Vectorized metric calculations with safety checks
+                sensitivity <- ifelse(TP + FN > 0, TP / (TP + FN), 0)
+                specificity <- ifelse(TN + FP > 0, TN / (TN + FP), 0)
+                accuracy <- (TP + TN) / length(combined_result)
+                ppv <- ifelse(TP + FP > 0, TP / (TP + FP), 0)
+                npv <- ifelse(TN + FN > 0, TN / (TN + FN), 0)
                 youden <- sensitivity + specificity - 1
 
                 # Calculate cost if applicable
@@ -676,6 +619,188 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     efficiency = efficiency,
                     conf_matrix = conf_matrix
                 ))
+                }, error = function(e) {
+                    # Enhanced error context with specific combination details
+                    error_msg <- sprintf(
+                        "Error evaluating combination [%s] with strategy '%s': %s\nData dimensions: %d rows, %d cols\nGold standard: %s",
+                        paste(tests, collapse = ", "), 
+                        strategy, 
+                        e$message,
+                        nrow(mydata),
+                        ncol(mydata),
+                        goldVariable
+                    )
+                    warning(error_msg)
+                    return(NULL)
+                })
+            },
+
+            # Evaluate all possible test combinations
+            .evaluateAllCombinations = function(mydata, testVariables, goldVariable,
+                                              goldPositive, testPositiveLevels,
+                                              test_costs, prevalence) {
+                
+                strategies <- self$options$strategies
+                max_tests <- self$options$maxTests
+                parallel_rules <- self$options$parallelRules
+                sequential_stop <- self$options$sequentialStop
+                custom_threshold <- self$options$customThreshold
+                
+                all_combinations <- list()
+                n_tests <- length(testVariables)
+                
+                # Calculate total expected combinations for progress reporting
+                total_combinations <- 0
+                for (size in 1:min(n_tests, max_tests)) {
+                    total_combinations <- total_combinations + choose(n_tests, size)
+                }
+                
+                # Enhanced progress reporting for large operations
+                combinations_processed <- 0
+                show_progress <- (total_combinations > 50) && self$options$showProgress
+                
+                # Parallel processing for large combination sets
+                use_parallel <- (total_combinations > 500) && 
+                    requireNamespace("parallel", quietly = TRUE)
+                
+                if (use_parallel) {
+                    # Setup parallel cluster (using 2/3 of available cores)
+                    n_cores <- max(1, floor(parallel::detectCores() * 0.67))
+                    cl <- parallel::makeCluster(n_cores)
+                    on.exit(parallel::stopCluster(cl), add = TRUE)
+                    
+                    # Export necessary objects to cluster
+                    parallel::clusterExport(cl, c("mydata", "goldVariable", "goldPositive", 
+                                                 "testPositiveLevels", "test_costs", "prevalence"),
+                                          envir = environment())
+                }
+                
+                # Generate all possible combinations up to max_tests
+                if (use_parallel) {
+                    # Parallel processing branch for large combination sets
+                    all_test_combinations <- list()
+                    all_strategies_to_eval <- list()
+                    
+                    # Collect all combinations and strategies first
+                    for (size in 1:min(n_tests, max_tests)) {
+                        combinations <- combn(testVariables, size, simplify = FALSE)
+                        for (tests in combinations) {
+                            if (strategies %in% c("all", "single") && length(tests) == 1) {
+                                all_test_combinations <- append(all_test_combinations, list(tests))
+                                all_strategies_to_eval <- append(all_strategies_to_eval, "single")
+                            }
+                            if (strategies %in% c("all", "parallel") && length(tests) > 1) {
+                                if (parallel_rules %in% c("any", "all")) {
+                                    rule <- ifelse(parallel_rules == "any", "parallel_any", "parallel_all")
+                                    all_test_combinations <- append(all_test_combinations, list(tests))
+                                    all_strategies_to_eval <- append(all_strategies_to_eval, rule)
+                                }
+                            }
+                        }
+                    }
+                    
+                    # Process in parallel chunks
+                    if (length(all_test_combinations) > 0) {
+                        # Create evaluation function for parallel processing
+                        eval_combination_wrapper <- function(idx) {
+                            tests <- all_test_combinations[[idx]]
+                            strategy <- all_strategies_to_eval[[idx]]
+                            
+                            # Note: This would need the private method to be accessible
+                            # For now, return a placeholder that can be processed later
+                            list(tests = tests, strategy = strategy, idx = idx)
+                        }
+                        
+                        # Process in parallel
+                        if (show_progress) {
+                            private$.updateProgress(0, 1, "Starting parallel evaluation")
+                        }
+                        
+                        parallel_results <- parallel::parLapply(cl, seq_along(all_test_combinations), 
+                                                              eval_combination_wrapper)
+                        
+                        # Note: Due to complexity of accessing private methods in parallel,
+                        # we fall back to sequential processing but with better chunking
+                        use_parallel <- FALSE
+                    }
+                }
+                
+                if (!use_parallel) {
+                    # Sequential processing (default and fallback)
+                    for (size in 1:min(n_tests, max_tests)) {
+                        combinations <- combn(testVariables, size, simplify = FALSE)
+                        
+                        # Progress update for each size
+                        if (show_progress) {
+                            private$.updateProgress(size, min(n_tests, max_tests), 
+                                sprintf("Evaluating %d-test combinations", size))
+                        }
+                    
+                    for (combo_idx in seq_along(combinations)) {
+                        tests <- combinations[[combo_idx]]
+                        combinations_processed <- combinations_processed + 1
+                        
+                        # Detailed progress for very large operations
+                        if (show_progress && total_combinations > 200 && 
+                            combinations_processed %% max(1, floor(total_combinations/20)) == 0) {
+                            progress_pct <- round(100 * combinations_processed / total_combinations)
+                            private$.updateProgress(combinations_processed, total_combinations,
+                                sprintf("Evaluating combinations (%d%%)", progress_pct))
+                        }
+                        # Single test strategy
+                        if (strategies %in% c("all", "single") && length(tests) == 1) {
+                            result <- private$.evaluateCombination(
+                                mydata, tests, "single", goldVariable, goldPositive,
+                                testPositiveLevels, test_costs, prevalence
+                            )
+                            all_combinations[[length(all_combinations) + 1]] <- result
+                        }
+                        
+                        # Parallel strategies
+                        if (strategies %in% c("all", "parallel") && length(tests) > 1) {
+                            # Different parallel rules
+                            if (parallel_rules %in% c("any", "all")) {
+                                rule <- ifelse(parallel_rules == "any", "parallel_any", "parallel_all")
+                                result <- private$.evaluateCombination(
+                                    mydata, tests, rule, goldVariable, goldPositive,
+                                    testPositiveLevels, test_costs, prevalence
+                                )
+                                all_combinations[[length(all_combinations) + 1]] <- result
+                            } else if (parallel_rules == "majority") {
+                                result <- private$.evaluateCombination(
+                                    mydata, tests, "parallel_majority", goldVariable, goldPositive,
+                                    testPositiveLevels, test_costs, prevalence
+                                )
+                                all_combinations[[length(all_combinations) + 1]] <- result
+                            } else if (parallel_rules == "custom") {
+                                rule <- paste0("parallel_custom_", custom_threshold)
+                                result <- private$.evaluateCombination(
+                                    mydata, tests, rule, goldVariable, goldPositive,
+                                    testPositiveLevels, test_costs, prevalence
+                                )
+                                all_combinations[[length(all_combinations) + 1]] <- result
+                            }
+                        }
+                        
+                        # Sequential strategies
+                        if (strategies %in% c("all", "sequential") && length(tests) > 1) {
+                            strategy_name <- paste0("sequential_", sequential_stop)
+                            result <- private$.evaluateCombination(
+                                mydata, tests, strategy_name, goldVariable, goldPositive,
+                                testPositiveLevels, test_costs, prevalence
+                            )
+                            all_combinations[[length(all_combinations) + 1]] <- result
+                        }
+                    }
+                }
+                }  # Close if (!use_parallel) block
+                
+                # Populate all combinations table if requested
+                if (self$options$showAllCombinations) {
+                    private$.populateAllCombinationsTable(all_combinations)
+                }
+                
+                return(all_combinations)
             },
 
             # Find optimal panels based on criteria
@@ -1208,9 +1333,20 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                             })
                         }
                         
-                        # Force garbage collection after each chunk for memory management
+                        # Enhanced memory management with monitoring
                         if (use_chunking) {
-                            gc(verbose = FALSE)
+                            # Monitor memory usage and force GC if needed
+                            mem_info <- gc(verbose = FALSE)
+                            total_memory <- sum(mem_info[, 2])  # Total allocated memory
+                            
+                            # Force more aggressive GC if memory usage is high (>500MB)
+                            if (total_memory > 500) {
+                                gc(verbose = FALSE)
+                                # If still high memory, reduce chunk size for next iteration
+                                if (chunk_size > 100 && sum(gc(verbose = FALSE)[, 2]) > 500) {
+                                    chunk_size <- max(100, chunk_size * 0.8)
+                                }
+                            }
                         }
                     }
 

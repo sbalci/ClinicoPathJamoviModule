@@ -1,10 +1,10 @@
 ---
 name: decisiongraph
 title: Decision Tree Graph
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: DecisionD
 menuSubtitle: Cost-Effectiveness Decision Tree Visualization
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

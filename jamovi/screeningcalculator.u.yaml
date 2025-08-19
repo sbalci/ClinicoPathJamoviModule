@@ -33,35 +33,31 @@ children:
             name: fnote
           - type: CheckBox
             name: fagan
+  - type: Label
+    label: Sample Size Estimation
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
           - type: CheckBox
             name: samplesize
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: expected_sens
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: expected_spec
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: width_sens
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: width_spec
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: alpha_level
-        format: number
+          - type: TextBox
+            name: expected_sens
+            format: number
+            enable: (samplesize)
+          - type: TextBox
+            name: expected_spec
+            format: number
+            enable: (samplesize)
+          - type: TextBox
+            name: width_sens
+            format: number
+            enable: (samplesize)
+          - type: TextBox
+            name: width_spec
+            format: number
+            enable: (samplesize)
+          - type: TextBox
+            name: alpha_level
+            format: number
+            enable: (samplesize)

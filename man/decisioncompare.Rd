@@ -12,7 +12,7 @@ decisioncompare(
   test1Positive,
   test2,
   test2Positive,
-  test3,
+  test3 = NULL,
   test3Positive,
   pp = FALSE,
   pprob = 0.3,

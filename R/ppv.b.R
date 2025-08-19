@@ -54,12 +54,18 @@ ppvClass <- R6::R6Class(
             power <- self$options$power
             percHack <- self$options$percHack
 
-            # Input validation
+            # Enhanced input validation with informative messages
             if (percTrue == 0) {
-                jmvcore::reject("Percentage of true hypotheses cannot be 0%")
+                jmvcore::reject("Percentage of true hypotheses cannot be 0%. In the most pessimistic research fields, set this to at least 1-5%.")
             }
             if (percTrue == 100 && percHack > 0) {
-                jmvcore::reject("Cannot have p-hacking when all hypotheses are true (100%)")
+                jmvcore::reject("Cannot have p-hacking when all hypotheses are true (100%). Set p-hacking to 0% or reduce the percentage of true hypotheses.")
+            }
+            if (power < 0.1) {
+                warning("Very low statistical power (<10%) detected. Results may be unrealistic for typical research scenarios.")
+            }
+            if (percHack > 50) {
+                warning("High p-hacking rate (>50%) detected. This represents a severely compromised research environment.")
             }
 
             suppressWarnings({
@@ -133,18 +139,29 @@ ppvClass <- R6::R6Class(
 
         #### Populate tables ----
         .populateConfusionTable = function(results) {
-
+            # Populate confusion matrix for research findings
+            # In research context:
+            # - hit = true positive (correctly claimed true finding)
+            # - falseAlarm = false positive (incorrectly claimed finding) 
+            # - miss = false negative (missed true finding)
+            # - trueRejection = true negative (correctly rejected null)
+            
             table <- self$results$confusion
 
             row <- list()
-            row[['true[pos]']] <- results$hit * 100
-            row[['false[pos]']] <- results$falseAlarm * 100
+            # Positive findings (claimed discoveries)
+            row[['true[pos]']] <- results$hit * 100           # True positives
+            row[['false[pos]']] <- results$falseAlarm * 100   # False positives
             row[['total[pos]']] <- (results$hit + results$falseAlarm) * 100
-            row[['true[neg]']] <- results$miss * 100
-            row[['false[neg]']] <- results$trueRejection * 100
+            
+            # Negative findings (no claim/rejected)
+            row[['true[neg]']] <- results$trueRejection * 100 # True negatives (correct rejection)
+            row[['false[neg]']] <- results$miss * 100         # False negatives (missed discoveries)
             row[['total[neg]']] <- (results$miss + results$trueRejection) * 100
-            row[['true[total]']] <- (results$hit + results$miss) * 100
-            row[['false[total]']] <- (results$falseAlarm + results$trueRejection) * 100
+            
+            # Totals by truth status
+            row[['true[total]']] <- (results$hit + results$miss) * 100        # All true relationships
+            row[['false[total]']] <- (results$falseAlarm + results$trueRejection) * 100  # All false relationships
             row[['total[total]']] <- (results$falseAlarm + results$trueRejection + results$hit + results$miss) * 100
 
             table$setRow(rowNo=1, values=row)
@@ -174,37 +191,66 @@ ppvClass <- R6::R6Class(
                 interpretation <- "Most claimed findings are likely to be true."
             }
 
-            # Build HTML content with enhanced formatting
+            # Build HTML content with enhanced formatting and methodology explanation
             content <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='margin-top: 0;'>Results Summary</h4>",
+                "<h4 style='margin-top: 0;'>📊 Results Summary</h4>",
                 "<p><b>Positive Predictive Value (PPV)</b>: ", ppv_percentage, "%</p>",
                 "<p style='margin-left: 20px; color: #666;'>",
-                "Out of ", round(totalPositives, 1), " positive findings, ",
-                round(truePositives, 1), " are expected to be true.",
+                "Out of ", round(totalPositives, 1), " claimed positive findings, ",
+                round(truePositives, 1), " are expected to be genuinely true.",
                 "</p>",
                 "<p><b>False Discovery Rate (FDR)</b>: ", fdr_percentage, "%</p>",
                 "<p style='margin-left: 20px; color: #666;'>",
-                "Out of ", round(totalPositives, 1), " positive findings, ",
-                round(falsePositives, 1), " are expected to be false.",
+                "Out of ", round(totalPositives, 1), " claimed positive findings, ",
+                round(falsePositives, 1), " are expected to be false discoveries.",
                 "</p>",
                 "</div>",
                 
                 "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='margin-top: 0;'>Interpretation</h4>",
-                "<p>", interpretation, "</p>",
+                "<h4 style='margin-top: 0;'>🎯 Research Interpretation</h4>",
+                "<p><strong>", interpretation, "</strong></p>",
+                if (ppv_percentage < 50) {
+                    paste0("<p style='color: #d73027; font-weight: bold;'>⚠️ Warning: ",
+                           "Under these conditions, most research claims are likely false. ",
+                           "Consider improving study design, increasing sample sizes, or adjusting significance thresholds.</p>")
+                } else if (ppv_percentage < 75) {
+                    paste0("<p style='color: #fc8d59;'>⚠️ Caution: ",
+                           "A significant portion of findings may be false. ",
+                           "Replication and validation studies are strongly recommended.</p>")
+                } else {
+                    paste0("<p style='color: #4575b4;'>✓ Good: ",
+                           "Most findings are likely reliable under these conditions.</p>")
+                },
+                "</div>",
+                
+                "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                "<h4 style='margin-top: 0;'>🔬 Methodology Notes</h4>",
+                "<p><strong>Confusion Matrix Context:</strong></p>",
+                "<ul style='margin: 5px 0 10px 20px;'>",
+                "<li><strong>True Positives:</strong> Correctly identified true relationships</li>",
+                "<li><strong>False Positives:</strong> Incorrectly claimed relationships (Type I errors + bias)</li>",
+                "<li><strong>False Negatives:</strong> Missed true relationships (Type II errors)</li>",
+                "<li><strong>True Negatives:</strong> Correctly rejected null hypotheses</li>",
+                "</ul>",
+                "<p style='font-size: 0.9em; color: #666;'>",
+                "This analysis simulates ", round(totalPositives + round((results$miss + results$trueRejection) * 100, 1), 1), 
+                " research studies to estimate the reliability of claimed findings.</p>",
                 "</div>",
                 
                 "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px;'>",
-                "<h4 style='margin-top: 0;'>Study Parameters Used</h4>",
+                "<h4 style='margin-top: 0;'>📋 Study Parameters Used</h4>",
                 "<ul style='margin: 5px 0;'>",
-                "<li>Prior probability of true hypotheses: ", self$options$percTrue, "%</li>",
-                "<li>Significance level (α): ", self$options$alpha, "</li>",
-                "<li>Statistical power: ", self$options$power, "</li>",
-                "<li>Percentage of p-hacked studies: ", self$options$percHack, "%</li>",
+                "<li><strong>Prior probability of true hypotheses:</strong> ", self$options$percTrue, "%</li>",
+                "<li><strong>Significance level (α):</strong> ", self$options$alpha, "</li>",
+                "<li><strong>Statistical power:</strong> ", self$options$power, "</li>",
+                "<li><strong>Percentage of p-hacked studies:</strong> ", self$options$percHack, "%</li>",
                 "</ul>",
-                "<p style='margin-top: 10px; font-size: 0.9em; color: #666;'>",
-                "Based on the framework by Ioannidis (2005): Why most published research findings are false.",
+                "<p style='margin-top: 15px; padding: 10px; background-color: #fff; border-left: 4px solid #ffc107; font-size: 0.9em;'>",
+                "<strong>Reference:</strong> Ioannidis, J. P. (2005). Why most published research findings are false. ",
+                "<em>PLoS Medicine</em>, 2(8), e124. ",
+                "<br><strong>Formula:</strong> PPV = (Power × R + u × β × R) / (R + α - β × R + u - u × α + u × β × R)",
+                "<br>where R = prior odds, u = bias factor, β = Type II error rate",
                 "</p>",
                 "</div>"
             )
@@ -221,32 +267,65 @@ ppvClass <- R6::R6Class(
             image$setState(results$df)
         },
         .dotPlot = function(image, ggtheme, theme, ...) {
-
+            # Create visualization of 500 hypothetical studies showing outcome distribution
+            # Each dot represents a study, colored by its truth status and outcome
+            
             if (is.null(image$state))
                 return(FALSE)
 
-            themeSpec <- ggplot2::theme(
-                legend.position = 'top',
-                legend.background = ggplot2::element_rect("transparent"),
-                legend.key = ggplot2::element_blank(),
-                legend.title = ggplot2::element_blank(),
-                axis.text.x = ggplot2::element_blank(),
-                axis.ticks.x = ggplot2::element_blank(),
-                axis.title.x = ggplot2::element_blank(),
-                axis.text.y = ggplot2::element_blank(),
-                axis.ticks.y = ggplot2::element_blank(),
-                axis.title.y = ggplot2::element_blank())
+            tryCatch({
+                themeSpec <- ggplot2::theme(
+                    legend.position = 'top',
+                    legend.background = ggplot2::element_rect("transparent"),
+                    legend.key = ggplot2::element_blank(),
+                    legend.title = ggplot2::element_blank(),
+                    axis.text.x = ggplot2::element_blank(),
+                    axis.ticks.x = ggplot2::element_blank(),
+                    axis.title.x = ggplot2::element_blank(),
+                    axis.text.y = ggplot2::element_blank(),
+                    axis.ticks.y = ggplot2::element_blank(),
+                    axis.title.y = ggplot2::element_blank(),
+                    panel.grid = ggplot2::element_blank(),
+                    panel.background = ggplot2::element_rect(fill = "white"),
+                    plot.title = ggplot2::element_text(size = 12, hjust = 0.5),
+                    legend.text = ggplot2::element_text(size = 10)
+                )
 
-            p <- ggplot2::ggplot(data=image$state, ggplot2::aes(x=y, y=x, color=type, shape=type)) +
-                ggplot2::geom_point(size=3) +
-                # ggplot2::scale_colour_brewer(palette = "Set1") +
-                ggplot2::scale_color_manual(values=c("#4DAF4A", "#E41A1C", "#4DAF4A", "#E41A1C"), drop = FALSE) +
-                ggplot2::scale_shape_manual(values=c(15, 16, 2, 5), drop = FALSE) +
-                ggtheme + themeSpec
+                # Enhanced color scheme with better contrast and accessibility
+                p <- ggplot2::ggplot(data=image$state, ggplot2::aes(x=y, y=x, color=type, shape=type)) +
+                    ggplot2::geom_point(size=3.5, alpha=0.8) +
+                    ggplot2::scale_color_manual(
+                        values=c(
+                            "True positive" = "#2166ac",   # Blue for correct positives
+                            "False positive" = "#d73027",  # Red for incorrect positives 
+                            "True negative" = "#5aae61",   # Green for correct negatives
+                            "False negative" = "#fc8d59"   # Orange for missed positives
+                        ), 
+                        drop = FALSE
+                    ) +
+                    ggplot2::scale_shape_manual(
+                        values=c(
+                            "True positive" = 16,   # Filled circle
+                            "False positive" = 17,  # Filled triangle
+                            "True negative" = 15,   # Filled square
+                            "False negative" = 18   # Filled diamond
+                        ), 
+                        drop = FALSE
+                    ) +
+                    ggplot2::labs(
+                        title = "Simulation of 500 Research Studies",
+                        subtitle = "Each dot represents one study outcome"
+                    ) +
+                    ggtheme + themeSpec
 
-            print(p)
-
-            TRUE
+                print(p)
+                return(TRUE)
+                
+            }, error = function(e) {
+                # Fallback for plotting errors
+                message("Plot generation failed: ", e$message)
+                return(FALSE)
+            })
         },
 
         #### Helper functions ----
@@ -278,10 +357,23 @@ ppvClass <- R6::R6Class(
         
         #' @description
         #' Generate R source code for PPV analysis
-        #' @return Character string indicating syntax mode is not supported
+        #' @return Character string with R syntax for reproducible analysis
         asSource=function() {
-
-            paste0("This module does not support syntax mode yet.")
+            
+            paste0(
+                "# Positive Predictive Value Analysis\n",
+                "# Based on Ioannidis (2005) framework\n\n",
+                "ppv(\n",
+                "    percTrue = ", self$options$percTrue, ",    # ", self$options$percTrue, "% of hypotheses are true\n",
+                "    alpha = ", self$options$alpha, ",        # significance level\n", 
+                "    power = ", self$options$power, ",        # statistical power\n",
+                "    percHack = ", self$options$percHack, "     # ", self$options$percHack, "% of studies have bias/p-hacking\n",
+                ")\n\n",
+                "# Results interpretation:\n",
+                "# - Lower PPV = higher false discovery rate\n",
+                "# - Consider replication, larger samples, or stricter significance levels\n",
+                "# - Prior probability and research bias strongly affect reliability of findings"
+            )
 
         })
 )

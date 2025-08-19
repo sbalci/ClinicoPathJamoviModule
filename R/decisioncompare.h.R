@@ -65,6 +65,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test3 <- jmvcore::OptionVariable$new(
                 "test3",
                 test3,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -203,6 +204,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable1",
                 title="Test 1 - Recoded Data",
+                visible="(!is.null(test1) && test1 != \"\")",
                 rows=0,
                 columns=list(
                     list(
@@ -225,6 +227,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="epirTable1",
                 title="Test 1 - Confidence Intervals",
+                visible="(ci && !is.null(test1) && test1 != \"\")",
                 rows=0,
                 columns=list(
                     list(
@@ -252,6 +255,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable2",
                 title="Test 2 - Recoded Data",
+                visible="(!is.null(test2) && test2 != \"\")",
                 rows=0,
                 columns=list(
                     list(
@@ -274,6 +278,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="epirTable2",
                 title="Test 2 - Confidence Intervals",
+                visible="(ci && !is.null(test2) && test2 != \"\")",
                 rows=0,
                 columns=list(
                     list(
@@ -301,6 +306,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable3",
                 title="Test 3 - Recoded Data",
+                visible="(!is.null(test3) && test3 != \"\")",
                 rows=0,
                 columns=list(
                     list(
@@ -323,6 +329,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="epirTable3",
                 title="Test 3 - Confidence Intervals",
+                visible="(ci && !is.null(test3) && test3 != \"\")",
                 rows=0,
                 columns=list(
                     list(
@@ -415,7 +422,11 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="p", 
                         `title`="p-value", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="diffTable",
@@ -483,7 +494,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncompare",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = decisioncompareResults$new(options=options),
                 data = data,
@@ -562,7 +573,7 @@ decisioncompare <- function(
     test2,
     test2Positive,
     test3 = NULL,
-    test3Positive = NULL,
+    test3Positive,
     pp = FALSE,
     pprob = 0.3,
     od = FALSE,

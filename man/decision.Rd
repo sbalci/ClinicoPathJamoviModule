@@ -22,40 +22,44 @@ decision(
 \item{data}{The data as a data frame. The data frame should contain the
 variables specified in the 'variables' option.}
 
-\item{gold}{The golden standard variable.}
+\item{gold}{The gold standard reference variable representing true disease
+status.}
 
-\item{goldPositive}{The positive level of the golden standard variable.}
+\item{goldPositive}{The level indicating presence of disease in the gold
+standard variable.}
 
-\item{newtest}{The new test variable.}
+\item{newtest}{The diagnostic test variable being evaluated for
+performance.}
 
-\item{testPositive}{The positive level of the new test variable.}
+\item{testPositive}{The level representing a positive result for the test
+under evaluation.}
 
-\item{pp}{Boolean selection whether to show prior probability. Default is
-'false'.}
+\item{pp}{Boolean selection whether to use known population prevalence
+instead of study prevalence.}
 
-\item{pprob}{Prior probability (disease prevalence in the community).
-Requires a value between 0.001 and 0.999, default 0.300.}
+\item{pprob}{Population disease prevalence as a proportion between 0.001
+and 0.999.}
 
-\item{od}{Boolean selection whether to show frequency table. Default is
-'false'.}
+\item{od}{Boolean selection whether to show original data frequency tables.}
 
-\item{fnote}{Boolean selection whether to show footnotes. Default is
-'false'.}
+\item{fnote}{Boolean selection whether to show detailed explanatory
+footnotes.}
 
-\item{ci}{Boolean selection whether to show 95\\% confidence intervals.
-Default is 'false'.}
+\item{ci}{Boolean selection whether to calculate and display 95\\%
+confidence intervals.}
 
-\item{fagan}{Boolean selection whether to show Fagan Nomogram. Default is
-'false'.}
+\item{fagan}{Boolean selection whether to generate a Fagan nomogram plot.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$missingDataSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
