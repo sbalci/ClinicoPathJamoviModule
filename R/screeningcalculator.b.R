@@ -1,6 +1,7 @@
 #' @title Screening Test Calculator
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @importFrom ggplot2 ggplot geom_text aes xlim ylim theme_void theme element_rect ggtitle
 
 screeningcalculatorClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
@@ -709,6 +710,47 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
             },
 
             .plot1 = function(image1, ggtheme, ...) {
+                # Check for nomogrammer function availability
+                if (!exists("nomogrammer")) {
+                    # Create informative message plot when nomogrammer is not available
+                    plotData1 <- image1$state
+                    
+                    # Create a basic informative plot using ggplot2
+                    info_plot <- ggplot2::ggplot() +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.7), 
+                            label = "Fagan Nomogram - Single Test", 
+                            size = 6, 
+                            fontface = "bold"
+                        ) +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.5), 
+                            label = paste0(
+                                "Pre-test Probability: ", round(plotData1$Prevalence * 100, 1), "%\n",
+                                "Positive LR: ", round(plotData1$Plr, 2), "\n", 
+                                "Negative LR: ", round(plotData1$Nlr, 3), "\n",
+                                "Post-test Prob (Positive): ", round((plotData1$Sens * plotData1$Prevalence) / 
+                                    ((plotData1$Sens * plotData1$Prevalence) + ((1 - plotData1$Spec) * (1 - plotData1$Prevalence))) * 100, 1), "%"
+                            ), 
+                            size = 4
+                        ) +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.2), 
+                            label = "Note: Full Fagan nomogram requires nomogrammer function", 
+                            size = 3, 
+                            color = "gray50"
+                        ) +
+                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                        ggplot2::theme_void() +
+                        ggplot2::theme(
+                            panel.background = ggplot2::element_rect(fill = "white"),
+                            plot.background = ggplot2::element_rect(fill = "white")
+                        )
+                    
+                    print(info_plot)
+                    return(TRUE)
+                }
+                
                 plotData1 <- image1$state
 
                 plot1 <- nomogrammer(
@@ -719,8 +761,7 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                     Nlr = plotData1$Nlr,
                     Detail = TRUE,
                     NullLine = TRUE,
-                    LabelSize = (14 /
-                                     5),
+                    LabelSize = (14 / 5),
                     Verbose = TRUE
                 )
 
@@ -731,6 +772,39 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
             },
 
             .plot2PP = function(image2PP, ggtheme, ...) {
+                # Check for nomogrammer function availability
+                if (!exists("nomogrammer")) {
+                    plotData2 <- image2PP$state
+                    
+                    # Create informative message plot
+                    info_plot <- ggplot2::ggplot() +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.7), 
+                            label = paste0("Fagan Nomogram - Second Test ", plotData2$Title), 
+                            size = 5, 
+                            fontface = "bold"
+                        ) +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.5), 
+                            label = paste0(
+                                "Pre-test Probability: ", round(plotData2$Prevalence * 100, 1), "%\n",
+                                "Positive LR: ", round(plotData2$Plr, 2), "\n", 
+                                "Sequential Testing Effect Shown\n",
+                                "(After Initial Positive Test)"
+                            ), 
+                            size = 4
+                        ) +
+                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                        ggplot2::theme_void() +
+                        ggplot2::theme(
+                            panel.background = ggplot2::element_rect(fill = "white"),
+                            plot.background = ggplot2::element_rect(fill = "white")
+                        )
+                    
+                    print(info_plot)
+                    return(TRUE)
+                }
+                
                 plotData2 <- image2PP$state
 
                 plot2PP <- nomogrammer(
@@ -741,8 +815,7 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                     Nlr = plotData2$Nlr,
                     Detail = TRUE,
                     NullLine = TRUE,
-                    LabelSize = (14 /
-                                     5),
+                    LabelSize = (14 / 5),
                     Verbose = TRUE
                 )
 
@@ -753,6 +826,39 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
             },
 
             .plot2NN = function(image2NN, ggtheme, ...) {
+                # Check for nomogrammer function availability
+                if (!exists("nomogrammer")) {
+                    plotData2 <- image2NN$state
+                    
+                    # Create informative message plot
+                    info_plot <- ggplot2::ggplot() +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.7), 
+                            label = paste0("Fagan Nomogram - Second Test ", plotData2$Title), 
+                            size = 5, 
+                            fontface = "bold"
+                        ) +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.5), 
+                            label = paste0(
+                                "Pre-test Probability: ", round(plotData2$Prevalence * 100, 1), "%\n",
+                                "Negative LR: ", round(plotData2$Nlr, 3), "\n", 
+                                "Sequential Testing Effect Shown\n",
+                                "(After Initial Negative Test)"
+                            ), 
+                            size = 4
+                        ) +
+                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                        ggplot2::theme_void() +
+                        ggplot2::theme(
+                            panel.background = ggplot2::element_rect(fill = "white"),
+                            plot.background = ggplot2::element_rect(fill = "white")
+                        )
+                    
+                    print(info_plot)
+                    return(TRUE)
+                }
+                
                 plotData2 <- image2NN$state
 
                 plot2NN <- nomogrammer(
@@ -763,8 +869,7 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                     Nlr = plotData2$Nlr,
                     Detail = TRUE,
                     NullLine = TRUE,
-                    LabelSize = (14 /
-                                     5),
+                    LabelSize = (14 / 5),
                     Verbose = TRUE
                 )
 
@@ -775,6 +880,39 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
             },
 
             .plot3PPP = function(image3PPP, ggtheme, ...) {
+                # Check for nomogrammer function availability
+                if (!exists("nomogrammer")) {
+                    plotData3 <- image3PPP$state
+                    
+                    # Create informative message plot
+                    info_plot <- ggplot2::ggplot() +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.7), 
+                            label = paste0("Fagan Nomogram - Third Test ", plotData3$Title), 
+                            size = 5, 
+                            fontface = "bold"
+                        ) +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.5), 
+                            label = paste0(
+                                "Pre-test Probability: ", round(plotData3$Prevalence * 100, 1), "%\n",
+                                "Positive LR: ", round(plotData3$Plr, 2), "\n", 
+                                "Triple Sequential Testing\n",
+                                "(After Two Positive Tests)"
+                            ), 
+                            size = 4
+                        ) +
+                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                        ggplot2::theme_void() +
+                        ggplot2::theme(
+                            panel.background = ggplot2::element_rect(fill = "white"),
+                            plot.background = ggplot2::element_rect(fill = "white")
+                        )
+                    
+                    print(info_plot)
+                    return(TRUE)
+                }
+                
                 plotData3 <- image3PPP$state
 
                 plot3PPP <- nomogrammer(
@@ -785,8 +923,7 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                     Nlr = plotData3$Nlr,
                     Detail = TRUE,
                     NullLine = TRUE,
-                    LabelSize = (14 /
-                                     5),
+                    LabelSize = (14 / 5),
                     Verbose = TRUE
                 )
 
@@ -797,6 +934,39 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
             },
 
             .plot3NNN = function(image3NNN, ggtheme, ...) {
+                # Check for nomogrammer function availability
+                if (!exists("nomogrammer")) {
+                    plotData3 <- image3NNN$state
+                    
+                    # Create informative message plot
+                    info_plot <- ggplot2::ggplot() +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.7), 
+                            label = paste0("Fagan Nomogram - Third Test ", plotData3$Title), 
+                            size = 5, 
+                            fontface = "bold"
+                        ) +
+                        ggplot2::geom_text(
+                            ggplot2::aes(x = 0.5, y = 0.5), 
+                            label = paste0(
+                                "Pre-test Probability: ", round(plotData3$Prevalence * 100, 1), "%\n",
+                                "Negative LR: ", round(plotData3$Nlr, 3), "\n", 
+                                "Triple Sequential Testing\n",
+                                "(After Two Negative Tests)"
+                            ), 
+                            size = 4
+                        ) +
+                        ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                        ggplot2::theme_void() +
+                        ggplot2::theme(
+                            panel.background = ggplot2::element_rect(fill = "white"),
+                            plot.background = ggplot2::element_rect(fill = "white")
+                        )
+                    
+                    print(info_plot)
+                    return(TRUE)
+                }
+                
                 plotData3 <- image3NNN$state
 
                 plot3NNN <- nomogrammer(
@@ -807,8 +977,7 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                     Nlr = plotData3$Nlr,
                     Detail = TRUE,
                     NullLine = TRUE,
-                    LabelSize = (14 /
-                                     5),
+                    LabelSize = (14 / 5),
                     Verbose = TRUE
                 )
 

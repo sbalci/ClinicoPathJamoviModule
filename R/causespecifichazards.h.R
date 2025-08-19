@@ -525,7 +525,7 @@ causespecifichazardsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 package = "ClinicoPath",
                 name = "causespecifichazards",
-                version = c(1,0,0),
+                version = c(0,0,31),
                 options = options,
                 results = causespecifichazardsResults$new(options=options),
                 data = data,

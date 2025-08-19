@@ -88,7 +88,6 @@ items:
       width: 600
       height: 450
       renderFun: .plot1
-      requiresData: true
       visible: (fagan)
       clearWith:
           - sens
@@ -102,7 +101,6 @@ items:
       width: 600
       height: 450
       renderFun: .plot2PP
-      requiresData: true
       visible: (fagan && repeat2)
       clearWith:
           - sens
@@ -117,7 +115,6 @@ items:
       width: 600
       height: 450
       renderFun: .plot2NN
-      requiresData: true
       visible: (fagan && repeat2)
       clearWith:
           - sens
@@ -132,7 +129,6 @@ items:
       width: 600
       height: 450
       renderFun: .plot3PPP
-      requiresData: true
       visible: (fagan && repeat3)
       clearWith:
           - sens
@@ -147,7 +143,6 @@ items:
       width: 600
       height: 450
       renderFun: .plot3NNN
-      requiresData: true
       visible: (fagan && repeat3)
       clearWith:
           - sens

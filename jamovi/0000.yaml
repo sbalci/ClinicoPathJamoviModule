@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.32
+version: 0.0.31.33
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-18'
+date: '2025-08-19'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1203,7 +1203,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1215,7 +1215,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1232,7 +1232,7 @@ analyses:
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Analysis Without Gold Standard
     menuSubtitle: Multiple Test Analysis Without Gold Standard
@@ -1242,7 +1242,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1257,7 +1257,7 @@ analyses:
   - title: Confidence Interval Approach for the Number of Subjects Required
     name: kappaSizeCI
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Power Analysis
     menuTitle: Confidence Interval Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on Kappa confidence
@@ -1268,7 +1268,7 @@ analyses:
   - title: Lowest Expected Value for a fixed sample size
     name: kappaSizeFixedN
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Power Analysis
     menuTitle: Lowest Expected Value for a fixed sample size
     menuSubtitle: Find lower Kappa based on sample size
@@ -1279,7 +1279,7 @@ analyses:
   - title: Power Approach for the Number of Subjects Required
     name: kappaSizePower
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Power Analysis
     menuTitle: Power Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on power
@@ -1290,7 +1290,7 @@ analyses:
   - title: ROC Analysis
     name: psychopdaroc
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuTitle: ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: ROC Analysis, AUC, Cutpoints
@@ -1302,7 +1302,7 @@ analyses:
   - title: Medical Decision Tree Analysis
     name: tree
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Medical Decision Tree Analysis
     description: >
@@ -1326,22 +1326,36 @@ analyses:
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine tests and evaluate performance
-    description: |
-      Analyzes and compares multiple medical diagnostic tests by examining all 
-      possible test result combinations. This function evaluates how different 
-      patterns of positive and negative test results perform against a gold 
-      standard, helping clinicians understand which test combinations are most 
-      informative. Shows individual test performance and comprehensive analysis 
-      of all possible test result patterns (e.g., +/+, +/-, -/+, -/-) with 
-      their respective positive predictive values and clinical interpretation. 
-      Essential for understanding test interactions and optimizing diagnostic 
-      strategies when multiple tests are available for the same condition.
+    description: >
+      Advanced medical diagnostic test combination analysis with automated 
+
+      optimal cut-point identification and comprehensive clinical
+      interpretation. 
+
+      This function systematically evaluates all possible test result
+      combinations 
+
+      (2-test: 4 patterns, 3-test: 8 patterns) against a gold standard using 
+
+      state-of-the-art statistical methods. Features include Wilson score 
+
+      confidence intervals for enhanced accuracy, ROC-based optimal cut-point 
+
+      selection using Youden Index maximization, and publication-quality 
+
+      visualizations with clinical decision thresholds. Provides actionable 
+
+      recommendations for screening vs. confirmatory testing strategies with 
+
+      detailed clinical interpretation guidelines. Essential for evidence-based 
+
+      diagnostic protocol development and test validation studies.
     ribbon: analyses
     category: analyses
   - title: Screening Test Calculator
     name: screeningcalculator
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Screening Test Calculator
     menuSubgroup: Decision
     menuSubtitle: Calculate disease probability based on test characteristics
@@ -1371,7 +1385,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Sequential Test Analysis
@@ -1391,7 +1405,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -1405,7 +1419,7 @@ analyses:
   - title: Prediction Model Builder
     name: modelbuilder
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Prediction Model Builder
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Build prediction models for Decision Curve Analysis
@@ -1427,7 +1441,7 @@ analyses:
   - title: Decision Tree Graph
     name: decisiongraph
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Decision Tree Graph
     menuSubgroup: DecisionD
     menuSubtitle: Cost-Effectiveness Decision Tree Visualization
@@ -1462,7 +1476,7 @@ analyses:
   - title: Dendrogram
     name: dendrogram
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Dendrogram
     menuSubgroup: Drafts
     ribbon: analyses
@@ -1470,7 +1484,7 @@ analyses:
   - title: Intraclass Correlation Coefficient
     name: icccoeff
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Agreement
     menuTitle: Intraclass Correlation Coefficient
     description: >
@@ -1665,7 +1679,7 @@ analyses:
   - title: Positive Predictive Value
     name: ppv
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Positive Predictive Value
     menuSubgroup: Research Design
     ribbon: analyses

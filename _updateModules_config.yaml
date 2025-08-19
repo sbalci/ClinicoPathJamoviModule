@@ -5,23 +5,35 @@
 
 # run  /Applications/jamovi.app/Contents/MacOS/jamovi
 
+# ========================================
+# MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE
+# ========================================
 
-# Global settings
+new_version: "0.0.31.33"
+new_date: "2025-08-19"
+quick: true
+TEST: false
+meddecide: false
+jjstatsplot: false
+jsurvival: false
+ClinicoPathDescriptives: false
+
+# ========================================
+# DETAILED CONFIGURATION BELOW
+# ========================================
+
+# Global settings (for backward compatibility)
 global:
-  new_version: "0.0.31.33"  # New version number for the modules
-  new_date: "2025-08-19" # New date for the modules
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
-# Operation modes
+# Operation modes (for backward compatibility)  
 modes:
-  quick: false # Quick mode to install main module
   check: false
   extended: true
   webpage: false
   commit_modules: false
   WIP: false
-  TEST: false  # Enable TEST mode for development/testing purposes
-
+  
   # File copying control modes
   copy_vignettes: false       # Enable/disable vignette file copying
   copy_data_files: false      # Enable/disable data file copying
@@ -32,14 +44,23 @@ modes:
   # NAMESPACE-DESCRIPTION synchronization
   sync_namespace_description: true  # Enable NAMESPACE to DESCRIPTION package synchronization
   namespace_sync_dry_run: false     # Perform dry run only (show what would be changed)
-  # 
-  # How it works:
-  # - Scans each module's NAMESPACE file for import() and importFrom() statements
-  # - Extracts package names from these import statements
-  # - Checks if these packages are declared in the module's DESCRIPTION file
-  # - Automatically adds missing packages to the Imports field in DESCRIPTION
-  # - Creates backup of original DESCRIPTION before making changes
-  # - Supports dry run mode to preview changes without modifying files
+
+# Module directories (hardcoded for simplicity)
+modules:
+  jjstatsplot:
+    directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
+  meddecide:
+    directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
+  jsurvival:
+    directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
+  ClinicoPathDescriptives:
+    directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
+  JamoviTest:
+    directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
+
+# ========================================
+# DETAILED CONFIGURATION BELOW
+# ========================================
 
 # Required packages for validation
 required_packages:
@@ -91,139 +112,6 @@ vignette_folders:
     overwrite_existing: true      # Overwrite existing vignette files
     create_directories: true      # Create vignette directories if missing
 
-# Module definitions
-modules:
-  jjstatsplot:
-    enabled: false
-    directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
-    menuGroup_pattern: "menuGroup: JJStatsPlot$"
-    menuGroup_pattern_wip: "menuGroup: JJStatsPlot"
-
-    data_files:
-      - "histopathology.rda"
-      - "groupsummary_financial_data.rda"
-      - "groupsummary_simple.rda"
-      - "categorical_quality_data.rda"
-      - "hullplot_clinical_data.rda"
-      - "hullplot_customer_data.rda"
-      - "hullplot_experimental_data.rda"
-      - "hullplot_quality_data.rda"
-      - "hullplot_survey_data.rda"
-      - "jggstats_clinical_data.rda"
-      - "jggstats_educational_data.rda"
-      - "jggstats_experimental_data.rda"
-      - "jggstats_financial_data.rda"
-      - "jggstats_marketing_data.rda"
-      - "jggstats_medical_data.rda"
-      - "jggstats_pharmaceutical_data.rda"
-      - "jggstats_psychological_data.rda"
-      - "jggstats_quality_data.rda"
-      - "jggstats_survey_data.rda"
-
-    r_files: 
-      - "utils.R"
-
-    vignette_files:
-      # Manual files (when use_folder_based: false)
-      # Example: ["01-introduction.Rmd", "02-categorical-plots.Rmd"]
-      # Leave empty to use folder-based copying
-      []
-
-    test_files: []
-
-    required_directories:
-      - "data"
-      - "R"
-      - "vignettes"
-      - "jamovi"
-
-  meddecide:
-    enabled: false
-    directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
-    menuGroup_pattern: "menuGroup: meddecide$"
-    menuGroup_pattern_wip: "menuGroup: meddecide"
-
-    data_files:
-      - "histopathology.rda"
-      - "roc_analysis_test_data.RData"
-      - "cancer_biomarker_data.csv"
-      - "cardiac_troponin_data.csv"
-      - "sepsis_biomarker_data.csv"
-      - "thyroid_function_data.csv"
-      - "bayesdca_test_data.rda"
-      - "breast_cancer_data.rda"
-      - "breast_diagnostic_styles.rda"
-      - "lymphoma_diagnostic_styles.rda"
-      - "dca_test_data.csv"
-      - "thyroid_function_data.rda"
-
-    r_files:
-      - "psychopdaroc_utilities.R"
-      - "nomogrammer.R"
-      - "utils.R"
-      # - "meddecide-utils.R"
-      # - "meddecide_stats_utils.R"
-
-    vignette_files:
-      # Manual files (when use_folder_based: false)
-      # Example: ["01-introduction.Rmd", "03-roc-analysis.Rmd"]
-      # Leave empty to use folder-based copying
-      []
-
-    test_files:
-      - "test-decision.R"
-      - "test-roc.R"
-
-    required_directories:
-      - "data"
-      - "R"
-      - "vignettes"
-      - "jamovi"
-      - "tests/testthat"
-
-  jsurvival:
-    enabled: false
-    directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
-    menuGroup_pattern: "menuGroup: Survival$"
-    menuGroup_pattern_wip: "menuGroup: Survival"
-
-    data_files:
-      - "histopathology.rda"
-      - "melanoma.rda"
-      - "data_longitudinal.rda"
-      # Stage migration test data files
-      - "stagemigration_lung_cancer.rda"
-      - "stagemigration_breast_cancer.rda"
-      - "stagemigration_colorectal_cancer.rda"
-      - "stagemigration_small_sample.rda"
-      - "stagemigration_large_performance.rda"
-      - "stagemigration_problematic.rda"
-      - "stagemigration_combined.rda"
-      - "stagemigration_summary_stats.rda"
-
-    r_files: 
-      - "utils.R"
-
-    vignette_files:
-      # Manual files (when use_folder_based: false)
-      # Example: ["01-introduction.Rmd", "02-person-time-analysis.Rmd"]
-      # Leave empty to use folder-based copying
-      []
-
-    test_files:
-      - "test-stagemigration.R"
-
-    required_directories:
-      - "data"
-      - "R"
-      - "vignettes"
-      - "jamovi"
-
-  ClinicoPathDescriptives:
-    enabled: true
-    directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
-    menuGroup_pattern: "menuGroup: Exploration$|menuGroup: OncoPathology$"
-    menuGroup_pattern_wip: "menuGroup: Exploration"
 
   JamoviTest:
     enabled: false  # Automatically enabled when TEST mode is active

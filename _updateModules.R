@@ -64,26 +64,25 @@ cat("\n📋 Loading configuration...\n")
 config <- load_config(config_file)
 config <- validate_config(config)
 
-# Extract configuration values
+# Extract configuration values with backward compatibility
 global <- config$global
 modes <- config$modes
 modules_config <- config$modules
 required_packages <- config$required_packages %||% c("xfun", "fs", "jmvtools", "devtools", "purrr", "yaml", "digest")
 
-# Override configuration with any manual settings (for backward compatibility)
-# You can still manually override these if needed
-new_version <- global$new_version
-new_date <- global$new_date
-main_repo_dir <- global$base_repo_dir
+# Handle simplified top-level configuration (new format) or nested format (old format)
+new_version <- config$new_version %||% global$new_version
+new_date <- config$new_date %||% global$new_date
+main_repo_dir <- global$base_repo_dir %||% "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
-# Operation modes
-quick <- modes$quick %||% FALSE
+# Operation modes (simplified format first, then nested format)
+quick <- config$quick %||% modes$quick %||% FALSE
 check <- modes$check %||% FALSE
-extended <- modes$extended %||% FALSE
+extended <- modes$extended %||% TRUE
 webpage <- modes$webpage %||% FALSE
 commit_modules <- modes$commit_modules %||% FALSE
 WIP <- modes$WIP %||% FALSE
-TEST <- modes$TEST %||% FALSE
+TEST <- config$TEST %||% modes$TEST %||% FALSE
 
 # File copying control modes
 copy_vignettes <- modes$copy_vignettes %||% TRUE
@@ -95,11 +94,65 @@ copy_r_files <- modes$copy_r_files %||% TRUE
 sync_namespace_description <- modes$sync_namespace_description %||% FALSE
 namespace_sync_dry_run <- modes$namespace_sync_dry_run %||% FALSE
 
-# Module-specific flags (extracted from config)
-ClinicoPathDescriptives_module <- modules_config$ClinicoPathDescriptives$enabled %||% FALSE
-jsurvival_module <- modules_config$jsurvival$enabled %||% FALSE
-jjstatsplot_module <- modules_config$jjstatsplot$enabled %||% FALSE
-meddecide_module <- modules_config$meddecide$enabled %||% FALSE
+# Module-specific flags (using simplified top-level toggles)
+meddecide_module <- config$meddecide %||% modes$meddecide %||% FALSE
+jjstatsplot_module <- config$jjstatsplot %||% modes$jjstatsplot %||% FALSE
+jsurvival_module <- config$jsurvival %||% modes$jsurvival %||% FALSE
+ClinicoPathDescriptives_module <- config$ClinicoPathDescriptives %||% modes$ClinicoPathDescriptives %||% FALSE
+
+# Hardcoded module configurations (simplified for maintainability)
+module_patterns <- list(
+  meddecide = list(
+    pattern = "menuGroup: meddecide$",
+    pattern_wip = "menuGroup: meddecide",
+    data_files = c("histopathology.rda", "roc_analysis_test_data.RData", "cancer_biomarker_data.csv", 
+                   "cardiac_troponin_data.csv", "sepsis_biomarker_data.csv", "thyroid_function_data.csv",
+                   "bayesdca_test_data.rda", "breast_cancer_data.rda", "breast_diagnostic_styles.rda",
+                   "lymphoma_diagnostic_styles.rda", "dca_test_data.csv", "thyroid_function_data.rda")
+  ),
+  jjstatsplot = list(
+    pattern = "menuGroup: JJStatsPlot$",
+    pattern_wip = "menuGroup: JJStatsPlot", 
+    data_files = c("histopathology.rda", "groupsummary_financial_data.rda", "groupsummary_simple.rda",
+                   "categorical_quality_data.rda", paste0("hullplot_", c("clinical", "customer", "experimental", "quality", "survey"), "_data.rda"),
+                   paste0("jggstats_", c("clinical", "educational", "experimental", "financial", "marketing", 
+                         "medical", "pharmaceutical", "psychological", "quality", "survey"), "_data.rda"))
+  ),
+  jsurvival = list(
+    pattern = "menuGroup: Survival$",
+    pattern_wip = "menuGroup: Survival",
+    data_files = c("histopathology.rda", "melanoma.rda", "data_longitudinal.rda",
+                   paste0("stagemigration_", c("lung_cancer", "breast_cancer", "colorectal_cancer", "small_sample",
+                         "large_performance", "problematic", "combined", "summary_stats"), ".rda"))
+  ),
+  ClinicoPathDescriptives = list(
+    pattern = "menuGroup: Exploration$|menuGroup: OncoPathology$",
+    pattern_wip = "menuGroup: Exploration",
+    data_files = c("histopathology.rda")
+  )
+)
+
+# Set enabled status for modules based on toggles and add hardcoded configurations
+if (meddecide_module) {
+  modules_config$meddecide$enabled <- TRUE
+  modules_config$meddecide <- c(modules_config$meddecide, module_patterns$meddecide)
+  cat("🔧 meddecide enabled\n")
+}
+if (jjstatsplot_module) {
+  modules_config$jjstatsplot$enabled <- TRUE
+  modules_config$jjstatsplot <- c(modules_config$jjstatsplot, module_patterns$jjstatsplot)
+  cat("🔧 jjstatsplot enabled\n")
+}
+if (jsurvival_module) {
+  modules_config$jsurvival$enabled <- TRUE
+  modules_config$jsurvival <- c(modules_config$jsurvival, module_patterns$jsurvival)
+  cat("🔧 jsurvival enabled\n")
+}
+if (ClinicoPathDescriptives_module) {
+  modules_config$ClinicoPathDescriptives$enabled <- TRUE
+  modules_config$ClinicoPathDescriptives <- c(modules_config$ClinicoPathDescriptives, module_patterns$ClinicoPathDescriptives)
+  cat("🔧 ClinicoPathDescriptives enabled\n")
+}
 
 # Apply WIP mode overrides
 if (WIP) {
@@ -166,7 +219,15 @@ module_validation_failed <- FALSE
 
 cat("\n📁 Validating module directories...\n")
 for (module_name in names(modules_config)) {
-  if (modules_config[[module_name]]$enabled) {
+  # Check if module is enabled via top-level toggles or old enabled property
+  module_enabled <- FALSE
+  if (module_name == "meddecide" && meddecide_module) module_enabled <- TRUE
+  if (module_name == "jjstatsplot" && jjstatsplot_module) module_enabled <- TRUE  
+  if (module_name == "jsurvival" && jsurvival_module) module_enabled <- TRUE
+  if (module_name == "ClinicoPathDescriptives" && ClinicoPathDescriptives_module) module_enabled <- TRUE
+  if (module_name == "JamoviTest" && (TEST || (!is.null(modules_config[[module_name]]$enabled) && modules_config[[module_name]]$enabled))) module_enabled <- TRUE
+  
+  if (module_enabled) {
     module_dir <- modules_config[[module_name]]$directory
 
     # Validate directory exists

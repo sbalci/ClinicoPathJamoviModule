@@ -1,10 +1,10 @@
 ---
 name:  ppv
 title: Positive Predictive Value
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Research Design
 menuSubtitle: 'PPV and FDR for research findings'
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 description:

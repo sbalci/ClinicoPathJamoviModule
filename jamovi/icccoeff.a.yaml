@@ -1,9 +1,9 @@
 ---
 name: icccoeff
 title: Intraclass Correlation Coefficient
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Agreement
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 description:
     main: |

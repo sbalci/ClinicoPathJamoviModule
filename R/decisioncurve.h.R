@@ -30,7 +30,10 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             ciLevel = 0.95,
             showOptimalThreshold = TRUE,
             compareModels = FALSE,
-            weightedAUC = FALSE, ...) {
+            weightedAUC = FALSE,
+            clinicalDecisionRule = FALSE,
+            decisionRuleThreshold = 0.15,
+            decisionRuleLabel = "Clinical Rule", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -169,6 +172,20 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "weightedAUC",
                 weightedAUC,
                 default=FALSE)
+            private$..clinicalDecisionRule <- jmvcore::OptionBool$new(
+                "clinicalDecisionRule",
+                clinicalDecisionRule,
+                default=FALSE)
+            private$..decisionRuleThreshold <- jmvcore::OptionNumber$new(
+                "decisionRuleThreshold",
+                decisionRuleThreshold,
+                default=0.15,
+                min=0.001,
+                max=0.999)
+            private$..decisionRuleLabel <- jmvcore::OptionString$new(
+                "decisionRuleLabel",
+                decisionRuleLabel,
+                default="Clinical Rule")
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomePositive)
@@ -195,6 +212,9 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showOptimalThreshold)
             self$.addOption(private$..compareModels)
             self$.addOption(private$..weightedAUC)
+            self$.addOption(private$..clinicalDecisionRule)
+            self$.addOption(private$..decisionRuleThreshold)
+            self$.addOption(private$..decisionRuleLabel)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -221,7 +241,10 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ciLevel = function() private$..ciLevel$value,
         showOptimalThreshold = function() private$..showOptimalThreshold$value,
         compareModels = function() private$..compareModels$value,
-        weightedAUC = function() private$..weightedAUC$value),
+        weightedAUC = function() private$..weightedAUC$value,
+        clinicalDecisionRule = function() private$..clinicalDecisionRule$value,
+        decisionRuleThreshold = function() private$..decisionRuleThreshold$value,
+        decisionRuleLabel = function() private$..decisionRuleLabel$value),
     private = list(
         ..outcome = NA,
         ..outcomePositive = NA,
@@ -247,7 +270,10 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..ciLevel = NA,
         ..showOptimalThreshold = NA,
         ..compareModels = NA,
-        ..weightedAUC = NA)
+        ..weightedAUC = NA,
+        ..clinicalDecisionRule = NA,
+        ..decisionRuleThreshold = NA,
+        ..decisionRuleLabel = NA)
 )
 
 decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -543,7 +569,7 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncurve",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = decisioncurveResults$new(options=options),
                 data = data,
@@ -608,6 +634,12 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param compareModels Calculate statistical tests for comparing model
 #'   performance.
 #' @param weightedAUC Calculate weighted area under the decision curve.
+#' @param clinicalDecisionRule Add clinical decision rule analysis and
+#'   comparison with models.
+#' @param decisionRuleThreshold Threshold probability for clinical decision
+#'   rule (e.g., "screen if risk > 15\%").
+#' @param decisionRuleLabel Label for the clinical decision rule in plots and
+#'   tables.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -656,7 +688,10 @@ decisioncurve <- function(
     ciLevel = 0.95,
     showOptimalThreshold = TRUE,
     compareModels = FALSE,
-    weightedAUC = FALSE) {
+    weightedAUC = FALSE,
+    clinicalDecisionRule = FALSE,
+    decisionRuleThreshold = 0.15,
+    decisionRuleLabel = "Clinical Rule") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncurve requires jmvcore to be installed (restart may be required)")
@@ -696,7 +731,10 @@ decisioncurve <- function(
         ciLevel = ciLevel,
         showOptimalThreshold = showOptimalThreshold,
         compareModels = compareModels,
-        weightedAUC = weightedAUC)
+        weightedAUC = weightedAUC,
+        clinicalDecisionRule = clinicalDecisionRule,
+        decisionRuleThreshold = decisionRuleThreshold,
+        decisionRuleLabel = decisionRuleLabel)
 
     analysis <- decisioncurveClass$new(
         options = options,

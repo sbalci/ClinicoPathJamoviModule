@@ -18,7 +18,8 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             edgeType = "diagonal",
             colorScheme = "default",
             highlightClusters = FALSE,
-            nClusters = 3, ...) {
+            nClusters = 3,
+            maxLabels = 50, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -121,6 +122,12 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=2,
                 max=10,
                 default=3)
+            private$..maxLabels <- jmvcore::OptionNumber$new(
+                "maxLabels",
+                maxLabels,
+                min=0,
+                max=200,
+                default=50)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..clusterMethod)
@@ -135,6 +142,7 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..colorScheme)
             self$.addOption(private$..highlightClusters)
             self$.addOption(private$..nClusters)
+            self$.addOption(private$..maxLabels)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -149,7 +157,8 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         edgeType = function() private$..edgeType$value,
         colorScheme = function() private$..colorScheme$value,
         highlightClusters = function() private$..highlightClusters$value,
-        nClusters = function() private$..nClusters$value),
+        nClusters = function() private$..nClusters$value,
+        maxLabels = function() private$..maxLabels$value),
     private = list(
         ..vars = NA,
         ..clusterMethod = NA,
@@ -163,7 +172,8 @@ dendrogramOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..edgeType = NA,
         ..colorScheme = NA,
         ..highlightClusters = NA,
-        ..nClusters = NA)
+        ..nClusters = NA,
+        ..maxLabels = NA)
 )
 
 dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -186,8 +196,8 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="plot",
                 title="Dendrogram Plot",
-                width=800,
-                height=600,
+                width=600,
+                height=450,
                 renderFun=".plot"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -230,7 +240,7 @@ dendrogramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "dendrogram",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = dendrogramResults$new(options=options),
                 data = data,
@@ -260,6 +270,7 @@ dendrogramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param colorScheme .
 #' @param highlightClusters .
 #' @param nClusters .
+#' @param maxLabels .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -288,7 +299,8 @@ dendrogram <- function(
     edgeType = "diagonal",
     colorScheme = "default",
     highlightClusters = FALSE,
-    nClusters = 3) {
+    nClusters = 3,
+    maxLabels = 50) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dendrogram requires jmvcore to be installed (restart may be required)")
@@ -316,7 +328,8 @@ dendrogram <- function(
         edgeType = edgeType,
         colorScheme = colorScheme,
         highlightClusters = highlightClusters,
-        nClusters = nClusters)
+        nClusters = nClusters,
+        maxLabels = maxLabels)
 
     analysis <- dendrogramClass$new(
         options = options,

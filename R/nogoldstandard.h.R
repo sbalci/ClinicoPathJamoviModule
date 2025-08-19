@@ -254,7 +254,6 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="model_fit",
                 title="Model Fit Statistics",
                 visible="(method==\"latent_class\")",
-                rows=1,
                 columns=list(
                     list(
                         `name`="statistic", 
@@ -287,7 +286,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "nogoldstandard",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = nogoldstandardResults$new(options=options),
                 data = data,

@@ -865,27 +865,44 @@ load_config <- function(config_file = "updateModules_config.yaml") {
 
 # Validate configuration
 validate_config <- function(config) {
-  required_sections <- c("global", "modes", "modules")
+  # Check for either simplified format (top-level) or nested format
+  has_top_level_version <- "new_version" %in% names(config)
+  has_nested_global <- "global" %in% names(config) && "new_version" %in% names(config$global)
+  
+  if (!has_top_level_version && !has_nested_global) {
+    stop("Missing version configuration - need either top-level 'new_version' or 'global.new_version'")
+  }
+  
+  # Check for modules section (always required)
+  if (!"modules" %in% names(config)) {
+    stop("Missing required configuration section: modules")
+  }
 
-  for (section in required_sections) {
-    if (!section %in% names(config)) {
-      stop("Missing required configuration section: ", section)
+  # Validate version and date (simplified format takes precedence)
+  if (has_top_level_version) {
+    if (!"new_date" %in% names(config)) {
+      stop("Missing required setting: new_date")
+    }
+  } else if (has_nested_global) {
+    global <- config$global
+    required_global <- c("new_version", "new_date")
+    
+    for (setting in required_global) {
+      if (!setting %in% names(global)) {
+        stop("Missing required global setting: ", setting)
+      }
     }
   }
 
-  # Validate global settings
-  global <- config$global
-  required_global <- c("new_version", "new_date", "base_repo_dir")
-
-  for (setting in required_global) {
-    if (!setting %in% names(global)) {
-      stop("Missing required global setting: ", setting)
-    }
+  # Validate base directory exists (get from either format)
+  base_repo_dir <- if ("global" %in% names(config) && "base_repo_dir" %in% names(config$global)) {
+    config$global$base_repo_dir
+  } else {
+    "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"  # Default fallback
   }
-
-  # Validate base directory exists
-  if (!dir.exists(global$base_repo_dir)) {
-    stop("Base repository directory does not exist: ", global$base_repo_dir)
+  
+  if (!dir.exists(base_repo_dir)) {
+    stop("Base repository directory does not exist: ", base_repo_dir)
   }
 
   # Validate modules
@@ -896,13 +913,8 @@ validate_config <- function(config) {
   for (module_name in names(config$modules)) {
     module <- config$modules[[module_name]]
 
-    if (!"enabled" %in% names(module)) {
-      warning("Module ", module_name, " missing 'enabled' setting, assuming TRUE")
-      config$modules[[module_name]]$enabled <- TRUE
-    }
-
-    if (module$enabled && !"directory" %in% names(module)) {
-      stop("Enabled module ", module_name, " missing 'directory' setting")
+    if (!"directory" %in% names(module)) {
+      stop("Module ", module_name, " missing 'directory' setting")
     }
   }
 

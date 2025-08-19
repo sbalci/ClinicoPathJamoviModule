@@ -19,6 +19,9 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             colorScheme <- self$options$colorScheme
             highlightClusters <- self$options$highlightClusters
             nClusters <- self$options$nClusters
+            maxLabels <- self$options$maxLabels
+            plotWidth <- self$options$plotWidth
+            plotHeight <- self$options$plotHeight
             
             # Check if we have variables selected
             if (length(vars) == 0) {
@@ -42,6 +45,24 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p>Insufficient data for clustering. Need at least 2 complete observations.</p>"
                 )
                 return()
+            }
+            
+            # Validate group variable if specified
+            groupData <- NULL
+            if (colorGroups && !is.null(group) && group != "") {
+                if (!group %in% names(data)) {
+                    self$results$clusterInfo$setContent(
+                        paste0("<p>Error: Grouping variable '", group, "' not found in data.</p>")
+                    )
+                    return()
+                }
+                groupData <- data[[group]]
+                if (length(groupData) != nrow(data)) {
+                    self$results$clusterInfo$setContent(
+                        "<p>Error: Grouping variable length does not match data dimensions.</p>"
+                    )
+                    return()
+                }
             }
             
             # Fill summary table
@@ -94,12 +115,16 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 showLabels = showLabels,
                 colorGroups = colorGroups,
                 group = group,
+                groupData = groupData,
                 vars = vars,
                 plotType = plotType,
                 edgeType = edgeType,
                 colorScheme = colorScheme,
                 highlightClusters = highlightClusters,
-                nClusters = nClusters
+                nClusters = nClusters,
+                maxLabels = maxLabels,
+                plotWidth = plotWidth,
+                plotHeight = plotHeight
             ))
         },
         
@@ -116,12 +141,14 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             showLabels <- state$showLabels
             colorGroups <- state$colorGroups
             group <- state$group
+            groupData <- state$groupData
             vars <- state$vars
             plotType <- state$plotType
             edgeType <- state$edgeType
             colorScheme <- state$colorScheme
             highlightClusters <- state$highlightClusters
             nClusters <- state$nClusters
+            maxLabels <- state$maxLabels
             
             # Convert to dendrogram
             dendro <- as.dendrogram(hclustResult)
@@ -130,35 +157,45 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Basic R dendrogram plot
                 return(private$.plotBaseDendrogram(hclustResult, dendro, data, showLabels, 
                                                  colorGroups, group, originalData, highlightClusters, 
-                                                 nClusters, colorScheme))
+                                                 nClusters, colorScheme, maxLabels))
             } else if (plotType == "linear" || plotType == "circular") {
                 # ggraph-based dendrograms
                 return(private$.plotGgraphDendrogram(hclustResult, dendro, data, showLabels, 
                                                    colorGroups, group, originalData, plotType, 
                                                    edgeType, colorScheme, highlightClusters, 
-                                                   nClusters, ggtheme))
+                                                   nClusters, maxLabels, ggtheme))
             }
             
             return(FALSE)
         },
         
         .plotBaseDendrogram = function(hclustResult, dendro, data, showLabels, colorGroups, 
-                                     group, originalData, highlightClusters, nClusters, colorScheme) {
+                                     group, originalData, highlightClusters, nClusters, colorScheme, maxLabels) {
             
             if (highlightClusters && requireNamespace('dendextend', quietly = TRUE)) {
                 # Enhanced dendrogram with dendextend
-                library(dendextend)
-                
-                # Set colors based on clusters
-                colors <- private$.getColors(nClusters, colorScheme)
-                
-                dendro <- dendro %>%
-                    dendextend::set("labels_col", value = colors, k = nClusters) %>%
-                    dendextend::set("branches_k_color", value = colors, k = nClusters) %>%
-                    dendextend::set("branches_lwd", 2) %>%
-                    dendextend::set("labels_cex", 0.8)
-                
-                plot(dendro, main = "Hierarchical Clustering Dendrogram with Highlighted Clusters")
+                tryCatch({
+                    # Set colors based on clusters
+                    colors <- private$.getColors(nClusters, colorScheme)
+                    
+                    dendro <- dendro %>%
+                        dendextend::set("labels_col", value = colors, k = nClusters) %>%
+                        dendextend::set("branches_k_color", value = colors, k = nClusters) %>%
+                        dendextend::set("branches_lwd", 2) %>%
+                        dendextend::set("labels_cex", 0.8)
+                    
+                    plot(dendro, main = "Hierarchical Clustering Dendrogram with Highlighted Clusters")
+                }, error = function(e) {
+                    warning("Error using dendextend package, falling back to basic plot: ", e$message)
+                    # Fall back to basic plot with rectangles
+                    plot(hclustResult, 
+                         main = "Hierarchical Clustering Dendrogram",
+                         xlab = "Observations", 
+                         ylab = "Distance",
+                         cex = 0.8)
+                    colors <- private$.getColors(nClusters, colorScheme)
+                    rect.hclust(hclustResult, k = nClusters, border = colors)
+                })
                 
             } else {
                 # Basic dendrogram plot
@@ -180,24 +217,19 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .plotGgraphDendrogram = function(hclustResult, dendro, data, showLabels, colorGroups, 
                                        group, originalData, plotType, edgeType, colorScheme, 
-                                       highlightClusters, nClusters, ggtheme) {
+                                       highlightClusters, nClusters, maxLabels, ggtheme) {
             
             if (!requireNamespace('ggraph', quietly = TRUE) || !requireNamespace('igraph', quietly = TRUE)) {
-                p <- ggplot2::ggplot() +
-                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                    label = "ggraph and igraph packages required for advanced dendrograms.\nPlease install these packages.",
-                                    size = 4) +
-                    ggplot2::xlim(0, 1) +
-                    ggplot2::ylim(0, 1) +
-                    ggplot2::labs(title = "Dendrogram Plot") +
-                    ggtheme
-                print(p)
-                return(TRUE)
+                # Fall back to base plot instead of showing error message
+                warning("ggraph/igraph packages not available, falling back to base plot")
+                return(private$.plotBaseDendrogram(hclustResult, dendro, data, showLabels, 
+                                                 colorGroups, group, originalData, highlightClusters, 
+                                                 nClusters, colorScheme, maxLabels))
             }
             
             # Convert dendrogram to graph format for ggraph
             edges_df <- private$.dendrogramToEdges(dendro)
-            vertices_df <- private$.createVertices(edges_df, data, colorGroups, group, originalData)
+            vertices_df <- private$.createVertices(edges_df, data, colorGroups, group, groupData)
             
             # Create graph object
             mygraph <- igraph::graph_from_data_frame(edges_df, vertices = vertices_df)
@@ -230,7 +262,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Add labels if requested
-            if (showLabels && nrow(data) <= 50) {  # Limit labels for readability
+            if (showLabels && nrow(data) <= maxLabels) {  # Use configurable label limit
                 if (circular) {
                     # Special handling for circular layout
                     vertices_df <- private$.calculateCircularAngles(vertices_df)
@@ -298,7 +330,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(edges)
         },
         
-        .createVertices = function(edges_df, data, colorGroups, group, originalData) {
+        .createVertices = function(edges_df, data, colorGroups, group, groupData) {
             # Create vertices dataframe
             all_nodes <- unique(c(edges_df$from, edges_df$to))
             vertices_df <- data.frame(
@@ -307,19 +339,28 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            # Add group information if available
-            if (colorGroups && !is.null(group) && group != "" && group %in% names(originalData)) {
-                groupData <- originalData[[group]]
-                # Match vertices to group data
+            # Add group information if available and validated
+            if (colorGroups && !is.null(groupData)) {
+                # Match vertices to group data using more robust matching
                 vertices_df$group <- NA
                 leaf_indices <- which(vertices_df$leaf)
+                
+                # Get the original row indices that correspond to the clustering data
+                original_indices <- as.numeric(rownames(data))
+                if (is.null(original_indices)) {
+                    original_indices <- seq_len(nrow(data))
+                }
+                
                 for (i in leaf_indices) {
                     vertex_name <- vertices_df$name[i]
-                    # Try to match by row names or indices
+                    # Try to match by vertex name to row names or index
                     if (vertex_name %in% rownames(data)) {
-                        row_idx <- which(rownames(data) == vertex_name)
-                        if (length(row_idx) > 0 && row_idx <= length(groupData)) {
-                            vertices_df$group[i] <- as.character(groupData[row_idx])
+                        data_row_idx <- which(rownames(data) == vertex_name)
+                        if (length(data_row_idx) > 0) {
+                            original_idx <- original_indices[data_row_idx[1]]
+                            if (original_idx <= length(groupData)) {
+                                vertices_df$group[i] <- as.character(groupData[original_idx])
+                            }
                         }
                     }
                 }

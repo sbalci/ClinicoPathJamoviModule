@@ -1085,7 +1085,12 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     private$.generateAllRiskScores(models_built)
                 }
                 
-                # Step 16: Create final summary
+                # Step 16: Initialize calibration plots array
+                if (self$options$showCalibrationPlots && length(models_built) > 0) {
+                    private$.initializeCalibrationPlotsArray(models_built)
+                }
+                
+                # Step 17: Create final summary
                 private$.createFinalSummary(models_built)
                 
                 # Store analysis completion time
@@ -1312,6 +1317,27 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             private$.crossValidationResults <- cv_results
+            
+            # Populate validation results table
+            if (length(cv_results) > 0) {
+                validation_table <- self$results$validationResults
+                validation_table$deleteRows()
+                
+                for (model_name in names(cv_results)) {
+                    cv_result <- cv_results[[model_name]]
+                    cv_summary <- cv_result$summary
+                    
+                    validation_table$addRow(rowKey = model_name, values = list(
+                        model = model_name,
+                        cv_auc_mean = cv_summary$mean_auc %||% NA,
+                        cv_auc_sd = cv_summary$sd_auc %||% NA,
+                        cv_calibration_slope = cv_summary$mean_calibration_slope %||% NA,
+                        cv_brier_score = cv_summary$mean_brier %||% NA,
+                        optimism = cv_summary$optimism_auc %||% NA
+                    ))
+                }
+            }
+            
             return(cv_results)
         },
         
@@ -1361,9 +1387,106 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
         
         .calculateAdvancedMetrics = function(models_built) {
-            # NRI and IDI calculations (simplified implementation)
-            # This would need more sophisticated implementation for full functionality
-            return(NULL)
+            if (length(models_built) < 2) return(NULL)
+            
+            outcome_var <- self$options$outcome
+            outcome_positive <- self$options$outcomePositive
+            actual <- private$.trainingData[[outcome_var]]
+            binary_actual <- as.numeric(actual == outcome_positive)
+            
+            # Calculate NRI if requested
+            if (self$options$calculateNRI && length(models_built) >= 2) {
+                nri_table <- self$results$nriTable
+                nri_table$deleteRows()
+                
+                # Parse NRI thresholds
+                threshold_str <- self$options$nriThresholds %||% "0.05, 0.10, 0.20"
+                thresholds <- as.numeric(unlist(strsplit(gsub("[[:space:]]", "", threshold_str), ",")))
+                thresholds <- thresholds[!is.na(thresholds)]
+                
+                # Compare each model to basic model (or first model)
+                reference_model <- private$.models[[models_built[1]]]
+                ref_predictions <- predict(reference_model, type = "response")
+                
+                for (i in 2:length(models_built)) {
+                    new_model <- private$.models[[models_built[i]]]
+                    new_predictions <- predict(new_model, type = "response")
+                    
+                    # Simplified NRI calculation for each threshold
+                    for (threshold in thresholds) {
+                        # Classify predictions into risk categories
+                        ref_high_risk <- ref_predictions >= threshold
+                        new_high_risk <- new_predictions >= threshold
+                        
+                        # Calculate reclassification for events
+                        events_mask <- binary_actual == 1
+                        events_up <- sum(events_mask & !ref_high_risk & new_high_risk)
+                        events_down <- sum(events_mask & ref_high_risk & !new_high_risk)
+                        total_events <- sum(events_mask)
+                        
+                        nri_events <- (events_up - events_down) / total_events
+                        
+                        # Calculate reclassification for non-events
+                        non_events_mask <- binary_actual == 0
+                        non_events_up <- sum(non_events_mask & !ref_high_risk & new_high_risk)
+                        non_events_down <- sum(non_events_mask & ref_high_risk & !new_high_risk)
+                        total_non_events <- sum(non_events_mask)
+                        
+                        nri_non_events <- (non_events_down - non_events_up) / total_non_events
+                        
+                        # Overall NRI
+                        nri_overall <- nri_events + nri_non_events
+                        
+                        # Add to table
+                        comparison_name <- paste0(models_built[i], " vs ", models_built[1], " (", threshold, ")")
+                        nri_table$addRow(rowKey = paste0(i, "_", threshold), values = list(
+                            comparison = comparison_name,
+                            nri_events = nri_events,
+                            nri_non_events = nri_non_events,
+                            nri_overall = nri_overall,
+                            nri_p_value = NA  # Would need proper statistical test
+                        ))
+                    }
+                }
+            }
+            
+            # Calculate IDI if requested
+            if (self$options$calculateIDI && length(models_built) >= 2) {
+                idi_table <- self$results$idiTable
+                idi_table$deleteRows()
+                
+                # Compare each model to basic model (or first model)
+                reference_model <- private$.models[[models_built[1]]]
+                ref_predictions <- predict(reference_model, type = "response")
+                
+                for (i in 2:length(models_built)) {
+                    new_model <- private$.models[[models_built[i]]]
+                    new_predictions <- predict(new_model, type = "response")
+                    
+                    # Calculate discrimination slopes
+                    events_mask <- binary_actual == 1
+                    non_events_mask <- binary_actual == 0
+                    
+                    # Discrimination slope = mean(predictions | events) - mean(predictions | non-events)
+                    disc_slope_ref <- mean(ref_predictions[events_mask]) - mean(ref_predictions[non_events_mask])
+                    disc_slope_new <- mean(new_predictions[events_mask]) - mean(new_predictions[non_events_mask])
+                    
+                    # IDI = difference in discrimination slopes
+                    idi_value <- disc_slope_new - disc_slope_ref
+                    
+                    # Add to table
+                    comparison_name <- paste0(models_built[i], " vs ", models_built[1])
+                    idi_table$addRow(rowKey = i, values = list(
+                        comparison = comparison_name,
+                        idi = idi_value,
+                        idi_p_value = NA,  # Would need proper statistical test
+                        discrimination_slope_new = disc_slope_new,
+                        discrimination_slope_old = disc_slope_ref
+                    ))
+                }
+            }
+            
+            return(TRUE)
         },
         
         .createFinalSummary = function(models_built) {
@@ -1476,10 +1599,39 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .addPredictionsToDataset = function() {
             if (!self$options$createPredictions) return()
+            if (length(private$.models) == 0) return()
 
             # Add predicted probability columns to the original dataset
-            # This would modify self$data to include prediction columns
-            # Implementation placeholder
+            for (model_name in names(private$.models)) {
+                model <- private$.models[[model_name]]
+                
+                # Get model name for column
+                model_col_name <- switch(model_name,
+                    "basic" = self$options$basicModelName %||% "basic_model",
+                    "enhanced" = self$options$enhancedModelName %||% "enhanced_model", 
+                    "biomarker" = self$options$biomarkerModelName %||% "biomarker_model",
+                    "custom" = self$options$customModelName %||% "custom_model",
+                    model_name
+                )
+                
+                # Create column name for predictions
+                pred_col_name <- paste0(model_col_name, "_prob")
+                
+                # Generate predictions for the full dataset
+                tryCatch({
+                    predictions <- predict(model, newdata = self$data, type = "response")
+                    
+                    # Store predictions for later use
+                    private$.predictions[[model_name]] <- predictions
+                    
+                    # Add to dataset (conceptually - jamovi handles this differently)
+                    # In practice, this would create new computed variables
+                    private$.predictions[[pred_col_name]] <- predictions
+                    
+                }, error = function(e) {
+                    warning(paste("Failed to generate predictions for", model_name, ":", e$message))
+                })
+            }
         },
 
         .prepareDCAOutput = function() {
@@ -1543,26 +1695,292 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 }
             }
         },
+        
+        .initializeCalibrationPlotsArray = function(models_built) {
+            # Initialize the calibration plots array with appropriate keys
+            calib_array <- self$results$calibrationPlotsArray
+            
+            for (model_name in models_built) {
+                key_name <- paste0("calibration_", model_name)
+                calib_array$addItem(key = key_name)
+            }
+        },
 
         # Plotting functions
         .plotROCCurves = function(image, ggtheme, theme, ...) {
-            # Implementation for ROC curves comparison plot
-            return(FALSE)  # Placeholder
+            if (length(private$.models) == 0) return(FALSE)
+            
+            if (!requireNamespace("ggplot2", quietly = TRUE) || 
+                !requireNamespace("pROC", quietly = TRUE)) {
+                return(FALSE)
+            }
+            
+            outcome_var <- self$options$outcome
+            outcome_positive <- self$options$outcomePositive
+            
+            # Prepare ROC data
+            roc_data <- data.frame()
+            
+            for (model_name in names(private$.models)) {
+                model <- private$.models[[model_name]]
+                
+                # Get predictions from training data
+                predictions <- predict(model, type = "response")
+                actual <- private$.trainingData[[outcome_var]]
+                binary_actual <- as.numeric(actual == outcome_positive)
+                
+                # Calculate ROC
+                tryCatch({
+                    roc_obj <- pROC::roc(binary_actual, predictions, quiet = TRUE)
+                    coords <- pROC::coords(roc_obj, "all", ret = c("sensitivity", "specificity"))
+                    
+                    model_data <- data.frame(
+                        sensitivity = coords$sensitivity,
+                        specificity = coords$specificity,
+                        fpr = 1 - coords$specificity,
+                        model = model_name,
+                        auc = as.numeric(pROC::auc(roc_obj)),
+                        stringsAsFactors = FALSE
+                    )
+                    
+                    roc_data <- rbind(roc_data, model_data)
+                }, error = function(e) {
+                    # Skip if ROC calculation fails
+                })
+            }
+            
+            if (nrow(roc_data) == 0) return(FALSE)
+            
+            # Create ROC plot
+            p <- ggplot2::ggplot(roc_data, ggplot2::aes(x = fpr, y = sensitivity, color = model)) +
+                ggplot2::geom_line(size = 1.2) +
+                ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+                ggplot2::labs(
+                    x = "False Positive Rate (1 - Specificity)",
+                    y = "True Positive Rate (Sensitivity)",
+                    title = "ROC Curves Comparison",
+                    color = "Model"
+                ) +
+                ggplot2::scale_x_continuous(limits = c(0, 1)) +
+                ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    legend.position = "bottom",
+                    plot.title = ggplot2::element_text(hjust = 0.5)
+                )
+            
+            # Add AUC values to legend
+            unique_models <- unique(roc_data$model)
+            auc_labels <- sapply(unique_models, function(m) {
+                auc_val <- round(unique(roc_data$auc[roc_data$model == m]), 3)
+                paste0(m, " (AUC: ", auc_val, ")")
+            })
+            
+            p <- p + ggplot2::scale_color_discrete(name = "Model", labels = auc_labels)
+            
+            print(p)
+            return(TRUE)
         },
 
         .plotCalibration = function(image, ggtheme, theme, ...) {
-            # Implementation for calibration plots
-            return(FALSE)  # Placeholder
+            plot_key <- image$name
+            model_name <- gsub("calibration_", "", plot_key)
+            
+            if (!model_name %in% names(private$.models)) return(FALSE)
+            
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+                return(FALSE)
+            }
+            
+            model <- private$.models[[model_name]]
+            outcome_var <- self$options$outcome
+            outcome_positive <- self$options$outcomePositive
+            
+            # Get predictions
+            predictions <- predict(model, type = "response")
+            actual <- private$.trainingData[[outcome_var]]
+            binary_actual <- as.numeric(actual == outcome_positive)
+            
+            # Create calibration bins
+            n_bins <- 10
+            bin_breaks <- seq(0, 1, length.out = n_bins + 1)
+            bin_indices <- cut(predictions, breaks = bin_breaks, include.lowest = TRUE)
+            
+            # Calculate observed vs predicted for each bin
+            calib_data <- data.frame()
+            
+            for (i in 1:n_bins) {
+                bin_mask <- bin_indices == levels(bin_indices)[i]
+                if (sum(bin_mask) == 0) next
+                
+                bin_pred_mean <- mean(predictions[bin_mask])
+                bin_obs_mean <- mean(binary_actual[bin_mask])
+                bin_count <- sum(bin_mask)
+                
+                calib_data <- rbind(calib_data, data.frame(
+                    predicted = bin_pred_mean,
+                    observed = bin_obs_mean,
+                    count = bin_count,
+                    bin = i
+                ))
+            }
+            
+            if (nrow(calib_data) == 0) return(FALSE)
+            
+            # Create calibration plot
+            p <- ggplot2::ggplot(calib_data, ggplot2::aes(x = predicted, y = observed)) +
+                ggplot2::geom_point(ggplot2::aes(size = count), alpha = 0.7) +
+                ggplot2::geom_smooth(method = "loess", se = TRUE, color = "blue") +
+                ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+                ggplot2::labs(
+                    x = "Predicted Probability",
+                    y = "Observed Frequency",
+                    title = paste("Calibration Plot:", model_name),
+                    size = "Bin Size"
+                ) +
+                ggplot2::scale_x_continuous(limits = c(0, 1)) +
+                ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(hjust = 0.5)
+                )
+            
+            print(p)
+            return(TRUE)
         },
 
         .plotModelComparison = function(image, ggtheme, theme, ...) {
-            # Implementation for model comparison plot
-            return(FALSE)  # Placeholder
+            if (length(private$.models) == 0) return(FALSE)
+            
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+                return(FALSE)
+            }
+            
+            # Prepare comparison data
+            comp_data <- data.frame()
+            
+            for (model_name in names(private$.models)) {
+                model <- private$.models[[model_name]]
+                
+                # Calculate basic metrics
+                predictions <- predict(model, type = "response")
+                outcome_var <- self$options$outcome
+                outcome_positive <- self$options$outcomePositive
+                actual <- private$.trainingData[[outcome_var]]
+                binary_actual <- as.numeric(actual == outcome_positive)
+                
+                # Calculate AUC
+                auc_val <- NA
+                if (requireNamespace("pROC", quietly = TRUE)) {
+                    tryCatch({
+                        roc_obj <- pROC::roc(binary_actual, predictions, quiet = TRUE)
+                        auc_val <- as.numeric(pROC::auc(roc_obj))
+                    }, error = function(e) auc_val <- NA)
+                }
+                
+                # Calculate Brier score
+                brier_score <- mean((predictions - binary_actual)^2)
+                
+                comp_data <- rbind(comp_data, data.frame(
+                    model = model_name,
+                    auc = auc_val,
+                    brier_score = brier_score,
+                    aic = AIC(model),
+                    n_predictors = length(coef(model)) - 1,
+                    stringsAsFactors = FALSE
+                ))
+            }
+            
+            if (nrow(comp_data) == 0) return(FALSE)
+            
+            # Create comparison plot
+            p <- ggplot2::ggplot(comp_data, ggplot2::aes(x = model, y = auc, fill = model)) +
+                ggplot2::geom_col(alpha = 0.7) +
+                ggplot2::geom_text(ggplot2::aes(label = round(auc, 3)), vjust = -0.5) +
+                ggplot2::labs(
+                    x = "Model",
+                    y = "AUC",
+                    title = "Model Performance Comparison",
+                    fill = "Model"
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                    plot.title = ggplot2::element_text(hjust = 0.5),
+                    legend.position = "none"
+                )
+            
+            print(p)
+            return(TRUE)
         },
 
         .plotValidation = function(image, ggtheme, theme, ...) {
-            # Implementation for validation results plot
-            return(FALSE)  # Placeholder
+            if (length(private$.crossValidationResults) == 0 && length(private$.bootstrapResults) == 0) {
+                return(FALSE)
+            }
+            
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+                return(FALSE)
+            }
+            
+            # Prepare validation data
+            val_data <- data.frame()
+            
+            # Cross-validation results
+            if (length(private$.crossValidationResults) > 0) {
+                for (model_name in names(private$.crossValidationResults)) {
+                    cv_result <- private$.crossValidationResults[[model_name]]
+                    if (!is.null(cv_result$cv_aucs)) {
+                        model_data <- data.frame(
+                            model = model_name,
+                            auc = cv_result$cv_aucs,
+                            type = "Cross-Validation",
+                            stringsAsFactors = FALSE
+                        )
+                        val_data <- rbind(val_data, model_data)
+                    }
+                }
+            }
+            
+            # Bootstrap results
+            if (length(private$.bootstrapResults) > 0) {
+                for (model_name in names(private$.bootstrapResults)) {
+                    boot_result <- private$.bootstrapResults[[model_name]]
+                    if (!is.null(boot_result$bootstrap_aucs)) {
+                        # Sample subset for plotting (too many points can be slow)
+                        sample_size <- min(100, length(boot_result$bootstrap_aucs))
+                        sampled_aucs <- sample(boot_result$bootstrap_aucs, sample_size)
+                        
+                        model_data <- data.frame(
+                            model = model_name,
+                            auc = sampled_aucs,
+                            type = "Bootstrap",
+                            stringsAsFactors = FALSE
+                        )
+                        val_data <- rbind(val_data, model_data)
+                    }
+                }
+            }
+            
+            if (nrow(val_data) == 0) return(FALSE)
+            
+            # Create validation plot
+            p <- ggplot2::ggplot(val_data, ggplot2::aes(x = model, y = auc, fill = type)) +
+                ggplot2::geom_boxplot(alpha = 0.7) +
+                ggplot2::labs(
+                    x = "Model",
+                    y = "AUC",
+                    title = "Validation Results",
+                    fill = "Validation Type"
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                    plot.title = ggplot2::element_text(hjust = 0.5)
+                )
+            
+            print(p)
+            return(TRUE)
         }
     )
 )

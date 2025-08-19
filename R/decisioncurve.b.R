@@ -18,6 +18,17 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .dcaResults = NULL,
         .plotData = NULL,
         .clinicalImpactData = NULL,
+        
+        # Constants for default values and thresholds
+        DECISIONCURVE_DEFAULTS = list(
+            selected_thresholds = c(0.05, 0.10, 0.15, 0.20, 0.25, 0.30),
+            bootstrap_progress_threshold = 5000,
+            performance_threshold_count = 1000,  # Threshold count for performance optimization
+            bootstrap_chunk_size = 10000,       # Memory-efficient chunking threshold
+            bootstrap_convergence_check = 500,  # Check convergence every N iterations
+            convergence_tolerance = 0.001,      # CI stability tolerance
+            max_models_full_plot = 10           # Plot optimization threshold
+        ),
 
         # Calculate net benefit for a model at given threshold
         .calculateNetBenefit = function(predictions, outcomes, threshold, positive_outcome) {
@@ -78,8 +89,35 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .calculateTreatNoneNetBenefit = function() {
             return(0)
         },
+        
+        # Vectorized net benefit calculation for performance optimization
+        .calculateNetBenefitsVectorized = function(predictions, outcomes, thresholds, positive_outcome) {
+            # Convert outcomes to binary once
+            binary_outcomes <- as.numeric(outcomes == positive_outcome)
+            n <- length(outcomes)
+            
+            # Pre-allocate result vector
+            net_benefits <- numeric(length(thresholds))
+            
+            # Calculate for each threshold (still a loop but optimized inner calculations)
+            for (j in seq_along(thresholds)) {
+                thresh <- thresholds[j]
+                
+                # Vectorized threshold comparison
+                predicted_positive <- predictions >= thresh
+                
+                # Vectorized confusion matrix calculation
+                tp <- sum(predicted_positive & binary_outcomes == 1)
+                fp <- sum(predicted_positive & binary_outcomes == 0)
+                
+                # Net benefit formula
+                net_benefits[j] <- (tp / n) - (fp / n) * (thresh / (1 - thresh))
+            }
+            
+            return(net_benefits)
+        },
 
-        # Generate threshold sequence
+        # Generate threshold sequence with enhanced validation
         .generateThresholds = function() {
             range_type <- self$options$thresholdRange
             step <- self$options$thresholdStep
@@ -91,17 +129,102 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else { # custom
                 min_thresh <- self$options$thresholdMin
                 max_thresh <- self$options$thresholdMax
+                
+                # Enhanced threshold range validation with clinical guidance
+                private$.validateThresholdRange(min_thresh, max_thresh)
+                
                 thresholds <- seq(min_thresh, max_thresh, by = step)
             }
 
             return(thresholds)
+        },
+        
+        # Validate threshold ranges with clinical context and guidance
+        .validateThresholdRange = function(min_thresh, max_thresh) {
+            # Basic validation
+            if (min_thresh >= max_thresh) {
+                stop(sprintf("Minimum threshold (%.3f) must be less than maximum threshold (%.3f)", 
+                           min_thresh, max_thresh))
+            }
+            
+            if (min_thresh <= 0 || max_thresh >= 1) {
+                stop("Threshold probabilities must be between 0 and 1 (exclusive)")
+            }
+            
+            # Clinical guidance warnings for unusual ranges
+            if (max_thresh > 0.8) {
+                warning(sprintf("Very high maximum threshold (%.1f%%). Decision thresholds above 80%% are rarely clinically meaningful for most medical decisions.", 
+                               max_thresh * 100))
+            }
+            
+            if (min_thresh < 0.01) {
+                warning(sprintf("Very low minimum threshold (%.1f%%). Thresholds below 1%% may not be clinically interpretable.", 
+                               min_thresh * 100))
+            }
+            
+            # Range size warnings
+            range_size <- max_thresh - min_thresh
+            if (range_size > 0.7) {
+                warning(sprintf("Very wide threshold range (%.1f%% span). Consider focusing on clinically relevant range for your specific decision context.", 
+                               range_size * 100))
+            }
+            
+            if (range_size < 0.05) {
+                warning(sprintf("Narrow threshold range (%.1f%% span). Decision curve analysis is most informative across wider probability ranges.", 
+                               range_size * 100))
+            }
+            
+            # Clinical context guidance
+            private$.provideThresholdContextGuidance(min_thresh, max_thresh)
+        },
+        
+        # Provide clinical context guidance for threshold selection
+        .provideThresholdContextGuidance = function(min_thresh, max_thresh) {
+            # Determine likely clinical contexts based on threshold range
+            cancer_screening_range <- min_thresh <= 0.10 && max_thresh >= 0.15
+            surgical_decision_range <- min_thresh <= 0.20 && max_thresh >= 0.40
+            treatment_selection_range <- min_thresh <= 0.15 && max_thresh >= 0.35
+            
+            guidance_messages <- character(0)
+            
+            if (cancer_screening_range) {
+                guidance_messages <- c(guidance_messages, 
+                    "• Threshold range suitable for cancer screening decisions (typical range: 5-20%)")
+            }
+            
+            if (surgical_decision_range) {
+                guidance_messages <- c(guidance_messages, 
+                    "• Threshold range suitable for surgical intervention decisions (typical range: 10-50%)")
+            }
+            
+            if (treatment_selection_range) {
+                guidance_messages <- c(guidance_messages, 
+                    "• Threshold range suitable for treatment selection decisions (typical range: 15-40%)")
+            }
+            
+            if (max_thresh <= 0.05) {
+                guidance_messages <- c(guidance_messages, 
+                    "• Very low threshold range - consider if this aligns with your clinical decision context")
+            }
+            
+            if (min_thresh >= 0.60) {
+                guidance_messages <- c(guidance_messages, 
+                    "• Very high threshold range - ensure this reflects actual clinical decision thresholds")
+            }
+            
+            if (length(guidance_messages) > 0) {
+                message("Clinical threshold context guidance:")
+                for (msg in guidance_messages) {
+                    message(msg)
+                }
+            }
         },
 
         # Parse selected thresholds for table
         .parseSelectedThresholds = function() {
             threshold_str <- self$options$selectedThresholds
             if (threshold_str == "") {
-                return(c(0.05, 0.10, 0.15, 0.20, 0.25, 0.30))
+                return(private$DECISIONCURVE_DEFAULTS$selected_thresholds)
             }
 
             # Parse comma-separated values
@@ -110,7 +233,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             thresholds <- thresholds[thresholds > 0 & thresholds < 1]
 
             if (length(thresholds) == 0) {
-                return(c(0.05, 0.10, 0.15, 0.20, 0.25, 0.30))
+                return(private$DECISIONCURVE_DEFAULTS$selected_thresholds)
             }
 
             return(sort(thresholds))
@@ -136,32 +259,208 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             return(names)
         },
 
-        # Bootstrap confidence intervals
+        # Check bootstrap convergence for early termination
+        .checkBootstrapConvergence = function(ci_history_lower, ci_history_upper, tolerance = NULL) {
+            if (is.null(tolerance)) tolerance <- private$DECISIONCURVE_DEFAULTS$convergence_tolerance
+            
+            # Need at least 100 iterations to assess convergence
+            if (length(ci_history_lower) < 100) return(FALSE)
+            
+            # Check stability of recent CI estimates
+            recent_lower <- tail(ci_history_lower, 20)
+            recent_upper <- tail(ci_history_upper, 20)
+            
+            # Calculate moving range of recent estimates
+            lower_changes <- abs(diff(recent_lower))
+            upper_changes <- abs(diff(recent_upper))
+            
+            # Convergence achieved if recent changes are small
+            lower_stable <- all(lower_changes < tolerance, na.rm = TRUE)
+            upper_stable <- all(upper_changes < tolerance, na.rm = TRUE)
+            
+            return(lower_stable && upper_stable)
+        },
+        
+        # Memory-efficient chunked bootstrap for very large n_boot
+        .calculateBootstrapCIChunked = function(predictions, outcomes, thresholds, positive_outcome, n_boot = 1000) {
+            chunk_size <- private$DECISIONCURVE_DEFAULTS$bootstrap_chunk_size
+            
+            if (n_boot <= chunk_size) {
+                return(private$.calculateBootstrapCI(predictions, outcomes, thresholds, positive_outcome, n_boot))
+            }
+            
+            message(sprintf("Large bootstrap (%d reps): Using memory-efficient chunked processing with %d reps per chunk", 
+                           n_boot, chunk_size))
+            
+            n_chunks <- ceiling(n_boot / chunk_size)
+            all_results <- list()
+            
+            for (chunk in 1:n_chunks) {
+                chunk_start <- (chunk - 1) * chunk_size + 1
+                chunk_end <- min(chunk * chunk_size, n_boot)
+                chunk_n_boot <- chunk_end - chunk_start + 1
+                
+                message(sprintf("Processing chunk %d/%d (%d replications)...", chunk, n_chunks, chunk_n_boot))
+                
+                chunk_result <- private$.calculateBootstrapCI(
+                    predictions, outcomes, thresholds, positive_outcome, chunk_n_boot
+                )
+                
+                if (!is.null(chunk_result)) {
+                    all_results[[chunk]] <- list(
+                        lower = chunk_result$lower,
+                        upper = chunk_result$upper,
+                        n_boot = chunk_n_boot
+                    )
+                }
+                
+                # Memory cleanup
+                gc(verbose = FALSE)
+            }
+            
+            # Combine results from all chunks
+            if (length(all_results) == 0) {
+                return(list(lower = rep(NA, length(thresholds)), upper = rep(NA, length(thresholds))))
+            }
+            
+            # Weight by chunk size and combine
+            total_weight <- sum(sapply(all_results, function(x) x$n_boot))
+            combined_lower <- numeric(length(thresholds))
+            combined_upper <- numeric(length(thresholds))
+            
+            for (i in seq_along(all_results)) {
+                weight <- all_results[[i]]$n_boot / total_weight
+                combined_lower <- combined_lower + weight * all_results[[i]]$lower
+                combined_upper <- combined_upper + weight * all_results[[i]]$upper
+            }
+            
+            message("Chunked bootstrap processing completed successfully.")
+            return(list(lower = combined_lower, upper = combined_upper))
+        },
+
+        # Bootstrap confidence intervals with enhanced error handling and progress reporting
         .calculateBootstrapCI = function(predictions, outcomes, thresholds, positive_outcome, n_boot = 1000) {
+            
+            # Validate inputs
+            if (length(predictions) != length(outcomes)) {
+                stop("Bootstrap CI: Predictions and outcomes must have same length")
+            }
+            
+            if (n_boot < 100) {
+                warning("Bootstrap CI: Using fewer than 100 replications may give unreliable confidence intervals")
+            }
+            
+            # Use chunked bootstrap for very large n_boot to manage memory
+            if (n_boot >= private$DECISIONCURVE_DEFAULTS$bootstrap_chunk_size) {
+                return(private$.calculateBootstrapCIChunked(predictions, outcomes, thresholds, positive_outcome, n_boot))
+            }
+            
+            # Progress reporting for large bootstrap runs
+            if (n_boot >= private$DECISIONCURVE_DEFAULTS$bootstrap_progress_threshold) {
+                message(sprintf("Bootstrap confidence intervals: Running %d replications (this may take several minutes)...", n_boot))
+            }
+            
             n <- length(outcomes)
             boot_results <- array(NA, dim = c(n_boot, length(thresholds)))
+            
+            # Convergence tracking for early termination
+            convergence_check_interval <- private$DECISIONCURVE_DEFAULTS$bootstrap_convergence_check
+            ci_history_lower <- list()
+            ci_history_upper <- list()
+            converged_early <- FALSE
+            
+            tryCatch({
+                for (i in 1:n_boot) {
+                    # Progress indicators for very large bootstrap runs
+                    if (n_boot >= 10000 && i %% 2000 == 0) {
+                        message(sprintf("Bootstrap progress: %d/%d replications completed (%.1f%%)", 
+                                       i, n_boot, (i/n_boot)*100))
+                    }
+                    
+                    # Check convergence periodically for early termination
+                    if (i %% convergence_check_interval == 0 && i >= convergence_check_interval * 2) {
+                        # Calculate interim CI estimates
+                        interim_lower <- apply(boot_results[1:i, , drop = FALSE], 2, function(x) {
+                            if (sum(!is.na(x)) < 10) return(NA)
+                            quantile(x, probs = (1 - self$options$ciLevel) / 2, na.rm = TRUE)
+                        })
+                        interim_upper <- apply(boot_results[1:i, , drop = FALSE], 2, function(x) {
+                            if (sum(!is.na(x)) < 10) return(NA)
+                            quantile(x, probs = 1 - (1 - self$options$ciLevel) / 2, na.rm = TRUE)
+                        })
+                        
+                        ci_history_lower[[length(ci_history_lower) + 1]] <- interim_lower
+                        ci_history_upper[[length(ci_history_upper) + 1]] <- interim_upper
+                        
+                        # Check if converged
+                        if (length(ci_history_lower) >= 3) {
+                            last_lower <- sapply(ci_history_lower, function(x) mean(x, na.rm = TRUE))
+                            last_upper <- sapply(ci_history_upper, function(x) mean(x, na.rm = TRUE))
+                            
+                            if (private$.checkBootstrapConvergence(last_lower, last_upper)) {
+                                message(sprintf("Bootstrap confidence intervals converged early at iteration %d (%.1f%% of requested replications)", 
+                                               i, (i/n_boot)*100))
+                                converged_early <- TRUE
+                                n_boot <- i  # Update effective n_boot
+                                boot_results <- boot_results[1:i, , drop = FALSE]
+                                break
+                            }
+                        }
+                    }
+                    
+                    # Bootstrap sample with error checking
+                    boot_idx <- sample(n, n, replace = TRUE)
+                    boot_pred <- predictions[boot_idx]
+                    boot_out <- outcomes[boot_idx]
+                    
+                    # Validate bootstrap sample has variation
+                    if (length(unique(boot_out)) < 2) {
+                        warning(sprintf("Bootstrap sample %d has no outcome variation, skipping", i))
+                        next
+                    }
 
-            for (i in 1:n_boot) {
-                # Bootstrap sample
-                boot_idx <- sample(n, n, replace = TRUE)
-                boot_pred <- predictions[boot_idx]
-                boot_out <- outcomes[boot_idx]
-
-                # Calculate net benefits for this bootstrap sample
-                for (j in seq_along(thresholds)) {
-                    thresh <- thresholds[j]
-                    nb_result <- private$.calculateNetBenefit(
-                        boot_pred, boot_out, thresh, positive_outcome
-                    )
-                    boot_results[i, j] <- nb_result$net_benefit
+                    # Calculate net benefits for this bootstrap sample
+                    for (j in seq_along(thresholds)) {
+                        thresh <- thresholds[j]
+                        nb_result <- private$.calculateNetBenefit(
+                            boot_pred, boot_out, thresh, positive_outcome
+                        )
+                        boot_results[i, j] <- nb_result$net_benefit
+                    }
                 }
-            }
 
-            # Calculate confidence intervals
-            ci_lower <- apply(boot_results, 2, quantile, probs = (1 - self$options$ciLevel) / 2, na.rm = TRUE)
-            ci_upper <- apply(boot_results, 2, quantile, probs = 1 - (1 - self$options$ciLevel) / 2, na.rm = TRUE)
+                # Check for sufficient valid bootstrap samples
+                valid_samples <- rowSums(!is.na(boot_results))
+                if (any(valid_samples < n_boot * 0.5)) {
+                    warning("Bootstrap CI: Less than 50% of bootstrap samples were valid. Results may be unreliable.")
+                }
 
-            return(list(lower = ci_lower, upper = ci_upper))
+                # Calculate confidence intervals with error handling
+                ci_lower <- apply(boot_results, 2, function(x) {
+                    if (sum(!is.na(x)) < 10) return(NA)
+                    quantile(x, probs = (1 - self$options$ciLevel) / 2, na.rm = TRUE)
+                })
+                
+                ci_upper <- apply(boot_results, 2, function(x) {
+                    if (sum(!is.na(x)) < 10) return(NA)
+                    quantile(x, probs = 1 - (1 - self$options$ciLevel) / 2, na.rm = TRUE)
+                })
+                
+                if (n_boot >= private$DECISIONCURVE_DEFAULTS$bootstrap_progress_threshold) {
+                    message("Bootstrap confidence intervals completed successfully.")
+                }
+
+                return(list(lower = ci_lower, upper = ci_upper))
+                
+            }, error = function(e) {
+                enhanced_msg <- sprintf("Bootstrap CI calculation failed: %s. Continuing without confidence intervals.", 
+                                       conditionMessage(e))
+                warning(enhanced_msg)
+                return(list(
+                    lower = rep(NA, length(thresholds)), 
+                    upper = rep(NA, length(thresholds))
+                ))
+            })
         },
 
         # Find optimal threshold for a model
@@ -290,6 +589,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Generate threshold sequence
             thresholds <- private$.generateThresholds()
 
+            # Performance monitoring for large analyses
+            n_calculations <- length(model_vars) * length(thresholds)
+            if (n_calculations >= private$DECISIONCURVE_DEFAULTS$performance_threshold_count) {
+                message(sprintf("Decision curve analysis: Processing %d models × %d thresholds (%d total calculations)...", 
+                               length(model_vars), length(thresholds), n_calculations))
+            }
+
             # Initialize results storage
             dca_results <- list()
             plot_data <- data.frame()
@@ -299,6 +605,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 model_var <- model_vars[i]
                 model_name <- model_names[i]
                 predictions <- analysis_data[[model_var]]
+
+                # Progress reporting for multiple models
+                if (length(model_vars) > 3) {
+                    message(sprintf("Processing model %d/%d: %s", i, length(model_vars), model_name))
+                }
 
                 # Validate predictions are between 0 and 1 (or convert if needed)
                 if (min(predictions, na.rm = TRUE) < 0 || max(predictions, na.rm = TRUE) > 1) {
@@ -310,17 +621,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     }
                 }
 
-                # Calculate net benefits across thresholds
-                net_benefits <- numeric(length(thresholds))
+                # Optimized threshold calculations - vectorize when possible
+                net_benefits <- private$.calculateNetBenefitsVectorized(
+                    predictions, outcomes, thresholds, outcome_positive
+                )
+                
+                # Detailed results for specific calculations (fallback to individual calculations)
                 detailed_results <- list()
-
                 for (j in seq_along(thresholds)) {
                     thresh <- thresholds[j]
-                    nb_result <- private$.calculateNetBenefit(
+                    detailed_results[[j]] <- private$.calculateNetBenefit(
                         predictions, outcomes, thresh, outcome_positive
                     )
-                    net_benefits[j] <- nb_result$net_benefit
-                    detailed_results[[j]] <- nb_result
                 }
 
                 # Store results
@@ -379,6 +691,14 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             )
 
             plot_data <- rbind(plot_data, ref_data)
+            
+            # Add clinical decision rule if requested
+            if (self$options$clinicalDecisionRule) {
+                decision_rule_data <- private$.calculateClinicalDecisionRule(
+                    outcomes, thresholds, outcome_positive
+                )
+                plot_data <- rbind(plot_data, decision_rule_data)
+            }
 
             # Store results for plotting
             private$.dcaResults <- dca_results
@@ -694,23 +1014,152 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<li>Consider the threshold range relevant to your clinical context</li>",
                 "<li>Net benefit can be interpreted as additional true positives per 100 patients screened</li>",
                 "</ul>",
+                private$.generateMethodologicalFootnotes(),
                 "</body></html>"
             )
 
             self$results$summaryText$setContent(interpretation)
         },
+        
+        # Generate methodological footnotes for enhanced clinical understanding
+        .generateMethodologicalFootnotes = function() {
+            footnotes <- "<div style='margin-top: 20px; font-size: 0.9em; color: #666;'>"
+            footnotes <- paste0(footnotes, "<p><strong>Methodological Notes:</strong></p>")
+            footnotes <- paste0(footnotes, "<ul style='font-size: 0.85em;'>")
+            
+            # Net benefit formula explanation
+            footnotes <- paste0(footnotes, 
+                "<li><strong>Net Benefit Formula:</strong> NB = (TP/n) - (FP/n) × [pt/(1-pt)], where pt is threshold probability</li>")
+            
+            # Reference strategies explanation
+            footnotes <- paste0(footnotes,
+                "<li><strong>Reference Strategies:</strong> 'Treat All' assumes all patients receive intervention; 'Treat None' assumes no intervention</li>")
+            
+            # Threshold interpretation
+            footnotes <- paste0(footnotes,
+                "<li><strong>Threshold Probability:</strong> The minimum probability at which a patient would choose intervention over no intervention</li>")
+            
+            # Bootstrap CI note if applicable
+            if (self$options$confidenceIntervals) {
+                footnotes <- paste0(footnotes,
+                    "<li><strong>Confidence Intervals:</strong> Bootstrap ", self$options$bootReps, 
+                    " replications with ", (self$options$ciLevel * 100), "% confidence level</li>")
+            }
+            
+            # Clinical impact note if applicable
+            if (self$options$calculateClinicalImpact) {
+                footnotes <- paste0(footnotes,
+                    "<li><strong>Clinical Impact:</strong> Calculated for population size of ", 
+                    self$options$populationSize, " patients</li>")
+            }
+            
+            # Clinical decision rule note if applicable
+            if (self$options$clinicalDecisionRule) {
+                footnotes <- paste0(footnotes,
+                    "<li><strong>Clinical Decision Rule:</strong> Fixed threshold at ", 
+                    round(self$options$decisionRuleThreshold * 100, 1), "% (", 
+                    self$options$decisionRuleLabel, ")</li>")
+            }
+            
+            footnotes <- paste0(footnotes, "</ul></div>")
+            
+            return(footnotes)
+        },
+        
+        # Optimize plot data for many models to improve performance and readability
+        .optimizePlotDataForManyModels = function(plot_data, n_models) {
+            # Strategies for handling many models:
+            # 1. Reduce line thickness
+            # 2. Sample data points for smoother rendering
+            # 3. Consider highlighting top-performing models
+            
+            # Sample data points if there are many thresholds
+            n_thresholds_per_model <- nrow(plot_data) / n_models
+            if (n_thresholds_per_model > 100) {
+                # Sample every nth point to reduce rendering load
+                sample_rate <- ceiling(n_thresholds_per_model / 50)  # Target ~50 points per model
+                
+                optimized_data <- data.frame()
+                for (model in unique(plot_data$model)) {
+                    model_data <- plot_data[plot_data$model == model, ]
+                    model_data <- model_data[seq(1, nrow(model_data), by = sample_rate), ]
+                    optimized_data <- rbind(optimized_data, model_data)
+                }
+                
+                message(sprintf("Reduced data points from %d to %d for faster rendering", 
+                               nrow(plot_data), nrow(optimized_data)))
+                
+                return(optimized_data)
+            }
+            
+            return(plot_data)
+        },
+        
+        # Calculate clinical decision rule net benefit
+        .calculateClinicalDecisionRule = function(outcomes, thresholds, outcome_positive) {
+            rule_threshold <- self$options$decisionRuleThreshold
+            rule_label <- self$options$decisionRuleLabel
+            
+            if (rule_label == "") {
+                rule_label <- paste0("Clinical Rule (", round(rule_threshold * 100, 1), "%)")
+            }
+            
+            # Clinical decision rule: binary decision at fixed threshold
+            # Net benefit = prevalence - (1-prevalence) * [rule_threshold/(1-rule_threshold)]
+            binary_outcomes <- as.numeric(outcomes == outcome_positive)
+            prevalence <- mean(binary_outcomes)
+            
+            # Calculate net benefit for the clinical decision rule at each threshold
+            rule_net_benefits <- numeric(length(thresholds))
+            
+            for (j in seq_along(thresholds)) {
+                threshold <- thresholds[j]
+                
+                # Clinical rule performance:
+                # If current threshold <= rule threshold: apply rule (screen/treat all above rule threshold)
+                # If current threshold > rule threshold: rule says "don't screen/treat"
+                
+                if (threshold <= rule_threshold) {
+                    # Rule recommends intervention for patients above rule threshold
+                    # This is equivalent to treating all patients with net benefit calculation
+                    rule_net_benefits[j] <- prevalence - (1 - prevalence) * (rule_threshold / (1 - rule_threshold))
+                } else {
+                    # Rule recommends no intervention at this threshold
+                    rule_net_benefits[j] <- 0
+                }
+            }
+            
+            # Create decision rule data
+            decision_rule_data <- data.frame(
+                threshold = thresholds,
+                net_benefit = rule_net_benefits,
+                model = rule_label,
+                stringsAsFactors = FALSE
+            )
+            
+            return(decision_rule_data)
+        },
 
-        # Plotting functions
+        # Optimized plotting functions with performance enhancements for many models
         .plotDCA = function(image, ggtheme, theme, ...) {
             if (is.null(private$.plotData) || nrow(private$.plotData) == 0) {
                 return(FALSE)
             }
 
             plot_data <- private$.plotData
+            
+            # Performance optimization for many models
+            n_models <- length(unique(plot_data$model))
+            max_models_threshold <- private$DECISIONCURVE_DEFAULTS$max_models_full_plot
+            
+            if (n_models > max_models_threshold) {
+                plot_data <- private$.optimizePlotDataForManyModels(plot_data, n_models)
+                message(sprintf("Plot optimized for %d models: Using performance enhancements", n_models))
+            }
 
-            # Create base plot
+            # Create base plot with optimized aesthetics
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = threshold, y = net_benefit, color = model)) +
-                ggplot2::geom_line(size = 1) +
+                ggplot2::geom_line(size = if(n_models > max_models_threshold) 0.8 else 1) +
                 ggplot2::labs(
                     title = "Decision Curve Analysis",
                     x = "Threshold Probability",
@@ -743,6 +1192,22 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
             }
 
+            # Optimize legend and colors for many models
+            if (n_models > max_models_threshold) {
+                # Use more efficient legend positioning and reduce legend size
+                p <- p + ggplot2::theme(
+                    legend.position = "bottom",
+                    legend.text = ggplot2::element_text(size = 8),
+                    legend.title = ggplot2::element_text(size = 9),
+                    legend.key.size = ggplot2::unit(0.4, "cm")
+                )
+                
+                # Consider using fewer distinct colors and rely more on line patterns
+                if (n_models > 15) {
+                    p <- p + ggplot2::guides(color = ggplot2::guide_legend(ncol = 3))
+                }
+            }
+
             # Style reference lines differently
             if (self$options$plotStyle == "standard" || self$options$plotStyle == "detailed") {
                 # Make treat all/none lines dashed
@@ -750,7 +1215,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 if (nrow(treat_lines) > 0) {
                     p <- p + ggplot2::geom_line(
                         data = treat_lines,
-                        linetype = "dashed", size = 0.8
+                        linetype = "dashed", 
+                        size = if(n_models > max_models_threshold) 0.6 else 0.8
                     )
                 }
             }

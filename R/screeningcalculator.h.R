@@ -263,7 +263,6 @@ screeningcalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 width=600,
                 height=450,
                 renderFun=".plot1",
-                requiresData=TRUE,
                 visible="(fagan)",
                 clearWith=list(
                     "sens",
@@ -277,7 +276,6 @@ screeningcalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 width=600,
                 height=450,
                 renderFun=".plot2PP",
-                requiresData=TRUE,
                 visible="(fagan && repeat2)",
                 clearWith=list(
                     "sens",
@@ -292,7 +290,6 @@ screeningcalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 width=600,
                 height=450,
                 renderFun=".plot2NN",
-                requiresData=TRUE,
                 visible="(fagan && repeat2)",
                 clearWith=list(
                     "sens",
@@ -307,7 +304,6 @@ screeningcalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 width=600,
                 height=450,
                 renderFun=".plot3PPP",
-                requiresData=TRUE,
                 visible="(fagan && repeat3)",
                 clearWith=list(
                     "sens",
@@ -322,7 +318,6 @@ screeningcalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 width=600,
                 height=450,
                 renderFun=".plot3NNN",
-                requiresData=TRUE,
                 visible="(fagan && repeat3)",
                 clearWith=list(
                     "sens",
@@ -365,7 +360,7 @@ screeningcalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 package = "ClinicoPath",
                 name = "screeningcalculator",
-                version = c(0,0,3),
+                version = c(0,0,31),
                 options = options,
                 results = screeningcalculatorResults$new(options=options),
                 data = data,

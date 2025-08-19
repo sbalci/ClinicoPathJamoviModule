@@ -18,7 +18,8 @@ dendrogram(
   edgeType = "diagonal",
   colorScheme = "default",
   highlightClusters = FALSE,
-  nClusters = 3
+  nClusters = 3,
+  maxLabels = 50
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ dendrogram(
 \item{highlightClusters}{.}
 
 \item{nClusters}{.}
+
+\item{maxLabels}{.}
 }
 \value{
 A results object containing:

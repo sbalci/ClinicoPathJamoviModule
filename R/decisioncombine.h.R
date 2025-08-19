@@ -412,7 +412,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="combStatsTableCI",
-                title="Combination Diagnostic Statistics with 95% CI",
+                title="Combination Diagnostic Statistics with 95% Confidence Intervals",
                 visible=TRUE,
                 rows=0,
                 columns=list(
@@ -432,13 +432,13 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="lower", 
                         `title`="Lower", 
-                        `superTitle`="95% CI", 
+                        `superTitle`="95% Wilson CI", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="upper", 
                         `title`="Upper", 
-                        `superTitle`="95% CI", 
+                        `superTitle`="95% Wilson CI", 
                         `type`="number", 
                         `format`="pc")),
                 clearWith=list(
@@ -453,7 +453,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="addCombinationPattern",
                 title="Test Combination Patterns",
                 varTitle="TestCombination",
-                varDescription="Test combination pattern (e.g., +/+, +/-, -/+, -/-)",
+                varDescription="Test combination pattern exported to dataset (e.g., +/+ = both positive, +/- = test1 pos/test2 neg, -/+ = test1 neg/test2 pos, -/- = both negative). Enables further analysis of pattern-specific outcomes.",
                 measureType="nominal",
                 clearWith=list(
                     "test1",
@@ -465,7 +465,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="performanceHeatmap",
-                title="Performance Heatmap",
+                title="Diagnostic Performance Heatmap",
                 width=800,
                 height=600,
                 visible="(showVisualization && (plotType == 'heatmap' || plotType == 'all'))",
@@ -480,7 +480,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="rocCurves",
-                title="ROC Curves Comparison",
+                title="ROC Analysis with Optimal Cut-point",
                 width=800,
                 height=600,
                 visible="(showVisualization && (plotType == 'roc' || plotType == 'all'))",
@@ -522,7 +522,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="forestPlot",
-                title="Forest Plot of Diagnostic Statistics",
+                title="Forest Plot with Wilson Confidence Intervals",
                 width=800,
                 height=600,
                 visible="(showVisualization && (plotType == 'forest' || plotType == 'all'))",
@@ -557,19 +557,22 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 
 #' Combine Medical Decision Tests
 #'
-#' Analyzes and compares multiple medical diagnostic tests by examining all 
-#' possible test result combinations. This function evaluates how different 
-#' patterns of positive and negative test results perform against a gold 
-#' standard, helping clinicians understand which test combinations are most 
-#' informative. Shows individual test performance and comprehensive analysis 
-#' of all possible test result patterns (e.g., +/+, +/-, -/+, -/-) with 
-#' their respective positive predictive values and clinical interpretation. 
-#' Essential for understanding test interactions and optimizing diagnostic 
-#' strategies when multiple tests are available for the same condition.
+#' Advanced medical diagnostic test combination analysis with automated 
+#' optimal cut-point identification and comprehensive clinical interpretation. 
+#' This function systematically evaluates all possible test result 
+#' combinations 
+#' (2-test: 4 patterns, 3-test: 8 patterns) against a gold standard using 
+#' state-of-the-art statistical methods. Features include Wilson score 
+#' confidence intervals for enhanced accuracy, ROC-based optimal cut-point 
+#' selection using Youden Index maximization, and publication-quality 
+#' visualizations with clinical decision thresholds. Provides actionable 
+#' recommendations for screening vs. confirmatory testing strategies with 
+#' detailed clinical interpretation guidelines. Essential for evidence-based 
+#' diagnostic protocol development and test validation studies.
 #' 
 #'
 #' @examples
-#' # Analyze two-test combinations
+#' # Basic two-test combination analysis with optimal cut-point identification
 #' result1 <- decisioncombine(
 #'   data = histopathology,
 #'   gold = "Golden Standart",
@@ -577,10 +580,12 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   test1 = "New Test",
 #'   test1Positive = "1",
 #'   test2 = "Rater 1",
-#'   test2Positive = "1"
+#'   test2Positive = "1",
+#'   showVisualization = TRUE,
+#'   plotType = "all"  # Shows all visualization types including ROC with optimal cut-point
 #' )
 #'
-#' # Analyze three-test combinations
+#' # Comprehensive three-test analysis with clinical recommendations
 #' result2 <- decisioncombine(
 #'   data = histopathology,
 #'   gold = "Golden Standart",
@@ -591,8 +596,14 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   test2Positive = "1",
 #'   test3 = "Rater 2",
 #'   test3Positive = "1",
-#'   showIndividual = TRUE
+#'   showIndividual = TRUE,
+#'   showVisualization = TRUE,
+#'   plotType = "roc",  # Focus on ROC analysis with optimal cut-point
+#'   exportCombinationPattern = TRUE  # Export patterns for further analysis
 #' )
+#'
+#' # Access optimal cut-point recommendations from HTML output
+#' # result2$combinationsAnalysis contains clinical recommendations
 #'
 #' @param data The data as a data frame.
 #' @param gold .
@@ -608,12 +619,11 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param showIndividual .
 #' @param exportCombinationPattern Export a new variable to the data frame
 #'   indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
-#' @param showVisualization Display visualizations for test combination
-#'   analysis.
-#' @param plotType Type of visualization to display. Heatmap shows combination
-#'   patterns performance, ROC curves compare individual and combined tests,
-#'   Decision tree shows test hierarchy, Venn diagram shows test overlaps,
-#'   Forest plot shows diagnostic statistics with CI.
+#' @param showVisualization Display comprehensive visualizations for test
+#'   combination analysis with automated optimal cut-point identification.
+#' @param plotType Visualization selection: heatmap (performance matrix), roc
+#'   (ROC space with optimal cut-point),  tree (clinical decision hierarchy),
+#'   venn (test agreement), forest (Wilson CIs), all (comprehensive output).
 #' @param plotHeight Height of the plot in pixels.
 #' @param plotWidth Width of the plot in pixels.
 #' @param colorScheme Color scheme for visualizations. Clinical uses red for
@@ -626,14 +636,14 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$indTable2} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$indTable3} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$combinationsAnalysis} \tab \tab \tab \tab \tab Comprehensive analysis of all possible test combinations \cr
-#'   \code{results$combStatsTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$combStatsTableCI} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$combStatsTable} \tab \tab \tab \tab \tab Primary diagnostic performance metrics for each test combination pattern. Wilson score confidence intervals used for enhanced accuracy with small samples. \cr
+#'   \code{results$combStatsTableCI} \tab \tab \tab \tab \tab Detailed confidence intervals using Wilson score method, which provides more accurate bounds for diagnostic proportions than normal approximation, especially for small samples or extreme values. \cr
 #'   \code{results$addCombinationPattern} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$performanceHeatmap} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$rocCurves} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$performanceHeatmap} \tab \tab \tab \tab \tab Publication-quality heatmap showing comprehensive diagnostic performance metrics across all test combination patterns with clinical color coding. \cr
+#'   \code{results$rocCurves} \tab \tab \tab \tab \tab ROC space analysis comparing all test combinations with automatic identification of optimal cut-point using Youden Index maximization for balanced sensitivity and specificity. \cr
 #'   \code{results$decisionTree} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$vennDiagram} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$forestPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$forestPlot} \tab \tab \tab \tab \tab Comprehensive forest plot displaying all diagnostic metrics with Wilson score confidence intervals, providing more accurate uncertainty estimates than normal approximation methods. \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
