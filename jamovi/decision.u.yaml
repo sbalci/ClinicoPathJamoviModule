@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Golden Standard
+        label: Gold Standard (Reference Test)
         children:
           - type: VariablesListBox
             name: gold
@@ -19,7 +19,7 @@ children:
             name: goldPositive
             enable: (gold)
       - type: TargetLayoutBox
-        label: New Test
+        label: Test Under Evaluation
         children:
           - type: VariablesListBox
             name: newtest
@@ -29,31 +29,31 @@ children:
             name: testPositive
             enable: (newtest)
   - type: Label
-    label: Table
+    label: Analysis Options
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
-            name: od
+            name: ci
+            enable: (!pp)
           - type: CheckBox
             name: fnote
           - type: CheckBox
-            name: ci
-            enable: (!pp)
+            name: od
   - type: Label
-    label: Prior Probability
+    label: Population Prevalence Settings
     children:
       - type: CheckBox
         name: pp
         enable: (!ci)
       - type: TextBox
         name: pprob
-        label: ''
+        label: 'Prevalence (0.0-1.0)'
         format: number
         enable: (!ci && pp)
   - type: Label
-    label: Plots
+    label: Visualization
     children:
       - type: CheckBox
         name: fagan

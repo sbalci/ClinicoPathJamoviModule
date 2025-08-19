@@ -9,19 +9,21 @@ jas: '1.2'
 
 description:
     main: |
-        Analyzes and compares multiple medical diagnostic tests by examining all 
-        possible test result combinations. This function evaluates how different 
-        patterns of positive and negative test results perform against a gold 
-        standard, helping clinicians understand which test combinations are most 
-        informative. Shows individual test performance and comprehensive analysis 
-        of all possible test result patterns (e.g., +/+, +/-, -/+, -/-) with 
-        their respective positive predictive values and clinical interpretation. 
-        Essential for understanding test interactions and optimizing diagnostic 
-        strategies when multiple tests are available for the same condition.
+        Advanced medical diagnostic test combination analysis with automated 
+        optimal cut-point identification and comprehensive clinical interpretation. 
+        This function systematically evaluates all possible test result combinations 
+        (2-test: 4 patterns, 3-test: 8 patterns) against a gold standard using 
+        state-of-the-art statistical methods. Features include Wilson score 
+        confidence intervals for enhanced accuracy, ROC-based optimal cut-point 
+        selection using Youden Index maximization, and publication-quality 
+        visualizations with clinical decision thresholds. Provides actionable 
+        recommendations for screening vs. confirmatory testing strategies with 
+        detailed clinical interpretation guidelines. Essential for evidence-based 
+        diagnostic protocol development and test validation studies.
     R:
         dontrun: false
         usage: |
-            # Analyze two-test combinations
+            # Basic two-test combination analysis with optimal cut-point identification
             result1 <- decisioncombine(
               data = histopathology,
               gold = "Golden Standart",
@@ -29,10 +31,12 @@ description:
               test1 = "New Test", 
               test1Positive = "1",
               test2 = "Rater 1",
-              test2Positive = "1"
+              test2Positive = "1",
+              showVisualization = TRUE,
+              plotType = "all"  # Shows all visualization types including ROC with optimal cut-point
             )
             
-            # Analyze three-test combinations
+            # Comprehensive three-test analysis with clinical recommendations
             result2 <- decisioncombine(
               data = histopathology,
               gold = "Golden Standart",
@@ -43,8 +47,14 @@ description:
               test2Positive = "1",
               test3 = "Rater 2",
               test3Positive = "1",
-              showIndividual = TRUE
+              showIndividual = TRUE,
+              showVisualization = TRUE,
+              plotType = "roc",  # Focus on ROC analysis with optimal cut-point
+              exportCombinationPattern = TRUE  # Export patterns for further analysis
             )
+            
+            # Access optimal cut-point recommendations from HTML output
+            # result2$combinationsAnalysis contains clinical recommendations
 
 options:
     - name: data
@@ -126,12 +136,16 @@ options:
 
     # Visualization options
     - name: showVisualization
-      title: Show Visualizations
+      title: Show Advanced Visualizations
       type: Bool
       default: true
       description:
+          ui: >
+            Generate publication-quality visualizations including performance heatmaps, 
+            ROC analysis with optimal cut-point identification, decision trees, Venn diagrams, 
+            and forest plots with Wilson confidence intervals.
           R: >
-            Display visualizations for test combination analysis.
+            Display comprehensive visualizations for test combination analysis with automated optimal cut-point identification.
 
     - name: plotType
       title: Visualization Type
@@ -139,22 +153,25 @@ options:
       options:
         - title: Performance Heatmap
           name: heatmap
-        - title: ROC Curves Comparison
+        - title: ROC Analysis with Optimal Cut-point
           name: roc
-        - title: Decision Tree
+        - title: Clinical Decision Tree
           name: tree
-        - title: Venn Diagram
+        - title: Test Agreement Venn Diagram
           name: venn
-        - title: Forest Plot
+        - title: Forest Plot with Wilson CIs
           name: forest
-        - title: All Plots
+        - title: All Visualizations
           name: all
       default: heatmap
       description:
+          ui: >
+            Select visualization type. ROC analysis automatically identifies optimal cut-points 
+            using Youden Index. Forest plots use Wilson score confidence intervals for enhanced 
+            accuracy. 'All Visualizations' provides comprehensive publication-ready output.
           R: >
-            Type of visualization to display. Heatmap shows combination patterns performance,
-            ROC curves compare individual and combined tests, Decision tree shows test hierarchy,
-            Venn diagram shows test overlaps, Forest plot shows diagnostic statistics with CI.
+            Visualization selection: heatmap (performance matrix), roc (ROC space with optimal cut-point), 
+            tree (clinical decision hierarchy), venn (test agreement), forest (Wilson CIs), all (comprehensive output).
 
     - name: plotHeight
       title: Plot Height (pixels)

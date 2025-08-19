@@ -1,0 +1,193 @@
+---
+name: permutationsurvival
+title: Permutation Tests for Survival
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs permutation-based tests for comparing survival distributions between groups.
+        These tests provide non-parametric alternatives to traditional log-rank tests that do not
+        rely on asymptotic theory, making them particularly suitable for small samples or when
+        distributional assumptions are violated. Includes various permutation strategies and
+        multiple comparison corrections for robust survival analysis.
+    R:
+        dontrun: false
+        usage: |
+            # Example usage will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time variable for survival analysis
+
+    - name: outcome
+      title: Event Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable
+
+    - name: explanatory
+      title: Group Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Grouping variable for comparison
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of the outcome variable that represents the event of interest.
+
+    - name: permutation_method
+      title: Permutation Method
+      type: List
+      options:
+          - title: "Exact permutation"
+            name: "exact"
+          - title: "Approximate permutation (Monte Carlo)"
+            name: "approximate"
+          - title: "Stratified permutation"
+            name: "stratified"
+      default: "approximate"
+      description:
+          R: >
+            Method for generating permutations of group assignments.
+
+    - name: n_permutations
+      title: Number of Permutations
+      type: Integer
+      min: 100
+      max: 100000
+      default: 10000
+      description:
+          R: >
+            Number of permutations to generate for approximate tests.
+
+    - name: test_statistic
+      title: Test Statistic
+      type: List
+      options:
+          - title: "Log-rank statistic"
+            name: "logrank"
+          - title: "Wilcoxon statistic"
+            name: "wilcoxon"
+          - title: "Tarone-Ware statistic"
+            name: "tarone_ware"
+          - title: "Maximum deviation"
+            name: "max_deviation"
+      default: "logrank"
+      description:
+          R: >
+            Test statistic to use for permutation testing.
+
+    - name: stratify_variable
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Optional stratification variable for stratified permutation tests.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for all confidence intervals.
+
+    - name: multiple_comparison
+      title: Multiple Comparison Correction
+      type: List
+      options:
+          - title: "None"
+            name: "none"
+          - title: "Bonferroni"
+            name: "bonferroni"
+          - title: "Holm"
+            name: "holm"
+          - title: "Hochberg"
+            name: "hochberg"
+          - title: "Benjamini-Hochberg (FDR)"
+            name: "BH"
+      default: "holm"
+      description:
+          R: >
+            Method for adjusting p-values for multiple comparisons.
+
+    - name: show_permutation_distribution
+      title: Show Permutation Distribution
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display histogram of permutation test statistics.
+
+    - name: show_survival_curves
+      title: Show Survival Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display Kaplan-Meier survival curves for comparison groups.
+
+    - name: show_test_progression
+      title: Show Test Progression
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display progression of p-values as permutations accumulate.
+
+    - name: seed_value
+      title: Random Seed
+      type: Integer
+      min: 1
+      max: 1000000
+      default: 123
+      description:
+          R: >
+            Random seed for reproducible permutation results.
+
+    - name: showSummaries
+      title: Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summary of results.
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations.
+
+...

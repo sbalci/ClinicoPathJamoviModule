@@ -1,0 +1,266 @@
+---
+name: raftgee
+title: Rank-based AFT Estimation
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+menuTitle: Rank-based AFT Estimation
+menuSubtitle: GEE-based accelerated failure time models
+description:
+    main: >-
+        Implements rank-based accelerated failure time (AFT) models using 
+        generalized estimating equations (GEE) for survival data analysis.
+        This approach provides robust estimation when proportional hazards
+        assumptions are violated, offering distribution-free methods for
+        modeling survival times with emphasis on median survival relationships
+        and time acceleration effects in clinical research applications.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: Basic rank-based AFT with GEE
+            library(aftgee)
+            library(survival)
+            
+            raftgee(
+                data = lung_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "2",
+                covariates = c("age", "sex", "ph.ecog"),
+                rank_method = "logrank",
+                correlation_structure = "independence"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Survival time or follow-up duration variable
+
+    - name: outcome
+      title: Event Variable  
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal  
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Covariate variables for AFT modeling
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of outcome variable indicating event occurrence
+
+    - name: rank_method
+      title: Rank Method
+      type: List
+      options:
+          - name: logrank
+            title: Log-rank
+          - name: gehan
+            title: Gehan
+          - name: normal
+            title: Normal Scores
+          - name: wilcoxon
+            title: Wilcoxon
+      default: logrank
+      description:
+          R: >
+            Rank-based test method for AFT estimation
+
+    - name: correlation_structure
+      title: Correlation Structure
+      type: List
+      options:
+          - name: independence
+            title: Independence
+          - name: exchangeable
+            title: Exchangeable
+          - name: ar1
+            title: AR(1)
+          - name: unstructured
+            title: Unstructured
+      default: independence
+      description:
+          R: >
+            Working correlation structure for GEE
+
+    - name: cluster_variable
+      title: Cluster Variable
+      type: Variable
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Variable defining clusters for correlated observations
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for parameter estimates
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Number
+      min: 10
+      max: 1000
+      default: 100
+      description:
+          R: >
+            Maximum number of iterations for GEE algorithm
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      min: 1e-8
+      max: 1e-2
+      default: 1e-6
+      description:
+          R: >
+            Convergence tolerance for parameter estimation
+
+    - name: weights_variable
+      title: Weights Variable
+      type: Variable
+      permitted:
+          - numeric
+      description:
+          R: >
+            Optional weights variable for observations
+
+    - name: robust_variance
+      title: Robust Variance Estimation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use robust sandwich variance estimator
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      min: 0
+      max: 2000
+      default: 0
+      description:
+          R: >
+            Number of bootstrap samples for variance estimation (0 = no bootstrap)
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive AFT model summary
+
+    - name: show_coefficients
+      title: Show Coefficients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display AFT model coefficients table
+
+    - name: show_diagnostics
+      title: Show Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model diagnostic statistics
+
+    - name: show_residual_plots
+      title: Show Residual Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display residual diagnostic plots
+
+    - name: show_qq_plots
+      title: Show Q-Q Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display quantile-quantile plots
+
+    - name: show_survival_plots
+      title: Show Survival Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display AFT-based survival curves
+
+    - name: show_acceleration_plots
+      title: Show Acceleration Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display time acceleration factor plots
+
+    - name: show_comparison_plots
+      title: Show Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comparison with Cox models
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries of the analysis results
+
+    - name: showExplanations
+      title: Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed explanations of the methodology and interpretation

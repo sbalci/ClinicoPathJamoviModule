@@ -1,0 +1,139 @@
+---
+name:  flexrstpm2
+title: Flexible Parametric Models (Royston-Parmar)
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      visible: (show_model_summary)
+
+    - name: coefficientsTable
+      title: Model Coefficients
+      type: Table
+      visible: (show_coefficients_table)
+      columns:
+          - name: term
+            title: Term
+            type: text
+          - name: coefficient
+            title: β
+            type: number
+          - name: se
+            title: SE
+            type: number
+          - name: z_value
+            title: z
+            type: number
+          - name: p_value
+            title: p
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+
+    - name: timeVaryingTable
+      title: Time-Varying Effects
+      type: Table
+      visible: (time_varying_covariates && show_coefficients_table)
+      columns:
+          - name: covariate
+            title: Covariate
+            type: text
+          - name: time_point
+            title: Time
+            type: number
+          - name: effect
+            title: Effect
+            type: number
+          - name: se
+            title: SE
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+
+    - name: modelFit
+      title: Model Fit Statistics
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: value
+            title: Value
+            type: number
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: splineInfo
+      title: Spline Configuration
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: component
+            title: Component
+            type: text
+          - name: df
+            title: Degrees of Freedom
+            type: integer
+          - name: knots
+            title: Knots
+            type: text
+          - name: boundary_knots
+            title: Boundary Knots
+            type: text
+
+    - name: survivalCurves
+      title: Fitted Survival Curves
+      type: Image
+      visible: (show_survival_curves)
+
+    - name: hazardCurves
+      title: Fitted Hazard Functions
+      type: Image
+      visible: (show_hazard_curves)
+
+    - name: timeVaryingPlots
+      title: Time-Varying Effects
+      type: Image
+      visible: (time_varying_covariates && show_time_varying_plots)
+
+    - name: modelDiagnostics
+      title: Model Diagnostics
+      type: Image
+      visible: (show_model_diagnostics)
+
+    - name: residualPlots
+      title: Residual Analysis
+      type: Image
+      visible: (show_residuals)
+
+    - name: splineComponents
+      title: Spline Components
+      type: Image
+      visible: (show_model_diagnostics)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)

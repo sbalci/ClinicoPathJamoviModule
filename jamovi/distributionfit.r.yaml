@@ -1,0 +1,144 @@
+---
+name: distributionfit
+title: Distribution Selection and Goodness-of-Fit
+jrs: "1.1"
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_comparison_table)
+      columns:
+        - name: distribution
+          title: Distribution
+          type: text
+        - name: parameters
+          title: Parameters
+          type: integer
+        - name: loglik
+          title: Log-likelihood
+          type: number
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: aicc
+          title: AIC_c
+          type: number
+        - name: delta_aic
+          title: Δ AIC
+          type: number
+        - name: aic_weight
+          title: AIC Weight
+          type: number
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: goodnessOfFit
+      title: Goodness-of-Fit Tests
+      type: Table
+      visible: (show_gof_table)
+      columns:
+        - name: distribution
+          title: Distribution
+          type: text
+        - name: test
+          title: Test
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+        - name: critical_value
+          title: Critical Value
+          type: number
+        - name: decision
+          title: Decision
+          type: text
+
+    - name: parameterEstimates
+      title: Parameter Estimates - Best Model
+      type: Table
+      visible: (show_parameter_table)
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: lower_ci
+          title: Lower CI
+          type: number
+        - name: upper_ci
+          title: Upper CI
+          type: number
+
+    - name: distributionSummary
+      title: Distribution Characteristics
+      type: Table
+      visible: true
+      columns:
+        - name: distribution
+          title: Distribution
+          type: text
+        - name: convergence
+          title: Convergence
+          type: text
+        - name: hazard_shape
+          title: Hazard Shape
+          type: text
+        - name: median_survival
+          title: Median Survival
+          type: number
+        - name: mean_survival
+          title: Mean Survival
+          type: number
+
+    - name: survivalPlot
+      title: Survival Function Comparison
+      type: Image
+      visible: (show_survival_plot)
+
+    - name: hazardPlot
+      title: Hazard Function Comparison
+      type: Image
+      visible: (show_hazard_plot)
+
+    - name: ppPlot
+      title: P-P Plot - Best Model
+      type: Image
+      visible: (show_pp_plot)
+
+    - name: qqPlot
+      title: Q-Q Plot - Best Model
+      type: Image
+      visible: (show_qq_plot)
+
+    - name: diagnosticPlots
+      title: Model Diagnostic Plots
+      type: Image
+      visible: true
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)

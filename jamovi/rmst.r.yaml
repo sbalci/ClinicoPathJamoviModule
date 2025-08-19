@@ -1,0 +1,112 @@
+---
+name:  rmst
+title: Restricted Mean Survival Time Tests
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: rmstTable
+      title: "Restricted Mean Survival Time Analysis"
+      type: Table
+      visible: (show_rmst_table)
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: events
+            title: Events
+            type: integer
+          - name: rmst
+            title: RMST
+            type: number
+          - name: rmst_se
+            title: SE
+            type: number
+          - name: rmst_lower
+            title: Lower CI
+            type: number
+          - name: rmst_upper
+            title: Upper CI
+            type: number
+
+    - name: comparisonTable
+      title: "Group Comparisons"
+      type: Table
+      visible: (show_difference_test || show_ratio_test)
+      columns:
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: test_type
+            title: Test Type
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+          - name: se
+            title: SE
+            type: number
+          - name: z_score
+            title: Z
+            type: number
+          - name: p_value
+            title: p
+            type: number
+          - name: ci_lower
+            title: Lower CI
+            type: number
+          - name: ci_upper
+            title: Upper CI
+            type: number
+
+    - name: rmstPlot
+      title: "Survival Curves with RMST Areas"
+      type: Image
+      visible: (show_rmst_plot)
+      requiresData: true
+
+    - name: tauAnalysisPlot
+      title: "Tau Sensitivity Analysis"
+      type: Image
+      visible: (show_tau_analysis)
+      requiresData: true
+
+    - name: tauAnalysisTable
+      title: "Tau Sensitivity Results"
+      type: Table
+      visible: (show_tau_analysis)
+      columns:
+          - name: tau
+            title: Tau
+            type: number
+          - name: rmst_diff
+            title: RMST Difference
+            type: number
+          - name: p_value
+            title: p
+            type: number
+          - name: ci_lower
+            title: Lower CI
+            type: number
+          - name: ci_upper
+            title: Upper CI
+            type: number
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)
+
+...

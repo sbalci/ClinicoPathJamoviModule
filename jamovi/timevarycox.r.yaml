@@ -1,0 +1,40 @@
+---
+name: timevarycox
+title: Time-Varying Covariates Cox Regression
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: "Analysis"
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: "Model Summary"
+      type: Html
+      visible: (show_model_summary)
+
+    - name: coefficientsTable
+      title: "Regression Coefficients"
+      type: Table
+      visible: (show_coefficients)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: coefficient
+          title: β
+          type: number
+        - name: hazard_ratio
+          title: HR
+          type: number
+
+    - name: analysisSummary
+      title: "Analysis Summary"
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: "Methodology"
+      type: Html
+      visible: (showExplanations)

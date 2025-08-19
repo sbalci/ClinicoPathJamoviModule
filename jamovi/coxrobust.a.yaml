@@ -1,0 +1,296 @@
+---
+name: coxrobust
+title: Robust Cox Regression
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+menuTitle: Robust Cox Regression
+menuSubtitle: Outlier-resistant survival modeling
+description:
+    main: >-
+        Implements robust Cox proportional hazards regression models that are
+        resistant to outliers and model misspecification. Provides multiple
+        robust estimation methods including Huber M-estimation, bounded
+        influence functions, and weighted partial likelihood approaches for
+        reliable survival analysis in the presence of data anomalies.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Robust Cox regression
+            library(survival)
+            library(coxrobust)
+            
+            coxrobust(
+                data = lung_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "2",
+                covariates = c("age", "sex", "ph.ecog"),
+                robust_method = "huber",
+                tuning_constant = 1.345
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Survival time or follow-up duration variable
+
+    - name: outcome
+      title: Event Variable
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Predictor variables for the Cox model
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of outcome variable indicating event occurrence
+
+    - name: robust_method
+      title: Robust Method
+      type: List
+      options:
+          - name: huber
+            title: Huber M-estimation
+          - name: tukey
+            title: Tukey's biweight
+          - name: hampel
+            title: Hampel's function
+          - name: bounded
+            title: Bounded influence
+          - name: weighted
+            title: Weighted likelihood
+      default: huber
+      description:
+          R: >
+            Robust estimation method to use
+
+    - name: tuning_constant
+      title: Tuning Constant
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1.345
+      description:
+          R: >
+            Tuning constant for robust estimation (method-specific)
+
+    - name: efficiency_target
+      title: Efficiency Target
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Target efficiency relative to standard Cox model
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Number
+      min: 10
+      max: 1000
+      default: 100
+      description:
+          R: >
+            Maximum number of iterations for robust estimation
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      min: 1e-8
+      max: 1e-2
+      default: 1e-6
+      description:
+          R: >
+            Convergence tolerance for parameter estimation
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform automatic outlier detection and flagging
+
+    - name: outlier_threshold
+      title: Outlier Threshold
+      type: Number
+      min: 2
+      max: 5
+      default: 3
+      description:
+          R: >
+            Threshold for outlier detection (in standard deviations)
+
+    - name: stratify_variable
+      title: Stratification Variable
+      type: Variable
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Variable for stratified analysis
+
+    - name: weights_variable
+      title: Weights Variable
+      type: Variable
+      permitted:
+          - numeric
+      description:
+          R: >
+            Optional observation weights
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compute bootstrap confidence intervals
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      min: 100
+      max: 2000
+      default: 500
+      description:
+          R: >
+            Number of bootstrap samples for CI estimation
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for intervals
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model summary
+
+    - name: show_coefficients
+      title: Show Coefficients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display coefficient estimates table
+
+    - name: show_outliers
+      title: Show Outlier Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display outlier detection results
+
+    - name: show_influence
+      title: Show Influence Measures
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display influence diagnostics
+
+    - name: show_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare robust vs standard Cox models
+
+    - name: show_residual_plots
+      title: Show Residual Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display residual diagnostic plots
+
+    - name: show_influence_plots
+      title: Show Influence Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display influence diagnostic plots
+
+    - name: show_weight_plots
+      title: Show Weight Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display robust weight distributions
+
+    - name: show_survival_plots
+      title: Show Survival Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display survival curves
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries
+
+    - name: showExplanations
+      title: Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations

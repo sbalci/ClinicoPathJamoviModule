@@ -1,5 +1,1031 @@
 # ClinicoPath News
 
+## Version 0.0.31.34
+
+### 🗓️ **August 19, 2025 - Cause-Specific Hazards Models Implementation**
+
+#### 🚀 **Cause-Specific Hazards Models - New Implementation (causespecifichazards)**
+
+##### **Comprehensive Competing Risks Framework**
+*   **Multiple Model Types:** Cox proportional hazards, Weibull AFT, exponential, and log-normal models for flexible cause-specific analysis
+*   **Cause-Specific Approach:** Models each cause separately, treating other causes as censoring events for proper competing risks analysis
+*   **Flexible Data Structure:** Support for separate cause variable or direct use of event variable with multiple cause levels
+*   **Model Comparison:** Comprehensive comparison across causes using likelihood ratio tests and information criteria
+
+##### **Advanced Statistical Features**
+*   **Cumulative Incidence Functions:** Proper estimation using cmprsk package with fallback to built-in methods when unavailable
+*   **Proportional Hazards Testing:** Comprehensive testing of proportional hazards assumption for Cox models across all causes
+*   **Cause-Specific Summaries:** Detailed event summaries by cause including proportions, median times, and quantiles
+*   **Confidence Intervals:** User-specified confidence levels for all parameter estimates and cumulative incidence functions
+
+##### **Clinical Analysis Capabilities**
+*   **Multi-Cause Event Tracking:** Automatic identification and separate modeling of multiple competing causes of failure
+*   **Reference Cause Comparisons:** Model comparisons using user-specified reference cause for clinical interpretation
+*   **Comprehensive Output:** Model fit statistics, hazard ratios, cumulative incidence estimates, and diagnostic tests
+*   **Visualization Suite:** Cumulative incidence plots, cause-specific hazard plots, and comprehensive diagnostic plots
+
+## Version 0.0.31.33
+
+### 🗓️ **August 19, 2025 - Parametric Frailty Models Implementation**
+
+#### 🚀 **Parametric Frailty Models - New Implementation (parametricfrailty)**
+
+##### **Comprehensive Parametric Frailty Framework**
+*   **Multiple Baseline Distributions:** Weibull, exponential, Gompertz, log-normal, log-logistic, and generalized gamma distributions for flexible baseline hazard modeling
+*   **Flexible Frailty Distributions:** Gamma, log-normal, inverse Gaussian, and positive stable distributions for heterogeneity modeling
+*   **Dual Implementation Strategy:** Primary support via frailtySurv package with comprehensive fallback using survival package
+*   **Advanced Estimation Methods:** Penalized likelihood, REML, and Laplace approximation for robust parameter estimation
+
+##### **Advanced Parametric Modeling Features**
+*   **Built-in Fallback Implementation:** Complete parametric frailty modeling using survival package (survreg/coxph) when frailtySurv is unavailable
+*   **Frailty Variance Analysis:** Comprehensive variance component estimation with Kendall's tau and heterogeneity measures
+*   **Individual Predictions:** Subject-specific frailty predictions with confidence intervals and shrinkage analysis
+*   **Model Diagnostics:** Goodness-of-fit tests, model comparison statistics (AIC/BIC), and comprehensive plotting options
+
+##### **Statistical Analysis Capabilities**
+*   **Flexible Model Specification:** Support for clustered and correlated survival data with multiple covariate structures
+*   **Confidence Intervals:** Comprehensive confidence interval estimation for all parameters with user-specified confidence levels
+*   **Visualization Suite:** Hazard function plots, survival function plots, frailty distribution plots, and diagnostic plots
+*   **Clinical Application:** Designed for real-world clinical data with robust error handling and data validation
+
+## Version 0.0.31.32
+
+### 🗓️ **August 18, 2025 - EM-Algorithm Frailty Models Implementation**
+
+#### 🚀 **EM-Algorithm Frailty Models - New Implementation (emfrailty)**
+
+##### **Expectation-Maximization Frailty Framework**
+*   **Multiple Frailty Distributions:** Gamma, log-normal, inverse Gaussian, and stable distributions for flexible heterogeneity modeling
+*   **Efficient EM Estimation:** Expectation-maximization algorithm with acceleration options for fast convergence
+*   **Built-in Implementation:** Comprehensive frailty modeling using survival package when frailtyEM package is not available
+*   **Convergence Diagnostics:** Complete monitoring of EM algorithm progress with iteration tracking and log-likelihood history
+
+##### **Advanced EM Algorithm Features**
+*   **Multiple Estimation Methods:** Standard EM, penalized EM, accelerated EM, and stochastic EM for different data scenarios
+*   **Baseline Hazard Options:** Weibull, exponential, spline, and non-parametric baseline hazards for maximum flexibility
+*   **Empirical Bayes Predictions:** Individual frailty estimates with shrinkage analysis and prediction intervals
+*   **Variance Estimation Methods:** Observed information matrix, Louis method, bootstrap, and profile likelihood approaches
+
+##### **Comprehensive Frailty Analysis**
+*   **Heterogeneity Assessment:** Frailty variance estimation, Kendall's tau, and median hazard ratio calculations
+*   **Shrinkage Analysis:** Detailed examination of empirical Bayes shrinkage patterns and group-specific predictions
+*   **Model Comparison:** Automatic comparison with standard Cox models using AIC/BIC model selection criteria
+*   **Convergence Monitoring:** Real-time tracking of EM algorithm convergence with diagnostic plots and iteration history
+
+##### **Clinical Applications & Interpretation**
+*   **Multi-center Clinical Trials:** Account for hospital or clinic-specific unobserved effects using frailty terms
+*   **Family-based Studies:** Model genetic or environmental clustering within families using hierarchical frailty structures
+*   **Recurrent Event Analysis:** Handle repeated events within patients using individual-level frailty modeling
+*   **Matched Study Designs:** Account for matching factors and unmeasured confounders in observational studies
+
+##### **Comprehensive Results & Diagnostics**
+*   **Fixed Effects Coefficients:** Hazard ratios with confidence intervals for population-level covariate effects
+*   **Frailty Distribution Analysis:** Complete characterization of frailty variance, standard deviation, and clustering measures
+*   **EM Algorithm Convergence:** Detailed convergence diagnostics including iteration count, final log-likelihood, and tolerance criteria
+*   **Empirical Bayes Predictions:** Individual group frailty predictions with shrinkage statistics and prediction intervals
+
+## Version 0.0.31.31
+
+### 🗓️ **August 18, 2025 - Mixed-Effects Cox Models Implementation**
+
+#### 🚀 **Mixed-Effects Cox Models - New Implementation (mixedeffectscox)**
+
+##### **Hierarchical Survival Analysis Framework**
+*   **Random Effects Structures:** Random intercept, random slope, nested, and crossed random effects for hierarchical data
+*   **Frailty-Based Implementation:** Built-in mixed-effects modeling using frailty terms when coxme package is not available
+*   **Multi-level Data Handling:** Support for clustered, multi-center, and repeated measurements survival data
+*   **Variance Components Analysis:** Comprehensive decomposition of variance into fixed and random components
+
+##### **Advanced Mixed-Effects Features**
+*   **Random Structure Options:** Five different random effects structures including random intercept, slope, intercept+slope, nested, and crossed effects
+*   **Hierarchical Structure Analysis:** Automatic detection and reporting of grouping structure with group sizes and distributions
+*   **Intraclass Correlation (ICC):** Calculation and interpretation of ICC values for assessing clustering effects
+*   **Best Linear Unbiased Predictors (BLUPs):** Random effects predictions with standard errors and prediction intervals
+
+##### **Clinical Applications & Interpretation**
+*   **Multi-center Clinical Trials:** Account for between-hospital or between-clinic variation in treatment effects
+*   **Longitudinal Survival Studies:** Handle repeated measurements and time-varying effects within patients
+*   **Genetic Epidemiology:** Model family-based or population-based clustering in survival outcomes
+*   **Quality Improvement Research:** Assess provider-level or institutional variation in clinical outcomes
+
+##### **Comprehensive Results & Diagnostics**
+*   **Fixed Effects Table:** Hazard ratios with confidence intervals for population-level effects
+*   **Random Effects Analysis:** Variance components, standard deviations, and proportion of total variance
+*   **Hierarchical Structure Summary:** Group-level statistics including number of groups and observations per group
+*   **Model Diagnostics:** AIC/BIC, events per parameter, and convergence information
+
+## Version 0.0.31.30
+
+### 🗓️ **August 18, 2025 - Transformation Models Implementation**
+
+#### 🚀 **Transformation Models - New Implementation (transformationmodels)**
+
+##### **Unified Survival Analysis Framework**
+*   **Multiple Transformation Functions:** Linear, Box-Cox, log-log, probit, logit, complementary log-log, and non-parametric transformations
+*   **Flexible Distribution Support:** Normal, logistic, extreme value, exponential, and Weibull error distributions
+*   **Automatic Lambda Optimization:** Box-Cox parameter search with grid-based likelihood maximization
+*   **Built-in Implementation:** Comprehensive transformation framework when tram package is not available
+
+##### **Advanced Transformation Methods**
+*   **Box-Cox Transformation:** Power transformation with automatic lambda parameter selection from -2 to 2 range
+*   **Log-log Transformation:** Double logarithmic transformation for extreme value modeling applications
+*   **Probit & Logit Links:** Normal and logistic quantile transformations for bounded outcome modeling
+*   **Complementary Log-log:** Asymmetric transformation particularly suited for rare event analysis
+*   **Non-parametric Transformation:** Data-driven rank-based transformation without distributional assumptions
+*   **Linear Models:** Standard parametric survival models as special case (λ=1 in Box-Cox)
+
+##### **Comprehensive Model Assessment Framework**
+*   **Transformation Validation:** Statistical tests for transformation assumptions (Shapiro-Wilk, Kolmogorov-Smirnov)
+*   **Model Selection:** Automatic comparison across transformation types using AIC/BIC criteria
+*   **Lambda Parameter Search:** Grid search optimization with detailed likelihood profile analysis
+*   **Diagnostic Plots:** Q-Q plots, residual analysis, transformation function visualization, and survival curves
+
+##### **Clinical Interpretation & Translation**
+*   **Unified Parameter Framework:** Consistent interpretation across different transformation functions
+*   **Effect Size Measures:** Transformation-adjusted effect ratios with confidence intervals
+*   **Model Comparison Tools:** Side-by-side evaluation of different transformation approaches
+*   **Natural Language Summaries:** Clinical interpretation of transformation selection and model results
+
+## Version 0.0.31.29
+
+### 🗓️ **August 18, 2025 - Robust AFT Models Implementation**
+
+#### 🚀 **Robust AFT Models - New Implementation (robustaft)**
+
+##### **Outlier-Resistant Parametric Survival Modeling**
+*   **M-Estimation Methods:** Huber, Tukey biweight, Hampel function, Andrews wave, median regression, and least absolute deviation approaches
+*   **Acceleration Factor Interpretation:** Direct modeling of covariate effects on survival time rather than hazard ratios
+*   **Multiple Parametric Distributions:** Weibull, exponential, log-normal, log-logistic, gamma, and Gaussian distributions
+*   **Built-in Robust Implementation:** Comprehensive M-estimation when RobustAFT package is not available
+
+##### **Advanced Robust Estimation Framework**
+*   **Huber M-estimator:** Quadratic loss for small residuals, linear for large residuals, optimal efficiency-robustness balance
+*   **Tukey Biweight:** Redescending M-estimator completely down-weighting extreme outliers to zero influence
+*   **Hampel Function:** Three-part redescending function with flexible influence function shape control
+*   **Andrews Wave:** Sine-based redescending function providing smooth outlier down-weighting
+*   **Median Regression (LAD):** Least absolute deviation estimation with high breakdown point
+*   **Iterative M-Estimation:** Convergent algorithm with configurable tolerance and maximum iterations
+
+##### **Comprehensive Outlier Detection & Analysis**
+*   **Automatic Outlier Detection:** Data-driven identification with configurable threshold parameters
+*   **Outlier Classification:** High vs low outlier categorization based on residual direction
+*   **Weight Distribution Analysis:** Detailed weight pattern analysis and influence assessment
+*   **Robust Scale Estimation:** Multiple robust scale estimators (MAD, Qn, Sn, Tau, Huber scale)
+
+##### **Model Comparison & Validation Framework**
+*   **Standard vs Robust Comparison:** Side-by-side comparison with efficiency and breakdown point analysis
+*   **Robust Diagnostics:** Model fit metrics with outlier-resistant standard errors
+*   **Scale Parameter Analysis:** Comparative scale estimation with relative efficiency measures
+*   **Convergence Monitoring:** Detailed convergence information with iteration tracking
+
+##### **Advanced Visualization Suite**
+*   **Residual Diagnostic Plots:** Comprehensive residual analysis for model validation and outlier identification
+*   **Outlier Identification Plots:** Visual representation of outlier patterns and weight distributions
+*   **Survival Curves:** Robust survival function estimates with parametric distribution fitting
+*   **Q-Q Plots:** Quantile-quantile plots for distribution assumption validation
+
+##### **Clinical Decision Support Features**
+*   **Acceleration Factor Interpretation:** AF > 1 (accelerated failure), AF = 1 (no effect), AF < 1 (decelerated failure)
+*   **Robust Confidence Intervals:** Bootstrap and asymptotic confidence intervals for acceleration factors
+*   **Clinical Summaries:** Natural language interpretation of robust estimation results
+*   **Method Explanations:** Comprehensive documentation of robust AFT methodology
+
+##### **Flexible Parameter Control**
+*   **Tuning Constants:** Customizable robustness vs efficiency trade-off parameters
+*   **Efficiency Targets:** Configurable target efficiency relative to non-robust estimators
+*   **Convergence Control:** Maximum iterations and tolerance settings for M-estimation
+*   **Bootstrap Options:** Optional bootstrap confidence intervals for enhanced reliability
+
+## Version 0.0.31.28
+
+### 🗓️ **August 18, 2025 - Weighted Cox Regression Implementation**
+
+#### 🚀 **Weighted Cox Regression - New Implementation (coxphw)**
+
+##### **Rare Events & Imbalanced Data Survival Modeling**
+*   **Average Hazard Weights (AHW):** Primary weighting method with α parameter controlling log-rank (α=0), average hazard (α=0.5), and Breslow (α=1) approaches
+*   **Multiple Weighting Schemes:** Schoenfeld residual weights, Prentice weights, and log-rank variance weights for different data characteristics  
+*   **Built-in Fallback Implementation:** Comprehensive weighted Cox implementation when coxphw package is not available
+*   **Improved Stability:** More reliable hazard ratio estimates for rare events and sparse data scenarios
+
+##### **Advanced Weighting Methods**
+*   **Average Hazard Weights:** Uses α parameter to control weighting strategy between different partial likelihood approaches
+*   **Schoenfeld Residual Weights:** Down-weights observations with large Schoenfeld residuals for robust estimation
+*   **Prentice Weights:** Emphasizes observations with larger risk sets using square root of risk set size
+*   **Log-rank Variance Weights:** Optimizes for log-rank test statistics with variance-based weighting
+
+##### **Comprehensive Weight Analysis Framework**
+*   **Weight Distribution Analysis:** Mean, range, variability, and impact assessment of applied weights
+*   **Rare Event Analysis:** Event rate calculation, imbalance ratio assessment, and weight impact evaluation per covariate
+*   **Model Comparison:** Side-by-side comparison of weighted vs standard Cox models with fit metrics
+*   **Convergence Monitoring:** Detailed convergence information including iterations, tolerance, and parameter tracking
+
+##### **Clinical Decision Support**
+*   **Diagnostic Tables:** Events per parameter ratio, censoring proportion assessment, and model stability metrics
+*   **Bootstrap Confidence Intervals:** Optional bootstrap estimation for more robust confidence intervals
+*   **Clinical Interpretation:** Natural language summaries explaining weighting strategy and clinical implications
+*   **Method Explanations:** Comprehensive methodology documentation for different weighting approaches
+
+##### **Advanced Visualization Suite**
+*   **Weight Distribution Plots:** Visual representation of weight patterns across observations
+*   **Residual Diagnostic Plots:** Comprehensive residual analysis for model validation
+*   **Survival Curves:** Weighted survival function estimates with confidence bands
+*   **Forest Plots:** Hazard ratio visualization with weighted confidence intervals
+*   **Model Comparison Plots:** Visual comparison between standard and weighted Cox models
+
+##### **Robust Implementation Features**
+*   **Flexible Parameter Control:** Maximum iterations, convergence tolerance, and confidence level adjustment
+*   **Stratification Support:** Stratified weighted Cox models for heterogeneous populations
+*   **Cluster Robust Variance:** Support for clustered data with robust variance estimation
+*   **Offset Variables:** Integration of known offset terms in the weighted partial likelihood
+
+## Version 0.0.31.27
+
+### 🗓️ **August 18, 2025 - Robust Cox Regression Implementation**
+
+#### 🚀 **Robust Cox Regression - New Implementation (coxrobust)**
+
+##### **Outlier-Resistant Survival Modeling**
+*   **Robust Estimation Methods:** Multiple M-estimation approaches including Huber, Tukey's biweight, Hampel's function, bounded influence, and weighted likelihood methods
+*   **Automatic Outlier Detection:** Data-driven identification and down-weighting of influential observations with configurable thresholds
+*   **Robust Standard Errors:** Sandwich variance estimators providing valid inference under model misspecification
+*   **Efficiency Control:** Tunable trade-off between robustness and statistical efficiency through method-specific tuning constants
+
+##### **Comprehensive Robust Methods Suite**
+*   **Huber M-estimation:** Quadratic loss for small residuals, linear for large residuals, balancing efficiency and robustness
+*   **Tukey's Biweight:** Redescending M-estimator completely down-weighting extreme outliers to zero
+*   **Hampel's Function:** Three-part redescending function with flexible control over influence function shape
+*   **Bounded Influence:** Limiting maximum influence any single observation can have on parameter estimates
+*   **Weighted Likelihood:** Data-driven weight application to partial likelihood based on residual magnitudes
+
+##### **Advanced Diagnostic Framework**
+*   **Influence Diagnostics:** Cook's distance, DFBETAS, and leverage measures with automatic threshold calculation
+*   **Residual Analysis:** Deviance, martingale, and Schoenfeld residuals for model assumption checking
+*   **Weight Distribution:** Visualization of robust weights applied to observations
+*   **Outlier Reporting:** Detailed flagging and reporting of influential observations with residual magnitudes
+
+##### **Model Comparison & Validation**
+*   **Standard vs Robust Comparison:** Side-by-side comparison with standard Cox regression for sensitivity analysis
+*   **Model Fit Metrics:** AIC, BIC, concordance index, and log-likelihood for both standard and robust models
+*   **Bootstrap Inference:** Optional bootstrap confidence intervals for enhanced statistical inference
+*   **Convergence Monitoring:** Detailed tracking of iterative estimation with user-specified tolerance
+
+##### **Clinical Decision Support**
+*   **Stable Parameter Estimates:** Reliable hazard ratios less sensitive to data anomalies
+*   **Robust Confidence Intervals:** Valid inference even with heavy-tailed distributions
+*   **Stratified Analysis Support:** Robust estimation within stratified Cox models
+*   **Weighted Analysis:** Integration with observation weights for complex sampling designs
+
+## Version 0.0.31.26
+
+### 🗓️ **August 18, 2025 - Rank-based AFT Estimation Implementation**
+
+#### 🚀 **Rank-based AFT Estimation - New Implementation (raftgee)**
+
+##### **Advanced Accelerated Failure Time Modeling**
+*   **Rank-based Estimation:** Distribution-free AFT models using rank-based estimating equations with multiple weighting schemes (log-rank, Gehan, normal scores, Wilcoxon)
+*   **GEE Framework:** Generalized Estimating Equations approach for handling clustered and correlated survival data with flexible correlation structures
+*   **Robust Inference:** Sandwich variance estimation and optional bootstrap procedures for reliable statistical inference
+*   **Clinical Interpretation:** Direct acceleration factor estimation providing intuitive time-based effect measures for clinical research
+
+##### **Comprehensive Correlation Structure Support**
+*   **Independence Structure:** Standard GEE approach for uncorrelated observations with robust variance estimation
+*   **Exchangeable Correlation:** Constant within-cluster correlation modeling for clustered survival data
+*   **Autoregressive AR(1):** Time-ordered correlation structure for longitudinal survival studies
+*   **Unstructured Correlation:** Flexible correlation matrix estimation for complex dependency patterns
+
+##### **Advanced Statistical Framework**
+*   **Multiple Rank Methods:** Log-rank weights for equal weighting across failure times, Gehan weights emphasizing early failures, normal scores and Wilcoxon-type weighting
+*   **Acceleration Factor Interpretation:** Direct multiplicative effects on survival time with confidence intervals and clinical significance assessment
+*   **Model Diagnostics:** Comprehensive residual analysis, Q-Q plots, and model fit assessment with comparison to Cox proportional hazards
+*   **Convergence Monitoring:** Detailed iteration tracking and convergence diagnostics with user-specified tolerance and maximum iteration controls
+
+##### **Clinical Decision Support & Validation**
+*   **AFT vs Cox Comparison:** Side-by-side model comparison with AIC, log-likelihood, and concordance measures for model selection guidance
+*   **Sample Size Assessment:** Events-per-covariate ratios and adequacy measures for reliable parameter estimation
+*   **Correlation Structure Selection:** Diagnostic tools for working correlation structure evaluation and selection
+*   **Bootstrap Validation:** Optional bootstrap variance estimation and confidence interval construction for robust inference
+
+##### **Comprehensive Visualization Suite**
+*   **Residual Diagnostic Plots:** Model assumption checking through standardized residual analysis and pattern detection
+*   **Survival Curve Estimation:** AFT-based survival curve prediction with acceleration factor incorporation
+*   **Acceleration Factor Plots:** Forest plot-style visualization of acceleration factors with confidence intervals
+*   **Model Comparison Plots:** Graphical comparison of AFT and Cox model predictions for model validation
+
+## Version 0.0.31.25
+
+### 🗓️ **August 18, 2025 - Proportional Hazards Testing Implementation**
+
+#### 🚀 **Proportional Hazards Testing - New Implementation (pheval)**
+
+##### **Comprehensive PH Assumption Validation**
+*   **Multiple Testing Methods:** Schoenfeld residuals, scaled Schoenfeld, global tests, correlation tests, log-rank trends, and supremum tests for robust validation
+*   **Statistical Rigor:** Implementation of established proportional hazards testing frameworks with chi-square, correlation, and trend-based approaches
+*   **Cox Model Diagnostics:** Comprehensive validation of fundamental assumptions underlying Cox proportional hazards regression models
+*   **Clinical Decision Support:** Automated recommendations for model selection and alternative approaches when assumptions are violated
+
+##### **Advanced Statistical Framework**
+*   **Schoenfeld Residuals Analysis:** Standard and scaled Schoenfeld residuals testing for time-varying effects detection with correlation analysis
+*   **Global Testing Procedures:** Omnibus tests for simultaneous evaluation of proportional hazards assumptions across all model covariates
+*   **Residual Correlation Testing:** Direct correlation tests between residuals and time for straightforward interpretation of time-dependent effects
+*   **Time Transformation Options:** Multiple time transformation approaches (identity, logarithmic, rank, Kaplan-Meier) for enhanced testing sensitivity
+
+##### **Comprehensive Diagnostic Suite**
+*   **Individual Covariate Testing:** Separate evaluation of proportional hazards assumption for each model covariate with detailed test statistics
+*   **Model-Wide Assessment:** Global tests providing overall model validation with chi-square and alternative distribution-based approaches
+*   **Residual Analysis Framework:** Detailed examination of Schoenfeld residuals including trend analysis and correlation diagnostics
+*   **Power Analysis Integration:** Estimation of test power and minimum detectable effects for study design and interpretation
+
+##### **Clinical Translation & Recommendations**
+*   **Automated Interpretation:** Intelligent assessment of test results with clinical significance determination and violation severity classification
+*   **Alternative Model Suggestions:** Systematic recommendations for stratified Cox models, time-varying coefficients, and alternative survival approaches
+*   **Regulatory Compliance:** Implementation following established statistical guidelines for Cox model validation in clinical research
+*   **Quality Control Framework:** Comprehensive diagnostic suite for survival analysis validation and assumption verification
+
+##### **Advanced Validation Features**
+*   **Multiple Test Integration:** Coordinated analysis across different testing approaches with consensus determination and conflict resolution
+*   **Stratified Analysis Support:** Framework for stratified proportional hazards testing with subgroup-specific validation capabilities
+*   **Model Comparison Metrics:** Systematic comparison between static and alternative modeling approaches using information criteria
+*   **Bootstrap Validation Ready:** Infrastructure supporting bootstrap and cross-validation approaches for robust model assessment
+
+##### **Clinical Applications & Impact**
+*   **Model Selection Guidance:** Evidence-based recommendations for appropriate survival modeling approaches in clinical research settings
+*   **Regulatory Validation:** Comprehensive documentation and testing procedures meeting regulatory requirements for survival analysis
+*   **Quality Assurance:** Systematic validation procedures ensuring reliable and valid Cox regression analyses in clinical studies
+*   **Research Methodology:** Advanced statistical validation supporting high-quality survival analysis in observational and experimental studies
+
+---
+
+## Version 0.0.31.24
+
+### 🗓️ **August 18, 2025 - Dynamic Coefficient Models Implementation**
+
+#### 🚀 **Dynamic Coefficient Models - New Implementation (dynamiccoeff)**
+
+##### **Real-Time Coefficient Adaptation**
+*   **Adaptive Filtering Methods:** Kalman filtering, particle filtering, Bayesian updating, and recursive estimation for dynamic parameter adaptation
+*   **State Space Modeling:** Time-varying coefficients evolving continuously through sophisticated state space formulations
+*   **Real-Time Learning:** Online parameter estimation adapting to new information as survival data accumulates over time
+*   **Multiple Updating Mechanisms:** Choice of filtering approaches optimized for different data characteristics and modeling assumptions
+
+##### **Advanced State Space Framework**
+*   **Dynamic Linear Models:** β(t) coefficients following state evolution equations with process and observation noise modeling
+*   **Filtering Algorithms:** Optimal estimation techniques for linear (Kalman) and non-linear (particle) dynamic systems
+*   **Bayesian Inference:** Posterior distribution updates incorporating prior knowledge with sequential likelihood updates
+*   **Convergence Diagnostics:** Comprehensive monitoring of filter stability, adaptation rates, and parameter convergence
+
+##### **Sophisticated Algorithm Selection**
+*   **Kalman Filtering:** Optimal linear unbiased estimation for Gaussian systems with computational efficiency
+*   **Particle Filtering:** Monte Carlo methods handling non-linear and non-Gaussian dynamic systems with sequential importance sampling
+*   **Bayesian Updating:** Prior-posterior framework with uncertainty quantification and knowledge incorporation
+*   **Recursive Estimation:** Online least squares with exponential forgetting for adaptive parameter tracking
+
+##### **Comprehensive Adaptation Metrics**
+*   **Dynamic Evolution Tracking:** Monitoring coefficient trajectories, adaptation speed, and steady-state convergence behavior
+*   **Model Comparison Framework:** Systematic comparison with static coefficient models using likelihood-based criteria
+*   **Filter Performance Assessment:** Effective sample sizes, autocorrelation diagnostics, and convergence rate monitoring
+*   **Clinical Decision Support:** Real-time risk prediction updates and adaptive prognostic model recommendations
+
+##### **Clinical Applications & Innovation**
+*   **Treatment Response Evolution:** Dynamic modeling of changing treatment effects during extended follow-up periods
+*   **Biomarker Adaptation:** Real-time adjustment of prognostic biomarker importance as disease progression patterns emerge
+*   **Personalized Risk Updates:** Patient-specific risk prediction models that adapt to new clinical information
+*   **Adaptive Clinical Trials:** Support for dynamic treatment decisions and real-time efficacy monitoring
+
+##### **Advanced Statistical Features**
+*   **State Dimension Control:** Configurable state space complexity balancing model flexibility against computational efficiency
+*   **Noise Parameter Tuning:** Process and observation variance settings controlling adaptation sensitivity and stability
+*   **Forgetting Factor Selection:** Exponential discounting parameters managing historical information retention
+*   **Confidence Interval Dynamics:** Time-varying uncertainty quantification for evolving coefficient estimates
+
+---
+
+## Version 0.0.31.23
+
+### 🗓️ **August 18, 2025 - Smooth Time-Varying Effects Implementation**
+
+#### 🚀 **Smoothly Time-Varying Effects - New Implementation (smoothtimevary)**
+
+##### **Continuous Time-Varying Coefficient Modeling**
+*   **Flexible Smoothing Methods:** Cubic splines, LOESS, kernel smoothing, and penalized splines for continuous effect estimation
+*   **Non-parametric Effect Patterns:** Detection and modeling of complex covariate influence evolution without parametric assumptions
+*   **Alternative to Step-Functions:** Smooth alternatives to discrete time-varying approaches in standard Cox model extensions
+*   **Multiple Smoothing Approaches:** User-selectable methods optimized for different data characteristics and analysis goals
+
+##### **Advanced Statistical Framework**
+*   **Continuous Time-Varying Coefficients:** β(t) functions estimated using flexible smoothing techniques for evolving covariate effects
+*   **Constancy Testing:** Statistical assessment of whether effects remain constant over time versus exhibiting time-varying patterns
+*   **Bootstrap Confidence Intervals:** Uncertainty quantification for smooth effect functions with configurable confidence levels
+*   **Model Comparison Framework:** Systematic comparison with constant effects models using information criteria
+
+##### **Sophisticated Parameter Control**
+*   **Degrees of Freedom Selection:** Configurable spline complexity balancing flexibility against overfitting risks
+*   **Bandwidth Optimization:** Kernel and local smoothing parameters controlling neighborhood size for effect estimation
+*   **Automatic Smoothness Selection:** Penalized spline approaches with data-driven smoothness parameter optimization
+*   **Cross-validation Integration:** Model selection and parameter tuning using robust validation frameworks
+
+##### **Comprehensive Diagnostic Framework**
+*   **Effect Constancy Assessment:** Variance-based tests identifying variables requiring time-varying versus constant modeling
+*   **Residual Analysis:** Model adequacy evaluation through comprehensive diagnostic plots and statistical measures
+*   **Smoothing Method Comparison:** Visual and statistical comparison across different smoothing approaches
+*   **Model Complexity Evaluation:** Information criteria and goodness-of-fit metrics for optimal method selection
+
+##### **Clinical Research Applications**
+*   **Treatment Effect Evolution:** Analysis of how therapeutic interventions change in effectiveness over follow-up periods
+*   **Biomarker Dynamics:** Investigation of biomarker influence patterns during disease progression and treatment response
+*   **Risk Factor Pattern Analysis:** Understanding how prognostic factors evolve in long-term survival studies
+*   **Proportional Hazards Assessment:** Alternative modeling approaches when standard Cox assumptions are violated
+
+##### **Advanced Methodological Features**
+*   **Time-Dependent Coefficient Estimation:** λ(t|x) = λ₀(t) exp(Σᵢ βᵢ(t)xᵢ) with smooth βᵢ(t) functions
+*   **Multiple Link Functions:** Flexible transformation approaches optimized for different survival data patterns
+*   **Robust Standard Errors:** Uncertainty quantification accounting for smoothing variability and model specification
+*   **Optimal Treatment Timing:** Identification of periods with maximal or minimal treatment effectiveness
+
+This implementation provides essential methodology for survival analysis requiring flexible modeling of time-dependent covariate effects, offering superior alternatives to step-function approaches while maintaining statistical rigor and clinical interpretability crucial for understanding dynamic treatment and prognostic factor influences in medical research.
+
+### 🗓️ **August 18, 2025 - Flexible Parametric Survival Models Implementation**
+
+#### 🚀 **Royston-Parmar Flexible Parametric Models - New Implementation (flexrstpm2)**
+
+##### **Advanced Parametric Survival Modeling**
+*   **Flexible Baseline Functions:** Restricted cubic splines for modeling complex, non-monotonic baseline hazard patterns
+*   **Multiple Model Scales:** Proportional hazards, proportional odds, and probit scales for different clinical contexts
+*   **Time-Varying Covariate Effects:** Spline-based interactions for modeling time-dependent treatment and prognostic factor effects
+*   **Customizable Spline Configuration:** User-controlled degrees of freedom and knot placement for optimal model flexibility
+
+##### **Parametric Modeling Advantages**
+*   **Smooth Function Estimates:** Direct parametric estimation of survival and hazard functions without step discontinuities
+*   **Extrapolation Capability:** Reliable prediction beyond observed follow-up periods for health economic modeling
+*   **Efficient Parameter Estimation:** Maximum likelihood estimation with asymptotic properties superior to non-parametric alternatives
+*   **Multiple Link Functions:** Choice of appropriate transformations optimized for specific survival data patterns
+
+##### **Advanced Clinical Features**
+*   **Cure Fraction Modeling:** Incorporation of long-term survivors who will never experience the event of interest
+*   **Background Hazard Integration:** Relative survival analysis incorporating population-based mortality rates
+*   **Time-Varying Effects Visualization:** Dynamic plots showing how covariate impacts evolve over follow-up time
+*   **Model Scale Selection:** Automatic or manual selection of optimal transformation scale (hazards vs odds vs probit)
+
+##### **Comprehensive Spline Methodology**
+*   **Restricted Cubic Splines:** Smooth baseline function modeling with natural boundary behavior and continuity constraints
+*   **Automatic Knot Placement:** Quantile-based knot positioning with user override capability for expert knowledge integration
+*   **Degrees of Freedom Control:** Balance between model flexibility and overfitting through configurable spline complexity
+*   **Boundary Knot Specification:** Customizable range definition for spline domain optimization
+
+##### **Clinical Research Applications**
+*   **Cancer Survival Modeling:** Flexible hazard patterns common in oncology with initial treatment effects and late recurrence risks
+*   **Long-term Follow-up Studies:** Extrapolation requirements for lifetime survival estimation and health economics
+*   **Population-based Analysis:** Integration with life table data for relative survival and excess mortality quantification
+*   **Health Economic Modeling:** Parametric survival functions required for cost-effectiveness analysis and budget impact modeling
+
+##### **Technical Implementation**
+*   **rstpm2 Package Integration:** Built on established Royston-Parmar methodology with extensive validation in medical literature
+*   **Multiple Scale Support:** Hazard, odds, and normal scale transformations with appropriate link functions
+*   **Robust Standard Errors:** Optional sandwich estimators for uncertainty quantification under model misspecification
+*   **Comprehensive Diagnostics:** Residual analysis, model fit statistics, and spline component visualization
+
+This implementation provides essential methodology for parametric survival analysis requiring flexibility in baseline hazard patterns while maintaining the advantages of parametric modeling for prediction, extrapolation, and health economic applications crucial in clinical research and medical decision-making.
+
+### 🗓️ **August 18, 2025 - Aalen's Additive Hazard Models Implementation**
+
+#### 🚀 **Aalen's Additive Hazard Models - New Implementation (aalenhazard)**
+
+##### **Non-Proportional Hazards Modeling**
+*   **Additive Hazard Framework:** Time-varying covariate effects through additive rather than multiplicative hazard contributions
+*   **Multiple Model Types:** Additive, semi-parametric, and non-parametric Aalen models for different analytical needs
+*   **Time-Varying Effects:** Estimation of cumulative regression coefficients that change over time without proportional hazards assumptions
+*   **Constant Effects Testing:** Kolmogorov-Smirnov tests to identify which covariates have time-varying vs constant effects
+
+##### **Advanced Statistical Methodology**
+*   **Cumulative Regression Functions:** β̂(t) estimation showing how covariate effects accumulate over follow-up time
+*   **Robust Standard Errors:** Optional sandwich estimator for robust inference in the presence of model misspecification
+*   **Semi-parametric Flexibility:** Mixed models with some covariates constrained to constant effects, others time-varying
+*   **Bandwidth Selection:** Configurable smoothing parameters for cumulative coefficient estimation
+
+##### **Clinical Research Applications**
+*   **Proportional Hazards Violations:** Alternative analysis when Cox model assumptions fail statistical testing
+*   **Treatment Effect Evolution:** Investigation of how treatment effects change over time during follow-up periods
+*   **Exploratory Survival Analysis:** Non-parametric exploration of covariate effect patterns without strong model assumptions
+*   **Time-Dependent Biomarker Effects:** Analysis of biomarkers whose influence varies across different survival periods
+
+##### **Comprehensive Diagnostic Framework**
+*   **Cumulative Coefficient Plots:** Visualization of time-varying covariate effects with confidence bands
+*   **Constantancy Tests:** Statistical testing for time-invariant vs time-varying covariate effects
+*   **Model Diagnostics:** Residual analysis and goodness-of-fit assessment for additive hazard assumptions
+*   **Effect Pattern Recognition:** Identification of periods with strong vs minimal covariate influence
+
+##### **Technical Implementation**
+*   **timereg Package Integration:** Built on robust additive hazard estimation with counting process methodology
+*   **Survival Package Compatibility:** Seamless integration with standard survival data structures and time-to-event formats
+*   **Formula Interface Flexibility:** Support for mixed constant/time-varying specifications through intuitive syntax
+*   **Bootstrap-based Inference:** Optional bootstrap procedures for enhanced uncertainty quantification
+
+This implementation provides essential methodology for survival analysis when standard Cox proportional hazards assumptions are violated, offering flexible additive modeling approaches that reveal time-dependent patterns in covariate effects crucial for understanding evolving treatment and prognostic factor influences in clinical research.
+
+## Version 0.0.31.20
+
+### 🗓️ **August 18, 2025 - High-Dimensional Cox Regression Implementation**
+
+#### 🚀 **High-Dimensional Cox Regression - New Implementation (highdimcox)**
+
+##### **Advanced High-Dimensional Survival Analysis**
+*   **Ultra-High Dimensional Support:** Handles p >> n scenarios common in genomic, proteomic, and high-throughput clinical data
+*   **Multiple Regularization Methods:** LASSO (L1), Ridge (L2), Elastic Net, and Adaptive LASSO for different variable selection needs
+*   **Variable Screening Framework:** Automatic marginal screening for ultra-high dimensional data (>1000 variables) using univariate Cox models
+*   **Stability Selection:** Bootstrap-based variable importance assessment with configurable selection probability thresholds
+
+##### **Sophisticated Model Selection**
+*   **Cross-Validation Optimization:** Standard k-fold CV with 1-SE rule and minimum CV error selection strategies
+*   **Regularization Path Analysis:** Complete solution path visualization showing coefficient evolution across lambda values
+*   **Bootstrap Stability Testing:** Multiple bootstrap iterations to identify consistently selected variables
+*   **Dimensionality Reduction Tracking:** Systematic reduction from original variables through screening to final selection
+
+##### **Clinical Genomics Applications**
+*   **Genomic Survival Analysis:** Expression, methylation, copy number variation data integration for survival prediction
+*   **Proteomic Risk Modeling:** High-throughput protein data analysis for biomarker discovery and risk stratification
+*   **Multi-omics Integration:** Combined analysis of multiple high-dimensional data types for comprehensive survival modeling
+*   **Personalized Medicine:** Development of high-dimensional prognostic signatures for individualized treatment decisions
+
+##### **Comprehensive Validation Framework**
+*   **Variable Importance Rankings:** Quantitative assessment of selected variables with importance scores and stability measures
+*   **Model Performance Metrics:** Time-dependent prediction accuracy assessment and high-dimensional model diagnostics
+*   **Regularization Visualization:** Path plots, cross-validation curves, and variable importance displays
+*   **Stability Assessment:** Selection probability analysis and robust variable identification across bootstrap samples
+
+##### **Technical Implementation**
+*   **glmnet Integration:** High-performance regularized Cox regression with optimal computational efficiency
+*   **Survival Package Compatibility:** Standard survival data structures with enhanced high-dimensional capabilities
+*   **Memory-Efficient Processing:** Optimized algorithms for large predictor matrices with sparse representation support
+*   **Parallel Processing Support:** Multi-core computation capabilities for large-scale variable screening and cross-validation
+
+This implementation addresses critical needs in modern biomedical research where traditional Cox regression fails due to high-dimensional predictor spaces, providing robust variable selection and prediction modeling essential for genomic medicine and precision oncology applications.
+
+## Version 0.0.31.19
+
+### 🗓️ **August 18, 2025 - Stratified Parametric Models Implementation**
+
+#### 🚀 **Stratified Parametric Models - New Implementation (stratifiedparametric)**
+
+##### **Advanced Stratified Parametric Modeling**
+*   **Group-Specific Baseline Functions:** Independent baseline hazard functions for each stratum while maintaining parametric assumptions
+*   **Multiple Stratification Approaches:** Separate baselines, proportional baselines, shared shape parameters, and fully stratified parameters
+*   **Comprehensive Distribution Support:** Weibull, exponential, log-normal, log-logistic, gamma, generalized gamma, and generalized F distributions
+*   **Flexible Baseline Specifications:** Configurable approaches for handling heterogeneity between groups
+
+##### **Statistical Methodology Framework**
+*   **Likelihood Ratio Testing:** Formal tests for evaluating the necessity of stratification vs non-stratified models
+*   **Information Criteria Comparison:** AIC and BIC comparison across stratified and non-stratified approaches
+*   **Stratum-Specific Parameter Estimation:** Independent parameter estimates for each group with appropriate confidence intervals
+*   **Model Adequacy Assessment:** Residual analysis and diagnostic testing within each stratum
+
+##### **Clinical Research Applications**
+*   **Heterogeneity Accommodation:** Accounts for differences in baseline risk between patient subgroups
+*   **Group-Specific Survival Estimation:** Stratum-specific survival and hazard function estimates
+*   **Subgroup Analysis Framework:** Systematic comparison of survival patterns across predefined groups
+*   **Personalized Risk Assessment:** Group-specific predictions and confidence intervals for clinical decision-making
+
+##### **Advanced Diagnostic and Validation Features**
+*   **Stratified Survival Curves:** Group-specific parametric survival function visualization
+*   **Comparative Hazard Functions:** Stratum-specific hazard rate estimation and comparison
+*   **Model Comparison Visualization:** Side-by-side comparison of stratified vs non-stratified models
+*   **Residual Analysis by Strata:** Group-specific model adequacy assessment and diagnostic testing
+
+##### **Technical Implementation**
+*   **flexsurv Integration:** Built on robust maximum likelihood estimation for parametric distributions
+*   **rstpm2 Compatibility:** Support for Royston-Parmar flexible parametric models with stratification
+*   **Multiple Modeling Approaches:** Support for separate models per stratum and interaction-based stratification
+*   **Robust Statistical Testing:** Proper handling of multiple comparisons and stratification effect testing
+
+This implementation addresses the critical need for modeling survival data with group-specific baseline hazards while maintaining the efficiency and interpretability of parametric approaches, essential for heterogeneous patient populations and subgroup analyses in clinical research.
+
+## Version 0.0.31.19
+
+### 🗓️ **August 18, 2025 - Flexible Baseline Distributions Implementation**
+
+#### 🚀 **Flexible Baseline Distributions - New Implementation (flexiblebaseline)**
+
+##### **Advanced Flexible Parametric Modeling**
+*   **Spline-based Approaches:** Spline-based hazard, odds, and normal models using B-splines for flexible baseline estimation
+*   **Royston-Parmar Models:** Flexible parametric models with spline-based log cumulative hazard functions
+*   **Transformation Models:** General transformation models supporting Cox, Weibull, log-logistic, log-normal, and exponential families
+*   **Flexible Parametric Framework:** Extended parametric models with adaptive baseline distributions
+
+##### **Comprehensive Spline Configuration**
+*   **Knot Specification:** Configurable number of internal knots (1-10) with automatic or manual placement
+*   **Knot Placement Methods:** Equal quantile, equal spacing, and manual specification options
+*   **Boundary Knots:** Optional boundary knots at extreme time points for complete time coverage
+*   **Spline Degree Control:** Linear, quadratic, and cubic B-spline basis functions
+
+##### **Clinical Research Applications**
+*   **Non-parametric Flexibility:** Avoids restrictive parametric assumptions while maintaining smooth estimates
+*   **Complex Hazard Patterns:** Capable of modeling non-monotonic and multi-modal hazard functions
+*   **Covariate Integration:** Seamless inclusion of time-constant and time-varying covariates
+*   **Stratified Analysis:** Support for group-specific flexible baseline distributions
+
+##### **Advanced Diagnostic Framework**
+*   **Fitted Function Visualization:** Smooth survival, hazard, and cumulative hazard function plots
+*   **Spline Basis Inspection:** Detailed examination of basis function contributions and significance
+*   **Model Comparison:** Systematic comparison with standard parametric and semi-parametric alternatives
+*   **Goodness-of-Fit Assessment:** Comprehensive diagnostic statistics and model adequacy testing
+
+##### **Technical Implementation**
+*   **flexsurv Integration:** Built on flexible survival modeling framework with spline extensions
+*   **rstpm2 Compatibility:** Support for Royston-Parmar flexible parametric survival models
+*   **Transformation Model Support:** General transformation model framework for survival data
+*   **Robust Parameter Estimation:** Maximum likelihood with proper uncertainty quantification
+
+This implementation provides the statistical flexibility needed for complex survival patterns while maintaining the smooth, interpretable estimates essential for clinical decision-making and prognostic model development.
+
+## Version 0.0.31.18
+
+### 🗓️ **August 18, 2025 - Distribution Selection and Goodness-of-Fit Implementation**
+
+#### 🚀 **Distribution Selection and Goodness-of-Fit - New Implementation (distributionfit)**
+
+##### **Automated Parametric Distribution Selection**
+*   **Multiple Distribution Testing:** Systematic comparison of Weibull, exponential, log-normal, log-logistic, gamma, generalized gamma, and generalized F distributions
+*   **Information Criteria Selection:** AIC, BIC, and corrected AIC (AICc) for robust model selection
+*   **Model Weights:** Akaike weights quantifying relative support for each distribution
+*   **Flexible Selection Methods:** Choice of AIC, BIC, AICc, or likelihood ratio tests for model ranking
+
+##### **Comprehensive Goodness-of-Fit Testing**
+*   **Classical GOF Tests:** Kolmogorov-Smirnov, Anderson-Darling, and Cramer-von Mises tests
+*   **Bootstrap Validation:** Bootstrap-based p-values accounting for parameter estimation uncertainty
+*   **Multiple Test Framework:** Systematic application of multiple adequacy tests for robust validation
+*   **Decision Support:** Clear pass/fail decisions with statistical interpretation guidance
+
+##### **Clinical Research Applications**
+*   **Model Uncertainty Assessment:** Quantification of model selection uncertainty through AIC weights
+*   **Distribution Adequacy:** Rigorous testing of parametric assumptions in survival modeling
+*   **Comparative Analysis:** Side-by-side comparison of multiple parametric models
+*   **Evidence-Based Selection:** Data-driven choice of optimal survival distribution
+
+##### **Advanced Diagnostic Visualization**
+*   **Survival Function Comparison:** Overlay plots comparing all fitted distributions against empirical data
+*   **Hazard Function Analysis:** Visual comparison of implied hazard shapes across distributions
+*   **P-P and Q-Q Plots:** Probability-probability and quantile-quantile plots for model adequacy assessment
+*   **Comprehensive Diagnostics:** Multi-panel diagnostic plots for thorough model evaluation
+
+##### **Technical Implementation**
+*   **flexsurv Integration:** Built on robust maximum likelihood estimation frameworks
+*   **Convergence Monitoring:** Automatic detection and reporting of estimation convergence issues
+*   **Robust Statistics:** Implementation of corrected information criteria for small samples
+*   **Statistical Rigor:** Proper handling of parameter estimation uncertainty in goodness-of-fit testing
+
+This implementation addresses the critical need for objective, data-driven selection of parametric survival distributions, ensuring that statistical models are both statistically adequate and clinically meaningful for survival analysis applications.
+
+## Version 0.0.31.17
+
+### 🗓️ **August 18, 2025 - Spline-based Hazard Functions Implementation**
+
+#### 🚀 **Spline-based Hazard Functions - New Implementation (splinehazard)**
+
+##### **Flexible Parametric Hazard Modeling**
+*   **Spline Basis Functions:** B-spline and natural spline basis functions for flexible hazard shape modeling
+*   **Automatic Knot Selection:** AIC-based optimization for optimal knot placement and number selection
+*   **Multiple Placement Methods:** Quantile-based, equally-spaced, and manual knot specification options
+*   **Polynomial Flexibility:** Linear, quadratic, and cubic spline degrees for varying smoothness levels
+
+##### **Advanced Statistical Framework**
+*   **Scale Flexibility:** Log-hazard, odds, and normal scales for different hazard function parameterizations
+*   **Model Comparison:** Systematic comparison of different knot configurations with AIC weights
+*   **Confidence Estimation:** Bootstrap and asymptotic confidence intervals for spline parameters
+*   **Covariate Integration:** Time-fixed covariates with proportional and non-proportional hazards options
+
+##### **Clinical Research Applications**
+*   **Complex Hazard Patterns:** Ideal for modeling non-monotonic, multi-modal, and irregular hazard functions
+*   **Oncology Research:** Flexible survival modeling for cancers with changing hazard rates during follow-up
+*   **Cardiovascular Studies:** Modeling complex risk patterns in heart disease progression
+*   **Biomarker Studies:** Time-varying hazard effects for dynamic biomarker relationships
+
+##### **Comprehensive Visualization Suite**
+*   **Flexible Hazard Plots:** Smooth hazard function visualization showing complex time-dependent patterns
+*   **Spline Basis Visualization:** Display of underlying spline basis functions and their contributions
+*   **Survival Function Plots:** Parametric survival curves based on flexible spline-based models  
+*   **Cumulative Hazard Plots:** Integrated hazard visualization for risk assessment over time
+
+##### **Technical Implementation**
+*   **flexsurv Integration:** Built on the robust flexsurvspline framework for reliable parameter estimation
+*   **Optimization Algorithms:** Advanced numerical methods for stable spline parameter fitting
+*   **Model Diagnostics:** Comprehensive goodness-of-fit assessment and residual analysis
+*   **Computational Efficiency:** Optimized algorithms for fast fitting of complex spline models
+
+This implementation addresses the critical need for flexible parametric survival modeling in clinical research, where standard parametric distributions may be too restrictive for complex hazard patterns commonly observed in medical data.
+
+## Version 0.0.31.16
+
+### 🗓️ **August 18, 2025 - Flexible Parametric Survival Models Implementation**
+
+#### 🚀 **Flexible Parametric Survival Models - New Implementation (flexparametric)**
+
+##### **Advanced Parametric Distribution Modeling**
+*   **Generalized Gamma Distribution:** Three-parameter flexible distribution that encompasses exponential, Weibull, and gamma as special cases
+*   **Generalized F Distribution:** Four-parameter distribution providing maximum flexibility for complex hazard shapes including bathtub, unimodal, and multi-modal patterns
+*   **Enhanced Distribution Library:** Support for original and standard parameterizations of both generalized gamma and F distributions
+*   **Standard Distributions:** Integrated Weibull, log-normal, and gamma distributions for comprehensive parametric modeling
+
+##### **Advanced Statistical Features**
+*   **Maximum Likelihood Estimation:** Robust parameter estimation using flexsurv package optimization algorithms
+*   **Confidence Intervals:** Bootstrap and asymptotic confidence intervals for all parameters and survival functions
+*   **Model Comparison:** Automatic AIC and BIC calculation for systematic model selection and validation
+*   **Covariate Integration:** Support for time-fixed covariates with proportional hazards assumptions
+
+##### **Clinical Research Applications**
+*   **Complex Hazard Modeling:** Ideal for diseases with non-monotonic hazard patterns (increasing, decreasing, bathtub, or bell-shaped)
+*   **Oncology Applications:** Flexible modeling of cancer survival with changing hazard rates over time
+*   **Reliability Analysis:** Engineering and biomedical device survival with complex failure patterns
+*   **Comparative Studies:** Model selection framework for identifying optimal parametric distributions
+
+##### **Comprehensive Visualization Suite**
+*   **Parametric Survival Curves:** Smooth survival probability plots with confidence bands based on fitted distributions
+*   **Hazard Function Plots:** Visualization of fitted hazard rates showing complex time-dependent patterns
+*   **Density Function Plots:** Probability density visualization for understanding failure time distributions
+*   **Model Comparison Plots:** Side-by-side comparison of different parametric fits
+
+##### **Advanced Model Diagnostics**
+*   **Parameter Estimation Tables:** Comprehensive parameter estimates with standard errors, z-statistics, and p-values
+*   **Goodness-of-Fit Metrics:** AIC, BIC, and log-likelihood statistics for model selection
+*   **Convergence Diagnostics:** Automatic assessment of optimization convergence and parameter identifiability
+*   **Residual Analysis:** Support for model diagnostic plots and residual analysis
+
+##### **Quality Assurance and Validation**
+*   **Robust Optimization:** Multiple starting values and convergence checks for reliable parameter estimation
+*   **Boundary Handling:** Proper handling of parameter constraints and boundary conditions
+*   **Missing Data Management:** Comprehensive treatment of censored and missing observations
+*   **Numerical Stability:** Advanced numerical methods for stable computation with extreme parameter values
+
+---
+
+*This implementation significantly advances the parametric survival modeling capabilities in ClinicoPath, providing researchers with state-of-the-art tools for modeling complex survival patterns that cannot be adequately captured by standard parametric distributions.*
+
+## Version 0.0.31.15
+
+### 🗓️ **August 18, 2025 - Median Survival Comparisons Implementation**
+
+#### 🚀 **Median Survival Comparisons - New Implementation (mediansurvival)**
+
+##### **Robust Median Survival Analysis**
+*   **Multiple CI Methods:** Brookmeyer-Crowley, Log transformation, Log-log transformation, and Plain linear methods
+*   **Flexible Test Statistics:** Log-rank, Wilcoxon, and Peto-Peto tests for comparing median survival between groups
+*   **Confidence Intervals:** Robust confidence intervals for median survival times accounting for censoring patterns
+*   **Group Comparisons:** Pairwise and overall comparisons with multiple comparison corrections
+
+##### **Advanced Statistical Methods**
+*   **Censoring-Aware Estimation:** Proper handling of incomplete follow-up data in median calculations
+*   **Bootstrap Confidence Intervals:** Alternative confidence interval methods for complex censoring patterns
+*   **Multiple Comparison Control:** Holm, Bonferroni, FDR (Benjamini-Hochberg), and Hochberg adjustments
+*   **Test Method Selection:** Choose from log-rank, Wilcoxon, Peto-Peto, or comprehensive analysis with all methods
+
+##### **Clinical Research Applications**
+*   **Treatment Efficacy Studies:** Compare median survival between treatment arms in clinical trials
+*   **Prognostic Factor Analysis:** Evaluate impact of biomarkers and clinical factors on median survival
+*   **Subset Analysis:** Robust median comparisons for patient subgroups and stratified analyses
+*   **Regulatory Reporting:** Publication-ready median survival summaries with confidence intervals
+
+##### **Enhanced Visualization and Reporting**
+*   **Survival Curves with Median Indicators:** Kaplan-Meier plots with median survival lines and confidence bands
+*   **Median Comparison Plots:** Forest plot-style visualization of median survival differences between groups
+*   **Risk Tables:** Optional numbers-at-risk tables below survival plots for transparency
+*   **Statistical Summaries:** Comprehensive reporting of median survival estimates and statistical tests
+
+##### **Quality Assurance Features**
+*   **Data Validation:** Automatic checks for proper time and event coding
+*   **Missing Data Handling:** Robust treatment of incomplete observations
+*   **Result Interpretation:** Built-in methodology explanations and analysis summaries
+*   **Export Capabilities:** Table and plot exports for manuscripts and presentations
+
+---
+
+*This implementation completes Phase 1 Core Hypothesis Testing in the ClinicoPath survival analysis roadmap, providing a comprehensive suite of non-parametric and median-based survival comparison methods essential for clinical research.*
+
+## Version 0.0.31.14
+
+### 🗓️ **August 18, 2025 - Permutation Tests for Survival Implementation**
+
+#### 🚀 **Permutation Tests for Survival - New Implementation (permutationsurvival)**
+
+##### **Non-Parametric Robust Survival Comparison**
+*   **Distribution-Free Testing:** No assumptions about underlying data distribution or asymptotic theory required
+*   **Exact Type I Error Control:** Provides exact p-values through resampling methodology under null hypothesis
+*   **Small Sample Validity:** Reliable results even with small sample sizes where traditional asymptotic theory fails
+*   **Multiple Test Statistics:** Log-rank, Wilcoxon (Gehan-Breslow), Tarone-Ware, and Maximum Deviation statistics
+
+##### **Advanced Permutation Strategies**
+*   **Approximate Permutation:** Monte Carlo sampling for practical analysis of larger datasets (recommended for n > 10)
+*   **Stratified Permutation:** Within-strata permutation to control for confounding variables
+*   **Reproducible Results:** Fixed seed option for consistent results across analyses
+*   **Progressive Monitoring:** Real-time p-value convergence tracking during permutation process
+
+##### **Clinical Research Applications**
+*   **Small Clinical Studies:** Reliable testing when sample sizes are too small for traditional log-rank tests
+*   **Violated Assumptions:** Alternative when proportional hazards or other distributional assumptions fail
+*   **Regulatory Submissions:** Exact p-values provide stronger statistical evidence than approximate methods
+*   **Exploratory Analysis:** Robust comparison method for pilot studies and biomarker discovery research
+
+##### **Advanced Visualization and Reporting**
+*   **Permutation Distribution Plots:** Histograms showing test statistic distribution under null hypothesis
+*   **P-value Convergence Tracking:** Monitor statistical stability as permutations accumulate
+*   **Multiple Comparison Corrections:** Bonferroni, Holm, Hochberg, and Benjamini-Hochberg adjustments
+*   **Comprehensive Group Statistics:** Sample sizes, events, and median survival with confidence intervals
+
+## Version 0.0.31.13
+
+### 🗓️ **August 18, 2025 - Restricted Mean Survival Time Tests Implementation**
+
+#### 🚀 **Restricted Mean Survival Time Tests - New Implementation (rmst)**
+
+##### **Clinically Meaningful Survival Analysis with Direct Time Interpretation**
+*   **RMST Analysis:** Calculate average survival time within a specified restriction period (tau) for direct clinical interpretation
+*   **Flexible Tau Selection:** Automatic (minimum group maximum), manual specification, or percentile-based tau determination
+*   **Statistical Comparisons:** Both difference and ratio tests between groups with robust confidence intervals
+*   **Bootstrap Support:** Enhanced confidence interval estimation for small sample sizes or non-normal distributions
+
+##### **Advanced Analysis Features**
+*   **Sensitivity Analysis:** Evaluate RMST differences across multiple tau values to assess robustness of findings
+*   **Comprehensive Visualizations:** Survival curves with highlighted RMST areas and tau sensitivity plots
+*   **Clinical Decision Support:** Direct measures of treatment benefit in time units rather than relative measures
+*   **Proportional Hazards Independence:** Valid alternative when Cox model assumptions are violated
+
+##### **Clinical Research Applications**
+*   **Treatment Benefit Quantification:** Direct measurement of gained survival time in clinically relevant units
+*   **Health Economics:** Cost-effectiveness analysis with interpretable survival time differences
+*   **Regulatory Submissions:** Clear demonstration of treatment efficacy with absolute rather than relative benefits
+*   **Patient Communication:** Easily interpretable results for shared decision-making
+
+## Version 0.0.31.12
+
+### 🗓️ **August 18, 2025 - Weighted Log-Rank Tests Implementation**
+
+#### 🚀 **Weighted Log-Rank Tests - New Implementation (weightedlogrank)**
+
+##### **Advanced Survival Comparison with Flexible Weighting Schemes**
+*   **Comprehensive Test Suite:** Standard log-rank, Gehan-Wilcoxon, Tarone-Ware, Peto-Peto, and Modified Peto tests for detecting differences at various time periods
+*   **Flexible Weighting Options:** Early difference detection (Gehan-Wilcoxon), intermediate weighting (Tarone-Ware), and balanced approaches for comprehensive survival comparison
+*   **Multiple Comparison Corrections:** Bonferroni, Holm, Hochberg, and Benjamini-Hochberg adjustments for controlling family-wise error rates across multiple tests
+*   **Clinical Interpretation Support:** Natural language summaries and methodology explanations for understanding test results and clinical implications
+
+##### **Clinical Research Applications**
+*   **Treatment Efficacy Assessment:** Enhanced power for detecting early, late, or sustained treatment effects in clinical trials
+*   **Biomarker Validation Studies:** Sensitive detection of prognostic differences across different follow-up periods
+*   **Drug Development:** Comprehensive survival comparison for regulatory submissions with multiple testing perspectives
+*   **Oncology Research:** Optimized detection of treatment benefits in cancer studies with varying hazard patterns
+
+##### **Statistical Features**
+*   **Weight Function Flexibility:** Different tests emphasize early failures, late failures, or provide balanced detection across all time points
+*   **Robust Group Comparisons:** Handles multiple groups with automatic adjustment for multiple comparisons
+*   **Comprehensive Output:** Group summaries, median survival times, event counts, and sample size reporting
+*   **Visualization Support:** Kaplan-Meier curves, weight function plots, and test statistic evolution over time
+
+## Version 0.0.31.11
+
+### 🗓️ **August 18, 2025 - Fleming-Harrington G-rho Family Tests Implementation**
+
+#### 🚀 **Fleming-Harrington G-rho Family Tests - New Implementation (flemingharrington)**
+
+##### **Advanced Weighted Log-Rank Testing for Survival Comparison**
+*   **Comprehensive Test Family:** Standard log-rank test (rho = 0), early difference detection (rho > 0), late difference detection (rho < 0), and custom parameter specifications for specialized testing scenarios
+*   **Multiple Comparison Corrections:** Bonferroni, Holm, Hochberg, and Benjamini-Hochberg (FDR) adjustments for family-wise error control in multiple testing
+*   **Omnibus Testing:** Combined test statistics for overall significance assessment across the entire G-rho family
+*   **Weight Function Flexibility:** Custom rho and gamma parameters for specialized weight functions emphasizing different time periods
+
+##### **Clinical Research Applications**
+*   **Early Treatment Effects:** Detection of immediate therapeutic benefits in clinical trials with early separation of survival curves
+*   **Late Effects Assessment:** Identification of delayed treatment effects common in immunotherapy and long-term interventions
+*   **Immunotherapy Response Patterns:** Specialized testing for delayed but durable responses characteristic of checkpoint inhibitors
+*   **Time-Period Specific Analysis:** Comprehensive survival comparison across different phases of follow-up
+
+##### **Advanced Statistical Features**
+*   **Effect Size Calculations:** Quantitative measures of survival differences with clinical interpretation guidelines
+*   **Post-hoc Power Analysis:** Retrospective power assessment for detected differences and sample size adequacy
+*   **Flexible Test Selection:** Individual control over early, late, and standard log-rank tests within the G-rho family
+*   **Multiple Visualization Options:** Weight function plots, survival difference trajectories, and test statistic comparisons
+
+## Version 0.0.31.10
+
+### 🗓️ **August 18, 2025 - Time-Varying Covariates Cox Regression Implementation**
+
+#### 🚀 **Time-Varying Covariates Cox Regression - New Implementation (timevarycox)**
+
+##### **Dynamic Covariate Modeling for Longitudinal Survival Data**
+*   **Multiple Data Format Support:** Long format (multiple rows per subject) and counting process format for flexible data input structures
+*   **Time-Varying Variable Handling:** Step function approach (constant between intervals), linear interpolation, and spline interpolation for smooth transitions between measurement times
+*   **Robust Statistical Methods:** Clustered standard errors, non-proportional hazards testing, and time-interaction effects for comprehensive model validation
+*   **Counting Process Integration:** Support for start-stop time intervals with proper risk set management and left truncation handling
+
+##### **Clinical Research Applications**
+*   **Treatment Changes During Follow-up:** Model therapy modifications, dose adjustments, and treatment switches that occur during patient follow-up
+*   **Dynamic Biomarker Measurements:** Incorporate laboratory values, vital signs, and disease markers that change over time during monitoring
+*   **Disease Progression Modeling:** Analyze stage changes, tumor size evolution, and performance status modifications as time-varying predictors
+*   **Longitudinal Exposure Variables:** Model time-dependent exposures like smoking status changes, occupational hazards, and medication adherence patterns
+
+##### **Advanced Statistical Features**
+*   **Non-Proportional Hazards Detection:** Comprehensive testing for violations of proportional hazards assumptions using Schoenfeld residuals
+*   **Time-Interaction Effects:** Model hazard ratios that change over follow-up time with flexible interaction specifications
+*   **Recurrent Events Support:** Extended Andersen-Gill and Prentice-Williams-Peterson models for multiple events per subject
+*   **Interpolation Methods:** Linear and spline interpolation for missing covariate values between measurement times with clinical validity checks
+
+## Version 0.0.31.09
+
+### 🗓️ **August 17, 2025 - Mixed-Effects Cox Regression Implementation**
+
+#### 🚀 **Mixed-Effects Cox Regression - New Implementation (mixedcox)**
+
+##### **Advanced Clustering and Hierarchical Survival Modeling**
+*   **Multiple Random Effects Types:** Random intercepts for cluster-specific baseline hazards, random slopes for cluster-specific covariate effects, and combined intercept-slope models for comprehensive clustering
+*   **Nested Clustering Support:** Hierarchical structures (patients within hospitals, tumors within patients) with proper correlation modeling and variance partitioning
+*   **Flexible Clustering Variables:** Support for hospital effects, patient effects, family clustering, and multi-level treatment groupings common in clinical research
+*   **Variance Components Estimation:** Comprehensive estimation of random effects variances with confidence intervals and significance testing
+*   **Intracluster Correlation (ICC):** Calculation and interpretation of ICC to quantify clustering strength and justify mixed-effects modeling
+
+##### **Clinical Research Applications**
+*   **Multi-Center Clinical Trials:** Account for hospital/center effects while estimating treatment effects and prognostic factors
+*   **Recurrent Events Analysis:** Model multiple events per patient (recurrences, hospitalizations) with patient-specific random effects
+*   **Family-Based Studies:** Analyze genetic and familial clustering in survival outcomes with appropriate correlation structures
+*   **Longitudinal Survival Data:** Handle repeated measurements and time-varying patient characteristics with proper clustering
+*   **Registry Analysis:** Account for institutional variation in large-scale cancer registries and epidemiological studies
+
+##### **Statistical Methodology and Model Assessment**
+*   **Likelihood Ratio Testing:** Formal statistical tests comparing mixed-effects vs standard Cox models with proper hypothesis testing
+*   **Model Diagnostics:** Residual analysis, influence diagnostics, and random effects prediction (BLUPs) for model validation
+*   **Bootstrap Validation:** Robust variance estimation and bias-corrected performance assessment for complex hierarchical models
+*   **Correlation Structures:** Multiple correlation patterns (unstructured, compound symmetry, AR(1)) for different clustering scenarios
+*   **Optimization Methods:** Efficient algorithms (penalized likelihood, Laplace approximation) for large datasets with complex clustering
+
+##### **Technical Excellence and Clinical Integration**
+*   **coxme Package Integration:** Seamless integration with the coxme package for validated mixed-effects survival analysis methods
+*   **Jamovi Architecture:** Complete four-file structure (.a.yaml, .b.R, .r.yaml, .u.yaml) with intuitive clustering variable specification
+*   **Clinical Workflow:** Natural language summaries, methodological explanations, and educational content for clinical researchers
+*   **Advanced Visualization:** Forest plots for fixed effects, random effects distributions, and cluster-specific survival curves
+*   **Production Quality:** Comprehensive error handling, input validation, and robust implementation for multi-center research
+
+## Version 0.0.31.08
+
+### 🗓️ **August 17, 2025 - Penalized Cox Regression Implementation**
+
+#### 🚀 **Penalized Cox Regression - New Implementation (penalizedcox)**
+
+##### **Advanced Regularization Methods for High-Dimensional Survival Data**
+*   **Multiple Penalty Types:** LASSO (L1) for variable selection, Ridge (L2) for coefficient shrinkage, and Elastic Net combining both penalties for optimal bias-variance trade-off
+*   **Flexible Regularization:** Customizable alpha parameter for Elastic Net mixing, custom lambda sequences, and automatic lambda selection via cross-validation
+*   **Cross-Validation Framework:** K-fold cross-validation with selectable error measures (partial likelihood deviance, C-index) and 1-standard-error rule for parsimonious models
+*   **Variable Selection:** Automatic identification of non-zero coefficients with standardization options and maximum variable constraints for large datasets
+*   **Bootstrap Validation:** Comprehensive model validation with bootstrap resampling for optimism-corrected performance assessment
+
+##### **High-Dimensional Clinical Applications**
+*   **Genomic Survival Analysis:** Regularized Cox models for gene expression data with thousands of variables and clinical outcome integration
+*   **Biomarker Discovery:** Variable selection in large clinical datasets for prognostic and predictive biomarker identification
+*   **Risk Score Development:** Linear predictor calculation with risk group stratification and survival curve visualization by risk categories
+*   **Multicollinearity Handling:** Ridge penalty for correlated predictor variables common in clinical research datasets
+*   **Feature Engineering:** Support for both continuous and categorical variables with automatic model matrix creation
+
+##### **Advanced Model Selection and Validation**
+*   **Lambda Path Analysis:** Coefficient path visualization showing variable entry/exit across regularization strength
+*   **Cross-Validation Plots:** CV error curves for optimal lambda selection with confidence bands and selection criteria visualization
+*   **Variable Importance:** Ranking of selected variables by coefficient magnitude and contribution to model performance
+*   **Model Performance Metrics:** Comprehensive assessment including deviance, C-index, and cross-validated performance measures
+*   **Prediction Infrastructure:** Risk score calculation and risk group classification with survival analysis integration
+
+##### **Technical Excellence and Clinical Integration**
+*   **glmnet Integration:** Seamless integration with the glmnet package for efficient coordinate descent algorithms and proven regularization methods
+*   **Jamovi Architecture:** Complete four-file structure (.a.yaml, .b.R, .r.yaml, .u.yaml) with comprehensive user interface for penalty specification
+*   **Clinical Workflow:** Natural language summaries, methodological explanations, and educational content for clinical researchers
+*   **Tabular Data Support:** Full compatibility with jamovi's data structure and clinical research dataset formats
+*   **Production Quality:** Comprehensive error handling, input validation, and robust implementation for research applications
+
+## Version 0.0.31.07
+
+### 🗓️ **August 17, 2025 - Survey-Weighted Survival Analysis Implementation**
+
+#### 🚀 **Survey-Weighted Survival Analysis - New Implementation (surveysurvival)**
+
+##### **Complete Survey Design Support for Complex Sampling**
+*   **Multiple Survey Design Types:** Simple random sampling (SRS), stratified sampling, cluster sampling, stratified cluster designs, and multi-stage sampling for comprehensive survey analysis capability
+*   **Survey Variables Integration:** Primary sampling units (PSU), stratification variables, finite population correction (FPC), and nested cluster specifications with proper design effect calculations
+*   **Complex Sampling Framework:** Survey weights, design effects, robust variance estimation, and population-level inference with proper standard error adjustments for survey data
+*   **Subpopulation Analysis:** Domain estimation capabilities for analyzing specific subgroups within the survey population with proper variance estimation
+*   **Survey Design Validation:** Comprehensive validation of survey design specifications with informative error messages and design characteristic summaries
+
+##### **Survey-Weighted Statistical Methods**
+*   **Weighted Kaplan-Meier Estimation:** Survey-weighted survival curves accounting for complex sampling designs with proper confidence intervals and population-level interpretation
+*   **Weighted Cox Regression:** Survey-weighted proportional hazards modeling with robust standard errors and design-based inference for population parameters
+*   **Population-Level Estimates:** Total population survival estimates, event prevalence calculation, and subpopulation comparisons with survey design adjustments
+*   **Robust Variance Estimation:** Design-based standard errors incorporating stratification and clustering effects for proper statistical inference
+*   **Survey-Weighted Plots:** Visualization of survey-weighted survival curves with confidence intervals and risk tables adjusted for sampling design
+
+##### **Clinical Research Applications**
+*   **Population Health Studies:** Analysis of national health surveys (NHANES, BRFSS) and population-based cancer registries with complex sampling designs
+*   **Epidemiological Research:** Survey-weighted survival analysis for cohort studies with stratified sampling and cluster designs
+*   **Healthcare Surveillance:** Population-level cancer survival estimates and public health monitoring using survey data
+*   **Registry Analysis:** Analysis of cancer registries and health surveillance systems with proper population-level inference
+*   **Natural Language Summaries:** Clinical interpretation of survey-weighted results with explanation of population-level implications
+
+##### **Technical Implementation Excellence**
+*   **R6 Class Architecture:** Robust backend implementation with comprehensive survey package integration and error handling
+*   **Survey Package Integration:** Seamless integration with R survey package (svydesign, svykm, svycoxph) for validated survey statistical methods
+*   **Jamovi Component Structure:** Complete four-file architecture (.a.yaml, .b.R, .r.yaml, .u.yaml) with proper survey design user interface
+*   **Tabular Data Compatibility:** Full support for jamovi's tabular data structure with survey variable specification and validation
+*   **Production Quality:** Comprehensive testing, error handling, and documentation with clinical research focus
+
 ## Version 0.0.31.06
 
 ### 🗓️ **August 17, 2025 - Multisurvival Function Comprehensive Enhancement**

@@ -1,0 +1,277 @@
+---
+name: coxphw
+title: Weighted Cox Regression
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+menuTitle: Weighted Cox Regression
+menuSubtitle: Cox models for rare events and imbalanced data
+description:
+    main: >-
+        Implements weighted Cox proportional hazards regression models
+        specifically designed for rare events and imbalanced survival data.
+        Uses average hazard weights to improve estimation accuracy when
+        events are rare or covariates are imbalanced, providing more
+        reliable hazard ratios and confidence intervals in challenging
+        clinical research scenarios.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Weighted Cox regression for rare events
+            library(survival)
+            library(coxphw)
+            
+            coxphw(
+                data = rare_event_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                covariates = c("age", "treatment", "biomarker"),
+                weight_method = "average",
+                alpha = 0.5
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Survival time or follow-up duration variable
+
+    - name: outcome
+      title: Event Variable
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Predictor variables for the Cox model
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of outcome variable indicating event occurrence
+
+    - name: weight_method
+      title: Weight Method
+      type: List
+      options:
+          - name: average
+            title: Average weights (AHW)
+          - name: schoenfeld
+            title: Schoenfeld residual weights
+          - name: prentice
+            title: Prentice weights
+          - name: logrankvar
+            title: Log-rank variance weights
+      default: average
+      description:
+          R: >
+            Weighting method for the partial likelihood
+
+    - name: alpha
+      title: Weight Parameter (α)
+      type: Number
+      min: 0
+      max: 1
+      default: 0.5
+      description:
+          R: >
+            Weight parameter (0=log-rank, 0.5=average, 1=Breslow)
+
+    - name: offset_variable
+      title: Offset Variable
+      type: Variable
+      permitted:
+          - numeric
+      description:
+          R: >
+            Optional offset variable for the model
+
+    - name: stratify_variable
+      title: Stratification Variable
+      type: Variable
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Variable for stratified analysis
+
+    - name: cluster_variable
+      title: Cluster Variable
+      type: Variable
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Variable defining clusters for robust variance
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for intervals
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Number
+      min: 10
+      max: 1000
+      default: 100
+      description:
+          R: >
+            Maximum number of iterations
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      min: 1e-8
+      max: 1e-2
+      default: 1e-6
+      description:
+          R: >
+            Convergence tolerance for estimation
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compute bootstrap confidence intervals
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      min: 100
+      max: 2000
+      default: 500
+      description:
+          R: >
+            Number of bootstrap samples
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model summary
+
+    - name: show_coefficients
+      title: Show Coefficients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display coefficient estimates table
+
+    - name: show_weights
+      title: Show Weight Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display weight distribution analysis
+
+    - name: show_diagnostics
+      title: Show Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model diagnostics
+
+    - name: show_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare weighted vs standard Cox models
+
+    - name: show_weight_plots
+      title: Show Weight Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display weight distribution plots
+
+    - name: show_residual_plots
+      title: Show Residual Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display residual diagnostic plots
+
+    - name: show_survival_plots
+      title: Show Survival Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display survival curves
+
+    - name: show_forest_plot
+      title: Show Forest Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display forest plot of hazard ratios
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries
+
+    - name: showExplanations
+      title: Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations

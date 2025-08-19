@@ -1,0 +1,279 @@
+---
+name: parametricfrailty
+title: Parametric Frailty Models
+jrs: '1.1'
+refs: survival
+items:
+    - name: overview
+      title: Analysis Overview
+      type: Table
+      description: Overview of the parametric frailty model analysis
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+      columns:
+        - name: analysis
+          title: Analysis
+          type: text
+        - name: outcome
+          title: Outcome Variable
+          type: text
+        - name: n_subjects
+          title: Number of Subjects
+          type: integer
+        - name: n_events
+          title: Number of Events
+          type: integer
+        - name: frailty_groups
+          title: Frailty Groups
+          type: integer
+        - name: baseline_dist
+          title: Baseline Distribution
+          type: text
+        - name: frailty_dist
+          title: Frailty Distribution
+          type: text
+        - name: estimation
+          title: Estimation Method
+          type: text
+
+    - name: model_fit
+      title: Model Fit Statistics
+      type: Table
+      description: Model fit statistics for the parametric frailty model
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto,pvalue
+
+    - name: coefficients
+      title: Model Coefficients
+      type: Table
+      description: Parameter estimates for the parametric frailty model
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+        - include_se
+        - include_ci
+        - conf_level
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+          visible: (include_se)
+        - name: z_stat
+          title: Z
+          type: number
+          format: zto
+          visible: (include_se)
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (include_se)
+        - name: lower_ci
+          title: Lower CI
+          type: number
+          format: zto
+          visible: (include_ci)
+        - name: upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+          visible: (include_ci)
+
+    - name: frailty_summary
+      title: Frailty Summary
+      type: Table
+      description: Summary statistics for frailty terms
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+        - frailty_variance
+      visible: (frailty_variance)
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: variance
+          title: Variance
+          type: number
+          format: zto
+        - name: se_variance
+          title: SE(Variance)
+          type: number
+          format: zto
+        - name: theta
+          title: θ (Heterogeneity)
+          type: number
+          format: zto
+        - name: kendall_tau
+          title: Kendall's τ
+          type: number
+          format: zto
+
+    - name: frailty_predictions_table
+      title: Individual Frailty Predictions
+      type: Table
+      description: Individual frailty predictions for each subject/group
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+        - frailty_predictions
+      visible: (frailty_predictions)
+      columns:
+        - name: subject
+          title: Subject/Group
+          type: text
+        - name: frailty_pred
+          title: Frailty Prediction
+          type: number
+          format: zto
+        - name: se_pred
+          title: SE(Prediction)
+          type: number
+          format: zto
+        - name: lower_pred
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper_pred
+          title: Upper CI
+          type: number
+          format: zto
+
+    - name: gof_table
+      title: Goodness-of-Fit Tests
+      type: Table
+      description: Goodness-of-fit tests for the parametric frailty model
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+        - gof_tests
+      visible: (gof_tests)
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: statistic
+          title: Test Statistic
+          type: number
+          format: zto
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: hazard_plot
+      title: Hazard Function
+      type: Image
+      description: Plot of the estimated hazard function
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+        - plot_hazard
+      visible: (plot_hazard)
+      renderFun: .plot_hazard
+
+    - name: survival_plot
+      title: Survival Function
+      type: Image
+      description: Plot of the estimated survival function
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+        - plot_survival
+      visible: (plot_survival)
+      renderFun: .plot_survival
+
+    - name: frailty_plot
+      title: Frailty Distribution
+      type: Image
+      description: Plot of the frailty distribution
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+        - plot_frailty
+      visible: (plot_frailty)
+      renderFun: .plot_frailty
+
+    - name: diagnostics_plot
+      title: Diagnostic Plots
+      type: Image
+      description: Model diagnostic plots
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method
+        - plot_diagnostics
+      visible: (plot_diagnostics)
+      renderFun: .plot_diagnostics
+
+    - name: model_summary
+      title: Model Summary
+      type: Html
+      description: Comprehensive model summary and interpretation
+      clearWith:
+        - outcome
+        - explanatory
+        - frailty
+        - baseline_distribution
+        - frailty_distribution
+        - estimation_method

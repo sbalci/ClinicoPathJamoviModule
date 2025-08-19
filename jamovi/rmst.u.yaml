@@ -1,0 +1,96 @@
+title: Restricted Mean Survival Time Tests
+name: rmst
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Group Variable
+        children:
+          - type: VariablesListBox
+            name: explanatory
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Tau Selection
+            children:
+              - type: ComboBox
+                name: tau_method
+              - type: TextBox
+                name: tau_value
+                format: number
+              - type: TextBox
+                name: tau_percentile
+                format: number
+          - type: Label
+            label: Confidence Level
+            children:
+              - type: TextBox
+                name: confidence_level
+                format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: outcomeLevel
+        format: string
+  - type: CollapseBox
+    label: Bootstrap Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: bootstrap_ci
+      - type: TextBox
+        name: bootstrap_n
+        format: number
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: show_rmst_table
+      - type: CheckBox
+        name: show_rmst_plot
+      - type: CheckBox
+        name: show_difference_test
+      - type: CheckBox
+        name: show_ratio_test
+      - type: CheckBox
+        name: show_tau_analysis
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showSummaries
+      - type: CheckBox
+        name: showExplanations

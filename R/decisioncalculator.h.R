@@ -188,6 +188,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         cTable = function() private$.items[["cTable"]],
         nTable = function() private$.items[["nTable"]],
         ratioTable = function() private$.items[["ratioTable"]],
+        advancedMetricsTable = function() private$.items[["advancedMetricsTable"]],
         epirTable_ratio = function() private$.items[["epirTable_ratio"]],
         epirTable_number = function() private$.items[["epirTable_number"]],
         plot1 = function() private$.items[["plot1"]],
@@ -325,6 +326,41 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     list(
                         `name`="LRN", 
                         `title`="Negative Likelihood Ratio", 
+                        `type`="number")),
+                clearWith=list(
+                    "pp",
+                    "pprob")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="advancedMetricsTable",
+                title="Advanced Diagnostic Metrics",
+                swapRowsColumns=TRUE,
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="tablename", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="youdenIndex", 
+                        `title`="Youden's Index", 
+                        `type`="number"),
+                    list(
+                        `name`="balancedAccuracy", 
+                        `title`="Balanced Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="f1Score", 
+                        `title`="F1 Score", 
+                        `type`="number"),
+                    list(
+                        `name`="mcc", 
+                        `title`="Matthews Correlation", 
+                        `type`="number"),
+                    list(
+                        `name`="dor", 
+                        `title`="Diagnostic Odds Ratio", 
                         `type`="number")),
                 clearWith=list(
                     "pp",
@@ -521,23 +557,25 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
 #' )
 #'
-#' @param TP .
-#' @param TN .
-#' @param FP .
-#' @param FN .
-#' @param pp .
+#' @param TP True Positive count: cases with disease that tested positive.
+#' @param TN True Negative count: cases without disease that tested negative.
+#' @param FP False Positive count: cases without disease that tested positive.
+#' @param FN False Negative count: cases with disease that tested negative.
+#' @param pp Boolean selection whether to use known population prevalence.
 #' @param pprob Prior probability (disease prevalence in the community).
 #'   Requires a value between 0.001 and 0.999, default 0.300.
-#' @param fnote .
-#' @param ci .
-#' @param fagan .
-#' @param multiplecuts .
-#' @param cutoff1 .
+#' @param fnote Boolean selection whether to show detailed explanatory
+#'   footnotes.
+#' @param ci Boolean selection whether to calculate 95\% confidence intervals.
+#' @param fagan Boolean selection whether to generate a Fagan nomogram plot.
+#' @param multiplecuts Boolean selection whether to evaluate multiple cut-off
+#'   scenarios.
+#' @param cutoff1 Name identifier for cut-off scenario 1.
 #' @param tp1 .
 #' @param fp1 .
 #' @param tn1 .
 #' @param fn1 .
-#' @param cutoff2 .
+#' @param cutoff2 Name identifier for cut-off scenario 2.
 #' @param tp2 .
 #' @param fp2 .
 #' @param tn2 .
@@ -547,6 +585,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$advancedMetricsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr

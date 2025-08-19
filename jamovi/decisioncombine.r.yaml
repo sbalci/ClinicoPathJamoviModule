@@ -186,9 +186,10 @@ items:
         - test1Positive
         - test2Positive
         - test3Positive
+      description: 'Primary diagnostic performance metrics for each test combination pattern. Wilson score confidence intervals used for enhanced accuracy with small samples.'
 
     - name: combStatsTableCI
-      title: 'Combination Diagnostic Statistics with 95% CI'
+      title: 'Combination Diagnostic Statistics with 95% Confidence Intervals'
       type: Table
       visible: true
       rows: 0  
@@ -205,12 +206,12 @@ items:
           format: pc
         - name: lower
           title: 'Lower'
-          superTitle: '95% CI'
+          superTitle: '95% Wilson CI'
           type: number
           format: pc
         - name: upper
           title: 'Upper'
-          superTitle: '95% CI'
+          superTitle: '95% Wilson CI'
           type: number
           format: pc
       clearWith:
@@ -220,12 +221,13 @@ items:
         - test1Positive
         - test2Positive
         - test3Positive
+      description: 'Detailed confidence intervals using Wilson score method, which provides more accurate bounds for diagnostic proportions than normal approximation, especially for small samples or extreme values.'
 
     - name: addCombinationPattern
       title: 'Test Combination Patterns'
       type: Output
       varTitle: TestCombination
-      varDescription: Test combination pattern (e.g., +/+, +/-, -/+, -/-)
+      varDescription: 'Test combination pattern exported to dataset (e.g., +/+ = both positive, +/- = test1 pos/test2 neg, -/+ = test1 neg/test2 pos, -/- = both negative). Enables further analysis of pattern-specific outcomes.'
       measureType: nominal
       clearWith:
         - test1
@@ -237,7 +239,7 @@ items:
 
     # Visualization outputs
     - name: performanceHeatmap
-      title: 'Performance Heatmap'
+      title: 'Diagnostic Performance Heatmap'
       type: Image
       width: 800
       height: 600
@@ -250,9 +252,10 @@ items:
         - colorScheme
         - plotWidth
         - plotHeight
+      description: 'Publication-quality heatmap showing comprehensive diagnostic performance metrics across all test combination patterns with clinical color coding.'
 
     - name: rocCurves
-      title: 'ROC Curves Comparison'
+      title: 'ROC Analysis with Optimal Cut-point'
       type: Image
       width: 800
       height: 600
@@ -264,6 +267,7 @@ items:
         - test3
         - plotWidth
         - plotHeight
+      description: 'ROC space analysis comparing all test combinations with automatic identification of optimal cut-point using Youden Index maximization for balanced sensitivity and specificity.'
 
     - name: decisionTree
       title: 'Decision Tree Visualization'
@@ -294,7 +298,7 @@ items:
         - plotHeight
 
     - name: forestPlot
-      title: 'Forest Plot of Diagnostic Statistics'
+      title: 'Forest Plot with Wilson Confidence Intervals'
       type: Image
       width: 800
       height: 600
@@ -306,6 +310,7 @@ items:
         - test3
         - plotWidth
         - plotHeight
+      description: 'Comprehensive forest plot displaying all diagnostic metrics with Wilson score confidence intervals, providing more accurate uncertainty estimates than normal approximation methods.'
 
 
 refs:

@@ -1,0 +1,181 @@
+title: Distribution Selection and Goodness-of-Fit
+name: distributionfit
+jus: "3.0"
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      
+      - type: TargetLayoutBox
+        label: Event Indicator  
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+            
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: explanatory
+            isTarget: true
+            itemDropBehaviour: insert
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Distribution Selection
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: selection_method
+                label: Selection Method
+                
+              - type: CheckBox
+                name: test_weibull
+                label: Weibull Distribution
+                
+              - type: CheckBox
+                name: test_exponential
+                label: Exponential Distribution
+                
+              - type: CheckBox
+                name: test_lognormal
+                label: Log-normal Distribution
+                
+              - type: CheckBox
+                name: test_loglogistic
+                label: Log-logistic Distribution
+                
+              - type: CheckBox
+                name: test_gamma
+                label: Gamma Distribution
+                
+              - type: CheckBox
+                name: test_gengamma
+                label: Generalized Gamma Distribution
+                
+              - type: CheckBox
+                name: test_genf
+                label: Generalized F Distribution
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Goodness-of-Fit Testing
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: gof_tests
+                label: GOF Tests
+                
+              - type: CheckBox
+                name: bootstrap_gof
+                label: Bootstrap GOF Tests
+                
+              - type: TextBox
+                name: bootstrap_samples
+                label: Bootstrap Samples
+                format: number
+                enable: (bootstrap_gof)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: outcomeLevel
+                label: Event Level
+                format: string
+                
+              - type: TextBox
+                name: confidence_level
+                label: Confidence Level
+                format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Results Tables
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_comparison_table
+                label: Model Comparison Table
+                
+              - type: CheckBox
+                name: show_gof_table
+                label: Goodness-of-Fit Table
+                
+              - type: CheckBox
+                name: show_parameter_table
+                label: Parameter Estimates Table
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Diagnostic Plots
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_survival_plot
+                label: Survival Function Plots
+                
+              - type: CheckBox
+                name: show_hazard_plot
+                label: Hazard Function Plots
+                
+              - type: CheckBox
+                name: show_pp_plot
+                label: P-P Plot
+                
+              - type: CheckBox
+                name: show_qq_plot
+                label: Q-Q Plot
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showSummaries
+                label: Analysis Summaries
+                
+              - type: CheckBox
+                name: showExplanations
+                label: Methodology Explanations

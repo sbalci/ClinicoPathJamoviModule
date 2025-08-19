@@ -1,0 +1,411 @@
+---
+name:  mixedcox
+title: Mixed-Effects Cox Regression
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fixed_effects
+          - continuous_effects
+          - cluster_var
+          - random_effects
+          - fudate
+          - dxdate
+          - tint
+
+    # Model Summary
+    - name: modelSummary
+      title: 'Mixed-Effects Cox Model Summary'
+      type: Html
+      clearWith:
+          - cluster_var
+          - random_effects
+          - fixed_effects
+          - continuous_effects
+          - outcome
+          - elapsedtime
+
+    # Fixed Effects Results Table
+    - name: fixedEffectsTable
+      title: 'Fixed Effects Coefficients'
+      type: Table
+      visible: (show_fixed_effects)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: coefficient
+          title: "Coefficient"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: z_statistic
+          title: "Z-statistic"
+          type: number
+        - name: p_value
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+        - name: hazard_ratio
+          title: "Hazard Ratio"
+          type: number
+      clearWith:
+        - fixed_effects
+        - continuous_effects
+        - cluster_var
+        - random_effects
+
+    # Random Effects Summary
+    - name: randomEffectsSummary
+      title: 'Random Effects Variance Components'
+      type: Html
+      visible: (show_random_effects)
+      clearWith:
+          - cluster_var
+          - random_effects
+          - random_slope_var
+          - nested_clustering
+
+    # Variance Components Table
+    - name: varianceTable
+      title: 'Variance Components Details'
+      type: Table
+      visible: (variance_components)
+      rows: 0
+      columns:
+        - name: component
+          title: "Component"
+          type: text
+        - name: variance
+          title: "Variance"
+          type: number
+        - name: std_dev
+          title: "Std. Dev."
+          type: number
+        - name: proportion
+          title: "Proportion"
+          type: number
+      clearWith:
+        - cluster_var
+        - random_effects
+        - variance_components
+
+    # Intracluster Correlation Table
+    - name: iccTable
+      title: 'Intracluster Correlation Coefficient'
+      type: Table
+      visible: (icc_calculation)
+      rows: 0
+      columns:
+        - name: cluster_level
+          title: "Cluster Level"
+          type: text
+        - name: icc_value
+          title: "ICC"
+          type: number
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+        - cluster_var
+        - nested_clustering
+        - icc_calculation
+
+    # Model Comparison
+    - name: modelComparison
+      title: 'Model Comparison: Mixed vs Standard Cox'
+      type: Html
+      visible: (show_model_comparison)
+      clearWith:
+          - cluster_var
+          - random_effects
+          - likelihood_ratio_test
+
+    # Likelihood Ratio Test Table
+    - name: likelihoodRatioTable
+      title: 'Likelihood Ratio Test for Random Effects'
+      type: Table
+      visible: (likelihood_ratio_test)
+      rows: 0
+      columns:
+        - name: model
+          title: "Model"
+          type: text
+        - name: df
+          title: "df"
+          type: integer
+        - name: loglik
+          title: "Log-likelihood"
+          type: number
+        - name: chisq
+          title: "χ²"
+          type: number
+        - name: p_value
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+      clearWith:
+        - likelihood_ratio_test
+        - random_effects
+
+    # Cluster Summary Statistics
+    - name: clusterSummaryTable
+      title: 'Cluster Summary Statistics'
+      type: Table
+      visible: (show_cluster_summary)
+      rows: 0
+      columns:
+        - name: cluster_id
+          title: "Cluster"
+          type: text
+        - name: n_observations
+          title: "N Obs"
+          type: integer
+        - name: n_events
+          title: "N Events"
+          type: integer
+        - name: event_rate
+          title: "Event Rate"
+          type: number
+        - name: median_time
+          title: "Median Time"
+          type: number
+      clearWith:
+        - cluster_var
+        - show_cluster_summary
+
+    # Random Effects Predictions Table
+    - name: randomEffectsPredTable
+      title: 'Predicted Random Effects (BLUPs)'
+      type: Table
+      visible: (random_effects_prediction)
+      rows: 0
+      columns:
+        - name: cluster_id
+          title: "Cluster"
+          type: text
+        - name: intercept
+          title: "Random Intercept"
+          type: number
+        - name: slope
+          title: "Random Slope"
+          type: number
+        - name: se_intercept
+          title: "SE (Intercept)"
+          type: number
+        - name: se_slope
+          title: "SE (Slope)"
+          type: number
+      clearWith:
+        - random_effects_prediction
+        - cluster_var
+        - random_effects
+
+    # Model Diagnostics Table
+    - name: diagnosticsTable
+      title: 'Model Diagnostics'
+      type: Table
+      visible: (residual_analysis)
+      rows: 0
+      columns:
+        - name: diagnostic
+          title: "Diagnostic"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+        - residual_analysis
+        - influence_diagnostics
+
+    # Fixed Effects Forest Plot
+    - name: fixedEffectsPlot
+      title: 'Fixed Effects Forest Plot'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotFixedEffects
+      requiresData: true
+      visible: (fixed_effects_plot)
+      clearWith:
+          - fixed_effects
+          - continuous_effects
+          - confidence_intervals
+
+    # Random Effects Distribution Plot
+    - name: randomEffectsPlot
+      title: 'Random Effects Distribution'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotRandomEffects
+      requiresData: true
+      visible: (random_effects_plot)
+      clearWith:
+          - cluster_var
+          - random_effects
+          - random_effects_prediction
+
+    # Cluster-Specific Survival Curves
+    - name: clusterSurvivalPlot
+      title: 'Cluster-Specific Survival Curves'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotClusterSurvival
+      requiresData: true
+      visible: (cluster_survival_plot)
+      clearWith:
+          - cluster_var
+          - n_clusters_plot
+          - outcome
+          - elapsedtime
+
+    # Residual Analysis Plot
+    - name: residualPlot
+      title: 'Residual Analysis'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotResiduals
+      requiresData: true
+      visible: (residual_analysis)
+      clearWith:
+          - residual_analysis
+          - cluster_var
+
+    # Analysis Summary
+    - name: analysisSummary
+      title: 'Analysis Summary'
+      type: Html
+      visible: (showSummaries)
+      clearWith:
+        - cluster_var
+        - random_effects
+        - icc_calculation
+
+    # Method Explanations
+    - name: methodExplanation
+      title: 'Mixed-Effects Cox Regression Methods'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - random_effects
+        - correlation_structure
+
+    # Clustering Explanation
+    - name: clusteringExplanation
+      title: 'Understanding Clustering in Survival Analysis'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - cluster_var
+        - nested_clustering
+
+    # Random Effects Explanation
+    - name: randomEffectsExplanation
+      title: 'Understanding Random Effects'
+      type: Html
+      visible: (show_random_effects && showExplanations)
+      clearWith:
+        - random_effects
+        - variance_components
+
+    # ICC Interpretation Explanation
+    - name: iccExplanation
+      title: 'Understanding Intracluster Correlation'
+      type: Html
+      visible: (icc_calculation && showExplanations)
+      clearWith:
+        - icc_calculation
+        - cluster_var
+
+    # Model Selection Explanation
+    - name: modelSelectionExplanation
+      title: 'Understanding Mixed vs Standard Cox Models'
+      type: Html
+      visible: (show_model_comparison && showExplanations)
+      clearWith:
+        - likelihood_ratio_test
+        - show_model_comparison
+
+    # Bootstrap Validation Results
+    - name: bootstrapTable
+      title: 'Bootstrap Validation Results'
+      type: Table
+      visible: (bootstrap_variance)
+      rows: 0
+      columns:
+        - name: parameter
+          title: "Parameter"
+          type: text
+        - name: original
+          title: "Original"
+          type: number
+        - name: bias
+          title: "Bias"
+          type: number
+        - name: bootstrap_se
+          title: "Bootstrap SE"
+          type: number
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+      clearWith:
+        - bootstrap_variance
+        - bootstrap_samples
+
+    # Time Variables Output
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+      varTitle: '`Calculated Time in Mixed Cox Function - from ${ dxdate } to { fudate }`'
+      varDescription: Calculated Time from given Dates in Mixed-Effects Cox Regression
+      clearWith:
+          - tint
+          - dxdate
+          - fudate
+
+    # Cluster Effects Output
+    - name: clusterEffectsOutput
+      title: Add Cluster Effects to Data
+      type: Output
+      varTitle: '`Cluster Random Effects (BLUPs)`'
+      varDescription: Predicted random effects (BLUPs) for each cluster
+      clearWith:
+          - addClusterEffects
+          - cluster_var
+          - random_effects
+
+    # Fitted Values Output
+    - name: fittedValuesOutput
+      title: Add Fitted Values to Data
+      type: Output
+      varTitle: '`Mixed Cox Fitted Values`'
+      varDescription: Fitted values from mixed-effects Cox regression
+      clearWith:
+          - addFittedValues
+          - cluster_var
+          - fixed_effects
+
+refs:
+    - coxme
+    - survival
+    - ClinicoPathJamoviModule
+
+...

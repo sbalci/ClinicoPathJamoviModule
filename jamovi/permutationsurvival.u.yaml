@@ -1,0 +1,96 @@
+title: Permutation Tests for Survival
+name: permutationsurvival
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Group Variable
+        children:
+          - type: VariablesListBox
+            name: explanatory
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stratification Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: stratify_variable
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Permutation Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Method and Statistics
+            children:
+              - type: ComboBox
+                name: permutation_method
+              - type: ComboBox
+                name: test_statistic
+              - type: TextBox
+                name: n_permutations
+                format: number
+          - type: Label
+            label: Multiple Comparisons
+            children:
+              - type: ComboBox
+                name: multiple_comparison
+              - type: TextBox
+                name: confidence_level
+                format: number
+          - type: Label
+            label: Reproducibility
+            children:
+              - type: TextBox
+                name: seed_value
+                format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: outcomeLevel
+        format: string
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: show_survival_curves
+      - type: CheckBox
+        name: show_permutation_distribution
+      - type: CheckBox
+        name: show_test_progression
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showSummaries
+      - type: CheckBox
+        name: showExplanations

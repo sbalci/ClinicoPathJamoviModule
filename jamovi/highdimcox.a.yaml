@@ -1,0 +1,251 @@
+---
+name:  highdimcox
+title: High-Dimensional Cox Regression
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Advanced regularization for high-dimensional survival data'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs high-dimensional Cox proportional hazards regression using advanced
+        regularization methods (LASSO, Ridge, Elastic Net, Adaptive LASSO) for 
+        survival data with many predictors. This method is essential when the number
+        of variables is large relative to the number of observations, enabling variable
+        selection and preventing overfitting in genomic, proteomic, or other high-dimensional
+        clinical datasets.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: LASSO regularization for gene expression data
+            library(survival)
+            library(glmnet)
+            
+            highdimcox(
+                data = genomic_survival_data,
+                elapsedtime = "time",
+                outcome = "status", 
+                outcomeLevel = "1",
+                predictors = c("gene1", "gene2", "gene3", "...gene1000"),
+                regularization_method = "lasso",
+                cv_folds = 10
+            )
+            
+            # Example 2: Elastic Net with stability selection
+            highdimcox(
+                data = protein_data,
+                elapsedtime = "survival_time",
+                outcome = "event",
+                outcomeLevel = "1", 
+                predictors = c("protein1", "protein2", "...protein500"),
+                regularization_method = "elastic_net",
+                alpha_value = 0.5,
+                stability_selection = TRUE,
+                bootstrap_iterations = 500
+            )
+
+options:
+  - name: data
+    type: Data
+    description:
+        R: the data as a data frame
+
+  - name: elapsedtime
+    title: Time Variable
+    type: Variable
+    suggested:
+        - continuous
+    permitted:
+        - numeric
+    description:
+        R: >
+          Time variable for survival analysis
+
+  - name: outcome
+    title: Event Variable  
+    type: Variable
+    suggested:
+        - nominal
+        - ordinal
+    permitted:
+        - factor
+        - numeric
+    description:
+        R: >
+          Event indicator variable
+
+  - name: predictors
+    title: High-Dimensional Predictors
+    type: Variables
+    suggested:
+        - continuous
+        - nominal
+        - ordinal
+    permitted:
+        - numeric
+        - factor
+    description:
+        R: >
+          High-dimensional predictor variables
+
+  - name: outcomeLevel
+    title: Event Level
+    type: String
+    default: '1'
+    description:
+        R: >
+          Level of outcome variable indicating event
+
+  - name: regularization_method
+    title: Regularization Method
+    type: List
+    options:
+        - name: lasso
+          title: "LASSO (L1)"
+        - name: ridge
+          title: "Ridge (L2)"  
+        - name: elastic_net
+          title: "Elastic Net (L1+L2)"
+        - name: adaptive_lasso
+          title: "Adaptive LASSO"
+    default: elastic_net
+    description:
+        R: >
+          Regularization method for high-dimensional Cox regression
+
+  - name: alpha_value
+    title: Elastic Net Alpha
+    type: Number
+    min: 0
+    max: 1
+    default: 0.5
+    description:
+        R: >
+          Alpha parameter for elastic net (0=ridge, 1=lasso)
+
+  - name: cv_method
+    title: Cross-Validation Method
+    type: List
+    options:
+        - name: cv_glmnet
+          title: "Standard K-Fold CV"
+        - name: cv_1se
+          title: "1-SE Rule CV"
+        - name: cv_min
+          title: "Minimum CV Error"
+    default: cv_1se
+    description:
+        R: >
+          Cross-validation method for lambda selection
+
+  - name: cv_folds
+    title: CV Folds
+    type: Integer
+    min: 3
+    max: 20
+    default: 10
+    description:
+        R: >
+          Number of cross-validation folds
+
+  - name: variable_selection
+    title: Variable Selection Method
+    type: List
+    options:
+        - name: none
+          title: "No Additional Selection"
+        - name: stepwise
+          title: "Stepwise Selection"
+        - name: best_subset
+          title: "Best Subset Selection"
+        - name: forward_selection
+          title: "Forward Selection"
+    default: none
+    description:
+        R: >
+          Additional variable selection method after regularization
+
+  - name: stability_selection
+    title: Stability Selection
+    type: Bool
+    default: false
+    description:
+        R: >
+          Perform stability selection for variable importance
+
+  - name: bootstrap_iterations
+    title: Bootstrap Iterations
+    type: Integer
+    min: 100
+    max: 1000
+    default: 500
+    description:
+        R: >
+          Number of bootstrap iterations for stability selection
+
+  - name: stability_threshold
+    title: Stability Threshold
+    type: Number
+    min: 0.5
+    max: 1.0
+    default: 0.8
+    description:
+        R: >
+          Threshold for stability selection
+
+  - name: show_regularization_path
+    title: Show Regularization Path
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display regularization path plot
+
+  - name: show_cv_plot
+    title: Show Cross-Validation Plot
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display cross-validation error plot
+
+  - name: show_variable_importance
+    title: Show Variable Importance
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display variable importance plot
+
+  - name: show_coefficients_table
+    title: Show Coefficients Table
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display selected coefficients table
+
+  - name: show_model_diagnostics
+    title: Show Model Diagnostics
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display model diagnostic plots
+
+  - name: showSummaries
+    title: Analysis Summaries
+    type: Bool
+    default: false
+    description:
+        R: >
+          Generate natural language summaries
+
+  - name: showExplanations
+    title: Method Explanations
+    type: Bool
+    default: false
+    description:
+        R: >
+          Show methodology explanations

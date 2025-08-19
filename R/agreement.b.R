@@ -33,6 +33,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # Initialization
         .init = function() {
+            # Check package dependencies
+            private$.checkPackageDependencies()
             if (is.null(self$data) || length(self$options$vars) == 0) {
                 todo <- "
                     <br>Welcome to Interrater Reliability Analysis
@@ -60,8 +62,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # Main analysis function
         .run = function() {
             # Early return if no variables selected
-            if (is.null(self$options$vars) || length(self$options$vars) < 2) {
+            if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 return()
+            }
+            
+            # Validate minimum number of raters
+            if (length(self$options$vars) < 2) {
+                stop('Agreement analysis requires at least 2 raters. Please select at least 2 variables.')
             }
 
             if (nrow(self$data) == 0) {
@@ -1088,7 +1095,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             print(p)
             TRUE
-        }
+        },
 
         # # Pairwise plot - commented out for future release
         # .pairwisePlot = function(image, ggtheme, theme, ...) {
@@ -1238,5 +1245,23 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         #     print(p)
         #     TRUE
         # # }
+        
+        # Package dependency checking
+        .checkPackageDependencies = function() {
+            required_packages <- c("irr", "psych")
+            missing_packages <- character(0)
+            
+            for (pkg in required_packages) {
+                if (!requireNamespace(pkg, quietly = TRUE)) {
+                    missing_packages <- c(missing_packages, pkg)
+                }
+            }
+            
+            if (length(missing_packages) > 0) {
+                stop(paste0("The following required packages are missing: ", 
+                           paste(missing_packages, collapse = ", "), 
+                           ". Please install them using install.packages()"))
+            }
+        }
     )
 )

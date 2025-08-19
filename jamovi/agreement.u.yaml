@@ -48,6 +48,13 @@ children:
           - type: ComboBox
             name: wght
             label: Weighted Kappa
+            options:
+              - title: Unweighted
+                name: unweighted
+              - title: Squared
+                name: squared
+              - title: Equal/Linear
+                name: equal
   - type: Label
     label: Krippendorff's Alpha
     children:
@@ -59,3 +66,12 @@ children:
           - type: ComboBox
             name: krippMethod
             enable: (kripp)
+            options:
+              - title: Nominal
+                name: nominal
+              - title: Ordinal
+                name: ordinal
+              - title: Interval
+                name: interval
+              - title: Ratio
+                name: ratio

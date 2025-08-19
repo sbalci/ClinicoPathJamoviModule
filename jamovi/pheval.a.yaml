@@ -1,0 +1,265 @@
+---
+name: pheval
+title: Proportional Hazards Testing
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+menuTitle: Proportional Hazards Testing
+menuSubtitle: Comprehensive PH assumption validation
+description:
+    main: >-
+        Comprehensive testing of the proportional hazards assumption in Cox
+        regression models using multiple statistical approaches. This analysis
+        provides systematic validation of the fundamental assumption underlying
+        Cox proportional hazards models through statistical tests, graphical
+        diagnostics, and time-dependent coefficient analysis for robust model
+        assessment and assumption verification.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: Basic proportional hazards testing
+            library(survival)
+            
+            pheval(
+                data = lung_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "2",
+                covariates = c("age", "sex", "ph.ecog"),
+                test_methods = c("schoenfeld", "scaled_schoenfeld")
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Survival time or follow-up duration variable
+
+    - name: outcome
+      title: Event Variable  
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal  
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Covariate variables for proportional hazards testing
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of outcome variable indicating event occurrence
+
+    - name: test_schoenfeld
+      title: Schoenfeld Residuals Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform Schoenfeld residuals test
+
+    - name: test_scaled_schoenfeld
+      title: Scaled Schoenfeld Residuals Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform scaled Schoenfeld residuals test
+
+    - name: test_global
+      title: Global Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform global proportional hazards test
+
+    - name: test_correlation
+      title: Correlation Test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform correlation test with time
+
+    - name: test_logrank
+      title: Log-rank Test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform log-rank trend test
+
+    - name: test_supremum
+      title: Supremum Test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform supremum test
+
+    - name: time_transform
+      title: Time Transformation
+      type: List
+      options:
+          - name: identity
+            title: Identity (t)
+          - name: log
+            title: Logarithmic (log t)
+          - name: rank
+            title: Rank Transform
+          - name: kaplan_meier
+            title: Kaplan-Meier
+      default: identity
+      description:
+          R: >
+            Transformation function for time in testing
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for test statistics and intervals
+
+    - name: rho_parameter
+      title: Rho Parameter
+      type: Number
+      min: 0
+      max: 2
+      default: 0
+      description:
+          R: >
+            Rho parameter for weighted residuals (0=unweighted)
+
+    - name: global_test_method
+      title: Global Test Method
+      type: List
+      options:
+          - name: chisquare
+            title: Chi-square Test
+          - name: kolmogorov
+            title: Kolmogorov-Smirnov
+          - name: cvm
+            title: Cramér-von Mises
+      default: chisquare
+      description:
+          R: >
+            Method for global proportional hazards test
+
+    - name: stratify_variable
+      title: Stratification Variable
+      type: Variable
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Optional variable for stratified analysis
+
+    - name: show_individual_tests
+      title: Show Individual Tests
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display individual covariate test results
+
+    - name: show_global_tests
+      title: Show Global Tests
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display global proportional hazards tests
+
+    - name: show_residual_plots
+      title: Show Residual Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display Schoenfeld residual plots
+
+    - name: show_diagnostic_plots
+      title: Show Diagnostic Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive diagnostic plots
+
+    - name: show_time_varying_plots
+      title: Show Time-Varying Effect Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display plots of potential time-varying effects
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display fitted Cox model summary
+
+    - name: show_recommendations
+      title: Show Recommendations
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display interpretation recommendations
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries of the analysis results
+
+    - name: showExplanations
+      title: Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed explanations of the methodology and interpretation

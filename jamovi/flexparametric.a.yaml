@@ -1,0 +1,159 @@
+---
+name: flexparametric
+title: Flexible Parametric Survival Models
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >-
+        Fits flexible parametric survival models including generalized gamma, 
+        generalized F, and other advanced parametric distributions. These models 
+        provide greater flexibility in modeling complex hazard shapes compared to 
+        standard parametric models, with applications in oncology, reliability, 
+        and comparative effectiveness research.
+    R:
+        dontrun: false
+        usage: |
+            # Example usage will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time variable for survival analysis.
+
+    - name: outcome
+      title: Event Indicator
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable.
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Covariates to include in the model.
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level of outcome variable indicating event.
+
+    - name: distribution
+      title: Distribution
+      type: List
+      options:
+        - name: gengamma
+          title: Generalized Gamma
+        - name: genf
+          title: Generalized F
+        - name: gengamma_orig
+          title: Generalized Gamma (Original)
+        - name: genf_orig
+          title: Generalized F (Original)
+        - name: weibull
+          title: Weibull
+        - name: lognormal
+          title: Log-Normal
+        - name: gamma
+          title: Gamma
+      default: gengamma
+      description:
+          R: >
+            Parametric distribution to fit.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for parameter estimates and survival curves.
+
+    - name: show_parameters
+      title: Show Parameters
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display parameter estimates table.
+
+    - name: show_aic_bic
+      title: Show Model Fit
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display AIC and BIC for model comparison.
+
+    - name: show_survival_plot
+      title: Show Survival Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display parametric survival curves.
+
+    - name: show_hazard_plot
+      title: Show Hazard Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display parametric hazard functions.
+
+    - name: show_density_plot
+      title: Show Density Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display parametric density functions.
+
+    - name: plot_time_max
+      title: Plot Time Range
+      type: Number
+      min: 0
+      default: 0
+      description:
+          R: >
+            Maximum time for plots (0 = automatic).
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries.
+
+    - name: showExplanations
+      title: Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show methodology explanations.

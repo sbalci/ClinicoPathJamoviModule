@@ -21,7 +21,8 @@ bayesdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             bootstrapReps = 2000,
             calculateEVPI = FALSE,
             nDraws = 2000,
-            directionIndicator = ">=", ...) {
+            directionIndicator = ">=",
+            calculateIC = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -118,6 +119,10 @@ bayesdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     ">=",
                     "<="),
                 default=">=")
+            private$..calculateIC <- jmvcore::OptionBool$new(
+                "calculateIC",
+                calculateIC,
+                default=FALSE)
 
             self$.addOption(private$..outcomes)
             self$.addOption(private$..outcomePos)
@@ -135,6 +140,7 @@ bayesdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..calculateEVPI)
             self$.addOption(private$..nDraws)
             self$.addOption(private$..directionIndicator)
+            self$.addOption(private$..calculateIC)
         }),
     active = list(
         outcomes = function() private$..outcomes$value,
@@ -152,7 +158,8 @@ bayesdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrapReps = function() private$..bootstrapReps$value,
         calculateEVPI = function() private$..calculateEVPI$value,
         nDraws = function() private$..nDraws$value,
-        directionIndicator = function() private$..directionIndicator$value),
+        directionIndicator = function() private$..directionIndicator$value,
+        calculateIC = function() private$..calculateIC$value),
     private = list(
         ..outcomes = NA,
         ..outcomePos = NA,
@@ -169,7 +176,8 @@ bayesdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..bootstrapReps = NA,
         ..calculateEVPI = NA,
         ..nDraws = NA,
-        ..directionIndicator = NA)
+        ..directionIndicator = NA,
+        ..calculateIC = NA)
 )
 
 bayesdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -182,6 +190,7 @@ bayesdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         modelResults = function() private$.items[["modelResults"]],
         comparisonTable = function() private$.items[["comparisonTable"]],
         evpiTable = function() private$.items[["evpiTable"]],
+        modelComparisonTable = function() private$.items[["modelComparisonTable"]],
         mainPlot = function() private$.items[["mainPlot"]],
         deltaPlot = function() private$.items[["deltaPlot"]],
         probPlot = function() private$.items[["probPlot"]],
@@ -307,6 +316,35 @@ bayesdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="EVPI", 
                         `type`="number", 
                         `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelComparisonTable",
+                title="Model Comparison Metrics",
+                visible="(calculateIC && bayesianAnalysis)",
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model/Test", 
+                        `type`="text"),
+                    list(
+                        `name`="dic", 
+                        `title`="DIC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="waic", 
+                        `title`="WAIC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="effective_params", 
+                        `title`="Effective Parameters", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ranking", 
+                        `title`="Ranking", 
+                        `type`="integer"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="mainPlot",
@@ -389,6 +427,8 @@ bayesdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param nDraws Number of posterior draws for Bayesian analysis.
 #' @param directionIndicator Direction of classification relative to the
 #'   cutpoint. Use '>=' when higher values predict positive outcomes.
+#' @param calculateIC Calculate model comparison metrics (DIC, WAIC) for
+#'   Bayesian analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -397,6 +437,7 @@ bayesdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$modelResults} \tab \tab \tab \tab \tab an array of tables \cr
 #'   \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$evpiTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelComparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$mainPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$deltaPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$probPlot} \tab \tab \tab \tab \tab an image \cr
@@ -427,7 +468,8 @@ bayesdca <- function(
     bootstrapReps = 2000,
     calculateEVPI = FALSE,
     nDraws = 2000,
-    directionIndicator = ">=") {
+    directionIndicator = ">=",
+    calculateIC = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("bayesdca requires jmvcore to be installed (restart may be required)")
@@ -458,7 +500,8 @@ bayesdca <- function(
         bootstrapReps = bootstrapReps,
         calculateEVPI = calculateEVPI,
         nDraws = nDraws,
-        directionIndicator = directionIndicator)
+        directionIndicator = directionIndicator,
+        calculateIC = calculateIC)
 
     analysis <- bayesdcaClass$new(
         options = options,

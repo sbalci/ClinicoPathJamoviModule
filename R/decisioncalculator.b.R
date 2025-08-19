@@ -43,61 +43,46 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
         .run = function() {
+            
+            # Read numbers from input ----
+            TP <- self$options$TP
+            FP <- self$options$FP
+            TN <- self$options$TN
+            FN <- self$options$FN
+            
+            # Input validation ----
+            # Check for non-negative values
+            if (TP < 0 || FP < 0 || TN < 0 || FN < 0) {
+                stop("All counts must be non-negative. Please check your input values.")
+            }
+            
+            # Check for at least some data
+            if (TP + FP + TN + FN == 0) {
+                stop("All counts are zero. Please provide valid diagnostic test data.")
+            }
+            
+            # Check for diseased subjects
+            if (TP + FN == 0) {
+                stop("No diseased subjects (TP + FN = 0). Cannot calculate sensitivity and related metrics.")
+            }
+            
+            # Check for healthy subjects
+            if (TN + FP == 0) {
+                stop("No healthy subjects (TN + FP = 0). Cannot calculate specificity and related metrics.")
+            }
+            
+            # Check for positive tests
+            if (TP + FP == 0) {
+                warning("No positive test results (TP + FP = 0). PPV will be undefined.")
+            }
+            
+            # Check for negative tests
+            if (TN + FN == 0) {
+                warning("No negative test results (TN + FN = 0). NPV will be undefined.")
+            }
 
 
-        # # Error Message ----
-        #
-        # if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
-        #
-        # if ( (is.null(self$options$vars) || is.null(self$options$facs)) && is.null(self$options$target) ) {
-        #     # ToDo Message ----
-        #     todo <- "
-        #         <br>Welcome to ClinicoPath
-        #                   <br><br>
-        #                   This tool will help you form an Alluvial Plots.
-        #                   "
-        #     html <- self$results$todo
-        #     html$setContent(todo)
-        #
-        # } else {
-        #     todo <- ""
-        #     html <- self$results$todo
-        #     html$setContent(todo)
-        #
-        #
-        #
-        # }
-
-
-
-
-
-
-
-
-        # TODO
-
-        # todo <- glue::glue( 'This Module is still under development - - ' )
-
-        # self$results$todo$setContent(todo)
-
-
-        # read numbers from input ----
-
-        TP <- self$options$TP
-
-        FP <- self$options$FP
-
-        TN <- self$options$TN
-
-        FN <- self$options$FN
-
-
-        # make table ----
-
-        # table1 <- matrix(c(TP, FP, FN, TN), nrow = 2, ncol = 2, byrow = TRUE,
-        # dimnames = list(c('Test Positive', 'Test Negative'), c('Gold
-        # Positive','Gold Negative'))) self$results$text1$setContent(table1)
+            # Create confusion matrix ----
 
         table2 <- matrix(c(TP, FP, FN, TN), nrow = 2, ncol = 2, byrow = TRUE,
             dimnames = list(c("Positive", "Negative"), c("Positive", "Negative")))
@@ -113,18 +98,6 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         pprob <- self$options$pprob
 
 
-        # caret result ----
-
-        # if (pp) {
-        #     caretresult <- caret::confusionMatrix(table3, prevalence = pprob)
-        #
-        # } else {
-        #
-        #     caretresult <- caret::confusionMatrix(table3)
-        #
-        # }
-
-        # self$results$text2$setContent(caretresult)
 
 
 
@@ -186,17 +159,13 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         TestW <- FP + FN
 
-        Sens <- TP/DiseaseP
-
-        Spec <- TN/DiseaseN
-
-        AccurT <- TestT/TotalPop
-
-        PrevalenceD <- DiseaseP/TotalPop
-
-        PPV <- TP/TestP
-
-        NPV <- TN/TestN
+        # Calculate metrics with safe division
+        Sens <- if (DiseaseP > 0) TP/DiseaseP else 0
+        Spec <- if (DiseaseN > 0) TN/DiseaseN else 0
+        AccurT <- if (TotalPop > 0) TestT/TotalPop else 0
+        PrevalenceD <- if (TotalPop > 0) DiseaseP/TotalPop else 0
+        PPV <- if (TestP > 0) TP/TestP else NA
+        NPV <- if (TestN > 0) TN/TestN else NA
 
 
         if (pp) {
@@ -219,9 +188,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
-        LRP <- Sens / (1 - Spec)
-
-        LRN <- (1 - Sens) / Spec
+        # Calculate likelihood ratios with safe division
+        LRP <- if ((1 - Spec) > 0 && !is.na(Sens)) Sens / (1 - Spec) else Inf
+        LRN <- if (Spec > 0 && !is.na(Sens)) (1 - Sens) / Spec else 0
 
         # Advanced confidence interval calculations ----
         # Following DiagROC's comprehensive approach
@@ -394,9 +363,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
         ratioTable$addFootnote(rowNo = 1, col = "PostTestProbHealthy", "Post-test Probability of Being Healthy (Probability of being healthy after a negative test using known Population Prevalence)")
 
-        # ratioTable$addFootnote(rowNo = 1, col = "LRP", "")
-
-        # ratioTable$addFootnote(rowNo = 1, col = "LRN", "")
+        ratioTable$addFootnote(rowNo = 1, col = "LRP", "Positive Likelihood Ratio: How much more likely a positive result is in diseased vs healthy patients. >10 = strong evidence, >5 = moderate, >2 = weak but potentially useful.")
+        
+        ratioTable$addFootnote(rowNo = 1, col = "LRN", "Negative Likelihood Ratio: How much more likely a negative result is in diseased vs healthy patients. <0.1 = strong evidence against disease, <0.2 = moderate, <0.5 = weak.")
 
 
         }
@@ -404,37 +373,37 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
 
 
-        # Reorganize Table
-
-
-
-        # caretresult[['positive']]
-        # caretresult[['table']]
-        # caretresult[['overall']]
-        # caretresult[['overall']][['Accuracy']]
-        # caretresult[['overall']][['Kappa']]
-        # caretresult[['overall']][['AccuracyLower']]
-        # caretresult[['overall']][['AccuracyUpper']]
-        # caretresult[['overall']][['AccuracyNull']]
-        # caretresult[['overall']][['AccuracyPValue']]
-        # caretresult[['overall']][['McnemarPValue']]
-        # caretresult[['byClass']]
-        # caretresult[['byClass']][['Sensitivity']]
-        # caretresult[['byClass']][['Specificity']]
-        # caretresult[['byClass']][['Pos Pred Value']]
-        # caretresult[['byClass']][['Neg Pred Value']]
-        # caretresult[['byClass']][['Precision']]
-        # caretresult[['byClass']][['Recall']] caretresult[['byClass']][['F1']]
-        # caretresult[['byClass']][['Prevalence']]
-        # caretresult[['byClass']][['Detection Rate']]
-        # caretresult[['byClass']][['Detection Prevalence']]
-        # caretresult[['byClass']][['Balanced Accuracy']] caretresult[['mode']]
-        # caretresult[['dots']]
-
-
-
-
-        # Write Summary
+        # Populate advanced metrics table ----
+        advancedMetricsTable <- self$results$advancedMetricsTable
+        advancedMetricsTable$setRow(
+            rowNo = 1,
+            values = list(
+                tablename = "Advanced Metrics",
+                youdenIndex = YoudenIndex,
+                balancedAccuracy = BalancedAccuracy,
+                f1Score = F1Score,
+                mcc = MCC,
+                dor = DOR
+            )
+        )
+        
+        # Add footnotes for advanced metrics
+        if (self$options$fnote) {
+            advancedMetricsTable$addFootnote(rowNo = 1, col = "youdenIndex", 
+                "Youden's Index: Discriminatory ability independent of prevalence. >0.5 excellent, 0.3-0.5 good, 0.1-0.3 fair, <0.1 poor.")
+            
+            advancedMetricsTable$addFootnote(rowNo = 1, col = "balancedAccuracy", 
+                "Balanced Accuracy: Average of sensitivity and specificity. Useful for imbalanced datasets.")
+            
+            advancedMetricsTable$addFootnote(rowNo = 1, col = "f1Score", 
+                "F1 Score: Harmonic mean of sensitivity and PPV. Ranges 0-1, higher is better.")
+            
+            advancedMetricsTable$addFootnote(rowNo = 1, col = "mcc", 
+                "Matthews Correlation Coefficient: Overall test quality measure. Ranges -1 to +1, >0.5 is good.")
+            
+            advancedMetricsTable$addFootnote(rowNo = 1, col = "dor", 
+                "Diagnostic Odds Ratio: Overall discriminatory performance. >25 strong, 5-25 moderate, 2-5 weak.")
+        }
 
 
 

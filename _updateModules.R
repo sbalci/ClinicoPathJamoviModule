@@ -1009,9 +1009,18 @@ if (WIP) {
 
 ## ClinicoPathDescriptives module functions ----
 
+# Get the menuGroup pattern from config for ClinicoPathDescriptives
+clinicopath_pattern <- if (WIP) {
+  modules_config$ClinicoPathDescriptives$menuGroup_pattern_wip %||% "menuGroup: Exploration"
+} else {
+  modules_config$ClinicoPathDescriptives$menuGroup_pattern %||% "menuGroup: Exploration$|menuGroup: OncoPathology$"
+}
+
+# Apply the pattern to find matching files
 ClinicoPathDescriptives_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
-  any(grepl("menuGroup: Exploration$", readLines(f, warn = FALSE)))
+  any(grepl(clinicopath_pattern, readLines(f, warn = FALSE)))
 })
+
 ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = "./jamovi/",
                                              replacement = "",
                                              x = ClinicoPathDescriptives_a_yaml_files)
@@ -1019,21 +1028,6 @@ ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = ".a.yaml",
                                              replacement = "",
                                              x = ClinicoPathDescriptives_a_yaml_files)
 ClinicoPathDescriptives_modules <- ClinicoPathDescriptives_a_yaml_files
-
-if (WIP) {
-  ClinicoPathDescriptives_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
-    any(grepl("menuGroup: Exploration", readLines(f, warn = FALSE)))
-  })
-
-  ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = "./jamovi/",
-                                               replacement = "",
-                                               x = ClinicoPathDescriptives_a_yaml_files)
-  ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = ".a.yaml",
-                                               replacement = "",
-                                               x = ClinicoPathDescriptives_a_yaml_files)
-
-  ClinicoPathDescriptives_modules <- ClinicoPathDescriptives_a_yaml_files
-}
 
 ## JamoviTest module functions (TEST mode) ----
 JamoviTest_modules <- c()

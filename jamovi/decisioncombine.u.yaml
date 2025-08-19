@@ -18,8 +18,9 @@ children:
           - type: LevelSelector
             name: goldPositive
             enable: (!is.null(gold))
+            description: "Select the level that represents a positive result in the gold standard variable"
       - type: TargetLayoutBox
-        label: Test 1
+        label: Test 1 (Required)
         children:
           - type: VariablesListBox
             name: test1
@@ -28,8 +29,9 @@ children:
           - type: LevelSelector
             name: test1Positive
             enable: (!is.null(test1))
+            description: "Select the level that represents a positive result for Test 1"
       - type: TargetLayoutBox
-        label: Test 2
+        label: Test 2 (Required for Combination Analysis)
         children:
           - type: VariablesListBox
             name: test2
@@ -38,8 +40,9 @@ children:
           - type: LevelSelector
             name: test2Positive
             enable: (!is.null(test2))
+            description: "Select the level that represents a positive result for Test 2"
       - type: TargetLayoutBox
-        label: Test 3
+        label: Test 3 (Optional)
         children:
           - type: VariablesListBox
             name: test3
@@ -48,42 +51,51 @@ children:
           - type: LevelSelector
             name: test3Positive
             enable: (!is.null(test3))
+            description: "Optional: Select the level that represents a positive result for Test 3"
   - type: Label
-    label: Table Options
+    label: Analysis Options
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: od
+            description: "Show original data frequency tables and cross-tabulations"
           - type: CheckBox
             name: showIndividual
+            description: "Display individual test performance statistics"
           - type: CheckBox
             name: exportCombinationPattern
+            description: "Export test combination patterns as a new variable to your dataset"
   - type: Label
-    label: Visualization Options
+    label: Advanced Visualizations
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: showVisualization
+            description: "Generate publication-quality visualizations with optimal cut-point identification"
           - type: ComboBox
             name: plotType
             enable: (showVisualization)
+            description: "Select visualization type. ROC analysis automatically identifies optimal cut-points."
           - type: ComboBox
             name: colorScheme
             enable: >-
               (showVisualization && (plotType == 'heatmap' || plotType ==
               'all'))
+            description: "Color scheme for heatmaps. Clinical scheme uses medical colors."
           - type: TextBox
             name: plotWidth
             format: number
             enable: (showVisualization)
+            description: "Plot width in pixels (600-1600)"
           - type: TextBox
             name: plotHeight
             format: number
             enable: (showVisualization)
+            description: "Plot height in pixels (400-1200)"
   - type: Label
     label: Export to Data
     children: []

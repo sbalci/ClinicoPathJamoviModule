@@ -19,6 +19,11 @@ items:
       title: Original Data
       type:  Html
       visible: (od)
+      
+    - name: clinicalInterpretation
+      title: 'Clinical Interpretation Guide'
+      type: Html
+      visible: true
 
 
     # - name:  text2
@@ -186,6 +191,11 @@ items:
       clearWith:
           - pp
           - pprob
+          
+    - name: missingDataSummary
+      title: 'Data Quality Summary'
+      type: Html
+      visible: (od)
 
 
     # - name:  ratioTable2

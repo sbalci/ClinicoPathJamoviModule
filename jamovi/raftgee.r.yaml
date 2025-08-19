@@ -1,0 +1,186 @@
+---
+name: raftgee
+title: Rank-based AFT Estimation
+jrs: '1.1'
+
+items:
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: term
+            title: ""
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: coefficients
+      title: AFT Model Coefficients
+      type: Table
+      visible: (show_coefficients)
+      columns:
+          - name: term
+            title: "Term"
+            type: text
+          - name: estimate
+            title: "Estimate"
+            type: number
+            format: zto
+          - name: se
+            title: "SE"
+            type: number
+            format: zto
+          - name: z
+            title: "z"
+            type: number
+            format: zto
+          - name: pvalue
+            title: "p"
+            type: number
+            format: zto,pvalue
+          - name: ciLower
+            title: "Lower"
+            type: number
+            format: zto
+          - name: ciUpper
+            title: "Upper" 
+            type: number
+            format: zto
+          - name: acceleration
+            title: "Accel. Factor"
+            type: number
+            format: zto
+          - name: accel_lower
+            title: "AF Lower"
+            type: number
+            format: zto
+          - name: accel_upper
+            title: "AF Upper"
+            type: number
+            format: zto
+
+    - name: diagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (show_diagnostics)
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: geeDiagnostics
+      title: GEE Diagnostics
+      type: Table
+      visible: (show_diagnostics)
+      columns:
+          - name: parameter
+            title: "Parameter"
+            type: text
+          - name: estimate
+            title: "Estimate"
+            type: number
+            format: zto
+          - name: se
+            title: "SE"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: convergenceInfo
+      title: Convergence Information
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: criterion
+            title: "Criterion"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_comparison_plots)
+      columns:
+          - name: model
+            title: "Model"
+            type: text
+          - name: aic
+            title: "AIC"
+            type: number
+            format: zto
+          - name: loglik
+            title: "Log-Likelihood"
+            type: number
+            format: zto
+          - name: concordance
+            title: "C-Index"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: residualPlots
+      title: Residual Diagnostic Plots
+      type: Image
+      visible: (show_residual_plots)
+      width: 800
+      height: 600
+
+    - name: qqPlots
+      title: Q-Q Plots
+      type: Image
+      visible: (show_qq_plots)
+      width: 800
+      height: 600
+
+    - name: survivalPlots
+      title: AFT-based Survival Curves
+      type: Image
+      visible: (show_survival_plots)
+      width: 800
+      height: 600
+
+    - name: accelerationPlots
+      title: Time Acceleration Factor Plots
+      type: Image
+      visible: (show_acceleration_plots)
+      width: 800
+      height: 600
+
+    - name: comparisonPlots
+      title: AFT vs Cox Model Comparison
+      type: Image
+      visible: (show_comparison_plots)
+      width: 800
+      height: 600
+
+    - name: correlationPlots
+      title: Working Correlation Structure
+      type: Image
+      visible: (show_diagnostics)
+      width: 600
+      height: 600
+
+    - name: summaryTable
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Method Explanation
+      type: Html
+      visible: (showExplanations)

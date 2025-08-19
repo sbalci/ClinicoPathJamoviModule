@@ -133,7 +133,34 @@ items:
           - pp
           - pprob
 
-
+    - name: advancedMetricsTable
+      title: 'Advanced Diagnostic Metrics'
+      type: Table
+      swapRowsColumns: true
+      rows: 1
+      columns:
+        - name: tablename
+          title: ''
+          type: text
+        - name: youdenIndex
+          title: "Youden's Index"
+          type: number
+        - name: balancedAccuracy
+          title: 'Balanced Accuracy'
+          type: number
+          format: pc
+        - name: f1Score
+          title: 'F1 Score'
+          type: number
+        - name: mcc
+          title: 'Matthews Correlation'
+          type: number
+        - name: dor
+          title: 'Diagnostic Odds Ratio'
+          type: number
+      clearWith:
+          - pp
+          - pprob
 
     # - name:  text3
     #   title: epiR

@@ -1,0 +1,149 @@
+---
+name: dynamiccoeff
+title: Dynamic Coefficient Models
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      visible: (show_model_summary)
+
+    - name: coefficientPaths
+      title: Dynamic Coefficient Paths
+      type: Table
+      visible: (show_coefficient_paths)
+      columns:
+          - name: covariate
+            title: Covariate
+            type: text
+          - name: time_point
+            title: Time
+            type: number
+          - name: coefficient
+            title: β(t)
+            type: number
+          - name: se
+            title: SE
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+
+    - name: stateEvolution
+      title: State Space Evolution
+      type: Table
+      visible: (show_state_evolution)
+      columns:
+          - name: time_point
+            title: Time
+            type: number
+          - name: state_variable
+            title: State
+            type: text
+          - name: state_value
+            title: Value
+            type: number
+          - name: state_variance
+            title: Variance
+            type: number
+          - name: predicted_value
+            title: Predicted
+            type: number
+
+    - name: adaptationMetrics
+      title: Adaptation Metrics
+      type: Table
+      visible: (show_adaptation_metrics)
+      columns:
+          - name: metric
+            title: Metric
+            type: text
+          - name: value
+            title: Value
+            type: number
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: model
+            title: Model
+            type: text
+          - name: log_likelihood
+            title: Log-Likelihood
+            type: number
+          - name: aic
+            title: AIC
+            type: number
+          - name: bic
+            title: BIC
+            type: number
+          - name: prediction_error
+            title: Prediction Error
+            type: number
+
+    - name: convergenceMetrics
+      title: Convergence Diagnostics
+      type: Table
+      visible: (show_adaptation_metrics)
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: convergence_rate
+            title: Convergence Rate
+            type: number
+          - name: effective_sample
+            title: Effective Sample
+            type: number
+          - name: autocorr_function
+            title: Autocorrelation
+            type: number
+
+    - name: dynamicPlots
+      title: Dynamic Coefficient Evolution
+      type: Image
+      visible: (show_dynamic_plots)
+
+    - name: statePlots
+      title: State Space Visualization
+      type: Image
+      visible: (show_state_plots)
+
+    - name: diagnosticPlots
+      title: Model Diagnostics
+      type: Image
+      visible: (show_diagnostic_plots)
+
+    - name: comparisonPlots
+      title: Model Comparison Plots
+      type: Image
+      visible: (show_comparison_plots)
+
+    - name: adaptationPlots
+      title: Adaptation Process
+      type: Image
+      visible: (show_adaptation_metrics)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)

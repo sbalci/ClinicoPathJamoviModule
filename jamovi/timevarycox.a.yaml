@@ -1,0 +1,136 @@
+---
+name: timevarycox
+title: Time-Varying Covariates Cox Regression
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Cox regression with time-varying covariates'
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs Cox proportional hazards regression with time-varying covariates. 
+        This analysis allows covariates to change values over time during follow-up, 
+        which is essential for modeling dynamic clinical variables such as treatment 
+        changes, biomarker levels, or disease progression markers.
+    R:
+        dontrun: false
+        usage: |
+            # example will be added
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: elapsedtime
+      title: 'Time Variable'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Time variable for survival analysis
+
+    - name: timevar_data
+      title: 'Time-Varying Variables'
+      type: Variables
+      suggested: [ continuous, nominal, ordinal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Variables that change over time
+
+    - name: outcome
+      title: 'Outcome Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            Event indicator variable
+
+    - name: fixed_covariates
+      title: 'Fixed Covariates'
+      type: Variables
+      suggested: [ continuous, nominal, ordinal ]
+      permitted: [ numeric, factor ]
+      description:
+          R: >
+            Time-constant covariates
+
+    - name: subject_id
+      title: 'Subject ID'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            Unique identifier for each subject
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level of outcome variable indicating event
+
+    - name: robust_se
+      title: Robust standard errors
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use robust standard errors
+
+    - name: cluster_se
+      title: Cluster standard errors by subject
+      type: Bool
+      default: true
+      description:
+          R: >
+            Cluster standard errors by subject
+
+    - name: show_model_summary
+      title: Show model summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model summary information
+
+    - name: show_coefficients
+      title: Show coefficient table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display regression coefficients table
+
+    - name: show_hazard_ratios
+      title: Show hazard ratios
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display hazard ratios
+
+    - name: showSummaries
+      title: Show natural language summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries
+
+    - name: showExplanations
+      title: Show methodology explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show methodology explanations

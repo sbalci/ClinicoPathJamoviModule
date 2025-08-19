@@ -1,7 +1,7 @@
 ---
 name: bayesdca
 title: Bayesian Decision Curve Analysis
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Bayesian Decision Curve Analysis
 version: '0.0.3'
@@ -167,3 +167,11 @@ options:
           R: >
             Direction of classification relative to the cutpoint.
             Use '>=' when higher values predict positive outcomes.
+
+    - name: calculateIC
+      title: Calculate Information Criteria
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate model comparison metrics (DIC, WAIC) for Bayesian analysis.

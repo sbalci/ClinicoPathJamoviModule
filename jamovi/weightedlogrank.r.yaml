@@ -1,0 +1,61 @@
+---
+name: weightedlogrank
+title: Weighted Log-Rank Tests
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: "Analysis"
+      type: Html
+      visible: true
+
+    - name: groupSummary
+      title: "Group Summary"
+      type: Html
+      visible: (show_sample_sizes || show_events || median_survival)
+
+    - name: weightedTestsTable
+      title: "Weighted Log-Rank Test Results"
+      type: Table
+      visible: true
+      columns:
+        - name: test_name
+          title: Test
+          type: text
+        - name: chi_square
+          title: χ²
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: p
+          type: number
+        - name: p_adjusted
+          title: "Adjusted p"
+          type: number
+
+    - name: survivalPlot
+      title: "Kaplan-Meier Survival Curves"
+      type: Image
+      visible: (show_kaplan_meier)
+
+    - name: weightFunctionsPlot
+      title: "Weight Functions"
+      type: Image
+      visible: (show_weight_functions)
+
+    - name: testStatisticsPlot
+      title: "Test Statistics Evolution"
+      type: Image
+      visible: (show_test_statistics)
+
+    - name: analysisSummary
+      title: "Analysis Summary"
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: "Methodology"
+      type: Html
+      visible: (showExplanations)

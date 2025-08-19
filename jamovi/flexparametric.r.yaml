@@ -1,0 +1,74 @@
+---
+name: flexparametric
+title: Flexible Parametric Survival Models
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: parametersTable
+      title: Parameter Estimates
+      type: Table
+      visible: (show_parameters)
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: lower_ci
+          title: Lower CI
+          type: number
+        - name: upper_ci
+          title: Upper CI
+          type: number
+        - name: z_value
+          title: z
+          type: number
+        - name: p_value
+          title: p
+          type: number
+
+    - name: fitStatistics
+      title: Model Fit Statistics
+      type: Table
+      visible: (show_aic_bic)
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: number
+
+    - name: survivalPlot
+      title: Parametric Survival Curves
+      type: Image
+      visible: (show_survival_plot)
+
+    - name: hazardPlot
+      title: Parametric Hazard Functions
+      type: Image
+      visible: (show_hazard_plot)
+
+    - name: densityPlot
+      title: Parametric Density Functions
+      type: Image
+      visible: (show_density_plot)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)

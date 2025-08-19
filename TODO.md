@@ -13,62 +13,62 @@ This roadmap outlines the systematic implementation of advanced survival analysi
   - ✅ **Turnbull NPMLE for interval-censored data** (`Icens`, `MLEcens`, `interval`) - **IMPLEMENTED**
   - ✅ **Product-limit estimator variants** (`prodlim`) - **IMPLEMENTED**
   - ✅ **Smooth hazard estimation** (`muhaz`, `kerdiest`, `bshazard`) - **IMPLEMENTED** (`smoothhazard`)
-  - **Survey-weighted survival estimates** (`survey`)
+  - ✅ **Survey-weighted survival estimates** (`survey`) - **IMPLEMENTED** (`surveysurvival`)
 
 - **Parametric Distribution Modeling:**
   - ✅ **Weibull, Exponential, Log-normal, Log-logistic models** (`survival`, `flexsurv`) - **IMPLEMENTED**
-  - **Generalized Gamma and F-distributions** (`flexsurv`, `eha`)
-  - **Spline-based hazard functions** (`flexsurv`, `splineSurv`)
-  - **Distribution selection and goodness-of-fit** (`fitdistrplus`, `AdequacyModel`)
-  - **Flexible baseline distributions** (`flexsurv`, `tram`)
-  - **Stratified parametric models** (`rstpm2`)
+  - ✅ **Generalized Gamma and F-distributions** (`flexsurv`, `eha`) - **IMPLEMENTED** (`flexparametric`)
+  - ✅ **Spline-based hazard functions** (`flexsurv`, `splineSurv`) - **IMPLEMENTED** (`splinehazard`)
+  - ✅ **Distribution selection and goodness-of-fit** (`fitdistrplus`, `AdequacyModel`) - **IMPLEMENTED** (`distributionfit`)
+  - ✅ **Flexible baseline distributions** (`flexsurv`, `tram`) - **IMPLEMENTED** (`flexiblebaseline`)
+  - ✅ **Stratified parametric models** (`rstpm2`) - **IMPLEMENTED** (`stratifiedparametric`)
 
 - **Core Hypothesis Testing:**
   - ✅ **Log-rank test and variants** (`survival`) - **IMPLEMENTED**
-  - **Fleming-Harrington G-rho family tests** (`survival`)
-  - **Weighted log-rank tests** (`survMisc`, `coin`)
-  - **Permutation tests for survival** (`coin`)
-  - **Restricted mean survival time tests** (`survRM2`, `SSRMST`)
-  - **Median survival comparisons** (`survminer`)
+  - ✅ **Fleming-Harrington G-rho family tests** (`survival`) - **IMPLEMENTED** (`flemingharrington`)
+  - ✅ **Weighted log-rank tests** (`survMisc`, `coin`) - **IMPLEMENTED** (`weightedlogrank`)
+  - ✅ **Restricted mean survival time tests** (`survRM2`, `SSRMST`) - **IMPLEMENTED** (`rmst`)
+  - ✅ **Permutation tests for survival** (`coin`) - **IMPLEMENTED** (`permutationsurvival`)
+  - ✅ **Median survival comparisons** (`survminer`) - **IMPLEMENTED** (`mediansurvival`)
 
 #### **Phase 2: Cox Regression & Advanced Modeling** 🔄 IN PROGRESS
 
 - **Cox Proportional Hazards Models:**
   - ✅ **Standard Cox PH with diagnostics** (`survival`, `survminer`, `rms`) - **IMPLEMENTED**
   - ✅ **Stratified Cox models** (`survival`) - **IMPLEMENTED**
-  - **Penalized Cox regression** (`coxphf`, `penalized`)
-  - **High-dimensional data Cox models** (`glmnet`, `CoxBoost`)
-  - **Robust Cox regression** (`coxrobust`)
-  - **Weighted Cox regression** (`coxphw`)
-  - **Mixed-effects Cox models** (`coxme`)
+  - ✅ **Penalized Cox regression** (`glmnet`, `penalized`) - **IMPLEMENTED** (`penalizedcox`)
+  - ✅ **High-dimensional data Cox models** (`glmnet`, `CoxBoost`) - **IMPLEMENTED** (`highdimcox`)
+  - ✅ **Robust Cox regression** (`coxrobust`) - **IMPLEMENTED** (`coxrobust`)
+  - ✅ **Weighted Cox regression** (`coxphw`) - **IMPLEMENTED** (`coxphw`)
+  - ✅ **Mixed-effects Cox models** (`coxme`) - **IMPLEMENTED** (`mixedcox`)
 
 - **Time-Varying Effects & Non-Proportional Hazards:**
-  - **Time-varying covariates in Cox models** (`survival`)
-  - **Aalen's additive hazard models** (`timereg`, `addhazard`)
-  - **Flexible parametric models** (`rstpm2`)
-  - **Smoothly time-varying effects** (`smoothHR`, `timereg`)
-  - **Dynamic coefficient models** (`dynsurv`)
-  - **Proportional hazards testing** (`PHeval`)
+  - ✅ **Time-varying covariates in Cox models** (`survival`) - **IMPLEMENTED** (`timevarycox`)
+  - ✅ **Aalen's additive hazard models** (`timereg`, `addhazard`) - **IMPLEMENTED** (`aalenhazard`)
+  - ✅ **Flexible parametric models** (`rstpm2`) - **IMPLEMENTED** (`flexrstpm2`)
+  - ✅ **Smoothly time-varying effects** (`smoothHR`, `timereg`) - **IMPLEMENTED** (`smoothtimevary`)
+  - ✅ **Dynamic coefficient models** (`dynsurv`) - **IMPLEMENTED** (`dynamiccoeff`)
+  - ✅ **Proportional hazards testing** (`PHeval`) - **IMPLEMENTED** (`pheval`)
 
 - **Accelerated Failure Time Models:**
   - ✅ **Parametric AFT models** (`survival`, `flexsurv`) - **IMPLEMENTED**
-  - **Rank-based AFT estimation** (`aftgee`)
-  - **Robust AFT models** (`RobustAFT`)
-  - **Transformation models** (`tram`)
-  - **GEE-based AFT models** (`aftgee`)
+  - ✅ **Rank-based AFT estimation** (`aftgee`) - **IMPLEMENTED** (`raftgee`)
+  - ✅ **Robust AFT models** (`RobustAFT`) - **IMPLEMENTED** (`robustaft`)
+  - ✅ **Transformation models** (`tram`) - **IMPLEMENTED** (`transformationmodels`)
+  - ✅ **GEE-based AFT models** (`aftgee`) - **IMPLEMENTED** (`raftgee`)
 
 - **Frailty Models:**
   - ✅ **Shared frailty models** (`frailtypack`) - **IMPLEMENTED**
-  - **Mixed-effects survival models** (`coxme`)
-  - **EM-algorithm frailty models** (`frailtyEM`)
-  - **Parametric frailty models** (`frailtySurv`)
+  - ✅ **Mixed-effects survival models** (`coxme`) - **IMPLEMENTED**
+  - ✅ **EM-algorithm frailty models** (`frailtyEM`) - **IMPLEMENTED**
+  - ✅ **Parametric frailty models** (`frailtySurv`) - **IMPLEMENTED** (`parametricfrailty`)
 
 #### **Phase 3: Competing Risks & Multi-State Analysis** 🔄 IN PROGRESS
 
 - **Competing Risks Analysis:**
   - ✅ **Cumulative Incidence Functions** (`cmprsk`, `etm`) - **IMPLEMENTED**
   - ✅ **Fine-Gray subdistribution hazards** (`cmprsk`) - **IMPLEMENTED**
-  - **Cause-specific hazards modeling** (`survival`)
+  - ✅ **Cause-specific hazards modeling** (`survival`) - **IMPLEMENTED** (`causespecifichazards`)
   - **Direct binomial regression** (`timereg`)
   - **Competing risks power analysis** (`powerCompRisk`)
   - **Flexible competing risks models** (`riskRegression`)
@@ -291,7 +291,6 @@ This section contains features and ideas from previous brainstorming sessions th
 
 - **Stage Migration Analysis:**
   - Temporal comparison framework for Will Rogers phenomenon.
-  - Cancer-specific templates (Pancreatic AJCC 8th, etc.).
   - Migration correction methods (probability-weighted expectations).
 
 - **Regulatory & Clinical Guidelines:**

@@ -1,0 +1,276 @@
+---
+name: dynamiccoeff
+title: Dynamic Coefficient Models
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+menuTitle: Dynamic Coefficient Models
+menuSubtitle: Time-varying coefficients with dynamic updating
+description:
+    main: >-
+        Implements dynamic coefficient models for survival data where regression
+        coefficients evolve continuously over time through adaptive updating
+        mechanisms. This approach provides real-time modeling of changing covariate
+        effects using Bayesian frameworks and dynamic linear models, offering
+        sophisticated alternatives to static coefficient approaches in survival
+        analysis.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: Dynamic coefficient model with Bayesian updating
+            library(survival)
+            library(dlm)
+            
+            dynamiccoeff(
+                data = veteran_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                covariates = c("age", "karno"),
+                dynamic_covariates = c("diagtime"),
+                updating_method = "kalman"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Survival time or follow-up duration variable
+
+    - name: outcome
+      title: Event Variable  
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+    - name: covariates
+      title: Static Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal  
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Covariate variables with constant effects over time
+
+    - name: dynamic_covariates
+      title: Dynamic Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Covariate variables with dynamically updating coefficients
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of outcome variable indicating event occurrence
+
+    - name: updating_method
+      title: Updating Method
+      type: List
+      options:
+          - name: kalman
+            title: Kalman Filtering
+          - name: particle
+            title: Particle Filtering
+          - name: bayesian
+            title: Bayesian Updating
+          - name: recursive
+            title: Recursive Estimation
+      default: kalman
+      description:
+          R: >
+            Method for dynamic coefficient updating
+
+    - name: state_dimension
+      title: State Space Dimension
+      type: Number
+      min: 1
+      max: 10
+      default: 2
+      description:
+          R: >
+            Dimension of the state space for dynamic modeling
+
+    - name: process_variance
+      title: Process Noise Variance
+      type: Number  
+      min: 0.01
+      max: 2.0
+      default: 0.1
+      description:
+          R: >
+            Variance of the process noise in state evolution
+
+    - name: observation_variance
+      title: Observation Noise Variance
+      type: Number
+      min: 0.01
+      max: 2.0
+      default: 0.1
+      description:
+          R: >
+            Variance of the observation noise
+
+    - name: forgetting_factor
+      title: Forgetting Factor
+      type: Number
+      min: 0.5
+      max: 1.0
+      default: 0.99
+      description:
+          R: >
+            Forgetting factor for exponential discounting of past observations
+
+    - name: burn_in_period
+      title: Burn-in Period
+      type: Number
+      min: 0
+      max: 100
+      default: 10
+      description:
+          R: >
+            Number of initial observations for model initialization
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for dynamic coefficient intervals
+
+    - name: smoothing_parameter
+      title: Smoothing Parameter
+      type: Number
+      min: 0.01
+      max: 1.0
+      default: 0.2
+      description:
+          R: >
+            Smoothing parameter for coefficient trajectory smoothing
+
+    - name: adaptation_rate
+      title: Adaptation Rate
+      type: Number
+      min: 0.01
+      max: 0.5
+      default: 0.1
+      description:
+          R: >
+            Rate of adaptation for dynamic coefficient updates
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive dynamic model summary
+
+    - name: show_coefficient_paths
+      title: Show Coefficient Paths
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display table of dynamic coefficient trajectories
+
+    - name: show_state_evolution
+      title: Show State Evolution
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display state space evolution results
+
+    - name: show_adaptation_metrics
+      title: Show Adaptation Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display adaptation and convergence metrics
+
+    - name: show_dynamic_plots
+      title: Show Dynamic Coefficient Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display plots of dynamic coefficient evolution
+
+    - name: show_state_plots
+      title: Show State Space Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display state space visualization plots
+
+    - name: show_diagnostic_plots
+      title: Show Diagnostic Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model diagnostic and residual plots
+
+    - name: show_comparison_plots
+      title: Show Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comparison with static coefficient models
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries of the analysis results
+
+    - name: showExplanations
+      title: Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed explanations of the methodology and interpretation

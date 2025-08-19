@@ -1,0 +1,142 @@
+name: parametricfrailty
+title: Parametric Frailty Models
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: Supplier
+    persistentItems: false
+    stretchFactor: 1
+    name: elapsedtime
+    label: Time Variable
+    children:
+      - type: TargetLayoutBox
+        label: 'Time Variable:'
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+  - type: Supplier
+    persistentItems: false
+    stretchFactor: 1
+    name: outcome
+    label: Event Variable
+    children:
+      - type: TargetLayoutBox
+        label: 'Event Variable:'
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+  - type: Supplier
+    persistentItems: false
+    stretchFactor: 1
+    name: covariates
+    label: Explanatory Variables
+    children:
+      - type: TargetLayoutBox
+        label: 'Explanatory Variables:'
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+  - type: Supplier
+    persistentItems: false
+    stretchFactor: 1
+    name: frailty_variable
+    label: Frailty Variable
+    children:
+      - type: TargetLayoutBox
+        label: 'Frailty Variable:'
+        children:
+          - type: VariablesListBox
+            name: frailty_variable
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Model Specification
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: baseline_distribution
+                label: Baseline Distribution
+              - type: ComboBox
+                name: frailty_distribution
+                label: Frailty Distribution
+              - type: ComboBox
+                name: estimation_method
+                label: Estimation Method
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Model Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: include_se
+                label: Include Standard Errors
+              - type: CheckBox
+                name: include_ci
+                label: Include Confidence Intervals
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Frailty Analysis
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: frailty_variance
+                label: Estimate Frailty Variance
+              - type: CheckBox
+                name: frailty_predictions
+                label: Individual Frailty Predictions
+              - type: CheckBox
+                name: gof_tests
+                label: Goodness-of-Fit Tests
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: conf_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Plots
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: plot_hazard
+                label: Hazard Function Plot
+              - type: CheckBox
+                name: plot_survival
+                label: Survival Function Plot
+              - type: CheckBox
+                name: plot_frailty
+                label: Frailty Distribution Plot
+              - type: CheckBox
+                name: plot_diagnostics
+                label: Diagnostic Plots

@@ -1,0 +1,184 @@
+---
+name: weightedlogrank
+title: Weighted Log-Rank Tests
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Advanced weighted survival comparison tests'
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs weighted log-rank tests for comparing survival distributions between groups.
+        These tests provide enhanced power for detecting differences at specific time points
+        using various weighting schemes. Includes Gehan-Wilcoxon, Tarone-Ware, Peto-Peto,
+        and custom weight function approaches for comprehensive survival comparison.
+    R:
+        dontrun: false
+        usage: |
+            # example will be added
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: elapsedtime
+      title: 'Time Variable'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          R: >
+            Time variable for survival analysis
+
+    - name: outcome
+      title: 'Outcome Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            Event indicator variable
+
+    - name: explanatory
+      title: 'Group Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor, numeric ]
+      description:
+          R: >
+            Grouping variable for comparison
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level of outcome variable indicating event
+
+    - name: gehan_wilcoxon
+      title: Gehan-Wilcoxon test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform Gehan-Wilcoxon weighted test
+
+    - name: tarone_ware
+      title: Tarone-Ware test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform Tarone-Ware weighted test
+
+    - name: peto_peto
+      title: Peto-Peto test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform Peto-Peto weighted test
+
+    - name: modified_peto
+      title: Modified Peto test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform Modified Peto weighted test
+
+    - name: standard_logrank
+      title: Standard log-rank test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include standard unweighted log-rank test
+
+    - name: multiple_comparison
+      title: Multiple comparison adjustment
+      type: String
+      default: 'holm'
+      description:
+          R: >
+            Method for multiple comparison adjustment
+
+    - name: confidence_level
+      title: Confidence level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for intervals
+
+    - name: show_kaplan_meier
+      title: Show Kaplan-Meier curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display Kaplan-Meier survival curves
+
+    - name: show_weight_functions
+      title: Show weight functions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display weight function plots
+
+    - name: show_test_statistics
+      title: Show test statistic evolution
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot test statistics over time
+
+    - name: show_sample_sizes
+      title: Show sample sizes
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display sample sizes by group
+
+    - name: show_events
+      title: Show event counts
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display event counts by group
+
+    - name: median_survival
+      title: Show median survival times
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display median survival times by group
+
+    - name: showSummaries
+      title: Show natural language summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries
+
+    - name: showExplanations
+      title: Show methodology explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show methodology explanations

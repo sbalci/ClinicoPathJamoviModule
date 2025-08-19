@@ -1,0 +1,172 @@
+---
+name: pheval
+title: Proportional Hazards Testing
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Cox Model Summary
+      type: Html
+      visible: (show_model_summary)
+
+    - name: individualTests
+      title: Individual Covariate Tests
+      type: Table
+      visible: (show_individual_tests)
+      columns:
+          - name: covariate
+            title: Covariate
+            type: text
+          - name: test_method
+            title: Test Method
+            type: text
+          - name: test_statistic
+            title: Test Statistic
+            type: number
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+          - name: significance
+            title: Significance
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: globalTests
+      title: Global Proportional Hazards Tests
+      type: Table
+      visible: (show_global_tests)
+      columns:
+          - name: test_name
+            title: Test
+            type: text
+          - name: test_statistic
+            title: Test Statistic
+            type: number
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+          - name: critical_value
+            title: Critical Value
+            type: number
+          - name: conclusion
+            title: Conclusion
+            type: text
+
+    - name: residualAnalysis
+      title: Schoenfeld Residuals Analysis
+      type: Table
+      visible: (show_individual_tests)
+      columns:
+          - name: covariate
+            title: Covariate
+            type: text
+          - name: correlation
+            title: Time Correlation
+            type: number
+          - name: slope
+            title: Trend Slope
+            type: number
+          - name: slope_se
+            title: Slope SE
+            type: number
+          - name: slope_p_value
+            title: Slope p-value
+            type: number
+          - name: trend_direction
+            title: Trend Direction
+            type: text
+
+    - name: stratifiedResults
+      title: Stratified Analysis Results
+      type: Table
+      visible: (stratify_variable)
+      columns:
+          - name: stratum
+            title: Stratum
+            type: text
+          - name: covariate
+            title: Covariate
+            type: text
+          - name: test_statistic
+            title: Test Statistic
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+          - name: ph_assumption
+            title: PH Assumption
+            type: text
+
+    - name: powerAnalysis
+      title: Test Power Analysis
+      type: Table
+      visible: (show_global_tests)
+      columns:
+          - name: test_method
+            title: Test Method
+            type: text
+          - name: sample_size
+            title: Sample Size
+            type: integer
+          - name: events
+            title: Events
+            type: integer
+          - name: estimated_power
+            title: Estimated Power
+            type: number
+          - name: minimum_effect
+            title: Minimum Detectable Effect
+            type: number
+
+    - name: residualPlots
+      title: Schoenfeld Residual Plots
+      type: Image
+      visible: (show_residual_plots)
+
+    - name: diagnosticPlots
+      title: Diagnostic Plots
+      type: Image
+      visible: (show_diagnostic_plots)
+
+    - name: timeVaryingPlots
+      title: Time-Varying Effect Plots
+      type: Image
+      visible: (show_time_varying_plots)
+
+    - name: globalTestPlots
+      title: Global Test Visualizations
+      type: Image
+      visible: (show_global_tests)
+
+    - name: stratifiedPlots
+      title: Stratified Analysis Plots
+      type: Image
+      visible: (stratify_variable)
+
+    - name: recommendations
+      title: Recommendations & Interpretation
+      type: Html
+      visible: (show_recommendations)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)
