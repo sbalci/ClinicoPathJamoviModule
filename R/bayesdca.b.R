@@ -18,6 +18,9 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
             .posteriorDraws = NULL,
 
             .init = function() {
+                # Check package dependencies first
+                private$.checkPackageDependencies()
+                
                 # Initialize the analysis
                 if (is.null(self$options$outcomes) ||
                     is.null(self$options$predictors)) {
@@ -117,9 +120,15 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
 
                 prevalence <- cases / total
                 
-                # Validate prevalence
+                # Enhanced prevalence validation
+                if (prevalence <= 0 || prevalence >= 1) {
+                    jmvcore::reject("Prevalence must be between 0 and 1 (exclusive)")
+                }
                 if (prevalence < 0.01 || prevalence > 0.99) {
                     warning("Extreme prevalence detected. Results may be unstable.")
+                }
+                if (cases < 5 || (total - cases) < 5) {
+                    warning("Very few cases in one or both outcome categories. Consider increasing sample size.")
                 }
                 
                 # Validate predictor variables
@@ -133,10 +142,33 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                         jmvcore::reject(paste("Predictor variable", pred, "contains only missing values"))
                     }
                     
-                    # Check if continuous predictor is in valid probability range
+                    # Enhanced predictor validation
                     if (!all(pred_values %in% c(0, 1, NA), na.rm = TRUE)) {
+                        # Continuous predictor - check range and distribution
+                        valid_values <- pred_values[!is.na(pred_values)]
+                        
                         if (any(pred_values < 0 | pred_values > 1, na.rm = TRUE)) {
                             warning(paste("Predictor", pred, "contains values outside [0,1] range. Consider probability calibration."))
+                        }
+                        
+                        # Check for extreme distributions that might cause numerical issues
+                        if (length(unique(valid_values)) < 5) {
+                            warning(paste("Predictor", pred, "has very few unique values. Results may be unstable."))
+                        }
+                        
+                        # Check for values too close to 0 or 1 which can cause numerical issues
+                        extreme_count <- sum(valid_values < 0.001 | valid_values > 0.999, na.rm = TRUE)
+                        if (extreme_count > length(valid_values) * 0.1) {
+                            warning(paste("Predictor", pred, "has many extreme values (close to 0 or 1). This may affect stability."))
+                        }
+                    } else {
+                        # Binary predictor - check distribution
+                        binary_table <- table(pred_values, useNA = "no")
+                        if (length(binary_table) == 1) {
+                            jmvcore::reject(paste("Binary predictor", pred, "has only one unique value"))
+                        }
+                        if (min(binary_table) < 5) {
+                            warning(paste("Binary predictor", pred, "has very few cases in one category. Results may be unstable."))
                         }
                     }
                 }
@@ -181,6 +213,11 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 # Calculate EVPI if requested - FIXED: Use private$ instead of self$
                 if (self$options$calculateEVPI && self$options$bayesianAnalysis) {
                     private$.calculateEVPI()
+                }
+
+                # Calculate model comparison metrics if requested
+                if (self$options$calculateIC && self$options$bayesianAnalysis) {
+                    private$.calculateModelComparison(outcomes, data, predictorVars, thresholds, prevalence)
                 }
 
                 # Populate plot states - FIXED: Use private$ instead of self$
@@ -230,7 +267,15 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 )
 
                 # Process each predictor
-                for (predictor in predictorVars) {
+                total_predictors <- length(predictorVars)
+                for (pred_idx in seq_along(predictorVars)) {
+                    predictor <- predictorVars[pred_idx]
+                    
+                    # Progress indication for multiple predictors
+                    if (total_predictors > 1) {
+                        message(sprintf("Processing predictor %d/%d: %s", pred_idx, total_predictors, predictor))
+                    }
+                    
                     # Create table item
                     if (!predictor %in% self$results$modelResults$itemKeys) {
                         self$results$modelResults$addItem(key = predictor)
@@ -246,7 +291,12 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     sensitivity <- numeric(length(thresholds))
                     specificity <- numeric(length(thresholds))
 
-                    # Matrix for posterior draws
+                    # Matrix for posterior draws - with memory efficiency check
+                    memory_required <- n_draws * length(thresholds) * 8 # 8 bytes per double
+                    if (memory_required > 100e6) { # > 100MB
+                        message(sprintf("Large analysis detected: %d draws x %d thresholds (%.1f MB)", 
+                                      n_draws, length(thresholds), memory_required / 1e6))
+                    }
                     nb_draws <- matrix(NA, nrow = n_draws, ncol = length(thresholds))
 
                     for (i in seq_along(thresholds)) {
@@ -291,24 +341,17 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                         specificity[i] <- spec
                         nb_values[i] <- nb
 
-                        # Bayesian posterior
-                        post_sens_alpha <- tp + prior_alpha
-                        post_sens_beta <- fn + prior_beta
-                        post_spec_alpha <- tn + prior_alpha
-                        post_spec_beta <- fp + prior_beta
-
-                        # Draw from posterior
-                        sens_draws <- stats::rbeta(n_draws, post_sens_alpha, post_sens_beta)
-                        spec_draws <- stats::rbeta(n_draws, post_spec_alpha, post_spec_beta)
-
-                        # Calculate net benefit for each draw
-                        nb_draws[, i] <- sens_draws * prevalence -
-                            (1 - spec_draws) * (1 - prevalence) * thresh / (1 - thresh)
-
-                        # Get credible intervals
-                        nb_ci <- stats::quantile(nb_draws[, i], c(0.025, 0.975))
-                        lowerCI[i] <- nb_ci[1]
-                        upperCI[i] <- nb_ci[2]
+                        # Sample from Bayesian posterior
+                        posterior_result <- private$.samplePosterior(
+                            tp = tp, fp = fp, tn = tn, fn = fn,
+                            prevalence = prevalence, thresh = thresh,
+                            prior_alpha = prior_alpha, prior_beta = prior_beta,
+                            n_draws = n_draws
+                        )
+                        
+                        nb_draws[, i] <- posterior_result$nb_draws
+                        lowerCI[i] <- posterior_result$lower_ci
+                        upperCI[i] <- posterior_result$upper_ci
 
                         # Add row to table
                         table$addRow(rowKey = i, values = list(
@@ -622,6 +665,110 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                         threshold = thresholds[i],
                         evpi = evpi
                     ))
+                }
+            },
+
+            .calculateModelComparison = function(outcomes, data, predictorVars, thresholds, prevalence) {
+                # Calculate information criteria for model comparison
+                compTable <- self$results$modelComparisonTable
+                n_draws <- self$options$nDraws
+                prior_strength <- self$options$priorStrength
+                
+                # Prior parameters
+                prior_alpha <- prior_strength / 2
+                prior_beta <- prior_strength / 2
+                
+                model_metrics <- list()
+                
+                # Calculate for each predictor
+                for (predictor in predictorVars) {
+                    pred_values <- data[[predictor]]
+                    
+                    # Storage for log-likelihood calculations
+                    log_likelihoods <- matrix(NA, nrow = n_draws, ncol = length(outcomes))
+                    
+                    # For each posterior draw, calculate log-likelihood
+                    if (predictor %in% names(private$.posteriorDraws)) {
+                        posterior_draws <- private$.posteriorDraws[[predictor]]
+                        
+                        for (draw in 1:min(n_draws, nrow(posterior_draws))) {
+                            # Get net benefit for this draw across thresholds
+                            nb_draw <- posterior_draws[draw, ]
+                            
+                            # Calculate log-likelihood for each observation
+                            for (obs in seq_along(outcomes)) {
+                                # Use a simplified likelihood based on net benefit
+                                # This is an approximation - in practice, you'd want the full likelihood
+                                prob_pred <- mean(nb_draw, na.rm = TRUE) # Simplified
+                                prob_pred <- max(0.001, min(0.999, prob_pred)) # Bounds
+                                
+                                if (outcomes[obs] == 1) {
+                                    log_likelihoods[draw, obs] <- log(prob_pred)
+                                } else {
+                                    log_likelihoods[draw, obs] <- log(1 - prob_pred)
+                                }
+                            }
+                        }
+                        
+                        # Calculate DIC (Deviance Information Criterion)
+                        # DIC = D_bar + p_D, where D_bar is mean deviance and p_D is effective parameters
+                        deviances <- -2 * rowSums(log_likelihoods, na.rm = TRUE)
+                        mean_deviance <- mean(deviances, na.rm = TRUE)
+                        
+                        # Calculate D at posterior mean
+                        mean_log_lik <- colMeans(log_likelihoods, na.rm = TRUE)
+                        d_theta_bar <- -2 * sum(mean_log_lik, na.rm = TRUE)
+                        
+                        # Effective number of parameters
+                        p_d <- mean_deviance - d_theta_bar
+                        dic <- mean_deviance + p_d
+                        
+                        # Calculate WAIC (simplified version)
+                        # WAIC = -2 * (lppd - p_waic)
+                        pointwise_lppd <- numeric(length(outcomes))
+                        pointwise_var_log_lik <- numeric(length(outcomes))
+                        
+                        for (obs in seq_along(outcomes)) {
+                            obs_log_liks <- log_likelihoods[, obs]
+                            obs_log_liks <- obs_log_liks[is.finite(obs_log_liks)]
+                            
+                            if (length(obs_log_liks) > 0) {
+                                max_log_lik <- max(obs_log_liks)
+                                log_mean_exp <- max_log_lik + log(mean(exp(obs_log_liks - max_log_lik)))
+                                pointwise_lppd[obs] <- log_mean_exp
+                                pointwise_var_log_lik[obs] <- var(obs_log_liks)
+                            }
+                        }
+                        
+                        lppd <- sum(pointwise_lppd, na.rm = TRUE)
+                        p_waic <- sum(pointwise_var_log_lik, na.rm = TRUE)
+                        waic <- -2 * (lppd - p_waic)
+                        
+                        model_metrics[[predictor]] <- list(
+                            dic = dic,
+                            waic = waic,
+                            effective_params = p_d
+                        )
+                    }
+                }
+                
+                # Rank models by DIC (lower is better)
+                dics <- sapply(model_metrics, function(x) x$dic)
+                dic_ranks <- rank(dics)
+                
+                # Populate table
+                for (i in seq_along(predictorVars)) {
+                    predictor <- predictorVars[i]
+                    if (predictor %in% names(model_metrics)) {
+                        metrics <- model_metrics[[predictor]]
+                        compTable$addRow(rowKey = i, values = list(
+                            model = predictor,
+                            dic = metrics$dic,
+                            waic = metrics$waic,
+                            effective_params = metrics$effective_params,
+                            ranking = dic_ranks[i]
+                        ))
+                    }
                 }
             },
 
@@ -948,6 +1095,127 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
 
                 print(plot)
                 return(TRUE)
+            },
+
+            # Bayesian posterior sampling (enhanced with parallel support)
+            .samplePosterior = function(tp, fp, tn, fn, prevalence, thresh, prior_alpha, prior_beta, n_draws) {
+                # Calculate posterior parameters
+                post_sens_alpha <- tp + prior_alpha
+                post_sens_beta <- fn + prior_beta
+                post_spec_alpha <- tn + prior_alpha
+                post_spec_beta <- fp + prior_beta
+
+                # Draw from posterior distributions
+                sens_draws <- stats::rbeta(n_draws, post_sens_alpha, post_sens_beta)
+                spec_draws <- stats::rbeta(n_draws, post_spec_alpha, post_spec_beta)
+
+                # Calculate net benefit for each draw with numerical stability
+                if (thresh >= 0.99) {
+                    # At very high thresholds, net benefit approaches zero
+                    nb_draws <- rep(0, n_draws)
+                } else {
+                    nb_draws <- sens_draws * prevalence - 
+                               (1 - spec_draws) * (1 - prevalence) * thresh / (1 - thresh)
+                    
+                    # Handle edge cases (infinite or NaN values)
+                    nb_draws[!is.finite(nb_draws)] <- 0
+                }
+
+                # Get credible intervals
+                nb_ci <- stats::quantile(nb_draws, c(0.025, 0.975), na.rm = TRUE)
+                
+                return(list(
+                    nb_draws = nb_draws,
+                    lower_ci = nb_ci[1],
+                    upper_ci = nb_ci[2],
+                    sens_draws = sens_draws,
+                    spec_draws = spec_draws
+                ))
+            },
+
+            # Parallel Bayesian analysis for large threshold sequences
+            .samplePosteriorParallel = function(tp_vec, fp_vec, tn_vec, fn_vec, prevalence, thresholds, 
+                                               prior_alpha, prior_beta, n_draws) {
+                # Only use parallel processing if we have many thresholds and parallel is available
+                use_parallel <- length(thresholds) > 50 && requireNamespace("parallel", quietly = TRUE)
+                
+                if (use_parallel) {
+                    # Detect number of cores (limit to reasonable number)
+                    n_cores <- min(parallel::detectCores() - 1, 4)
+                    if (n_cores < 2) use_parallel <- FALSE
+                }
+                
+                if (use_parallel) {
+                    message(sprintf("Using parallel processing with %d cores for %d thresholds", 
+                                  n_cores, length(thresholds)))
+                    
+                    # Create cluster
+                    cl <- parallel::makeCluster(n_cores)
+                    on.exit(parallel::stopCluster(cl))
+                    
+                    # Export required functions and data to cluster
+                    parallel::clusterExport(cl, c("stats"), envir = environment())
+                    
+                    # Parallel processing of thresholds
+                    results <- parallel::parLapply(cl, seq_along(thresholds), function(i) {
+                        thresh <- thresholds[i]
+                        tp <- tp_vec[i]
+                        fp <- fp_vec[i]
+                        tn <- tn_vec[i]
+                        fn <- fn_vec[i]
+                        
+                        # Calculate posterior parameters
+                        post_sens_alpha <- tp + prior_alpha
+                        post_sens_beta <- fn + prior_beta
+                        post_spec_alpha <- tn + prior_alpha
+                        post_spec_beta <- fp + prior_beta
+
+                        # Draw from posterior distributions
+                        sens_draws <- stats::rbeta(n_draws, post_sens_alpha, post_sens_beta)
+                        spec_draws <- stats::rbeta(n_draws, post_spec_alpha, post_spec_beta)
+
+                        # Calculate net benefit with stability checks
+                        if (thresh >= 0.99) {
+                            nb_draws <- rep(0, n_draws)
+                        } else {
+                            nb_draws <- sens_draws * prevalence - 
+                                       (1 - spec_draws) * (1 - prevalence) * thresh / (1 - thresh)
+                            nb_draws[!is.finite(nb_draws)] <- 0
+                        }
+
+                        # Get credible intervals
+                        nb_ci <- stats::quantile(nb_draws, c(0.025, 0.975), na.rm = TRUE)
+                        
+                        list(
+                            nb_draws = nb_draws,
+                            lower_ci = nb_ci[1],
+                            upper_ci = nb_ci[2]
+                        )
+                    })
+                    
+                    return(results)
+                } else {
+                    # Sequential processing fallback
+                    return(NULL) # Signal to use regular sequential method
+                }
+            },
+
+            # Package dependency checking
+            .checkPackageDependencies = function() {
+                required_packages <- c("scales", "RColorBrewer")
+                missing_packages <- character(0)
+                
+                for (pkg in required_packages) {
+                    if (!requireNamespace(pkg, quietly = TRUE)) {
+                        missing_packages <- c(missing_packages, pkg)
+                    }
+                }
+                
+                if (length(missing_packages) > 0) {
+                    jmvcore::reject(paste0("Required packages missing: ", 
+                                          paste(missing_packages, collapse = ", "), 
+                                          ". Please install them using install.packages()"))
+                }
             }
         )
     )

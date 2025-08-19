@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.06
+version: 0.0.31.32
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-17'
+date: '2025-08-18'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -111,7 +111,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathology
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >
@@ -125,7 +125,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPathologyD
+    menuGroup: OncoPathology
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -1358,7 +1358,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Analyze combined test results
@@ -1418,7 +1418,7 @@ analyses:
   - title: Bayesian Decision Curve Analysis
     name: bayesdca
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: Bayesian Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Bayesian Decision Curve Analysis
@@ -1459,18 +1459,6 @@ analyses:
     menuSubgroup: Drafts
     menuSubtitle: Classification
     ribbon: analyses
-  - title: Decision 2 for using init
-    name: decision2
-    ns: ClinicoPath
-    menuGroup: meddecideD
-    menuSubgroup: Drafts
-    menuTitle: Decision 2 for using init
-    menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
-    description: >
-      Function for Medical Decision Analysis. Sensitivity, specificity, positive
-      predictive value, negative predictive value.
-    ribbon: analyses
-    category: analyses
   - title: Dendrogram
     name: dendrogram
     ns: ClinicoPath
@@ -2610,6 +2598,368 @@ analyses:
     category: analyses
     menuGroup: ClinicoPath Survival
     menuTitle: Smooth Hazard Estimation & Analysis
+  - title: Survey-Weighted Survival Analysis
+    name: surveysurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Survey-Weighted Survival Analysis
+    menuSubtitle: Survey-weighted Kaplan-Meier, Weighted Cox regression
+    description: >-
+      Performs survival analysis with complex survey designs and sampling
+      weights. This module implements survey-weighted survival methods for
+      population-based inference from complex sampling designs including
+      stratified, clustered, and multi-stage sampling. The analysis accounts for
+      survey design effects on standard errors and confidence intervals,
+      enabling proper population-level survival estimates from survey data.
+  - title: Penalized Cox Regression
+    name: penalizedcox
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Penalized Cox Regression
+    menuSubtitle: LASSO, Ridge, Elastic Net for high-dimensional survival data
+    description: >-
+      Performs penalized Cox proportional hazards regression using
+      regularization methods (LASSO, Ridge, Elastic Net) for high-dimensional
+      survival data. This method is particularly useful when the number of
+      variables is large relative to the number of observations, or when
+      multicollinearity is present. The regularization helps with variable
+      selection and prevents overfitting.
+  - title: Mixed-Effects Cox Regression
+    name: mixedcox
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Mixed-Effects Cox Regression
+    menuSubtitle: Cox models with random effects for clustered data
+    description: >-
+      Performs Cox proportional hazards regression with random effects for 
+      clustered or hierarchical survival data. This method accounts for 
+      correlation within clusters (e.g., patients within hospitals, multiple 
+      events per patient) using mixed-effects modeling. The random effects 
+      capture cluster-specific variation while estimating population-level 
+      fixed effects.
+  - title: Time-Varying Covariates Cox Regression
+    name: timevarycox
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Time-Varying Covariates Cox Regression
+    menuSubtitle: Cox regression with time-varying covariates
+    description: >-
+      Performs Cox proportional hazards regression with time-varying
+      covariates.  This analysis allows covariates to change values over time
+      during follow-up,  which is essential for modeling dynamic clinical
+      variables such as treatment  changes, biomarker levels, or disease
+      progression markers.
+  - title: Weighted Log-Rank Tests
+    name: weightedlogrank
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Weighted Log-Rank Tests
+    menuSubtitle: Advanced weighted survival comparison tests
+    description: >-
+      Performs weighted log-rank tests for comparing survival distributions
+      between groups. These tests provide enhanced power for detecting
+      differences at specific time points using various weighting schemes.
+      Includes Gehan-Wilcoxon, Tarone-Ware, Peto-Peto, and custom weight
+      function approaches for comprehensive survival comparison.
+  - title: Restricted Mean Survival Time Tests
+    name: rmst
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Restricted Mean Survival Time Tests
+    description: >
+      Performs restricted mean survival time (RMST) analysis for comparing 
+      survival distributions between groups. RMST provides a clinically
+      meaningful  measure of survival benefit by estimating the area under the
+      survival curve  up to a specific time point (tau), representing the
+      average survival time  within the restriction period.
+  - title: Permutation Tests for Survival
+    name: permutationsurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Permutation Tests for Survival
+    description: >-
+      Performs permutation-based tests for comparing survival distributions
+      between groups. These tests provide non-parametric alternatives to
+      traditional log-rank tests that do not rely on asymptotic theory, making
+      them particularly suitable for small samples or when distributional
+      assumptions are violated. Includes various permutation strategies and
+      multiple comparison corrections for robust survival analysis.
+  - title: Median Survival Comparisons
+    name: mediansurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Median Survival Comparisons
+    description: >-
+      Performs statistical comparisons of median survival times between groups.
+      Provides confidence intervals, hypothesis tests, and robust estimators
+      for  median survival with handling of censored data and group comparisons.
+  - title: Flexible Parametric Survival Models
+    name: flexparametric
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Flexible Parametric Survival Models
+    description: >-
+      Fits flexible parametric survival models including generalized gamma, 
+      generalized F, and other advanced parametric distributions. These models 
+      provide greater flexibility in modeling complex hazard shapes compared to 
+      standard parametric models, with applications in oncology, reliability, 
+      and comparative effectiveness research.
+  - title: Spline-based Hazard Functions
+    name: splinehazard
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Spline-based Hazard Functions
+    menuSubtitle: Flexible parametric survival modeling with splines
+  - title: Distribution Selection and Goodness-of-Fit
+    name: distributionfit
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Distribution Selection and Goodness-of-Fit
+    menuSubtitle: Automated parametric distribution selection with model adequacy testing
+  - title: Flexible Baseline Distributions
+    name: flexiblebaseline
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Flexible Baseline Distributions
+  - title: Stratified Parametric Models
+    name: stratifiedparametric
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Stratified Parametric Models
+  - title: High-Dimensional Cox Regression
+    name: highdimcox
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: High-Dimensional Cox Regression
+    menuSubtitle: Advanced regularization for high-dimensional survival data
+    description: >-
+      Performs high-dimensional Cox proportional hazards regression using
+      advanced regularization methods (LASSO, Ridge, Elastic Net, Adaptive
+      LASSO) for  survival data with many predictors. This method is essential
+      when the number of variables is large relative to the number of
+      observations, enabling variable selection and preventing overfitting in
+      genomic, proteomic, or other high-dimensional clinical datasets.
+  - title: Aalen's Additive Hazard Models
+    name: aalenhazard
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Aalen's Additive Hazard Models
+    menuSubtitle: Non-proportional hazards with additive effects
+    description: >-
+      Implements Aalen's additive hazard regression models for survival data
+      where covariate effects are additive rather than multiplicative. This
+      approach is particularly useful when the proportional hazards assumption
+      is violated, allowing for time-varying covariate effects and
+      non-proportional hazards. The model estimates cumulative regression
+      functions that can reveal how covariate effects change over time.
+  - title: Flexible Parametric Models (Royston-Parmar)
+    name: flexrstpm2
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Flexible Parametric Models (Royston-Parmar)
+    menuSubtitle: Flexible parametric survival models with splines
+    description: >-
+      Implements Royston-Parmar flexible parametric survival models using
+      restricted cubic splines to model the baseline log cumulative hazard
+      function. This approach provides a flexible alternative to standard
+      parametric models by allowing non-monotonic hazard functions while
+      maintaining the advantages of parametric modeling including smooth
+      survival curves, extrapolation capability, and direct modeling of
+      covariate effects on survival time.
+  - title: Smoothly Time-Varying Effects
+    name: smoothtimevary
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Smoothly Time-Varying Effects
+    menuSubtitle: Smooth estimation of time-varying covariate effects using splines
+    description: >-
+      Implements smooth estimation of time-varying covariate effects in survival
+      analysis using flexible spline-based methods. This approach provides
+      continuous modeling of how covariate effects change over time, offering an
+      alternative to step-function approaches in standard time-varying Cox
+      models and complementing Aalen's additive hazard methodology.
+  - title: Dynamic Coefficient Models
+    name: dynamiccoeff
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Dynamic Coefficient Models
+    menuSubtitle: Time-varying coefficients with dynamic updating
+    description: >-
+      Implements dynamic coefficient models for survival data where regression
+      coefficients evolve continuously over time through adaptive updating
+      mechanisms. This approach provides real-time modeling of changing
+      covariate effects using Bayesian frameworks and dynamic linear models,
+      offering sophisticated alternatives to static coefficient approaches in
+      survival analysis.
+  - title: Proportional Hazards Testing
+    name: pheval
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Proportional Hazards Testing
+    menuSubtitle: Comprehensive PH assumption validation
+    description: >-
+      Comprehensive testing of the proportional hazards assumption in Cox
+      regression models using multiple statistical approaches. This analysis
+      provides systematic validation of the fundamental assumption underlying
+      Cox proportional hazards models through statistical tests, graphical
+      diagnostics, and time-dependent coefficient analysis for robust model
+      assessment and assumption verification.
+  - title: Weighted Cox Regression
+    name: coxphw
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Weighted Cox Regression
+    menuSubtitle: Cox models for rare events and imbalanced data
+    description: >-
+      Implements weighted Cox proportional hazards regression models
+      specifically designed for rare events and imbalanced survival data. Uses
+      average hazard weights to improve estimation accuracy when events are rare
+      or covariates are imbalanced, providing more reliable hazard ratios and
+      confidence intervals in challenging clinical research scenarios.
+  - title: Robust Cox Regression
+    name: coxrobust
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Robust Cox Regression
+    menuSubtitle: Outlier-resistant survival modeling
+    description: >-
+      Implements robust Cox proportional hazards regression models that are
+      resistant to outliers and model misspecification. Provides multiple robust
+      estimation methods including Huber M-estimation, bounded influence
+      functions, and weighted partial likelihood approaches for reliable
+      survival analysis in the presence of data anomalies.
+  - title: Rank-based AFT Estimation
+    name: raftgee
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Rank-based AFT Estimation
+    menuSubtitle: GEE-based accelerated failure time models
+    description: >-
+      Implements rank-based accelerated failure time (AFT) models using 
+      generalized estimating equations (GEE) for survival data analysis. This
+      approach provides robust estimation when proportional hazards assumptions
+      are violated, offering distribution-free methods for modeling survival
+      times with emphasis on median survival relationships and time acceleration
+      effects in clinical research applications.
+  - title: Robust AFT Models
+    name: robustaft
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Robust AFT Models
+    menuSubtitle: Accelerated failure time models with robust estimation
+    description: >-
+      Implements robust accelerated failure time (AFT) models with M-estimation
+      and resistant estimators. Provides outlier-resistant estimation for
+      parametric survival models when standard AFT models are sensitive to
+      extreme observations or model misspecification, ensuring reliable
+      parameter estimates in challenging clinical datasets.
+  - title: Transformation Models
+    name: transformationmodels
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: Survival Analysis
+    menuTitle: Transformation Models
+    menuSubtitle: Unified framework for survival models through transformations
+    description: >-
+      Implements transformation models providing a unified framework for 
+      various survival analysis approaches through transformation functions.
+      Includes linear transformation models, Box-Cox transformations, and
+      non-parametric transformations, enabling flexible modeling of survival
+      data with automatic transformation selection and validation.
+  - title: Mixed-Effects Cox Models
+    name: mixedeffectscox
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath Survival
+    menuTitle: Mixed-Effects Cox Models
+    description: >
+      Implements mixed-effects Cox proportional hazards models for hierarchical 
+      survival data with random effects. Accounts for clustering, repeated 
+      measurements, and unobserved heterogeneity using the coxme framework for 
+      multi-level survival analysis in clinical research.
+  - title: EM-Algorithm Frailty Models
+    name: emfrailty
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath Survival
+    menuTitle: EM-Algorithm Frailty Models
+    description: >
+      Implements expectation-maximization (EM) algorithm based frailty models
+      for survival analysis. Provides efficient estimation of frailty
+      distributions and variance components in complex survival data with
+      unobserved heterogeneity. Supports multiple frailty distributions and
+      convergence diagnostics.
+  - title: Parametric Frailty Models
+    name: parametricfrailty
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuTitle: Parametric Frailty Models
+    description: >
+      Implements parametric frailty models for survival analysis with clustered
+      or correlated survival data. Uses the frailtySurv package for efficient
+      estimation of parametric baseline distributions combined with frailty
+      components to model unobserved heterogeneity between clusters or
+      individuals.
+  - title: Cause-Specific Hazards Models
+    name: causespecifichazards
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuTitle: Cause-Specific Hazards Models
+    description: >
+      Implements cause-specific hazards modeling for competing risks analysis.
+      This approach models the hazard for each specific cause separately,
+      treating other causes as censoring events. Provides comprehensive analysis
+      including hazard ratios, cumulative incidence functions, and model
+      comparisons across different causes of failure.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

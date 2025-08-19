@@ -1,0 +1,88 @@
+---
+name: permutationsurvival
+title: Permutation Tests for Survival
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: permutationTestsTable
+      title: "Permutation Test Results"
+      type: Table
+      visible: true
+      columns:
+          - name: comparison
+            title: Comparison
+            type: text
+          - name: test_statistic_name
+            title: Test Statistic
+            type: text
+          - name: observed_statistic
+            title: Observed
+            type: number
+          - name: n_permutations
+            title: N Permutations
+            type: integer
+          - name: p_value
+            title: p
+            type: number
+          - name: p_adjusted
+            title: Adjusted p
+            type: number
+
+    - name: groupSummaryTable
+      title: "Group Summary Statistics"
+      type: Table
+      visible: true
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: events
+            title: Events
+            type: integer
+          - name: median_survival
+            title: Median Survival
+            type: number
+          - name: median_ci_lower
+            title: Lower CI
+            type: number
+          - name: median_ci_upper
+            title: Upper CI
+            type: number
+
+    - name: survivalPlot
+      title: "Survival Curves Comparison"
+      type: Image
+      visible: (show_survival_curves)
+      requiresData: true
+
+    - name: permutationDistributionPlot
+      title: "Permutation Test Statistics Distribution"
+      type: Image
+      visible: (show_permutation_distribution)
+      requiresData: true
+
+    - name: testProgressionPlot
+      title: "P-value Progression"
+      type: Image
+      visible: (show_test_progression)
+      requiresData: true
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)
+
+...

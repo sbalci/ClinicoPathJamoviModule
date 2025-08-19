@@ -1,0 +1,121 @@
+---
+name: splinehazard
+title: Spline-based Hazard Functions
+jas: "1.2"
+version: "1.0.0"
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+menuTitle: Spline-based Hazard Functions
+menuSubtitle: Flexible parametric survival modeling with splines
+
+options:
+    - name: elapsedtime
+      title: "Time Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description: "Time to event or censoring"
+      
+    - name: outcome
+      title: "Event Indicator" 
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description: "Event indicator (1 = event, 0 = censored)"
+      
+    - name: explanatory
+      title: "Covariates"
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description: "Explanatory variables for modeling"
+      
+    - name: outcomeLevel
+      title: "Event Level"
+      type: String
+      default: "1"
+      description: "Level indicating event occurrence"
+      
+    - name: knots_method
+      title: "Knots Selection"
+      type: List
+      options: 
+        - quantile
+        - equal
+        - manual
+        - automatic
+      default: automatic
+      description: "Method for selecting spline knots"
+      
+    - name: num_knots
+      title: "Number of Knots"
+      type: Integer
+      default: 3
+      min: 1
+      max: 10
+      description: "Number of internal knots for spline"
+      
+    - name: spline_degree
+      title: "Spline Degree"
+      type: List
+      options:
+        - "1"
+        - "2"
+        - "3"
+      default: "3"
+      description: "Polynomial degree for spline basis"
+      
+    - name: hazard_scale
+      title: "Hazard Scale"
+      type: List
+      options:
+        - log
+        - odds
+        - normal
+      default: log
+      description: "Scale for modeling hazard function"
+      
+    - name: confidence_level
+      title: "Confidence Level"
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description: "Confidence level for intervals"
+      
+    - name: show_hazard_plot
+      title: "Hazard Function Plot"
+      type: Bool
+      default: true
+      description: "Display estimated hazard function over time"
+      
+    - name: show_survival_plot
+      title: "Survival Function Plot"
+      type: Bool
+      default: true
+      description: "Display survival curves"
+      
+    - name: show_cumulative_plot
+      title: "Cumulative Hazard Plot"
+      type: Bool
+      default: false
+      description: "Display cumulative hazard function"
+      
+    - name: show_model_comparison
+      title: "Model Comparison"
+      type: Bool
+      default: true
+      description: "Compare different knot configurations"
+      
+    - name: showSummaries
+      title: "Summaries"
+      type: Bool
+      default: false
+      description: "Generate natural language summaries"
+      
+    - name: showExplanations
+      title: "Explanations"
+      type: Bool
+      default: false
+      description: "Show methodology explanations"
+...

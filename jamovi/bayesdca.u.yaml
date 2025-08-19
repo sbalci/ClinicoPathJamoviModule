@@ -93,6 +93,10 @@ children:
             name: calculateEVPI
             label: Calculate EVPI
             enable: (bayesianAnalysis)
+          - type: CheckBox
+            name: calculateIC
+            label: Calculate Information Criteria (DIC/WAIC)
+            enable: (bayesianAnalysis)
 
   - type: CollapseBox
     label: Prevalence Settings

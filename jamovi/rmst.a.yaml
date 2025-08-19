@@ -1,0 +1,181 @@
+---
+name:  rmst
+title: Restricted Mean Survival Time Tests
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Performs restricted mean survival time (RMST) analysis for comparing 
+        survival distributions between groups. RMST provides a clinically meaningful 
+        measure of survival benefit by estimating the area under the survival curve 
+        up to a specific time point (tau), representing the average survival time 
+        within the restriction period.
+    R:
+        dontrun: false
+        usage: |
+            # Example usage will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time variable for survival analysis
+
+    - name: outcome
+      title: Event Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable
+
+    - name: explanatory
+      title: Group Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Grouping variable for comparison
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of the outcome variable that represents the event of interest.
+
+    - name: tau_method
+      title: Tau Selection Method
+      type: List
+      options:
+          - title: "Automatic (min follow-up)"
+            name: "auto"
+          - title: "Manual specification"
+            name: "manual"
+          - title: "Percentile of max follow-up"
+            name: "percentile"
+      default: "auto"
+      description:
+          R: >
+            Method for selecting the restriction time tau.
+
+    - name: tau_value
+      title: Tau Value
+      type: Number
+      min: 0.1
+      default: 365
+      description:
+          R: >
+            Manual specification of restriction time tau (used when method is 'manual').
+
+    - name: tau_percentile
+      title: Tau Percentile
+      type: Number
+      min: 10
+      max: 90
+      default: 80
+      description:
+          R: >
+            Percentile of maximum follow-up time to use as tau (used when method is 'percentile').
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for all confidence intervals.
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use bootstrap method for confidence intervals (more robust for small samples).
+
+    - name: bootstrap_n
+      title: Bootstrap Iterations
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: >
+            Number of bootstrap iterations for confidence interval estimation.
+
+    - name: show_rmst_table
+      title: Show RMST Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display table with RMST estimates and confidence intervals by group.
+
+    - name: show_rmst_plot
+      title: Show RMST Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display survival curves with highlighted RMST areas.
+
+    - name: show_difference_test
+      title: Show Difference Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform statistical test for difference in RMST between groups.
+
+    - name: show_ratio_test
+      title: Show Ratio Test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform statistical test for ratio of RMST between groups.
+
+    - name: show_tau_analysis
+      title: Show Tau Sensitivity
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display sensitivity analysis across different tau values.
+
+    - name: showSummaries
+      title: Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summary of results.
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations.
+
+...

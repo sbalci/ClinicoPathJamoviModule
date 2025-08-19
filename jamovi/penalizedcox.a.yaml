@@ -1,0 +1,432 @@
+---
+name:  penalizedcox
+title: Penalized Cox Regression
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'LASSO, Ridge, Elastic Net for high-dimensional survival data'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs penalized Cox proportional hazards regression using regularization
+        methods (LASSO, Ridge, Elastic Net) for high-dimensional survival data.
+        This method is particularly useful when the number of variables is large
+        relative to the number of observations, or when multicollinearity is present.
+        The regularization helps with variable selection and prevents overfitting.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: LASSO penalized Cox regression
+            library(survival)
+            library(glmnet)
+            
+            penalizedcox(
+                data = lung_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "2",
+                predictors = c("age", "sex", "ph.ecog", "ph.karno"),
+                penalty_type = "lasso",
+                cv_folds = 10
+            )
+            
+            # Example 2: Elastic Net with variable selection
+            penalizedcox(
+                data = genomic_data,
+                elapsedtime = "survival_time",
+                outcome = "event",
+                outcomeLevel = "1",
+                predictors = c("gene1", "gene2", "gene3", "gene4"),
+                penalty_type = "elastic_net",
+                alpha = 0.5,
+                lambda_selection = "1se",
+                variable_selection = TRUE
+            )
+
+options:
+
+# Data ----
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The dataset for analysis, provided as a data frame. Should contain
+            survival variables and predictor variables for penalized regression.
+
+# Time Variables ----
+
+    - name: elapsedtime
+      title: 'Time Elapsed'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+        R: >
+          The numeric variable representing follow-up time until the event or censoring.
+
+    - name: tint
+      title: Using Dates to Calculate Survival Time
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, survival time will be calculated from diagnosis and follow-up dates.
+
+    - name: dxdate
+      title: 'Diagnosis Date'
+      type: Variable
+      default: NULL
+      description:
+        R: >
+          Date of diagnosis or start of follow-up. Required if tint = true.
+
+    - name: fudate
+      title: 'Follow-up Date'
+      type: Variable
+      default: NULL
+      description:
+        R: >
+          Follow-up date or date of last observation. Required if tint = true.
+
+    - name: timetypedata
+      title: 'Time Type in Data'
+      type: List
+      options:
+        - title: 'Year-Month-Day'
+          name: ymd
+        - title: 'Month-Day-Year'
+          name: mdy
+        - title: 'Day-Month-Year'
+          name: dmy
+      default: ymd
+      description:
+        R: >
+          Specifies the format of date variables in the input data.
+
+    - name: timetypeoutput
+      title: Time Type in Output
+      type: List
+      options:
+        - title: days
+          name: days
+        - title: weeks
+          name: weeks
+        - title: months
+          name: months
+        - title: years
+          name: years
+      default: months
+      description:
+        R: >
+          The units in which survival time is reported in the output.
+
+# Outcome Variables ----
+
+    - name: outcome
+      title: 'Outcome'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      default: NULL
+      description:
+        R: >
+          The outcome variable indicating event status (e.g., death, recurrence).
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+      description:
+        R: >
+          The level of outcome considered as the event.
+
+# Predictor Variables ----
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      default: NULL
+      description:
+        R: >
+          Variables to include in the penalized Cox regression model.
+
+# Penalization Options ----
+
+    - name: penalty_type
+      title: 'Penalty Type'
+      type: List
+      options:
+        - title: LASSO (L1)
+          name: lasso
+        - title: Ridge (L2)
+          name: ridge
+        - title: Elastic Net
+          name: elastic_net
+      default: lasso
+      description:
+        R: >
+          Type of penalty to apply. LASSO performs variable selection,
+          Ridge shrinks coefficients, Elastic Net combines both.
+
+    - name: alpha
+      title: 'Elastic Net Mixing Parameter'
+      type: Number
+      min: 0
+      max: 1
+      default: 0.5
+      description:
+        R: >
+          Mixing parameter for Elastic Net. Alpha=1 is LASSO, alpha=0 is Ridge.
+          Used only when penalty_type = "elastic_net".
+
+    - name: lambda_selection
+      title: 'Lambda Selection Method'
+      type: List
+      options:
+        - title: Minimum CV Error
+          name: min
+        - title: 1 Standard Error Rule
+          name: 1se
+        - title: Custom Value
+          name: custom
+      default: 1se
+      description:
+        R: >
+          Method for selecting the regularization parameter lambda.
+
+    - name: lambda_custom
+      title: 'Custom Lambda Value'
+      type: Number
+      min: 0
+      default: 0.01
+      description:
+        R: >
+          Custom lambda value when lambda_selection = "custom".
+
+# Cross-Validation Options ----
+
+    - name: cv_folds
+      title: 'Cross-Validation Folds'
+      type: Integer
+      min: 3
+      max: 20
+      default: 10
+      description:
+        R: >
+          Number of folds for cross-validation to select optimal lambda.
+
+    - name: cv_type
+      title: 'CV Error Measure'
+      type: List
+      options:
+        - title: Partial Likelihood Deviance
+          name: deviance
+        - title: C-index
+          name: C
+      default: deviance
+      description:
+        R: >
+          Cross-validation error measure for model selection.
+
+# Variable Selection and Analysis ----
+
+    - name: variable_selection
+      title: 'Perform Variable Selection'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Extract and display selected variables (non-zero coefficients).
+
+    - name: standardize
+      title: 'Standardize Variables'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Whether to standardize predictor variables before fitting.
+
+    - name: include_intercept
+      title: 'Include Intercept'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Whether to include an intercept in the model (usually false for Cox models).
+
+# Model Validation ----
+
+    - name: bootstrap_validation
+      title: 'Bootstrap Validation'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform bootstrap validation of the penalized model.
+
+    - name: bootstrap_samples
+      title: 'Bootstrap Samples'
+      type: Integer
+      min: 50
+      max: 1000
+      default: 100
+      description:
+        R: >
+          Number of bootstrap samples for validation.
+
+# Prediction and Scoring ----
+
+    - name: predict_risk
+      title: 'Calculate Risk Scores'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Calculate linear predictors (risk scores) for each observation.
+
+    - name: survival_curves
+      title: 'Survival Curves by Risk Groups'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Generate survival curves stratified by risk score groups.
+
+    - name: risk_groups
+      title: 'Number of Risk Groups'
+      type: List
+      options:
+        - title: '2 Groups'
+          name: '2'
+        - title: '3 Groups'
+          name: '3'
+        - title: '4 Groups'
+          name: '4'
+      default: '3'
+      description:
+        R: >
+          Number of risk groups for survival curve stratification.
+
+# Plotting Options ----
+
+    - name: coefficient_plot
+      title: 'Coefficient Path Plot'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Display coefficient paths showing shrinkage across lambda values.
+
+    - name: cv_plot
+      title: 'Cross-Validation Plot'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Display cross-validation error plot for lambda selection.
+
+    - name: variable_importance
+      title: 'Variable Importance Plot'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display variable importance based on coefficient magnitudes.
+
+# Advanced Options ----
+
+    - name: lambda_sequence
+      title: 'Custom Lambda Sequence'
+      type: String
+      default: ""
+      description:
+        R: >
+          Custom sequence of lambda values (comma-separated). 
+          If empty, glmnet will choose automatically.
+
+    - name: max_variables
+      title: 'Maximum Variables to Select'
+      type: Integer
+      min: 1
+      max: 1000
+      default: 100
+      description:
+        R: >
+          Maximum number of variables to include in the model path.
+
+    - name: convergence_threshold
+      title: 'Convergence Threshold'
+      type: Number
+      min: 1e-8
+      max: 1e-3
+      default: 1e-7
+      description:
+        R: >
+          Convergence threshold for coordinate descent algorithm.
+
+# Output Options ----
+
+    - name: show_coefficients
+      title: 'Show Coefficient Table'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Display table of selected variables and their coefficients.
+
+    - name: show_model_metrics
+      title: 'Show Model Performance Metrics'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Display model performance metrics including deviance and C-index.
+
+    - name: show_lambda_path
+      title: 'Show Lambda Selection Details'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display detailed information about lambda selection process.
+
+    - name: showSummaries
+      title: "Show Natural Language Summaries"
+      type: Bool
+      default: false
+      description: >-
+        Display natural language summaries alongside tables and plots for
+        interpretation of penalized Cox regression results.
+
+    - name: showExplanations
+      title: "Show Analysis Explanations"
+      type: Bool
+      default: false
+      description: >-
+        Display detailed explanations of penalized Cox regression methods
+        and interpretation guidelines.
+
+# Output Variables ----
+
+    - name: addRiskScore
+      title: Add Risk Score to Data
+      type: Bool
+      default: false
+      description:
+        R: >
+          Add calculated linear predictor (risk score) as new variable to dataset.
+
+    - name: addRiskGroup
+      title: Add Risk Group to Data
+      type: Bool
+      default: false
+      description:
+        R: >
+          Add risk group classification as new variable to dataset.
+
+...

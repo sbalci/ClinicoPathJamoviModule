@@ -1,0 +1,339 @@
+---
+name: robustaft
+title: Robust AFT Models
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+menuTitle: Robust AFT Models
+menuSubtitle: Accelerated failure time models with robust estimation
+description:
+    main: >-
+        Implements robust accelerated failure time (AFT) models with
+        M-estimation and resistant estimators. Provides outlier-resistant
+        estimation for parametric survival models when standard AFT models
+        are sensitive to extreme observations or model misspecification,
+        ensuring reliable parameter estimates in challenging clinical datasets.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Robust AFT model with Weibull distribution
+            library(survival)
+            library(RobustAFT)
+            
+            robustaft(
+                data = clinical_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                covariates = c("age", "treatment", "biomarker"),
+                distribution = "weibull",
+                robust_method = "huber",
+                tuning_constant = 1.345
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Survival time or follow-up duration variable
+
+    - name: outcome
+      title: Event Variable
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Predictor variables for the AFT model
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of outcome variable indicating event occurrence
+
+    - name: distribution
+      title: Parametric Distribution
+      type: List
+      options:
+          - name: weibull
+            title: Weibull
+          - name: exponential
+            title: Exponential
+          - name: lognormal
+            title: Log-normal
+          - name: loglogistic
+            title: Log-logistic
+          - name: gamma
+            title: Gamma
+          - name: gaussian
+            title: Gaussian
+      default: weibull
+      description:
+          R: >
+            Parametric distribution for AFT model
+
+    - name: robust_method
+      title: Robust Method
+      type: List
+      options:
+          - name: huber
+            title: Huber M-estimator
+          - name: tukey
+            title: Tukey biweight
+          - name: hampel
+            title: Hampel function
+          - name: andrews
+            title: Andrews wave
+          - name: median
+            title: Median regression
+          - name: lad
+            title: Least absolute deviation
+      default: huber
+      description:
+          R: >
+            Robust estimation method for outlier resistance
+
+    - name: tuning_constant
+      title: Tuning Constant
+      type: Number
+      min: 0.1
+      max: 5.0
+      default: 1.345
+      description:
+          R: >
+            Tuning constant controlling robustness vs efficiency
+
+    - name: efficiency_target
+      title: Efficiency Target
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Target efficiency relative to non-robust estimator
+
+    - name: scale_estimation
+      title: Scale Estimation Method
+      type: List
+      options:
+          - name: mad
+            title: Median absolute deviation
+          - name: qn
+            title: Qn estimator
+          - name: sn
+            title: Sn estimator
+          - name: tau
+            title: Tau estimator
+          - name: huber
+            title: Huber scale
+      default: mad
+      description:
+          R: >
+            Method for robust scale estimation
+
+    - name: stratify_variable
+      title: Stratification Variable
+      type: Variable
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Variable for stratified analysis
+
+    - name: weights_variable
+      title: Weights Variable
+      type: Variable
+      permitted:
+          - numeric
+      description:
+          R: >
+            Observation weights variable
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for intervals
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Number
+      min: 10
+      max: 1000
+      default: 100
+      description:
+          R: >
+            Maximum number of iterations
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      min: 1e-8
+      max: 1e-2
+      default: 1e-6
+      description:
+          R: >
+            Convergence tolerance for estimation
+
+    - name: outlier_detection
+      title: Automatic Outlier Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Automatically detect and flag outliers
+
+    - name: outlier_threshold
+      title: Outlier Threshold
+      type: Number
+      min: 1.0
+      max: 5.0
+      default: 2.5
+      description:
+          R: >
+            Threshold for outlier detection
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compute bootstrap confidence intervals
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      min: 100
+      max: 2000
+      default: 500
+      description:
+          R: >
+            Number of bootstrap samples
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model summary
+
+    - name: show_coefficients
+      title: Show Coefficients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display coefficient estimates table
+
+    - name: show_outliers
+      title: Show Outlier Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display outlier detection results
+
+    - name: show_diagnostics
+      title: Show Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model diagnostics
+
+    - name: show_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare robust vs standard AFT models
+
+    - name: show_residual_plots
+      title: Show Residual Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display residual diagnostic plots
+
+    - name: show_outlier_plots
+      title: Show Outlier Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display outlier identification plots
+
+    - name: show_survival_plots
+      title: Show Survival Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display survival curves
+
+    - name: show_qq_plots
+      title: Show Q-Q Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display quantile-quantile plots
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries
+
+    - name: showExplanations
+      title: Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations

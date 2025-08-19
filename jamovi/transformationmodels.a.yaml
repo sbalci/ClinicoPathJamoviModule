@@ -1,0 +1,360 @@
+---
+name: transformationmodels
+title: Transformation Models
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+menuTitle: Transformation Models
+menuSubtitle: Unified framework for survival models through transformations
+description:
+    main: >-
+        Implements transformation models providing a unified framework for 
+        various survival analysis approaches through transformation functions.
+        Includes linear transformation models, Box-Cox transformations, and
+        non-parametric transformations, enabling flexible modeling of survival
+        data with automatic transformation selection and validation.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Transformation model with Box-Cox transformation
+            library(survival)
+            library(tram)
+            
+            transformationmodels(
+                data = survival_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                covariates = c("age", "treatment", "biomarker"),
+                transformation = "boxcox",
+                distribution = "normal",
+                method = "ml"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Survival time or follow-up duration variable
+
+    - name: outcome
+      title: Event Variable
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Predictor variables for the transformation model
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of outcome variable indicating event occurrence
+
+    - name: transformation
+      title: Transformation Function
+      type: List
+      options:
+          - name: linear
+            title: Linear transformation
+          - name: boxcox
+            title: Box-Cox transformation
+          - name: loglog
+            title: Log-log transformation
+          - name: probit
+            title: Probit transformation
+          - name: logit
+            title: Logit transformation
+          - name: cloglog
+            title: Complementary log-log transformation
+          - name: nonparametric
+            title: Non-parametric transformation
+      default: boxcox
+      description:
+          R: >
+            Type of transformation function to apply
+
+    - name: distribution
+      title: Error Distribution
+      type: List
+      options:
+          - name: normal
+            title: Normal (Gaussian)
+          - name: logistic
+            title: Logistic
+          - name: extreme
+            title: Extreme value (Gumbel)
+          - name: exponential
+            title: Exponential
+          - name: weibull
+            title: Weibull
+      default: normal
+      description:
+          R: >
+            Error distribution assumption
+
+    - name: method
+      title: Estimation Method
+      type: List
+      options:
+          - name: ml
+            title: Maximum likelihood
+          - name: score
+            title: Score estimation
+          - name: gradient
+            title: Gradient-based
+          - name: iterative
+            title: Iterative scoring
+      default: ml
+      description:
+          R: >
+            Parameter estimation method
+
+    - name: support
+      title: Support Specification
+      type: List
+      options:
+          - name: automatic
+            title: Automatic support detection
+          - name: bounded
+            title: Bounded support
+          - name: unbounded
+            title: Unbounded support
+          - name: custom
+            title: Custom support range
+      default: automatic
+      description:
+          R: >
+            Specification of transformation support
+
+    - name: lambda_search
+      title: Lambda Parameter Search
+      type: Bool
+      default: true
+      description:
+          R: >
+            Automatic search for optimal Box-Cox lambda parameter
+
+    - name: lambda_range_min
+      title: Lambda Range Minimum
+      type: Number
+      min: -3.0
+      max: 0.0
+      default: -2.0
+      description:
+          R: >
+            Minimum value for lambda parameter search
+
+    - name: lambda_range_max
+      title: Lambda Range Maximum
+      type: Number
+      min: 0.0
+      max: 3.0
+      default: 2.0
+      description:
+          R: >
+            Maximum value for lambda parameter search
+
+    - name: stratify_variable
+      title: Stratification Variable
+      type: Variable
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Variable for stratified analysis
+
+    - name: weights_variable
+      title: Weights Variable
+      type: Variable
+      permitted:
+          - numeric
+      description:
+          R: >
+            Observation weights variable
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for intervals
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Number
+      min: 10
+      max: 1000
+      default: 100
+      description:
+          R: >
+            Maximum number of iterations
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      min: 1e-8
+      max: 1e-2
+      default: 1e-6
+      description:
+          R: >
+            Convergence tolerance for estimation
+
+    - name: transformation_validation
+      title: Transformation Validation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Validate transformation assumptions
+
+    - name: model_selection
+      title: Automatic Model Selection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Automatic selection of best transformation
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compute bootstrap confidence intervals
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      min: 100
+      max: 2000
+      default: 500
+      description:
+          R: >
+            Number of bootstrap samples
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model summary
+
+    - name: show_coefficients
+      title: Show Coefficients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display coefficient estimates table
+
+    - name: show_transformation
+      title: Show Transformation Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display transformation function analysis
+
+    - name: show_diagnostics
+      title: Show Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model diagnostics
+
+    - name: show_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare different transformation models
+
+    - name: show_transformation_plots
+      title: Show Transformation Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display transformation function plots
+
+    - name: show_residual_plots
+      title: Show Residual Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display residual diagnostic plots
+
+    - name: show_survival_plots
+      title: Show Survival Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display survival curves
+
+    - name: show_qq_plots
+      title: Show Q-Q Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display quantile-quantile plots
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries
+
+    - name: showExplanations
+      title: Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations

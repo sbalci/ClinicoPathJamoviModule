@@ -1,0 +1,146 @@
+title: Proportional Hazards Testing
+name: pheval
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Event Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+            itemDropBehaviour: insert
+      - type: TargetLayoutBox
+        label: Stratification Variable
+        children:
+          - type: VariablesListBox
+            name: stratify_variable
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Event Variable Options
+        style: list-inline
+        children:
+          - type: TextBox
+            name: outcomeLevel
+            format: string
+            label: Event Level
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Test Configuration
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: test_schoenfeld
+            label: Schoenfeld Residuals
+          - type: CheckBox
+            name: test_scaled_schoenfeld
+            label: Scaled Schoenfeld
+          - type: CheckBox
+            name: test_global
+            label: Global Test
+          - type: CheckBox
+            name: test_correlation
+            label: Correlation Test
+          - type: CheckBox
+            name: test_logrank
+            label: Log-rank Test
+          - type: CheckBox
+            name: test_supremum
+            label: Supremum Test
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Test Parameters
+        style: list-inline
+        children:
+          - type: ComboBox
+            name: time_transform
+            label: Time Transformation
+          - type: ComboBox
+            name: global_test_method
+            label: Global Test Method
+          - type: TextBox
+            name: confidence_level
+            format: number
+            label: Confidence Level
+          - type: TextBox
+            name: rho_parameter
+            format: number
+            label: Rho Parameter
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options - Tables
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: show_individual_tests
+            label: Individual Tests
+          - type: CheckBox
+            name: show_global_tests
+            label: Global Tests
+          - type: CheckBox
+            name: show_model_summary
+            label: Model Summary
+          - type: CheckBox
+            name: show_recommendations
+            label: Recommendations
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options - Plots
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: show_residual_plots
+            label: Residual Plots
+          - type: CheckBox
+            name: show_diagnostic_plots
+            label: Diagnostic Plots
+          - type: CheckBox
+            name: show_time_varying_plots
+            label: Time-Varying Plots
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Analysis Options
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: showSummaries
+            label: Analysis Summaries
+          - type: CheckBox
+            name: showExplanations
+            label: Method Explanations

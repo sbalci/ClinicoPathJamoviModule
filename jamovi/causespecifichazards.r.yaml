@@ -1,0 +1,294 @@
+---
+name: causespecifichazards
+title: Cause-Specific Hazards Models
+jrs: '1.1'
+refs: survival
+items:
+    - name: overview
+      title: Analysis Overview
+      type: Table
+      description: Overview of the cause-specific hazards analysis
+      clearWith:
+        - elapsedtime
+        - outcome
+        - covariates
+        - cause_variable
+        - reference_cause
+        - model_type
+      columns:
+        - name: analysis
+          title: Analysis
+          type: text
+        - name: outcome
+          title: Outcome Variable
+          type: text
+        - name: n_subjects
+          title: Number of Subjects
+          type: integer
+        - name: n_events
+          title: Total Events
+          type: integer
+        - name: n_causes
+          title: Number of Causes
+          type: integer
+        - name: model_type
+          title: Model Type
+          type: text
+        - name: reference_cause
+          title: Reference Cause
+          type: text
+
+    - name: cause_summary
+      title: Cause-Specific Event Summary
+      type: Table
+      description: Summary of events by cause
+      clearWith:
+        - elapsedtime
+        - outcome
+        - cause_variable
+      columns:
+        - name: cause
+          title: Cause
+          type: text
+        - name: n_events
+          title: Number of Events
+          type: integer
+        - name: proportion
+          title: Proportion
+          type: number
+          format: zto
+        - name: median_time
+          title: Median Time
+          type: number
+          format: zto
+        - name: q25_time
+          title: Q1 Time
+          type: number
+          format: zto
+        - name: q75_time
+          title: Q3 Time
+          type: number
+          format: zto
+
+    - name: model_fit
+      title: Model Fit Statistics by Cause
+      type: Table
+      description: Model fit statistics for each cause-specific model
+      clearWith:
+        - elapsedtime
+        - outcome
+        - covariates
+        - cause_variable
+        - model_type
+      columns:
+        - name: cause
+          title: Cause
+          type: text
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+
+    - name: coefficients
+      title: Cause-Specific Hazard Ratios
+      type: Table
+      description: Parameter estimates for each cause-specific model
+      clearWith:
+        - elapsedtime
+        - outcome
+        - covariates
+        - cause_variable
+        - model_type
+        - include_se
+        - include_ci
+        - conf_level
+      columns:
+        - name: cause
+          title: Cause
+          type: text
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: hr
+          title: Hazard Ratio
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+          visible: (include_se)
+        - name: z_stat
+          title: Z
+          type: number
+          format: zto
+          visible: (include_se)
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (include_se)
+        - name: lower_ci
+          title: Lower CI
+          type: number
+          format: zto
+          visible: (include_ci)
+        - name: upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+          visible: (include_ci)
+
+    - name: cumulative_incidence_table
+      title: Cumulative Incidence Functions
+      type: Table
+      description: Cumulative incidence estimates by cause and time points
+      clearWith:
+        - elapsedtime
+        - outcome
+        - cause_variable
+        - cumulative_incidence
+      visible: (cumulative_incidence)
+      columns:
+        - name: time
+          title: Time
+          type: number
+          format: zto
+        - name: cause
+          title: Cause
+          type: text
+        - name: cumulative_incidence
+          title: Cumulative Incidence
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+        - name: lower_ci
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+
+    - name: model_comparison_table
+      title: Model Comparison Across Causes
+      type: Table
+      description: Comparison of model fit across different causes
+      clearWith:
+        - elapsedtime
+        - outcome
+        - covariates
+        - cause_variable
+        - model_type
+        - model_comparison
+      visible: (model_comparison)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: statistic
+          title: Test Statistic
+          type: number
+          format: zto
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: proportional_hazards_table
+      title: Proportional Hazards Tests
+      type: Table
+      description: Tests of proportional hazards assumption for each cause
+      clearWith:
+        - elapsedtime
+        - outcome
+        - covariates
+        - cause_variable
+        - proportional_hazards_test
+      visible: (proportional_hazards_test)
+      columns:
+        - name: cause
+          title: Cause
+          type: text
+        - name: variable
+          title: Variable
+          type: text
+        - name: rho
+          title: Correlation (ρ)
+          type: number
+          format: zto
+        - name: chi_square
+          title: χ²
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+
+    - name: cumulative_incidence_plot
+      title: Cumulative Incidence Functions
+      type: Image
+      description: Plot of cumulative incidence functions by cause
+      clearWith:
+        - elapsedtime
+        - outcome
+        - cause_variable
+        - plot_cumulative_incidence
+        - stratify_plots
+      visible: (plot_cumulative_incidence)
+      renderFun: .plot_cumulative_incidence
+
+    - name: hazards_plot
+      title: Cause-Specific Hazard Functions
+      type: Image
+      description: Plot of hazard functions by cause
+      clearWith:
+        - elapsedtime
+        - outcome
+        - covariates
+        - cause_variable
+        - model_type
+        - plot_hazards
+        - stratify_plots
+      visible: (plot_hazards)
+      renderFun: .plot_hazards
+
+    - name: diagnostics_plot
+      title: Diagnostic Plots
+      type: Image
+      description: Model diagnostic plots for cause-specific models
+      clearWith:
+        - elapsedtime
+        - outcome
+        - covariates
+        - cause_variable
+        - model_type
+        - plot_diagnostics
+      visible: (plot_diagnostics)
+      renderFun: .plot_diagnostics
+
+    - name: model_summary
+      title: Model Summary
+      type: Html
+      description: Comprehensive summary and interpretation of cause-specific hazards analysis
+      clearWith:
+        - elapsedtime
+        - outcome
+        - covariates
+        - cause_variable
+        - model_type

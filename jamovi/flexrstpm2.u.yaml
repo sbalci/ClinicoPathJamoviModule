@@ -1,0 +1,150 @@
+title: Flexible Parametric Models (Royston-Parmar)
+name: flexrstpm2
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Event Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+            itemDropBehaviour: insert
+      - type: TargetLayoutBox
+        label: Time-Varying Covariates (Optional)
+        children:
+          - type: VariablesListBox
+            name: time_varying_covariates
+            isTarget: true
+            itemDropBehaviour: insert
+      - type: TargetLayoutBox
+        label: Background Hazard (Optional)
+        children:
+          - type: VariablesListBox
+            name: bhazard
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Event Variable Options
+        style: list-inline
+        children:
+          - type: TextBox
+            name: outcomeLevel
+            format: string
+            label: Event Level
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: tvc_df
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Specifications
+        style: list-inline
+        children:
+          - type: ComboBox
+            name: scale
+            label: Model Scale
+          - type: ComboBox
+            name: link_function
+            label: Link Function
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Spline Configuration
+        style: list-inline
+        children:
+          - type: TextBox
+            name: knots
+            format: string
+            label: Knot Positions
+          - type: TextBox
+            name: boundary_knots
+            format: string
+            label: Boundary Knots
+          - type: TextBox
+            name: smooth_formula
+            format: string
+            label: Custom Formula
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: df
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Advanced Options
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: cure_fraction
+            label: Include Cure Fraction
+          - type: CheckBox
+            name: robust_se
+            label: Robust Standard Errors
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: show_model_summary
+            label: Show Model Summary
+          - type: CheckBox
+            name: show_coefficients_table
+            label: Show Coefficients Table
+          - type: CheckBox
+            name: show_survival_curves
+            label: Show Survival Curves
+          - type: CheckBox
+            name: show_hazard_curves
+            label: Show Hazard Curves
+          - type: CheckBox
+            name: show_time_varying_plots
+            label: Show Time-Varying Plots
+          - type: CheckBox
+            name: show_model_diagnostics
+            label: Show Model Diagnostics
+          - type: CheckBox
+            name: show_residuals
+            label: Show Residual Plots
+          - type: CheckBox
+            name: showSummaries
+            label: Analysis Summaries
+          - type: CheckBox
+            name: showExplanations
+            label: Method Explanations

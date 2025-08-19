@@ -1,0 +1,408 @@
+---
+name: mixedeffectscox
+title: Mixed-Effects Cox Models
+jrs: '1.1'
+
+items:
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      visible: (show_model_summary)
+      columns:
+        - name: term
+          title: ''
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: fixedEffects
+      title: Fixed Effects Coefficients
+      type: Table
+      visible: (show_fixed_effects)
+      columns:
+        - name: term
+          title: Term
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+        - name: z
+          title: z
+          type: number
+          format: zto
+        - name: pvalue
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: ciLower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: ciUpper
+          title: Upper CI
+          type: number
+          format: zto
+        - name: hazard_ratio
+          title: HR
+          type: number
+          format: zto
+        - name: hr_lower
+          title: HR Lower
+          type: number
+          format: zto
+        - name: hr_upper
+          title: HR Upper
+          type: number
+          format: zto
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: randomEffects
+      title: Random Effects and Variance Components
+      type: Table
+      visible: (show_random_effects)
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: variance
+          title: Variance
+          type: number
+          format: zto
+        - name: std_dev
+          title: Std Dev
+          type: number
+          format: zto
+        - name: proportion
+          title: Proportion of Total
+          type: number
+          format: zto,pc
+        - name: icc
+          title: ICC
+          type: number
+          format: zto
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: varianceComponents
+      title: Variance Components Tests
+      type: Table
+      visible: (show_random_effects && variance_components_test)
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: chi_square
+          title: Chi-square
+          type: number
+          format: zto
+        - name: df
+          title: df
+          type: integer
+        - name: pvalue
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: significance
+          title: Significance
+          type: text
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: randomEffectsPredictions
+      title: Random Effects Predictions (BLUPs)
+      type: Table
+      visible: (show_random_effects && random_effects_prediction)
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: blup
+          title: BLUP
+          type: number
+          format: zto
+        - name: se_blup
+          title: SE(BLUP)
+          type: number
+          format: zto
+        - name: pred_lower
+          title: Lower PI
+          type: number
+          format: zto
+        - name: pred_upper
+          title: Upper PI
+          type: number
+          format: zto
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: diagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (show_diagnostics)
+      columns:
+        - name: measure
+          title: Measure
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_comparison)
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: loglik
+          title: Log-Likelihood
+          type: number
+          format: zto
+        - name: aic
+          title: AIC
+          type: number
+          format: zto
+        - name: bic
+          title: BIC
+          type: number
+          format: zto
+        - name: lrt_statistic
+          title: LRT Statistic
+          type: number
+          format: zto
+        - name: lrt_pvalue
+          title: LRT p-value
+          type: number
+          format: zto,pvalue
+        - name: selected
+          title: Selected
+          type: text
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: convergenceInfo
+      title: Convergence Information
+      type: Table
+      visible: (show_model_summary)
+      columns:
+        - name: criterion
+          title: Criterion
+          type: text
+        - name: value
+          title: Value
+          type: text
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: hierarchicalStructure
+      title: Hierarchical Structure Analysis
+      type: Table
+      visible: (show_random_effects)
+      columns:
+        - name: level
+          title: Level
+          type: text
+        - name: groups
+          title: Number of Groups
+          type: integer
+        - name: observations
+          title: Observations per Group
+          type: text
+        - name: min_obs
+          title: Min Obs
+          type: integer
+        - name: max_obs
+          title: Max Obs
+          type: integer
+        - name: mean_obs
+          title: Mean Obs
+          type: number
+          format: zto
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: iccAnalysis
+      title: Intraclass Correlation Analysis
+      type: Table
+      visible: (show_random_effects)
+      columns:
+        - name: random_effect
+          title: Random Effect
+          type: text
+        - name: icc
+          title: ICC
+          type: number
+          format: zto
+        - name: icc_lower
+          title: ICC Lower
+          type: number
+          format: zto
+        - name: icc_upper
+          title: ICC Upper
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: residualPlots
+      title: Residual Diagnostic Plots
+      type: Image
+      width: 800
+      height: 600
+      visible: (show_residual_plots)
+      renderFun: .plotResiduals
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: randomEffectsPlots
+      title: Random Effects Distribution Plots
+      type: Image
+      width: 800
+      height: 600
+      visible: (show_random_effects_plots)
+      renderFun: .plotRandomEffects
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: survivalPlots
+      title: Survival Curves by Groups
+      type: Image
+      width: 800
+      height: 600
+      visible: (show_survival_plots)
+      renderFun: .plotSurvival
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: forestPlot
+      title: Forest Plot
+      type: Image
+      width: 800
+      height: 600
+      visible: (show_forest_plot)
+      renderFun: .plotForest
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: clusterAnalysisPlots
+      title: Cluster Analysis Plots
+      type: Image
+      width: 800
+      height: 600
+      visible: (show_random_effects_plots)
+      renderFun: .plotClusterAnalysis
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: summaryTable
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+      clearWith:
+        - elapsedtime
+        - outcome
+        - fixed_effects
+        - random_effects
+        - random_structure
+        - estimation_method
+
+    - name: methodExplanation
+      title: Method Explanation
+      type: Html
+      visible: (showExplanations)
+
+...

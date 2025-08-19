@@ -1,0 +1,340 @@
+---
+name: emfrailty
+title: EM-Algorithm Frailty Models
+menuGroup: ClinicoPath Survival
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Implements expectation-maximization (EM) algorithm based frailty models
+        for survival analysis. Provides efficient estimation of frailty distributions
+        and variance components in complex survival data with unobserved heterogeneity.
+        Supports multiple frailty distributions and convergence diagnostics.
+    R:
+        dontrun: false
+        usage: |
+            data('lung', package='survival')
+            
+            emfrailty(data = lung, 
+                     elapsedtime = 'time',
+                     outcome = 'status', 
+                     covariates = c('age', 'sex'),
+                     frailty_variable = 'inst',
+                     frailty_distribution = 'gamma',
+                     estimation_method = 'em',
+                     max_iterations = 100)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Survival time or follow-up duration variable. Should contain positive 
+            numeric values representing the time to event or censoring.
+
+    - name: outcome
+      title: Event Variable  
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable specifying whether the event of interest occurred.
+            Can be coded as 0/1, TRUE/FALSE, or factor levels.
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Predictor variables for the frailty model. Can include continuous variables,
+            factors, and interactions. Will be included as fixed effects in the model.
+
+    - name: frailty_variable
+      title: Frailty Variable
+      type: Variable
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Variable defining the frailty groups (clusters). Each unique value
+            represents a different frailty group sharing common unobserved risk factors.
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Specifies which level of the outcome variable represents the event of interest.
+            For numeric variables, typically '1'. For factors, specify the appropriate level name.
+
+    - name: frailty_distribution
+      title: Frailty Distribution
+      type: List
+      options:
+        - name: gamma
+          title: Gamma distribution
+        - name: lognormal  
+          title: Log-normal distribution
+        - name: inverse_gaussian
+          title: Inverse Gaussian distribution
+        - name: stable
+          title: Stable distribution
+      default: gamma
+      description:
+          R: >
+            Distribution assumed for the frailty terms. Gamma is most commonly used
+            and provides conjugate properties for efficient EM estimation.
+
+    - name: estimation_method
+      title: Estimation Method
+      type: List
+      options:
+        - name: em
+          title: Expectation-Maximization
+        - name: penalized_em
+          title: Penalized EM
+        - name: accelerated_em
+          title: Accelerated EM
+        - name: stochastic_em
+          title: Stochastic EM
+      default: em
+      description:
+          R: >
+            Method for parameter estimation. Standard EM is most robust, while
+            accelerated variants may converge faster for large datasets.
+
+    - name: baseline_hazard
+      title: Baseline Hazard
+      type: List
+      options:
+        - name: weibull
+          title: Weibull baseline
+        - name: exponential
+          title: Exponential baseline
+        - name: spline
+          title: Spline baseline
+        - name: nonparametric
+          title: Non-parametric baseline
+      default: weibull
+      description:
+          R: >
+            Specification for the baseline hazard function. Parametric forms provide
+            efficiency while non-parametric allows maximum flexibility.
+
+    - name: ties_method
+      title: Ties Method
+      type: List
+      options:
+        - name: breslow
+          title: Breslow approximation
+        - name: efron
+          title: Efron method
+        - name: exact
+          title: Exact method
+      default: breslow
+      description:
+          R: >
+            Method for handling tied event times. Breslow is fastest, Efron more accurate,
+            exact method most precise but computationally intensive.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for parameter confidence intervals and hypothesis tests.
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Number
+      min: 10
+      max: 1000
+      default: 100
+      description:
+          R: >
+            Maximum number of EM algorithm iterations before forced termination.
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      min: 1e-8
+      max: 1e-2
+      default: 1e-6
+      description:
+          R: >
+            Convergence tolerance for the EM algorithm. Smaller values require more
+            precise convergence but may increase computation time.
+
+    - name: em_acceleration
+      title: EM Acceleration
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable acceleration methods (SQUAREM, Anderson) to speed up EM convergence.
+            Recommended for large datasets or complex models.
+
+    - name: variance_estimation
+      title: Variance Estimation
+      type: List
+      options:
+        - name: observed_information
+          title: Observed Information Matrix
+        - name: louis_method
+          title: Louis Method
+        - name: bootstrap
+          title: Bootstrap
+        - name: profile_likelihood
+          title: Profile Likelihood
+      default: observed_information
+      description:
+          R: >
+            Method for estimating parameter variances and standard errors.
+            Observed information is most common, bootstrap most robust.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      min: 100
+      max: 2000
+      default: 500
+      description:
+          R: >
+            Number of bootstrap samples for variance estimation when bootstrap method is selected.
+
+    - name: frailty_prediction
+      title: Frailty Prediction
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compute empirical Bayes predictions of individual frailty values
+            with prediction intervals and shrinkage estimates.
+
+    - name: model_selection
+      title: Model Selection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform automatic model selection comparing different frailty distributions
+            and baseline hazard specifications using information criteria.
+
+    - name: diagnostic_plots
+      title: Diagnostic Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate comprehensive diagnostic plots including convergence traces,
+            residuals, frailty predictions, and model fit assessments.
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: Display comprehensive model summary with sample characteristics and convergence information.
+
+    - name: show_coefficients
+      title: Show Coefficients
+      type: Bool
+      default: true
+      description:
+          R: Display fixed effects coefficient estimates with confidence intervals and tests.
+
+    - name: show_frailty_analysis
+      title: Show Frailty Analysis
+      type: Bool
+      default: true
+      description:
+          R: Display frailty variance estimates, distribution parameters, and heterogeneity measures.
+
+    - name: show_convergence
+      title: Show Convergence
+      type: Bool
+      default: true
+      description:
+          R: Display EM algorithm convergence diagnostics and iteration history.
+
+    - name: show_diagnostics
+      title: Show Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: Display comprehensive model diagnostics including fit statistics and residual analysis.
+
+    - name: show_predictions
+      title: Show Predictions
+      type: Bool
+      default: true
+      description:
+          R: Display empirical Bayes frailty predictions with shrinkage analysis.
+
+    - name: show_comparison
+      title: Show Comparison
+      type: Bool
+      default: true
+      description:
+          R: Compare EM frailty model with standard Cox model and alternative specifications.
+
+    - name: show_convergence_plots
+      title: Show Convergence Plots
+      type: Bool
+      default: true
+      description:
+          R: Display EM algorithm convergence trace plots and diagnostic visualizations.
+
+    - name: show_frailty_plots
+      title: Show Frailty Plots
+      type: Bool
+      default: true
+      description:
+          R: Display frailty distribution plots and empirical Bayes prediction visualizations.
+
+    - name: show_residual_plots
+      title: Show Residual Plots
+      type: Bool
+      default: true
+      description:
+          R: Display residual diagnostic plots for model adequacy assessment.
+
+    - name: show_survival_plots
+      title: Show Survival Plots
+      type: Bool
+      default: true
+      description:
+          R: Display survival curves stratified by frailty groups and predictions.
+
+    - name: showSummaries
+      title: Explanatory Text
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate comprehensive explanatory text summarizing the analysis results,
+            methodology, and clinical interpretation guidelines.
+
+    - name: showExplanations
+      title: Method Explanation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Provide detailed explanations of the EM-algorithm frailty methodology,
+            assumptions, advantages, and interpretation guidelines.

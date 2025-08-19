@@ -1,0 +1,204 @@
+---
+name: stratifiedparametric
+title: Stratified Parametric Models
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      visible: (show_model_summary)
+
+    - name: coefficientsTable
+      title: Parameter Estimates by Strata
+      type: Table
+      visible: (show_coefficients)
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: lower_ci
+          title: Lower CI
+          type: number
+        - name: upper_ci
+          title: Upper CI
+          type: number
+        - name: z_value
+          title: z
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+
+    - name: stratificationTestTable
+      title: Stratification Effect Test
+      type: Table
+      visible: (show_stratification_test)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: test_statistic
+          title: Test Statistic
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: p-value
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: modelComparisonTable
+      title: Model Comparison Statistics
+      type: Table
+      visible: true
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: loglik
+          title: Log-likelihood
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: deviance
+          title: Deviance
+          type: number
+
+    - name: strataCharacteristicsTable
+      title: Strata Characteristics
+      type: Table
+      visible: true
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: n_total
+          title: Total
+          type: integer
+        - name: n_events
+          title: Events
+          type: integer
+        - name: event_rate
+          title: Event Rate (%)
+          type: number
+        - name: median_time
+          title: Median Time
+          type: number
+        - name: mean_time
+          title: Mean Time
+          type: number
+
+    - name: survivalPlot
+      title: Stratified Survival Curves
+      type: Image
+      visible: (show_survival_curves)
+      width: 800
+      height: 600
+      renderFun: .plot
+
+    - name: hazardPlot
+      title: Stratified Hazard Functions
+      type: Image
+      visible: (show_hazard_curves)
+      width: 800
+      height: 600
+      renderFun: .plotHazard
+
+    - name: comparisonPlot
+      title: Stratified vs Non-stratified Model
+      type: Image
+      visible: (show_comparison_plot)
+      width: 900
+      height: 600
+      renderFun: .plotComparison
+
+    - name: diagnosticPlots
+      title: Stratified Model Diagnostics
+      type: Image
+      visible: (show_diagnostics)
+      width: 1000
+      height: 700
+      renderFun: .plotDiagnostics
+
+    - name: residualAnalysisTable
+      title: Residual Analysis by Strata
+      type: Table
+      visible: (show_diagnostics)
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: residual_type
+          title: Residual Type
+          type: text
+        - name: mean_residual
+          title: Mean
+          type: number
+        - name: sd_residual
+          title: SD
+          type: number
+        - name: ks_test_p
+          title: KS Test p-value
+          type: number
+        - name: normality_assessment
+          title: Normality
+          type: text
+
+    - name: predictionTable
+      title: Predicted Values by Strata
+      type: Table
+      visible: true
+      columns:
+        - name: stratum
+          title: Stratum
+          type: text
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: survival_prob
+          title: Survival Probability
+          type: number
+        - name: hazard_rate
+          title: Hazard Rate
+          type: number
+        - name: lower_ci
+          title: Lower CI
+          type: number
+        - name: upper_ci
+          title: Upper CI
+          type: number
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)

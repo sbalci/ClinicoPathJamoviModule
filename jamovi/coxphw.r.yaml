@@ -1,0 +1,202 @@
+---
+name: coxphw
+title: Weighted Cox Regression
+jrs: '1.1'
+
+items:
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: term
+            title: ""
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: coefficients
+      title: Weighted Cox Coefficients
+      type: Table
+      visible: (show_coefficients)
+      columns:
+          - name: term
+            title: "Term"
+            type: text
+          - name: estimate
+            title: "Estimate"
+            type: number
+            format: zto
+          - name: se
+            title: "SE"
+            type: number
+            format: zto
+          - name: z
+            title: "z"
+            type: number
+            format: zto
+          - name: pvalue
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: ciLower
+            title: "Lower CI"
+            type: number
+            format: zto
+          - name: ciUpper
+            title: "Upper CI"
+            type: number
+            format: zto
+          - name: hazard_ratio
+            title: "HR"
+            type: number
+            format: zto
+          - name: hr_lower
+            title: "HR Lower"
+            type: number
+            format: zto
+          - name: hr_upper
+            title: "HR Upper"
+            type: number
+            format: zto
+
+    - name: weightAnalysis
+      title: Weight Distribution Analysis
+      type: Table
+      visible: (show_weights)
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: diagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (show_diagnostics)
+      columns:
+          - name: measure
+            title: "Measure"
+            type: text
+          - name: value
+            title: "Value"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_comparison)
+      columns:
+          - name: model
+            title: "Model"
+            type: text
+          - name: loglik
+            title: "Log-Likelihood"
+            type: number
+            format: zto
+          - name: aic
+            title: "AIC"
+            type: number
+            format: zto
+          - name: bic
+            title: "BIC"
+            type: number
+            format: zto
+          - name: concordance
+            title: "C-Index"
+            type: number
+            format: zto
+          - name: events
+            title: "Events"
+            type: integer
+          - name: weight_effect
+            title: "Weight Effect"
+            type: text
+
+    - name: convergenceInfo
+      title: Convergence Information
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: criterion
+            title: "Criterion"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: rareEventAnalysis
+      title: Rare Event Analysis
+      type: Table
+      visible: (show_weights)
+      columns:
+          - name: covariate
+            title: "Covariate"
+            type: text
+          - name: event_rate
+            title: "Event Rate"
+            type: number
+            format: zto,pc
+          - name: imbalance_ratio
+            title: "Imbalance Ratio"
+            type: number
+            format: zto
+          - name: weight_impact
+            title: "Weight Impact"
+            type: text
+
+    - name: weightPlots
+      title: Weight Distribution Plots
+      type: Image
+      visible: (show_weight_plots)
+      width: 800
+      height: 600
+
+    - name: residualPlots
+      title: Residual Diagnostic Plots
+      type: Image
+      visible: (show_residual_plots)
+      width: 800
+      height: 600
+
+    - name: survivalPlots
+      title: Survival Curves
+      type: Image
+      visible: (show_survival_plots)
+      width: 800
+      height: 600
+
+    - name: forestPlot
+      title: Forest Plot
+      type: Image
+      visible: (show_forest_plot)
+      width: 800
+      height: 600
+
+    - name: comparisonPlots
+      title: Model Comparison Plots
+      type: Image
+      visible: (show_comparison)
+      width: 800
+      height: 600
+
+    - name: summaryTable
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Method Explanation
+      type: Html
+      visible: (showExplanations)

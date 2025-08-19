@@ -1,7 +1,7 @@
 ---
 name: decisioncompare
 title: Compare Medical Decision Tests
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
 version: '0.0.3'
@@ -62,6 +62,7 @@ options:
     - name: test3
       title: Test 3
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
 
@@ -69,6 +70,7 @@ options:
       title: Positive Level
       type: Level
       variable: (test3)
+      default: NULL
 
     # Options
     - name: pp

@@ -1,0 +1,425 @@
+---
+name:  surveysurvival
+title: Survey-Weighted Survival Analysis
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - weights
+          - strata
+          - cluster
+          - design_type
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+
+    # Survey Design Summary
+    - name: designSummary
+      title: 'Survey Design Summary'
+      type: Html
+      visible: (design_summary)
+      clearWith:
+          - weights
+          - strata
+          - cluster
+          - design_type
+          - nest_clusters
+          - fpc
+
+    # Survey-Weighted Survival Analysis Results
+    - name: survivalAnalysis
+      title: 'Survey-Weighted Kaplan-Meier Analysis'
+      type: Html
+      visible: (km_weighted)
+      clearWith:
+          - km_weighted
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - weights
+          - strata
+          - cluster
+          - design_type
+          - explanatory
+          - fudate
+          - dxdate
+          - tint
+
+    # Survey-Weighted Cox Regression
+    - name: coxAnalysis
+      title: 'Survey-Weighted Cox Regression'
+      type: Html
+      visible: (cox_weighted)
+      clearWith:
+          - cox_weighted
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - weights
+          - strata
+          - cluster
+          - design_type
+          - robust_se
+          - fudate
+          - dxdate
+          - tint
+
+    # Population-Level Estimates
+    - name: populationEstimates
+      title: 'Population-Level Survival Estimates'
+      type: Html
+      visible: (population_totals)
+      clearWith:
+          - population_totals
+          - weights
+          - outcome
+          - outcomeLevel
+          - subpopulation
+
+    # Survey-Weighted Kaplan-Meier Plot
+    - name: kmPlot
+      title: 'Survey-Weighted Kaplan-Meier Plot'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .kmPlot
+      requiresData: true
+      visible: (km_plot)
+      clearWith:
+          - km_plot
+          - km_weighted
+          - endplot
+          - byplot
+          - ci95
+          - risktable
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - weights
+          - strata
+          - cluster
+          - fudate
+          - dxdate
+          - tint
+
+    # Survey Design Diagnostics Table
+    - name: designDiagnostics
+      title: 'Survey Design Diagnostics'
+      type: Table
+      visible: (design_summary)
+      rows: 0
+      columns:
+        - name: characteristic
+          title: "Design Characteristic"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: description
+          title: "Description"
+          type: text
+      clearWith:
+        - weights
+        - strata
+        - cluster
+        - design_type
+        - nest_clusters
+        - fpc
+
+    # Weighted Survival Summary Table
+    - name: weightedSurvivalTable
+      title: 'Survey-Weighted Survival Summary'
+      type: Table
+      visible: (km_weighted)
+      rows: 0
+      columns:
+        - name: strata
+          title: "Group"
+          type: text
+        - name: n_effective
+          title: "Effective N"
+          type: number
+          format: zto
+        - name: events
+          title: "Events"
+          type: integer
+        - name: median_survival
+          title: "Median Survival"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "Lower"
+          superTitle: "95% CI"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "Upper"
+          superTitle: "95% CI"
+          type: number
+          format: zto
+      clearWith:
+        - km_weighted
+        - ci_level
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - explanatory
+        - weights
+
+    # Cox Regression Coefficients Table
+    - name: coxCoefficients
+      title: 'Survey-Weighted Cox Regression Coefficients'
+      type: Table
+      visible: (cox_weighted)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: level
+          title: "Level"
+          type: text
+        - name: coef
+          title: "Coefficient"
+          type: number
+        - name: hr
+          title: "Hazard Ratio"
+          type: number
+        - name: se_robust
+          title: "Robust SE"
+          type: number
+        - name: z_stat
+          title: "Z-statistic"
+          type: number
+        - name: p_value
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: "Lower"
+          superTitle: "95% CI"
+          type: number
+        - name: ci_upper
+          title: "Upper"
+          superTitle: "95% CI"
+          type: number
+      clearWith:
+        - cox_weighted
+        - explanatory
+        - contexpl
+        - robust_se
+        - ci_level
+
+    # Population Totals Table
+    - name: populationTotalsTable
+      title: 'Population-Level Estimates'
+      type: Table
+      visible: (population_totals)
+      rows: 0
+      columns:
+        - name: estimate_type
+          title: "Estimate"
+          type: text
+        - name: total
+          title: "Population Total"
+          type: number
+          format: zto
+        - name: se
+          title: "Standard Error"
+          type: number
+        - name: ci_lower
+          title: "Lower"
+          superTitle: "95% CI"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "Upper"
+          superTitle: "95% CI"
+          type: number
+          format: zto
+        - name: cv_percent
+          title: "CV (%)"
+          type: number
+      clearWith:
+        - population_totals
+        - weights
+        - subpopulation
+
+    # Subpopulation Analysis Table
+    - name: subpopulationAnalysis
+      title: 'Subpopulation (Domain) Analysis'
+      type: Table
+      visible: (subpopulation)
+      rows: 0
+      columns:
+        - name: domain
+          title: "Subpopulation"
+          type: text
+        - name: n_effective
+          title: "Effective N"
+          type: number
+          format: zto
+        - name: events
+          title: "Events"
+          type: integer
+        - name: event_rate
+          title: "Event Rate"
+          type: number
+          format: proportion
+        - name: se
+          title: "SE"
+          type: number
+        - name: ci_lower
+          title: "Lower"
+          superTitle: "95% CI"
+          type: number
+          format: proportion
+        - name: ci_upper
+          title: "Upper"
+          superTitle: "95% CI"
+          type: number
+          format: proportion
+      clearWith:
+        - subpopulation
+        - weights
+        - outcome
+
+    # Model Fit Statistics
+    - name: modelFitStatistics
+      title: 'Survey-Weighted Model Fit Statistics'
+      type: Table
+      visible: (cox_weighted)
+      rows: 0
+      columns:
+        - name: statistic
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+        - name: df
+          title: "df"
+          type: integer
+        - name: p_value
+          title: "P-value"
+          type: number
+          format: zto,pvalue
+      clearWith:
+        - cox_weighted
+        - explanatory
+        - contexpl
+
+    # Survey Design Effects Summary
+    - name: designEffectsSummary
+      title: 'Design Effects Summary'
+      type: Html
+      visible: (design_summary)
+      clearWith:
+        - weights
+        - strata
+        - cluster
+        - design_type
+
+    # Analysis Summary (Natural Language)
+    - name: analysisSummary
+      title: 'Analysis Summary'
+      type: Html
+      visible: (showSummaries)
+      clearWith:
+        - km_weighted
+        - cox_weighted
+        - population_totals
+        - design_type
+
+    # Method Explanations
+    - name: methodExplanation
+      title: 'Survey-Weighted Survival Methods'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - km_weighted
+        - cox_weighted
+        - design_type
+        - robust_se
+
+    # Survey Design Methodology Explanation
+    - name: surveyDesignExplanation
+      title: 'Understanding Survey Design in Survival Analysis'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - design_type
+        - weights
+        - strata
+        - cluster
+
+    # Weighted Kaplan-Meier Explanation
+    - name: kmWeightedExplanation
+      title: 'Understanding Survey-Weighted Kaplan-Meier Estimation'
+      type: Html
+      visible: (km_weighted && showExplanations)
+      clearWith:
+        - km_weighted
+        - weights
+        - outcome
+
+    # Weighted Cox Regression Explanation
+    - name: coxWeightedExplanation
+      title: 'Understanding Survey-Weighted Cox Regression'
+      type: Html
+      visible: (cox_weighted && showExplanations)
+      clearWith:
+        - cox_weighted
+        - robust_se
+        - explanatory
+
+    # Population Inference Explanation
+    - name: populationInferenceExplanation
+      title: 'Understanding Population-Level Inference'
+      type: Html
+      visible: (population_totals && showExplanations)
+      clearWith:
+        - population_totals
+        - weights
+        - design_type
+
+    # Time Variables Output
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+      varTitle: '`Calculated Time in Survey Survival Function - from ${ dxdate } to { fudate }`'
+      varDescription: Calculated Time from given Dates in Survey-Weighted Survival Analysis
+      clearWith:
+          - tint
+          - dxdate
+          - fudate
+
+    # Redefined Outcome Output
+    - name: outcomeredefined
+      title: Add Redefined Outcome to Data
+      type: Output
+      varTitle: '`Redefined Outcome in Survey Survival Function - from ${ outcome }`'
+      varDescription: Redefined Outcome for Survey-Weighted Survival Analysis
+      clearWith:
+          - outcome
+          - outcomeLevel
+
+refs:
+    - survey
+    - survival
+    - survminer
+    - ClinicoPathJamoviModule
+
+...

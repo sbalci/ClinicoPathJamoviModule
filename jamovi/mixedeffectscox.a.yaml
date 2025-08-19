@@ -1,0 +1,339 @@
+---
+name: mixedeffectscox
+title: Mixed-Effects Cox Models
+menuGroup: ClinicoPath Survival
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Implements mixed-effects Cox proportional hazards models for hierarchical 
+        survival data with random effects. Accounts for clustering, repeated 
+        measurements, and unobserved heterogeneity using the coxme framework for 
+        multi-level survival analysis in clinical research.
+    R:
+        dontrun: false
+        usage: |
+            # Mixed-effects Cox model with random intercept
+            mixedeffectscox(
+                data = hierarchical_data,
+                elapsedtime = "time",
+                outcome = "status", 
+                outcomeLevel = "1",
+                fixed_effects = c("age", "treatment"),
+                random_effects = c("hospital"),
+                random_structure = "random_intercept"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Survival Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Survival time or follow-up duration variable
+
+    - name: outcome
+      title: Event Status
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+    - name: fixed_effects
+      title: Fixed Effects
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Fixed effect covariates for the Cox model
+
+    - name: random_effects
+      title: Random Effects
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Random effect grouping variables (clusters, subjects)
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of outcome variable indicating event occurrence
+
+    - name: random_structure
+      title: Random Structure
+      type: List
+      options:
+        - name: random_intercept
+          title: Random Intercept
+        - name: random_slope
+          title: Random Slope
+        - name: random_intercept_slope
+          title: Random Intercept + Slope
+        - name: nested_random
+          title: Nested Random Effects
+        - name: crossed_random
+          title: Crossed Random Effects
+      default: random_intercept
+      description:
+          R: >
+            Structure of random effects in the model
+
+    - name: correlation_structure
+      title: Correlation Structure
+      type: List
+      options:
+        - name: independent
+          title: Independent
+        - name: exchangeable
+          title: Exchangeable
+        - name: ar1
+          title: AR(1)
+        - name: unstructured
+          title: Unstructured
+      default: independent
+      description:
+          R: >
+            Correlation structure for random effects
+
+    - name: variance_structure
+      title: Variance Structure
+      type: List
+      options:
+        - name: homoscedastic
+          title: Homoscedastic
+        - name: heteroscedastic_group
+          title: Heteroscedastic by Group
+        - name: power_variance
+          title: Power Variance Function
+        - name: exponential_variance
+          title: Exponential Variance Function
+      default: homoscedastic
+      description:
+          R: >
+            Variance structure specification
+
+    - name: estimation_method
+      title: Estimation Method
+      type: List
+      options:
+        - name: reml
+          title: Restricted Maximum Likelihood (REML)
+        - name: ml
+          title: Maximum Likelihood (ML)
+        - name: penalized
+          title: Penalized Likelihood
+        - name: laplace
+          title: Laplace Approximation
+      default: reml
+      description:
+          R: >
+            Method for estimating variance components
+
+    - name: sparse_matrix
+      title: Sparse Matrix Methods
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use sparse matrix methods for large datasets
+
+    - name: ties_method
+      title: Tied Events Method
+      type: List
+      options:
+        - name: efron
+          title: Efron
+        - name: breslow
+          title: Breslow
+        - name: exact
+          title: Exact
+      default: efron
+      description:
+          R: >
+            Method for handling tied event times
+
+    - name: offset_variable
+      title: Offset Variable
+      type: Variable
+      permitted: [numeric]
+      description:
+          R: >
+            Optional offset variable for the model
+
+    - name: weights_variable
+      title: Weights Variable
+      type: Variable
+      permitted: [numeric]
+      description:
+          R: >
+            Optional case weights variable
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for intervals
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Number
+      min: 10
+      max: 1000
+      default: 100
+      description:
+          R: >
+            Maximum number of iterations
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      min: 1e-8
+      max: 0.01
+      default: 0.000001
+      description:
+          R: >
+            Convergence tolerance for estimation
+
+    - name: random_effects_prediction
+      title: Random Effects Prediction
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compute and display random effects predictions (BLUPs)
+
+    - name: variance_components_test
+      title: Test Variance Components
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test significance of variance components
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compute bootstrap confidence intervals
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Number
+      min: 100
+      max: 2000
+      default: 500
+      description:
+          R: >
+            Number of bootstrap samples
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model summary
+
+    - name: show_fixed_effects
+      title: Show Fixed Effects
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display fixed effects coefficients table
+
+    - name: show_random_effects
+      title: Show Random Effects
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display random effects and variance components
+
+    - name: show_diagnostics
+      title: Show Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model diagnostics
+
+    - name: show_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare mixed-effects vs standard Cox models
+
+    - name: show_residual_plots
+      title: Show Residual Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display residual diagnostic plots
+
+    - name: show_random_effects_plots
+      title: Show Random Effects Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display random effects distribution plots
+
+    - name: show_survival_plots
+      title: Show Survival Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display survival curves by groups
+
+    - name: show_forest_plot
+      title: Show Forest Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display forest plot of hazard ratios
+
+    - name: showSummaries
+      title: Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries
+
+    - name: showExplanations
+      title: Explanations  
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations
+
+...

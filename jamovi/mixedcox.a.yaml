@@ -1,0 +1,457 @@
+---
+name:  mixedcox
+title: Mixed-Effects Cox Regression
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Cox models with random effects for clustered data'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs Cox proportional hazards regression with random effects for 
+        clustered or hierarchical survival data. This method accounts for 
+        correlation within clusters (e.g., patients within hospitals, multiple 
+        events per patient) using mixed-effects modeling. The random effects 
+        capture cluster-specific variation while estimating population-level 
+        fixed effects.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: Patients clustered within hospitals
+            library(survival)
+            library(coxme)
+            
+            mixedcox(
+                data = hospital_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                fixed_effects = c("age", "sex", "treatment"),
+                cluster_var = "hospital_id",
+                random_effects = "intercept"
+            )
+            
+            # Example 2: Multiple tumors per patient
+            mixedcox(
+                data = tumor_data,
+                elapsedtime = "survival_time",
+                outcome = "recurrence",
+                outcomeLevel = "Yes",
+                fixed_effects = c("tumor_size", "grade", "stage"),
+                continuous_effects = c("age", "biomarker_level"),
+                cluster_var = "patient_id",
+                random_effects = "slope",
+                random_slope_var = "treatment"
+            )
+
+options:
+
+# Data ----
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The dataset for analysis, provided as a data frame. Should contain
+            survival variables, fixed effects, and clustering variables.
+
+# Time Variables ----
+
+    - name: elapsedtime
+      title: 'Time Elapsed'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+        R: >
+          The numeric variable representing follow-up time until the event or censoring.
+
+    - name: tint
+      title: Using Dates to Calculate Survival Time
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, survival time will be calculated from diagnosis and follow-up dates.
+
+    - name: dxdate
+      title: 'Diagnosis Date'
+      type: Variable
+      default: NULL
+      description:
+        R: >
+          Date of diagnosis or start of follow-up. Required if tint = true.
+
+    - name: fudate
+      title: 'Follow-up Date'
+      type: Variable
+      default: NULL
+      description:
+        R: >
+          Follow-up date or date of last observation. Required if tint = true.
+
+    - name: timetypedata
+      title: 'Time Type in Data'
+      type: List
+      options:
+        - title: 'Year-Month-Day'
+          name: ymd
+        - title: 'Month-Day-Year'
+          name: mdy
+        - title: 'Day-Month-Year'
+          name: dmy
+      default: ymd
+      description:
+        R: >
+          Specifies the format of date variables in the input data.
+
+    - name: timetypeoutput
+      title: Time Type in Output
+      type: List
+      options:
+        - title: days
+          name: days
+        - title: weeks
+          name: weeks
+        - title: months
+          name: months
+        - title: years
+          name: years
+      default: months
+      description:
+        R: >
+          The units in which survival time is reported in the output.
+
+# Outcome Variables ----
+
+    - name: outcome
+      title: 'Outcome'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      default: NULL
+      description:
+        R: >
+          The outcome variable indicating event status (e.g., death, recurrence).
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+      description:
+        R: >
+          The level of outcome considered as the event.
+
+# Fixed Effects ----
+
+    - name: fixed_effects
+      title: Fixed Effects (Categorical)
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+        R: >
+          Categorical variables for fixed effects in the mixed-effects model.
+
+    - name: continuous_effects
+      title: Fixed Effects (Continuous)
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+        R: >
+          Continuous variables for fixed effects in the mixed-effects model.
+
+# Random Effects and Clustering ----
+
+    - name: cluster_var
+      title: 'Clustering Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+        R: >
+          Variable defining clusters (e.g., hospital, patient, family).
+          Observations within the same cluster are assumed correlated.
+
+    - name: random_effects
+      title: 'Random Effects Type'
+      type: List
+      options:
+        - title: Random Intercept Only
+          name: intercept
+        - title: Random Slope Only
+          name: slope
+        - title: Random Intercept and Slope
+          name: both
+      default: intercept
+      description:
+        R: >
+          Type of random effects to include in the model.
+
+    - name: random_slope_var
+      title: 'Random Slope Variable'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      default: NULL
+      description:
+        R: >
+          Variable for random slopes when random_effects includes slopes.
+
+    - name: nested_clustering
+      title: 'Nested Clustering'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Whether to model nested clustering structure (e.g., patients within hospitals).
+
+    - name: nested_cluster_var
+      title: 'Nested Cluster Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+        R: >
+          Higher-level clustering variable for nested structures.
+
+# Model Options ----
+
+    - name: correlation_structure
+      title: 'Correlation Structure'
+      type: List
+      options:
+        - title: Unstructured
+          name: unstructured
+        - title: Compound Symmetry
+          name: compound_symmetry
+        - title: AR(1)
+          name: ar1
+      default: unstructured
+      description:
+        R: >
+          Correlation structure for random effects.
+
+    - name: sparse_matrix
+      title: 'Use Sparse Matrix Methods'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Use sparse matrix methods for computational efficiency with large datasets.
+
+    - name: optimization_method
+      title: 'Optimization Method'
+      type: List
+      options:
+        - title: Penalized Likelihood
+          name: penalized
+        - title: Laplace Approximation
+          name: laplace
+        - title: Adaptive Gaussian Quadrature
+          name: agq
+      default: penalized
+      description:
+        R: >
+          Method for optimizing the mixed-effects model likelihood.
+
+# Model Assessment ----
+
+    - name: likelihood_ratio_test
+      title: 'Likelihood Ratio Test'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Perform likelihood ratio test comparing mixed-effects vs standard Cox model.
+
+    - name: random_effects_significance
+      title: 'Test Random Effects Significance'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Test significance of random effects using appropriate methods.
+
+    - name: icc_calculation
+      title: 'Calculate Intracluster Correlation'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Calculate intracluster correlation coefficient (ICC).
+
+# Model Diagnostics ----
+
+    - name: residual_analysis
+      title: 'Residual Analysis'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform residual analysis for mixed-effects Cox model.
+
+    - name: influence_diagnostics
+      title: 'Influence Diagnostics'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Calculate influence diagnostics for clusters and observations.
+
+    - name: random_effects_prediction
+      title: 'Predict Random Effects'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Predict random effects (BLUPs) for each cluster.
+
+# Plotting Options ----
+
+    - name: fixed_effects_plot
+      title: 'Fixed Effects Forest Plot'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Generate forest plot for fixed effects coefficients.
+
+    - name: random_effects_plot
+      title: 'Random Effects Plot'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Generate plots for random effects distribution.
+
+    - name: cluster_survival_plot
+      title: 'Cluster-Specific Survival Curves'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Generate survival curves for selected clusters.
+
+    - name: n_clusters_plot
+      title: 'Number of Clusters to Plot'
+      type: Integer
+      min: 1
+      max: 20
+      default: 5
+      description:
+        R: >
+          Number of clusters to display in cluster-specific plots.
+
+# Advanced Options ----
+
+    - name: variance_components
+      title: 'Estimate Variance Components'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Estimate and display variance components for random effects.
+
+    - name: confidence_intervals
+      title: 'Confidence Intervals'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Calculate confidence intervals for fixed and random effects.
+
+    - name: bootstrap_variance
+      title: 'Bootstrap Variance Estimation'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Use bootstrap methods for variance estimation.
+
+    - name: bootstrap_samples
+      title: 'Bootstrap Samples'
+      type: Integer
+      min: 100
+      max: 1000
+      default: 500
+      description:
+        R: >
+          Number of bootstrap samples for variance estimation.
+
+# Output Options ----
+
+    - name: show_fixed_effects
+      title: 'Show Fixed Effects Table'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Display table of fixed effects estimates.
+
+    - name: show_random_effects
+      title: 'Show Random Effects Summary'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Display summary of random effects variance components.
+
+    - name: show_model_comparison
+      title: 'Show Model Comparison'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Display comparison between mixed-effects and standard Cox models.
+
+    - name: show_cluster_summary
+      title: 'Show Cluster Summary'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display summary statistics by cluster.
+
+    - name: showSummaries
+      title: "Show Natural Language Summaries"
+      type: Bool
+      default: false
+      description: >-
+        Display natural language summaries alongside tables and plots for
+        interpretation of mixed-effects Cox regression results.
+
+    - name: showExplanations
+      title: "Show Analysis Explanations"
+      type: Bool
+      default: false
+      description: >-
+        Display detailed explanations of mixed-effects Cox regression methods
+        and interpretation guidelines.
+
+# Output Variables ----
+
+    - name: addClusterEffects
+      title: Add Cluster Effects to Data
+      type: Bool
+      default: false
+      description:
+        R: >
+          Add predicted random effects (BLUPs) as new variables to dataset.
+
+    - name: addFittedValues
+      title: Add Fitted Values to Data
+      type: Bool
+      default: false
+      description:
+        R: >
+          Add fitted values from mixed-effects model to dataset.
+
+...

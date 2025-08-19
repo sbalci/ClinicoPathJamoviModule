@@ -21,7 +21,8 @@ bayesdca(
   bootstrapReps = 2000,
   calculateEVPI = FALSE,
   nDraws = 2000,
-  directionIndicator = ">="
+  directionIndicator = ">=",
+  calculateIC = FALSE
 )
 }
 \arguments{
@@ -66,6 +67,9 @@ intervals.}
 
 \item{directionIndicator}{Direction of classification relative to the
 cutpoint. Use '>=' when higher values predict positive outcomes.}
+
+\item{calculateIC}{Calculate model comparison metrics (DIC, WAIC) for
+Bayesian analysis.}
 }
 \value{
 A results object containing:
@@ -76,6 +80,7 @@ A results object containing:
 \code{results$modelResults} \tab \tab \tab \tab \tab an array of tables \cr
 \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$evpiTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$mainPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$deltaPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$probPlot} \tab \tab \tab \tab \tab an image \cr

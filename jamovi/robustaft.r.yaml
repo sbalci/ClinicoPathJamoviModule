@@ -1,0 +1,222 @@
+---
+name: robustaft
+title: Robust AFT Models
+jrs: '1.1'
+
+items:
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: term
+            title: ""
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: coefficients
+      title: Robust AFT Coefficients
+      type: Table
+      visible: (show_coefficients)
+      columns:
+          - name: term
+            title: "Term"
+            type: text
+          - name: estimate
+            title: "Estimate"
+            type: number
+            format: zto
+          - name: robust_se
+            title: "Robust SE"
+            type: number
+            format: zto
+          - name: z
+            title: "z"
+            type: number
+            format: zto
+          - name: pvalue
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: ciLower
+            title: "Lower CI"
+            type: number
+            format: zto
+          - name: ciUpper
+            title: "Upper CI"
+            type: number
+            format: zto
+          - name: acceleration_factor
+            title: "AF"
+            type: number
+            format: zto
+          - name: af_lower
+            title: "AF Lower"
+            type: number
+            format: zto
+          - name: af_upper
+            title: "AF Upper"
+            type: number
+            format: zto
+
+    - name: outlierAnalysis
+      title: Outlier Detection
+      type: Table
+      visible: (show_outliers)
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: diagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (show_diagnostics)
+      columns:
+          - name: measure
+            title: "Measure"
+            type: text
+          - name: robust_value
+            title: "Robust Value"
+            type: number
+            format: zto
+          - name: standard_value
+            title: "Standard Value"
+            type: number
+            format: zto
+          - name: interpretation
+            title: "Interpretation"
+            type: text
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_comparison)
+      columns:
+          - name: model
+            title: "Model"
+            type: text
+          - name: loglik
+            title: "Log-Likelihood"
+            type: number
+            format: zto
+          - name: aic
+            title: "AIC"
+            type: number
+            format: zto
+          - name: bic
+            title: "BIC"
+            type: number
+            format: zto
+          - name: efficiency
+            title: "Efficiency"
+            type: number
+            format: zto,pc
+          - name: breakdown_point
+            title: "Breakdown Point"
+            type: number
+            format: zto,pc
+
+    - name: robustnessInfo
+      title: Robustness Information
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: criterion
+            title: "Criterion"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: scaleEstimates
+      title: Scale Parameter Estimates
+      type: Table
+      visible: (show_coefficients)
+      columns:
+          - name: parameter
+            title: "Parameter"
+            type: text
+          - name: robust_estimate
+            title: "Robust Estimate"
+            type: number
+            format: zto
+          - name: standard_estimate
+            title: "Standard Estimate"
+            type: number
+            format: zto
+          - name: relative_efficiency
+            title: "Relative Efficiency"
+            type: number
+            format: zto,pc
+
+    - name: outlierTable
+      title: Identified Outliers
+      type: Table
+      visible: (show_outliers)
+      columns:
+          - name: observation
+            title: "Observation"
+            type: integer
+          - name: residual
+            title: "Residual"
+            type: number
+            format: zto
+          - name: weight
+            title: "Weight"
+            type: number
+            format: zto
+          - name: influence
+            title: "Influence"
+            type: number
+            format: zto
+          - name: outlier_type
+            title: "Outlier Type"
+            type: text
+
+    - name: residualPlots
+      title: Residual Diagnostic Plots
+      type: Image
+      visible: (show_residual_plots)
+      width: 800
+      height: 600
+
+    - name: outlierPlots
+      title: Outlier Identification Plots
+      type: Image
+      visible: (show_outlier_plots)
+      width: 800
+      height: 600
+
+    - name: survivalPlots
+      title: Survival Curves
+      type: Image
+      visible: (show_survival_plots)
+      width: 800
+      height: 600
+
+    - name: qqPlots
+      title: Q-Q Plots
+      type: Image
+      visible: (show_qq_plots)
+      width: 800
+      height: 600
+
+    - name: summaryTable
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Method Explanation
+      type: Html
+      visible: (showExplanations)

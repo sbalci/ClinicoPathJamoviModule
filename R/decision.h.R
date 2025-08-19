@@ -113,9 +113,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
+        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
         cTable = function() private$.items[["cTable"]],
         nTable = function() private$.items[["nTable"]],
         ratioTable = function() private$.items[["ratioTable"]],
+        missingDataSummary = function() private$.items[["missingDataSummary"]],
         epirTable_ratio = function() private$.items[["epirTable_ratio"]],
         epirTable_number = function() private$.items[["epirTable_number"]],
         plot1 = function() private$.items[["plot1"]]),
@@ -139,6 +141,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="text2",
                 title="Original Data",
                 visible="(od)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalInterpretation",
+                title="Clinical Interpretation Guide",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable",
@@ -265,6 +272,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "pp",
                     "pprob")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="missingDataSummary",
+                title="Data Quality Summary",
+                visible="(od)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_ratio",
@@ -376,29 +388,33 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'}
 #' @param data The data as a data frame. The data frame should contain the
 #'   variables specified in the 'variables' option.
-#' @param gold The golden standard variable.
-#' @param goldPositive The positive level of the golden standard variable.
-#' @param newtest The new test variable.
-#' @param testPositive The positive level of the new test variable.
-#' @param pp Boolean selection whether to show prior probability. Default is
-#'   'false'.
-#' @param pprob Prior probability (disease prevalence in the community).
-#'   Requires a value between 0.001 and 0.999, default 0.300.
-#' @param od Boolean selection whether to show frequency table. Default is
-#'   'false'.
-#' @param fnote Boolean selection whether to show footnotes. Default is
-#'   'false'.
-#' @param ci Boolean selection whether to show 95\% confidence intervals.
-#'   Default is 'false'.
-#' @param fagan Boolean selection whether to show Fagan Nomogram. Default is
-#'   'false'.
+#' @param gold The gold standard reference variable representing true disease
+#'   status.
+#' @param goldPositive The level indicating presence of disease in the gold
+#'   standard variable.
+#' @param newtest The diagnostic test variable being evaluated for
+#'   performance.
+#' @param testPositive The level representing a positive result for the test
+#'   under evaluation.
+#' @param pp Boolean selection whether to use known population prevalence
+#'   instead of study prevalence.
+#' @param pprob Population disease prevalence as a proportion between 0.001
+#'   and 0.999.
+#' @param od Boolean selection whether to show original data frequency tables.
+#' @param fnote Boolean selection whether to show detailed explanatory
+#'   footnotes.
+#' @param ci Boolean selection whether to calculate and display 95\%
+#'   confidence intervals.
+#' @param fagan Boolean selection whether to generate a Fagan nomogram plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$nTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratioTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$missingDataSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$epirTable_ratio} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable_number} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr

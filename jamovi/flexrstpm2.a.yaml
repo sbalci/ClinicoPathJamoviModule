@@ -1,0 +1,293 @@
+---
+name:  flexrstpm2
+title: Flexible Parametric Models (Royston-Parmar)
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Flexible parametric survival models with splines'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Implements Royston-Parmar flexible parametric survival models using restricted
+        cubic splines to model the baseline log cumulative hazard function. This approach
+        provides a flexible alternative to standard parametric models by allowing
+        non-monotonic hazard functions while maintaining the advantages of parametric
+        modeling including smooth survival curves, extrapolation capability, and
+        direct modeling of covariate effects on survival time.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: Basic flexible parametric model
+            library(rstpm2)
+            library(survival)
+            
+            flexrstpm2(
+                data = breast_cancer_data,
+                elapsedtime = "rectime",
+                outcome = "censrec",
+                outcomeLevel = "1",
+                covariates = c("hormon", "age", "size"),
+                df = 4,
+                scale = "hazard"
+            )
+            
+            # Example 2: Time-varying effects with spline interactions
+            flexrstpm2(
+                data = colon_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                covariates = c("rx", "age", "nodes"),
+                time_varying_covariates = c("rx"),
+                df = 5,
+                tvc_df = 3,
+                scale = "odds",
+                show_time_varying_plots = TRUE
+            )
+
+options:
+
+# Data ----
+  - name: data
+    type: Data
+    description:
+        R: the data as a data frame
+
+# Variables ----
+  - name: elapsedtime
+    title: Time Variable
+    type: Variable
+    suggested:
+        - continuous
+    permitted:
+        - numeric
+    description:
+        R: >
+          Survival time or follow-up duration variable
+
+  - name: outcome
+    title: Event Variable
+    type: Variable
+    suggested:
+        - nominal
+        - ordinal
+    permitted:
+        - factor
+        - numeric
+    description:
+        R: >
+          Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+  - name: covariates
+    title: Covariates
+    type: Variables
+    suggested:
+        - continuous
+        - nominal
+        - ordinal
+    permitted:
+        - numeric
+        - factor
+    description:
+        R: >
+          Covariate variables for flexible parametric modeling
+
+# Model Specifications ----
+  - name: outcomeLevel
+    title: Event Level
+    type: String
+    default: '1'
+    description:
+        R: >
+          Level of outcome variable indicating event occurrence
+
+  - name: scale
+    title: Model Scale
+    type: List
+    options:
+        - name: hazard
+          title: "Proportional Hazards"
+        - name: odds
+          title: "Proportional Odds"
+        - name: normal
+          title: "Probit (Normal)"
+    default: hazard
+    description:
+        R: >
+          Scale for the flexible parametric model
+
+  - name: df
+    title: Degrees of Freedom
+    type: Integer
+    min: 1
+    max: 10
+    default: 4
+    description:
+        R: >
+          Degrees of freedom for baseline spline function
+
+  - name: knots
+    title: Knot Positions
+    type: String
+    default: ''
+    description:
+        R: >
+          Comma-separated knot positions (optional, overrides df)
+
+  - name: boundary_knots
+    title: Boundary Knots
+    type: String
+    default: ''
+    description:
+        R: >
+          Comma-separated boundary knot positions (optional)
+
+# Time-Varying Effects ----
+  - name: time_varying_covariates
+    title: Time-Varying Covariates
+    type: Variables
+    suggested:
+        - continuous
+        - nominal
+        - ordinal
+    permitted:
+        - numeric
+        - factor
+    description:
+        R: >
+          Covariates with time-varying effects (spline interactions)
+
+  - name: tvc_df
+    title: Time-Varying Effect DF
+    type: Integer
+    min: 1
+    max: 6
+    default: 3
+    description:
+        R: >
+          Degrees of freedom for time-varying covariate effects
+
+  - name: cure_fraction
+    title: Cure Fraction
+    type: Bool
+    default: false
+    description:
+        R: >
+          Include cure fraction in the model
+
+  - name: bhazard
+    title: Background Hazard Variable
+    type: Variable
+    suggested:
+        - continuous
+    permitted:
+        - numeric
+    description:
+        R: >
+          Background hazard variable for relative survival analysis
+
+# Advanced Options ----
+  - name: link_function
+    title: Link Function
+    type: List
+    options:
+        - name: log
+          title: "Log"
+        - name: identity
+          title: "Identity"
+        - name: sqrt
+          title: "Square Root"
+    default: log
+    description:
+        R: >
+          Link function for baseline transformation
+
+  - name: smooth_formula
+    title: Custom Smooth Formula
+    type: String
+    default: ''
+    description:
+        R: >
+          Custom smoothing formula for advanced specifications
+
+  - name: robust_se
+    title: Robust Standard Errors
+    type: Bool
+    default: false
+    description:
+        R: >
+          Use robust sandwich estimator for standard errors
+
+# Display Options ----
+  - name: show_model_summary
+    title: Show Model Summary
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display comprehensive model summary
+
+  - name: show_coefficients_table
+    title: Show Coefficients Table
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display table of model coefficients
+
+  - name: show_survival_curves
+    title: Show Survival Curves
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display fitted survival curves
+
+  - name: show_hazard_curves
+    title: Show Hazard Curves
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display fitted hazard functions
+
+  - name: show_time_varying_plots
+    title: Show Time-Varying Effect Plots
+    type: Bool
+    default: false
+    description:
+        R: >
+          Display time-varying covariate effect plots
+
+  - name: show_model_diagnostics
+    title: Show Model Diagnostics
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display model diagnostic plots
+
+  - name: show_residuals
+    title: Show Residual Plots
+    type: Bool
+    default: false
+    description:
+        R: >
+          Display residual analysis plots
+
+  - name: showSummaries
+    title: Analysis Summaries
+    type: Bool
+    default: false
+    description:
+        R: >
+          Generate natural language summaries of results
+
+  - name: showExplanations
+    title: Method Explanations
+    type: Bool
+    default: false
+    description:
+        R: >
+          Show detailed methodology explanations

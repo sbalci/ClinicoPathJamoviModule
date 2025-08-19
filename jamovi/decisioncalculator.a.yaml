@@ -1,7 +1,7 @@
 ---
 name:  decisioncalculator
 title: Medical Decision Calculator
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
 version: '0.0.3'
@@ -42,29 +42,55 @@ description:
 
 options:
     - name: TP
-      title: 'True Positive ='
+      title: 'True Positive (TP)'
       type: Number
       default: 90
+      description:
+          ui: >
+            Number of cases correctly identified as positive (diseased) by the test.
+          R: >
+            True Positive count: cases with disease that tested positive.
 
     - name: TN
-      title: 'True Negative ='
+      title: 'True Negative (TN)'
       type: Number
       default: 80
+      description:
+          ui: >
+            Number of cases correctly identified as negative (healthy) by the test.
+          R: >
+            True Negative count: cases without disease that tested negative.
 
     - name: FP
-      title: 'False Positive ='
+      title: 'False Positive (FP)'
       type: Number
       default: 30
+      description:
+          ui: >
+            Number of cases incorrectly identified as positive (healthy subjects that tested positive).
+          R: >
+            False Positive count: cases without disease that tested positive.
 
     - name: FN
-      title: 'False Negative ='
+      title: 'False Negative (FN)'
       type: Number
       default: 20
+      description:
+          ui: >
+            Number of cases incorrectly identified as negative (diseased subjects that tested negative).
+          R: >
+            False Negative count: cases with disease that tested negative.
 
     - name: pp
-      title: Prior Probability (prevalence)
+      title: Use Known Population Prevalence
       type: Bool
       default: false
+      description:
+          ui: >
+            Use known disease prevalence from population data instead of study prevalence.
+            Enable this when your study sample may not represent the target population.
+          R: >
+            Boolean selection whether to use known population prevalence.
 
 
 
@@ -85,31 +111,60 @@ options:
 
 
     - name: fnote
-      title: Show Footnote
+      title: Show Explanatory Footnotes
       type: Bool
       default: false
+      description:
+          ui: >
+            Add detailed explanatory footnotes to all tables with clinical interpretation guidance.
+            Helpful for understanding what each statistic means.
+          R: >
+            Boolean selection whether to show detailed explanatory footnotes.
 
     - name: ci
-      title: 'Show 95% CI'
+      title: '95% Confidence Intervals'
       type: Bool
       default: false
+      description:
+          ui: >
+            Calculate and display 95% confidence intervals for all diagnostic statistics.
+            Provides uncertainty estimates around point estimates.
+          R: >
+            Boolean selection whether to calculate 95% confidence intervals.
 
 
     - name: fagan
-      title: 'Fagan Nomogram'
+      title: 'Fagan Nomogram Plot'
       type: Bool
       default: false
+      description:
+          ui: >
+            Generate a Fagan nomogram for visual interpretation of test results.
+            Shows how test results change the probability of disease.
+          R: >
+            Boolean selection whether to generate a Fagan nomogram plot.
       
     # Multiple cut-off evaluation (DiagROC inspired)
     - name: multiplecuts
       title: 'Multiple Cut-off Evaluation'
       type: Bool
       default: false
+      description:
+          ui: >
+            Compare multiple diagnostic cut-off scenarios to identify optimal thresholds.
+            Useful for evaluating different test interpretation criteria.
+          R: >
+            Boolean selection whether to evaluate multiple cut-off scenarios.
       
     - name: cutoff1
       title: 'Cut-off Scenario 1 Name'
       type: String
       default: 'Conservative'
+      description:
+          ui: >
+            Descriptive name for the first cut-off scenario (e.g., 'Conservative', 'Sensitive').
+          R: >
+            Name identifier for cut-off scenario 1.
       
     - name: tp1
       title: 'TP (Cut-off 1)'
@@ -135,6 +190,11 @@ options:
       title: 'Cut-off Scenario 2 Name'
       type: String
       default: 'Aggressive'
+      description:
+          ui: >
+            Descriptive name for the second cut-off scenario (e.g., 'Aggressive', 'Specific').
+          R: >
+            Name identifier for cut-off scenario 2.
       
     - name: tp2
       title: 'TP (Cut-off 2)'

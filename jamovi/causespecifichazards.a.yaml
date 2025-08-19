@@ -1,0 +1,182 @@
+---
+name: causespecifichazards
+title: Cause-Specific Hazards Models
+menuGroup: Survival
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Implements cause-specific hazards modeling for competing risks analysis.
+        This approach models the hazard for each specific cause separately, treating
+        other causes as censoring events. Provides comprehensive analysis including
+        hazard ratios, cumulative incidence functions, and model comparisons across
+        different causes of failure.
+    R:
+        dontrun: false
+        usage: |
+            data('mgus2', package='survival')
+            
+            causespecifichazards(data = mgus2, 
+                                elapsedtime = 'futime',
+                                outcome = 'death', 
+                                covariates = c('age', 'sex'),
+                                cause_variable = 'death',
+                                reference_cause = '1')
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Survival time or follow-up duration variable. Should contain positive 
+            numeric values representing the time to event or censoring.
+
+    - name: outcome
+      title: Event Variable  
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable. Should contain values indicating the type
+            of event or censoring (0 for censored, 1,2,3... for different causes).
+
+    - name: covariates
+      title: Explanatory Variables
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          R: >
+            Vector of variable names for covariates/explanatory variables to include 
+            in the cause-specific hazards models.
+
+    - name: cause_variable
+      title: Cause Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: null
+      description:
+          R: >
+            Optional separate variable identifying the cause of failure. If not
+            specified, the outcome variable will be used to identify causes.
+
+    - name: reference_cause
+      title: Reference Cause
+      type: String
+      default: "1"
+      description:
+          R: >
+            The reference cause for model comparison and hazard ratio calculations.
+            Should match one of the cause levels in the data.
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+        - name: cox
+          title: Cox Proportional Hazards
+        - name: weibull
+          title: Weibull AFT
+        - name: exponential
+          title: Exponential
+        - name: lognormal
+          title: Log-normal AFT
+      default: cox
+      description:
+          R: >
+            Type of survival model to fit for each cause-specific hazard.
+
+    - name: include_se
+      title: Include Standard Errors
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to compute and display standard errors for parameter estimates.
+
+    - name: include_ci
+      title: Include Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to compute and display confidence intervals for parameter estimates.
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Confidence level for confidence intervals (between 0.5 and 0.99).
+
+    - name: cumulative_incidence
+      title: Cumulative Incidence
+      type: Bool
+      default: true
+      description:
+          R: >
+            Whether to compute and display cumulative incidence functions for each cause.
+
+    - name: model_comparison
+      title: Model Comparison
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to perform model comparison across different causes using
+            likelihood ratio tests and information criteria.
+
+    - name: proportional_hazards_test
+      title: Proportional Hazards Test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to test the proportional hazards assumption for Cox models.
+
+    - name: plot_cumulative_incidence
+      title: Plot Cumulative Incidence
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to create cumulative incidence function plots for each cause.
+
+    - name: plot_hazards
+      title: Plot Hazard Functions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to create hazard function plots for each cause.
+
+    - name: plot_diagnostics
+      title: Diagnostic Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to create diagnostic plots for model assessment (residuals, etc.).
+
+    - name: stratify_plots
+      title: Stratify Plots by Covariates
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to stratify plots by covariate levels for better visualization.

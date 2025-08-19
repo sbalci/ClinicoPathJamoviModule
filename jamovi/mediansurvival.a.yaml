@@ -1,0 +1,172 @@
+---
+name:  mediansurvival
+title: Median Survival Comparisons
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs statistical comparisons of median survival times between groups.
+        Provides confidence intervals, hypothesis tests, and robust estimators for 
+        median survival with handling of censored data and group comparisons.
+    R:
+        dontrun: false
+        usage: |
+            # Example usage will be added
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time variable for survival analysis.
+
+    - name: outcome
+      title: Event Indicator
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable.
+
+    - name: explanatory
+      title: Grouping Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Grouping variable for comparison.
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level of outcome variable indicating event.
+
+    - name: confidence_method
+      title: Confidence Interval Method
+      type: List
+      options:
+        - name: brookmeyer_crowley
+          title: Brookmeyer-Crowley
+        - name: log_transform
+          title: Log Transformation
+        - name: loglog_transform
+          title: Log-Log Transformation
+        - name: plain
+          title: Plain (Linear)
+      default: brookmeyer_crowley
+      description:
+          R: >
+            Method for constructing confidence intervals for median survival.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for median survival intervals.
+
+    - name: test_method
+      title: Test Method
+      type: List
+      options:
+        - name: logrank
+          title: Log-rank test
+        - name: wilcoxon
+          title: Wilcoxon test
+        - name: petopeto
+          title: Peto-Peto test
+        - name: all
+          title: All methods
+      default: logrank
+      description:
+          R: >
+            Statistical test method for comparing median survival times.
+
+    - name: multiple_comparison
+      title: Multiple Comparison Correction
+      type: List
+      options:
+        - name: none
+          title: None
+        - name: holm
+          title: Holm
+        - name: bonferroni
+          title: Bonferroni
+        - name: fdr
+          title: FDR (Benjamini-Hochberg)
+        - name: hochberg
+          title: Hochberg
+      default: holm
+      description:
+          R: >
+            Method for multiple comparison adjustment.
+
+    - name: show_survival_plot
+      title: Show Survival Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display Kaplan-Meier survival curves with median indicators.
+
+    - name: show_median_lines
+      title: Show Median Lines
+      type: Bool
+      default: true
+      description:
+          R: >
+            Add median survival lines to survival plot.
+
+    - name: show_confidence_bands
+      title: Show Confidence Bands
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display confidence bands around survival curves.
+
+    - name: show_risk_table
+      title: Show Risk Table
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include numbers at risk table below survival plot.
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries.
+
+    - name: showExplanations
+      title: Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show methodology explanations.

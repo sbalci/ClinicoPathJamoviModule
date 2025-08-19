@@ -107,6 +107,31 @@ items:
           type: number
           format: zto
 
+    # Model comparison table
+    - name: modelComparisonTable
+      title: Model Comparison Metrics
+      type: Table
+      visible: (calculateIC && bayesianAnalysis)
+      columns:
+        - name: model
+          title: Model/Test
+          type: text
+        - name: dic
+          title: DIC
+          type: number
+          format: zto
+        - name: waic
+          title: WAIC
+          type: number
+          format: zto
+        - name: effective_params
+          title: Effective Parameters
+          type: number
+          format: zto
+        - name: ranking
+          title: Ranking
+          type: integer
+
     # Main decision curve plot
     - name: mainPlot
       title: Decision Curves

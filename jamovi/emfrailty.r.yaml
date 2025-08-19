@@ -1,0 +1,110 @@
+---
+name: emfrailty
+title: EM-Algorithm Frailty Models
+jrs: '1.0'
+
+items:
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      visible: (show_model_summary)
+      columns: []
+
+    - name: coefficients
+      title: Fixed Effects Coefficients
+      type: Table
+      visible: (show_coefficients)
+      columns: []
+
+    - name: frailtyAnalysis
+      title: Frailty Distribution Analysis
+      type: Table
+      visible: (show_frailty_analysis)
+      columns: []
+
+    - name: convergenceInfo
+      title: EM Algorithm Convergence
+      type: Table
+      visible: (show_convergence)
+      columns: []
+
+    - name: diagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (show_diagnostics)
+      columns: []
+
+    - name: frailtyPredictions
+      title: Empirical Bayes Frailty Predictions
+      type: Table
+      visible: (show_predictions)
+      columns: []
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_comparison)
+      columns: []
+
+    - name: baselineHazard
+      title: Baseline Hazard Analysis
+      type: Table
+      visible: (show_frailty_analysis)
+      columns: []
+
+    - name: heterogeneityAnalysis
+      title: Heterogeneity Assessment
+      type: Table
+      visible: (show_frailty_analysis)
+      columns: []
+
+    - name: shrinkageAnalysis
+      title: Shrinkage Analysis
+      type: Table
+      visible: (show_predictions)
+      columns: []
+
+    - name: convergencePlots
+      title: EM Convergence Diagnostic Plots
+      type: Image
+      visible: (show_convergence_plots)
+      width: 800
+      height: 600
+
+    - name: frailtyPlots
+      title: Frailty Distribution and Prediction Plots
+      type: Image
+      visible: (show_frailty_plots)
+      width: 800
+      height: 600
+
+    - name: residualPlots
+      title: Residual Diagnostic Plots
+      type: Image
+      visible: (show_residual_plots)
+      width: 800
+      height: 600
+
+    - name: survivalPlots
+      title: Stratified Survival Curves
+      type: Image
+      visible: (show_survival_plots)
+      width: 800
+      height: 600
+
+    - name: fitPlots
+      title: Model Fit Assessment Plots
+      type: Image
+      visible: (diagnostic_plots)
+      width: 800
+      height: 600
+
+    - name: summaryTable
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Method Explanation
+      type: Html
+      visible: (showExplanations)

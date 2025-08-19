@@ -1,0 +1,125 @@
+title: High-Dimensional Cox Regression
+name: highdimcox
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Event Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: High-Dimensional Predictors
+        children:
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+            itemDropBehaviour: insert
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Outcome Variable Options
+        style: list-inline
+        children:
+          - type: TextBox
+            name: outcomeLevel
+            format: string
+            label: Event Level
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Regularization Settings
+        style: list-inline
+        children:
+          - type: ComboBox
+            name: regularization_method
+            label: Regularization Method
+          - type: TextBox
+            name: alpha_value
+            format: number
+            label: Elastic Net Alpha
+          - type: ComboBox
+            name: cv_method
+            label: Cross-Validation Method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Variable Selection
+        style: list-inline
+        children:
+          - type: ComboBox
+            name: variable_selection
+            label: Variable Selection Method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cv_folds
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Stability Selection
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: stability_selection
+            label: Perform Stability Selection
+          - type: TextBox
+            name: stability_threshold
+            format: number
+            label: Stability Threshold
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: show_regularization_path
+            label: Show Regularization Path
+          - type: CheckBox
+            name: show_cv_plot
+            label: Show Cross-Validation Plot
+          - type: CheckBox
+            name: show_variable_importance
+            label: Show Variable Importance
+          - type: CheckBox
+            name: show_coefficients_table
+            label: Show Coefficients Table
+          - type: CheckBox
+            name: show_model_diagnostics
+            label: Show Model Diagnostics
+          - type: CheckBox
+            name: showSummaries
+            label: Analysis Summaries
+          - type: CheckBox
+            name: showExplanations
+            label: Method Explanations
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_iterations
+        format: number

@@ -1,0 +1,151 @@
+title: Flexible Baseline Distributions
+name: flexiblebaseline
+jus: "3.0"
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        label: Event Indicator
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: explanatory
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+            itemDropBehaviour: insert
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Flexible Baseline Distribution Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: baseline_type
+                label: Baseline Distribution Type
+
+              - type: TextBox
+                name: outcomeLevel
+                label: Event Level
+                format: string
+
+              - type: TextBox
+                name: spline_knots
+                label: Number of Knots
+                format: number
+
+              - type: ComboBox
+                name: knot_placement
+                label: Knot Placement Method
+
+              - type: CheckBox
+                name: boundary_knots
+                label: Include Boundary Knots
+
+              - type: ComboBox
+                name: spline_degree
+                label: Spline Degree
+
+              - type: ComboBox
+                name: transformation_family
+                label: Transformation Family
+
+              - type: TextBox
+                name: confidence_level
+                label: Confidence Level
+                format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options - Tables
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_model_summary
+                label: Model Summary
+
+              - type: CheckBox
+                name: show_coefficients
+                label: Coefficients Table
+
+              - type: CheckBox
+                name: show_spline_basis
+                label: Spline Basis Functions
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options - Plots
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: show_survival_curves
+                label: Survival Curves
+
+              - type: CheckBox
+                name: show_hazard_curves
+                label: Hazard Function
+
+              - type: CheckBox
+                name: show_cumulative_hazard
+                label: Cumulative Hazard
+
+              - type: CheckBox
+                name: show_diagnostics
+                label: Model Diagnostics
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showSummaries
+                label: Analysis Summaries
+
+              - type: CheckBox
+                name: showExplanations
+                label: Methodology Explanations

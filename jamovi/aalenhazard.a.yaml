@@ -1,0 +1,220 @@
+---
+name:  aalenhazard
+title: Aalen's Additive Hazard Models
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Non-proportional hazards with additive effects'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Implements Aalen's additive hazard regression models for survival data
+        where covariate effects are additive rather than multiplicative. This approach
+        is particularly useful when the proportional hazards assumption is violated,
+        allowing for time-varying covariate effects and non-proportional hazards.
+        The model estimates cumulative regression functions that can reveal how
+        covariate effects change over time.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: Basic Aalen additive hazard model
+            library(timereg)
+            library(survival)
+            
+            aalenhazard(
+                data = veteran_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                covariates = c("age", "karno", "diagtime"),
+                model_type = "additive"
+            )
+            
+            # Example 2: Semi-parametric Aalen model with constant effects
+            aalenhazard(
+                data = lung_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "2",
+                covariates = c("age", "sex", "ph.ecog"),
+                model_type = "semiparametric",
+                constant_effects = c("sex"),
+                show_cumulative_plots = TRUE
+            )
+
+options:
+
+# Data ----
+  - name: data
+    type: Data
+    description:
+        R: the data as a data frame
+
+# Variables ----
+  - name: elapsedtime
+    title: Time Variable
+    type: Variable
+    suggested:
+        - continuous
+    permitted:
+        - numeric
+    description:
+        R: >
+          Survival time or follow-up duration variable
+
+  - name: outcome
+    title: Event Variable
+    type: Variable
+    suggested:
+        - nominal
+        - ordinal
+    permitted:
+        - factor
+        - numeric
+    description:
+        R: >
+          Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+  - name: covariates
+    title: Covariates
+    type: Variables
+    suggested:
+        - continuous
+        - nominal
+        - ordinal
+    permitted:
+        - numeric
+        - factor
+    description:
+        R: >
+          Covariate variables for additive hazard modeling
+
+# Model Options ----
+  - name: outcomeLevel
+    title: Event Level
+    type: String
+    default: '1'
+    description:
+        R: >
+          Level of outcome variable indicating event occurrence
+
+  - name: model_type
+    title: Model Type
+    type: List
+    options:
+        - name: additive
+          title: "Additive Hazard Model"
+        - name: semiparametric
+          title: "Semi-parametric Aalen"
+        - name: nonparametric
+          title: "Non-parametric Aalen"
+    default: additive
+    description:
+        R: >
+          Type of Aalen hazard model to fit
+
+  - name: constant_effects
+    title: Constant Effects Variables
+    type: Variables
+    suggested:
+        - continuous
+        - nominal
+        - ordinal
+    permitted:
+        - numeric
+        - factor
+    description:
+        R: >
+          Variables to be treated as having constant (time-independent) effects
+
+  - name: test_constant_effects
+    title: Test for Constant Effects
+    type: Bool
+    default: true
+    description:
+        R: >
+          Test whether covariate effects are constant over time
+
+  - name: bandwidth
+    title: Bandwidth for Smoothing
+    type: Number
+    min: 0.01
+    max: 2.0
+    default: 1.0
+    description:
+        R: >
+          Bandwidth parameter for kernel smoothing of cumulative coefficients
+
+  - name: robust_se
+    title: Robust Standard Errors
+    type: Bool
+    default: true
+    description:
+        R: >
+          Use robust sandwich estimator for standard errors
+
+# Display Options ----
+  - name: show_model_summary
+    title: Show Model Summary
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display model summary table
+
+  - name: show_coefficients_table
+    title: Show Coefficients Table
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display table of cumulative regression coefficients
+
+  - name: show_test_results
+    title: Show Test Results
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display statistical test results
+
+  - name: show_cumulative_plots
+    title: Show Cumulative Coefficient Plots
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display plots of cumulative regression coefficients over time
+
+  - name: show_hazard_plots
+    title: Show Hazard Function Plots
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display estimated hazard function plots
+
+  - name: show_diagnostics
+    title: Show Model Diagnostics
+    type: Bool
+    default: true
+    description:
+        R: >
+          Display model diagnostic plots and residuals
+
+  - name: showSummaries
+    title: Analysis Summaries
+    type: Bool
+    default: false
+    description:
+        R: >
+          Generate natural language summaries of results
+
+  - name: showExplanations
+    title: Method Explanations
+    type: Bool
+    default: false
+    description:
+        R: >
+          Show detailed methodology explanations

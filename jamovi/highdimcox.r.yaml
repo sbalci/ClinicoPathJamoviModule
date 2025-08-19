@@ -1,0 +1,119 @@
+---
+name:  highdimcox
+title: High-Dimensional Cox Regression
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      visible: (show_coefficients_table)
+
+    - name: selectedVariables
+      title: Selected Variables
+      type: Table
+      visible: (show_coefficients_table)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: coefficient
+            title: β
+            type: number
+          - name: hazard_ratio
+            title: HR
+            type: number
+          - name: importance_score
+            title: Importance
+            type: number
+
+    - name: regularizationMetrics
+      title: Regularization Metrics
+      type: Table
+      visible: true
+      columns:
+          - name: metric
+            title: Metric
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: stabilityResults
+      title: Stability Selection Results
+      type: Table
+      visible: (stability_selection)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: selection_probability
+            title: Selection Probability
+            type: number
+          - name: stable
+            title: Stable Selection
+            type: text
+          - name: importance_rank
+            title: Importance Rank
+            type: integer
+
+    - name: dimensionalityReduction
+      title: Dimensionality Summary
+      type: Table
+      visible: true
+      columns:
+          - name: stage
+            title: Analysis Stage
+            type: text
+          - name: variables_input
+            title: Input Variables
+            type: integer
+          - name: variables_selected
+            title: Selected Variables
+            type: integer
+          - name: reduction_ratio
+            title: Reduction Ratio
+            type: number
+
+    - name: regularizationPath
+      title: Regularization Path
+      type: Image
+      visible: (show_regularization_path)
+
+    - name: cvPlot
+      title: Cross-Validation Plot
+      type: Image
+      visible: (show_cv_plot)
+
+    - name: variableImportance
+      title: Variable Importance Plot
+      type: Image
+      visible: (show_variable_importance)
+
+    - name: modelDiagnostics
+      title: Model Diagnostics
+      type: Image
+      visible: (show_model_diagnostics)
+
+    - name: stabilityPlot
+      title: Stability Selection Plot
+      type: Image
+      visible: (stability_selection)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)

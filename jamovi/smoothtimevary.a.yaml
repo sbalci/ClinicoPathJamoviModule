@@ -1,0 +1,225 @@
+---
+name: smoothtimevary
+title: Smoothly Time-Varying Effects
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+menuTitle: Smoothly Time-Varying Effects
+menuSubtitle: Smooth estimation of time-varying covariate effects using splines
+description:
+    main: >-
+        Implements smooth estimation of time-varying covariate effects in survival
+        analysis using flexible spline-based methods. This approach provides
+        continuous modeling of how covariate effects change over time, offering
+        an alternative to step-function approaches in standard time-varying Cox
+        models and complementing Aalen's additive hazard methodology.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: Spline-based time-varying effects
+            library(timereg)
+            library(survival)
+            
+            smoothtimevary(
+                data = veteran_data,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                covariates = c("age", "karno"),
+                time_varying_covariates = c("diagtime"),
+                smoothing_method = "spline"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Survival time or follow-up duration variable
+
+    - name: outcome
+      title: Event Variable  
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Event indicator variable (0/1, FALSE/TRUE, or factor)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal  
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Covariate variables for smooth time-varying effects modeling
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: "1"
+      description:
+          R: >
+            Level of outcome variable indicating event occurrence
+
+    - name: time_varying_covariates
+      title: Time-Varying Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: >
+            Covariates to model with smooth time-varying effects
+
+    - name: smoothing_method
+      title: Smoothing Method
+      type: List
+      options:
+          - name: spline
+            title: Cubic Splines
+          - name: loess
+            title: LOESS Smoothing
+          - name: kernel
+            title: Kernel Smoothing
+          - name: penalized_spline
+            title: Penalized Splines
+      default: spline
+      description:
+          R: >
+            Method for smooth estimation of time-varying effects
+
+    - name: spline_df
+      title: Spline Degrees of Freedom
+      type: Number
+      min: 2
+      max: 10
+      default: 4
+      description:
+          R: >
+            Degrees of freedom for spline-based smoothing
+
+    - name: bandwidth
+      title: Bandwidth Parameter
+      type: Number  
+      min: 0.1
+      max: 3.0
+      default: 1.0
+      description:
+          R: >
+            Bandwidth parameter for kernel or LOESS smoothing
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for interval estimation
+
+    - name: test_constancy
+      title: Test for Constant Effects
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test whether covariate effects are constant over time
+
+    - name: residual_analysis
+      title: Residual Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform comprehensive residual analysis and diagnostics
+
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model summary
+
+    - name: show_effects_table
+      title: Show Effects Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display table of smooth time-varying effects
+
+    - name: show_constancy_tests
+      title: Show Constancy Tests
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display statistical tests for effect constancy
+
+    - name: show_smooth_plots
+      title: Show Smooth Effect Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display plots of smooth time-varying effects
+
+    - name: show_diagnostic_plots
+      title: Show Diagnostic Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model diagnostic and residual plots
+
+    - name: show_comparison_plots
+      title: Show Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comparison with constant effects models
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries of the analysis results
+
+    - name: showExplanations
+      title: Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed explanations of the methodology and interpretation

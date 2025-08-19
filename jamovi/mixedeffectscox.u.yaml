@@ -1,0 +1,270 @@
+---
+name: mixedeffectscox
+title: Mixed-Effects Cox Models
+jus: '3.0'
+
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    suggested:
+      - continuous
+      - nominal
+      - ordinal
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Survival Time
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        label: Event Status
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+          - type: TextBox
+            name: outcomeLevel
+            label: Event Level
+            format: string
+
+      - type: TargetLayoutBox
+        label: Fixed Effects
+        children:
+          - type: VariablesListBox
+            name: fixed_effects
+            isTarget: true
+            height: large
+
+      - type: TargetLayoutBox
+        label: Random Effects
+        children:
+          - type: VariablesListBox
+            name: random_effects
+            isTarget: true
+            height: large
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Mixed-Effects Structure
+        children:
+          - type: RadioButton
+            name: random_structure_random_intercept
+            optionName: random_structure
+            optionPart: random_intercept
+            label: Random Intercept
+
+          - type: RadioButton
+            name: random_structure_random_slope
+            optionName: random_structure
+            optionPart: random_slope
+            label: Random Slope
+
+          - type: RadioButton
+            name: random_structure_random_intercept_slope
+            optionName: random_structure
+            optionPart: random_intercept_slope
+            label: Random Intercept + Slope
+
+          - type: RadioButton
+            name: random_structure_nested_random
+            optionName: random_structure
+            optionPart: nested_random
+            label: Nested Random Effects
+
+          - type: RadioButton
+            name: random_structure_crossed_random
+            optionName: random_structure
+            optionPart: crossed_random
+            label: Crossed Random Effects
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Correlation Structure
+        children:
+          - type: RadioButton
+            name: correlation_structure_independent
+            optionName: correlation_structure
+            optionPart: independent
+            label: Independent
+
+          - type: RadioButton
+            name: correlation_structure_exchangeable
+            optionName: correlation_structure
+            optionPart: exchangeable
+            label: Exchangeable
+
+          - type: RadioButton
+            name: correlation_structure_ar1
+            optionName: correlation_structure
+            optionPart: ar1
+            label: AR(1)
+
+          - type: RadioButton
+            name: correlation_structure_unstructured
+            optionName: correlation_structure
+            optionPart: unstructured
+            label: Unstructured
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Options
+        children:
+          - type: ComboBox
+            name: estimation_method
+            label: Estimation Method
+
+          - type: ComboBox
+            name: variance_structure
+            label: Variance Structure
+
+          - type: ComboBox
+            name: ties_method
+            label: Tied Events Method
+
+          - type: CheckBox
+            name: sparse_matrix
+            label: Use Sparse Matrix Methods
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Advanced Options
+        children:
+          - type: VariablesListBox
+            name: offset_variable
+            label: Offset Variable
+            maxItemCount: 1
+            height: small
+
+          - type: VariablesListBox
+            name: weights_variable
+            label: Weights Variable
+            maxItemCount: 1
+            height: small
+
+          - type: TextBox
+            name: confidence_level
+            label: Confidence Level
+            format: number
+            suffix: '%'
+
+          - type: TextBox
+            name: max_iterations
+            label: Maximum Iterations
+            format: number
+
+          - type: TextBox
+            name: convergence_tolerance
+            label: Convergence Tolerance
+            format: number
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Random Effects Options
+        children:
+          - type: CheckBox
+            name: random_effects_prediction
+            label: Compute Random Effects Predictions (BLUPs)
+
+          - type: CheckBox
+            name: variance_components_test
+            label: Test Variance Components Significance
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Bootstrap Options
+        children:
+          - type: CheckBox
+            name: bootstrap_ci
+            label: Bootstrap Confidence Intervals
+
+          - type: TextBox
+            name: bootstrap_samples
+            label: Bootstrap Samples
+            format: number
+            enable: (bootstrap_ci)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options
+        children:
+          - type: CheckBox
+            name: show_model_summary
+            label: Model Summary
+
+          - type: CheckBox
+            name: show_fixed_effects
+            label: Fixed Effects Coefficients
+
+          - type: CheckBox
+            name: show_random_effects
+            label: Random Effects & Variance Components
+
+          - type: CheckBox
+            name: show_diagnostics
+            label: Model Diagnostics
+
+          - type: CheckBox
+            name: show_comparison
+            label: Model Comparison (Mixed vs Standard)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Plots
+        children:
+          - type: CheckBox
+            name: show_residual_plots
+            label: Residual Diagnostic Plots
+
+          - type: CheckBox
+            name: show_random_effects_plots
+            label: Random Effects Distribution Plots
+
+          - type: CheckBox
+            name: show_survival_plots
+            label: Survival Curves by Groups
+
+          - type: CheckBox
+            name: show_forest_plot
+            label: Forest Plot
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Additional Output
+        children:
+          - type: CheckBox
+            name: showSummaries
+            label: Natural Language Summaries
+
+          - type: CheckBox
+            name: showExplanations
+            label: Method Explanations
+
+...

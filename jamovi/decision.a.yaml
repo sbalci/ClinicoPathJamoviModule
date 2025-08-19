@@ -1,7 +1,7 @@
 ---
 name:  decision
 title: Medical Decision
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
 version: '0.0.3'
@@ -25,47 +25,51 @@ options:
 
 
     - name: gold
-      title: Golden Standard
+      title: Gold Standard (Reference)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
           ui: >
-            The golden standard variable.
+            The gold standard reference variable (true disease status). 
+            This should be the most reliable test or diagnosis available (e.g., biopsy, final diagnosis).
           R: >
-            The golden standard variable.
+            The gold standard reference variable representing true disease status.
 
 
     - name: goldPositive
-      title: Positive Level
+      title: Disease Present Level
       type: Level
       variable: (gold)
       description:
           ui: >
-            The positive level of the golden standard variable.
+            Select the level that indicates disease is present in your gold standard variable.
+            This represents the condition you want to detect or diagnose.
           R: >
-            The positive level of the golden standard variable.
+            The level indicating presence of disease in the gold standard variable.
 
     - name: newtest
-      title: New Test
+      title: Test Under Evaluation
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
           ui: >
-            The new test variable.
+            The diagnostic test being evaluated for performance.
+            This is typically a new, faster, or less expensive test compared to the gold standard.
           R: >
-            The new test variable.
+            The diagnostic test variable being evaluated for performance.
 
     - name: testPositive
-      title: Positive Level
+      title: Test Positive Level
       type: Level
       variable: (newtest)
       description:
           ui: >
-            The positive level of the new test variable.
+            Select the level that represents a positive test result.
+            This should correspond to the level indicating suspected disease presence.
           R: >
-            The positive level of the new test variable.
+            The level representing a positive result for the test under evaluation.
 
 
 
@@ -74,60 +78,75 @@ options:
 
 
     - name: pp
-      title: Prior Probability (prevalence)
+      title: Use Known Population Prevalence
       type: Bool
       default: false
       description:
+          ui: >
+            Use known disease prevalence from population data instead of study prevalence.
+            Enable this when your study sample may not represent the target population.
           R: >
-            Boolean selection whether to show prior probability. Default is 'false'.
+            Boolean selection whether to use known population prevalence instead of study prevalence.
 
     - name: pprob
-      title: Prior Probability (prevalence)
+      title: Population Disease Prevalence
       type: Number
       default: 0.300
       min: 0.001
       max: 0.999
       description:
           ui: >
-            Prior probability (disease prevalence in the community).
-            Requires a value between 0.001 and 0.999, default 0.300.
+            Known disease prevalence in the target population (as proportion: 0.0-1.0).
+            Examples: rare diseases (0.001-0.01), common conditions (0.05-0.20).
+            This affects post-test probabilities and predictive values.
           R: >
-            Prior probability (disease prevalence in the community).
-            Requires a value between 0.001 and 0.999, default 0.300.
+            Population disease prevalence as a proportion between 0.001 and 0.999.
 
 
     - name: od
-      title: Original Data
+      title: Show Raw Data Tables
       type: Bool
       default: false
       description:
+          ui: >
+            Display the original contingency tables and raw data summaries.
+            Useful for verifying data entry and understanding the underlying counts.
           R: >
-            Boolean selection whether to show frequency table. Default is 'false'.
+            Boolean selection whether to show original data frequency tables.
 
     - name: fnote
-      title: Footnotes
+      title: Show Explanatory Footnotes
       type: Bool
       default: false
       description:
+          ui: >
+            Add detailed explanatory footnotes to all tables with clinical interpretation guidance.
+            Helpful for understanding what each statistic means and how to interpret the results.
           R: >
-            Boolean selection whether to show footnotes. Default is 'false'.
+            Boolean selection whether to show detailed explanatory footnotes.
 
     - name: ci
-      title: '95% CI'
+      title: '95% Confidence Intervals'
       type: Bool
       default: false
       description:
+          ui: >
+            Calculate and display 95% confidence intervals for all diagnostic statistics.
+            Provides uncertainty estimates around point estimates of sensitivity, specificity, etc.
           R: >
-            Boolean selection whether to show 95% confidence intervals. Default is 'false'.
+            Boolean selection whether to calculate and display 95% confidence intervals.
 
 
     - name: fagan
-      title: 'Fagan Nomogram'
+      title: 'Fagan Nomogram Plot'
       type: Bool
       default: false
       description:
+          ui: >
+            Generate a Fagan nomogram for visual interpretation of test results.
+            Shows how test results change the probability of disease from pre-test to post-test.
           R: >
-            Boolean selection whether to show Fagan Nomogram. Default is 'false'.
+            Boolean selection whether to generate a Fagan nomogram plot.
 
     # - name: roc
     #   title: 'ROC Curve'

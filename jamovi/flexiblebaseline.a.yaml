@@ -1,0 +1,243 @@
+---
+name: flexiblebaseline
+title: Flexible Baseline Distributions
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: elapsedtime
+      title: Time
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time variable for survival analysis.
+
+    - name: outcome
+      title: Outcome
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Event indicator variable.
+
+    - name: explanatory
+      title: Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Optional grouping variable for stratified analysis.
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Covariates to include in the flexible parametric model.
+
+    - name: outcomeLevel
+      title: Outcome Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level of outcome variable indicating event.
+
+    - name: baseline_type
+      title: Baseline Distribution Type
+      type: List
+      options:
+        - name: spline_hazard
+          title: "Spline-based Hazard"
+        - name: spline_odds
+          title: "Spline-based Odds"
+        - name: spline_normal
+          title: "Spline-based Normal"
+        - name: royston_parmar
+          title: "Royston-Parmar Model"
+        - name: transformation_model
+          title: "Transformation Model"
+        - name: flexible_parametric
+          title: "Flexible Parametric"
+      default: spline_hazard
+      description:
+          R: >
+            Type of flexible baseline distribution modeling approach.
+
+    - name: spline_knots
+      title: Number of Knots
+      type: Integer
+      default: 2
+      min: 1
+      max: 10
+      description:
+          R: >
+            Number of internal knots for spline-based models.
+
+    - name: knot_placement
+      title: Knot Placement Method
+      type: List
+      options:
+        - name: quantiles
+          title: "Equal Quantiles"
+        - name: equal_spaced
+          title: "Equal Spaced"
+        - name: manual
+          title: "Manual Specification"
+      default: quantiles
+      description:
+          R: >
+            Method for placing spline knots.
+
+    - name: boundary_knots
+      title: Boundary Knots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include boundary knots at extreme time points.
+
+    - name: spline_degree
+      title: Spline Degree
+      type: List
+      options:
+        - name: linear
+          title: "Linear (1)"
+        - name: quadratic
+          title: "Quadratic (2)"
+        - name: cubic
+          title: "Cubic (3)"
+      default: cubic
+      description:
+          R: >
+            Degree of B-splines for flexible modeling.
+
+    - name: transformation_family
+      title: Transformation Family
+      type: List
+      options:
+        - name: cox
+          title: "Cox (Proportional Hazards)"
+        - name: weibull
+          title: "Weibull"
+        - name: loglogistic
+          title: "Log-logistic"
+        - name: lognormal
+          title: "Log-normal"
+        - name: exponential
+          title: "Exponential"
+      default: cox
+      description:
+          R: >
+            Transformation family for transformation models.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Confidence level for parameter estimates and predictions.
+
+    - name: show_model_summary
+      title: Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model summary information.
+
+    - name: show_coefficients
+      title: Coefficients Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display parameter estimates and standard errors.
+
+    - name: show_spline_basis
+      title: Spline Basis Functions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display spline basis function details.
+
+    - name: show_survival_curves
+      title: Survival Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display fitted survival curves.
+
+    - name: show_hazard_curves
+      title: Hazard Function
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display estimated hazard function over time.
+
+    - name: show_cumulative_hazard
+      title: Cumulative Hazard
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display cumulative hazard function.
+
+    - name: show_diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model diagnostic plots and statistics.
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries of results.
+
+    - name: showExplanations
+      title: Methodology
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations.

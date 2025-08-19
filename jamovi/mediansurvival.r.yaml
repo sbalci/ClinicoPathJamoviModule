@@ -1,0 +1,75 @@
+---
+name:  mediansurvival
+title: Median Survival Comparisons
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: medianTable
+      title: Median Survival Times
+      type: Table
+      visible: true
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: median
+          title: Median
+          type: number
+        - name: lower_ci
+          title: Lower CI
+          type: number
+        - name: upper_ci
+          title: Upper CI
+          type: number
+        - name: n_events
+          title: Events
+          type: integer
+        - name: n_total
+          title: Total
+          type: integer
+
+    - name: comparisonTable
+      title: Pairwise Comparisons
+      type: Table
+      visible: true
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: test_statistic
+          title: Test Statistic
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+        - name: p_adjusted
+          title: Adjusted p
+          type: number
+        - name: method
+          title: Method
+          type: text
+
+    - name: survivalPlot
+      title: Survival Curves with Median Indicators
+      type: Image
+      visible: (show_survival_plot)
+
+    - name: medianComparisonPlot
+      title: Median Survival Comparison
+      type: Image
+      visible: true
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)

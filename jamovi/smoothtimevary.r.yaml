@@ -1,0 +1,146 @@
+---
+name: smoothtimevary
+title: Smoothly Time-Varying Effects
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      visible: (show_model_summary)
+
+    - name: effectsTable
+      title: Smooth Time-Varying Effects
+      type: Table
+      visible: (show_effects_table)
+      columns:
+          - name: covariate
+            title: Covariate
+            type: text
+          - name: time_point
+            title: Time
+            type: number
+          - name: effect_estimate
+            title: β(t)
+            type: number
+          - name: se
+            title: SE
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+
+    - name: constancyTests
+      title: Tests for Effect Constancy
+      type: Table
+      visible: (test_constancy && show_constancy_tests)
+      columns:
+          - name: covariate
+            title: Covariate
+            type: text
+          - name: test_statistic
+            title: Test Statistic
+            type: number
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+          - name: conclusion
+            title: Interpretation
+            type: text
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: model
+            title: Model
+            type: text
+          - name: aic
+            title: AIC
+            type: number
+          - name: bic
+            title: BIC
+            type: number
+          - name: loglik
+            title: Log-Likelihood
+            type: number
+          - name: df
+            title: df
+            type: integer
+
+    - name: smoothingParameters
+      title: Smoothing Parameters
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: description
+            title: Description
+            type: text
+
+    - name: goodnessOfFit
+      title: Goodness of Fit Statistics
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: value
+            title: Value
+            type: number
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: smoothEffectPlots
+      title: Smooth Time-Varying Effects
+      type: Image
+      visible: (show_smooth_plots)
+
+    - name: diagnosticPlots
+      title: Model Diagnostics
+      type: Image
+      visible: (show_diagnostic_plots)
+
+    - name: residualPlots
+      title: Residual Analysis
+      type: Image
+      visible: (residual_analysis && show_diagnostic_plots)
+
+    - name: comparisonPlots
+      title: Model Comparison Plots
+      type: Image
+      visible: (show_comparison_plots)
+
+    - name: smoothingPlots
+      title: Smoothing Method Comparison
+      type: Image
+      visible: (show_diagnostic_plots)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)

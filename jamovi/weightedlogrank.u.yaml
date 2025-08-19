@@ -1,0 +1,96 @@
+title: Weighted Log-Rank Tests
+name: weightedlogrank
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            fitToGrid: true
+      - type: TargetLayoutBox
+        label: Group Variable
+        children:
+          - type: VariablesListBox
+            name: explanatory
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Test Selection
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: standard_logrank
+      - type: CheckBox
+        name: gehan_wilcoxon
+      - type: CheckBox
+        name: tarone_ware
+      - type: CheckBox
+        name: peto_peto
+      - type: CheckBox
+        name: modified_peto
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: outcomeLevel
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: multiple_comparison
+        format: string
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: show_sample_sizes
+      - type: CheckBox
+        name: show_events
+      - type: CheckBox
+        name: median_survival
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+  - type: CollapseBox
+    label: Plots
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: show_kaplan_meier
+      - type: CheckBox
+        name: show_weight_functions
+      - type: CheckBox
+        name: show_test_statistics
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showSummaries
+      - type: CheckBox
+        name: showExplanations

@@ -1,0 +1,367 @@
+---
+name:  penalizedcox
+title: Penalized Cox Regression
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - predictors
+          - penalty_type
+          - lambda_selection
+          - cv_folds
+          - fudate
+          - dxdate
+          - tint
+
+    # Model Summary
+    - name: modelSummary
+      title: 'Penalized Cox Model Summary'
+      type: Html
+      visible: (show_model_metrics)
+      clearWith:
+          - penalty_type
+          - alpha
+          - lambda_selection
+          - cv_folds
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - predictors
+
+    # Coefficient Results Table
+    - name: coefficientTable
+      title: 'Selected Variables and Coefficients'
+      type: Table
+      visible: (show_coefficients && variable_selection)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: coefficient
+          title: "Coefficient"
+          type: number
+        - name: hazard_ratio
+          title: "Hazard Ratio"
+          type: number
+      clearWith:
+        - penalty_type
+        - alpha
+        - lambda_selection
+        - predictors
+        - variable_selection
+
+    # Model Performance Metrics Table
+    - name: performanceTable
+      title: 'Model Performance Metrics'
+      type: Table
+      visible: (show_model_metrics)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+        - name: description
+          title: "Description"
+          type: text
+      clearWith:
+        - penalty_type
+        - cv_folds
+        - cv_type
+
+    # Cross-Validation Summary
+    - name: crossValidationSummary
+      title: 'Cross-Validation Results'
+      type: Html
+      visible: (show_lambda_path)
+      clearWith:
+          - cv_folds
+          - cv_type
+          - lambda_selection
+          - penalty_type
+
+    # Lambda Selection Table
+    - name: lambdaTable
+      title: 'Lambda Selection Details'
+      type: Table
+      visible: (show_lambda_path)
+      rows: 0
+      columns:
+        - name: lambda_type
+          title: "Lambda Type"
+          type: text
+        - name: lambda_value
+          title: "Lambda Value"
+          type: number
+        - name: cv_error
+          title: "CV Error"
+          type: number
+        - name: n_variables
+          title: "Variables Selected"
+          type: integer
+      clearWith:
+        - lambda_selection
+        - cv_folds
+        - penalty_type
+
+    # Variable Importance Table
+    - name: variableImportanceTable
+      title: 'Variable Importance Ranking'
+      type: Table
+      visible: (variable_importance)
+      rows: 0
+      columns:
+        - name: rank
+          title: "Rank"
+          type: integer
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: importance
+          title: "Importance Score"
+          type: number
+        - name: coefficient
+          title: "Coefficient"
+          type: number
+      clearWith:
+        - penalty_type
+        - predictors
+        - variable_selection
+
+    # Risk Score Summary Table
+    - name: riskScoreTable
+      title: 'Risk Score Summary Statistics'
+      type: Table
+      visible: (predict_risk)
+      rows: 0
+      columns:
+        - name: statistic
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+      clearWith:
+        - penalty_type
+        - predictors
+        - lambda_selection
+
+    # Risk Group Analysis Table
+    - name: riskGroupTable
+      title: 'Risk Group Analysis'
+      type: Table
+      visible: (survival_curves)
+      rows: 0
+      columns:
+        - name: risk_group
+          title: "Risk Group"
+          type: text
+        - name: n_patients
+          title: "N Patients"
+          type: integer
+        - name: n_events
+          title: "N Events"
+          type: integer
+        - name: median_survival
+          title: "Median Survival"
+          type: number
+        - name: mean_risk_score
+          title: "Mean Risk Score"
+          type: number
+      clearWith:
+        - predict_risk
+        - survival_curves
+        - risk_groups
+
+    # Bootstrap Validation Results
+    - name: bootstrapTable
+      title: 'Bootstrap Validation Results'
+      type: Table
+      visible: (bootstrap_validation)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Validation Metric"
+          type: text
+        - name: original
+          title: "Original"
+          type: number
+        - name: optimism
+          title: "Optimism"
+          type: number
+        - name: corrected
+          title: "Bias-Corrected"
+          type: number
+      clearWith:
+        - bootstrap_validation
+        - bootstrap_samples
+        - penalty_type
+
+    # Coefficient Path Plot
+    - name: coefficientPlot
+      title: 'Coefficient Path Plot'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotCoefficients
+      requiresData: true
+      visible: (coefficient_plot)
+      clearWith:
+          - penalty_type
+          - alpha
+          - predictors
+          - lambda_selection
+
+    # Cross-Validation Plot
+    - name: cvPlot
+      title: 'Cross-Validation Error Plot'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotCrossValidation
+      requiresData: true
+      visible: (cv_plot)
+      clearWith:
+          - cv_folds
+          - cv_type
+          - penalty_type
+          - lambda_selection
+
+    # Variable Importance Plot
+    - name: importancePlot
+      title: 'Variable Importance Plot'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotVariableImportance
+      requiresData: true
+      visible: (variable_importance)
+      clearWith:
+          - penalty_type
+          - predictors
+          - variable_selection
+
+    # Survival Curves by Risk Groups
+    - name: survivalPlot
+      title: 'Survival Curves by Risk Groups'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotSurvivalCurves
+      requiresData: true
+      visible: (survival_curves)
+      clearWith:
+          - predict_risk
+          - survival_curves
+          - risk_groups
+          - outcome
+          - elapsedtime
+
+    # Analysis Summary
+    - name: analysisSummary
+      title: 'Analysis Summary'
+      type: Html
+      visible: (showSummaries)
+      clearWith:
+        - penalty_type
+        - variable_selection
+        - predictors
+
+    # Method Explanations
+    - name: methodExplanation
+      title: 'Penalized Cox Regression Methods'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - penalty_type
+        - alpha
+        - lambda_selection
+
+    # Regularization Explanation
+    - name: regularizationExplanation
+      title: 'Understanding Regularization in Cox Models'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - penalty_type
+        - alpha
+
+    # Variable Selection Explanation
+    - name: variableSelectionExplanation
+      title: 'Understanding Variable Selection'
+      type: Html
+      visible: (variable_selection && showExplanations)
+      clearWith:
+        - penalty_type
+        - variable_selection
+
+    # Cross-Validation Explanation
+    - name: crossValidationExplanation
+      title: 'Understanding Cross-Validation for Model Selection'
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - cv_folds
+        - cv_type
+        - lambda_selection
+
+    # Model Performance Explanation
+    - name: performanceExplanation
+      title: 'Understanding Model Performance Metrics'
+      type: Html
+      visible: (show_model_metrics && showExplanations)
+      clearWith:
+        - cv_type
+        - penalty_type
+
+    # Time Variables Output
+    - name: calculatedtime
+      title: Add Calculated Time to Data
+      type: Output
+      varTitle: '`Calculated Time in Penalized Cox Function - from ${ dxdate } to { fudate }`'
+      varDescription: Calculated Time from given Dates in Penalized Cox Regression
+      clearWith:
+          - tint
+          - dxdate
+          - fudate
+
+    # Risk Score Output
+    - name: riskScoreOutput
+      title: Add Risk Score to Data
+      type: Output
+      varTitle: '`Penalized Cox Risk Score`'
+      varDescription: Linear predictor (risk score) from penalized Cox regression
+      clearWith:
+          - addRiskScore
+          - penalty_type
+          - lambda_selection
+          - predictors
+
+    # Risk Group Output
+    - name: riskGroupOutput
+      title: Add Risk Group to Data
+      type: Output
+      varTitle: '`Penalized Cox Risk Group`'
+      varDescription: Risk group classification based on penalized Cox model
+      clearWith:
+          - addRiskGroup
+          - penalty_type
+          - risk_groups
+          - predictors
+
+refs:
+    - glmnet
+    - survival
+    - ClinicoPathJamoviModule
+
+...

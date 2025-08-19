@@ -5,7 +5,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: Label
-    label: Number of Cases
+    label: Confusion Matrix (2×2 Table)
     children:
       - type: LayoutBox
         style: inline
@@ -35,94 +35,116 @@ children:
                 name: TN
                 format: number
   - type: Label
-    label: Table
+    label: Analysis Options
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
-            name: fnote
-          - type: CheckBox
             name: ci
             enable: (!pp)
+          - type: CheckBox
+            name: fnote
   - type: Label
-    label: Prior Probability
+    label: Population Prevalence Settings
     children:
       - type: CheckBox
         name: pp
         enable: (!ci)
       - type: TextBox
         name: pprob
-        label: ''
+        label: 'Prevalence (0.0-1.0)'
         format: number
         enable: (!ci && pp)
   - type: Label
-    label: Plots
+    label: Visualization
     children:
       - type: CheckBox
         name: fagan
-  - type: LayoutBox
-    margin: large
+  - type: Label
+    label: Multiple Cut-off Comparison
     children:
       - type: CheckBox
         name: multiplecuts
-  - type: LayoutBox
-    margin: large
+  - type: Label
+    label: Cut-off Scenario 1
+    visible: (multiplecuts)
     children:
-      - type: TextBox
-        name: cutoff1
-        format: string
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: cutoff1
+            label: 'Scenario Name'
+            format: string
+      - type: LayoutBox
+        style: inline
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              row: 1
+              column: 1
+            children:
+              - type: TextBox
+                name: tp1
+                label: 'TP'
+                format: number
+              - type: TextBox
+                name: fn1
+                label: 'FN'
+                format: number
+          - type: LayoutBox
+            cell:
+              row: 1
+              column: 2
+            children:
+              - type: TextBox
+                name: fp1
+                label: 'FP'
+                format: number
+              - type: TextBox
+                name: tn1
+                label: 'TN'
+                format: number
+  - type: Label
+    label: Cut-off Scenario 2
+    visible: (multiplecuts)
     children:
-      - type: TextBox
-        name: tp1
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: fp1
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: tn1
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: fn1
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: cutoff2
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: tp2
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: fp2
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: tn2
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: fn2
-        format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: cutoff2
+            label: 'Scenario Name'
+            format: string
+      - type: LayoutBox
+        style: inline
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              row: 1
+              column: 1
+            children:
+              - type: TextBox
+                name: tp2
+                label: 'TP'
+                format: number
+              - type: TextBox
+                name: fn2
+                label: 'FN'
+                format: number
+          - type: LayoutBox
+            cell:
+              row: 1
+              column: 2
+            children:
+              - type: TextBox
+                name: fp2
+                label: 'FP'
+                format: number
+              - type: TextBox
+                name: tn2
+                label: 'TN'
+                format: number

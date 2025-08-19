@@ -1,0 +1,126 @@
+---
+name:  aalenhazard
+title: Aalen's Additive Hazard Models
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      visible: (show_model_summary)
+
+    - name: coefficientsTable
+      title: Cumulative Regression Coefficients
+      type: Table
+      visible: (show_coefficients_table)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: cumulative_coeff
+            title: Cumulative β
+            type: number
+          - name: se
+            title: SE
+            type: number
+          - name: z_value
+            title: z
+            type: number
+          - name: p_value
+            title: p
+            type: number
+
+    - name: constantEffectsTest
+      title: Test for Constant Effects
+      type: Table
+      visible: (test_constant_effects && show_test_results)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: test_statistic
+            title: Test Statistic
+            type: number
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+          - name: interpretation
+            title: Result
+            type: text
+
+    - name: goodnessOfFit
+      title: Model Goodness of Fit
+      type: Table
+      visible: (show_test_results)
+      columns:
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_model_summary)
+      columns:
+          - name: model
+            title: Model
+            type: text
+          - name: loglik
+            title: Log-Likelihood
+            type: number
+          - name: aic
+            title: AIC
+            type: number
+          - name: n_events
+            title: Events
+            type: integer
+          - name: n_obs
+            title: Observations
+            type: integer
+
+    - name: cumulativePlots
+      title: Cumulative Regression Functions
+      type: Image
+      visible: (show_cumulative_plots)
+
+    - name: hazardPlots
+      title: Estimated Hazard Functions
+      type: Image
+      visible: (show_hazard_plots)
+
+    - name: diagnosticPlots
+      title: Model Diagnostics
+      type: Image
+      visible: (show_diagnostics)
+
+    - name: residualPlots
+      title: Residual Analysis
+      type: Image
+      visible: (show_diagnostics)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)

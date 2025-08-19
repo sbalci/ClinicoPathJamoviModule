@@ -1,0 +1,228 @@
+---
+name: stratifiedparametric
+title: Stratified Parametric Models
+menuGroup: ClinicoPath
+menuSubgroup: Survival Analysis
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: elapsedtime
+      title: Time
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time variable for survival analysis.
+
+    - name: outcome
+      title: Outcome
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Event indicator variable.
+
+    - name: strata_variable
+      title: Stratification Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Variable for stratifying the parametric models.
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Covariates to include in the stratified parametric model.
+
+    - name: outcomeLevel
+      title: Outcome Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level of outcome variable indicating event.
+
+    - name: parametric_distribution
+      title: Parametric Distribution
+      type: List
+      options:
+        - name: weibull
+          title: "Weibull"
+        - name: exponential
+          title: "Exponential"
+        - name: lognormal
+          title: "Log-normal"
+        - name: loglogistic
+          title: "Log-logistic"
+        - name: gamma
+          title: "Gamma"
+        - name: gengamma
+          title: "Generalized Gamma"
+        - name: genf
+          title: "Generalized F"
+      default: weibull
+      description:
+          R: >
+            Parametric distribution for stratified modeling.
+
+    - name: baseline_specification
+      title: Baseline Specification
+      type: List
+      options:
+        - name: separate_baselines
+          title: "Separate Baseline Functions"
+        - name: proportional_baselines
+          title: "Proportional Baseline Functions"
+        - name: shared_shape
+          title: "Shared Shape Parameter"
+        - name: fully_stratified
+          title: "Fully Stratified Parameters"
+      default: separate_baselines
+      description:
+          R: >
+            Method for specifying baseline functions across strata.
+
+    - name: spline_df
+      title: Spline Degrees of Freedom
+      type: Integer
+      default: 3
+      min: 1
+      max: 10
+      description:
+          R: >
+            Degrees of freedom for spline-based baseline functions.
+
+    - name: knot_placement
+      title: Knot Placement
+      type: List
+      options:
+        - name: quantiles
+          title: "Equal Quantiles"
+        - name: boundary
+          title: "Boundary Knots Only"
+        - name: auto
+          title: "Automatic Placement"
+      default: quantiles
+      description:
+          R: >
+            Method for placing spline knots.
+
+    - name: test_stratification
+      title: Test Stratification Effect
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test whether stratification significantly improves model fit.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Confidence level for parameter estimates and predictions.
+
+    - name: show_model_summary
+      title: Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model summary information.
+
+    - name: show_coefficients
+      title: Coefficients Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display parameter estimates for each stratum.
+
+    - name: show_stratification_test
+      title: Stratification Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display test results for stratification effect.
+
+    - name: show_survival_curves
+      title: Survival Curves by Strata
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display stratified survival curves.
+
+    - name: show_hazard_curves
+      title: Hazard Functions by Strata
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display stratified hazard functions.
+
+    - name: show_comparison_plot
+      title: Model Comparison Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare stratified vs non-stratified models.
+
+    - name: show_diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display diagnostic plots and statistics for each stratum.
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate natural language summaries of results.
+
+    - name: showExplanations
+      title: Methodology
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show detailed methodology explanations.

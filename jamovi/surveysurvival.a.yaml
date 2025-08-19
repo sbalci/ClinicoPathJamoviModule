@@ -1,0 +1,389 @@
+---
+name:  surveysurvival
+title: Survey-Weighted Survival Analysis
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Survey-weighted Kaplan-Meier, Weighted Cox regression'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs survival analysis with complex survey designs and sampling weights.
+        This module implements survey-weighted survival methods for population-based
+        inference from complex sampling designs including stratified, clustered, and
+        multi-stage sampling. The analysis accounts for survey design effects on
+        standard errors and confidence intervals, enabling proper population-level
+        survival estimates from survey data.
+    R:
+        dontrun: false
+        usage: |
+            # Example 1: Basic survey-weighted Kaplan-Meier
+            library(survival)
+            library(survey)
+            
+            surveysurvival(
+                data = mysurveydata,
+                elapsedtime = "time",
+                outcome = "status",
+                outcomeLevel = "1",
+                weights = "survey_weight",
+                strata = "stratum",
+                cluster = "psu",
+                timetypeoutput = "months"
+            )
+            
+            # Example 2: Weighted Cox regression with complex design
+            surveysurvival(
+                data = mysurveydata,
+                elapsedtime = "time", 
+                outcome = "status",
+                outcomeLevel = "1",
+                explanatory = c("age_group", "sex"),
+                contexpl = c("income"),
+                weights = "survey_weight",
+                strata = "stratum",
+                cluster = "psu",
+                fpc = "fpc_var",
+                design_type = "stratified_cluster"
+            )
+            
+            # Example 3: Multi-stage survey design
+            surveysurvival(
+                data = nhanes_data,
+                elapsedtime = "followup_years",
+                outcome = "death",
+                outcomeLevel = "Dead",
+                explanatory = c("education", "race"),
+                weights = "wtmec2yr",
+                strata = "sdmvstra", 
+                cluster = "sdmvpsu",
+                design_type = "multistage",
+                nest_clusters = TRUE
+            )
+
+options:
+
+# Data ----
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The survey dataset to be analyzed, provided as a data frame. Must contain
+            survival variables, survey design variables (weights, strata, clusters),
+            and any explanatory variables for analysis.
+
+# Time Variables ----
+
+    - name: elapsedtime
+      title: 'Time Elapsed'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+        R: >
+          The numeric variable representing follow-up time until the event or last observation.
+          Time should be in consistent units across all observations.
+
+    - name: tint
+      title: Using Dates to Calculate Survival Time
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, survival time will be calculated from diagnosis and follow-up dates.
+          If false, elapsedtime should be provided as a pre-calculated numeric variable.
+
+    - name: dxdate
+      title: 'Diagnosis Date'
+      type: Variable
+      default: NULL
+      description:
+        R: >
+          Date of diagnosis or start of follow-up. Required if tint = true.
+          Must match the format specified in timetypedata.
+
+    - name: fudate
+      title: 'Follow-up Date'
+      type: Variable
+      default: NULL
+      description:
+        R: >
+          Follow-up date or date of last observation. Required if tint = true.
+          Must match the format specified in timetypedata.
+
+    - name: timetypedata
+      title: 'Time Type in Data'
+      type: List
+      options:
+        - title: 'Year-Month-Day'
+          name: ymd
+        - title: 'Month-Day-Year'
+          name: mdy
+        - title: 'Day-Month-Year'
+          name: dmy
+      default: ymd
+      description:
+        R: >
+          Specifies the format of date variables in the input data.
+          Used when tint = true to parse diagnosis and follow-up dates.
+
+    - name: timetypeoutput
+      title: Time Type in Output
+      type: List
+      options:
+        - title: days
+          name: days
+        - title: weeks
+          name: weeks
+        - title: months
+          name: months
+        - title: years
+          name: years
+      default: months
+      description:
+        R: >
+          The units in which survival time is reported in the output.
+
+# Outcome Variables ----
+
+    - name: outcome
+      title: 'Outcome'
+      type: Variable
+      suggested: [ ordinal, nominal, continuous ]
+      permitted: [ factor, numeric ]
+      default: NULL
+      description:
+        R: >
+          The outcome variable indicating event status (e.g., death, disease occurrence).
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+      description:
+        R: >
+          The level of outcome considered as the event.
+
+# Survey Design Variables ----
+
+    - name: weights
+      title: 'Survey Weights'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+        R: >
+          Variable containing survey sampling weights for each observation.
+          Required for survey-weighted analysis.
+
+    - name: strata
+      title: 'Stratification Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+        R: >
+          Variable defining survey strata. Used in stratified sampling designs.
+
+    - name: cluster
+      title: 'Primary Sampling Units (PSU)'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+        R: >
+          Variable defining primary sampling units or clusters.
+          Used in cluster and multi-stage sampling designs.
+
+    - name: fpc
+      title: 'Finite Population Correction'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+        R: >
+          Variable containing finite population correction factors.
+          Optional for improved variance estimation when sampling fraction is large.
+
+    - name: design_type
+      title: 'Survey Design Type'
+      type: List
+      options:
+        - title: Simple Random Sample
+          name: srs
+        - title: Stratified Sample
+          name: stratified
+        - title: Cluster Sample
+          name: cluster
+        - title: Stratified Cluster Sample
+          name: stratified_cluster
+        - title: Multi-stage Sample
+          name: multistage
+      default: srs
+      description:
+        R: >
+          Type of survey sampling design used to collect the data.
+
+    - name: nest_clusters
+      title: 'Nested Clusters'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Whether clusters are nested within strata (TRUE) or crossed (FALSE).
+          Relevant for stratified cluster designs.
+
+# Explanatory Variables ----
+
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+        R: >
+          Categorical explanatory variables for weighted Cox regression.
+
+    - name: contexpl
+      title: Continuous Explanatory Variable
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: NULL
+      description:
+        R: >
+          Continuous explanatory variables for weighted Cox regression.
+
+# Analysis Options ----
+
+    - name: km_weighted
+      title: Weighted Kaplan-Meier
+      type: Bool
+      default: true
+      description:
+        R: >
+          Perform survey-weighted Kaplan-Meier survival estimation.
+
+    - name: cox_weighted
+      title: Weighted Cox Regression
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform survey-weighted Cox proportional hazards regression.
+
+    - name: robust_se
+      title: Robust Standard Errors
+      type: Bool
+      default: true
+      description:
+        R: >
+          Use robust variance estimation accounting for survey design effects.
+
+    - name: ci_level
+      title: 'Confidence Level'
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+        R: >
+          Confidence level for confidence intervals (e.g., 0.95 for 95% CI).
+
+# Population Estimates ----
+
+    - name: population_totals
+      title: 'Population Totals'
+      type: Bool
+      default: false
+      description:
+        R: >
+          Calculate population-level survival estimates and totals.
+
+    - name: subpopulation
+      title: 'Subpopulation Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
+      default: NULL
+      description:
+        R: >
+          Variable defining subpopulation for domain estimation.
+
+# Plot Options ----
+
+    - name: km_plot
+      title: 'Kaplan-Meier Plot'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Generate survey-weighted Kaplan-Meier survival plot.
+
+    - name: endplot
+      title: Plot End Time
+      type: Integer
+      default: 60
+      description:
+        R: >
+          Maximum follow-up time to display on survival plots.
+
+    - name: byplot
+      title: Time Interval
+      type: Integer
+      default: 12
+      description:
+        R: >
+          Time interval for plot labels and risk tables.
+
+    - name: ci95
+      title: '95% CI'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Display confidence intervals on survival plots.
+
+    - name: risktable
+      title: Risk Table
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display number at risk below survival plots.
+
+# Output Options ----
+
+    - name: design_summary
+      title: 'Survey Design Summary'
+      type: Bool
+      default: true
+      description:
+        R: >
+          Display summary of survey design characteristics.
+
+    - name: showSummaries
+      title: "Show Natural Language Summaries"
+      type: Bool
+      default: false
+      description: >-
+        Display natural language summaries alongside tables and plots for
+        interpretation of survey-weighted survival results.
+
+    - name: showExplanations
+      title: "Show Analysis Explanations"
+      type: Bool
+      default: false
+      description: >-
+        Display detailed explanations of survey-weighted survival methods
+        and interpretation guidelines.
+
+...

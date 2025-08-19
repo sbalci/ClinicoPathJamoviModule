@@ -1,0 +1,153 @@
+title: Dynamic Coefficient Models
+name: dynamiccoeff
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: elapsedtime
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Event Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Static Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+            itemDropBehaviour: insert
+      - type: TargetLayoutBox
+        label: Dynamic Covariates
+        children:
+          - type: VariablesListBox
+            name: dynamic_covariates
+            isTarget: true
+            itemDropBehaviour: insert
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Event Variable Options
+        style: list-inline
+        children:
+          - type: TextBox
+            name: outcomeLevel
+            format: string
+            label: Event Level
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Dynamic Model Settings
+        style: list-inline
+        children:
+          - type: ComboBox
+            name: updating_method
+            label: Updating Method
+          - type: TextBox
+            name: state_dimension
+            format: number
+            label: State Dimension
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Model Parameters
+        style: list-inline
+        children:
+          - type: TextBox
+            name: process_variance
+            format: number
+            label: Process Variance
+          - type: TextBox
+            name: observation_variance
+            format: number
+            label: Observation Variance
+          - type: TextBox
+            name: forgetting_factor
+            format: number
+            label: Forgetting Factor
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Adaptation Settings
+        style: list-inline
+        children:
+          - type: TextBox
+            name: burn_in_period
+            format: number
+            label: Burn-in Period
+          - type: TextBox
+            name: adaptation_rate
+            format: number
+            label: Adaptation Rate
+          - type: TextBox
+            name: smoothing_parameter
+            format: number
+            label: Smoothing Parameter
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Display Options
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: show_model_summary
+            label: Show Model Summary
+          - type: CheckBox
+            name: show_coefficient_paths
+            label: Show Coefficient Paths
+          - type: CheckBox
+            name: show_state_evolution
+            label: Show State Evolution
+          - type: CheckBox
+            name: show_adaptation_metrics
+            label: Show Adaptation Metrics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Visualization Options
+        style: list-inline
+        children:
+          - type: CheckBox
+            name: show_dynamic_plots
+            label: Show Dynamic Plots
+          - type: CheckBox
+            name: show_state_plots
+            label: Show State Plots
+          - type: CheckBox
+            name: show_diagnostic_plots
+            label: Show Diagnostic Plots
+          - type: CheckBox
+            name: show_comparison_plots
+            label: Show Comparison Plots
+          - type: CheckBox
+            name: showSummaries
+            label: Analysis Summaries
+          - type: CheckBox
+            name: showExplanations
+            label: Method Explanations

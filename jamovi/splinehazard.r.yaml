@@ -1,0 +1,130 @@
+---
+name: splinehazard
+title: Spline-based Hazard Functions
+jrs: "1.1"
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      visible: true
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: knots
+          title: Knots  
+          type: integer
+        - name: degree
+          title: Degree
+          type: integer
+        - name: loglik
+          title: Log-likelihood
+          type: number
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+
+    - name: parametersTable
+      title: Spline Parameters
+      type: Table
+      visible: true
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: lower_ci
+          title: Lower CI
+          type: number
+        - name: upper_ci
+          title: Upper CI
+          type: number
+        - name: z_value
+          title: Z-value
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+
+    - name: knotsTable
+      title: Knot Locations
+      type: Table
+      visible: true
+      columns:
+        - name: knot_number
+          title: Knot
+          type: integer
+        - name: time_location
+          title: Time Location
+          type: number
+        - name: quantile
+          title: Quantile
+          type: number
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_model_comparison)
+      columns:
+        - name: n_knots
+          title: Knots
+          type: integer
+        - name: degree
+          title: Degree  
+          type: integer
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: delta_aic
+          title: Δ AIC
+          type: number
+        - name: weight
+          title: AIC Weight
+          type: number
+
+    - name: hazardPlot
+      title: Spline-based Hazard Function
+      type: Image
+      visible: (show_hazard_plot)
+
+    - name: survivalPlot
+      title: Survival Function
+      type: Image
+      visible: (show_survival_plot)
+
+    - name: cumulativePlot
+      title: Cumulative Hazard Function
+      type: Image
+      visible: (show_cumulative_plot)
+
+    - name: splineBasisPlot
+      title: Spline Basis Functions
+      type: Image
+      visible: true
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)
