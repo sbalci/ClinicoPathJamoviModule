@@ -67,3 +67,5 @@ children:
             name: showDetailedTables
           - type: CheckBox
             name: plot
+          - type: CheckBox
+            name: exportResults

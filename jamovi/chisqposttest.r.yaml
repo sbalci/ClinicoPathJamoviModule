@@ -119,10 +119,27 @@ items:
           - sig
           - excl
 
-    # - name: mydataview_plot
-    #   title: mydataview_plot
-    #   type: Preformatted
-
+    - name:  exportTable
+      title: 'Exported Results'
+      type:  Table
+      visible: (exportResults)
+      columns:
+        - name: category
+          title: "Category"
+          type: text
+        - name: measure
+          title: "Measure"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+          - rows
+          - cols
+          - exportResults
 
     - name:  plot
       title: 'Standardized Residuals'

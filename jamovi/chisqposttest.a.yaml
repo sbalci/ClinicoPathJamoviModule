@@ -1,7 +1,7 @@
 ---
 name:  chisqposttest
 title: Chi-Square Post-Hoc Tests
-menuGroup: ExplorationD
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Comparisons
 version: '0.0.3'
 jas: '1.2'
@@ -134,4 +134,11 @@ options:
       default: auto
       description: >
                   method for selecting statistical test for pairwise comparisons
+
+    - name: exportResults
+      title: Export Detailed Results
+      type: Bool
+      default: false
+      description: >
+                  Export comprehensive analysis results to downloadable format for further analysis
 ...

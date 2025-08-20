@@ -1,0 +1,11 @@
+study_name,author,year,country,sample_size,true_positives,false_positives,false_negatives,true_negatives,ihc_antibody,staining_method,patient_population
+"Smith_2020","Smith et al.","2020","USA","895","47","101","9","738","anti-CD20","automated","mixed_population"
+"Johnson_2021","Johnson et al.","2021","UK","1992","126","272","51","1543","anti-CD20","manual","early_stage"
+"Zhang_2019","Zhang et al.","2019","China","233","19","12","10","192","anti-CD20","automated","advanced_stage"
+"Mueller_2020","Mueller et al.","2020","Germany","393","36","78","3","276","anti-CD20","manual","mixed_population"
+"Rodriguez_2021","Rodriguez et al.","2021","Spain","1319","130","211","19","959","anti-CD20","automated","early_stage"
+"Tanaka_2020","Tanaka et al.","2020","Japan","243","84","68","2","89","anti-CD20","manual","advanced_stage"
+"Brown_2019","Brown et al.","2019","Canada","487","58","89","12","328","anti-CD20","automated","mixed_population"
+"Lee_2021","Lee et al.","2021","South Korea","654","91","134","8","421","anti-CD20","manual","early_stage"
+"Patel_2020","Patel et al.","2020","India","342","42","56","7","237","anti-CD20","automated","advanced_stage"
+"Wilson_2021","Wilson et al.","2021","Australia","756","103","142","15","496","anti-CD20","manual","mixed_population"
