@@ -1,0 +1,259 @@
+---
+name: flexcomprisk
+title: Flexible Competing Risks Models
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - time
+          - event
+          - covs
+
+    - name: educationalInfo
+      title: 'Flexible Competing Risks Guide'
+      type: Html
+      visible: (showEducational)
+      clearWith:
+          - time
+          - event
+
+    - name: modelSummary
+      title: 'Model Summary'
+      type: Table
+      rows: 1
+      columns:
+        - name: model_type
+          title: "Model Type"
+          type: text
+        - name: n_events
+          title: "Events"
+          type: number
+        - name: n_competing
+          title: "Competing"
+          type: number
+        - name: n_censored
+          title: "Censored"
+          type: number
+        - name: aic
+          title: "AIC"
+          type: number
+        - name: bic
+          title: "BIC"
+          type: number
+      clearWith:
+          - time
+          - event
+          - covs
+          - modelType
+
+    - name: coefficientsTable
+      title: 'Model Coefficients'
+      type: Table
+      columns:
+        - name: parameter
+          title: "Parameter"
+          type: text
+        - name: estimate
+          title: "Estimate"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: z_value
+          title: "z-value"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: interpretation
+          title: "Effect"
+          type: text
+      clearWith:
+          - time
+          - event
+          - covs
+          - modelType
+
+    - name: predictionsTable
+      title: 'Cumulative Incidence Predictions'
+      type: Table
+      visible: (showPredictions)
+      columns:
+        - name: time_point
+          title: "Time"
+          type: number
+        - name: cif_estimate
+          title: "CIF"
+          type: number
+        - name: cif_se
+          title: "SE"
+          type: number
+        - name: cif_lower
+          title: "Lower CI"
+          type: number
+        - name: cif_upper
+          title: "Upper CI"
+          type: number
+        - name: risk_level
+          title: "Risk Level"
+          type: text
+      clearWith:
+          - time
+          - event
+          - covs
+          - predictionTimes
+
+    - name: modelComparisonTable
+      title: 'Model Performance Comparison'
+      type: Table
+      visible: (showModelComparison)
+      columns:
+        - name: model
+          title: "Model"
+          type: text
+        - name: c_index
+          title: "C-Index"
+          type: number
+        - name: ibs
+          title: "IBS"
+          type: number
+        - name: auc
+          title: "AUC (5-year)"
+          type: number
+        - name: brier_score
+          title: "Brier Score"
+          type: number
+        - name: rank
+          title: "Rank"
+          type: text
+      clearWith:
+          - modelType
+          - showModelComparison
+
+    - name: validationResults
+      title: 'Validation Results'
+      type: Table
+      visible: (showValidationResults)
+      columns:
+        - name: metric
+          title: "Validation Metric"
+          type: text
+        - name: estimate
+          title: "Estimate"
+          type: number
+        - name: cv_mean
+          title: "CV Mean"
+          type: number
+        - name: cv_se
+          title: "CV SE"
+          type: number
+        - name: optimism
+          title: "Optimism"
+          type: number
+        - name: corrected
+          title: "Corrected"
+          type: number
+      clearWith:
+          - validationType
+          - cvFolds
+
+    - name: timeVaryingEffects
+      title: 'Time-Varying Effects'
+      type: Table
+      visible: (timeInteractions)
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: time_point
+          title: "Time"
+          type: number
+        - name: effect
+          title: "Effect"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Trend"
+          type: text
+      clearWith:
+          - timeInteractions
+          - time
+          - event
+
+    - name: methodsInfo
+      title: 'Statistical Methods'
+      type: Html
+      clearWith:
+          - modelType
+          - validationType
+
+    - name: recommendationsInfo
+      title: 'Model Selection Recommendations'
+      type: Html
+      clearWith:
+          - modelType
+          - showModelComparison
+
+    - name: cifPlot
+      title: 'Cumulative Incidence Functions'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .cifPlot
+      visible: (plotCumulativeIncidence)
+      requiresData: true
+      clearWith:
+          - time
+          - event
+          - covs
+          - modelType
+
+    - name: modelComparisonPlot
+      title: 'Model Performance Comparison'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .modelComparisonPlot
+      visible: (plotModelComparison)
+      requiresData: true
+      clearWith:
+          - modelType
+          - showModelComparison
+
+    - name: validationPlot
+      title: 'Model Validation and Calibration'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .validationPlot
+      visible: (plotValidation)
+      requiresData: true
+      clearWith:
+          - validationType
+          - time
+          - event
+
+refs:
+    - riskRegression
+    - survival
+    - splines
+    - randomForestSRC
+    - ClinicoPathJamoviModule
+
+...

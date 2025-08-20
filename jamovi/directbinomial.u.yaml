@@ -1,0 +1,87 @@
+title: Direct Binomial Regression for Competing Risks
+name: directbinomial
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Variable
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covs
+            isTarget: true
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: eventOfInterest
+            format: number
+            suffix: "event code"
+          - type: TextBox
+            name: times
+            format: string
+          - type: TextBox
+            name: conf
+            format: number
+            suffix: α
+  - type: CollapseBox
+    label: Bootstrap Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bootstrap
+          - type: TextBox
+            name: nboot
+            format: number
+            enable: (bootstrap)
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showModel
+          - type: CheckBox
+            name: showEducational
+          - type: CheckBox
+            name: predictions
+          - type: CheckBox
+            name: residuals
+  - type: CollapseBox
+    label: Plot Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: plotCIF
+          - type: CheckBox
+            name: plotResiduals

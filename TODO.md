@@ -74,9 +74,9 @@ This roadmap outlines the systematic implementation of advanced survival analysi
   - **Flexible competing risks models** (`riskRegression`)
 
 - **Multi-State Models:**
-  - **Markov multi-state models** (`mstate`, `msm`)
-  - **Semi-Markov models** (`SemiMarkov`)
-  - **Hidden Markov models for survival** (`msm`)
+  - ✅ **Markov multi-state models** (`mstate`, `msm`) - **IMPLEMENTED** (`markovmultistate`)
+  - ✅ **Semi-Markov models** (`SemiMarkov`) - **IMPLEMENTED** (`semimarkov`)
+  - ✅ **Hidden Markov models for survival** (`msm`) - **IMPLEMENTED** (`hiddenmarkov`)
   - **Illness-death models** (`p3state.msm`)
   - **Flexible multi-state models** (`flexmsm`)
   - **Continuous-time Markov models** (`msm`)

@@ -1,0 +1,254 @@
+---
+name: hiddenmarkov
+title: Hidden Markov Models for Survival
+menuGroup: SurvivalT
+menuSubgroup: jsurvival Multi-State Models
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >
+        Fits Hidden Markov models for survival data using the msm package. 
+        Hidden Markov models are useful when the states are not directly 
+        observed but are inferred from observed covariates or measurements. 
+        Provides estimation of transition intensities, state prevalences, 
+        and predictions with uncertainty quantification.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: subject
+      title: Subject ID
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description: >
+          Subject identifier variable
+
+    - name: state
+      title: Observed State
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      description: >
+          Observed state variable (can be noisy observations of true states)
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >
+          Time at which state was observed
+
+    - name: covs
+      title: Covariates
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description: >
+          Covariates to include in the transition intensity model
+
+    - name: hiddenCovs
+      title: Hidden State Covariates
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description: >
+          Covariates for hidden state probabilities (misclassification model)
+
+    - name: nstates
+      title: Number of Hidden States
+      type: Number
+      min: 2
+      max: 10
+      default: 3
+      description: >
+          Number of hidden states in the model
+
+    - name: qmatrix
+      title: Q-Matrix Structure
+      type: List
+      options:
+        - title: Irreversible (unidirectional)
+          name: irreversible
+        - title: Reversible (bidirectional)
+          name: reversible
+        - title: Custom Structure
+          name: custom
+      default: irreversible
+      description: >
+          Structure of the transition intensity matrix
+
+    - name: censor
+      title: Censoring Indicator
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description: >
+          Censoring indicator (1=observed, 0=censored)
+
+    - name: pci
+      title: Piecewise Constant Intensities
+      type: Bool
+      default: false
+      description: >
+          Use piecewise constant transition intensities
+
+    - name: timeIntervals
+      title: Time Intervals
+      type: String
+      default: ""
+      description: >
+          Comma-separated time intervals for piecewise constant model
+
+    - name: obstype
+      title: Observation Type
+      type: List
+      options:
+        - title: Exact Times
+          name: exact
+        - title: Panel Data
+          name: panel
+        - title: Mixed
+          name: mixed
+      default: exact
+      description: >
+          Type of observation process
+
+    - name: ematrix
+      title: Misclassification Matrix
+      type: List
+      options:
+        - title: Identity (no misclassification)
+          name: identity
+        - title: Symmetric misclassification
+          name: symmetric
+        - title: Custom misclassification
+          name: custom
+      default: identity
+      description: >
+          Structure of the emission/misclassification matrix
+
+    - name: method
+      title: Optimization Method
+      type: List
+      options:
+        - title: BFGS
+          name: BFGS
+        - title: Nelder-Mead
+          name: Nelder-Mead
+        - title: BOBYQA
+          name: BOBYQA
+      default: BFGS
+      description: >
+          Optimization method for parameter estimation
+
+    - name: fixedpar
+      title: Fixed Parameters
+      type: String
+      default: ""
+      description: >
+          Comma-separated indices of parameters to fix during estimation
+
+    - name: initprobs
+      title: Initial State Probabilities
+      type: String
+      default: ""
+      description: >
+          Comma-separated initial state probabilities
+
+    - name: showModel
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description: >
+          Display detailed model summary and parameter estimates
+
+    - name: showTransitions
+      title: Show Transition Probabilities
+      type: Bool
+      default: true
+      description: >
+          Display transition probability matrices at specific times
+
+    - name: predTimes
+      title: Prediction Times
+      type: String
+      default: "1, 3, 5"
+      description: >
+          Comma-separated list of time points for transition predictions
+
+    - name: showPrevalence
+      title: Show State Prevalence
+      type: Bool
+      default: true
+      description: >
+          Display expected state prevalences over time
+
+    - name: showResiduals
+      title: Show Residuals
+      type: Bool
+      default: false
+      description: >
+          Display model residuals and goodness-of-fit statistics
+
+    - name: showViterbi
+      title: Show Viterbi States
+      type: Bool
+      default: false
+      description: >
+          Display most likely hidden state sequences (Viterbi algorithm)
+
+    - name: bootstrap
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description: >
+          Use bootstrap methods for confidence interval estimation
+
+    - name: nboot
+      title: Bootstrap Samples
+      type: Number
+      min: 50
+      max: 2000
+      default: 500
+      description: >
+          Number of bootstrap samples (when bootstrap is enabled)
+
+    - name: plotTransitions
+      title: Plot Transition Intensities
+      type: Bool
+      default: true
+      description: >
+          Display transition intensity plots over time
+
+    - name: plotPrevalence
+      title: Plot State Prevalence
+      type: Bool
+      default: true
+      description: >
+          Display state prevalence plots over time
+
+    - name: plotResiduals
+      title: Plot Residuals
+      type: Bool
+      default: false
+      description: >
+          Display residual plots for model diagnostics
+
+    - name: showEducational
+      title: Show Educational Information
+      type: Bool
+      default: true
+      description: >
+          Display educational information about Hidden Markov models
+...

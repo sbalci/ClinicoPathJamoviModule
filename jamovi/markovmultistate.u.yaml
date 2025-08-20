@@ -1,0 +1,122 @@
+title: Markov Multi-State Models
+name: markovmultistate
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event/State Variable
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Subject ID
+        children:
+          - type: VariablesListBox
+            name: subject
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covs
+            isTarget: true
+  - type: CollapseBox
+    label: Model Configuration
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: modelType
+          - type: ComboBox
+            name: transitionMatrix
+          - type: ComboBox
+            name: baselineHazard
+          - type: ComboBox
+            name: estimationMethod
+  - type: CollapseBox
+    label: Time Settings
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: timeUnits
+          - type: TextBox
+            name: predictionTimes
+            format: string
+          - type: TextBox
+            name: transitionTimes
+            format: string
+  - type: CollapseBox
+    label: Estimation Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: maxIterations
+            format: number
+          - type: TextBox
+            name: tolerance
+            format: number
+          - type: TextBox
+            name: conf
+            format: number
+            suffix: α
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showEducational
+          - type: CheckBox
+            name: showTransitionIntensities
+          - type: CheckBox
+            name: showTransitionProbs
+          - type: CheckBox
+            name: showStateProbabilities
+          - type: CheckBox
+            name: showMeanSojournTimes
+          - type: CheckBox
+            name: showExpectedRewards
+          - type: CheckBox
+            name: showModelFit
+          - type: CheckBox
+            name: showPredictions
+  - type: CollapseBox
+    label: Plot Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: plotStateProbs
+          - type: CheckBox
+            name: plotTransitionProbs
+          - type: CheckBox
+            name: plotHazardRatios
+          - type: CheckBox
+            name: plotModelDiagnostics

@@ -1,0 +1,137 @@
+title: Hidden Markov Models for Survival
+name: hiddenmarkov
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Subject ID
+        children:
+          - type: VariablesListBox
+            name: subject
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Observed State
+        children:
+          - type: VariablesListBox
+            name: state
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Transition Covariates
+        children:
+          - type: VariablesListBox
+            name: covs
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Hidden State Covariates
+        children:
+          - type: VariablesListBox
+            name: hiddenCovs
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Censoring Indicator (Optional)
+        children:
+          - type: VariablesListBox
+            name: censor
+            maxItemCount: 1
+            isTarget: true
+  - type: Label
+    label: Model Specification
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: nstates
+            format: number
+          - type: ComboBox
+            name: qmatrix
+          - type: ComboBox
+            name: ematrix
+          - type: ComboBox
+            name: obstype
+  - type: Label
+    label: Advanced Options
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: pci
+          - type: TextBox
+            name: timeIntervals
+            format: string
+            enable: (pci)
+          - type: ComboBox
+            name: method
+          - type: TextBox
+            name: fixedpar
+            format: string
+          - type: TextBox
+            name: initprobs
+            format: string
+  - type: Label
+    label: Output Options
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showModel
+          - type: CheckBox
+            name: showTransitions
+          - type: TextBox
+            name: predTimes
+            format: string
+            enable: (showTransitions)
+          - type: CheckBox
+            name: showPrevalence
+          - type: CheckBox
+            name: showResiduals
+          - type: CheckBox
+            name: showViterbi
+  - type: Label
+    label: Bootstrap Options
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bootstrap
+          - type: TextBox
+            name: nboot
+            format: number
+            enable: (bootstrap)
+  - type: Label
+    label: Plots
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: plotTransitions
+          - type: CheckBox
+            name: plotPrevalence
+          - type: CheckBox
+            name: plotResiduals
+  - type: Label
+    label: Educational
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showEducational

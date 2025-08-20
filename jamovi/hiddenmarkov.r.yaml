@@ -1,0 +1,211 @@
+---
+name: hiddenmarkov
+title: Hidden Markov Models for Survival
+jrs: '1.0'
+
+items:
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+        - name: lower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper
+          title: Upper CI
+          type: number
+          format: zto
+        - name: pvalue
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: transitionMatrix
+      title: Transition Intensity Matrix
+      type: Table
+      columns:
+        - name: from_state
+          title: From State
+          type: text
+        - name: to_state
+          title: To State
+          type: text
+        - name: intensity
+          title: Intensity
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+        - name: lower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper
+          title: Upper CI
+          type: number
+          format: zto
+
+    - name: transitionProbs
+      title: Transition Probabilities
+      type: Table
+      columns:
+        - name: time
+          title: Time
+          type: number
+          format: zto
+        - name: from_state
+          title: From State
+          type: text
+        - name: to_state
+          title: To State
+          type: text
+        - name: probability
+          title: Probability
+          type: number
+          format: zto
+        - name: lower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper
+          title: Upper CI
+          type: number
+          format: zto
+
+    - name: statePrevalence
+      title: Expected State Prevalence
+      type: Table
+      columns:
+        - name: time
+          title: Time
+          type: number
+          format: zto
+        - name: state
+          title: State
+          type: text
+        - name: prevalence
+          title: Prevalence
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+        - name: lower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper
+          title: Upper CI
+          type: number
+          format: zto
+
+    - name: misclassification
+      title: Misclassification Probabilities
+      type: Table
+      columns:
+        - name: true_state
+          title: True State
+          type: text
+        - name: observed_state
+          title: Observed State
+          type: text
+        - name: probability
+          title: Probability
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+        - name: lower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper
+          title: Upper CI
+          type: number
+          format: zto
+
+    - name: goodnessOfFit
+      title: Model Fit Statistics
+      type: Table
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: df
+          title: df
+          type: integer
+        - name: pvalue
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: viterbiStates
+      title: Most Likely Hidden States (Viterbi)
+      type: Table
+      columns:
+        - name: subject
+          title: Subject
+          type: text
+        - name: time
+          title: Time
+          type: number
+          format: zto
+        - name: observed_state
+          title: Observed
+          type: text
+        - name: viterbi_state
+          title: Viterbi State
+          type: text
+        - name: probability
+          title: Probability
+          type: number
+          format: zto
+
+    - name: transitionPlot
+      title: Transition Intensities Over Time
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .transitionPlot
+
+    - name: prevalencePlot
+      title: State Prevalence Over Time
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .prevalencePlot
+
+    - name: residualPlot
+      title: Model Residuals
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .residualPlot
+
+    - name: educationalText
+      title: 'Hidden Markov Models for Survival - Educational Information'
+      type: Html
+      visible: (showEducational)
+      refs: msm
+...

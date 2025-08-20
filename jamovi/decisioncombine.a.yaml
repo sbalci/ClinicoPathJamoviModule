@@ -124,21 +124,21 @@ options:
     - name: showIndividual
       title: 'Show Individual Test Results'
       type: Bool
-      default: true
+      default: false
 
-    - name: exportCombinationPattern
-      title: 'Export Combination Patterns'
+    - name: addCombinationPattern
+      title: 'Add Combination Pattern to Data'
       type: Bool
       default: false
       description:
           R: >
-            Export a new variable to the data frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
+            Export a new variable to the original data frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
 
     # Visualization options
     - name: showVisualization
       title: Show Advanced Visualizations
       type: Bool
-      default: true
+      default: false
       description:
           ui: >
             Generate publication-quality visualizations including performance heatmaps, 

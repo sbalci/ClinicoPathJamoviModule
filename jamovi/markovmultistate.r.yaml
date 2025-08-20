@@ -1,0 +1,358 @@
+---
+name: markovmultistate
+title: Markov Multi-State Models
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - time
+          - event
+          - subject
+
+    - name: educationalInfo
+      title: 'Multi-State Models Guide'
+      type: Html
+      visible: (showEducational)
+      clearWith:
+          - modelType
+          - transitionMatrix
+
+    - name: modelSummary
+      title: 'Model Summary'
+      type: Table
+      rows: 1
+      columns:
+        - name: model_type
+          title: "Model Type"
+          type: text
+        - name: n_states
+          title: "States"
+          type: number
+        - name: n_subjects
+          title: "Subjects"
+          type: number
+        - name: n_transitions
+          title: "Transitions"
+          type: number
+        - name: loglik
+          title: "Log-likelihood"
+          type: number
+        - name: aic
+          title: "AIC"
+          type: number
+        - name: bic
+          title: "BIC"
+          type: number
+        - name: convergence
+          title: "Convergence"
+          type: text
+      clearWith:
+          - time
+          - event
+          - subject
+          - modelType
+
+    - name: transitionIntensities
+      title: 'Transition Intensities (Q-matrix)'
+      type: Table
+      visible: (showTransitionIntensities)
+      columns:
+        - name: from_state
+          title: "From State"
+          type: text
+        - name: to_state
+          title: "To State"
+          type: text
+        - name: intensity
+          title: "Intensity"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Rate"
+          type: text
+      clearWith:
+          - modelType
+          - baselineHazard
+
+    - name: transitionProbabilities
+      title: 'Transition Probabilities'
+      type: Table
+      visible: (showTransitionProbs)
+      columns:
+        - name: time_point
+          title: "Time"
+          type: number
+        - name: from_state
+          title: "From"
+          type: text
+        - name: to_state
+          title: "To"
+          type: text
+        - name: probability
+          title: "P(transition)"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: risk_level
+          title: "Risk"
+          type: text
+      clearWith:
+          - transitionTimes
+          - modelType
+
+    - name: stateProbabilities
+      title: 'State Occupation Probabilities'
+      type: Table
+      visible: (showStateProbabilities)
+      columns:
+        - name: time_point
+          title: "Time"
+          type: number
+        - name: state
+          title: "State"
+          type: text
+        - name: probability
+          title: "P(state)"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: prevalent_cases
+          title: "Expected N"
+          type: number
+      clearWith:
+          - predictionTimes
+          - modelType
+
+    - name: meanSojournTimes
+      title: 'Mean Sojourn Times'
+      type: Table
+      visible: (showMeanSojournTimes)
+      columns:
+        - name: state
+          title: "State"
+          type: text
+        - name: mean_time
+          title: "Mean Time"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: median_time
+          title: "Median Time"
+          type: number
+        - name: interpretation
+          title: "Duration"
+          type: text
+      clearWith:
+          - modelType
+          - timeUnits
+
+    - name: covariateEffects
+      title: 'Covariate Effects on Transitions'
+      type: Table
+      visible: (covs)
+      columns:
+        - name: transition
+          title: "Transition"
+          type: text
+        - name: covariate
+          title: "Covariate"
+          type: text
+        - name: coefficient
+          title: "Coefficient"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: hazard_ratio
+          title: "HR"
+          type: number
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Effect"
+          type: text
+      clearWith:
+          - covs
+          - modelType
+
+    - name: modelFitStatistics
+      title: 'Model Fit and Diagnostics'
+      type: Table
+      visible: (showModelFit)
+      columns:
+        - name: statistic
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+        - name: df
+          title: "df"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Assessment"
+          type: text
+      clearWith:
+          - modelType
+          - estimationMethod
+
+    - name: predictionsTable
+      title: 'Individual Predictions'
+      type: Table
+      visible: (showPredictions)
+      columns:
+        - name: subject_id
+          title: "Subject"
+          type: text
+        - name: time_point
+          title: "Time"
+          type: number
+        - name: current_state
+          title: "Current State"
+          type: text
+        - name: most_likely_state
+          title: "Predicted State"
+          type: text
+        - name: probability
+          title: "Probability"
+          type: number
+        - name: confidence_interval
+          title: "95% CI"
+          type: text
+        - name: risk_category
+          title: "Risk"
+          type: text
+      clearWith:
+          - predictionTimes
+          - subject
+
+    - name: methodsInfo
+      title: 'Statistical Methods'
+      type: Html
+      clearWith:
+          - modelType
+          - estimationMethod
+
+    - name: interpretationGuide
+      title: 'Clinical Interpretation Guide'
+      type: Html
+      clearWith:
+          - modelType
+          - transitionMatrix
+
+    - name: stateTransitionDiagram
+      title: 'State Transition Diagram'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .stateTransitionDiagram
+      requiresData: true
+      clearWith:
+          - transitionMatrix
+          - modelType
+
+    - name: stateProbabilityPlot
+      title: 'State Occupation Probabilities'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .stateProbabilityPlot
+      visible: (plotStateProbs)
+      requiresData: true
+      clearWith:
+          - time
+          - event
+          - modelType
+
+    - name: transitionProbabilityPlot
+      title: 'Transition Probability Matrix'
+      type: Image
+      width: 700
+      height: 700
+      renderFun: .transitionProbabilityPlot
+      visible: (plotTransitionProbs)
+      requiresData: true
+      clearWith:
+          - transitionTimes
+          - modelType
+
+    - name: hazardRatioPlot
+      title: 'Covariate Hazard Ratios'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .hazardRatioPlot
+      visible: (plotHazardRatios)
+      requiresData: true
+      clearWith:
+          - covs
+          - modelType
+
+    - name: diagnosticsPlot
+      title: 'Model Diagnostics'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .diagnosticsPlot
+      visible: (plotModelDiagnostics)
+      requiresData: true
+      clearWith:
+          - modelType
+          - estimationMethod
+
+refs:
+    - mstate
+    - msm
+    - survival
+    - diagram
+    - ClinicoPathJamoviModule
+
+...
