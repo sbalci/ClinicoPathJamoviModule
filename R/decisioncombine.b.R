@@ -13,6 +13,12 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             },
 
             .run = function() {
+                # Check if we have the minimum required variables for analysis
+                if (!private$.hasRequiredInputs()) {
+                    private$.displayWelcomeMessage()
+                    return()
+                }
+                
                 # Main analysis orchestrator - delegates to focused methods
                 tryCatch({
                     # Step 1: Validate inputs
@@ -77,6 +83,26 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 if (!is.null(self$options$test3) && self$options$test3 != "" && 
                     (is.null(self$options$test3Positive) || self$options$test3Positive == "")) {
                     stop(paste("Positive level for Test 3 (", self$options$test3, ") must be specified."))
+                }
+                
+                # Validate gold standard has at least 2 levels for meaningful analysis
+                gold_levels <- unique(self$data[[self$options$gold]])
+                gold_levels <- gold_levels[!is.na(gold_levels)]
+                if (length(gold_levels) < 2) {
+                    stop(paste("Gold standard variable '", self$options$gold, "' must have at least 2 levels for diagnostic analysis. Currently found levels: ", paste(gold_levels, collapse = ", ")))
+                }
+                
+                # Validate test variables have at least 2 levels
+                test_vars <- c(self$options$test1, self$options$test2, self$options$test3)
+                test_vars <- test_vars[!is.null(test_vars) & test_vars != ""]
+                for (test_var in test_vars) {
+                    if (test_var %in% names(self$data)) {
+                        test_levels <- unique(self$data[[test_var]])
+                        test_levels <- test_levels[!is.na(test_levels)]
+                        if (length(test_levels) < 2) {
+                            warning(paste("Test variable '", test_var, "' has only one level: ", paste(test_levels, collapse = ", "), ". This may limit diagnostic analysis."))
+                        }
+                    }
                 }
                 
                 invisible(TRUE)
@@ -366,13 +392,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 mydata2 <- private$.analyzeCombinations(mydata2, test_variables, gold_variable)
                 
                 # Export combination pattern to data if requested
-                if (self$options$exportCombinationPattern && self$results$addCombinationPattern$isNotFilled()) {
+                if (self$options$addCombinationPattern && self$results$addCombinationPattern$isNotFilled()) {
                     # Create combination pattern for export
                     if ("combination_pattern" %in% names(mydata2)) {
                         # Export the combination pattern to the dataset
                         self$results$addCombinationPattern$setRowNums(rownames(processed_data$original_data))
                         self$results$addCombinationPattern$setValues(mydata2$combination_pattern)
                     }
+                }
+                
+                # Store visualization enablement state for plot rendering
+                if (self$options$showVisualization) {
+                    # This ensures plots are only prepared when visualization is enabled
+                    private$.prepareVisualizationData(mydata2, test_variables)
                 }
             },
 
@@ -558,8 +590,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     return(TRUE)
                 })
                 
-                # Get plot options
+                # Get plot options including dimensions
                 color_scheme <- self$options$colorScheme
+                plot_width <- self$options$plotWidth
+                plot_height <- self$options$plotHeight
+                
+                # Set image dimensions if provided
+                if (!is.null(plot_width) && !is.null(plot_height)) {
+                    image$setSize(width = plot_width, height = plot_height)
+                }
                 
                 # Create publication-ready heatmap data with comprehensive metrics
                 heatmap_data <- data.frame(
@@ -713,6 +752,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             .plotROCCurves = function(image, ...) {
                 # Validate plot data first
                 plotData <- image$state
+                
+                # Get plot dimensions if provided
+                plot_width <- self$options$plotWidth
+                plot_height <- self$options$plotHeight
+                
+                # Set image dimensions if provided
+                if (!is.null(plot_width) && !is.null(plot_height)) {
+                    image$setSize(width = plot_width, height = plot_height)
+                }
                 
                 # Find optimal cut-point before plotting
                 optimal_cutpoint <- private$.findOptimalCutpoint(plotData)
@@ -880,6 +928,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             .plotDecisionTree = function(image, ...) {
                 # Validate plot data first
                 plotData <- image$state
+                
+                # Get plot dimensions if provided
+                plot_width <- self$options$plotWidth
+                plot_height <- self$options$plotHeight
+                
+                # Set image dimensions if provided
+                if (!is.null(plot_width) && !is.null(plot_height)) {
+                    image$setSize(width = plot_width, height = plot_height)
+                }
+                
                 tryCatch({
                     private$.validatePlotData(plotData)
                 }, error = function(e) {
@@ -1085,6 +1143,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             .plotVennDiagram = function(image, ...) {
                 # Validate plot data first
                 plotData <- image$state
+                
+                # Get plot dimensions if provided
+                plot_width <- self$options$plotWidth
+                plot_height <- self$options$plotHeight
+                
+                # Set image dimensions if provided
+                if (!is.null(plot_width) && !is.null(plot_height)) {
+                    image$setSize(width = plot_width, height = plot_height)
+                }
+                
                 tryCatch({
                     private$.validatePlotData(plotData)
                 }, error = function(e) {
@@ -1270,6 +1338,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             .plotForest = function(image, ...) {
                 # Validate plot data first
                 plotData <- image$state
+                
+                # Get plot dimensions if provided
+                plot_width <- self$options$plotWidth
+                plot_height <- self$options$plotHeight
+                
+                # Set image dimensions if provided
+                if (!is.null(plot_width) && !is.null(plot_height)) {
+                    image$setSize(width = plot_width, height = plot_height)
+                }
+                
                 tryCatch({
                     private$.validatePlotData(plotData)
                 }, error = function(e) {
@@ -1468,7 +1546,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
             
             .generateAnalysisSummaryHTML = function(num_tests, test_names, n_total_cases, 
                                                    n_positive_cases, n_negative_cases, 
-                                                   patterns, descriptions) {
+                                                   patterns, descriptions, optimal_cutpoint = NULL) {
                 # Generate structured, professional HTML summary
                 html <- paste0(
                     "<div style='font-family: serif; max-width: 800px; margin: 0 auto;'>",
@@ -1726,27 +1804,33 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 patterns <- pattern_result$patterns
                 descriptions <- pattern_result$descriptions
                 
-                # Calculate totals for the gold standard
-                total_positive_gold <- sum(combo_table[, "Positive"], na.rm = TRUE)
-                total_negative_gold <- sum(combo_table[, "Negative"], na.rm = TRUE)
+                # Calculate totals for the gold standard (safe column access)
+                total_positive_gold <- if("Positive" %in% colnames(combo_table)) {
+                    sum(combo_table[, "Positive"], na.rm = TRUE)
+                } else {
+                    0
+                }
+                total_negative_gold <- if("Negative" %in% colnames(combo_table)) {
+                    sum(combo_table[, "Negative"], na.rm = TRUE) 
+                } else {
+                    0
+                }
                 
                 # Create structured HTML summary with better formatting
                 num_tests <- length(testVariables)
                 test_names <- paste(testVariables, collapse = ", ")
                 n_total_cases <- sum(total_positive_gold, total_negative_gold)
                 
-                # Find optimal cut-point for recommendations
-                optimal_cutpoint <- NULL
-                if (plot_data_index > 0) {
-                    # Create temporary plot data for optimal cut-point analysis
-                    temp_plot_data <- list(
-                        patterns = plot_data$patterns[1:plot_data_index],
-                        sensitivity = plot_data$sensitivity[1:plot_data_index],
-                        specificity = plot_data$specificity[1:plot_data_index],
-                        accuracy = plot_data$accuracy[1:plot_data_index]
-                    )
-                    optimal_cutpoint <- private$.findOptimalCutpoint(temp_plot_data)
+                # Add validation to prevent zero total cases
+                if (n_total_cases == 0) {
+                    stop("Invalid data: No valid gold standard cases found. Please check your gold standard variable and positive level selection.")
                 }
+                
+                # Initialize plot data index before use
+                plot_data_index <- 0
+                
+                # Find optimal cut-point for recommendations (will be calculated after data collection)
+                optimal_cutpoint <- NULL
                 
                 # Professional HTML structure with optimal cut-point recommendations
                 summary_html <- private$.generateAnalysisSummaryHTML(
@@ -1775,7 +1859,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     fn = numeric(n_patterns),
                     tn = numeric(n_patterns)
                 )
-                plot_data_index <- 0
                 
                 # Populate diagnostic statistics tables
                 for (i in seq_along(patterns)) {
@@ -1846,7 +1929,29 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     }
                 }
                 
-                # Clinical interpretation is now part of the HTML generation function
+                # After data collection, calculate optimal cut-point for recommendations
+                if (plot_data_index > 0) {
+                    # Create temporary plot data for optimal cut-point analysis
+                    temp_plot_data <- list(
+                        patterns = plot_data$patterns[1:plot_data_index],
+                        sensitivity = plot_data$sensitivity[1:plot_data_index],
+                        specificity = plot_data$specificity[1:plot_data_index],
+                        accuracy = plot_data$accuracy[1:plot_data_index]
+                    )
+                    optimal_cutpoint <- private$.findOptimalCutpoint(temp_plot_data)
+                    
+                    # Regenerate HTML summary with optimal cut-point
+                    summary_html <- private$.generateAnalysisSummaryHTML(
+                        num_tests = num_tests,
+                        test_names = test_names,
+                        n_total_cases = n_total_cases,
+                        n_positive_cases = total_positive_gold,
+                        n_negative_cases = total_negative_gold,
+                        patterns = patterns,
+                        descriptions = descriptions,
+                        optimal_cutpoint = optimal_cutpoint
+                    )
+                }
                 
                 # Set content
                 if ("combinationsAnalysis" %in% names(self$results)) {
@@ -1903,6 +2008,151 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 
                 # Return mydata2 with combination_pattern column
                 return(mydata2)
+            },
+            
+            .hasRequiredInputs = function() {
+                # Check if the minimum required inputs are provided, including positive levels
+                has_gold <- !is.null(self$options$gold) && length(self$options$gold) > 0 && self$options$gold != ""
+                has_gold_positive <- !is.null(self$options$goldPositive) && self$options$goldPositive != ""
+                has_test1 <- !is.null(self$options$test1) && self$options$test1 != ""
+                has_test1_positive <- !is.null(self$options$test1Positive) && self$options$test1Positive != ""
+                has_data <- !is.null(self$data) && nrow(self$data) > 0
+                
+                return(has_gold && has_gold_positive && has_test1 && has_test1_positive && has_data)
+            },
+            
+            .displayWelcomeMessage = function() {
+                # Display welcome message in the combinationsAnalysis HTML output
+                html <- self$results$combinationsAnalysis
+                
+                welcome_html <- paste0(
+                    '<div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">',
+                    
+                    '<h1 style="color: #2E86C1; text-align: center; border-bottom: 3px solid #2E86C1; padding-bottom: 15px;">',
+                    'Combine Medical Decision Tests</h1>',
+                    
+                    '<div style="background: linear-gradient(135deg, #EBF5FB 0%, #D6EAF8 100%); padding: 25px; border-radius: 10px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">',
+                    '<h2 style="color: #1B4F72; margin-top: 0; text-align: center;">Welcome to Advanced Diagnostic Test Combination Analysis!</h2>',
+                    '<p style="font-size: 16px; line-height: 1.6; text-align: center; color: #34495E;">',
+                    'This powerful tool evaluates the combined performance of multiple diagnostic tests against a gold standard, ',
+                    'providing comprehensive statistical analysis with optimal cut-point identification and clinical recommendations.',
+                    '</p>',
+                    '</div>',
+                    
+                    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0;">',
+                    '<div style="background-color: #F8F9FA; padding: 20px; border-left: 5px solid #17A2B8; border-radius: 5px;">',
+                    '<h3 style="color: #138496; margin-top: 0;">📊 What This Analysis Provides</h3>',
+                    '<ul style="line-height: 1.8; color: #495057;">',
+                    '<li>Systematic evaluation of all test combinations</li>',
+                    '<li>Wilson score confidence intervals</li>',
+                    '<li>ROC-based optimal cut-point identification</li>',
+                    '<li>Publication-quality visualizations</li>',
+                    '<li>Clinical decision recommendations</li>',
+                    '</ul>',
+                    '</div>',
+                    
+                    '<div style="background-color: #F8F9FA; padding: 20px; border-left: 5px solid #28A745; border-radius: 5px;">',
+                    '<h3 style="color: #155724; margin-top: 0;">🎯 Getting Started</h3>',
+                    '<ol style="line-height: 1.8; color: #495057;">',
+                    '<li><strong>Select Gold Standard:</strong> Reference test variable</li>',
+                    '<li><strong>Choose Positive Level:</strong> Define positive result</li>',
+                    '<li><strong>Add Test Variables:</strong> At least Test 1 is required</li>',
+                    '<li><strong>Configure Options:</strong> Visualizations and outputs</li>',
+                    '</ol>',
+                    '</div>',
+                    '</div>',
+                    
+                    '<div style="background-color: #FFF3CD; padding: 20px; border: 1px solid #FFEEBA; border-radius: 8px; margin: 20px 0;">',
+                    '<h3 style="color: #856404; margin-top: 0;">⚡ Quick Start Checklist</h3>',
+                    '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">',
+                    
+                    private$.getRequiredVariableStatus(),
+                    
+                    '</div>',
+                    '</div>',
+                    
+                    '<div style="background-color: #E8F5E8; padding: 20px; border-left: 5px solid #27AE60; border-radius: 5px; margin: 20px 0;">',
+                    '<h3 style="color: #1E8449; margin-top: 0;">📋 Supported Analysis Types</h3>',
+                    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">',
+                    '<div>',
+                    '<h4 style="color: #27AE60;">Two-Test Combinations (4 patterns)</h4>',
+                    '<p style="margin: 10px 0;">Perfect for comparing two diagnostic methods or validating new tests against established ones.</p>',
+                    '</div>',
+                    '<div>',
+                    '<h4 style="color: #27AE60;">Three-Test Combinations (8 patterns)</h4>',
+                    '<p style="margin: 10px 0;">Comprehensive analysis for complex diagnostic scenarios with multiple complementary tests.</p>',
+                    '</div>',
+                    '</div>',
+                    '</div>',
+                    
+                    '<div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #F1F3F4; border-radius: 8px;">',
+                    '<p style="font-size: 14px; color: #6C757D; margin: 0;">',
+                    '💡 <strong>Pro Tip:</strong> Enable "Show Advanced Visualizations" for publication-ready plots with automated optimal cut-point analysis.',
+                    '</p>',
+                    '</div>',
+                    
+                    '</div>'
+                )
+                
+                html$setContent(welcome_html)
+            },
+            
+            .getRequiredVariableStatus = function() {
+                # Generate status checkboxes for required variables
+                has_data <- !is.null(self$data) && nrow(self$data) > 0
+                has_gold <- !is.null(self$options$gold) && length(self$options$gold) > 0 && self$options$gold != ""
+                has_gold_positive <- !is.null(self$options$goldPositive) && self$options$goldPositive != ""
+                has_test1 <- !is.null(self$options$test1) && self$options$test1 != ""
+                has_test1_positive <- !is.null(self$options$test1Positive) && self$options$test1Positive != ""
+                
+                status_items <- c(
+                    private$.createStatusItem("Data loaded", has_data),
+                    private$.createStatusItem("Gold Standard selected", has_gold),
+                    private$.createStatusItem("Gold Standard positive level", has_gold_positive),
+                    private$.createStatusItem("Test 1 selected", has_test1),
+                    private$.createStatusItem("Test 1 positive level", has_test1_positive)
+                )
+                
+                return(paste(status_items, collapse = ""))
+            },
+            
+            .createStatusItem = function(label, is_complete) {
+                icon <- if (is_complete) "✅" else "⚠️"
+                color <- if (is_complete) "#28A745" else "#FFC107"
+                
+                return(paste0(
+                    '<div style="display: flex; align-items: center; margin-bottom: 8px;">',
+                    '<span style="font-size: 18px; margin-right: 10px;">', icon, '</span>',
+                    '<span style="color: ', color, '; font-weight: ', 
+                    if (is_complete) "normal" else "bold", ';">', label, '</span>',
+                    '</div>'
+                ))
+            },
+            
+            .prepareVisualizationData = function(mydata2, test_variables) {
+                # Helper method to prepare data for visualizations when enabled
+                # This ensures visualization data is only prepared when showVisualization is TRUE
+                
+                if (!self$options$showVisualization) {
+                    return(invisible(NULL))
+                }
+                
+                # Log that visualizations are being prepared
+                message("Preparing visualization data for enabled plot types")
+                
+                # Check which plot type is selected
+                plot_type <- self$options$plotType
+                
+                if (plot_type == "all") {
+                    message("All visualization types will be rendered")
+                } else {
+                    message(paste("Preparing data for", plot_type, "visualization"))
+                }
+                
+                # Additional preparation logic can be added here if needed
+                # For now, the main preparation happens in .analyzeCombinations
+                
+                invisible(TRUE)
             }
 
         )

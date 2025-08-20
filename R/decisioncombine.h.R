@@ -15,9 +15,9 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             test3 = NULL,
             test3Positive = NULL,
             od = FALSE,
-            showIndividual = TRUE,
-            exportCombinationPattern = FALSE,
-            showVisualization = TRUE,
+            showIndividual = FALSE,
+            addCombinationPattern = FALSE,
+            showVisualization = FALSE,
             plotType = "heatmap",
             plotHeight = 600,
             plotWidth = 800,
@@ -80,15 +80,15 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..showIndividual <- jmvcore::OptionBool$new(
                 "showIndividual",
                 showIndividual,
-                default=TRUE)
-            private$..exportCombinationPattern <- jmvcore::OptionBool$new(
-                "exportCombinationPattern",
-                exportCombinationPattern,
+                default=FALSE)
+            private$..addCombinationPattern <- jmvcore::OptionBool$new(
+                "addCombinationPattern",
+                addCombinationPattern,
                 default=FALSE)
             private$..showVisualization <- jmvcore::OptionBool$new(
                 "showVisualization",
                 showVisualization,
-                default=TRUE)
+                default=FALSE)
             private$..plotType <- jmvcore::OptionList$new(
                 "plotType",
                 plotType,
@@ -132,7 +132,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..test3Positive)
             self$.addOption(private$..od)
             self$.addOption(private$..showIndividual)
-            self$.addOption(private$..exportCombinationPattern)
+            self$.addOption(private$..addCombinationPattern)
             self$.addOption(private$..showVisualization)
             self$.addOption(private$..plotType)
             self$.addOption(private$..plotHeight)
@@ -150,7 +150,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         test3Positive = function() private$..test3Positive$value,
         od = function() private$..od$value,
         showIndividual = function() private$..showIndividual$value,
-        exportCombinationPattern = function() private$..exportCombinationPattern$value,
+        addCombinationPattern = function() private$..addCombinationPattern$value,
         showVisualization = function() private$..showVisualization$value,
         plotType = function() private$..plotType$value,
         plotHeight = function() private$..plotHeight$value,
@@ -167,7 +167,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..test3Positive = NA,
         ..od = NA,
         ..showIndividual = NA,
-        ..exportCombinationPattern = NA,
+        ..addCombinationPattern = NA,
         ..showVisualization = NA,
         ..plotType = NA,
         ..plotHeight = NA,
@@ -609,16 +609,16 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param gold .
 #' @param goldPositive .
 #' @param test1 .
-#' @param test1Positive .
-#' @param test2 .
-#' @param test2Positive .
-#' @param test3 .
-#' @param test3Positive .
+#' @param test1Positive Positive level for Test 1 variable (e.g., "Positive", "1", "Yes").
+#' @param test2 Second diagnostic test variable (optional, required for combination analysis).
+#' @param test2Positive Positive level for Test 2 variable (e.g., "Positive", "1", "Yes").
+#' @param test3 Third diagnostic test variable (optional for 3-test combinations).
+#' @param test3Positive Positive level for Test 3 variable (e.g., "Positive", "1", "Yes").
 #' @param od Boolean selection whether to show frequency tables. Default is
 #'   'false'.
-#' @param showIndividual .
-#' @param exportCombinationPattern Export a new variable to the data frame
-#'   indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
+#' @param showIndividual Boolean indicating whether to display individual test performance statistics and contingency tables.
+#' @param addCombinationPattern Export a new variable to the original data
+#'   frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
 #' @param showVisualization Display comprehensive visualizations for test
 #'   combination analysis with automated optimal cut-point identification.
 #' @param plotType Visualization selection: heatmap (performance matrix), roc
@@ -664,9 +664,9 @@ decisioncombine <- function(
     test3,
     test3Positive,
     od = FALSE,
-    showIndividual = TRUE,
-    exportCombinationPattern = FALSE,
-    showVisualization = TRUE,
+    showIndividual = FALSE,
+    addCombinationPattern = FALSE,
+    showVisualization = FALSE,
     plotType = "heatmap",
     plotHeight = 600,
     plotWidth = 800,
@@ -703,7 +703,7 @@ decisioncombine <- function(
         test3Positive = test3Positive,
         od = od,
         showIndividual = showIndividual,
-        exportCombinationPattern = exportCombinationPattern,
+        addCombinationPattern = addCombinationPattern,
         showVisualization = showVisualization,
         plotType = plotType,
         plotHeight = plotHeight,

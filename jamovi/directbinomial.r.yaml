@@ -1,0 +1,206 @@
+---
+name: directbinomial
+title: Direct Binomial Regression for Competing Risks
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - time
+          - event
+          - covs
+
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      visible: (showModel)
+      rows: 1
+      columns:
+        - name: statistic
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+          - time
+          - event
+          - covs
+
+    - name: educationalInfo
+      title: 'Direct Binomial Regression Guide'
+      type: Html
+      visible: (showEducational)
+      clearWith:
+          - time
+          - event
+
+    - name: coefficientsTable
+      title: 'Parameter Estimates'
+      type: Table
+      columns:
+        - name: term
+          title: "Parameter"
+          type: text
+        - name: estimate
+          title: "Estimate"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: z
+          title: "z-value"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: lower
+          title: "Lower CI"
+          type: number
+        - name: upper
+          title: "Upper CI"
+          type: number
+        - name: interpretation
+          title: "Effect"
+          type: text
+      clearWith:
+          - time
+          - event
+          - covs
+
+    - name: cumulativeIncidenceTable
+      title: 'Cumulative Incidence Predictions'
+      type: Table
+      visible: (predictions)
+      columns:
+        - name: time
+          title: "Time"
+          type: number
+        - name: cif
+          title: "Cum. Incidence"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: lower
+          title: "Lower CI"
+          type: number
+        - name: upper
+          title: "Upper CI"
+          type: number
+        - name: interpretation
+          title: "Risk Level"
+          type: text
+      clearWith:
+          - time
+          - event
+          - covs
+          - times
+
+    - name: covariateEffectsTable
+      title: 'Covariate Effects on Cumulative Incidence'
+      type: Table
+      visible: (covs)
+      columns:
+        - name: covariate
+          title: "Covariate"
+          type: text
+        - name: level
+          title: "Level/Value"
+          type: text
+        - name: time
+          title: "Time"
+          type: number
+        - name: cif
+          title: "Cum. Incidence"
+          type: number
+        - name: difference
+          title: "Difference"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - time
+          - event
+          - covs
+
+    - name: goodnessOfFit
+      title: 'Model Goodness of Fit'
+      type: Table
+      visible: (residuals)
+      rows: 1
+      columns:
+        - name: test
+          title: "Test"
+          type: text
+        - name: statistic
+          title: "Statistic"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+          - time
+          - event
+          - covs
+
+    - name: residualAnalysis
+      title: 'Residual Analysis'
+      type: Html
+      visible: (residuals)
+      clearWith:
+          - time
+          - event
+          - covs
+
+    - name: methodsInfo
+      title: 'Statistical Methods'
+      type: Html
+      clearWith:
+          - time
+          - event
+
+    - name: cifPlot
+      title: 'Cumulative Incidence Functions'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .cifPlot
+      visible: (plotCIF)
+      requiresData: true
+      clearWith:
+          - time
+          - event
+          - covs
+
+    - name: residualPlot
+      title: 'Model Residuals'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .residualPlot
+      visible: (plotResiduals)
+      requiresData: true
+      clearWith:
+          - time
+          - event
+          - covs
+
+refs:
+    - timereg
+    - cmprsk
+    - ClinicoPathJamoviModule
+
+...

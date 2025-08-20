@@ -9,10 +9,10 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE
 # ========================================
 
-new_version: "0.0.31.33"
-new_date: "2025-08-19"
-quick: true
-TEST: false
+new_version: "0.0.31.34"
+new_date: "2025-08-20"
+quick: false
+TEST: true
 meddecide: false
 jjstatsplot: false
 jsurvival: false
@@ -57,6 +57,22 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
   JamoviTest:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
+    enabled: false  # Automatically enabled when TEST mode is active
+    test_patterns:
+      - "menuGroup: JJStatsPlotT$"
+      - "menuGroup: meddecideT$"
+      - "menuGroup: SurvivalT$"
+      - "menuGroup: ExplorationT$"
+      - "menuGroup: OncoPathologyT$"
+    data_files:
+      - "histopathology.rda"
+    r_files: 
+      - "utils.R"
+    vignette_files: []
+    test_files: []
+    required_directories:
+      - "R"
+      - "jamovi"
 
 # ========================================
 # DETAILED CONFIGURATION BELOW
@@ -111,30 +127,6 @@ vignette_folders:
     include_general: false         # Copy general vignettes folder to all modules
     overwrite_existing: true      # Overwrite existing vignette files
     create_directories: true      # Create vignette directories if missing
-
-
-  JamoviTest:
-    enabled: false  # Automatically enabled when TEST mode is active
-    directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
-    test_patterns:
-      - "menuGroup: JJStatsPlotT$"
-      - "menuGroup: meddecideT$"
-      - "menuGroup: SurvivalT$"
-      - "menuGroup: ExplorationT$"
-      - "menuGroup: OncoPathologyT$"
-
-    data_files:
-      - "histopathology.rda"
-    
-    r_files: 
-      - "utils.R"
-    
-    vignette_files: []
-    test_files: []
-    
-    required_directories:
-      - "R"
-      - "jamovi"
 
 # File extensions to copy for jamovi modules
 jamovi_extensions:

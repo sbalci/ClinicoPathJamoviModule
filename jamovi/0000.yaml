@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.33
+version: 0.0.31.34
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-19'
+date: '2025-08-20'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1464,7 +1464,7 @@ analyses:
   - title: Intraclass Correlation Coefficient
     name: icccoeff
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Agreement
     menuTitle: Intraclass Correlation Coefficient
     description: >
@@ -3017,6 +3017,64 @@ analyses:
 
       clinical validation, performance metrics, and medical interpretation
       guidelines.
+  - title: Direct Binomial Regression for Competing Risks
+    name: directbinomial
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: jsurvival Competing Risks
+    menuTitle: Direct Binomial Regression for Competing Risks
+    description: >
+      Performs direct binomial regression modeling for cumulative incidence 
+      functions in competing risks analysis using the timereg package. This 
+      method provides direct modeling of cumulative incidence without 
+      proportional subdistribution hazards assumptions.
+  - title: Flexible Competing Risks Models
+    name: flexcomprisk
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: jsurvival Competing Risks
+    menuTitle: Flexible Competing Risks Models
+    description: >
+      Performs flexible competing risks analysis using advanced regression 
+      techniques including spline-based hazards, time-varying effects, and 
+      robust prediction models with comprehensive model validation.
+  - title: Markov Multi-State Models
+    name: markovmultistate
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: jsurvival Multi-State Models
+    menuTitle: Markov Multi-State Models
+    description: >
+      Fits Markov multi-state models for analyzing transitions between different
+      health states over time. Supports homogeneous and non-homogeneous models
+      with covariate effects using mstate and msm packages.
+  - title: Semi-Markov Models
+    name: semimarkov
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: jsurvival Multi-State Models
+    menuTitle: Semi-Markov Models
+    description: >
+      Fits Semi-Markov models where transition intensities depend on time since 
+      last transition rather than absolute time. Suitable for processes where
+      the  'clock' resets at each transition using SemiMarkov package.
+  - title: Hidden Markov Models for Survival
+    name: hiddenmarkov
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: jsurvival Multi-State Models
+    menuTitle: Hidden Markov Models for Survival
+    description: >
+      Fits Hidden Markov models for survival data using the msm package.  Hidden
+      Markov models are useful when the states are not directly  observed but
+      are inferred from observed covariates or measurements.  Provides
+      estimation of transition intensities, state prevalences,  and predictions
+      with uncertainty quantification.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

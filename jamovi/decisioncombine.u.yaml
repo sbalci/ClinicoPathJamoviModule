@@ -58,8 +58,6 @@ children:
             name: od
           - type: CheckBox
             name: showIndividual
-          - type: CheckBox
-            name: exportCombinationPattern
   - type: Label
     label: Advanced Visualizations
     children:
@@ -86,4 +84,9 @@ children:
             enable: (showVisualization)
   - type: Label
     label: Export to Data
-    children: []
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: addCombinationPattern

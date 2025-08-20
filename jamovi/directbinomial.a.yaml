@@ -1,0 +1,133 @@
+---
+name: directbinomial
+title: Direct Binomial Regression for Competing Risks
+menuGroup: SurvivalD
+menuSubgroup: jsurvival Competing Risks
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >
+        Performs direct binomial regression modeling for cumulative incidence 
+        functions in competing risks analysis using the timereg package. This 
+        method provides direct modeling of cumulative incidence without 
+        proportional subdistribution hazards assumptions.
+    R:
+        dontrun: true
+        usage: |
+            # example will be added
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description: >
+          Follow-up time variable
+
+    - name: event
+      title: Event Variable  
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      description: >
+          Event type variable (0=censored, 1=event of interest, 2=competing event, etc.)
+
+    - name: covs
+      title: Covariates
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description: >
+          Covariates to include in the model
+
+    - name: eventOfInterest
+      title: Event of Interest
+      type: Number
+      min: 1
+      max: 10
+      default: 1
+      description: >
+          Numeric code for the event of interest (primary event)
+
+    - name: times
+      title: Prediction Times
+      type: String
+      default: "1, 3, 5"
+      description: >
+          Comma-separated list of time points for cumulative incidence prediction
+
+    - name: conf
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description: >
+          Confidence level for confidence intervals
+
+    - name: residuals
+      title: Show Residuals
+      type: Bool
+      default: false
+      description: >
+          Display model residuals and goodness-of-fit statistics
+
+    - name: predictions
+      title: Show Predictions
+      type: Bool  
+      default: true
+      description: >
+          Display predicted cumulative incidence at specified time points
+
+    - name: bootstrap
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description: >
+          Use bootstrap methods for confidence interval estimation
+
+    - name: nboot
+      title: Bootstrap Samples
+      type: Number
+      min: 50
+      max: 2000
+      default: 500
+      description: >
+          Number of bootstrap samples (when bootstrap is enabled)
+
+    - name: showModel
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description: >
+          Display detailed model summary and parameter estimates
+
+    - name: showEducational
+      title: Show Educational Information
+      type: Bool
+      default: true
+      description: >
+          Display educational information about direct binomial regression
+
+    - name: plotCIF
+      title: Plot Cumulative Incidence
+      type: Bool
+      default: true
+      description: >
+          Display cumulative incidence function plots
+
+    - name: plotResiduals
+      title: Plot Residuals
+      type: Bool
+      default: false
+      description: >
+          Display residual plots for model diagnostics
+...

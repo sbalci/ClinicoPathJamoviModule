@@ -1,0 +1,402 @@
+---
+name: semimarkov
+title: Semi-Markov Models
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - time
+          - event
+          - subject
+
+    - name: educationalInfo
+      title: 'Semi-Markov Models Guide'
+      type: Html
+      visible: (showEducational)
+      clearWith:
+          - modelType
+          - transitionStructure
+
+    - name: modelSummary
+      title: 'Model Summary'
+      type: Table
+      rows: 1
+      columns:
+        - name: model_type
+          title: "Model Type"
+          type: text
+        - name: n_states
+          title: "States"
+          type: number
+        - name: n_subjects
+          title: "Subjects"
+          type: number
+        - name: n_transitions
+          title: "Transitions"
+          type: number
+        - name: distribution
+          title: "Distribution"
+          type: text
+        - name: loglik
+          title: "Log-likelihood"
+          type: number
+        - name: aic
+          title: "AIC"
+          type: number
+        - name: bic
+          title: "BIC"
+          type: number
+        - name: convergence
+          title: "Convergence"
+          type: text
+      clearWith:
+          - time
+          - event
+          - subject
+          - modelType
+
+    - name: transitionRates
+      title: 'Transition Rate Parameters'
+      type: Table
+      visible: (showTransitionRates)
+      columns:
+        - name: transition
+          title: "Transition"
+          type: text
+        - name: parameter
+          title: "Parameter"
+          type: text
+        - name: estimate
+          title: "Estimate"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+          - modelType
+          - distributionType
+
+    - name: sojournDistribution
+      title: 'Sojourn Time Distributions'
+      type: Table
+      visible: (showSojournDistribution)
+      columns:
+        - name: state
+          title: "State"
+          type: text
+        - name: distribution
+          title: "Distribution"
+          type: text
+        - name: parameter1
+          title: "Parameter 1"
+          type: number
+        - name: parameter2
+          title: "Parameter 2"
+          type: number
+        - name: mean_sojourn
+          title: "Mean Time"
+          type: number
+        - name: median_sojourn
+          title: "Median Time"
+          type: number
+        - name: variance_sojourn
+          title: "Variance"
+          type: number
+        - name: interpretation
+          title: "Duration"
+          type: text
+      clearWith:
+          - distributionType
+          - modelType
+
+    - name: transitionProbabilities
+      title: 'Transition Probabilities'
+      type: Table
+      visible: (showTransitionProbs)
+      columns:
+        - name: time_point
+          title: "Time"
+          type: number
+        - name: from_state
+          title: "From State"
+          type: text
+        - name: to_state
+          title: "To State"
+          type: text
+        - name: probability
+          title: "Probability"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: cumulative
+          title: "Cumulative"
+          type: number
+      clearWith:
+          - timePoints
+          - modelType
+
+    - name: stateProbabilities
+      title: 'State Occupation Probabilities'
+      type: Table
+      visible: (showStateProbabilities)
+      columns:
+        - name: time_point
+          title: "Time"
+          type: number
+        - name: state
+          title: "State"
+          type: text
+        - name: probability
+          title: "Probability"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: expected_count
+          title: "Expected N"
+          type: number
+        - name: prevalence_rate
+          title: "Prevalence"
+          type: text
+      clearWith:
+          - predictionHorizons
+          - modelType
+
+    - name: reliabilityAnalysis
+      title: 'Reliability Analysis'
+      type: Table
+      visible: (showReliabilityAnalysis)
+      columns:
+        - name: state
+          title: "State"
+          type: text
+        - name: time_point
+          title: "Time"
+          type: number
+        - name: reliability
+          title: "Reliability"
+          type: number
+        - name: hazard_rate
+          title: "Hazard Rate"
+          type: number
+        - name: failure_rate
+          title: "Failure Rate"
+          type: number
+        - name: mtbf
+          title: "MTBF"
+          type: number
+        - name: survival_prob
+          title: "Survival"
+          type: number
+      clearWith:
+          - distributionType
+          - timePoints
+
+    - name: covariateEffects
+      title: 'Covariate Effects'
+      type: Table
+      visible: (covs)
+      columns:
+        - name: transition
+          title: "Transition"
+          type: text
+        - name: covariate
+          title: "Covariate"
+          type: text
+        - name: coefficient
+          title: "Coefficient"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: hazard_ratio
+          title: "HR"
+          type: number
+        - name: lower_ci
+          title: "Lower CI"
+          type: number
+        - name: upper_ci
+          title: "Upper CI"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: effect_size
+          title: "Effect Size"
+          type: text
+      clearWith:
+          - covs
+          - modelType
+
+    - name: modelDiagnostics
+      title: 'Model Diagnostics'
+      type: Table
+      visible: (showModelDiagnostics)
+      columns:
+        - name: diagnostic
+          title: "Diagnostic Test"
+          type: text
+        - name: statistic
+          title: "Statistic"
+          type: number
+        - name: df
+          title: "df"
+          type: number
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: critical_value
+          title: "Critical Value"
+          type: number
+        - name: assessment
+          title: "Assessment"
+          type: text
+      clearWith:
+          - modelType
+          - estimationMethod
+
+    - name: predictionsTable
+      title: 'State Predictions'
+      type: Table
+      visible: (showPredictions)
+      columns:
+        - name: subject_id
+          title: "Subject"
+          type: text
+        - name: current_state
+          title: "Current State"
+          type: text
+        - name: time_horizon
+          title: "Time Horizon"
+          type: number
+        - name: predicted_state
+          title: "Most Likely State"
+          type: text
+        - name: probability
+          title: "Probability"
+          type: number
+        - name: confidence_interval
+          title: "95% CI"
+          type: text
+        - name: risk_category
+          title: "Risk Level"
+          type: text
+      clearWith:
+          - predictionHorizons
+          - subject
+
+    - name: methodsInfo
+      title: 'Statistical Methods'
+      type: Html
+      clearWith:
+          - modelType
+          - distributionType
+          - estimationMethod
+
+    - name: interpretationGuide
+      title: 'Semi-Markov Model Interpretation'
+      type: Html
+      clearWith:
+          - modelType
+          - transitionStructure
+
+    - name: sojournDistributionPlot
+      title: 'Sojourn Time Distributions'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .sojournDistributionPlot
+      visible: (plotSojournDistributions)
+      requiresData: true
+      clearWith:
+          - distributionType
+          - modelType
+
+    - name: stateProbabilityPlot
+      title: 'State Occupation Probabilities'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .stateProbabilityPlot
+      visible: (plotStateProbabilities)
+      requiresData: true
+      clearWith:
+          - time
+          - event
+          - modelType
+
+    - name: transitionIntensityPlot
+      title: 'Transition Intensity Functions'
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .transitionIntensityPlot
+      visible: (plotTransitionIntensities)
+      requiresData: true
+      clearWith:
+          - distributionType
+          - timePoints
+
+    - name: reliabilityPlot
+      title: 'Reliability and Hazard Functions'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .reliabilityPlot
+      visible: (plotReliabilityFunctions)
+      requiresData: true
+      clearWith:
+          - distributionType
+          - modelType
+
+    - name: diagnosticsPlot
+      title: 'Model Diagnostics'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .diagnosticsPlot
+      visible: (plotModelDiagnostics)
+      requiresData: true
+      clearWith:
+          - modelType
+          - estimationMethod
+
+refs:
+    - SemiMarkov
+    - survival
+    - ReliabilityTheory
+    - flexsurv
+    - ClinicoPathJamoviModule
+
+...
