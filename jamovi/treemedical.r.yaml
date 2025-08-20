@@ -1,0 +1,159 @@
+---
+name: treemedical
+title: Medical Decision Trees
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: model_summary
+      title: Model Summary
+      type: Html
+      visible: (show_performance_metrics)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - validation
+        - holdout_split
+        - handle_missing
+        - bootstrap_samples
+        - max_depth
+        - cost_complexity
+        - cost_sensitive
+
+    - name: performance_table
+      title: Performance Metrics
+      type: Table
+      visible: (show_performance_metrics)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - validation
+        - holdout_split
+        - handle_missing
+        - cost_sensitive
+        - fn_fp_ratio
+        - bootstrap_samples
+        - cv_folds
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+
+    - name: confusion_matrix
+      title: Confusion Matrix
+      type: Table
+      visible: (show_confusion_matrix)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - validation
+        - holdout_split
+        - handle_missing
+        - cost_sensitive
+        - bootstrap_samples
+        - cv_folds
+      columns:
+        - name: actual
+          title: Actual
+          type: text
+        - name: predicted_negative
+          title: Predicted Negative
+          type: integer
+        - name: predicted_positive
+          title: Predicted Positive
+          type: integer
+        - name: total
+          title: Total
+          type: integer
+
+    - name: variable_importance
+      title: Variable Importance
+      type: Table
+      visible: (show_importance_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - handle_missing
+        - cost_sensitive
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: importance
+          title: Importance
+          type: number
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: tree_plot
+      title: Decision Tree
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .tree_plot
+      visible: (show_tree_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - max_depth
+        - cost_complexity
+        - handle_missing
+        - cost_sensitive
+        - use_1se_rule
+
+    - name: importance_plot
+      title: Variable Importance Plot
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .importance_plot
+      visible: (show_importance_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - handle_missing
+        - cost_sensitive
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (show_clinical_interpretation)
+      clearWith:
+        - clinical_context
+        - target
+        - targetLevel
+
+refs:
+    - ClinicoPathJamoviModule
+    - rpart
+    - rpart.plot
+    - caret
+    - pROC
+    - ggplot2
+...

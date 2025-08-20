@@ -1,0 +1,188 @@
+---
+name: treeensemble
+title: Clinical Random Forest Analysis
+menuGroup: meddecideT
+menuSubgroup: Clinical Decision Support
+menuSubtitle: Random Forest for Clinical Research
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Random Forest and ensemble methods for clinical research and biomarker discovery.
+        Provides high-accuracy predictions with robust feature importance analysis,
+        out-of-bag error estimation, and clinical interpretation guidelines.
+
+options:
+    - name: data
+      type: Data
+
+    # Core variables
+    - name: vars
+      title: Continuous Clinical Variables
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+
+    - name: facs
+      title: Categorical Clinical Variables  
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      default: null
+
+    - name: target
+      title: Target Outcome
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+
+    - name: targetLevel
+      title: Disease/Positive Level
+      type: Level
+      variable: (target)
+
+    # Ensemble parameters
+    - name: n_trees
+      title: Number of Trees
+      type: Integer
+      default: 500
+      min: 50
+      max: 2000
+
+    - name: mtry_method
+      title: Variables per Split
+      type: List
+      options:
+        - title: "Automatic (sqrt for classification)"
+          name: auto
+        - title: "Custom number"
+          name: custom
+      default: auto
+
+    - name: mtry_custom
+      title: Custom Variables per Split
+      type: Integer
+      default: 3
+      min: 1
+      max: 20
+
+    - name: min_node_size
+      title: Minimum Node Size
+      type: Integer
+      default: 5
+      min: 1
+      max: 50
+
+    # Validation
+    - name: validation
+      title: Validation Method
+      type: List
+      options:
+        - title: "Out-of-Bag (OOB) Error"
+          name: oob
+        - title: "Cross-Validation"
+          name: cv
+        - title: "Hold-Out Validation"
+          name: holdout
+      default: oob
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+
+    - name: test_split
+      title: Test Set Proportion
+      type: Number
+      default: 0.25
+      min: 0.1
+      max: 0.4
+
+    # Feature importance
+    - name: importance_type
+      title: Importance Calculation
+      type: List
+      options:
+        - title: "Permutation Importance"
+          name: permutation
+        - title: "Gini Importance"
+          name: gini
+        - title: "Both Methods"
+          name: both
+      default: permutation
+
+    - name: feature_selection
+      title: Automated Feature Selection
+      type: Bool
+      default: false
+
+    - name: max_features
+      title: Maximum Features to Select
+      type: Integer
+      default: 10
+      min: 2
+      max: 50
+
+    # Clinical context
+    - name: clinical_context
+      title: Clinical Application
+      type: List
+      options:
+        - title: "Biomarker Discovery"
+          name: biomarker
+        - title: "Diagnosis"
+          name: diagnosis
+        - title: "Prognosis"
+          name: prognosis
+        - title: "Treatment Response"
+          name: treatment
+      default: biomarker
+
+    - name: class_weights
+      title: Handle Class Imbalance
+      type: Bool
+      default: false
+
+    # Output options
+    - name: show_performance_metrics
+      title: Show Performance Metrics
+      type: Bool
+      default: true
+
+    - name: show_importance_plot
+      title: Show Feature Importance
+      type: Bool
+      default: true
+
+    - name: show_oob_error
+      title: Show OOB Error Progression
+      type: Bool
+      default: true
+
+    - name: show_confusion_matrix
+      title: Show Confusion Matrix
+      type: Bool
+      default: true
+
+    - name: show_clinical_interpretation
+      title: Show Clinical Guidelines
+      type: Bool
+      default: true
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+...

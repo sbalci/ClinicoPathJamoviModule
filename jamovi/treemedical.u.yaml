@@ -1,0 +1,123 @@
+title: Medical Decision Trees
+name: treemedical
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Target Variable
+        children:
+          - type: VariablesListBox
+            name: target
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: targetLevel
+            label: Disease/Positive Class
+            variable: (target)
+      - type: TargetLayoutBox
+        label: Continuous Clinical Variables
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            height: small
+      - type: TargetLayoutBox
+        label: Categorical Clinical Variables
+        children:
+          - type: VariablesListBox
+            name: facs
+            isTarget: true
+            height: small
+
+  - type: CollapseBox
+    label: Analysis Settings
+    collapsed: false
+    children:
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: validation
+          - type: TextBox
+            name: cv_folds
+            format: number
+            enable: (validation:cv)
+          - type: TextBox
+            name: bootstrap_samples
+            format: number
+            enable: (validation:bootstrap)
+          - type: TextBox
+            name: holdout_split
+            format: number
+            enable: (validation:holdout)
+          - type: CheckBox
+            name: stratified_sampling
+          - type: ComboBox
+            name: handle_missing
+
+  - type: CollapseBox
+    label: Tree Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: max_depth
+            format: number
+          - type: TextBox
+            name: min_samples_split
+            format: number
+          - type: TextBox
+            name: cost_complexity
+            format: number
+          - type: CheckBox
+            name: use_1se_rule
+
+  - type: CollapseBox
+    label: Clinical Context
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: clinical_context
+          - type: CheckBox
+            name: cost_sensitive
+          - type: TextBox
+            name: fn_fp_ratio
+            format: number
+            enable: (cost_sensitive)
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: show_tree_plot
+          - type: CheckBox
+            name: show_performance_metrics
+          - type: CheckBox
+            name: show_confusion_matrix
+          - type: CheckBox
+            name: show_importance_plot
+          - type: CheckBox
+            name: show_clinical_interpretation
+
+  - type: CollapseBox
+    label: Reproducibility
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: set_seed
+          - type: TextBox
+            name: seed_value
+            format: number
+            enable: (set_seed)

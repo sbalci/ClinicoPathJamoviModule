@@ -1,0 +1,255 @@
+---
+name: treemedical
+title: Medical Decision Trees
+menuGroup: meddecideT
+menuSubgroup: Clinical Decision Support
+menuSubtitle: Simple Clinical Decision Trees
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Simple decision tree analysis for medical research and clinical decision making.
+        Uses enhanced CART algorithm optimized for healthcare applications with
+        clinical validation, performance metrics, and medical interpretation guidelines.
+    R:
+        dontrun: false
+        usage: |
+            # Example for cancer diagnosis
+            data(cancer_data)
+            treemedical(
+                data = cancer_data,
+                vars = c("PSA", "age"),
+                facs = c("grade", "stage"),
+                target = "diagnosis",
+                targetLevel = "cancer",
+                validation = "cv",
+                show_tree_plot = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame containing clinical variables and outcomes.
+
+    # Core variables
+    - name: vars
+      title: Continuous Clinical Variables
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description: >
+                  Continuous variables such as biomarker levels, age, 
+                  laboratory values, or quantitative measurements.
+
+    - name: facs
+      title: Categorical Clinical Variables  
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      default: null
+      description: >
+                  Categorical variables such as tumor grade, stage, 
+                  histological type, or patient demographics.
+
+    - name: target
+      title: Target Outcome
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description: >
+                  Primary outcome variable: disease status, treatment response, 
+                  or diagnostic category.
+
+    - name: targetLevel
+      title: Disease/Positive Level
+      type: Level
+      variable: (target)
+      description: >
+                  Level representing disease presence or positive outcome.
+
+    # Validation
+    - name: validation
+      title: Validation Method
+      type: List
+      options:
+        - title: "K-Fold Cross-Validation"
+          name: cv
+        - title: "Hold-Out Validation (75/25 split)"
+          name: holdout
+        - title: "Bootstrap Validation"
+          name: bootstrap
+      default: cv
+      description: >
+                  Validation approach for assessing model performance.
+
+    - name: cv_folds
+      title: Number of CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+      description: >
+                  Number of folds for cross-validation.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 100
+      min: 50
+      max: 500
+      description: >
+                  Number of bootstrap samples for bootstrap validation.
+
+    - name: stratified_sampling
+      title: Stratified Sampling
+      type: Bool
+      default: true
+      description: >
+                  Maintain class proportions in train/test splits.
+
+    - name: holdout_split
+      title: Holdout Training Proportion
+      type: Number
+      default: 0.75
+      min: 0.5
+      max: 0.9
+      description: >
+                  Proportion of data for training in holdout validation (rest for testing).
+
+    - name: handle_missing
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: "Remove rows with missing values"
+          name: remove
+        - title: "Simple imputation (median/mode)"
+          name: impute
+      default: remove
+      description: >
+                  How to handle missing values in predictor variables.
+
+    # Tree parameters
+    - name: max_depth
+      title: Maximum Tree Depth
+      type: Integer
+      default: 5
+      min: 2
+      max: 10
+      description: >
+                  Maximum depth of decision tree. Clinical trees typically 3-6 levels.
+
+    - name: min_samples_split
+      title: Minimum Samples to Split
+      type: Integer
+      default: 20
+      min: 5
+      max: 100
+      description: >
+                  Minimum number of samples required to split a node.
+
+    - name: cost_complexity
+      title: Complexity Parameter (CP)
+      type: Number
+      default: 0.01
+      min: 0.001
+      max: 0.1
+      description: >
+                  Controls tree pruning - lower values create more complex trees.
+
+    - name: use_1se_rule
+      title: Use 1-SE Rule for Pruning
+      type: Bool
+      default: true
+      description: >
+                  Select simplest tree within 1 SE of optimal performance.
+
+    # Clinical context
+    - name: clinical_context
+      title: Clinical Application
+      type: List
+      options:
+        - title: "General Diagnosis"
+          name: diagnosis
+        - title: "Cancer Screening"
+          name: screening
+        - title: "Treatment Selection"
+          name: treatment
+        - title: "Risk Assessment"
+          name: risk
+      default: diagnosis
+      description: >
+                  Clinical application context affects interpretation guidelines.
+
+    - name: cost_sensitive
+      title: Cost-Sensitive Analysis
+      type: Bool
+      default: false
+      description: >
+                  Consider different costs of false positives vs false negatives.
+
+    - name: fn_fp_ratio
+      title: False Negative to False Positive Cost Ratio
+      type: Number
+      default: 2
+      min: 0.5
+      max: 10
+      description: >
+                  Relative cost of missing positive case vs false alarm.
+
+    # Output options
+    - name: show_tree_plot
+      title: Show Decision Tree
+      type: Bool
+      default: true
+      description: >
+                  Display visual representation of the decision tree.
+
+    - name: show_performance_metrics
+      title: Show Performance Metrics
+      type: Bool
+      default: true
+      description: >
+                  Display accuracy, sensitivity, specificity, AUC, and clinical metrics.
+
+    - name: show_confusion_matrix
+      title: Show Confusion Matrix
+      type: Bool
+      default: true
+      description: >
+                  Display confusion matrix with clinical interpretations.
+
+    - name: show_importance_plot
+      title: Show Variable Importance
+      type: Bool
+      default: true
+      description: >
+                  Display ranking of most important clinical variables.
+
+    - name: show_clinical_interpretation
+      title: Show Clinical Guidelines
+      type: Bool
+      default: true
+      description: >
+                  Display clinical interpretation and usage guidelines.
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+      description: >
+                  Set random seed for reproducible results.
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+      description: >
+                  Seed value for random number generation.
+...

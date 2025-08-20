@@ -1,0 +1,207 @@
+---
+name: treeadvanced
+title: Advanced Clinical Decision Trees
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: modelsummary
+      title: Model Summary
+      type: Html
+      visible: (show_performance_metrics)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - validation
+        - hyperparameter_tuning
+        - cost_sensitive
+        - clinical_loss_preset
+        - prevalence_adjustment
+        - feature_selection
+        - feature_selection_method
+
+    - name: tuningresults
+      title: Hyperparameter Tuning Results
+      type: Html
+      visible: (hyperparameter_tuning)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - tuning_method
+        - tuning_metric
+        - max_depth_range
+        - cp_range
+        - min_samples_range
+        - cost_sensitive
+
+    - name: performancetable
+      title: Performance Metrics
+      type: Table
+      visible: (show_performance_metrics)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - validation
+        - hyperparameter_tuning
+        - cost_sensitive
+        - clinical_loss_preset
+        - prevalence_adjustment
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+
+    - name: confusionmatrix
+      title: Confusion Matrix
+      type: Table
+      visible: (show_confusion_matrix)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - validation
+      columns:
+        - name: actual
+          title: Actual
+          type: text
+        - name: predictednegative
+          title: Predicted Negative
+          type: integer
+        - name: predictedpositive
+          title: Predicted Positive
+          type: integer
+        - name: total
+          title: Total
+          type: integer
+
+    - name: variableimportance
+      title: Variable Importance
+      type: Table
+      visible: (show_importance_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - feature_selection
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: importance
+          title: Importance
+          type: number
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: treeplot
+      title: Advanced Decision Tree
+      type: Image
+      width: 900
+      height: 700
+      renderFun: .tree_plot
+      visible: (show_tree_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - hyperparameter_tuning
+        - max_depth_range
+        - cp_range
+
+    - name: importanceplot
+      title: Variable Importance Plot
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .importance_plot
+      visible: (show_importance_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - feature_selection
+
+    - name: validationcurves
+      title: Validation Curves
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .validation_curves_plot
+      visible: (show_validation_curves)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - hyperparameter_tuning
+
+    - name: calibrationplot
+      title: Calibration Plot
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .calibration_plot
+      visible: (show_calibration_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+
+    - name: roccurve
+      title: ROC Curve
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .roc_plot
+      visible: (show_roc_curve)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+
+    - name: clinicalinterpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (show_clinical_interpretation)
+      clearWith:
+        - clinical_context
+        - target
+        - targetLevel
+
+refs:
+    - ClinicoPathJamoviModule
+    - rpart
+    - rpart.plot
+    - caret
+    - pROC
+    - randomForest
+    - Boruta
+    - ggplot2
+    - stats
+...
