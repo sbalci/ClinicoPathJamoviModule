@@ -2,6 +2,44 @@
 
 ## Version 0.0.31.34
 
+### 🗓️ **August 20, 2025 - Major Decision Tree Architecture Redesign**
+
+#### 🏗️ **Tree Function Architecture Overhaul**
+
+##### **Monolithic Function Split into Focused Analyses**
+*   **Architectural Improvement:** Split massive 7,482-line tree function with 166 parameters into four focused, specialized analyses
+*   **Enhanced Maintainability:** Each new function serves specific clinical research needs with optimized parameter sets
+*   **Improved Performance:** Reduced complexity and better resource utilization through focused implementations
+*   **Clinical Focus:** Each analysis type optimized for specific medical decision-making scenarios
+
+##### **Four New Specialized Tree Functions**
+*   **treemedical:** Simple medical decision trees for clinical research (24 parameters)
+*   **treeadvanced:** Advanced CART with hyperparameter tuning for complex analysis (30+ parameters)  
+*   **treeensemble:** Random Forest ensemble methods for clinical research (25+ parameters)
+*   **treecompare:** Algorithm comparison and model selection (35+ parameters)
+
+#### 🚀 **Medical Decision Trees - Comprehensive Enhancement (treemedical)**
+
+##### **Clinical-Focused Implementation**
+*   **Enhanced CART Algorithm:** Optimized rpart implementation with clinical validation and medical interpretation guidelines
+*   **Cost-Sensitive Learning:** Configurable false negative to false positive cost ratios for clinical decision optimization
+*   **Missing Data Handling:** Robust missing value strategies including simple imputation (median/mode) and complete case analysis
+*   **Clinical Context Integration:** Four specialized clinical application contexts (diagnosis, screening, treatment, risk assessment)
+
+##### **Advanced Validation Framework**
+*   **Multiple Validation Methods:** Cross-validation, holdout validation, and bootstrap validation with stratified sampling support
+*   **Configurable Parameters:** User-controlled holdout splits (50%-90%) and bootstrap sample sizes (50-500)
+*   **Performance Optimization:** Helper methods eliminate code duplication and improve maintainability
+*   **Comprehensive Metrics:** Accuracy, sensitivity, specificity, PPV, NPV, AUC with confidence intervals
+
+##### **Enhanced User Experience**
+*   **Intelligent UI Behavior:** Enhanced clearWith patterns ensure proper result clearing when parameters change
+*   **Clinical Interpretation:** Context-specific interpretation guidelines for medical applications
+*   **Robust Error Handling:** Graceful fallbacks when optional packages (pROC, rpart.plot) are unavailable
+*   **Comprehensive Documentation:** Detailed parameter descriptions with clinical focus and usage examples
+
+## Version 0.0.31.33
+
 ### 🗓️ **August 19, 2025 - Cause-Specific Hazards Models Implementation**
 
 #### 🚀 **Cause-Specific Hazards Models - New Implementation (causespecifichazards)**

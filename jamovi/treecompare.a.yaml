@@ -1,0 +1,370 @@
+---
+name: treecompare
+title: Clinical Tree Algorithm Comparison
+menuGroup: meddecideT
+menuSubgroup: Clinical Decision Support
+menuSubtitle: Compare Decision Tree Algorithms
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive comparison of decision tree algorithms for clinical research.
+        Compares CART, Random Forest, and Gradient Boosting with cross-validation,
+        statistical testing, and clinical performance assessment.
+    R:
+        dontrun: false
+        usage: |
+            # Compare multiple tree algorithms
+            treecomparison(
+                data = clinical_data,
+                vars = c("biomarker1", "biomarker2", "age"),
+                facs = c("grade", "stage"),
+                target = "outcome",
+                targetLevel = "positive",
+                algorithms = c("cart", "rf", "gbm"),
+                validation = "repeated_cv"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for algorithm comparison.
+
+    # Core variables
+    - name: vars
+      title: Continuous Clinical Variables
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+
+    - name: facs
+      title: Categorical Clinical Variables  
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      default: null
+
+    - name: target
+      title: Target Outcome
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+
+    - name: targetLevel
+      title: Disease/Positive Level
+      type: Level
+      variable: (target)
+
+    # Algorithm selection
+    - name: include_cart
+      title: Include CART (rpart)
+      type: Bool
+      default: true
+      description: >
+                  Include Classification and Regression Trees (CART) algorithm.
+
+    - name: include_rf
+      title: Include Random Forest
+      type: Bool
+      default: true
+      description: >
+                  Include Random Forest ensemble method.
+
+    - name: include_gbm
+      title: Include Gradient Boosting
+      type: Bool
+      default: false
+      description: >
+                  Include Gradient Boosting Machine (requires gbm package).
+
+    - name: include_xgboost
+      title: Include XGBoost
+      type: Bool
+      default: false
+      description: >
+                  Include XGBoost algorithm (requires xgboost package).
+
+    - name: include_ctree
+      title: Include Conditional Trees
+      type: Bool
+      default: false
+      description: >
+                  Include conditional inference trees (requires party package).
+
+    # Validation settings
+    - name: validation
+      title: Validation Method
+      type: List
+      options:
+        - title: "Repeated Cross-Validation"
+          name: repeated_cv
+        - title: "K-Fold Cross-Validation"
+          name: cv
+        - title: "Bootstrap Validation"
+          name: bootstrap
+        - title: "Hold-Out Validation"
+          name: holdout
+      default: repeated_cv
+      description: >
+                  Validation method for fair algorithm comparison.
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+
+    - name: cv_repeats
+      title: CV Repeats
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 200
+      min: 100
+      max: 500
+
+    - name: test_split
+      title: Test Set Proportion
+      type: Number
+      default: 0.25
+      min: 0.1
+      max: 0.4
+
+    - name: stratified_sampling
+      title: Stratified Sampling
+      type: Bool
+      default: true
+
+    # Performance metrics
+    - name: primary_metric
+      title: Primary Comparison Metric
+      type: List
+      options:
+        - title: "Balanced Accuracy"
+          name: bacc
+        - title: "AUC"
+          name: auc
+        - title: "Accuracy"
+          name: accuracy
+        - title: "Sensitivity"
+          name: sensitivity
+        - title: "Specificity"
+          name: specificity
+        - title: "F1 Score"
+          name: f1
+      default: bacc
+      description: >
+                  Primary metric for ranking algorithms.
+
+    - name: statistical_testing
+      title: Statistical Significance Testing
+      type: Bool
+      default: true
+      description: >
+                  Perform statistical tests to compare algorithm performance.
+
+    - name: correction_method
+      title: Multiple Comparison Correction
+      type: List
+      options:
+        - title: "Bonferroni"
+          name: bonferroni
+        - title: "Holm"
+          name: holm
+        - title: "FDR (Benjamini-Hochberg)"
+          name: fdr
+        - title: "None"
+          name: none
+      default: holm
+      description: >
+                  Correction method for multiple pairwise comparisons.
+
+    # Algorithm-specific parameters
+    - name: tune_parameters
+      title: Tune Algorithm Parameters
+      type: Bool
+      default: true
+      description: >
+                  Automatically tune key parameters for each algorithm.
+
+    - name: tuning_method
+      title: Parameter Tuning Method
+      type: List
+      options:
+        - title: "Grid Search"
+          name: grid
+        - title: "Random Search"
+          name: random
+      default: grid
+
+    # CART parameters
+    - name: cart_max_depth
+      title: CART Max Depth
+      type: Integer
+      default: 5
+      min: 2
+      max: 10
+
+    - name: cart_min_split
+      title: CART Min Split
+      type: Integer
+      default: 20
+      min: 5
+      max: 100
+
+    # Random Forest parameters
+    - name: rf_ntrees
+      title: RF Number of Trees
+      type: Integer
+      default: 500
+      min: 100
+      max: 1000
+
+    - name: rf_mtry_method
+      title: RF mtry Method
+      type: List
+      options:
+        - title: "Auto (sqrt)"
+          name: auto
+        - title: "One-third"
+          name: third
+        - title: "All variables"
+          name: all
+      default: auto
+
+    # Clinical context
+    - name: clinical_context
+      title: Clinical Application
+      type: List
+      options:
+        - title: "Diagnosis"
+          name: diagnosis
+        - title: "Screening"
+          name: screening
+        - title: "Prognosis"
+          name: prognosis
+        - title: "Treatment Selection"
+          name: treatment
+        - title: "Risk Assessment"
+          name: risk
+      default: diagnosis
+
+    - name: interpretability_weight
+      title: Weight Interpretability
+      type: Number
+      default: 0.3
+      min: 0
+      max: 1
+      description: >
+                  Weight given to interpretability in final recommendations (0=performance only, 1=interpretability only).
+
+    # Output options
+    - name: show_comparison_table
+      title: Show Algorithm Comparison
+      type: Bool
+      default: true
+      description: >
+                  Display comprehensive comparison table with all metrics.
+
+    - name: show_performance_plot
+      title: Show Performance Plot
+      type: Bool
+      default: true
+      description: >
+                  Display box plots comparing algorithm performance.
+
+    - name: show_roc_comparison
+      title: Show ROC Comparison
+      type: Bool
+      default: true
+      description: >
+                  Display overlaid ROC curves for all algorithms.
+
+    - name: show_statistical_tests
+      title: Show Statistical Tests
+      type: Bool
+      default: true
+      description: >
+                  Display pairwise statistical test results.
+
+    - name: show_ranking_table
+      title: Show Algorithm Ranking
+      type: Bool
+      default: true
+      description: >
+                  Display final algorithm ranking with recommendations.
+
+    - name: show_computational_time
+      title: Show Computational Time
+      type: Bool
+      default: true
+      description: >
+                  Include computational time in comparison.
+
+    - name: show_clinical_recommendations
+      title: Show Clinical Recommendations
+      type: Bool
+      default: true
+      description: >
+                  Provide clinical recommendations based on comparison results.
+
+    - name: show_detailed_metrics
+      title: Show Detailed Metrics
+      type: Bool
+      default: false
+      description: >
+                  Show detailed metrics for each algorithm (sensitivity, specificity, etc.).
+
+    # Advanced options
+    - name: ensemble_best_models
+      title: Create Ensemble of Best Models
+      type: Bool
+      default: false
+      description: >
+                  Create ensemble combining top-performing algorithms.
+
+    - name: save_best_models
+      title: Save Best Models
+      type: Bool
+      default: false
+      description: >
+                  Save the best-performing models for future use.
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+
+    # Performance
+    - name: parallel_processing
+      title: Enable Parallel Processing
+      type: Bool
+      default: true
+      description: >
+                  Use multiple cores for faster comparison (if available).
+
+    - name: verbose_output
+      title: Verbose Progress
+      type: Bool
+      default: false
+      description: >
+                  Show detailed progress during model comparison.
+...

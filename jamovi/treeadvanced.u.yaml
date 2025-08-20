@@ -1,0 +1,224 @@
+title: Advanced Clinical Decision Trees
+name: treeadvanced
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Target Variable
+        children:
+          - type: VariablesListBox
+            name: target
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: targetLevel
+            label: Disease/Positive Class
+            variable: (target)
+      - type: TargetLayoutBox
+        label: Continuous Clinical Variables
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            height: small
+      - type: TargetLayoutBox
+        label: Categorical Clinical Variables
+        children:
+          - type: VariablesListBox
+            name: facs
+            isTarget: true
+            height: small
+      - type: TargetLayoutBox
+        label: Training/Validation Cohort (Optional)
+        children:
+          - type: VariablesListBox
+            name: train
+            maxItemCount: 1
+            isTarget: true
+            height: small
+          - type: LevelSelector
+            name: trainLevel
+            label: Training Cohort
+            variable: (train)
+
+  - type: CollapseBox
+    label: Validation & Tuning
+    collapsed: false
+    children:
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: validation
+          - type: TextBox
+            name: cv_folds
+            format: number
+            enable: (validation:cv || validation:repeated_cv)
+          - type: TextBox
+            name: cv_repeats
+            format: number
+            enable: (validation:repeated_cv)
+          - type: TextBox
+            name: bootstrap_samples
+            format: number
+            enable: (validation:bootstrap)
+          - type: TextBox
+            name: test_split
+            format: number
+            enable: (validation:holdout)
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: stratified_sampling
+          - type: CheckBox
+            name: hyperparameter_tuning
+          - type: Label
+            label: "Note: Hyperparameter tuning may take several minutes"
+            visible: (hyperparameter_tuning)
+            style: "color: #666; font-style: italic; font-size: 12px;"
+          - type: ComboBox
+            name: tuning_method
+            enable: (hyperparameter_tuning)
+          - type: ComboBox
+            name: tuning_metric
+            enable: (hyperparameter_tuning)
+
+  - type: CollapseBox
+    label: Tree Parameters
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: TextBox
+            name: max_depth_range
+            format: string
+            enable: (hyperparameter_tuning)
+          - type: TextBox
+            name: cp_range
+            format: string
+            enable: (hyperparameter_tuning)
+          - type: TextBox
+            name: min_samples_range
+            format: string
+            enable: (hyperparameter_tuning)
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: pruning_method
+          - type: TextBox
+            name: custom_cp
+            format: number
+            enable: (pruning_method:custom_cp)
+          - type: CheckBox
+            name: auto_prune
+          - type: CheckBox
+            name: show_cp_analysis
+
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: splitting_criterion
+          - type: CheckBox
+            name: surrogate_splits
+          - type: TextBox
+            name: max_surrogate
+            format: number
+            enable: (surrogate_splits)
+          - type: TextBox
+            name: competing_splits
+            format: number
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: feature_selection
+          - type: Label
+            label: "Note: Boruta method may be slow with large datasets"
+            visible: (feature_selection && feature_selection_method:boruta)
+            style: "color: #666; font-style: italic; font-size: 12px;"
+          - type: ComboBox
+            name: feature_selection_method
+            enable: (feature_selection)
+          - type: TextBox
+            name: max_features
+            format: number
+            enable: (feature_selection)
+
+  - type: CollapseBox
+    label: Clinical Context
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: ComboBox
+            name: clinical_context
+          - type: CheckBox
+            name: cost_sensitive
+          - type: ComboBox
+            name: clinical_loss_preset
+            enable: (cost_sensitive)
+          - type: TextBox
+            name: fn_fp_cost_ratio
+            format: number
+            enable: (cost_sensitive && clinical_loss_preset:custom)
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: prevalence_adjustment
+          - type: TextBox
+            name: population_prevalence
+            format: number
+            enable: (prevalence_adjustment)
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: show_tree_plot
+          - type: CheckBox
+            name: show_performance_metrics
+          - type: CheckBox
+            name: show_confusion_matrix
+          - type: CheckBox
+            name: show_importance_plot
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: show_roc_curve
+          - type: CheckBox
+            name: show_validation_curves
+          - type: CheckBox
+            name: show_calibration_plot
+          - type: CheckBox
+            name: show_clinical_interpretation
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: bootstrap_confidence
+          - type: TextBox
+            name: n_bootstrap
+            format: number
+            enable: (bootstrap_confidence)
+
+  - type: CollapseBox
+    label: Reproducibility
+    collapsed: true
+    children:
+      - type: LayoutBox
+        children:
+          - type: CheckBox
+            name: set_seed
+          - type: TextBox
+            name: seed_value
+            format: number
+            enable: (set_seed)

@@ -1,0 +1,381 @@
+---
+name: treeadvanced
+title: Advanced Clinical Decision Trees
+menuGroup: meddecideT
+menuSubgroup: Clinical Decision Support
+menuSubtitle: Enhanced CART with Advanced Validation
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced decision tree analysis with enhanced CART algorithm, comprehensive
+        validation methods, hyperparameter tuning, and detailed clinical performance
+        assessment for medical research and clinical decision support.
+    R:
+        dontrun: false
+        usage: |
+            # Advanced analysis with hyperparameter tuning
+            tree_advanced(
+                data = clinical_data,
+                vars = c("biomarker1", "biomarker2", "age"),
+                facs = c("grade", "stage"),
+                target = "outcome",
+                targetLevel = "positive",
+                validation = "repeated_cv",
+                hyperparameter_tuning = TRUE,
+                show_cp_analysis = TRUE,
+                cost_sensitive = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for advanced tree analysis.
+
+    # Core variables
+    - name: vars
+      title: Continuous Clinical Variables
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+
+    - name: facs
+      title: Categorical Clinical Variables  
+      type: Variables
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      default: null
+
+    - name: target
+      title: Target Outcome
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+
+    - name: targetLevel
+      title: Disease/Positive Level
+      type: Level
+      variable: (target)
+
+    # Training/Validation
+    - name: train
+      title: Training/Validation Cohort
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      default: null
+
+    - name: trainLevel
+      title: Training Cohort Level
+      type: Level
+      variable: (train)
+
+    - name: validation
+      title: Validation Method
+      type: List
+      options:
+        - title: "K-Fold Cross-Validation"
+          name: cv
+        - title: "Repeated Cross-Validation"
+          name: repeated_cv
+        - title: "Bootstrap Validation"
+          name: bootstrap
+        - title: "Hold-Out Validation"
+          name: holdout
+        - title: "Cohort-based Validation"
+          name: cohort
+      default: repeated_cv
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+
+    - name: cv_repeats
+      title: CV Repeats
+      type: Integer
+      default: 3
+      min: 1
+      max: 10
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 200
+      min: 100
+      max: 1000
+
+    - name: stratified_sampling
+      title: Stratified Sampling
+      type: Bool
+      default: true
+
+    - name: test_split
+      title: Test Set Proportion
+      type: Number
+      default: 0.25
+      min: 0.1
+      max: 0.4
+
+    # Advanced tree parameters
+    - name: hyperparameter_tuning
+      title: Hyperparameter Tuning
+      type: Bool
+      default: false
+
+    - name: tuning_method
+      title: Tuning Method
+      type: List
+      options:
+        - title: "Grid Search"
+          name: grid
+        - title: "Random Search"
+          name: random
+        - title: "Bayesian Optimization"
+          name: bayesian
+      default: grid
+
+    - name: tuning_metric
+      title: Optimization Metric
+      type: List
+      options:
+        - title: "Balanced Accuracy"
+          name: bacc
+        - title: "AUC"
+          name: auc
+        - title: "Sensitivity"
+          name: sens
+        - title: "Specificity"
+          name: spec
+        - title: "F1 Score"
+          name: f1
+      default: bacc
+
+    - name: max_depth_range
+      title: Max Depth Range (min:max)
+      type: String
+      default: "3:8"
+
+    - name: cp_range
+      title: CP Range (min:max)
+      type: String
+      default: "0.001:0.1"
+
+    - name: min_samples_range
+      title: Min Samples Range (min:max)
+      type: String
+      default: "10:50"
+
+    # Pruning methods
+    - name: pruning_method
+      title: Pruning Method
+      type: List
+      options:
+        - title: "1-SE Rule"
+          name: one_se
+        - title: "Minimum xerror"
+          name: min_xerror
+        - title: "Custom CP"
+          name: custom_cp
+      default: one_se
+
+    - name: custom_cp
+      title: Custom CP Value
+      type: Number
+      default: 0.01
+      min: 0.001
+      max: 0.5
+
+    - name: auto_prune
+      title: Automatic Pruning
+      type: Bool
+      default: true
+
+    - name: show_cp_analysis
+      title: Show CP Analysis
+      type: Bool
+      default: false
+
+    # Advanced rpart options
+    - name: splitting_criterion
+      title: Splitting Criterion
+      type: List
+      options:
+        - title: "Gini Index"
+          name: gini
+        - title: "Information Gain"
+          name: information
+      default: gini
+
+    - name: surrogate_splits
+      title: Use Surrogate Splits
+      type: Bool
+      default: true
+
+    - name: max_surrogate
+      title: Max Surrogate Splits
+      type: Integer
+      default: 5
+      min: 0
+      max: 10
+
+    - name: competing_splits
+      title: Max Competing Splits
+      type: Integer
+      default: 4
+      min: 0
+      max: 10
+
+    # Clinical optimization
+    - name: cost_sensitive
+      title: Cost-Sensitive Analysis
+      type: Bool
+      default: false
+
+    - name: clinical_loss_preset
+      title: Clinical Loss Matrix
+      type: List
+      options:
+        - title: "Equal costs"
+          name: equal
+        - title: "Conservative screening (avoid FN)"
+          name: screening
+        - title: "Conservative diagnosis (avoid FP)"
+          name: diagnosis
+        - title: "Custom matrix"
+          name: custom
+      default: equal
+
+    - name: fn_fp_cost_ratio
+      title: FN:FP Cost Ratio
+      type: Number
+      default: 2
+      min: 0.1
+      max: 10
+
+    - name: prevalence_adjustment
+      title: Adjust for Population Prevalence
+      type: Bool
+      default: false
+
+    - name: population_prevalence
+      title: Population Prevalence (%)
+      type: Number
+      default: 10
+      min: 0.1
+      max: 50
+
+    # Feature selection
+    - name: feature_selection
+      title: Automated Feature Selection
+      type: Bool
+      default: false
+
+    - name: feature_selection_method
+      title: Feature Selection Method
+      type: List
+      options:
+        - title: "Recursive Feature Elimination"
+          name: rfe
+        - title: "Boruta Algorithm"
+          name: boruta
+        - title: "Variable Importance"
+          name: importance
+      default: rfe
+
+    - name: max_features
+      title: Maximum Features
+      type: Integer
+      default: 10
+      min: 2
+      max: 50
+
+    # Advanced outputs
+    - name: show_tree_plot
+      title: Show Decision Tree
+      type: Bool
+      default: true
+
+    - name: show_performance_metrics
+      title: Show Performance Metrics
+      type: Bool
+      default: true
+
+    - name: show_confusion_matrix
+      title: Show Confusion Matrix
+      type: Bool
+      default: true
+
+    - name: show_importance_plot
+      title: Show Variable Importance
+      type: Bool
+      default: true
+
+    - name: show_validation_curves
+      title: Show Validation Curves
+      type: Bool
+      default: false
+
+    - name: show_calibration_plot
+      title: Show Calibration Plot
+      type: Bool
+      default: false
+
+    - name: show_roc_curve
+      title: Show ROC Curve
+      type: Bool
+      default: true
+
+    - name: bootstrap_confidence
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+
+    - name: n_bootstrap
+      title: Bootstrap Samples for CI
+      type: Integer
+      default: 500
+      min: 100
+      max: 2000
+
+    # Clinical interpretation
+    - name: clinical_context
+      title: Clinical Application
+      type: List
+      options:
+        - title: "Diagnosis"
+          name: diagnosis
+        - title: "Screening"
+          name: screening
+        - title: "Prognosis"
+          name: prognosis
+        - title: "Treatment Selection"
+          name: treatment
+        - title: "Risk Stratification"
+          name: risk
+      default: diagnosis
+
+    - name: show_clinical_interpretation
+      title: Show Clinical Guidelines
+      type: Bool
+      default: true
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+...

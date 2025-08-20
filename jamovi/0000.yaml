@@ -1299,26 +1299,6 @@ analyses:
       cutpoint determination.
     ribbon: analyses
     category: analyses
-  - title: Medical Decision Tree Analysis
-    name: tree
-    ns: ClinicoPath
-    menuGroup: meddecideT
-    menuSubgroup: Clinical Decision Support
-    menuTitle: Medical Decision Tree Analysis
-    description: >
-      Comprehensive decision tree analysis for medical research, pathology and
-      oncology.
-
-      Combines FFTrees (Fast-and-Frugal Trees) and enhanced CART algorithms for
-      robust
-
-      clinical decision support. Provides extensive validation, performance
-      metrics,
-
-      interpretability analysis, and clinical interpretation guidelines.
-    menuSubtitle: Advanced Clinical Decision Trees
-    ribbon: analyses
-    category: analyses
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
@@ -2974,6 +2954,69 @@ analyses:
       treating other causes as censoring events. Provides comprehensive analysis
       including hazard ratios, cumulative incidence functions, and model
       comparisons across different causes of failure.
+  - title: Advanced Clinical Decision Trees
+    name: treeadvanced
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Advanced Clinical Decision Trees
+    menuSubtitle: Enhanced CART with Advanced Validation
+    description: >
+      Advanced decision tree analysis with enhanced CART algorithm,
+      comprehensive
+
+      validation methods, hyperparameter tuning, and detailed clinical
+      performance
+
+      assessment for medical research and clinical decision support.
+  - title: Clinical Tree Algorithm Comparison
+    name: treecompare
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Clinical Tree Algorithm Comparison
+    menuSubtitle: Compare Decision Tree Algorithms
+    description: >
+      Comprehensive comparison of decision tree algorithms for clinical
+      research.
+
+      Compares CART, Random Forest, and Gradient Boosting with cross-validation,
+
+      statistical testing, and clinical performance assessment.
+  - title: Clinical Random Forest Analysis
+    name: treeensemble
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Clinical Random Forest Analysis
+    menuSubtitle: Random Forest for Clinical Research
+    description: >
+      Random Forest and ensemble methods for clinical research and biomarker
+      discovery.
+
+      Provides high-accuracy predictions with robust feature importance
+      analysis,
+
+      out-of-bag error estimation, and clinical interpretation guidelines.
+  - title: Medical Decision Trees
+    name: treemedical
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Medical Decision Trees
+    menuSubtitle: Simple Clinical Decision Trees
+    description: >
+      Simple decision tree analysis for medical research and clinical decision
+      making.
+
+      Uses enhanced CART algorithm optimized for healthcare applications with
+
+      clinical validation, performance metrics, and medical interpretation
+      guidelines.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
