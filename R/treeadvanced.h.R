@@ -504,7 +504,10 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "rpart.plot",
                     "caret",
                     "pROC",
-                    "randomForest"))
+                    "randomForest",
+                    "Boruta",
+                    "ggplot2",
+                    "stats"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -521,7 +524,12 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "target",
                     "targetLevel",
                     "validation",
-                    "hyperparameter_tuning")))
+                    "hyperparameter_tuning",
+                    "cost_sensitive",
+                    "clinical_loss_preset",
+                    "prevalence_adjustment",
+                    "feature_selection",
+                    "feature_selection_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tuningresults",
@@ -533,7 +541,11 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "target",
                     "targetLevel",
                     "tuning_method",
-                    "tuning_metric")))
+                    "tuning_metric",
+                    "max_depth_range",
+                    "cp_range",
+                    "min_samples_range",
+                    "cost_sensitive")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="performancetable",
@@ -545,7 +557,10 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "target",
                     "targetLevel",
                     "validation",
-                    "hyperparameter_tuning"),
+                    "hyperparameter_tuning",
+                    "cost_sensitive",
+                    "clinical_loss_preset",
+                    "prevalence_adjustment"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -556,11 +571,11 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `title`="Value", 
                         `type`="number"),
                     list(
-                        `name`="cilower", 
+                        `name`="ci_lower", 
                         `title`="95% CI Lower", 
                         `type`="number"),
                     list(
-                        `name`="ciupper", 
+                        `name`="ci_upper", 
                         `title`="95% CI Upper", 
                         `type`="number"))))
             self$add(jmvcore::Table$new(

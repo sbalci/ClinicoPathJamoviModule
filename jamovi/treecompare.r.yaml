@@ -1,0 +1,160 @@
+---
+name: treecompare
+title: Clinical Tree Algorithm Comparison
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+      clearWith: []
+
+    - name: algorithm_summary
+      title: Algorithm Summary
+      type: Html
+      visible: (show_comparison_table)
+      clearWith:
+        - include_cart
+        - include_rf
+        - include_gbm
+        - include_xgboost
+        - include_ctree
+
+    - name: comparison_table
+      title: Algorithm Comparison
+      type: Table
+      visible: (show_comparison_table)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - validation
+        - primary_metric
+      columns:
+        - name: algorithm
+          title: Algorithm
+          type: text
+        - name: accuracy
+          title: Accuracy
+          type: number
+        - name: bacc
+          title: Balanced Accuracy
+          type: number
+        - name: auc
+          title: AUC
+          type: number
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+        - name: specificity
+          title: Specificity
+          type: number
+        - name: f1_score
+          title: F1 Score
+          type: number
+        - name: computation_time
+          title: Time (sec)
+          type: number
+
+    - name: performance_plot
+      title: Performance Comparison
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .performance_plot
+      visible: (show_performance_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - primary_metric
+
+    - name: roc_comparison
+      title: ROC Comparison
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .roc_plot
+      visible: (show_roc_comparison)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+
+    - name: statistical_tests
+      title: Statistical Test Results
+      type: Table
+      visible: (show_statistical_tests && statistical_testing)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - correction_method
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: statistic
+          title: Test Statistic
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+        - name: p_adjusted
+          title: Adjusted P-value
+          type: number
+        - name: significance
+          title: Significant
+          type: text
+
+    - name: ranking_table
+      title: Algorithm Ranking
+      type: Table
+      visible: (show_ranking_table)
+      clearWith:
+        - primary_metric
+        - interpretability_weight
+        - clinical_context
+      columns:
+        - name: rank
+          title: Rank
+          type: integer
+        - name: algorithm
+          title: Algorithm
+          type: text
+        - name: performance_score
+          title: Performance Score
+          type: number
+        - name: interpretability_score
+          title: Interpretability Score
+          type: number
+        - name: combined_score
+          title: Combined Score
+          type: number
+        - name: recommendation
+          title: Recommendation
+          type: text
+
+    - name: clinical_recommendations
+      title: Clinical Recommendations
+      type: Html
+      visible: (show_clinical_recommendations)
+      clearWith:
+        - clinical_context
+        - interpretability_weight
+        - primary_metric
+
+refs:
+    - ClinicoPathJamoviModule
+    - rpart
+    - randomForest
+    - gbm
+    - caret
+    - pROC
+    - ggplot2
+...

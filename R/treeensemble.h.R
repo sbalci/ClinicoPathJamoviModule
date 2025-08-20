@@ -249,14 +249,169 @@ treeensembleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 treeensembleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "treeensembleResults",
     inherit = jmvcore::Group,
-    active = list(),
+    active = list(
+        instructions = function() private$.items[["instructions"]],
+        model_summary = function() private$.items[["model_summary"]],
+        performance_table = function() private$.items[["performance_table"]],
+        confusion_matrix = function() private$.items[["confusion_matrix"]],
+        importance_table = function() private$.items[["importance_table"]],
+        importance_plot = function() private$.items[["importance_plot"]],
+        oob_error_plot = function() private$.items[["oob_error_plot"]],
+        clinical_interpretation = function() private$.items[["clinical_interpretation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Clinical Random Forest Analysis")}))
+                title="Clinical Random Forest Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "randomForest",
+                    "ggplot2",
+                    "caret",
+                    "stats"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Instructions",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="model_summary",
+                title="Model Summary",
+                visible="(show_performance_metrics)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "n_trees",
+                    "mtry_method",
+                    "mtry_custom",
+                    "min_node_size",
+                    "validation",
+                    "class_weights")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="performance_table",
+                title="Performance Metrics",
+                visible="(show_performance_metrics)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "validation",
+                    "class_weights"),
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="confusion_matrix",
+                title="Confusion Matrix",
+                visible="(show_confusion_matrix)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "validation"),
+                columns=list(
+                    list(
+                        `name`="actual", 
+                        `title`="Actual", 
+                        `type`="text"),
+                    list(
+                        `name`="predicted_negative", 
+                        `title`="Predicted Negative", 
+                        `type`="integer"),
+                    list(
+                        `name`="predicted_positive", 
+                        `title`="Predicted Positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="total", 
+                        `title`="Total", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="importance_table",
+                title="Feature Importance",
+                visible="(show_importance_plot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "importance_type",
+                    "feature_selection"),
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="importance", 
+                        `title`="Importance", 
+                        `type`="number"),
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="importance_plot",
+                title="Feature Importance Plot",
+                width=700,
+                height=500,
+                renderFun=".importance_plot",
+                visible="(show_importance_plot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "importance_type",
+                    "feature_selection")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="oob_error_plot",
+                title="OOB Error Progression",
+                width=600,
+                height=400,
+                renderFun=".oob_error_plot",
+                visible="(show_oob_error)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "n_trees")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_interpretation",
+                title="Clinical Interpretation",
+                visible="(show_clinical_interpretation)",
+                clearWith=list(
+                    "clinical_context",
+                    "target",
+                    "targetLevel")))}))
 
 treeensembleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "treeensembleBase",
@@ -312,7 +467,21 @@ treeensembleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param seed_value .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$model_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$performance_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$confusion_matrix} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$importance_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$importance_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$oob_error_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clinical_interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$performance_table$asDF}
+#'
+#' \code{as.data.frame(results$performance_table)}
 #'
 #' @export
 treeensemble <- function(
