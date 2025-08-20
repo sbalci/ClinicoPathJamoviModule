@@ -1,0 +1,143 @@
+---
+name: treeensemble
+title: Clinical Random Forest Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: model_summary
+      title: Model Summary
+      type: Html
+      visible: (show_performance_metrics)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - n_trees
+        - mtry_method
+        - mtry_custom
+        - min_node_size
+        - validation
+        - class_weights
+
+    - name: performance_table
+      title: Performance Metrics
+      type: Table
+      visible: (show_performance_metrics)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - validation
+        - class_weights
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: ci_lower
+          title: 95% CI Lower
+          type: number
+        - name: ci_upper
+          title: 95% CI Upper
+          type: number
+
+    - name: confusion_matrix
+      title: Confusion Matrix
+      type: Table
+      visible: (show_confusion_matrix)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - validation
+      columns:
+        - name: actual
+          title: Actual
+          type: text
+        - name: predicted_negative
+          title: Predicted Negative
+          type: integer
+        - name: predicted_positive
+          title: Predicted Positive
+          type: integer
+        - name: total
+          title: Total
+          type: integer
+
+    - name: importance_table
+      title: Feature Importance
+      type: Table
+      visible: (show_importance_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - importance_type
+        - feature_selection
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: importance
+          title: Importance
+          type: number
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: importance_plot
+      title: Feature Importance Plot
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .importance_plot
+      visible: (show_importance_plot)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - importance_type
+        - feature_selection
+
+    - name: oob_error_plot
+      title: OOB Error Progression
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .oob_error_plot
+      visible: (show_oob_error)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - n_trees
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: (show_clinical_interpretation)
+      clearWith:
+        - clinical_context
+        - target
+        - targetLevel
+
+refs:
+    - ClinicoPathJamoviModule
+    - randomForest
+    - ggplot2
+    - caret
+    - stats
+...

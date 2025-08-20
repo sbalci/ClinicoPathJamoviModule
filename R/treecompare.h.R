@@ -403,14 +403,194 @@ treecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 treecompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "treecompareResults",
     inherit = jmvcore::Group,
-    active = list(),
+    active = list(
+        instructions = function() private$.items[["instructions"]],
+        algorithm_summary = function() private$.items[["algorithm_summary"]],
+        comparison_table = function() private$.items[["comparison_table"]],
+        performance_plot = function() private$.items[["performance_plot"]],
+        roc_comparison = function() private$.items[["roc_comparison"]],
+        statistical_tests = function() private$.items[["statistical_tests"]],
+        ranking_table = function() private$.items[["ranking_table"]],
+        clinical_recommendations = function() private$.items[["clinical_recommendations"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Clinical Tree Algorithm Comparison")}))
+                title="Clinical Tree Algorithm Comparison",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "rpart",
+                    "randomForest",
+                    "gbm",
+                    "caret",
+                    "pROC",
+                    "ggplot2"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Instructions",
+                visible=FALSE,
+                clearWith=list()))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="algorithm_summary",
+                title="Algorithm Summary",
+                visible="(show_comparison_table)",
+                clearWith=list(
+                    "include_cart",
+                    "include_rf",
+                    "include_gbm",
+                    "include_xgboost",
+                    "include_ctree")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparison_table",
+                title="Algorithm Comparison",
+                visible="(show_comparison_table)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "validation",
+                    "primary_metric"),
+                columns=list(
+                    list(
+                        `name`="algorithm", 
+                        `title`="Algorithm", 
+                        `type`="text"),
+                    list(
+                        `name`="accuracy", 
+                        `title`="Accuracy", 
+                        `type`="number"),
+                    list(
+                        `name`="bacc", 
+                        `title`="Balanced Accuracy", 
+                        `type`="number"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number"),
+                    list(
+                        `name`="f1_score", 
+                        `title`="F1 Score", 
+                        `type`="number"),
+                    list(
+                        `name`="computation_time", 
+                        `title`="Time (sec)", 
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="performance_plot",
+                title="Performance Comparison",
+                width=800,
+                height=600,
+                renderFun=".performance_plot",
+                visible="(show_performance_plot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "primary_metric")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="roc_comparison",
+                title="ROC Comparison",
+                width=700,
+                height=500,
+                renderFun=".roc_plot",
+                visible="(show_roc_comparison)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="statistical_tests",
+                title="Statistical Test Results",
+                visible="(show_statistical_tests && statistical_testing)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "correction_method"),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Test Statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="P-value", 
+                        `type`="number"),
+                    list(
+                        `name`="p_adjusted", 
+                        `title`="Adjusted P-value", 
+                        `type`="number"),
+                    list(
+                        `name`="significance", 
+                        `title`="Significant", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ranking_table",
+                title="Algorithm Ranking",
+                visible="(show_ranking_table)",
+                clearWith=list(
+                    "primary_metric",
+                    "interpretability_weight",
+                    "clinical_context"),
+                columns=list(
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer"),
+                    list(
+                        `name`="algorithm", 
+                        `title`="Algorithm", 
+                        `type`="text"),
+                    list(
+                        `name`="performance_score", 
+                        `title`="Performance Score", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretability_score", 
+                        `title`="Interpretability Score", 
+                        `type`="number"),
+                    list(
+                        `name`="combined_score", 
+                        `title`="Combined Score", 
+                        `type`="number"),
+                    list(
+                        `name`="recommendation", 
+                        `title`="Recommendation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinical_recommendations",
+                title="Clinical Recommendations",
+                visible="(show_clinical_recommendations)",
+                clearWith=list(
+                    "clinical_context",
+                    "interpretability_weight",
+                    "primary_metric")))}))
 
 treecompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "treecompareBase",
@@ -510,7 +690,21 @@ treecompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param verbose_output Show detailed progress during model comparison.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$algorithm_summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$comparison_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$performance_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$roc_comparison} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ranking_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinical_recommendations} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$comparison_table$asDF}
+#'
+#' \code{as.data.frame(results$comparison_table)}
 #'
 #' @export
 treecompare <- function(
