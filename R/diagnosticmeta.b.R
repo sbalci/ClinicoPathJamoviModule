@@ -545,18 +545,66 @@ diagnosticmetaClass <- R6::R6Class(
             <p>This module performs comprehensive meta-analysis of diagnostic test accuracy studies, specifically designed for pathology research including AI algorithm validation and biomarker diagnostic accuracy synthesis.</p>
             
             <h3>Required Data Structure</h3>
-            <p>Your data should contain the following variables:</p>
+            <p><strong>Essential Variables (Required):</strong></p>
             <ul>
-                <li><strong>Study identifier:</strong> Unique name or ID for each study</li>
+                <li><strong>Study identifier:</strong> Unique name or ID for each study (e.g., 'Smith_2020', 'Study_1')</li>
                 <li><strong>True positives (TP):</strong> Number correctly identified as positive</li>
                 <li><strong>False positives (FP):</strong> Number incorrectly identified as positive</li>
                 <li><strong>False negatives (FN):</strong> Number incorrectly identified as negative</li>
                 <li><strong>True negatives (TN):</strong> Number correctly identified as negative</li>
             </ul>
             
+            <p><strong>Optional Variables for Meta-Regression:</strong></p>
+            <ul>
+                <li><strong>Patient population:</strong> Disease stage, demographics (e.g., 'early_stage', 'advanced', 'mixed')</li>
+                <li><strong>Technical method:</strong> Staining protocol (e.g., 'automated', 'manual')</li>
+                <li><strong>Geographic region:</strong> Study location for population analysis</li>
+                <li><strong>Publication year:</strong> For temporal trend investigation</li>
+            </ul>
+            
+            <h3>Data Preparation Checklist</h3>
+            <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>
+                <p><strong>Before running analysis, verify:</strong></p>
+                <ul>
+                    <li>✅ No missing values in TP, FP, FN, TN columns</li>
+                    <li>✅ All values are non-negative integers</li>
+                    <li>✅ At least 2 studies with complete data</li>
+                    <li>✅ Study identifiers are unique</li>
+                    <li>✅ Sample sizes are realistic (TP+FP+FN+TN = total cases per study)</li>
+                </ul>
+            </div>
+            
+            <h3>Example Data Format</h3>
+            <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
+                <tr style='background-color: #f1f1f1;'>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>study_name</th>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>true_positives</th>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>false_positives</th>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>false_negatives</th>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>true_negatives</th>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>population</th>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Smith_2020</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>47</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>101</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>9</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>738</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>mixed</td>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Johnson_2021</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>126</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>272</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>51</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>1543</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>early_stage</td>
+                </tr>
+            </table>
+            
             <h3>Analysis Methods</h3>
             <ul>
-                <li><strong>Bivariate Random-Effects Model:</strong> Jointly analyzes sensitivity and specificity accounting for correlation</li>
+                <li><strong>Bivariate Random-Effects Model (Recommended):</strong> Jointly analyzes sensitivity and specificity accounting for correlation</li>
                 <li><strong>HSROC Analysis:</strong> Hierarchical summary ROC curve modeling</li>
                 <li><strong>Meta-Regression:</strong> Investigates sources of heterogeneity using study-level covariates</li>
                 <li><strong>Publication Bias Assessment:</strong> Deeks' funnel plot asymmetry test</li>
@@ -564,19 +612,11 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h3>Clinical Applications</h3>
             <ul>
-                <li>AI algorithm performance meta-analysis across multiple validation studies</li>
-                <li>Biomarker diagnostic accuracy synthesis for clinical implementation</li>
-                <li>Comparison of diagnostic methods across different populations</li>
-                <li>Assessment of test performance heterogeneity and sources of variation</li>
-            </ul>
-            
-            <h3>Interpretation Guidelines</h3>
-            <p>Focus on:</p>
-            <ul>
-                <li>Pooled sensitivity and specificity with confidence intervals</li>
-                <li>Likelihood ratios for clinical decision-making</li>
-                <li>Heterogeneity assessment (I² > 50% indicates substantial heterogeneity)</li>
-                <li>Publication bias evaluation for evidence quality</li>
+                <li>IHC marker validation across multiple pathology studies</li>
+                <li>AI algorithm performance meta-analysis for clinical implementation</li>
+                <li>Biomarker diagnostic accuracy synthesis for guideline development</li>
+                <li>Cross-population comparison of diagnostic test performance</li>
+                <li>Assessment of test performance heterogeneity and variation sources</li>
             </ul>
             "
             
@@ -633,41 +673,169 @@ diagnosticmetaClass <- R6::R6Class(
             html <- "
             <h2>Clinical Interpretation Guidelines</h2>
             
-            <h3>Meta-Analysis Results Interpretation</h3>
+            <h3>📊 Primary Results Interpretation</h3>
+            
+            <h4>Pooled Sensitivity and Specificity</h4>
             <ul>
-                <li><strong>Pooled Sensitivity:</strong> Proportion of true positives correctly identified (higher is better for screening)</li>
-                <li><strong>Pooled Specificity:</strong> Proportion of true negatives correctly identified (higher is better for confirmation)</li>
-                <li><strong>Positive Likelihood Ratio (PLR):</strong> How much the odds of disease increase with a positive test (>10 = strong evidence)</li>
-                <li><strong>Negative Likelihood Ratio (NLR):</strong> How much the odds of disease decrease with a negative test (<0.1 = strong evidence)</li>
+                <li><strong>Pooled Sensitivity:</strong> Proportion of diseased cases correctly identified
+                    <ul>
+                        <li>High sensitivity (>90%): Excellent for screening - few diseased cases missed</li>
+                        <li>Moderate sensitivity (80-90%): Good for screening with acceptable miss rate</li>
+                        <li>Low sensitivity (<80%): Limited screening utility - many cases missed</li>
+                    </ul>
+                </li>
+                <li><strong>Pooled Specificity:</strong> Proportion of non-diseased cases correctly identified
+                    <ul>
+                        <li>High specificity (>90%): Excellent for confirmation - few false alarms</li>
+                        <li>Moderate specificity (80-90%): Good confirmatory value with some false positives</li>
+                        <li>Low specificity (<80%): Limited confirmatory utility - many false alarms</li>
+                    </ul>
+                </li>
             </ul>
             
-            <h3>Heterogeneity Assessment</h3>
+            <h4>Likelihood Ratios for Clinical Decision-Making</h4>
+            <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
+                <tr style='background-color: #f1f1f1;'>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>Likelihood Ratio</th>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>Value Range</th>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>Clinical Interpretation</th>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Positive LR</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>>10</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Strong evidence FOR disease when test positive</td>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Positive LR</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>5-10</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Moderate evidence for disease</td>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Positive LR</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>2-5</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Weak evidence for disease</td>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Negative LR</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'><0.1</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Strong evidence AGAINST disease when test negative</td>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Negative LR</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>0.1-0.2</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Moderate evidence against disease</td>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Negative LR</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>0.2-0.5</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>Weak evidence against disease</td>
+                </tr>
+            </table>
+            
+            <h4>Diagnostic Odds Ratio (DOR)</h4>
             <ul>
-                <li><strong>I² < 25%:</strong> Low heterogeneity - results can be pooled</li>
-                <li><strong>I² 25-50%:</strong> Moderate heterogeneity - investigate sources</li>
-                <li><strong>I² > 50%:</strong> Substantial heterogeneity - pooling may not be appropriate</li>
+                <li><strong>DOR > 25:</strong> Excellent overall discriminative ability</li>
+                <li><strong>DOR 10-25:</strong> Good discriminative ability</li>
+                <li><strong>DOR 5-10:</strong> Moderate discriminative ability</li>
+                <li><strong>DOR < 5:</strong> Limited discriminative ability</li>
             </ul>
             
-            <h3>Publication Bias Evaluation</h3>
+            <h3>🔍 Heterogeneity Assessment</h3>
+            
+            <div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>
+                <h4>I² Statistic Interpretation:</h4>
+                <ul>
+                    <li><strong>I² < 25%:</strong> Low heterogeneity - results can be reliably pooled</li>
+                    <li><strong>I² 25-50%:</strong> Moderate heterogeneity - investigate potential sources</li>
+                    <li><strong>I² 50-75%:</strong> Substantial heterogeneity - pooling questionable</li>
+                    <li><strong>I² > 75%:</strong> Considerable heterogeneity - avoid pooling, use subgroup analysis</li>
+                </ul>
+            </div>
+            
+            <h4>Common Sources of Heterogeneity:</h4>
             <ul>
-                <li><strong>Deeks' Test p < 0.05:</strong> Significant asymmetry suggests publication bias</li>
-                <li><strong>Funnel Plot:</strong> Visual assessment of study distribution symmetry</li>
+                <li><strong>Patient Population:</strong> Disease stage, severity, demographics</li>
+                <li><strong>Technical Factors:</strong> Staining protocols, antibody sources, automation</li>
+                <li><strong>Methodological:</strong> Reference standards, blinding, cut-off thresholds</li>
+                <li><strong>Geographic/Temporal:</strong> Population differences, technology evolution</li>
             </ul>
             
-            <h3>Clinical Decision Making</h3>
+            <h3>📈 Publication Bias Assessment</h3>
+            
+            <h4>Deeks' Funnel Plot Test:</h4>
             <ul>
-                <li>Consider both sensitivity and specificity for clinical utility</li>
-                <li>High sensitivity tests are preferred for screening populations</li>
-                <li>High specificity tests are preferred for confirming diagnoses</li>
-                <li>Likelihood ratios help quantify the clinical impact of test results</li>
+                <li><strong>p ≥ 0.05:</strong> No significant asymmetry - low risk of publication bias</li>
+                <li><strong>p < 0.05:</strong> Significant asymmetry - potential publication bias detected</li>
             </ul>
             
-            <h3>AI Algorithm Validation Context</h3>
+            <div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0;'>
+                <p><strong>⚠️ When Publication Bias is Detected:</strong></p>
+                <ul>
+                    <li>Pooled estimates may be overoptimistic</li>
+                    <li>Search for unpublished studies or negative results</li>
+                    <li>Consider contacting study authors for additional data</li>
+                    <li>Report limitations and interpret results cautiously</li>
+                </ul>
+            </div>
+            
+            <h3>🏥 Clinical Application Guidance</h3>
+            
+            <h4>IHC Marker Validation:</h4>
             <ul>
-                <li>Meta-analysis provides robust evidence for algorithm performance</li>
-                <li>Heterogeneity may indicate variability across different datasets or populations</li>
-                <li>Publication bias assessment is crucial for unbiased performance estimates</li>
+                <li><strong>Screening Applications:</strong> Prioritize high sensitivity (≥90%)</li>
+                <li><strong>Confirmatory Testing:</strong> Prioritize high specificity (≥90%)</li>
+                <li><strong>Balanced Performance:</strong> Consider clinical costs of false positives vs false negatives</li>
             </ul>
+            
+            <h4>AI Algorithm Implementation:</h4>
+            <ul>
+                <li><strong>Consistent Performance:</strong> Low heterogeneity supports broad implementation</li>
+                <li><strong>Variable Performance:</strong> High heterogeneity suggests population-specific validation needed</li>
+                <li><strong>External Validation:</strong> Meta-analysis provides evidence for regulatory approval</li>
+            </ul>
+            
+            <h4>Predictive Values in Clinical Practice:</h4>
+            <p><strong>Important:</strong> Sensitivity and specificity are test characteristics, but clinicians need predictive values that depend on disease prevalence in their population.</p>
+            
+            <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
+                <tr style='background-color: #f1f1f1;'>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>Disease Prevalence</th>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>PPV (Sen=90%, Spe=80%)</th>
+                    <th style='border: 1px solid #ddd; padding: 8px;'>NPV (Sen=90%, Spe=80%)</th>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>5%</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>19%</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>99%</td>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>20%</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>53%</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>97%</td>
+                </tr>
+                <tr>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>50%</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>82%</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>89%</td>
+                </tr>
+            </table>
+            
+            <h3>📋 Reporting Recommendations</h3>
+            
+            <p>When reporting your meta-analysis results, include:</p>
+            <ul>
+                <li>✅ <strong>Study Selection:</strong> Number of studies included and excluded</li>
+                <li>✅ <strong>Pooled Estimates:</strong> Sensitivity and specificity with 95% confidence intervals</li>
+                <li>✅ <strong>Likelihood Ratios:</strong> For clinical decision-making context</li>
+                <li>✅ <strong>Heterogeneity:</strong> I² values and potential sources investigated</li>
+                <li>✅ <strong>Publication Bias:</strong> Deeks' test results and visual assessment</li>
+                <li>✅ <strong>Clinical Implications:</strong> Population-specific predictive values</li>
+                <li>✅ <strong>Limitations:</strong> Study quality, missing data, generalizability</li>
+            </ul>
+            
+            <div style='background-color: #d1ecf1; padding: 15px; border-left: 4px solid #17a2b8; margin: 10px 0;'>
+                <p><strong>💡 Pro Tip:</strong> Always interpret meta-analysis results in the context of your specific clinical population and intended use. A test excellent for one application may be inappropriate for another.</p>
+            </div>
             "
             
             self$results$interpretation$setContent(html)

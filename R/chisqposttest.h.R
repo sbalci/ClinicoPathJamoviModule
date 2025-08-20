@@ -18,7 +18,8 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showEducational = TRUE,
             showDetailedTables = TRUE,
             residualsCutoff = 2,
-            testSelection = "auto", ...) {
+            testSelection = "auto",
+            exportResults = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -102,6 +103,10 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "chisquare",
                     "fisher"),
                 default="auto")
+            private$..exportResults <- jmvcore::OptionBool$new(
+                "exportResults",
+                exportResults,
+                default=FALSE)
 
             self$.addOption(private$..rows)
             self$.addOption(private$..cols)
@@ -116,6 +121,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showDetailedTables)
             self$.addOption(private$..residualsCutoff)
             self$.addOption(private$..testSelection)
+            self$.addOption(private$..exportResults)
         }),
     active = list(
         rows = function() private$..rows$value,
@@ -130,7 +136,8 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showEducational = function() private$..showEducational$value,
         showDetailedTables = function() private$..showDetailedTables$value,
         residualsCutoff = function() private$..residualsCutoff$value,
-        testSelection = function() private$..testSelection$value),
+        testSelection = function() private$..testSelection$value,
+        exportResults = function() private$..exportResults$value),
     private = list(
         ..rows = NA,
         ..cols = NA,
@@ -144,7 +151,8 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showEducational = NA,
         ..showDetailedTables = NA,
         ..residualsCutoff = NA,
-        ..testSelection = NA)
+        ..testSelection = NA,
+        ..exportResults = NA)
 )
 
 chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -160,6 +168,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         multipleTestingInfo = function() private$.items[["multipleTestingInfo"]],
         posthocTable = function() private$.items[["posthocTable"]],
         detailedComparisons = function() private$.items[["detailedComparisons"]],
+        exportTable = function() private$.items[["exportTable"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -298,6 +307,32 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "posthoc",
                     "sig",
                     "excl")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="exportTable",
+                title="Exported Results",
+                visible="(exportResults)",
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="Category", 
+                        `type`="text"),
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "exportResults")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -361,6 +396,8 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (typically 2.0 or 3.0)
 #' @param testSelection method for selecting statistical test for pairwise
 #'   comparisons
+#' @param exportResults Export comprehensive analysis results to downloadable
+#'   format for further analysis
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -372,6 +409,7 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$exportTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
@@ -396,7 +434,8 @@ chisqposttest <- function(
     showEducational = TRUE,
     showDetailedTables = TRUE,
     residualsCutoff = 2,
-    testSelection = "auto") {
+    testSelection = "auto",
+    exportResults = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("chisqposttest requires jmvcore to be installed (restart may be required)")
@@ -427,7 +466,8 @@ chisqposttest <- function(
         showEducational = showEducational,
         showDetailedTables = showDetailedTables,
         residualsCutoff = residualsCutoff,
-        testSelection = testSelection)
+        testSelection = testSelection,
+        exportResults = exportResults)
 
     analysis <- chisqposttestClass$new(
         options = options,
