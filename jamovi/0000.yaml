@@ -3154,6 +3154,13 @@ analyses:
       sparse, interpretable solutions. The method automatically handles tied
       survival times, stratified analysis, and provides uncertainty
       quantification through bootstrap procedures.
+  - title: Bayesian Model Averaging
+    name: bayesianma
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuTitle: Bayesian Model Averaging
+    description: Bayesian Model Averaging for survival analysis
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

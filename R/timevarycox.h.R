@@ -11,14 +11,35 @@ timevarycoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             outcome = NULL,
             fixed_covariates = NULL,
             subject_id = NULL,
+            data_format = "long",
+            timevar_type = "step",
+            use_start_stop = FALSE,
+            start_time = NULL,
+            stop_time = NULL,
+            time_units = "days",
             outcomeLevel = "1",
+            multiple_events = FALSE,
+            event_handling = "first",
             robust_se = TRUE,
             cluster_se = TRUE,
+            ties_method = "efron",
+            time_interaction = FALSE,
+            time_interaction_vars = NULL,
+            nonproportional_test = FALSE,
+            residual_plots = FALSE,
             show_model_summary = TRUE,
             show_coefficients = TRUE,
             show_hazard_ratios = TRUE,
+            confidence_intervals = TRUE,
+            ci_level = 0.95,
+            survival_plot = FALSE,
+            covariate_plot = FALSE,
+            hazard_ratio_plot = FALSE,
+            diagnostic_plots = FALSE,
             showSummaries = FALSE,
-            showExplanations = FALSE, ...) {
+            showExplanations = FALSE,
+            add_fitted_values = FALSE,
+            add_residuals = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -71,10 +92,64 @@ timevarycoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 permitted=list(
                     "factor",
                     "numeric"))
+            private$..data_format <- jmvcore::OptionList$new(
+                "data_format",
+                data_format,
+                options=list(
+                    "long",
+                    "counting"),
+                default="long")
+            private$..timevar_type <- jmvcore::OptionList$new(
+                "timevar_type",
+                timevar_type,
+                options=list(
+                    "step",
+                    "linear",
+                    "spline"),
+                default="step")
+            private$..use_start_stop <- jmvcore::OptionBool$new(
+                "use_start_stop",
+                use_start_stop,
+                default=FALSE)
+            private$..start_time <- jmvcore::OptionVariable$new(
+                "start_time",
+                start_time,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..stop_time <- jmvcore::OptionVariable$new(
+                "stop_time",
+                stop_time,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..time_units <- jmvcore::OptionList$new(
+                "time_units",
+                time_units,
+                options=list(
+                    "days",
+                    "weeks",
+                    "months",
+                    "years"),
+                default="days")
             private$..outcomeLevel <- jmvcore::OptionString$new(
                 "outcomeLevel",
                 outcomeLevel,
                 default="1")
+            private$..multiple_events <- jmvcore::OptionBool$new(
+                "multiple_events",
+                multiple_events,
+                default=FALSE)
+            private$..event_handling <- jmvcore::OptionList$new(
+                "event_handling",
+                event_handling,
+                options=list(
+                    "first",
+                    "recurrent",
+                    "gap_time"),
+                default="first")
             private$..robust_se <- jmvcore::OptionBool$new(
                 "robust_se",
                 robust_se,
@@ -83,6 +158,36 @@ timevarycoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "cluster_se",
                 cluster_se,
                 default=TRUE)
+            private$..ties_method <- jmvcore::OptionList$new(
+                "ties_method",
+                ties_method,
+                options=list(
+                    "efron",
+                    "breslow",
+                    "exact"),
+                default="efron")
+            private$..time_interaction <- jmvcore::OptionBool$new(
+                "time_interaction",
+                time_interaction,
+                default=FALSE)
+            private$..time_interaction_vars <- jmvcore::OptionVariables$new(
+                "time_interaction_vars",
+                time_interaction_vars,
+                suggested=list(
+                    "continuous",
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "numeric",
+                    "factor"))
+            private$..nonproportional_test <- jmvcore::OptionBool$new(
+                "nonproportional_test",
+                nonproportional_test,
+                default=FALSE)
+            private$..residual_plots <- jmvcore::OptionBool$new(
+                "residual_plots",
+                residual_plots,
+                default=FALSE)
             private$..show_model_summary <- jmvcore::OptionBool$new(
                 "show_model_summary",
                 show_model_summary,
@@ -95,6 +200,32 @@ timevarycoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "show_hazard_ratios",
                 show_hazard_ratios,
                 default=TRUE)
+            private$..confidence_intervals <- jmvcore::OptionBool$new(
+                "confidence_intervals",
+                confidence_intervals,
+                default=TRUE)
+            private$..ci_level <- jmvcore::OptionNumber$new(
+                "ci_level",
+                ci_level,
+                min=0.5,
+                max=0.99,
+                default=0.95)
+            private$..survival_plot <- jmvcore::OptionBool$new(
+                "survival_plot",
+                survival_plot,
+                default=FALSE)
+            private$..covariate_plot <- jmvcore::OptionBool$new(
+                "covariate_plot",
+                covariate_plot,
+                default=FALSE)
+            private$..hazard_ratio_plot <- jmvcore::OptionBool$new(
+                "hazard_ratio_plot",
+                hazard_ratio_plot,
+                default=FALSE)
+            private$..diagnostic_plots <- jmvcore::OptionBool$new(
+                "diagnostic_plots",
+                diagnostic_plots,
+                default=FALSE)
             private$..showSummaries <- jmvcore::OptionBool$new(
                 "showSummaries",
                 showSummaries,
@@ -103,20 +234,49 @@ timevarycoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "showExplanations",
                 showExplanations,
                 default=FALSE)
+            private$..add_fitted_values <- jmvcore::OptionBool$new(
+                "add_fitted_values",
+                add_fitted_values,
+                default=FALSE)
+            private$..add_residuals <- jmvcore::OptionBool$new(
+                "add_residuals",
+                add_residuals,
+                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..timevar_data)
             self$.addOption(private$..outcome)
             self$.addOption(private$..fixed_covariates)
             self$.addOption(private$..subject_id)
+            self$.addOption(private$..data_format)
+            self$.addOption(private$..timevar_type)
+            self$.addOption(private$..use_start_stop)
+            self$.addOption(private$..start_time)
+            self$.addOption(private$..stop_time)
+            self$.addOption(private$..time_units)
             self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..multiple_events)
+            self$.addOption(private$..event_handling)
             self$.addOption(private$..robust_se)
             self$.addOption(private$..cluster_se)
+            self$.addOption(private$..ties_method)
+            self$.addOption(private$..time_interaction)
+            self$.addOption(private$..time_interaction_vars)
+            self$.addOption(private$..nonproportional_test)
+            self$.addOption(private$..residual_plots)
             self$.addOption(private$..show_model_summary)
             self$.addOption(private$..show_coefficients)
             self$.addOption(private$..show_hazard_ratios)
+            self$.addOption(private$..confidence_intervals)
+            self$.addOption(private$..ci_level)
+            self$.addOption(private$..survival_plot)
+            self$.addOption(private$..covariate_plot)
+            self$.addOption(private$..hazard_ratio_plot)
+            self$.addOption(private$..diagnostic_plots)
             self$.addOption(private$..showSummaries)
             self$.addOption(private$..showExplanations)
+            self$.addOption(private$..add_fitted_values)
+            self$.addOption(private$..add_residuals)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -124,28 +284,70 @@ timevarycoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         outcome = function() private$..outcome$value,
         fixed_covariates = function() private$..fixed_covariates$value,
         subject_id = function() private$..subject_id$value,
+        data_format = function() private$..data_format$value,
+        timevar_type = function() private$..timevar_type$value,
+        use_start_stop = function() private$..use_start_stop$value,
+        start_time = function() private$..start_time$value,
+        stop_time = function() private$..stop_time$value,
+        time_units = function() private$..time_units$value,
         outcomeLevel = function() private$..outcomeLevel$value,
+        multiple_events = function() private$..multiple_events$value,
+        event_handling = function() private$..event_handling$value,
         robust_se = function() private$..robust_se$value,
         cluster_se = function() private$..cluster_se$value,
+        ties_method = function() private$..ties_method$value,
+        time_interaction = function() private$..time_interaction$value,
+        time_interaction_vars = function() private$..time_interaction_vars$value,
+        nonproportional_test = function() private$..nonproportional_test$value,
+        residual_plots = function() private$..residual_plots$value,
         show_model_summary = function() private$..show_model_summary$value,
         show_coefficients = function() private$..show_coefficients$value,
         show_hazard_ratios = function() private$..show_hazard_ratios$value,
+        confidence_intervals = function() private$..confidence_intervals$value,
+        ci_level = function() private$..ci_level$value,
+        survival_plot = function() private$..survival_plot$value,
+        covariate_plot = function() private$..covariate_plot$value,
+        hazard_ratio_plot = function() private$..hazard_ratio_plot$value,
+        diagnostic_plots = function() private$..diagnostic_plots$value,
         showSummaries = function() private$..showSummaries$value,
-        showExplanations = function() private$..showExplanations$value),
+        showExplanations = function() private$..showExplanations$value,
+        add_fitted_values = function() private$..add_fitted_values$value,
+        add_residuals = function() private$..add_residuals$value),
     private = list(
         ..elapsedtime = NA,
         ..timevar_data = NA,
         ..outcome = NA,
         ..fixed_covariates = NA,
         ..subject_id = NA,
+        ..data_format = NA,
+        ..timevar_type = NA,
+        ..use_start_stop = NA,
+        ..start_time = NA,
+        ..stop_time = NA,
+        ..time_units = NA,
         ..outcomeLevel = NA,
+        ..multiple_events = NA,
+        ..event_handling = NA,
         ..robust_se = NA,
         ..cluster_se = NA,
+        ..ties_method = NA,
+        ..time_interaction = NA,
+        ..time_interaction_vars = NA,
+        ..nonproportional_test = NA,
+        ..residual_plots = NA,
         ..show_model_summary = NA,
         ..show_coefficients = NA,
         ..show_hazard_ratios = NA,
+        ..confidence_intervals = NA,
+        ..ci_level = NA,
+        ..survival_plot = NA,
+        ..covariate_plot = NA,
+        ..hazard_ratio_plot = NA,
+        ..diagnostic_plots = NA,
         ..showSummaries = NA,
-        ..showExplanations = NA)
+        ..showExplanations = NA,
+        ..add_fitted_values = NA,
+        ..add_residuals = NA)
 )
 
 timevarycoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -155,6 +357,14 @@ timevarycoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         todo = function() private$.items[["todo"]],
         modelSummary = function() private$.items[["modelSummary"]],
         coefficientsTable = function() private$.items[["coefficientsTable"]],
+        timeVaryingSummary = function() private$.items[["timeVaryingSummary"]],
+        nonproportionalTest = function() private$.items[["nonproportionalTest"]],
+        dataPreparationSummary = function() private$.items[["dataPreparationSummary"]],
+        survivalPlot = function() private$.items[["survivalPlot"]],
+        covariatePlot = function() private$.items[["covariatePlot"]],
+        hazardRatioPlot = function() private$.items[["hazardRatioPlot"]],
+        diagnosticPlots = function() private$.items[["diagnosticPlots"]],
+        residualPlots = function() private$.items[["residualPlots"]],
         analysisSummary = function() private$.items[["analysisSummary"]],
         methodExplanation = function() private$.items[["methodExplanation"]]),
     private = list(),
@@ -187,11 +397,106 @@ timevarycoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="coefficient", 
                         `title`="\u03B2", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="z_statistic", 
+                        `title`="z", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
                     list(
                         `name`="hazard_ratio", 
                         `title`="HR", 
-                        `type`="number"))))
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(show_hazard_ratios)"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower CI", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(confidence_intervals)"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper CI", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(confidence_intervals)"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="timeVaryingSummary",
+                title="Time-Varying Effects Summary",
+                visible="(time_interaction)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="nonproportionalTest",
+                title="Non-Proportional Hazards Test",
+                visible="(nonproportional_test)",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="rho", 
+                        `title`="\u03C1", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="chi_sq", 
+                        `title`="\u03C7\u00B2", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="dataPreparationSummary",
+                title="Data Preparation Summary",
+                visible=TRUE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="survivalPlot",
+                title="Survival Curves by Time-Varying Groups",
+                visible="(survival_plot)",
+                renderFun=".survivalPlot"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="covariatePlot",
+                title="Time-Varying Covariate Trajectories",
+                visible="(covariate_plot)",
+                renderFun=".covariatePlot"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="hazardRatioPlot",
+                title="Time-Varying Hazard Ratios",
+                visible="(hazard_ratio_plot)",
+                renderFun=".hazardRatioPlot"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="diagnosticPlots",
+                title="Model Diagnostic Plots",
+                visible="(diagnostic_plots)",
+                renderFun=".diagnosticPlots"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="residualPlots",
+                title="Residual Analysis",
+                visible="(residual_plots)",
+                renderFun=".residualPlots"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",
@@ -240,19 +545,48 @@ timevarycoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param outcome Event indicator variable
 #' @param fixed_covariates Time-constant covariates
 #' @param subject_id Unique identifier for each subject
+#' @param data_format Format of the input data
+#' @param timevar_type How to handle values between time points
+#' @param use_start_stop Use start and stop times for counting process
+#' @param start_time Start time for counting process intervals
+#' @param stop_time Stop time for counting process intervals
+#' @param time_units Units for time measurements
 #' @param outcomeLevel Level of outcome variable indicating event
+#' @param multiple_events Allow subjects to have multiple events
+#' @param event_handling How to handle multiple events
 #' @param robust_se Use robust standard errors
 #' @param cluster_se Cluster standard errors by subject
+#' @param ties_method Method for handling tied event times
+#' @param time_interaction Include interactions with time
+#' @param time_interaction_vars Variables to interact with time
+#' @param nonproportional_test Test proportional hazards assumption
+#' @param residual_plots Generate residual diagnostic plots
 #' @param show_model_summary Display model summary information
 #' @param show_coefficients Display regression coefficients table
 #' @param show_hazard_ratios Display hazard ratios
+#' @param confidence_intervals Include confidence intervals
+#' @param ci_level Confidence level for intervals
+#' @param survival_plot Generate survival curves
+#' @param covariate_plot Plot covariate trajectories over time
+#' @param hazard_ratio_plot Plot hazard ratios over time
+#' @param diagnostic_plots Generate model diagnostic plots
 #' @param showSummaries Generate natural language summaries
 #' @param showExplanations Show methodology explanations
+#' @param add_fitted_values Add fitted values as output variables
+#' @param add_residuals Add residuals as output variables
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coefficientsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$timeVaryingSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$nonproportionalTest} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$dataPreparationSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survivalPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$covariatePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$hazardRatioPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagnosticPlots} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$residualPlots} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
@@ -271,14 +605,35 @@ timevarycox <- function(
     outcome,
     fixed_covariates,
     subject_id,
+    data_format = "long",
+    timevar_type = "step",
+    use_start_stop = FALSE,
+    start_time,
+    stop_time,
+    time_units = "days",
     outcomeLevel = "1",
+    multiple_events = FALSE,
+    event_handling = "first",
     robust_se = TRUE,
     cluster_se = TRUE,
+    ties_method = "efron",
+    time_interaction = FALSE,
+    time_interaction_vars,
+    nonproportional_test = FALSE,
+    residual_plots = FALSE,
     show_model_summary = TRUE,
     show_coefficients = TRUE,
     show_hazard_ratios = TRUE,
+    confidence_intervals = TRUE,
+    ci_level = 0.95,
+    survival_plot = FALSE,
+    covariate_plot = FALSE,
+    hazard_ratio_plot = FALSE,
+    diagnostic_plots = FALSE,
     showSummaries = FALSE,
-    showExplanations = FALSE) {
+    showExplanations = FALSE,
+    add_fitted_values = FALSE,
+    add_residuals = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("timevarycox requires jmvcore to be installed (restart may be required)")
@@ -288,6 +643,9 @@ timevarycox <- function(
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(fixed_covariates)) fixed_covariates <- jmvcore::resolveQuo(jmvcore::enquo(fixed_covariates))
     if ( ! missing(subject_id)) subject_id <- jmvcore::resolveQuo(jmvcore::enquo(subject_id))
+    if ( ! missing(start_time)) start_time <- jmvcore::resolveQuo(jmvcore::enquo(start_time))
+    if ( ! missing(stop_time)) stop_time <- jmvcore::resolveQuo(jmvcore::enquo(stop_time))
+    if ( ! missing(time_interaction_vars)) time_interaction_vars <- jmvcore::resolveQuo(jmvcore::enquo(time_interaction_vars))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -295,7 +653,10 @@ timevarycox <- function(
             `if`( ! missing(timevar_data), timevar_data, NULL),
             `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(fixed_covariates), fixed_covariates, NULL),
-            `if`( ! missing(subject_id), subject_id, NULL))
+            `if`( ! missing(subject_id), subject_id, NULL),
+            `if`( ! missing(start_time), start_time, NULL),
+            `if`( ! missing(stop_time), stop_time, NULL),
+            `if`( ! missing(time_interaction_vars), time_interaction_vars, NULL))
 
 
     options <- timevarycoxOptions$new(
@@ -304,14 +665,35 @@ timevarycox <- function(
         outcome = outcome,
         fixed_covariates = fixed_covariates,
         subject_id = subject_id,
+        data_format = data_format,
+        timevar_type = timevar_type,
+        use_start_stop = use_start_stop,
+        start_time = start_time,
+        stop_time = stop_time,
+        time_units = time_units,
         outcomeLevel = outcomeLevel,
+        multiple_events = multiple_events,
+        event_handling = event_handling,
         robust_se = robust_se,
         cluster_se = cluster_se,
+        ties_method = ties_method,
+        time_interaction = time_interaction,
+        time_interaction_vars = time_interaction_vars,
+        nonproportional_test = nonproportional_test,
+        residual_plots = residual_plots,
         show_model_summary = show_model_summary,
         show_coefficients = show_coefficients,
         show_hazard_ratios = show_hazard_ratios,
+        confidence_intervals = confidence_intervals,
+        ci_level = ci_level,
+        survival_plot = survival_plot,
+        covariate_plot = covariate_plot,
+        hazard_ratio_plot = hazard_ratio_plot,
+        diagnostic_plots = diagnostic_plots,
         showSummaries = showSummaries,
-        showExplanations = showExplanations)
+        showExplanations = showExplanations,
+        add_fitted_values = add_fitted_values,
+        add_residuals = add_residuals)
 
     analysis <- timevarycoxClass$new(
         options = options,

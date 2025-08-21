@@ -494,7 +494,7 @@ gradientboostingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   is the  time from study entry to event or censoring.
 #' @param event Event indicator variable. For survival analysis: 0 = censored,
 #'   1 = event. For competing risks: 0 = censored, 1+ = different event types.
-#' @param predictors Variables to use for boosting. Can include continuous,
+#' @param predictors Variables to use for boosting. Can include numeric,
 #'   ordinal, and  nominal variables. The algorithm automatically handles
 #'   mixed-type predictors and performs variable selection.
 #' @param strata Optional stratification variable for stratified survival

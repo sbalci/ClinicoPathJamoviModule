@@ -134,11 +134,11 @@ items:
           type: number
           format: zto
         - name: proportion_events
-          title: % from Events
+          title: Events Percent
           type: number
           format: pc
         - name: proportion_nonevents
-          title: % from Non-Events
+          title: Non-Events Percent
           type: number
           format: pc
 

@@ -1,8 +1,12 @@
 
 powercompriskClass <- R6::R6Class(
-    "powercompriskClass", 
+    "powercompriskClass",
     inherit = powercompriskBase,
     private = list(
+
+        .params = NULL,
+        .power_result = NULL,
+
         .init = function() {
             todo <- paste0(
                 "<h4>📋 Competing Risks Power Analysis</h4>",
@@ -14,21 +18,21 @@ powercompriskClass <- R6::R6Class(
                 "<li>Define study design parameters</li>",
                 "</ul>"
             )
-            
+
             self$results$todo$setContent(todo)
         },
-        
+
         .run = function() {
             # Get analysis parameters
             analysis_type <- self$options$analysisType
             alpha <- as.numeric(self$options$alpha)
             power <- as.numeric(self$options$power)
             total_n <- as.numeric(self$options$totalSampleSize)
-            
+
             # Parse allocation ratio
             allocation_str <- self$options$allocationRatio
             allocation_ratio <- private$.parseAllocationRatio(allocation_str)
-            
+
             if (is.null(allocation_ratio)) {
                 self$results$todo$setContent(
                     "<h4>⚠️ Invalid Allocation Ratio</h4>
@@ -36,23 +40,23 @@ powercompriskClass <- R6::R6Class(
                 )
                 return()
             }
-            
+
             # Get event rates
             event_rate1 <- as.numeric(self$options$eventRate1)
             event_rate2 <- as.numeric(self$options$eventRate2)
             competing_rate1 <- as.numeric(self$options$competingRate1)
             competing_rate2 <- as.numeric(self$options$competingRate2)
-            
+
             # Validate event rates
             if (event_rate1 + competing_rate1 > 0.95 || event_rate2 + competing_rate2 > 0.95) {
                 self$results$todo$setContent(
                     "<h4>⚠️ High Total Event Rates</h4>
-                    <p>Combined event and competing risk rates exceed 95%. 
+                    <p>Combined event and competing risk rates exceed 95%.
                     Please adjust rates to allow for censoring.</p>"
                 )
                 return()
             }
-            
+
             tryCatch({
                 # Store parameters
                 private$.params <- list(
@@ -72,13 +76,13 @@ powercompriskClass <- R6::R6Class(
                     distribution = self$options$distributionType,
                     n_simulations = as.numeric(self$options$numberOfSimulations)
                 )
-                
+
                 # Perform power analysis
                 power_result <- private$.performPowerAnalysis()
-                
+
                 if (!is.null(power_result)) {
                     private$.power_result <- power_result
-                    
+
                     # Populate results
                     private$.populateEducationalInfo()
                     private$.populatePowerResults()
@@ -87,16 +91,16 @@ powercompriskClass <- R6::R6Class(
                     private$.populatePowerCurveTable()
                     private$.populateMethodsInfo()
                     private$.populateRecommendations()
-                    
+
                     if (self$options$sensitivityAnalysis) {
                         private$.populateSensitivityAnalysis()
                     }
-                    
+
                     if (self$options$showSimulationDetails) {
                         private$.populateSimulationDiagnostics()
                     }
                 }
-                
+
             }, error = function(e) {
                 error_msg <- paste0(
                     "<h4>❌ Analysis Error</h4>",
@@ -108,32 +112,32 @@ powercompriskClass <- R6::R6Class(
                     "<li>Verify that hazard ratio is positive</li>",
                     "</ul>"
                 )
-                
+
                 self$results$todo$setContent(error_msg)
             })
         },
-        
+
         .parseAllocationRatio = function(ratio_str) {
             if (is.null(ratio_str) || ratio_str == "") return(c(1, 1))
-            
+
             parts <- unlist(strsplit(gsub("\\s", "", ratio_str), ":"))
-            
+
             if (length(parts) != 2) return(NULL)
-            
+
             ratios <- as.numeric(parts)
             if (any(is.na(ratios)) || any(ratios <= 0)) return(NULL)
-            
+
             return(ratios)
         },
-        
+
         .performPowerAnalysis = function() {
             params <- private$.params
             set.seed(12345)
-            
+
             switch(params$analysis_type,
                 "power" = {
                     estimated_power <- private$.calculatePower(params)
-                    
+
                     list(
                         type = "power",
                         power = estimated_power,
@@ -148,7 +152,7 @@ powercompriskClass <- R6::R6Class(
                 },
                 "samplesize" = {
                     required_n <- private$.calculateSampleSize(params)
-                    
+
                     list(
                         type = "sample_size",
                         sample_size = required_n,
@@ -163,27 +167,27 @@ powercompriskClass <- R6::R6Class(
                 }
             )
         },
-        
+
         .calculatePower = function(params) {
             base_power <- 0.80
             n_factor <- (params$total_n / 200)^0.5
             hr_factor <- abs(log(params$hazard_ratio)) / log(1.5)
             event_factor <- (params$event_rate1 + params$event_rate2) / 0.6
-            
+
             power <- base_power * n_factor * hr_factor * event_factor
             return(min(0.99, max(0.05, power)))
         },
-        
+
         .calculateSampleSize = function(params) {
             base_n <- 200
             power_factor <- (params$power / 0.80)^2
             hr_factor <- (log(1.5) / abs(log(params$hazard_ratio)))^2
             event_factor <- 0.6 / (params$event_rate1 + params$event_rate2)
-            
+
             required_n <- base_n * power_factor * hr_factor * event_factor
             return(round(max(20, required_n)))
         },
-        
+
         .populateEducationalInfo = function() {
             educational_content <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
@@ -193,15 +197,15 @@ powercompriskClass <- R6::R6Class(
                 "when multiple event types can occur.</p>",
                 "</div>"
             )
-            
+
             self$results$educationalInfo$setContent(educational_content)
         },
-        
+
         .populatePowerResults = function() {
             if (is.null(private$.power_result)) return()
-            
+
             result <- private$.power_result
-            
+
             result_data <- data.frame(
                 parameter = c("Statistical Power", "Sample Size", "Effect Size (HR)", "Significance Level"),
                 value = c(
@@ -223,17 +227,17 @@ powercompriskClass <- R6::R6Class(
                 ),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$powerResults$setData(result_data)
         },
-        
+
         .populateStudyDesignTable = function() {
             params <- private$.params
-            
+
             total_ratio <- sum(params$allocation_ratio)
             n1 <- round(params$total_n * params$allocation_ratio[1] / total_ratio)
             n2 <- params$total_n - n1
-            
+
             design_data <- data.frame(
                 parameter = c("Sample Size", "Event Rate (Primary)", "Competing Risk Rate"),
                 group1 = c(
@@ -258,17 +262,17 @@ powercompriskClass <- R6::R6Class(
                 ),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$studyDesignTable$setData(design_data)
         },
-        
+
         .populateSampleSizeBreakdown = function() {
             params <- private$.params
-            
+
             total_ratio <- sum(params$allocation_ratio)
             n1 <- round(params$total_n * params$allocation_ratio[1] / total_ratio)
             n2 <- params$total_n - n1
-            
+
             breakdown_data <- data.frame(
                 group = c("Group 1", "Group 2", "Combined"),
                 sample_size = c(n1, n2, params$total_n),
@@ -295,10 +299,10 @@ powercompriskClass <- R6::R6Class(
                 ),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$sampleSizeBreakdown$setData(breakdown_data)
         },
-        
+
         .populatePowerCurveTable = function() {
             scenarios <- data.frame(
                 scenario = c("Current Design", "Increased HR (1.8)", "Higher Event Rate (+10%)", "Larger Sample (+50%)"),
@@ -308,10 +312,10 @@ powercompriskClass <- R6::R6Class(
                 feasibility = c("Feasible", "Feasible", "Feasible", "Challenging"),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$powerCurveTable$setData(scenarios)
         },
-        
+
         .populateSensitivityAnalysis = function() {
             sensitivity_data <- data.frame(
                 parameter = c("Event Rate (Group 1)", "Event Rate (Group 2)", "Hazard Ratio"),
@@ -322,10 +326,10 @@ powercompriskClass <- R6::R6Class(
                 robustness = c("Moderate", "Moderate", "Sensitive"),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$sensitivityTable$setData(sensitivity_data)
         },
-        
+
         .populateSimulationDiagnostics = function() {
             diagnostics_data <- data.frame(
                 metric = c("Simulation Convergence", "Monte Carlo Error", "Confidence Interval Width"),
@@ -334,13 +338,13 @@ powercompriskClass <- R6::R6Class(
                 recommendation = c("Results reliable", "Sufficient precision", "Adequate precision"),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$simulationDiagnostics$setData(diagnostics_data)
         },
-        
+
         .populateMethodsInfo = function() {
             params <- private$.params
-            
+
             methods_content <- paste0(
                 "<div style='background-color: #e7f3ff; padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0;'>",
                 "<h4>📊 Statistical Methods</h4>",
@@ -356,52 +360,52 @@ powercompriskClass <- R6::R6Class(
                 "<p><b>Monte Carlo Simulation:</b> ", params$n_simulations, " replications for power estimation.</p>",
                 "</div>"
             )
-            
+
             self$results$methodsInfo$setContent(methods_content)
         },
-        
+
         .populateRecommendations = function() {
             if (is.null(private$.power_result)) return()
-            
+
             result <- private$.power_result
-            
+
             recommendations <- paste0(
                 "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
                 "<h4>💡 Study Design Recommendations</h4>"
             )
-            
+
             if (result$type == "power") {
                 if (result$power < 0.8) {
                     recommendations <- paste0(recommendations,
-                        "<p><b>⚠️ Power Warning:</b> Current design provides only ", 
+                        "<p><b>⚠️ Power Warning:</b> Current design provides only ",
                         round(result$power * 100, 1), "% power, below the conventional 80% threshold.</p>"
                     )
                 } else {
                     recommendations <- paste0(recommendations,
-                        "<p><b>✅ Adequate Power:</b> Current design provides ", 
+                        "<p><b>✅ Adequate Power:</b> Current design provides ",
                         round(result$power * 100, 1), "% power, meeting conventional standards.</p>"
                     )
                 }
             }
-            
+
             recommendations <- paste0(recommendations, "</div>")
             self$results$recommendationsInfo$setContent(recommendations)
         },
-        
+
         .powerCurvePlot = function(image, ggtheme, theme, ...) {
             if (is.null(private$.params)) return()
-            
+
             library(ggplot2)
-            
+
             sample_sizes <- seq(50, 500, 25)
             powers <- sapply(sample_sizes, function(n) {
                 params_temp <- private$.params
                 params_temp$total_n <- n
                 private$.calculatePower(params_temp)
             })
-            
+
             plot_data <- data.frame(x = sample_sizes, y = powers)
-            
+
             p <- ggplot(plot_data, aes(x = x, y = y)) +
                 geom_line(color = "#007bff", size = 1.2) +
                 geom_point(color = "#007bff", size = 2, alpha = 0.7) +
@@ -414,27 +418,27 @@ powercompriskClass <- R6::R6Class(
                 ) +
                 scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
                 theme_minimal()
-            
+
             print(p)
             TRUE
         },
-        
+
         .eventRatesPlot = function(image, ggtheme, theme, ...) {
             if (is.null(private$.params)) return()
-            
+
             library(ggplot2)
             params <- private$.params
-            
+
             times <- seq(0, params$follow_up, 0.1)
             cif1_event <- params$event_rate1 * (1 - exp(-times / (params$follow_up / 2)))
             cif2_event <- params$event_rate2 * (1 - exp(-times / (params$follow_up / 2)))
-            
+
             plot_data <- data.frame(
                 time = rep(times, 2),
                 cif = c(cif1_event, cif2_event),
                 group = rep(c("Group 1", "Group 2"), each = length(times))
             )
-            
+
             p <- ggplot(plot_data, aes(x = time, y = cif, color = group)) +
                 geom_line(size = 1.2) +
                 labs(
@@ -444,14 +448,9 @@ powercompriskClass <- R6::R6Class(
                 ) +
                 scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
                 theme_minimal()
-            
+
             print(p)
             TRUE
         }
-    ),
-    
-    private = list(
-        .params = NULL,
-        .power_result = NULL
     )
 )

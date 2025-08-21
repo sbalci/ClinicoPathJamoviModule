@@ -1,9 +1,8 @@
----
-name: grouplasso
 title: Group LASSO for Survival Analysis
+name: grouplasso
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -36,170 +35,174 @@ children:
             name: strata
             maxItemCount: 1
             isTarget: true
-
   - type: LayoutBox
     margin: large
-    stretchFactor: 1
     children:
-      - type: TabWidget
-        children:
-          - type: Tab
-            label: Groups
-            children:
-              - type: GroupBox
-                label: Group Definition
-                children:
-                  - type: ComboBox
-                    name: group_definition
-                  - type: TextBox
-                    name: group_structure
-                  - type: CheckBox
-                    name: factor_grouping
-
-              - type: GroupBox
-                label: Penalty Settings
-                children:
-                  - type: ComboBox
-                    name: penalty_type
-                  - type: TextBox
-                    name: alpha
-                    format: number
-                  - type: ComboBox
-                    name: group_weights
-                  - type: TextBox
-                    name: custom_weights
-
-          - type: Tab
-            label: Model
-            children:
-              - type: GroupBox
-                label: Cross-Validation
-                children:
-                  - type: TextBox
-                    name: cv_folds
-                    format: integer
-                  - type: ComboBox
-                    name: cv_measure
-
-              - type: GroupBox
-                label: Lambda Sequence
-                children:
-                  - type: ComboBox
-                    name: lambda_sequence
-                  - type: TextBox
-                    name: n_lambda
-                    format: integer
-                  - type: TextBox
-                    name: lambda_min_ratio
-                    format: number
-
-              - type: GroupBox
-                label: Algorithm
-                children:
-                  - type: ComboBox
-                    name: algorithm
-                  - type: TextBox
-                    name: max_iterations
-                    format: integer
-                  - type: TextBox
-                    name: tolerance
-                    format: number
-
-          - type: Tab
-            label: Selection
-            children:
-              - type: GroupBox
-                label: Group Selection
-                children:
-                  - type: TextBox
-                    name: selection_threshold
-                    format: number
-
-              - type: GroupBox
-                label: Stability Selection
-                children:
-                  - type: CheckBox
-                    name: stability_selection
-                  - type: TextBox
-                    name: bootstrap_samples
-                    format: integer
-                  - type: TextBox
-                    name: stability_threshold
-                    format: number
-
-              - type: GroupBox
-                label: Advanced Options
-                children:
-                  - type: CheckBox
-                    name: standardize
-                  - type: CheckBox
-                    name: center_groups
-                  - type: ComboBox
-                    name: adaptive_weights_method
-
-          - type: Tab
-            label: Validation
-            children:
-              - type: GroupBox
-                label: Nested Cross-Validation
-                children:
-                  - type: CheckBox
-                    name: nested_cv
-                  - type: TextBox
-                    name: inner_cv_folds
-                    format: integer
-
-              - type: GroupBox
-                label: Permutation Testing
-                children:
-                  - type: CheckBox
-                    name: permutation_test
-                  - type: TextBox
-                    name: n_permutations
-                    format: integer
-
-              - type: GroupBox
-                label: Computational
-                children:
-                  - type: CheckBox
-                    name: parallel_computing
-                  - type: CheckBox
-                    name: warm_start
-
-          - type: Tab
-            label: Output
-            children:
-              - type: GroupBox
-                label: Tables
-                children:
-                  - type: CheckBox
-                    name: show_group_summary
-                  - type: CheckBox
-                    name: show_coefficients
-                  - type: CheckBox
-                    name: show_path_summary
-                  - type: CheckBox
-                    name: show_cv_results
-
-              - type: GroupBox
-                label: Plots
-                children:
-                  - type: CheckBox
-                    name: plot_regularization_path
-                  - type: CheckBox
-                    name: plot_cv_curve
-                  - type: CheckBox
-                    name: plot_group_importance
-                  - type: CheckBox
-                    name: plot_stability
-                  - type: CheckBox
-                    name: plot_group_structure
-
-              - type: GroupBox
-                label: Options
-                children:
-                  - type: TextBox
-                    name: random_seed
-                    format: integer
-
-...
+      - type: ComboBox
+        name: group_definition
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: group_structure
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: factor_grouping
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: penalty_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: group_weights
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: custom_weights
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cv_folds
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: cv_measure
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: lambda_sequence
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: n_lambda
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: lambda_min_ratio
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: algorithm
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: max_iterations
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: tolerance
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: selection_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: stability_selection
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_samples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: stability_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: nested_cv
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: inner_cv_folds
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: permutation_test
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: n_permutations
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_group_summary
+      - type: CheckBox
+        name: show_coefficients
+      - type: CheckBox
+        name: show_path_summary
+      - type: CheckBox
+        name: show_cv_results
+      - type: CheckBox
+        name: plot_regularization_path
+      - type: CheckBox
+        name: plot_cv_curve
+      - type: CheckBox
+        name: plot_group_importance
+      - type: CheckBox
+        name: plot_stability
+      - type: CheckBox
+        name: plot_group_structure
+      - type: CheckBox
+        name: standardize
+      - type: CheckBox
+        name: center_groups
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: adaptive_weights_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: warm_start
+      - type: CheckBox
+        name: parallel_computing
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: random_seed
+        format: number
