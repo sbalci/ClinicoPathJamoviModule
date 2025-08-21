@@ -508,8 +508,8 @@ extratreesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param event Event indicator variable. For survival analysis: 0 = censored,
 #'   1 = event. For competing risks: 0 = censored, 1+ = different event types.
 #' @param predictors Variables to use for tree construction. Can include
-#'   continuous, ordinal, and nominal variables. The algorithm handles
-#'   mixed-type predictors efficiently.
+#'   numeric, ordinal, and nominal variables. The algorithm handles mixed-type
+#'   predictors efficiently.
 #' @param strata Optional stratification variable for stratified survival
 #'   analysis. Creates separate baseline hazards for each stratum.
 #' @param num_trees Number of trees in the forest. More trees generally
