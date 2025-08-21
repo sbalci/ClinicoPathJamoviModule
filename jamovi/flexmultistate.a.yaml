@@ -1,0 +1,277 @@
+---
+name: flexmultistate
+title: Flexible Multi-State Survival Models
+menuGroup: SurvivalD
+menuSubgroup: Multi-State Models
+menuSubtitle: 'Flexible Parametric Multi-State Modeling'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Flexible parametric multi-state survival models for complex disease progression.
+        Models transition hazards using splines and handles competing risks and intermediate states.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage
+            flexmultistate(
+                data = disease_data,
+                time = transition_time,
+                status = state_variable,
+                states = c("Healthy", "Disease", "Death"),
+                transition_matrix = transition_def
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: 'Transition Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Time to state transition or censoring
+          R: >
+            Time variable for transitions
+
+    - name: status
+      title: 'State/Status Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            State identifier or transition type
+          R: >
+            State or transition status variable
+
+    - name: start_state
+      title: 'Starting State Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      default: null
+      description:
+          ui: >
+            Starting state for each observation (optional)
+          R: >
+            Variable indicating starting state
+
+    - name: predictors
+      title: 'Predictor Variables'
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Covariates affecting transition hazards
+          R: >
+            Variables to include in transition models
+
+    - name: model_type
+      title: 'Multi-State Model Type'
+      type: List
+      options:
+        - title: Illness-Death Model
+          name: illness_death
+        - title: Competing Risks Model
+          name: competing_risks
+        - title: Progressive Model
+          name: progressive
+        - title: Custom Transition Matrix
+          name: custom
+      default: illness_death
+      description:
+          ui: >
+            Type of multi-state model structure
+          R: >
+            Multi-state model configuration
+
+    - name: hazard_distribution
+      title: 'Hazard Distribution'
+      type: List
+      options:
+        - title: Weibull with splines
+          name: weibull_spline
+        - title: Log-normal with splines
+          name: lognormal_spline
+        - title: Royston-Parmar splines
+          name: royston_parmar
+        - title: Piecewise exponential
+          name: piecewise_exp
+      default: royston_parmar
+      description:
+          ui: >
+            Distribution for modeling transition hazards
+          R: >
+            Hazard function specification
+
+    - name: spline_knots
+      title: 'Number of Spline Knots'
+      type: Integer
+      default: 3
+      min: 1
+      max: 10
+      description:
+          ui: >
+            Number of internal knots for spline fitting
+          R: >
+            Spline complexity parameter
+
+    - name: time_scale
+      title: 'Time Scale'
+      type: List
+      options:
+        - title: Hazard scale
+          name: hazard
+        - title: Odds scale
+          name: odds
+        - title: Normal scale
+          name: normal
+      default: hazard
+      description:
+          ui: >
+            Scale for flexible parametric modeling
+          R: >
+            Transformation scale for splines
+
+    - name: transition_specific
+      title: 'Transition-Specific Effects'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Allow different covariate effects for each transition
+          R: >
+            Fit separate models for each transition type
+
+    - name: shared_effects
+      title: 'Variables with Shared Effects'
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Variables with same effect across all transitions
+          R: >
+            Predictors with constrained effects
+
+    - name: time_varying_effects
+      title: 'Time-Varying Effects'
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Variables with time-varying effects
+          R: >
+            Predictors with time-dependent coefficients
+
+    - name: prediction_times
+      title: 'Prediction Time Points'
+      type: String
+      default: "12, 24, 36, 60"
+      description:
+          ui: >
+            Times for state probability predictions (comma-separated)
+          R: >
+            Time points for state occupancy predictions
+
+    - name: transition_probabilities
+      title: 'Calculate Transition Probabilities'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate transition probabilities over time
+          R: >
+            Compute state transition probabilities
+
+    - name: state_probabilities
+      title: 'Calculate State Occupancy Probabilities'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate probability of occupying each state
+          R: >
+            Compute state occupancy probabilities
+
+    - name: expected_sojourn
+      title: 'Expected Sojourn Times'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate expected time spent in each state
+          R: >
+            Compute expected sojourn times
+
+    - name: plot_hazards
+      title: 'Plot Transition Hazards'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display transition hazard functions
+          R: >
+            Generate hazard function plots
+
+    - name: plot_cumhaz
+      title: 'Plot Cumulative Hazards'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display cumulative transition hazards
+          R: >
+            Generate cumulative hazard plots
+
+    - name: plot_survival
+      title: 'Plot State Probabilities'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display state occupancy probabilities over time
+          R: >
+            Generate state probability plots
+
+    - name: microsimulation
+      title: 'Microsimulation Analysis'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform microsimulation for complex predictions
+          R: >
+            Use simulation for state predictions
+
+    - name: n_simulation
+      title: 'Simulation Sample Size'
+      type: Integer
+      default: 10000
+      min: 1000
+      max: 100000
+      description:
+          ui: >
+            Number of simulated trajectories
+          R: >
+            Sample size for microsimulation
+
+    - name: confidence_intervals
+      title: 'Calculate Confidence Intervals'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Include confidence intervals in predictions
+          R: >
+            Compute uncertainty estimates
+...

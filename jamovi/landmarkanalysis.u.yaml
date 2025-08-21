@@ -1,0 +1,69 @@
+title: Landmark Analysis for Time-varying Predictors
+name: landmarkanalysis
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Survival Time
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Status
+        children:
+          - type: VariablesListBox
+            name: status
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Predictor Variables
+        children:
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: landmark_times
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: prediction_window
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: min_events
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: include_baseline
+      - type: CheckBox
+        name: dynamic_prediction
+      - type: CheckBox
+        name: calibration_plot
+      - type: CheckBox
+        name: discrimination_plot
+      - type: CheckBox
+        name: supermodel
+      - type: CheckBox
+        name: bootstrap_validation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: n_bootstrap
+        format: number

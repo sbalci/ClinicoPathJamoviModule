@@ -1,0 +1,219 @@
+name: plscox
+title: Partial Least Squares Cox Models
+jrs: '1.1'
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      clearWith:
+          - time
+          - status
+          - predictors
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      visible: true
+
+    - name: componentSelection
+      title: Component Selection Results
+      type: Table
+      visible: true
+      columns:
+          - name: n_components
+            title: Components
+            type: integer
+          - name: cv_score
+            title: CV Score
+            type: number
+          - name: se_cv_score
+            title: SE
+            type: number
+          - name: c_index
+            title: C-Index
+            type: number
+          - name: selected
+            title: Selected
+            type: text
+
+    - name: modelCoefficients
+      title: PLS Cox Model Coefficients
+      type: Table
+      visible: true
+      columns:
+          - name: component
+            title: PLS Component
+            type: text
+          - name: coefficient
+            title: Coefficient
+            type: number
+          - name: hr
+            title: Hazard Ratio
+            type: number
+          - name: hr_lower
+            title: HR Lower CI
+            type: number
+          - name: hr_upper
+            title: HR Upper CI
+            type: number
+          - name: se
+            title: Standard Error
+            type: number
+          - name: z_value
+            title: Z-value
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+
+    - name: variableLoadings
+      title: Variable Loadings on PLS Components
+      type: Table
+      visible: (feature_importance)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: component_1
+            title: Component 1
+            type: number
+          - name: component_2
+            title: Component 2
+            type: number
+          - name: component_3
+            title: Component 3
+            type: number
+          - name: importance_score
+            title: Importance
+            type: number
+
+    - name: modelPerformance
+      title: Model Performance Metrics
+      type: Table
+      visible: (prediction_accuracy)
+      columns:
+          - name: metric
+            title: Metric
+            type: text
+          - name: value
+            title: Value
+            type: number
+          - name: se
+            title: Standard Error
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+
+    - name: riskStratification
+      title: Risk Group Stratification
+      type: Table
+      visible: true
+      columns:
+          - name: risk_group
+            title: Risk Group
+            type: text
+          - name: n_subjects
+            title: N Subjects
+            type: integer
+          - name: n_events
+            title: N Events
+            type: integer
+          - name: median_survival
+            title: Median Survival
+            type: number
+          - name: survival_se
+            title: SE
+            type: number
+          - name: hr_vs_low
+            title: HR vs Low Risk
+            type: number
+          - name: hr_p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+
+    - name: componentPlot
+      title: PLS Component Analysis
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotComponents
+      visible: (plot_components)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - pls_components
+
+    - name: loadingsPlot
+      title: Variable Loadings Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotLoadings
+      visible: (plot_loadings)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - pls_components
+
+    - name: scoresPlot
+      title: Component Scores vs Survival
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotScores
+      visible: (plot_scores)
+      clearWith:
+          - time
+          - status
+          - predictors
+
+    - name: validationPlot
+      title: Cross-Validation Results
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .plotValidation
+      visible: (plot_validation)
+      clearWith:
+          - cross_validation
+          - component_selection
+
+    - name: survivalPlot
+      title: Risk-Stratified Survival Curves
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotSurvival
+      visible: (plot_survival)
+      clearWith:
+          - time
+          - status
+          - risk_groups
+
+    - name: bootstrapResults
+      title: Bootstrap Validation Results
+      type: Html
+      visible: (bootstrap_validation)
+
+    - name: permutationResults
+      title: Permutation Test Results
+      type: Html
+      visible: (permutation_test)
+
+    - name: clinicalGuidance
+      title: Clinical Interpretation Guide
+      type: Html
+      visible: true
+
+    - name: technicalNotes
+      title: Technical Notes and Assumptions
+      type: Html
+      visible: true

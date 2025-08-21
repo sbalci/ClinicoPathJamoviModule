@@ -1,0 +1,169 @@
+---
+name: landmarkanalysis
+title: Landmark Analysis for Time-varying Predictors
+menuGroup: SurvivalD
+menuSubgroup: Advanced Survival
+menuSubtitle: 'Landmark Method for Dynamic Predictions'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Landmark analysis for survival data with time-varying predictors.
+        Provides unbiased estimates by analyzing survival from fixed landmark times.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage
+            landmarkanalysis(
+                data = survival_data,
+                time = followup_time,
+                status = event_status,
+                predictors = c(biomarker, treatment),
+                landmark_times = c(6, 12, 24)
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: 'Survival Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Follow-up time variable (in months or years)
+          R: >
+            Follow-up time variable
+
+    - name: status
+      title: 'Event Status'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Event status (0 = censored, 1 = event)
+          R: >
+            Event status variable
+
+    - name: predictors
+      title: 'Predictor Variables'
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Variables to include in landmark models
+          R: >
+            Predictor variables for landmark analysis
+
+    - name: landmark_times
+      title: 'Landmark Time Points'
+      type: String
+      default: "6, 12, 24"
+      description:
+          ui: >
+            Comma-separated landmark times for analysis
+          R: >
+            Vector of landmark time points
+
+    - name: prediction_window
+      title: 'Prediction Window'
+      type: Number
+      default: 12
+      min: 1
+      description:
+          ui: >
+            Time window for predictions from landmark (months)
+          R: >
+            Length of prediction window from each landmark
+
+    - name: min_events
+      title: 'Minimum Events per Landmark'
+      type: Integer
+      default: 10
+      min: 5
+      max: 50
+      description:
+          ui: >
+            Minimum number of events required at each landmark
+          R: >
+            Minimum events threshold for landmark analysis
+
+    - name: include_baseline
+      title: 'Include Baseline Model'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Include baseline model without landmark restriction
+          R: >
+            Whether to include baseline Cox model
+
+    - name: dynamic_prediction
+      title: 'Dynamic Risk Prediction'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Generate dynamic risk predictions over time
+          R: >
+            Calculate time-dependent risk predictions
+
+    - name: calibration_plot
+      title: 'Calibration Plot'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display calibration plots for landmark models
+          R: >
+            Generate calibration assessment plots
+
+    - name: discrimination_plot
+      title: 'Discrimination Plot'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display discrimination plots (C-index over time)
+          R: >
+            Generate discrimination assessment plots
+
+    - name: supermodel
+      title: 'Super Model Approach'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Use super model approach combining all landmarks
+          R: >
+            Combine landmark models using super model
+
+    - name: bootstrap_validation
+      title: 'Bootstrap Validation'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform bootstrap validation of landmark models
+          R: >
+            Use bootstrap for model validation
+
+    - name: n_bootstrap
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 200
+      min: 50
+      max: 1000
+      description:
+          ui: >
+            Number of bootstrap samples for validation
+          R: >
+            Number of bootstrap replications
+...

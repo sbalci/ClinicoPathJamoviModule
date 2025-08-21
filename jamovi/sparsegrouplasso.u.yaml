@@ -1,9 +1,8 @@
----
-name: sparsegrouplasso
 title: Sparse Group LASSO
+name: sparsegrouplasso
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -29,6 +28,21 @@ children:
           - type: VariablesListBox
             name: pred_vars
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: group_definition
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: custom_groups
+        format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
       - type: TargetLayoutBox
         label: Pathway Information
         children:
@@ -36,182 +50,170 @@ children:
             name: pathway_info
             maxItemCount: 1
             isTarget: true
-
   - type: LayoutBox
     margin: large
-    stretchFactor: 1
     children:
-      - type: TabWidget
-        children:
-          - type: Tab
-            label: Model
-            children:
-              - type: GroupBox
-                label: Group Definition
-                children:
-                  - type: ComboBox
-                    name: group_definition
-                  - type: TextBox
-                    name: custom_groups
-                    enable: (group_definition:custom)
-                  - type: TextBox
-                    name: correlation_threshold
-                    format: number
-                    enable: (group_definition:correlation_based)
-
-              - type: GroupBox
-                label: Sparse Group LASSO Parameters
-                children:
-                  - type: TextBox
-                    name: alpha_sgl
-                    format: number
-                  - type: ComboBox
-                    name: lambda_sequence
-                  - type: TextBox
-                    name: custom_lambda
-                    enable: (lambda_sequence:custom)
-                  - type: TextBox
-                    name: lambda_min_ratio
-                    format: number
-                    enable: (lambda_sequence:auto)
-                  - type: TextBox
-                    name: n_lambda
-                    format: integer
-                    enable: (lambda_sequence:auto)
-
-              - type: GroupBox
-                label: Model Selection
-                children:
-                  - type: ComboBox
-                    name: selection_criterion
-                  - type: TextBox
-                    name: ebic_gamma
-                    format: number
-                    enable: (selection_criterion:ebic)
-
-          - type: Tab
-            label: Adaptive Weights
-            children:
-              - type: GroupBox
-                label: Weight Configuration
-                children:
-                  - type: ComboBox
-                    name: weight_type
-                  - type: TextBox
-                    name: weight_power
-                    format: number
-                    enable: (weight_type:!none)
-
-              - type: GroupBox
-                label: Preprocessing
-                children:
-                  - type: CheckBox
-                    name: standardize_vars
-                  - type: CheckBox
-                    name: center_vars
-                  - type: CheckBox
-                    name: orthogonalize_groups
-
-          - type: Tab
-            label: Cross-Validation
-            children:
-              - type: GroupBox
-                label: Cross-Validation Settings
-                children:
-                  - type: TextBox
-                    name: cv_folds
-                    format: integer
-                  - type: TextBox
-                    name: cv_repeats
-                    format: integer
-                  - type: CheckBox
-                    name: parallel_cv
-
-              - type: GroupBox
-                label: Stability Selection
-                children:
-                  - type: CheckBox
-                    name: stability_selection
-                  - type: TextBox
-                    name: stability_threshold
-                    format: number
-                    enable: (stability_selection)
-                  - type: TextBox
-                    name: stability_subsample
-                    format: number
-                    enable: (stability_selection)
-
-          - type: Tab
-            label: Advanced
-            children:
-              - type: GroupBox
-                label: Optimization Settings
-                children:
-                  - type: TextBox
-                    name: max_iterations
-                    format: integer
-                  - type: TextBox
-                    name: convergence_threshold
-                    format: number
-                  - type: CheckBox
-                    name: warm_start
-
-              - type: GroupBox
-                label: Bootstrap & Inference
-                children:
-                  - type: CheckBox
-                    name: confidence_intervals
-                  - type: TextBox
-                    name: bootstrap_samples
-                    format: integer
-                    enable: (confidence_intervals)
-                  - type: TextBox
-                    name: alpha_level
-                    format: number
-
-              - type: GroupBox
-                label: Reproducibility
-                children:
-                  - type: TextBox
-                    name: seed_value
-                    format: integer
-
-          - type: Tab
-            label: Output
-            children:
-              - type: GroupBox
-                label: Tables
-                children:
-                  - type: CheckBox
-                    name: show_summary
-                  - type: CheckBox
-                    name: show_coefficients
-                  - type: CheckBox
-                    name: show_groups
-                  - type: CheckBox
-                    name: show_path
-                  - type: CheckBox
-                    name: show_performance
-                  - type: CheckBox
-                    name: show_validation
-
-              - type: GroupBox
-                label: Plots
-                children:
-                  - type: CheckBox
-                    name: plot_cv_error
-                  - type: CheckBox
-                    name: plot_coefficients
-                  - type: CheckBox
-                    name: plot_groups
-                  - type: CheckBox
-                    name: plot_sparsity
-                  - type: CheckBox
-                    name: plot_stability
-
-              - type: GroupBox
-                label: Options
-                children:
-                  - type: CheckBox
-                    name: showExplanations
-...
+      - type: TextBox
+        name: correlation_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha_sgl
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: lambda_sequence
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: custom_lambda
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: lambda_min_ratio
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: n_lambda
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: selection_criterion
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cv_folds
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cv_repeats
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: ebic_gamma
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: weight_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: weight_power
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: standardize_vars
+      - type: CheckBox
+        name: center_vars
+      - type: CheckBox
+        name: orthogonalize_groups
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: max_iterations
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: convergence_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: warm_start
+      - type: CheckBox
+        name: parallel_cv
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: seed_value
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_summary
+      - type: CheckBox
+        name: show_coefficients
+      - type: CheckBox
+        name: show_groups
+      - type: CheckBox
+        name: show_path
+      - type: CheckBox
+        name: show_performance
+      - type: CheckBox
+        name: show_validation
+      - type: CheckBox
+        name: plot_cv_error
+      - type: CheckBox
+        name: plot_coefficients
+      - type: CheckBox
+        name: plot_groups
+      - type: CheckBox
+        name: plot_sparsity
+      - type: CheckBox
+        name: plot_stability
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: confidence_intervals
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_samples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: stability_selection
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: stability_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: stability_subsample
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showExplanations

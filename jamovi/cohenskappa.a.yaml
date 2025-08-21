@@ -1,0 +1,134 @@
+---
+name: cohenskappa
+title: Cohen's Kappa Agreement
+menuGroup: ClinicoPath
+menuSubgroup: Diagnostic Statistics
+menuSubtitle: 'Two-Rater Agreement Analysis'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Cohen's kappa and weighted kappa for two-rater agreement analysis.
+        Essential for assessing agreement between two pathologists, diagnostic reproducibility,
+        and quality assurance in clinical pathology practice.
+
+options:
+    - name: rater1
+      title: 'First Rater'
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+          - numeric
+
+    - name: rater2
+      title: 'Second Rater'
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+          - numeric
+
+    - name: kappa_type
+      title: 'Kappa Method'
+      type: List
+      options:
+          - title: 'Cohen\'s Kappa (Unweighted)'
+            name: cohen
+          - title: 'Weighted Kappa (Linear)'
+            name: linear
+          - title: 'Weighted Kappa (Quadratic)'
+            name: quadratic
+          - title: 'All Methods'
+            name: all
+      default: cohen
+      description: 'Type of kappa statistic to calculate'
+
+    - name: confidence_level
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description: 'Confidence level for confidence intervals'
+
+    - name: ci_method
+      title: 'Confidence Interval Method'
+      type: List
+      options:
+          - title: 'Asymptotic (Normal Approximation)'
+            name: asymptotic
+          - title: 'Bootstrap'
+            name: bootstrap
+          - title: 'Both Methods'
+            name: both
+      default: asymptotic
+      description: 'Method for calculating confidence intervals'
+
+    - name: bootstrap_samples
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description: 'Number of bootstrap samples for CI estimation'
+
+    - name: exact_agreement
+      title: 'Exact Agreement Statistics'
+      type: Bool
+      default: true
+      description: 'Calculate overall and category-specific agreement percentages'
+
+    - name: marginal_homogeneity
+      title: 'Test Marginal Homogeneity'
+      type: Bool
+      default: true
+      description: 'Test whether marginal distributions are equal (Stuart-Maxwell test)'
+
+    - name: agreement_plot
+      title: 'Agreement Visualization'
+      type: Bool
+      default: true
+      description: 'Create agreement plot showing observed vs expected agreement'
+
+    - name: confusion_matrix
+      title: 'Confusion Matrix'
+      type: Bool
+      default: true
+      description: 'Display confusion matrix with agreement patterns'
+
+    - name: category_analysis
+      title: 'Category-Specific Analysis'
+      type: Bool
+      default: false
+      description: 'Detailed analysis of agreement for each category'
+
+    - name: interpretation_guide
+      title: 'Clinical Interpretation Guide'
+      type: Bool
+      default: true
+      description: 'Provide clinical interpretation of kappa values'
+
+    - name: missing_treatment
+      title: 'Missing Data Treatment'
+      type: List
+      options:
+          - title: 'Exclude Missing (Listwise)'
+            name: listwise
+          - title: 'Exclude Pairwise'
+            name: pairwise
+      default: listwise
+      description: 'How to handle missing data'
+
+    - name: minimum_categories
+      title: 'Minimum Categories Warning'
+      type: Integer
+      default: 2
+      min: 2
+      max: 10
+      description: 'Minimum number of categories required for analysis'

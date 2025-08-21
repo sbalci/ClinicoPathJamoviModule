@@ -18,7 +18,8 @@ chisqposttest(
   showEducational = TRUE,
   showDetailedTables = TRUE,
   residualsCutoff = 2,
-  testSelection = "auto"
+  testSelection = "auto",
+  exportResults = FALSE
 )
 }
 \arguments{
@@ -55,6 +56,9 @@ comparison}
 
 \item{testSelection}{method for selecting statistical test for pairwise
 comparisons}
+
+\item{exportResults}{Export comprehensive analysis results to downloadable
+format for further analysis}
 }
 \value{
 A results object containing:
@@ -68,6 +72,7 @@ A results object containing:
 \code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
+\code{results$exportTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 

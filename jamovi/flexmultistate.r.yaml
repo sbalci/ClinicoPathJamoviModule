@@ -1,0 +1,228 @@
+---
+name: flexmultistate
+title: Flexible Multi-State Survival Models
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      clearWith:
+          - time
+          - status
+          - predictors
+
+    - name: summary
+      title: Model Summary
+      type: Html
+      visible: true
+
+    - name: transitionMatrix
+      title: Transition Matrix
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: from_state
+            title: 'From State'
+            type: text
+          - name: to_state
+            title: 'To State'
+            type: text
+          - name: transition_name
+            title: 'Transition'
+            type: text
+          - name: n_transitions
+            title: 'Observed'
+            type: integer
+          - name: person_years
+            title: 'Person-Years'
+            type: number
+
+    - name: transitionModels
+      title: Transition Model Results
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: transition
+            title: 'Transition'
+            type: text
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: estimate
+            title: 'Estimate'
+            type: number
+          - name: se
+            title: 'Std. Error'
+            type: number
+          - name: z_value
+            title: 'z value'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_lower
+            title: 'HR Lower'
+            type: number
+          - name: hr_upper
+            title: 'HR Upper'
+            type: number
+
+    - name: modelComparison
+      title: Model Fit Statistics
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: transition
+            title: 'Transition'
+            type: text
+          - name: loglik
+            title: 'Log-Likelihood'
+            type: number
+          - name: aic
+            title: 'AIC'
+            type: number
+          - name: bic
+            title: 'BIC'
+            type: number
+          - name: n_parameters
+            title: 'Parameters'
+            type: integer
+
+    - name: transitionProbTable
+      title: Transition Probabilities
+      type: Table
+      visible: (transition_probabilities)
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: from_state
+            title: 'From State'
+            type: text
+          - name: to_state
+            title: 'To State'
+            type: text
+          - name: probability
+            title: 'Probability'
+            type: number
+          - name: prob_lower
+            title: 'Lower CI'
+            type: number
+          - name: prob_upper
+            title: 'Upper CI'
+            type: number
+
+    - name: stateProbTable
+      title: State Occupancy Probabilities
+      type: Table
+      visible: (state_probabilities)
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: state
+            title: 'State'
+            type: text
+          - name: probability
+            title: 'Probability'
+            type: number
+          - name: prob_lower
+            title: 'Lower CI'
+            type: number
+          - name: prob_upper
+            title: 'Upper CI'
+            type: number
+
+    - name: sojournTable
+      title: Expected Sojourn Times
+      type: Table
+      visible: (expected_sojourn)
+      rows: 1
+      columns:
+          - name: state
+            title: 'State'
+            type: text
+          - name: expected_time
+            title: 'Expected Time'
+            type: number
+          - name: sojourn_lower
+            title: 'Lower CI'
+            type: number
+          - name: sojourn_upper
+            title: 'Upper CI'
+            type: number
+
+    - name: hazardPlot
+      title: Transition Hazard Functions
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotTransitionHazards
+      visible: (plot_hazards)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - hazard_distribution
+
+    - name: cumhazPlot
+      title: Cumulative Hazard Functions
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotCumulativeHazards
+      visible: (plot_cumhaz)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - hazard_distribution
+
+    - name: survivalPlot
+      title: State Occupancy Probabilities
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotStateProbabilities
+      visible: (plot_survival)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - prediction_times
+
+    - name: transitionDiagram
+      title: State Transition Diagram
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotTransitionDiagram
+      visible: true
+      clearWith:
+          - model_type
+
+    - name: microsimResults
+      title: Microsimulation Results
+      type: Html
+      visible: (microsimulation)
+
+    - name: goodnessOfFit
+      title: Model Diagnostics
+      type: Html
+      visible: true
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+...

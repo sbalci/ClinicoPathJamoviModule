@@ -1,0 +1,241 @@
+---
+name: pcacox
+title: Principal Component Cox Models
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      clearWith:
+          - time
+          - status
+          - predictors
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: true
+
+    - name: pcaSummary
+      title: PCA Summary
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: component
+            title: 'Component'
+            type: text
+          - name: eigenvalue
+            title: 'Eigenvalue'
+            type: number
+          - name: prop_variance
+            title: 'Prop. Variance'
+            type: number
+          - name: cumul_variance
+            title: 'Cumul. Variance'
+            type: number
+          - name: selected
+            title: 'Selected'
+            type: text
+
+    - name: coxResults
+      title: Cox Model Results
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: variable
+            title: 'Variable'
+            type: text
+          - name: coefficient
+            title: 'Coefficient'
+            type: number
+          - name: se
+            title: 'Std. Error'
+            type: number
+          - name: z_value
+            title: 'z value'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_lower
+            title: 'HR Lower'
+            type: number
+          - name: hr_upper
+            title: 'HR Upper'
+            type: number
+
+    - name: componentLoadings
+      title: Component Loadings (Top Features)
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: component
+            title: 'Component'
+            type: text
+          - name: feature
+            title: 'Feature'
+            type: text
+          - name: loading
+            title: 'Loading'
+            type: number
+          - name: abs_loading
+            title: 'Abs. Loading'
+            type: number
+          - name: rank
+            title: 'Rank'
+            type: integer
+
+    - name: modelPerformance
+      title: Model Performance
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+          - name: se
+            title: 'Std. Error'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name: featureImportance
+      title: Feature Importance Rankings
+      type: Table
+      visible: (feature_importance)
+      rows: 1
+      columns:
+          - name: feature
+            title: 'Feature'
+            type: text
+          - name: importance_score
+            title: 'Importance'
+            type: number
+          - name: rank
+            title: 'Rank'
+            type: integer
+          - name: contributing_pcs
+            title: 'Main PCs'
+            type: text
+
+    - name: riskScore
+      title: Risk Score Analysis
+      type: Table
+      visible: (risk_score)
+      rows: 1
+      columns:
+          - name: risk_group
+            title: 'Risk Group'
+            type: text
+          - name: n_patients
+            title: 'N Patients'
+            type: integer
+          - name: n_events
+            title: 'N Events'
+            type: integer
+          - name: median_survival
+            title: 'Median Survival'
+            type: number
+          - name: hr_vs_low
+            title: 'HR vs Low Risk'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name: screePlot
+      title: Scree Plot - Explained Variance
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotScree
+      visible: (plot_scree)
+      clearWith:
+          - predictors
+          - n_components
+          - pca_method
+
+    - name: loadingsPlot
+      title: Component Loadings
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotLoadings
+      visible: (plot_loadings)
+      clearWith:
+          - predictors
+          - n_components
+          - pca_method
+
+    - name: biplot
+      title: PCA Biplot
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotBiplot
+      visible: (plot_biplot)
+      clearWith:
+          - predictors
+          - n_components
+          - pca_method
+
+    - name: survivalPlot
+      title: Survival by Principal Component Scores
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotSurvival
+      visible: (plot_survival)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - n_components
+
+    - name: crossValidation
+      title: Cross-Validation Results
+      type: Html
+      visible: (component_selection:cv)
+
+    - name: bootstrapValidation
+      title: Bootstrap Validation
+      type: Html
+      visible: (bootstrap_validation)
+
+    - name: permutationTest
+      title: Permutation Test Results
+      type: Html
+      visible: (permutation_test)
+
+    - name: pathwayAnalysis
+      title: Pathway Enrichment Analysis
+      type: Html
+      visible: (pathway_analysis)
+
+    - name: technicalDetails
+      title: Technical Details
+      type: Html
+      visible: true
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+...

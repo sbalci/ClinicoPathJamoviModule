@@ -1,0 +1,211 @@
+---
+name: plscox
+title: Partial Least Squares Cox Models
+menuGroup: SurvivalD
+menuSubgroup: High-Dimensional Methods
+menuSubtitle: 'PLS-based Cox Regression for High-Dimensional Survival Data'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Partial Least Squares Cox regression for high-dimensional survival data.
+        Combines PLS dimensionality reduction with Cox proportional hazards modeling
+        for analysis of genomic, proteomic, and other high-dimensional datasets.
+
+options:
+    - name: time
+      title: 'Time Variable'
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+
+    - name: status
+      title: 'Status Variable'
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+          - numeric
+
+    - name: predictors
+      title: 'High-dimensional Predictors'
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+
+    - name: pls_components
+      title: 'Number of PLS Components'
+      type: Integer
+      default: 5
+      min: 1
+      max: 50
+      description: 'Number of PLS components to extract'
+
+    - name: cross_validation
+      title: 'Cross-Validation Method'
+      type: List
+      options:
+          - title: 'Leave-One-Out CV'
+            name: loo
+          - title: '10-Fold CV'
+            name: k10
+          - title: '5-Fold CV' 
+            name: k5
+          - title: 'No CV'
+            name: none
+      default: k10
+      description: 'Cross-validation method for component selection'
+
+    - name: component_selection
+      title: 'Component Selection Method'
+      type: List
+      options:
+          - title: 'Cross-Validated Log-Likelihood'
+            name: cv_loglik
+          - title: 'Cross-Validated C-Index'
+            name: cv_cindex
+          - title: 'BIC'
+            name: bic
+          - title: 'AIC'
+            name: aic
+          - title: 'Manual'
+            name: manual
+      default: cv_loglik
+      description: 'Method for selecting optimal number of components'
+
+    - name: scaling_method
+      title: 'Variable Scaling'
+      type: List
+      options:
+          - title: 'Standardization (Z-scores)'
+            name: standardize
+          - title: 'Unit Variance Scaling'
+            name: unit_variance
+          - title: 'Min-Max Scaling'
+            name: minmax
+          - title: 'No Scaling'
+            name: none
+      default: standardize
+      description: 'Method for scaling predictor variables'
+
+    - name: pls_algorithm
+      title: 'PLS Algorithm'
+      type: List
+      options:
+          - title: 'NIPALS'
+            name: nipals
+          - title: 'Kernel PLS'
+            name: kernel
+          - title: 'Wide Kernel PLS'
+            name: widekernelpls
+      default: nipals
+      description: 'Algorithm for PLS computation'
+
+    - name: max_iterations
+      title: 'Maximum Iterations'
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description: 'Maximum iterations for PLS algorithm convergence'
+
+    - name: tolerance
+      title: 'Convergence Tolerance'
+      type: Number
+      default: 1e-06
+      min: 1e-10
+      max: 1e-03
+      description: 'Tolerance for algorithm convergence'
+
+    - name: bootstrap_validation
+      title: 'Bootstrap Validation'
+      type: Bool
+      default: false
+      description: 'Perform bootstrap validation of model performance'
+
+    - name: n_bootstrap
+      title: 'Bootstrap Replications'
+      type: Integer
+      default: 200
+      min: 50
+      max: 2000
+      description: 'Number of bootstrap replications'
+
+    - name: permutation_test
+      title: 'Permutation Test'
+      type: Bool
+      default: false
+      description: 'Perform permutation test for variable importance'
+
+    - name: n_permutations
+      title: 'Number of Permutations'
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description: 'Number of permutations for significance testing'
+
+    - name: plot_components
+      title: 'Component Plots'
+      type: Bool
+      default: true
+      description: 'Create PLS component visualization plots'
+
+    - name: plot_loadings
+      title: 'Variable Loadings Plot'
+      type: Bool
+      default: true
+      description: 'Display variable loadings for PLS components'
+
+    - name: plot_scores
+      title: 'Component Scores Plot'
+      type: Bool
+      default: true
+      description: 'Show component scores and survival relationships'
+
+    - name: plot_validation
+      title: 'Cross-Validation Plot'
+      type: Bool
+      default: true
+      description: 'Display cross-validation curves for component selection'
+
+    - name: plot_survival
+      title: 'Survival Curves'
+      type: Bool
+      default: true
+      description: 'Generate risk-stratified survival curves'
+
+    - name: risk_groups
+      title: 'Number of Risk Groups'
+      type: Integer
+      default: 3
+      min: 2
+      max: 5
+      description: 'Number of risk groups for survival stratification'
+
+    - name: confidence_intervals
+      title: 'Confidence Intervals'
+      type: Bool
+      default: true
+      description: 'Calculate confidence intervals for hazard ratios'
+
+    - name: feature_importance
+      title: 'Variable Importance'
+      type: Bool
+      default: true
+      description: 'Calculate and display variable importance scores'
+
+    - name: prediction_accuracy
+      title: 'Prediction Accuracy'
+      type: Bool
+      default: true
+      description: 'Assess model prediction accuracy using C-index and other metrics'

@@ -3098,7 +3098,7 @@ analyses:
     name: extratrees
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvival
+    menuGroup: jsurvivalD
     menuSubgroup: Machine Learning
     menuTitle: Extremely Randomized Trees for Survival
     menuSubtitle: Ultra-fast random forest with extreme randomization
@@ -3117,7 +3117,7 @@ analyses:
     name: gradientboosting
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvival
+    menuGroup: jsurvivalD
     menuSubgroup: Machine Learning
     menuTitle: Gradient Boosting for Survival Analysis
     menuSubtitle: Ensemble learning with boosted survival trees
@@ -3161,6 +3161,193 @@ analyses:
     menuGroup: ClinicoPath
     menuTitle: Bayesian Model Averaging
     description: Bayesian Model Averaging for survival analysis
+  - title: Group LASSO for Survival Analysis
+    name: grouplasso
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvivalD
+    menuSubgroup: Machine Learning
+    menuTitle: Group LASSO for Survival Analysis
+    menuSubtitle: Penalized regression with group-wise variable selection
+    description: >
+      Group LASSO for Cox proportional hazards models enabling simultaneous
+      selection of pre-defined variable groups while maintaining within-group
+      structure. This method extends traditional LASSO by applying penalties at
+      the group level, making it ideal for categorical variables with multiple
+      dummy codes, grouped biomarkers, or structured predictors like gene
+      pathways. The implementation supports overlapping groups, adaptive group
+      weights, sparse group LASSO combining group and individual penalties, and
+      comprehensive cross-validation for optimal penalty selection. Particularly
+      valuable for genomic survival analysis, clinical prediction models with
+      natural variable groupings, and scenarios requiring interpretable
+      group-wise feature selection with preserved biological or clinical
+      structure.
+  - title: Integrated Discrimination Improvement (IDI)
+    name: idi
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideD
+    menuSubgroup: Performance Metrics
+    menuTitle: Integrated Discrimination Improvement (IDI)
+    menuSubtitle: Model improvement assessment through discrimination analysis
+    description: >
+      Integrated Discrimination Improvement (IDI) analysis for assessing the
+      incremental value of new biomarkers or risk factors in prediction models.
+      IDI quantifies the improvement in model discrimination by measuring the
+      difference in predicted probabilities between events and non-events for
+      the new model compared to the baseline model. Unlike NRI which focuses on
+      reclassification, IDI provides a numeric measure of discrimination
+      improvement without requiring risk categories. The analysis includes
+      confidence intervals through bootstrap methods, statistical significance
+      testing, and decomposition into event and non-event components. Essential
+      for biomarker validation, model enhancement assessment, and demonstrating
+      clinical utility of new predictors in medical research. Particularly
+      valuable when numeric risk improvement is more relevant than categorical
+      reclassification, such as in precision medicine applications.
+  - title: Illness-Death Multi-State Models
+    name: illnessdeath
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvivalD
+    menuSubgroup: Multi-State Analysis
+    menuTitle: Illness-Death Multi-State Models
+    menuSubtitle: Three-state models for disease progression with recovery and mortality
+    description: >
+      Illness-death multi-state models for analyzing disease progression through
+      three states: healthy (state 0), ill (state 1), and death (state 2). This
+      framework models transitions between states with separate hazard
+      functions, enabling analysis of disease onset, recovery rates, and
+      differential mortality risks. The implementation supports both
+      non-parametric and parametric approaches, competing risks formulation,
+      reversible and irreversible illness states, time-dependent covariates, and
+      comprehensive transition probability estimation. Particularly valuable for
+      chronic disease studies, cancer progression analysis, hospital readmission
+      studies, and any scenario involving intermediate health states with
+      potential recovery. The model provides state occupancy probabilities, mean
+      sojourn times, and transition-specific hazard ratios with clinical
+      interpretation frameworks for evidence-based medicine.
+  - title: Net Reclassification Improvement (NRI)
+    name: netreclassification
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideD
+    menuSubgroup: Performance Metrics
+    menuTitle: Net Reclassification Improvement (NRI)
+    menuSubtitle: Advanced model improvement assessment with reclassification analysis
+    description: >
+      Net Reclassification Improvement (NRI) analysis for assessing the clinical
+      utility of adding new biomarkers or risk factors to existing prediction
+      models. NRI quantifies how well a new model reclassifies individuals into
+      more appropriate risk categories compared to a baseline model. This
+      implementation supports both categorical NRI (with predefined risk
+      thresholds) and numeric NRI (risk-free approach). The analysis includes
+      confidence intervals via bootstrap, statistical significance testing, and
+      comprehensive visualization of reclassification patterns. Essential for
+      biomarker validation studies, clinical decision making, and demonstrating
+      incremental value of new predictors in medical research. Particularly
+      valuable for risk prediction model development and validation in
+      cardiovascular, oncology, and other clinical domains where risk
+      stratification drives treatment decisions.
+  - title: Sparse Group LASSO
+    name: sparsegrouplasso
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuTitle: Sparse Group LASSO
+    description: Sparse Group LASSO regularization for survival analysis
+  - title: Bayesian Additive Regression Trees (BART) for Survival
+    name: survivalbart
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvivalD
+    menuSubgroup: Machine Learning
+    menuTitle: Bayesian Additive Regression Trees (BART) for Survival
+    menuSubtitle: Nonparametric Bayesian ensemble learning for survival analysis
+    description: >
+      Bayesian Additive Regression Trees (BART) for survival analysis providing
+      flexible nonparametric modeling with automatic variable selection and
+      interaction detection. BART combines an ensemble of weak learners (trees)
+      with Bayesian priors to create a powerful predictive model that naturally
+      handles nonlinear relationships, interactions, and variable selection
+      without requiring preprocessing. The method provides full posterior
+      distributions for predictions, built-in uncertainty quantification, and
+      robust performance across diverse survival scenarios. Particularly
+      effective for complex survival data with unknown functional forms,
+      high-dimensional predictors, mixed variable types, and scenarios requiring
+      individualized survival predictions with credible intervals.
+      Implementation supports both accelerated failure time and proportional
+      hazards formulations with comprehensive posterior inference and model
+      diagnostics.
+  - title: Landmark Analysis for Time-varying Predictors
+    name: landmarkanalysis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Advanced Survival
+    menuTitle: Landmark Analysis for Time-varying Predictors
+    menuSubtitle: Landmark Method for Dynamic Predictions
+    description: >
+      Landmark analysis for survival data with time-varying predictors.
+
+      Provides unbiased estimates by analyzing survival from fixed landmark
+      times.
+  - title: Flexible Multi-State Survival Models
+    name: flexmultistate
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Multi-State Models
+    menuTitle: Flexible Multi-State Survival Models
+    menuSubtitle: Flexible Parametric Multi-State Modeling
+    description: >
+      Flexible parametric multi-state survival models for complex disease
+      progression.
+
+      Models transition hazards using splines and handles competing risks and
+      intermediate states.
+  - title: Continuous-Time Markov Models
+    name: continuousmarkov
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Multi-State Models
+    menuTitle: Continuous-Time Markov Models
+    menuSubtitle: Continuous-Time Markov Chain Modeling
+    description: >
+      Continuous-time Markov models for analyzing longitudinal data with
+      discrete states.
+
+      Handles irregularly observed data and estimates transition intensities
+      between states.
+  - title: Principal Component Cox Models
+    name: pcacox
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: High-Dimensional Methods
+    menuTitle: Principal Component Cox Models
+    menuSubtitle: PCA-based Cox Regression for High-Dimensional Data
+    description: >
+      Principal Component Analysis for Cox regression with high-dimensional
+      predictors.
+
+      Reduces dimensionality while preserving survival-relevant information
+      using supervised PCA.
+  - title: Partial Least Squares Cox Models
+    name: plscox
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: High-Dimensional Methods
+    menuTitle: Partial Least Squares Cox Models
+    menuSubtitle: PLS-based Cox Regression for High-Dimensional Survival Data
+    description: >
+      Partial Least Squares Cox regression for high-dimensional survival data.
+
+      Combines PLS dimensionality reduction with Cox proportional hazards
+      modeling
+
+      for analysis of genomic, proteomic, and other high-dimensional datasets.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

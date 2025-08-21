@@ -1,0 +1,176 @@
+---
+name: landmarkanalysis
+title: Landmark Analysis for Time-varying Predictors
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      clearWith:
+          - time
+          - status
+          - predictors
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: true
+
+    - name: baselineModel
+      title: Baseline Cox Model
+      type: Table
+      visible: (include_baseline)
+      rows: 1
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_lower
+            title: 'HR Lower'
+            type: number
+          - name: hr_upper
+            title: 'HR Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name: landmarkResults
+      title: Landmark Model Results
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: landmark_time
+            title: 'Landmark Time'
+            type: text
+          - name: n_subjects
+            title: 'N Subjects'
+            type: integer
+          - name: n_events
+            title: 'N Events'
+            type: integer
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_lower
+            title: 'HR Lower'
+            type: number
+          - name: hr_upper
+            title: 'HR Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name: modelComparison
+      title: Model Performance Comparison
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: model
+            title: 'Model'
+            type: text
+          - name: landmark_time
+            title: 'Landmark'
+            type: text
+          - name: c_index
+            title: 'C-Index'
+            type: number
+          - name: c_index_se
+            title: 'C-Index SE'
+            type: number
+          - name: auc
+            title: 'AUC'
+            type: number
+          - name: brier_score
+            title: 'Brier Score'
+            type: number
+
+    - name: dynamicPredictionPlot
+      title: Dynamic Risk Prediction
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotDynamicRisk
+      visible: (dynamic_prediction)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - landmark_times
+
+    - name: calibrationPlot
+      title: Calibration Assessment
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotCalibration
+      visible: (calibration_plot)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - landmark_times
+
+    - name: discriminationPlot
+      title: Discrimination Over Time
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotDiscrimination
+      visible: (discrimination_plot)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - landmark_times
+
+    - name: superModelResults
+      title: Super Model Results
+      type: Table
+      visible: (supermodel)
+      rows: 1
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_lower
+            title: 'HR Lower'
+            type: number
+          - name: hr_upper
+            title: 'HR Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name: validationResults
+      title: Bootstrap Validation
+      type: Html
+      visible: (bootstrap_validation)
+
+    - name: clinicalGuidance
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+
+    - name: technicalNotes
+      title: Technical Notes
+      type: Html
+      visible: true
+...

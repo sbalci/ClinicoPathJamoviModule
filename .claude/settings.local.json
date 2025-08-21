@@ -89,7 +89,9 @@
       "Bash(/tmp/fix_yaml_types.sh:*)",
       "Bash(do mv jamovi/$module.* /tmp/)",
       "Bash(do cp /tmp/$module.* jamovi/)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(/tmp/fix_suggested_types.sh:*)",
+      "Bash(do echo \"Fixing $file\")"
     ],
     "deny": []
   }
