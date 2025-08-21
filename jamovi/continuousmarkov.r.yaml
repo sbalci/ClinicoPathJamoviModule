@@ -1,0 +1,271 @@
+---
+name: continuousmarkov
+title: Continuous-Time Markov Models
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      clearWith:
+          - subject
+          - time
+          - state
+
+    - name: summary
+      title: Model Summary
+      type: Html
+      visible: true
+
+    - name: dataStructure
+      title: Data Structure Summary
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: text
+
+    - name: transitionMatrix
+      title: Observed Transitions
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: from_state
+            title: 'From State'
+            type: text
+          - name: to_state
+            title: 'To State'
+            type: text
+          - name: n_transitions
+            title: 'Observed'
+            type: integer
+          - name: total_time
+            title: 'Total Time'
+            type: number
+          - name: rate
+            title: 'Crude Rate'
+            type: number
+
+    - name: intensityMatrix
+      title: Estimated Transition Intensities
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: from_state
+            title: 'From State'
+            type: text
+          - name: to_state
+            title: 'To State'
+            type: text
+          - name: intensity
+            title: 'Intensity'
+            type: number
+          - name: se
+            title: 'Std. Error'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name: covariateEffects
+      title: Covariate Effects on Transitions
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: transition
+            title: 'Transition'
+            type: text
+          - name: covariate
+            title: 'Covariate'
+            type: text
+          - name: coefficient
+            title: 'Coefficient'
+            type: number
+          - name: se
+            title: 'Std. Error'
+            type: number
+          - name: hazard_ratio
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_lower
+            title: 'HR Lower'
+            type: number
+          - name: hr_upper
+            title: 'HR Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name: sojournTimes
+      title: Expected Sojourn Times
+      type: Table
+      visible: (calculate_sojourn)
+      rows: 1
+      columns:
+          - name: state
+            title: 'State'
+            type: text
+          - name: sojourn_time
+            title: 'Expected Time'
+            type: number
+          - name: sojourn_se
+            title: 'Std. Error'
+            type: number
+          - name: sojourn_lower
+            title: 'CI Lower'
+            type: number
+          - name: sojourn_upper
+            title: 'CI Upper'
+            type: number
+
+    - name: transitionProbabilities
+      title: Transition Probabilities P(t)
+      type: Table
+      visible: (transition_probabilities)
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: from_state
+            title: 'From State'
+            type: text
+          - name: to_state
+            title: 'To State'
+            type: text
+          - name: probability
+            title: 'Probability'
+            type: number
+          - name: prob_lower
+            title: 'CI Lower'
+            type: number
+          - name: prob_upper
+            title: 'CI Upper'
+            type: number
+
+    - name: prevalenceTable
+      title: State Prevalence Over Time
+      type: Table
+      visible: (prevalence_estimates)
+      rows: 1
+      columns:
+          - name: time_point
+            title: 'Time'
+            type: number
+          - name: state
+            title: 'State'
+            type: text
+          - name: prevalence
+            title: 'Prevalence'
+            type: number
+          - name: prev_lower
+            title: 'CI Lower'
+            type: number
+          - name: prev_upper
+            title: 'CI Upper'
+            type: number
+
+    - name: modelFit
+      title: Model Fit Statistics
+      type: Table
+      visible: true
+      rows: 1
+      columns:
+          - name: statistic
+            title: 'Statistic'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+          - name: description
+            title: 'Description'
+            type: text
+
+    - name: intensityPlot
+      title: Transition Intensity Functions
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotIntensities
+      visible: (plot_intensities)
+      clearWith:
+          - subject
+          - time
+          - state
+          - model_structure
+
+    - name: probabilityPlot
+      title: Transition Probabilities Over Time
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotTransitionProbabilities
+      visible: (plot_probabilities)
+      clearWith:
+          - subject
+          - time
+          - state
+          - prediction_times
+
+    - name: prevalencePlot
+      title: State Prevalence Over Time
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotPrevalence
+      visible: (plot_prevalence)
+      clearWith:
+          - subject
+          - time
+          - state
+          - prediction_times
+
+    - name: modelComparison
+      title: Model Selection Results
+      type: Table
+      visible: (model_selection)
+      rows: 1
+      columns:
+          - name: model
+            title: 'Model'
+            type: text
+          - name: loglik
+            title: 'Log-Likelihood'
+            type: number
+          - name: aic
+            title: 'AIC'
+            type: number
+          - name: bic
+            title: 'BIC'
+            type: number
+          - name: n_params
+            title: 'Parameters'
+            type: integer
+
+    - name: goodnessOfFit
+      title: Goodness of Fit Assessment
+      type: Html
+      visible: (goodness_of_fit)
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+...

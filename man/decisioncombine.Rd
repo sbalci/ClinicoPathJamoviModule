@@ -10,14 +10,14 @@ decisioncombine(
   goldPositive,
   test1,
   test1Positive,
-  test2,
+  test2 = NULL,
   test2Positive,
-  test3,
+  test3 = NULL,
   test3Positive,
   od = FALSE,
-  showIndividual = TRUE,
-  exportCombinationPattern = FALSE,
-  showVisualization = TRUE,
+  showIndividual = FALSE,
+  addCombinationPattern = FALSE,
+  showVisualization = FALSE,
   plotType = "heatmap",
   plotHeight = 600,
   plotWidth = 800,
@@ -48,8 +48,8 @@ decisioncombine(
 
 \item{showIndividual}{.}
 
-\item{exportCombinationPattern}{Export a new variable to the data frame
-indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).}
+\item{addCombinationPattern}{Export a new variable to the original data
+frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).}
 
 \item{showVisualization}{Display comprehensive visualizations for test
 combination analysis with automated optimal cut-point identification.}
@@ -132,7 +132,7 @@ result2 <- decisioncombine(
   showIndividual = TRUE,
   showVisualization = TRUE,
   plotType = "roc",  # Focus on ROC analysis with optimal cut-point
-  exportCombinationPattern = TRUE  # Export patterns for further analysis
+  addCombinationPattern = TRUE  # Export patterns for further analysis
 )
 
 # Access optimal cut-point recommendations from HTML output

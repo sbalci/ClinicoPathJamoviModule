@@ -1,0 +1,293 @@
+---
+name: pcacox
+title: Principal Component Cox Models
+menuGroup: SurvivalD
+menuSubgroup: High-Dimensional Methods
+menuSubtitle: 'PCA-based Cox Regression for High-Dimensional Data'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Principal Component Analysis for Cox regression with high-dimensional predictors.
+        Reduces dimensionality while preserving survival-relevant information using supervised PCA.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage
+            pcacox(
+                data = highdim_data,
+                time = survival_time,
+                status = event_status,
+                predictors = high_dimensional_variables,
+                n_components = 5
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: 'Survival Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Time to event or censoring
+          R: >
+            Survival time variable
+
+    - name: status
+      title: 'Event Status'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Event indicator (0 = censored, 1 = event)
+          R: >
+            Event status variable
+
+    - name: predictors
+      title: 'High-Dimensional Predictors'
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            High-dimensional predictor variables (e.g., gene expression)
+          R: >
+            Variables for principal component analysis
+
+    - name: clinical_vars
+      title: 'Clinical Variables'
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Standard clinical variables to include (optional)
+          R: >
+            Clinical predictors to retain in model
+
+    - name: pca_method
+      title: 'PCA Method'
+      type: List
+      options:
+        - title: Supervised PCA
+          name: supervised
+        - title: Standard PCA
+          name: standard
+        - title: Sparse PCA
+          name: sparse
+        - title: Kernel PCA
+          name: kernel
+      default: supervised
+      description:
+          ui: >
+            Method for principal component extraction
+          R: >
+            PCA methodology for dimensionality reduction
+
+    - name: n_components
+      title: 'Number of Components'
+      type: Integer
+      default: 5
+      min: 1
+      max: 50
+      description:
+          ui: >
+            Number of principal components to extract
+          R: >
+            Number of PCs to include in Cox model
+
+    - name: component_selection
+      title: 'Component Selection Method'
+      type: List
+      options:
+        - title: Cross-validation
+          name: cv
+        - title: Fixed number
+          name: fixed
+        - title: Variance threshold
+          name: variance
+        - title: Significance threshold
+          name: significance
+      default: cv
+      description:
+          ui: >
+            Method for selecting optimal number of components
+          R: >
+            Selection criteria for PCs
+
+    - name: cv_folds
+      title: 'Cross-Validation Folds'
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+      description:
+          ui: >
+            Number of folds for cross-validation
+          R: >
+            K-fold CV parameter
+
+    - name: variance_threshold
+      title: 'Variance Threshold'
+      type: Number
+      default: 0.8
+      min: 0.5
+      max: 0.99
+      description:
+          ui: >
+            Minimum cumulative variance to explain
+          R: >
+            Proportion of variance threshold
+
+    - name: scaling
+      title: 'Scale Variables'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Standardize predictors before PCA
+          R: >
+            Center and scale variables
+
+    - name: centering
+      title: 'Center Variables'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Center predictors before PCA
+          R: >
+            Center variables to zero mean
+
+    - name: survival_weighting
+      title: 'Survival-Based Weighting'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Weight variables by survival association
+          R: >
+            Use survival information in PCA
+
+    - name: permutation_test
+      title: 'Permutation Test'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform permutation test for significance
+          R: >
+            Test component significance via permutation
+
+    - name: n_permutations
+      title: 'Number of Permutations'
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description:
+          ui: >
+            Number of permutations for significance testing
+          R: >
+            Permutation sample size
+
+    - name: bootstrap_validation
+      title: 'Bootstrap Validation'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Bootstrap validation of model performance
+          R: >
+            Assess model stability via bootstrap
+
+    - name: n_bootstrap
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description:
+          ui: >
+            Number of bootstrap samples
+          R: >
+            Bootstrap sample size
+
+    - name: plot_scree
+      title: 'Scree Plot'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display scree plot of explained variance
+          R: >
+            Generate scree plot
+
+    - name: plot_loadings
+      title: 'Loading Plots'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display component loading plots
+          R: >
+            Generate loading visualizations
+
+    - name: plot_biplot
+      title: 'PCA Biplot'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display PCA biplot
+          R: >
+            Generate biplot visualization
+
+    - name: plot_survival
+      title: 'Survival Curves by PC Score'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display survival curves by component scores
+          R: >
+            Generate survival stratification plots
+
+    - name: risk_score
+      title: 'Calculate Risk Score'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Generate prognostic risk score
+          R: >
+            Calculate combined risk score
+
+    - name: pathway_analysis
+      title: 'Pathway Analysis'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Perform pathway enrichment analysis
+          R: >
+            Analyze biological pathways
+
+    - name: feature_importance
+      title: 'Feature Importance'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate variable importance scores
+          R: >
+            Rank features by contribution
+...

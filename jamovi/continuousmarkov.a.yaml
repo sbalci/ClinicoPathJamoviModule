@@ -1,0 +1,297 @@
+---
+name: continuousmarkov
+title: Continuous-Time Markov Models
+menuGroup: SurvivalD
+menuSubgroup: Multi-State Models
+menuSubtitle: 'Continuous-Time Markov Chain Modeling'
+version: '0.0.3'
+jas: '1.2'
+
+description:
+    main: |
+        Continuous-time Markov models for analyzing longitudinal data with discrete states.
+        Handles irregularly observed data and estimates transition intensities between states.
+    R:
+        dontrun: true
+        usage: |
+            # Example usage
+            continuousmarkov(
+                data = longitudinal_data,
+                time = observation_time,
+                state = state_variable,
+                subject = patient_id,
+                covariates = c(age, treatment)
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: subject
+      title: 'Subject ID'
+      type: Variable
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            Subject identifier for longitudinal observations
+          R: >
+            Variable identifying individual subjects
+
+    - name: time
+      title: 'Observation Time'
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+          ui: >
+            Time of state observation (can be irregular)
+          R: >
+            Time variable for observations
+
+    - name: state
+      title: 'State Variable'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      description:
+          ui: >
+            State at each observation time
+          R: >
+            Discrete state variable
+
+    - name: covariates
+      title: 'Covariate Variables'
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Time-constant covariates affecting transition rates
+          R: >
+            Variables affecting transition intensities
+
+    - name: time_covariates
+      title: 'Time-Varying Covariates'
+      type: Variables
+      suggested: [ continuous, ordinal, nominal ]
+      permitted: [ numeric, factor ]
+      description:
+          ui: >
+            Time-varying covariates (optional)
+          R: >
+            Covariates that change over time
+
+    - name: model_structure
+      title: 'Model Structure'
+      type: List
+      options:
+        - title: Fully connected
+          name: full
+        - title: Progressive (no backwards)
+          name: progressive
+        - title: Reversible illness-death
+          name: reversible
+        - title: Custom transition matrix
+          name: custom
+      default: full
+      description:
+          ui: >
+            Structure of allowed transitions between states
+          R: >
+            Defines which state transitions are possible
+
+    - name: baseline_hazard
+      title: 'Baseline Hazard'
+      type: List
+      options:
+        - title: Piecewise constant
+          name: piecewise
+        - title: Exponential
+          name: exponential
+        - title: Weibull
+          name: weibull
+        - title: Spline-based
+          name: spline
+      default: piecewise
+      description:
+          ui: >
+            Form of baseline transition intensities
+          R: >
+            Baseline hazard specification
+
+    - name: n_intervals
+      title: 'Number of Time Intervals'
+      type: Integer
+      default: 5
+      min: 2
+      max: 20
+      description:
+          ui: >
+            Number of intervals for piecewise constant hazards
+          R: >
+            Time intervals for piecewise baseline
+
+    - name: absorbing_states
+      title: 'Absorbing States'
+      type: String
+      default: ""
+      description:
+          ui: >
+            Comma-separated list of absorbing state values
+          R: >
+            States from which no transitions are possible
+
+    - name: initial_values
+      title: 'Use Initial Values'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Specify starting values for optimization
+          R: >
+            Use custom initial parameter values
+
+    - name: optimization_method
+      title: 'Optimization Method'
+      type: List
+      options:
+        - title: BFGS
+          name: BFGS
+        - title: Nelder-Mead
+          name: Nelder-Mead
+        - title: CG
+          name: CG
+        - title: SANN
+          name: SANN
+      default: BFGS
+      description:
+          ui: >
+            Numerical optimization algorithm
+          R: >
+            Method for maximum likelihood estimation
+
+    - name: calculate_sojourn
+      title: 'Calculate Sojourn Times'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate expected time in each state
+          R: >
+            Compute mean sojourn times
+
+    - name: transition_probabilities
+      title: 'Transition Probabilities'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate transition probability matrices
+          R: >
+            Compute P(t) matrices over time
+
+    - name: prevalence_estimates
+      title: 'Prevalence Estimates'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate state prevalence over time
+          R: >
+            Estimate prevalence in each state
+
+    - name: prediction_times
+      title: 'Prediction Time Points'
+      type: String
+      default: "1, 5, 10, 20"
+      description:
+          ui: >
+            Times for prediction (comma-separated)
+          R: >
+            Time points for probability predictions
+
+    - name: confidence_intervals
+      title: 'Confidence Intervals'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Calculate confidence intervals for parameters
+          R: >
+            Include uncertainty estimates
+
+    - name: bootstrap_se
+      title: 'Bootstrap Standard Errors'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Use bootstrap for standard error estimation
+          R: >
+            Bootstrap-based confidence intervals
+
+    - name: n_bootstrap
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description:
+          ui: >
+            Number of bootstrap samples
+          R: >
+            Bootstrap sample size
+
+    - name: plot_intensities
+      title: 'Plot Transition Intensities'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display transition intensity functions
+          R: >
+            Generate intensity plots
+
+    - name: plot_probabilities
+      title: 'Plot Transition Probabilities'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display transition probabilities over time
+          R: >
+            Generate probability plots
+
+    - name: plot_prevalence
+      title: 'Plot State Prevalence'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display state prevalence over time
+          R: >
+            Generate prevalence plots
+
+    - name: model_selection
+      title: 'Model Selection'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Compare different model structures
+          R: >
+            Perform model comparison using AIC/BIC
+
+    - name: goodness_of_fit
+      title: 'Goodness of Fit Tests'
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Assess model fit to observed data
+          R: >
+            Test model adequacy
+...
