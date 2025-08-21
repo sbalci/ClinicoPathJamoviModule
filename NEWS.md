@@ -1,8 +1,124 @@
 # ClinicoPath News
 
+## Version 0.0.31.35
+
+### 🗓️ **August 20, 2025 - Advanced Machine Learning & Regularization Methods**
+
+#### 🧬 **Sparse Group LASSO for Survival Analysis (sparsegrouplasso)**
+
+##### **Advanced Group-Wise Variable Selection with Individual Sparsity**
+*   **Dual-Level Regularization:** Combines group LASSO and individual variable selection with configurable alpha parameter (0=group LASSO, 1=LASSO)
+*   **Multiple Group Definition Methods:** Factor-based, custom, correlation-based, pathway-based, and variable type-based grouping strategies
+*   **Sophisticated Parameter Selection:** Cross-validation with multiple criteria (deviance, C-index, AIC, BIC, EBIC), adaptive lambda sequences
+*   **Adaptive Weighting Schemes:** Ridge-based, univariate-based, and LASSO-based adaptive weights for improved variable selection performance
+*   **Stability Selection:** Bootstrap-based stability selection with configurable thresholds for robust variable identification
+*   **Clinical Applications:** Optimal for genomic pathway analysis, biomarker discovery, and correlated predictor management in survival analysis
+
+##### **Comprehensive Validation & Inference**
+*   **Cross-Validation Framework:** Repeated k-fold CV with parallel processing support and optimism correction
+*   **Bootstrap Confidence Intervals:** Non-parametric confidence intervals for coefficient estimates and variable importance measures
+*   **Regularization Path Analysis:** Complete solution path visualization with sparsity pattern analysis and model complexity assessment
+*   **Group Selection Patterns:** Detailed analysis of group-wise selection frequency and within-group sparsity patterns
+*   **Performance Comparison:** Systematic comparison with standard LASSO and group LASSO methods with relative performance metrics
+
+#### 🎯 **Bayesian Model Averaging for Survival (bayesianma)**
+
+##### **Comprehensive Model Space Exploration**
+*   **Multiple Prior Specifications:** Uniform, beta-binomial, complexity, and Scott-Berger priors for model space with customizable parameters
+*   **Advanced MCMC Methods:** MC³ (Metropolis-Coupled), Birth-Death, Gibbs Variable Selection, and Reversible Jump MCMC algorithms
+*   **Temperature Laddering:** MC³ with configurable temperature schedules for improved mixing and model space exploration
+*   **Convergence Diagnostics:** Gelman-Rubin, Geweke, Heidelberger-Welch, and Raftery-Lewis diagnostics with effective sample size estimation
+*   **Model Selection Strategies:** Highest posterior probability, median probability model, mode probability model, and Occam's window approaches
+
+##### **Uncertainty Quantification & Clinical Translation**
+*   **Decomposed Uncertainty:** Separate quantification of model uncertainty and parameter uncertainty with total uncertainty estimation
+*   **Posterior Inclusion Probabilities:** Variable-specific inclusion probabilities with Bayes factors and evidence strength interpretation
+*   **Model-Averaged Coefficients:** Posterior distributions for coefficients with credible intervals and hazard ratio estimates
+*   **Cross-Validation Assessment:** K-fold CV with log predictive scores, deviance, C-index, and calibration metrics
+*   **Prior Sensitivity Analysis:** Systematic evaluation of prior specification effects on posterior inferences with robustness assessment
+*   **Clinical Decision Support:** Integration with treatment threshold analysis and cost-effectiveness considerations
+
+#### 📊 **Enhanced Documentation & Validation Framework**
+
+##### **Comprehensive Analysis Explanations**
+*   **Method-Specific Guidance:** Detailed explanations for sparse group LASSO parameter selection and Bayesian model averaging interpretation
+*   **Clinical Context Integration:** Specific guidance for genomic studies, pathway analysis, biomarker discovery, and clinical prediction applications
+*   **Performance Interpretation:** Clear interpretation frameworks for regularization results, inclusion probabilities, and model uncertainty measures
+*   **Validation Recommendations:** Best practices for cross-validation, stability selection, prior sensitivity, and external validation
+
+##### **Advanced Visualization Suite**
+*   **Regularization Path Plots:** Interactive visualization of coefficient paths with lambda selection and variable importance highlighting
+*   **Group Selection Patterns:** Heatmaps and network plots showing group-wise selection frequency and variable relationships
+*   **Posterior Distributions:** Density plots for model-averaged coefficients with credible intervals and hazard ratio transformations
+*   **Model Space Exploration:** Visualization of model posterior probabilities, inclusion probabilities, and convergence diagnostics
+*   **Uncertainty Decomposition:** Graphical representation of model vs. parameter uncertainty contributions
+
 ## Version 0.0.31.34
 
-### 🗓️ **August 20, 2025 - Major Decision Tree Architecture Redesign**
+### 🗓️ **August 20, 2025 - Decision Analysis Enhancement & Architecture Redesign**
+
+#### 🔧 **Medical Decision Test Combination Analysis (decisioncombine)**
+
+##### **Function Signature & Parameter Optimization**
+*   **Fixed Parameter Requirements:** Resolved critical issue where test2 and test3 were incorrectly required parameters
+*   **Optional Parameter Support:** Added proper NULL defaults for test2, test2Positive, test3, and test3Positive parameters
+*   **Enhanced Flexibility:** Users can now perform single-test, two-test, or three-test combination analyses without forced parameter specification
+*   **Schema Consistency:** Updated jamovi .a.yaml configuration to properly support optional Variable parameters with `default: null`
+
+##### **Improved User Experience**
+*   **Simplified Function Calls:** Enable analysis with minimal required parameters (gold standard, test1 only)
+*   **Progressive Enhancement:** Users can add test2 and test3 incrementally without breaking existing analyses
+*   **Better Error Handling:** More informative error messages when required positive levels are not specified
+*   **Production-Ready Status:** Function now fully validated for clinical research applications
+
+#### 🌳 **Machine Learning & Survival Analysis Expansion**
+
+##### **Advanced Tree-Based Methods for Survival Analysis**
+*   **Conditional Inference Trees (conditionalinference):** Unbiased recursive partitioning addressing variable selection bias in traditional CART methods
+*   **Gradient Boosting (gradientboosting):** Multi-algorithm ensemble learning supporting mboost, gbm, and xgboost with automatic variable selection
+*   **Extremely Randomized Trees (extratrees):** Ultra-fast random forests with extreme randomization for high-dimensional survival data
+*   **Comprehensive ML Suite:** Complete coverage of modern tree-based survival analysis methods with cross-validation and importance measures
+*   **Clinical Applications:** Optimized for biomarker discovery, prognostic modeling, and high-dimensional clinical prediction tasks
+
+##### **Bayesian & Advanced Regression Methods**
+*   **Bayesian Survival Models (bayesiansurvival):** MCMC-based inference with rstanarm for uncertainty quantification and robust parameter estimation
+*   **Adaptive LASSO (adaptivelasso):** Data-driven penalty selection with oracle properties for consistent variable selection in high-dimensional Cox models
+*   **Comprehensive Bayesian Suite:** Full posterior distributions, credible intervals, model comparison via LOO-CV and WAIC, hierarchical modeling support
+*   **Advanced Variable Selection:** Stability selection, bootstrap confidence intervals, regularization path analysis with clinical interpretation
+
+##### **Clinical Model Assessment & Performance**
+*   **Net Reclassification Improvement (netreclassification):** Advanced model improvement assessment for biomarker validation and clinical decision making
+*   **Integrated Discrimination Improvement (idi):** Continuous discrimination assessment without arbitrary risk thresholds for biomarker validation
+*   **Comprehensive NRI Analysis:** Both categorical and continuous NRI with bootstrap confidence intervals, decomposition analysis, sensitivity testing
+*   **Advanced IDI Features:** Risk distribution analysis, outlier detection, bootstrap inference, cross-validation, and decomposition into event/non-event contributions
+*   **Clinical Translation:** Support for treatment thresholds, cost-effectiveness analysis, subgroup analysis, and clinical guideline integration
+*   **Model Validation:** Cross-validation, stability assessment, competing model comparison with clinical interpretation frameworks
+
+##### **Advanced Regularization & Variable Selection**
+*   **Group LASSO (grouplasso):** Penalized regression with group-wise variable selection for structured predictors and biological pathways
+*   **Adaptive LASSO (adaptivelasso):** Data-driven penalty selection with oracle properties for consistent variable selection in high-dimensional Cox models
+*   **Comprehensive Group Selection:** Factor-based grouping, custom group definitions, stability selection, nested cross-validation with clinical interpretation
+*   **Advanced Penalty Methods:** Sparse group LASSO, overlapping groups, adaptive weights, regularization path analysis with bootstrap confidence intervals
+
+##### **Bayesian & Nonparametric Machine Learning**
+*   **Bayesian Survival Models (bayesiansurvival):** MCMC-based inference with rstanarm for uncertainty quantification and robust parameter estimation
+*   **Survival BART (survivalbart):** Bayesian Additive Regression Trees for nonparametric ensemble learning with automatic interaction detection
+*   **Comprehensive Bayesian Suite:** Full posterior distributions, credible intervals, model comparison via LOO-CV and WAIC, hierarchical modeling support
+*   **Advanced Tree Methods:** Variable importance ranking, interaction detection, partial dependence analysis, posterior predictive checking
+
+##### **Multi-State & Complex Survival Models**
+*   **Illness-Death Models (illnessdeath):** Three-state models for disease progression with recovery and mortality in chronic disease studies
+*   **Comprehensive Multi-State Analysis:** Transition-specific hazard modeling, state occupation probabilities, sojourn time analysis, bootstrap confidence intervals
+*   **Clinical Applications:** Hospital readmission analysis, cancer progression studies, chronic disease management with evidence-based interpretation
+*   **Advanced Features:** Reversible illness states, competing risks formulation, time-dependent covariates, comprehensive model validation
+
+#### 🎯 **Competing Risks Analysis - Complete Implementation**
+
+##### **Advanced Competing Risks Methods**
+*   **Direct Binomial Regression (directbinomial):** Implementation of timereg-based direct modeling for competing events
+*   **Power Analysis (powercomprisk):** Comprehensive power and sample size calculations for competing risks studies
+*   **Flexible Modeling (flexcomprisk):** Advanced flexible parametric models using riskRegression framework
+*   **Complete Phase 3 Coverage:** All high-priority competing risks methods now fully implemented and validated
 
 #### 🏗️ **Tree Function Architecture Overhaul**
 
