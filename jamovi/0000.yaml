@@ -3075,6 +3075,85 @@ analyses:
       are inferred from observed covariates or measurements.  Provides
       estimation of transition intensities, state prevalences,  and predictions
       with uncertainty quantification.
+  - title: Conditional Inference Trees for Survival
+    name: conditionalinference
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvivalD
+    menuSubgroup: Machine Learning
+    menuTitle: Conditional Inference Trees for Survival
+    menuSubtitle: Unbiased recursive partitioning for survival data
+    description: >
+      Conditional Inference Trees for survival analysis using unbiased recursive
+      partitioning. This method addresses the variable selection bias inherent
+      in traditional CART by employing conditional inference procedures. The
+      algorithm separates variable selection from splitting point selection,
+      providing unbiased tree structures particularly valuable for survival data
+      with mixed-type predictors and complex censoring patterns. Features
+      include statistical significance-based stopping criteria, handling of 
+      missing values without surrogate splits, and robust performance with
+      correlated predictors. The method is particularly suitable for exploratory
+      survival analysis and biomarker discovery in clinical research.
+  - title: Extremely Randomized Trees for Survival
+    name: extratrees
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvival
+    menuSubgroup: Machine Learning
+    menuTitle: Extremely Randomized Trees for Survival
+    menuSubtitle: Ultra-fast random forest with extreme randomization
+    description: >
+      Extremely Randomized Trees (Extra Trees) for survival analysis using the
+      ranger package implementation. This method extends random forests by
+      introducing additional randomization in both variable selection and split
+      point selection, leading to increased bias but reduced variance and
+      computational efficiency. The algorithm is particularly effective for
+      high-dimensional survival data, large datasets, and scenarios requiring
+      fast training and prediction. Features include built-in variable
+      importance measures, out-of-bag error estimation, support for competing
+      risks, and excellent scalability. Ideal for exploratory analysis, baseline
+      modeling, and ensemble methods in survival prediction tasks.
+  - title: Gradient Boosting for Survival Analysis
+    name: gradientboosting
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvival
+    menuSubgroup: Machine Learning
+    menuTitle: Gradient Boosting for Survival Analysis
+    menuSubtitle: Ensemble learning with boosted survival trees
+    description: >
+      Gradient Boosting for survival analysis using ensemble methods that
+      combine multiple weak learners (typically shallow trees) to create strong
+      predictive models. This implementation supports both traditional gradient
+      boosting (gbm) and modern component-wise boosting (mboost) approaches. The
+      method is particularly effective for high-dimensional survival data and
+      complex non-linear relationships between predictors and survival outcomes.
+      Features include automatic variable selection, handling of mixed-type
+      predictors, built-in cross-validation for optimal stopping, and robust
+      performance with noisy data. Especially suitable for biomarker discovery,
+      prognostic modeling, and complex survival prediction tasks.
+  - title: Adaptive LASSO for Cox Models
+    name: adaptivelasso
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvivalD
+    menuSubgroup: Machine Learning
+    menuTitle: Adaptive LASSO for Cox Models
+    menuSubtitle: Advanced penalized regression with adaptive variable selection
+    description: >
+      Adaptive LASSO for Cox proportional hazards models with data-driven
+      penalty selection and improved variable selection properties. Unlike
+      standard LASSO, the adaptive LASSO uses weights based on initial parameter
+      estimates to provide consistent variable selection (oracle property) and
+      reduced bias for non-zero coefficients. This implementation supports
+      multiple weight calculation methods, cross-validation for optimal penalty
+      selection, stability selection for robust variable identification, and
+      comprehensive model diagnostics. Particularly effective for
+      high-dimensional survival data where traditional methods fail, genomic
+      studies with many biomarkers, and clinical prediction models requiring
+      sparse, interpretable solutions. The method automatically handles tied
+      survival times, stratified analysis, and provides uncertainty
+      quantification through bootstrap procedures.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

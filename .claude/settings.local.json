@@ -69,7 +69,27 @@
       "Bash(do echo -n \"$opt: \")",
       "Bash(done)",
       "Bash(for output in todo medianTable medianSummary medianSurvivalExplanation survTable survTableSummary survivalProbabilityExplanation personTimeTable personTimeSummary personTimeExplanation personTimeHeading2 plot plot2 plot3 plot6 survivalPlotsExplanation calculatedtime outcomeredefined)",
-      "Bash(do echo -n \"$output: \")"
+      "Bash(do echo -n \"$output: \")",
+      "Bash(for output in goldStandardFreqTable crossTabTable indTable1 indTable2 indTable3 combinationsAnalysis combStatsTable combStatsTableCI addCombinationPattern performanceHeatmap rocCurves decisionTree vennDiagram forestPlot)",
+      "Bash(if grep -q \"self$results$$output\" /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/decisioncombine.b.R)",
+      "Bash(then echo \"✅ Populated\")",
+      "Bash(else echo \"❌ Not populated\")",
+      "Bash(fi)",
+      "Bash(for:*)",
+      "Bash(do echo -n \"$file: \")",
+      "Bash(if grep -q \"jrs:\" \"$file\")",
+      "Bash(then echo \"✅ has jrs\")",
+      "Bash(else echo \"❌ missing jrs\")",
+      "Bash(do sed -i '' '2a\\\njrs: ''''1.1''''\n' \"$file\")",
+      "Bash(do sed -i '' 's/^results:/title: Analysis Results\\nitems:/' \"$file\")",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then sed -i '' 's/continuous/numeric/g' \"$file\")",
+      "Bash(then sed -i '' '/suggested:/,/^[[:space:]]*-/{s/- numeric/- continuous/g}' \"$file\")",
+      "Bash(chmod:*)",
+      "Bash(/tmp/fix_yaml_types.sh:*)",
+      "Bash(do mv jamovi/$module.* /tmp/)",
+      "Bash(do cp /tmp/$module.* jamovi/)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

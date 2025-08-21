@@ -69,15 +69,15 @@ This roadmap outlines the systematic implementation of advanced survival analysi
   - ✅ **Cumulative Incidence Functions** (`cmprsk`, `etm`) - **IMPLEMENTED**
   - ✅ **Fine-Gray subdistribution hazards** (`cmprsk`) - **IMPLEMENTED**
   - ✅ **Cause-specific hazards modeling** (`survival`) - **IMPLEMENTED** (`causespecifichazards`)
-  - **Direct binomial regression** (`timereg`)
-  - **Competing risks power analysis** (`powerCompRisk`)
-  - **Flexible competing risks models** (`riskRegression`)
+  - ✅ **Direct binomial regression** (`timereg`) - **IMPLEMENTED** (`directbinomial`)
+  - ✅ **Competing risks power analysis** (`powerCompRisk`) - **IMPLEMENTED** (`powercomprisk`)
+  - ✅ **Flexible competing risks models** (`riskRegression`) - **IMPLEMENTED** (`flexcomprisk`)
 
 - **Multi-State Models:**
   - ✅ **Markov multi-state models** (`mstate`, `msm`) - **IMPLEMENTED** (`markovmultistate`)
   - ✅ **Semi-Markov models** (`SemiMarkov`) - **IMPLEMENTED** (`semimarkov`)
   - ✅ **Hidden Markov models for survival** (`msm`) - **IMPLEMENTED** (`hiddenmarkov`)
-  - **Illness-death models** (`p3state.msm`)
+  - ✅ **Illness-death models** (`p3state.msm`) - **IMPLEMENTED** (`illnessdeath`)
   - **Flexible multi-state models** (`flexmsm`)
   - **Continuous-time Markov models** (`msm`)
 
@@ -94,21 +94,21 @@ This roadmap outlines the systematic implementation of advanced survival analysi
 - **Tree-Based Methods:**
   - ✅ **Survival trees** (`rpart`, `party`) - **IMPLEMENTED**
   - ✅ **Random survival forests** (`randomForestSRC`) - **IMPLEMENTED**
-  - **Conditional inference trees** (`party`, `partykit`)
-  - **Gradient boosting for survival** (`gbm`, `mboost`, `xgboost`)
-  - **Extremely randomized trees** (`ranger`)
-  - **Bayesian additive regression trees** (`BART`)
+  - ✅ **Conditional inference trees** (`party`, `partykit`) - **IMPLEMENTED** (`conditionalinference`)
+  - ✅ **Gradient boosting for survival** (`gbm`, `mboost`, `xgboost`) - **IMPLEMENTED** (`gradientboosting`)
+  - ✅ **Extremely randomized trees** (`ranger`) - **IMPLEMENTED** (`extratrees`)
+  - ✅ **Bayesian additive regression trees** (`BART`) - **IMPLEMENTED** (`survivalbart`)
 
 - **Regularized Survival Models:**
   - ✅ **LASSO, Ridge, Elastic Net** (`glmnet`) - **IMPLEMENTED**
-  - **Adaptive LASSO for Cox models** (`glmnet`)
-  - **Group LASSO for survival** (`grplasso`)
+  - ✅ **Adaptive LASSO for Cox models** (`glmnet`) - **IMPLEMENTED** (`adaptivelasso`)
+  - ✅ **Group LASSO for survival** (`grplasso`) - **IMPLEMENTED** (`grouplasso`)
   - **Sparse group LASSO** (`SGL`)
   - **Penalized Cox regression** (`penalized`)
   - **Smoothly clipped absolute deviation** (`ncvreg`)
 
 - **Bayesian Methods:**
-  - **Bayesian survival models** (`rstanarm`)
+  - ✅ **Bayesian survival models** (`rstanarm`) - **IMPLEMENTED** (`bayesiansurvival`)
   - **Bayesian model averaging** (`BMA`)
   - **Spatial Bayesian survival** (`spBayesSurv`)
   - **Bayesian joint models** (`JMbayes`)
@@ -126,8 +126,8 @@ This roadmap outlines the systematic implementation of advanced survival analysi
   - ✅ **Prediction error curves** (`pec`) - **IMPLEMENTED**
   - ✅ **Concordance index and C-statistics** (`survC1`, `compareC`) - **IMPLEMENTED**
   - ✅ **Integrated prediction error** (`pec`, `riskRegression`) - **IMPLEMENTED**
-  - **Net reclassification improvement** (`nricens`)
-  - **Integrated discrimination improvement** (`survIDI`)
+  - ✅ **Net reclassification improvement** (`nricens`) - **IMPLEMENTED** (`netreclassification`)
+  - ✅ **Integrated discrimination improvement** (`survIDI`) - **IMPLEMENTED** (`idi`)
 
 - **Model Calibration & Validation:**
   - ✅ **Calibration plots for survival models** (`rms`, `pec`) - **IMPLEMENTED**

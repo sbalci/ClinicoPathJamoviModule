@@ -54,6 +54,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test2 <- jmvcore::OptionVariable$new(
                 "test2",
                 test2,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -65,6 +66,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test3 <- jmvcore::OptionVariable$new(
                 "test3",
                 test3,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -599,7 +601,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   showIndividual = TRUE,
 #'   showVisualization = TRUE,
 #'   plotType = "roc",  # Focus on ROC analysis with optimal cut-point
-#'   exportCombinationPattern = TRUE  # Export patterns for further analysis
+#'   addCombinationPattern = TRUE  # Export patterns for further analysis
 #' )
 #'
 #' # Access optimal cut-point recommendations from HTML output
@@ -609,14 +611,14 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param gold .
 #' @param goldPositive .
 #' @param test1 .
-#' @param test1Positive Positive level for Test 1 variable (e.g., "Positive", "1", "Yes").
-#' @param test2 Second diagnostic test variable (optional, required for combination analysis).
-#' @param test2Positive Positive level for Test 2 variable (e.g., "Positive", "1", "Yes").
-#' @param test3 Third diagnostic test variable (optional for 3-test combinations).
-#' @param test3Positive Positive level for Test 3 variable (e.g., "Positive", "1", "Yes").
+#' @param test1Positive .
+#' @param test2 .
+#' @param test2Positive .
+#' @param test3 .
+#' @param test3Positive .
 #' @param od Boolean selection whether to show frequency tables. Default is
 #'   'false'.
-#' @param showIndividual Boolean indicating whether to display individual test performance statistics and contingency tables.
+#' @param showIndividual .
 #' @param addCombinationPattern Export a new variable to the original data
 #'   frame indicating the test combination pattern (e.g., +/+, +/-, -/+, -/-).
 #' @param showVisualization Display comprehensive visualizations for test
@@ -659,9 +661,9 @@ decisioncombine <- function(
     goldPositive,
     test1,
     test1Positive,
-    test2,
+    test2 = NULL,
     test2Positive,
-    test3,
+    test3 = NULL,
     test3Positive,
     od = FALSE,
     showIndividual = FALSE,
