@@ -1,0 +1,209 @@
+---
+name: illnessdeath
+title: Illness-Death Multi-State Models
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Entry Time Variable
+        children:
+          - type: VariablesListBox
+            name: time_entry
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Exit Time Variable
+        children:
+          - type: VariablesListBox
+            name: time_exit
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: From State Variable
+        children:
+          - type: VariablesListBox
+            name: state_from
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: To State Variable
+        children:
+          - type: VariablesListBox
+            name: state_to
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Subject ID Variable
+        children:
+          - type: VariablesListBox
+            name: subject_id
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Covariate Variables
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time-Varying Covariates
+        children:
+          - type: VariablesListBox
+            name: time_varying_covariates
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stratification Variable
+        children:
+          - type: VariablesListBox
+            name: stratification_variable
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: TabWidget
+        children:
+          - type: Tab
+            label: Model
+            children:
+              - type: GroupBox
+                label: Model Structure
+                children:
+                  - type: ComboBox
+                    name: model_structure
+                  - type: CheckBox
+                    name: transition_specific
+                  - type: ComboBox
+                    name: baseline_hazard
+                  - type: CheckBox
+                    name: common_baseline
+
+              - type: GroupBox
+                label: Estimation Method
+                children:
+                  - type: ComboBox
+                    name: estimation_method
+                  - type: ComboBox
+                    name: tie_method
+
+              - type: GroupBox
+                label: Advanced Options
+                children:
+                  - type: CheckBox
+                    name: left_truncation
+                  - type: CheckBox
+                    name: interval_censoring
+                  - type: CheckBox
+                    name: frailty_model
+
+          - type: Tab
+            label: Covariates
+            children:
+              - type: GroupBox
+                label: Covariate Effects
+                children:
+                  - type: CheckBox
+                    name: time_varying_effects
+                  - type: TextBox
+                    name: interaction_terms
+
+              - type: GroupBox
+                label: Regularization
+                children:
+                  - type: TextBox
+                    name: penalization_parameter
+                    format: number
+
+              - type: GroupBox
+                label: Competing Risks
+                children:
+                  - type: CheckBox
+                    name: competing_mortality
+
+          - type: Tab
+            label: Prediction
+            children:
+              - type: GroupBox
+                label: Prediction Settings
+                children:
+                  - type: TextBox
+                    name: prediction_times
+                  - type: TextBox
+                    name: prediction_horizon
+                    format: number
+                  - type: CheckBox
+                    name: transition_probabilities
+                  - type: CheckBox
+                    name: sojourn_times
+
+              - type: GroupBox
+                label: Confidence Intervals
+                children:
+                  - type: CheckBox
+                    name: bootstrap_ci
+                  - type: TextBox
+                    name: bootstrap_samples
+                    format: integer
+                  - type: TextBox
+                    name: confidence_level
+                    format: number
+
+          - type: Tab
+            label: Validation
+            children:
+              - type: GroupBox
+                label: Model Validation
+                children:
+                  - type: CheckBox
+                    name: goodness_of_fit
+                  - type: CheckBox
+                    name: residual_analysis
+                  - type: CheckBox
+                    name: cross_validation
+
+          - type: Tab
+            label: Output
+            children:
+              - type: GroupBox
+                label: Tables
+                children:
+                  - type: CheckBox
+                    name: show_transition_summary
+                  - type: CheckBox
+                    name: show_hazard_ratios
+                  - type: CheckBox
+                    name: show_state_probabilities
+                  - type: CheckBox
+                    name: show_sojourn_analysis
+
+              - type: GroupBox
+                label: Plots
+                children:
+                  - type: CheckBox
+                    name: plot_transition_diagram
+                  - type: CheckBox
+                    name: plot_state_probabilities
+                  - type: CheckBox
+                    name: plot_transition_hazards
+                  - type: CheckBox
+                    name: plot_cumulative_incidence
+                  - type: CheckBox
+                    name: plot_sojourn_distributions
+                  - type: CheckBox
+                    name: plot_residuals
+
+              - type: GroupBox
+                label: Options
+                children:
+                  - type: TextBox
+                    name: random_seed
+                    format: integer
+
+...

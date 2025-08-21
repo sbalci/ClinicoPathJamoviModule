@@ -1,0 +1,349 @@
+---
+name: sparsegrouplasso
+jrs: '1.1'
+title: Analysis Results
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: todo
+      title: Analysis Todo
+      type: Html
+      visible: false
+
+    - name: summary
+      title: Sparse Group LASSO Summary
+      type: Table
+      visible: (show_summary)
+      clearWith:
+        - time_var
+        - event_var
+        - pred_vars
+        - alpha_sgl
+        - selection_criterion
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: description
+          title: Description
+          type: text
+
+    - name: coefficients
+      title: Selected Coefficients
+      type: Table
+      visible: (show_coefficients)
+      clearWith:
+        - pred_vars
+        - alpha_sgl
+        - lambda_sequence
+        - selection_criterion
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: group
+          title: Group
+          type: text
+        - name: coefficient
+          title: Coefficient
+          type: number
+          format: zto
+        - name: hazard_ratio
+          title: Hazard Ratio
+          type: number
+          format: zto
+        - name: standardized_coef
+          title: Standardized Coef
+          type: number
+          format: zto
+        - name: importance
+          title: Importance
+          type: number
+          format: zto
+        - name: selection_frequency
+          title: Selection Frequency
+          type: number
+          format: pc
+
+    - name: groupStructure
+      title: Group Structure
+      type: Table
+      visible: (show_groups)
+      clearWith:
+        - pred_vars
+        - group_definition
+        - custom_groups
+      columns:
+        - name: group_id
+          title: Group ID
+          type: integer
+        - name: group_name
+          title: Group Name
+          type: text
+        - name: n_variables
+          title: Variables
+          type: integer
+        - name: group_selected
+          title: Selected
+          type: text
+        - name: group_penalty
+          title: Group Penalty
+          type: number
+          format: zto
+        - name: sparsity_within
+          title: Within-Group Sparsity
+          type: number
+          format: pc
+        - name: variables_list
+          title: Variables in Group
+          type: text
+
+    - name: solutionPath
+      title: Regularization Path
+      type: Table
+      visible: (show_path)
+      clearWith:
+        - alpha_sgl
+        - lambda_sequence
+      columns:
+        - name: lambda_index
+          title: Lambda Index
+          type: integer
+        - name: lambda_value
+          title: Lambda
+          type: number
+          format: zto
+        - name: n_selected_vars
+          title: Selected Variables
+          type: integer
+        - name: n_selected_groups
+          title: Selected Groups
+          type: integer
+        - name: deviance
+          title: Deviance
+          type: number
+          format: zto
+        - name: df
+          title: Degrees of Freedom
+          type: number
+          format: zto
+        - name: sparsity_level
+          title: Sparsity Level
+          type: number
+          format: pc
+
+    - name: performance
+      title: Performance Metrics
+      type: Table
+      visible: (show_performance)
+      clearWith:
+        - selection_criterion
+        - cv_folds
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: training
+          title: Training
+          type: number
+          format: zto
+        - name: cv_mean
+          title: CV Mean
+          type: number
+          format: zto
+        - name: cv_se
+          title: CV SE
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: validationResults
+      title: Cross-Validation Results
+      type: Table
+      visible: (show_validation)
+      clearWith:
+        - cv_folds
+        - cv_repeats
+        - selection_criterion
+      columns:
+        - name: lambda_value
+          title: Lambda
+          type: number
+          format: zto
+        - name: cv_error
+          title: CV Error
+          type: number
+          format: zto
+        - name: cv_se
+          title: CV SE
+          type: number
+          format: zto
+        - name: n_selected
+          title: Variables Selected
+          type: integer
+        - name: model_rank
+          title: Model Rank
+          type: integer
+
+    - name: adaptiveWeights
+      title: Adaptive Weights
+      type: Table
+      visible: (weight_type:none)
+      clearWith:
+        - weight_type
+        - weight_power
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: group
+          title: Group
+          type: text
+        - name: individual_weight
+          title: Individual Weight
+          type: number
+          format: zto
+        - name: group_weight
+          title: Group Weight
+          type: number
+          format: zto
+        - name: combined_weight
+          title: Combined Weight
+          type: number
+          format: zto
+        - name: weight_rationale
+          title: Weight Rationale
+          type: text
+
+    - name: stabilityResults
+      title: Stability Selection Results
+      type: Table
+      visible: (stability_selection)
+      clearWith:
+        - stability_selection
+        - stability_threshold
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: group
+          title: Group
+          type: text
+        - name: selection_probability
+          title: Selection Probability
+          type: number
+          format: pc
+        - name: stable_selection
+          title: Stable Selection
+          type: text
+        - name: first_selected
+          title: First Selected (Lambda)
+          type: number
+          format: zto
+        - name: last_selected
+          title: Last Selected (Lambda)
+          type: number
+          format: zto
+
+    - name: comparisonTable
+      title: Method Comparison
+      type: Table
+      visible: (show_performance)
+      clearWith:
+        - alpha_sgl
+        - selection_criterion
+      columns:
+        - name: method
+          title: Method
+          type: text
+        - name: n_selected
+          title: Variables Selected
+          type: integer
+        - name: n_groups_selected
+          title: Groups Selected
+          type: integer
+        - name: cv_error
+          title: CV Error
+          type: number
+          format: zto
+        - name: c_index
+          title: C-Index
+          type: number
+          format: zto
+        - name: relative_performance
+          title: Relative Performance
+          type: text
+
+    - name: cvErrorPlot
+      title: Cross-Validation Error
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_cv_error)
+      requiresData: true
+      clearWith:
+        - lambda_sequence
+        - cv_folds
+        - selection_criterion
+
+    - name: coefficientPlot
+      title: Coefficient Path
+      type: Image
+      width: 700
+      height: 500
+      visible: (plot_coefficients)
+      requiresData: true
+      clearWith:
+        - alpha_sgl
+        - lambda_sequence
+        - pred_vars
+
+    - name: groupSelectionPlot
+      title: Group Selection Pattern
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_groups)
+      requiresData: true
+      clearWith:
+        - group_definition
+        - alpha_sgl
+        - lambda_sequence
+
+    - name: sparsityPlot
+      title: Sparsity Pattern
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_sparsity)
+      requiresData: true
+      clearWith:
+        - alpha_sgl
+        - lambda_sequence
+        - selection_criterion
+
+    - name: stabilityPlot
+      title: Stability Selection
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_stability)
+      requiresData: true
+      clearWith:
+        - stability_selection
+        - stability_threshold
+        - stability_subsample
+
+    - name: explanations
+      title: Sparse Group LASSO Explanations
+      type: Html
+      visible: (showExplanations)
+...

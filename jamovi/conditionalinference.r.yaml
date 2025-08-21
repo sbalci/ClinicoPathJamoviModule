@@ -1,0 +1,136 @@
+---
+name: conditionalinference
+title: Conditional Inference Trees for Survival
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: TODO
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      visible: (show_splits)
+      rows: 0
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+
+    - name: splitStatistics
+      title: Split Statistics
+      type: Table
+      visible: (show_splits)
+      rows: 0
+      columns:
+        - name: node
+          title: Node
+          type: integer
+        - name: variable
+          title: Split Variable
+          type: text
+        - name: cutpoint
+          title: Split Point
+          type: text
+        - name: statistic
+          title: Test Statistic
+          type: number
+          format: zto
+        - name: pvalue
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: n_left
+          title: Left n
+          type: integer
+        - name: n_right
+          title: Right n
+          type: integer
+
+    - name: nodeDetails
+      title: Terminal Node Details
+      type: Table
+      visible: (show_nodes)
+      rows: 0
+      columns:
+        - name: node
+          title: Node
+          type: integer
+        - name: n
+          title: Sample Size
+          type: integer
+        - name: events
+          title: Events
+          type: integer
+        - name: median_survival
+          title: Median Survival
+          type: number
+          format: zto
+        - name: survival_se
+          title: SE
+          type: number
+          format: zto
+        - name: survival_lower
+          title: Lower 95% CI
+          type: number
+          format: zto
+        - name: survival_upper
+          title: Upper 95% CI
+          type: number
+          format: zto
+
+    - name: variableImportance
+      title: Variable Importance
+      type: Table
+      visible: (show_importance)
+      rows: 0
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: importance
+          title: Importance
+          type: number
+          format: zto
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: treePlot
+      title: Conditional Inference Tree
+      type: Image
+      width: 800
+      height: 600
+      visible: (plot_tree)
+      renderFun: .plotTree
+      requiresData: true
+
+    - name: survivalPlot
+      title: Node Survival Curves
+      type: Image
+      width: 800
+      height: 600
+      visible: (plot_survival)
+      renderFun: .plotSurvival
+      requiresData: true
+
+    - name: importancePlot
+      title: Variable Importance Plot
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_importance)
+      renderFun: .plotImportance
+      requiresData: true
+
+refs:
+    - Hothorn2006
+    - Strobl2007
+    - Survival
+    - ClinicoPathJamoviModule
+...

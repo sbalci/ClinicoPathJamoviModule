@@ -1,0 +1,328 @@
+---
+name: idi
+jrs: '1.1'
+title: Analysis Results
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: todo
+      title: Analysis Todo
+      type: Html
+      visible: false
+
+    - name: summary
+      title: IDI Summary
+      type: Table
+      visible: (show_summary)
+      clearWith:
+        - outcome
+        - baseline_risk
+        - new_risk
+        - idi_type
+        - discrimination_measure
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: lower_ci
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: distributionSummary
+      title: Risk Distribution Summary
+      type: Table
+      visible: (show_distributions)
+      clearWith:
+        - baseline_risk
+        - new_risk
+        - outcome
+        - risk_distribution
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: outcome_group
+          title: Outcome Group
+          type: text
+        - name: n_subjects
+          title: N
+          type: integer
+        - name: mean_risk
+          title: Mean Risk
+          type: number
+          format: zto
+        - name: median_risk
+          title: Median Risk
+          type: number
+          format: zto
+        - name: sd_risk
+          title: SD Risk
+          type: number
+          format: zto
+        - name: risk_range
+          title: Risk Range
+          type: text
+
+    - name: discriminationAnalysis
+      title: Discrimination Analysis
+      type: Table
+      visible: (show_discrimination)
+      clearWith:
+        - discrimination_slope
+        - discrimination_measure
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: discrimination_slope
+          title: Discrimination Slope
+          type: number
+          format: zto
+        - name: slope_ci
+          title: 95% CI
+          type: text
+        - name: relative_improvement
+          title: Relative Improvement (%)
+          type: number
+          format: zto
+        - name: significance
+          title: Significance
+          type: text
+
+    - name: decomposition
+      title: IDI Decomposition
+      type: Table
+      visible: (decompose_idi)
+      clearWith:
+        - outcome
+        - baseline_risk
+        - new_risk
+        - idi_type
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: idi_events
+          title: IDI Events
+          type: number
+          format: zto
+        - name: idi_nonevents
+          title: IDI Non-Events
+          type: number
+          format: zto
+        - name: total_idi
+          title: Total IDI
+          type: number
+          format: zto
+        - name: proportion_events
+          title: % from Events
+          type: number
+          format: pc
+        - name: proportion_nonevents
+          title: % from Non-Events
+          type: number
+          format: pc
+
+    - name: validationResults
+      title: Validation Results
+      type: Table
+      visible: (show_validation)
+      clearWith:
+        - cross_validation
+        - sensitivity_analysis
+      columns:
+        - name: validation_type
+          title: Validation Type
+          type: text
+        - name: idi_estimate
+          title: IDI Estimate
+          type: number
+          format: zto
+        - name: idi_se
+          title: Standard Error
+          type: number
+          format: zto
+        - name: bias_correction
+          title: Bias Correction
+          type: number
+          format: zto
+        - name: optimism
+          title: Optimism
+          type: number
+          format: zto
+
+    - name: subgroupAnalysis
+      title: Subgroup Analysis
+      type: Table
+      visible: (stratified_analysis)
+      clearWith:
+        - subgroup_var
+        - outcome
+        - baseline_risk
+        - new_risk
+      columns:
+        - name: subgroup
+          title: Subgroup
+          type: text
+        - name: n_subjects
+          title: N
+          type: integer
+        - name: event_rate
+          title: Event Rate
+          type: number
+          format: pc
+        - name: idi_estimate
+          title: IDI
+          type: number
+          format: zto
+        - name: idi_ci
+          title: 95% CI
+          type: text
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto
+
+    - name: outlierAnalysis
+      title: Outlier Analysis
+      type: Table
+      visible: (outlier_detection)
+      clearWith:
+        - outlier_detection
+        - outlier_method
+      columns:
+        - name: analysis_type
+          title: Analysis
+          type: text
+        - name: n_outliers_baseline
+          title: Outliers Baseline
+          type: integer
+        - name: n_outliers_new
+          title: Outliers New Model
+          type: integer
+        - name: idi_with_outliers
+          title: IDI (with outliers)
+          type: number
+          format: zto
+        - name: idi_without_outliers
+          title: IDI (without outliers)
+          type: number
+          format: zto
+        - name: outlier_influence
+          title: Outlier Influence
+          type: number
+          format: zto
+
+    - name: sensitivityTable
+      title: Sensitivity Analysis
+      type: Table
+      visible: (sensitivity_analysis)
+      clearWith:
+        - sensitivity_analysis
+        - followup_time
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: idi_estimate
+          title: IDI Estimate
+          type: number
+          format: zto
+        - name: change_from_base
+          title: Change from Base
+          type: number
+          format: zto
+        - name: stability
+          title: Stability
+          type: text
+
+    - name: riskDistributionsPlot
+      title: Risk Score Distributions
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_risk_distributions)
+      requiresData: true
+      clearWith:
+        - baseline_risk
+        - new_risk
+        - outcome
+
+    - name: discriminationPlot
+      title: Discrimination Improvement
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_discrimination)
+      requiresData: true
+      clearWith:
+        - discrimination_slope
+        - confidence_level
+
+    - name: scatterPlot
+      title: Risk Score Comparison
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_scatter)
+      requiresData: true
+      clearWith:
+        - baseline_risk
+        - new_risk
+        - outcome
+
+    - name: bootstrapPlot
+      title: Bootstrap Distribution
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_bootstrap)
+      requiresData: true
+      clearWith:
+        - bootstrap_samples
+        - bootstrap_method
+
+    - name: sensitivityPlot
+      title: Sensitivity Analysis
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_sensitivity)
+      requiresData: true
+      clearWith:
+        - sensitivity_analysis
+
+    - name: outliersPlot
+      title: Outlier Influence Analysis
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_outliers)
+      requiresData: true
+      clearWith:
+        - outlier_detection
+        - outlier_method
+
+...

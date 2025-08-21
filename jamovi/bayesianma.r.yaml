@@ -1,0 +1,371 @@
+---
+name: bayesianma
+jrs: '1.1'
+title: Analysis Results
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: todo
+      title: Analysis Todo
+      type: Html
+      visible: false
+
+    - name: summary
+      title: Bayesian Model Averaging Summary
+      type: Table
+      visible: (show_summary)
+      clearWith:
+        - time_var
+        - event_var
+        - pred_vars
+        - prior_type
+        - mcmc_method
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: description
+          title: Description
+          type: text
+
+    - name: modelSpace
+      title: Model Space Exploration
+      type: Table
+      visible: (show_model_space)
+      clearWith:
+        - mcmc_iterations
+        - mcmc_chains
+        - prior_type
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: averagedCoefficients
+      title: Model-Averaged Coefficients
+      type: Table
+      visible: (show_coefficients)
+      clearWith:
+        - pred_vars
+        - mcmc_iterations
+        - credible_level
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: posterior_mean
+          title: Posterior Mean
+          type: number
+          format: zto
+        - name: posterior_sd
+          title: Posterior SD
+          type: number
+          format: zto
+        - name: credible_lower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: credible_upper
+          title: Upper CI
+          type: number
+          format: zto
+        - name: hazard_ratio
+          title: Hazard Ratio
+          type: number
+          format: zto
+        - name: hr_lower
+          title: HR Lower CI
+          type: number
+          format: zto
+        - name: hr_upper
+          title: HR Upper CI
+          type: number
+          format: zto
+
+    - name: inclusionProbabilities
+      title: Posterior Inclusion Probabilities
+      type: Table
+      visible: (show_inclusion_probs)
+      clearWith:
+        - pred_vars
+        - mcmc_iterations
+        - variable_selection_threshold
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: inclusion_prob
+          title: Inclusion Probability
+          type: number
+          format: pc
+        - name: bayes_factor
+          title: Bayes Factor
+          type: number
+          format: zto
+        - name: log_bayes_factor
+          title: Log BF
+          type: number
+          format: zto
+        - name: evidence_strength
+          title: Evidence Strength
+          type: text
+        - name: selected
+          title: Selected
+          type: text
+
+    - name: topModels
+      title: Top Probability Models
+      type: Table
+      visible: (show_top_models)
+      clearWith:
+        - mcmc_iterations
+        - model_selection_method
+      columns:
+        - name: model_rank
+          title: Rank
+          type: integer
+        - name: posterior_prob
+          title: Posterior Probability
+          type: number
+          format: pc
+        - name: log_marginal_likelihood
+          title: Log Marginal Likelihood
+          type: number
+          format: zto
+        - name: model_size
+          title: Model Size
+          type: integer
+        - name: variables_included
+          title: Variables Included
+          type: text
+        - name: cumulative_prob
+          title: Cumulative Probability
+          type: number
+          format: pc
+
+    - name: mcmcDiagnostics
+      title: MCMC Convergence Diagnostics
+      type: Table
+      visible: (show_diagnostics)
+      clearWith:
+        - mcmc_chains
+        - mcmc_iterations
+        - convergence_diagnostic
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: diagnostic_value
+          title: Diagnostic Value
+          type: number
+          format: zto
+        - name: upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+        - name: convergence_status
+          title: Convergence
+          type: text
+        - name: effective_sample_size
+          title: Effective Sample Size
+          type: number
+          format: zto
+
+    - name: selectedModel
+      title: Selected Model Details
+      type: Table
+      visible: (show_top_models)
+      clearWith:
+        - model_selection_method
+        - variable_selection_threshold
+      columns:
+        - name: selection_method
+          title: Selection Method
+          type: text
+        - name: model_probability
+          title: Model Probability
+          type: number
+          format: pc
+        - name: model_size
+          title: Model Size
+          type: integer
+        - name: log_likelihood
+          title: Log Likelihood
+          type: number
+          format: zto
+        - name: deviance
+          title: Deviance
+          type: number
+          format: zto
+        - name: dic
+          title: DIC
+          type: number
+          format: zto
+
+    - name: uncertaintyQuantification
+      title: Uncertainty Quantification
+      type: Table
+      visible: (uncertainty_quantification)
+      clearWith:
+        - mcmc_iterations
+        - credible_level
+      columns:
+        - name: quantity
+          title: Quantity
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: model_uncertainty
+          title: Model Uncertainty
+          type: number
+          format: zto
+        - name: parameter_uncertainty
+          title: Parameter Uncertainty
+          type: number
+          format: zto
+        - name: total_uncertainty
+          title: Total Uncertainty
+          type: number
+          format: zto
+
+    - name: sensitivityAnalysis
+      title: Prior Sensitivity Analysis
+      type: Table
+      visible: (sensitivity_analysis)
+      clearWith:
+        - prior_type
+        - sensitivity_analysis
+      columns:
+        - name: prior_specification
+          title: Prior Specification
+          type: text
+        - name: posterior_prob_change
+          title: Posterior Prob Change
+          type: number
+          format: pc
+        - name: inclusion_prob_change
+          title: Inclusion Prob Change
+          type: number
+          format: pc
+        - name: sensitivity_measure
+          title: Sensitivity Measure
+          type: number
+          format: zto
+        - name: robustness
+          title: Robustness
+          type: text
+
+    - name: crossValidation
+      title: Cross-Validation Results
+      type: Table
+      visible: (cross_validation)
+      clearWith:
+        - cross_validation
+        - cv_folds
+      columns:
+        - name: fold
+          title: Fold
+          type: integer
+        - name: log_predictive_score
+          title: Log Predictive Score
+          type: number
+          format: zto
+        - name: deviance
+          title: Deviance
+          type: number
+          format: zto
+        - name: c_index
+          title: C-Index
+          type: number
+          format: zto
+        - name: calibration
+          title: Calibration
+          type: number
+          format: zto
+
+    - name: modelProbsPlot
+      title: Model Posterior Probabilities
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_model_probs)
+      requiresData: true
+      clearWith:
+        - mcmc_iterations
+        - model_selection_method
+
+    - name: inclusionProbsPlot
+      title: Variable Inclusion Probabilities
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_inclusion_probs)
+      requiresData: true
+      clearWith:
+        - pred_vars
+        - variable_selection_threshold
+
+    - name: coefficientsPlot
+      title: Posterior Coefficient Distributions
+      type: Image
+      width: 700
+      height: 600
+      visible: (plot_coefficients)
+      requiresData: true
+      clearWith:
+        - pred_vars
+        - credible_level
+
+    - name: convergencePlot
+      title: MCMC Convergence Diagnostics
+      type: Image
+      width: 800
+      height: 600
+      visible: (plot_convergence)
+      requiresData: true
+      clearWith:
+        - mcmc_chains
+        - mcmc_iterations
+
+    - name: modelSpacePlot
+      title: Model Space Exploration
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_model_space)
+      requiresData: true
+      clearWith:
+        - mcmc_iterations
+        - prior_type
+
+    - name: predictionsPlot
+      title: Model-Averaged Predictions
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_predictions)
+      requiresData: true
+      clearWith:
+        - prediction_intervals
+        - credible_level
+
+    - name: explanations
+      title: Bayesian Model Averaging Explanations
+      type: Html
+      visible: (showExplanations)
+...

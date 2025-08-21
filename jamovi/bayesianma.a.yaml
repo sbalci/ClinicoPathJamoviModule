@@ -1,0 +1,400 @@
+---
+name: bayesianma
+title: Bayesian Model Averaging
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Bayesian Model Averaging for survival analysis
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology', package='ClinicoPath')
+            
+            bayesianma(data = histopathology,
+                      time_var = 'OverallSurvival',
+                      event_var = 'Death',
+                      pred_vars = c('Age', 'Grade', 'LVI', 'PNI'),
+                      prior_type = 'uniform',
+                      mcmc_chains = 3,
+                      mcmc_iterations = 5000)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time_var
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: the time-to-event variable
+
+    - name: event_var
+      title: Event Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: the event indicator variable (0/1 or FALSE/TRUE)
+
+    - name: pred_vars
+      title: Predictor Variables
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: the predictor variables for model averaging
+
+    - name: prior_type
+      title: Prior Type
+      type: List
+      options:
+        - name: uniform
+          title: Uniform Prior
+        - name: beta_binomial
+          title: Beta-Binomial Prior
+        - name: complexity_prior
+          title: Complexity Prior
+        - name: scott_berger
+          title: Scott-Berger Prior
+        - name: custom
+          title: Custom Prior
+      default: uniform
+      description:
+          R: type of prior distribution for model space
+
+    - name: prior_inclusion_prob
+      title: Prior Inclusion Probability
+      type: Number
+      min: 0.01
+      max: 0.99
+      default: 0.5
+      description:
+          R: prior probability of variable inclusion (for uniform/beta-binomial priors)
+
+    - name: beta_alpha
+      title: Beta Prior Alpha
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1
+      description:
+          R: alpha parameter for beta-binomial prior
+
+    - name: beta_beta
+      title: Beta Prior Beta
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1
+      description:
+          R: beta parameter for beta-binomial prior
+
+    - name: complexity_penalty
+      title: Complexity Penalty
+      type: Number
+      min: 0.1
+      max: 5
+      default: 1
+      description:
+          R: penalty parameter for complexity prior
+
+    - name: mcmc_method
+      title: MCMC Method
+      type: List
+      options:
+        - name: mc3
+          title: MC³ (Metropolis-Coupled MCMC)
+        - name: birth_death
+          title: Birth-Death MCMC
+        - name: gibbs_variable
+          title: Gibbs Variable Selection
+        - name: reversible_jump
+          title: Reversible Jump MCMC
+      default: mc3
+      description:
+          R: MCMC sampling method for model space exploration
+
+    - name: mcmc_chains
+      title: Number of Chains
+      type: Integer
+      min: 1
+      max: 8
+      default: 3
+      description:
+          R: number of MCMC chains
+
+    - name: mcmc_iterations
+      title: MCMC Iterations
+      type: Integer
+      min: 1000
+      max: 50000
+      default: 5000
+      description:
+          R: number of MCMC iterations per chain
+
+    - name: burn_in
+      title: Burn-in Period
+      type: Integer
+      min: 100
+      max: 20000
+      default: 1000
+      description:
+          R: number of burn-in iterations
+
+    - name: thinning
+      title: Thinning Interval
+      type: Integer
+      min: 1
+      max: 100
+      default: 1
+      description:
+          R: thinning interval for MCMC samples
+
+    - name: convergence_diagnostic
+      title: Convergence Diagnostic
+      type: List
+      options:
+        - name: gelman_rubin
+          title: Gelman-Rubin Diagnostic
+        - name: geweke
+          title: Geweke Diagnostic
+        - name: heidelberger_welch
+          title: Heidelberger-Welch
+        - name: raftery_lewis
+          title: Raftery-Lewis
+      default: gelman_rubin
+      description:
+          R: convergence diagnostic method
+
+    - name: model_selection_method
+      title: Model Selection Method
+      type: List
+      options:
+        - name: highest_posterior
+          title: Highest Posterior Probability
+        - name: median_probability
+          title: Median Probability Model
+        - name: mode_probability
+          title: Mode Probability Model
+        - name: occam_window
+          title: Occam's Window
+      default: highest_posterior
+      description:
+          R: method for selecting representative model
+
+    - name: occam_ratio
+      title: Occam's Window Ratio
+      type: Number
+      min: 1
+      max: 1000
+      default: 20
+      description:
+          R: ratio for Occam's window model selection
+
+    - name: temperature_ladder
+      title: Temperature Ladder
+      type: String
+      default: "1.0,1.5,2.0,3.0"
+      description:
+          R: >
+            temperature ladder for MC³ (comma-separated values).
+            Higher temperatures enable better mixing
+
+    - name: proposal_variance
+      title: Proposal Variance
+      type: Number
+      min: 0.01
+      max: 10
+      default: 1
+      description:
+          R: variance for parameter proposal distributions
+
+    - name: variable_selection_threshold
+      title: Variable Selection Threshold
+      type: Number
+      min: 0.1
+      max: 0.9
+      default: 0.5
+      description:
+          R: posterior probability threshold for variable selection
+
+    - name: uncertainty_quantification
+      title: Uncertainty Quantification
+      type: Bool
+      default: true
+      description:
+          R: whether to perform comprehensive uncertainty quantification
+
+    - name: prediction_intervals
+      title: Prediction Intervals
+      type: Bool
+      default: true
+      description:
+          R: whether to compute prediction intervals
+
+    - name: credible_level
+      title: Credible Interval Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+          R: level for credible intervals
+
+    - name: model_diagnostics
+      title: Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: whether to perform comprehensive model diagnostics
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: whether to perform prior sensitivity analysis
+
+    - name: cross_validation
+      title: Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: whether to perform cross-validation assessment
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      min: 3
+      max: 10
+      default: 5
+      description:
+          R: number of folds for cross-validation
+
+    - name: parallel_processing
+      title: Parallel Processing
+      type: Bool
+      default: false
+      description:
+          R: whether to use parallel processing for MCMC
+
+    - name: seed_value
+      title: Random Seed
+      type: Integer
+      default: 42
+      description:
+          R: random seed for reproducible results
+
+    - name: show_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: show model averaging summary
+
+    - name: show_model_space
+      title: Show Model Space
+      type: Bool
+      default: true
+      description:
+          R: show model space exploration results
+
+    - name: show_coefficients
+      title: Show Averaged Coefficients
+      type: Bool
+      default: true
+      description:
+          R: show model-averaged coefficient estimates
+
+    - name: show_inclusion_probs
+      title: Show Inclusion Probabilities
+      type: Bool
+      default: true
+      description:
+          R: show posterior inclusion probabilities
+
+    - name: show_top_models
+      title: Show Top Models
+      type: Bool
+      default: true
+      description:
+          R: show highest probability models
+
+    - name: show_diagnostics
+      title: Show MCMC Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: show MCMC convergence diagnostics
+
+    - name: show_predictions
+      title: Show Predictions
+      type: Bool
+      default: false
+      description:
+          R: show model-averaged predictions
+
+    - name: plot_model_probs
+      title: Plot Model Probabilities
+      type: Bool
+      default: true
+      description:
+          R: plot model posterior probabilities
+
+    - name: plot_inclusion_probs
+      title: Plot Inclusion Probabilities
+      type: Bool
+      default: true
+      description:
+          R: plot variable inclusion probabilities
+
+    - name: plot_coefficients
+      title: Plot Coefficient Distributions
+      type: Bool
+      default: true
+      description:
+          R: plot posterior coefficient distributions
+
+    - name: plot_convergence
+      title: Plot MCMC Convergence
+      type: Bool
+      default: true
+      description:
+          R: plot MCMC convergence diagnostics
+
+    - name: plot_model_space
+      title: Plot Model Space
+      type: Bool
+      default: false
+      description:
+          R: plot model space exploration
+
+    - name: plot_predictions
+      title: Plot Predictions
+      type: Bool
+      default: false
+      description:
+          R: plot model-averaged predictions
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: true
+      description:
+          R: show explanations for the analysis
+...

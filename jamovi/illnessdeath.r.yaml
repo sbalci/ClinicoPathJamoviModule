@@ -1,0 +1,346 @@
+---
+name: illnessdeath
+jrs: '1.1'
+title: Analysis Results
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: todo
+      title: Analysis Todo
+      type: Html
+      visible: false
+
+    - name: transitionSummary
+      title: Transition Summary
+      type: Table
+      visible: (show_transition_summary)
+      clearWith:
+        - time_entry
+        - time_exit
+        - state_from
+        - state_to
+        - model_structure
+      columns:
+        - name: transition
+          title: Transition
+          type: text
+        - name: n_transitions
+          title: N Transitions
+          type: integer
+        - name: n_censored
+          title: N Censored
+          type: integer
+        - name: total_time
+          title: Total Time at Risk
+          type: number
+          format: zto
+        - name: transition_rate
+          title: Rate (per unit time)
+          type: number
+          format: zto
+        - name: median_time
+          title: Median Time
+          type: number
+          format: zto
+
+    - name: hazardRatios
+      title: Transition-Specific Hazard Ratios
+      type: Table
+      visible: (show_hazard_ratios)
+      clearWith:
+        - covariates
+        - transition_specific
+        - estimation_method
+      columns:
+        - name: transition
+          title: Transition
+          type: text
+        - name: covariate
+          title: Covariate
+          type: text
+        - name: hazard_ratio
+          title: Hazard Ratio
+          type: number
+          format: zto
+        - name: lower_ci
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto
+        - name: significance
+          title: Significance
+          type: text
+
+    - name: stateProbabilities
+      title: State Occupation Probabilities
+      type: Table
+      visible: (show_state_probabilities)
+      clearWith:
+        - prediction_times
+        - transition_probabilities
+      columns:
+        - name: time_point
+          title: Time
+          type: number
+          format: zto
+        - name: initial_state
+          title: Initial State
+          type: text
+        - name: prob_healthy
+          title: P(Healthy)
+          type: number
+          format: zto
+        - name: prob_ill
+          title: P(Ill)
+          type: number
+          format: zto
+        - name: prob_dead
+          title: P(Dead)
+          type: number
+          format: zto
+        - name: prob_healthy_ci
+          title: Healthy CI
+          type: text
+        - name: prob_ill_ci
+          title: Ill CI
+          type: text
+        - name: prob_dead_ci
+          title: Dead CI
+          type: text
+
+    - name: sojournAnalysis
+      title: Expected Sojourn Times
+      type: Table
+      visible: (show_sojourn_analysis)
+      clearWith:
+        - sojourn_times
+        - bootstrap_ci
+      columns:
+        - name: state
+          title: State
+          type: text
+        - name: mean_sojourn
+          title: Mean Sojourn Time
+          type: number
+          format: zto
+        - name: median_sojourn
+          title: Median Sojourn Time
+          type: number
+          format: zto
+        - name: sojourn_lower_ci
+          title: Lower CI
+          type: number
+          format: zto
+        - name: sojourn_upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+        - name: sojourn_variance
+          title: Variance
+          type: number
+          format: zto
+
+    - name: transitionMatrix
+      title: Transition Probability Matrix
+      type: Table
+      visible: (transition_probabilities)
+      clearWith:
+        - prediction_times
+        - model_structure
+      columns:
+        - name: time_horizon
+          title: Time Horizon
+          type: number
+          format: zto
+        - name: from_state
+          title: From State
+          type: text
+        - name: to_healthy
+          title: → Healthy
+          type: number
+          format: zto
+        - name: to_ill
+          title: → Ill
+          type: number
+          format: zto
+        - name: to_dead
+          title: → Dead
+          type: number
+          format: zto
+
+    - name: goodnessOfFit
+      title: Goodness of Fit Tests
+      type: Table
+      visible: (goodness_of_fit)
+      clearWith:
+        - goodness_of_fit
+        - model_structure
+      columns:
+        - name: test_type
+          title: Test
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+          format: zto
+        - name: degrees_freedom
+          title: df
+          type: integer
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: modelComparison
+      title: Model Selection Criteria
+      type: Table
+      clearWith:
+        - estimation_method
+        - baseline_hazard
+      columns:
+        - name: criterion
+          title: Criterion
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: description
+          title: Description
+          type: text
+
+    - name: crossValidationResults
+      title: Cross-Validation Results
+      type: Table
+      visible: (cross_validation)
+      clearWith:
+        - cross_validation
+        - prediction_times
+      columns:
+        - name: fold
+          title: Fold
+          type: integer
+        - name: prediction_error
+          title: Prediction Error
+          type: number
+          format: zto
+        - name: log_likelihood
+          title: Log-Likelihood
+          type: number
+          format: zto
+        - name: c_index
+          title: C-Index
+          type: number
+          format: zto
+
+    - name: residualAnalysis
+      title: Residual Analysis
+      type: Table
+      visible: (residual_analysis)
+      clearWith:
+        - residual_analysis
+        - estimation_method
+      columns:
+        - name: transition
+          title: Transition
+          type: text
+        - name: residual_type
+          title: Residual Type
+          type: text
+        - name: mean_residual
+          title: Mean
+          type: number
+          format: zto
+        - name: sd_residual
+          title: SD
+          type: number
+          format: zto
+        - name: test_statistic
+          title: Test Statistic
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto
+
+    - name: transitionDiagram
+      title: Multi-State Transition Diagram
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_transition_diagram)
+      requiresData: true
+      clearWith:
+        - model_structure
+        - show_hazard_ratios
+
+    - name: stateProbabilitiesPlot
+      title: State Occupation Probabilities
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_state_probabilities)
+      requiresData: true
+      clearWith:
+        - prediction_times
+        - transition_probabilities
+
+    - name: transitionHazardsPlot
+      title: Transition-Specific Hazard Functions
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_transition_hazards)
+      requiresData: true
+      clearWith:
+        - baseline_hazard
+        - covariates
+
+    - name: cumulativeIncidencePlot
+      title: Cumulative Incidence Functions
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_cumulative_incidence)
+      requiresData: true
+      clearWith:
+        - model_structure
+        - prediction_horizon
+
+    - name: sojournDistributionsPlot
+      title: Sojourn Time Distributions
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_sojourn_distributions)
+      requiresData: true
+      clearWith:
+        - sojourn_times
+        - baseline_hazard
+
+    - name: residualsPlot
+      title: Model Diagnostic Residuals
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_residuals)
+      requiresData: true
+      clearWith:
+        - residual_analysis
+        - estimation_method
+
+...

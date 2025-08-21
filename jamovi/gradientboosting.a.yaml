@@ -1,0 +1,333 @@
+---
+name: gradientboosting
+title: Gradient Boosting for Survival Analysis
+menuGroup: jsurvivalD
+menuSubgroup: Machine Learning
+menuSubtitle: Ensemble learning with boosted survival trees
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >
+        Gradient Boosting for survival analysis using ensemble methods that combine
+        multiple weak learners (typically shallow trees) to create strong predictive
+        models. This implementation supports both traditional gradient boosting (gbm)
+        and modern component-wise boosting (mboost) approaches. The method is particularly
+        effective for high-dimensional survival data and complex non-linear relationships
+        between predictors and survival outcomes. Features include automatic variable
+        selection, handling of mixed-type predictors, built-in cross-validation for
+        optimal stopping, and robust performance with noisy data. Especially suitable
+        for biomarker discovery, prognostic modeling, and complex survival prediction tasks.
+    R:
+        dontrun: false
+        usage: >
+            result <- gradientboosting(
+                data = mydata,
+                time = "time_to_event",
+                event = "event_indicator",
+                predictors = c("age", "stage", "biomarker1", "biomarker2"),
+                algorithm = "mboost",
+                n_trees = 100,
+                learning_rate = 0.1,
+                max_depth = 3,
+                cv_folds = 5
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time to event variable (numeric). For right-censored data, this is the 
+            time from study entry to event or censoring.
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable. For survival analysis: 0 = censored, 1 = event.
+            For competing risks: 0 = censored, 1+ = different event types.
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables to use for boosting. Can include numeric, ordinal, and 
+            nominal variables. The algorithm automatically handles mixed-type
+            predictors and performs variable selection.
+
+    - name: strata
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Optional stratification variable for stratified survival analysis.
+            Creates separate baseline hazards for each stratum.
+
+    # Algorithm selection
+    - name: algorithm
+      title: Boosting Algorithm
+      type: List
+      options:
+        - title: Component-wise Boosting (mboost)
+          name: mboost
+        - title: Traditional Gradient Boosting (gbm)
+          name: gbm
+        - title: Extreme Gradient Boosting (xgboost)
+          name: xgboost
+      default: mboost
+      description:
+          R: >
+            Boosting algorithm to use. mboost provides component-wise boosting with
+            statistical framework, gbm offers traditional gradient boosting,
+            xgboost provides extreme gradient boosting with advanced regularization.
+
+    # Boosting parameters
+    - name: n_trees
+      title: Number of Trees
+      type: Integer
+      default: 100
+      min: 10
+      max: 5000
+      description:
+          R: >
+            Number of boosting iterations (trees). More trees can improve performance
+            but may lead to overfitting. Use cross-validation to determine optimal value.
+
+    - name: learning_rate
+      title: Learning Rate
+      type: Number
+      default: 0.1
+      min: 0.001
+      max: 1.0
+      description:
+          R: >
+            Learning rate (shrinkage parameter). Lower values require more trees
+            but often provide better generalization. Typical values: 0.01-0.3.
+
+    - name: max_depth
+      title: Maximum Tree Depth
+      type: Integer
+      default: 3
+      min: 1
+      max: 10
+      description:
+          R: >
+            Maximum depth of individual trees. Shallow trees (1-6) are typically
+            sufficient for boosting. Deeper trees may capture interactions but
+            increase overfitting risk.
+
+    - name: min_node_size
+      title: Minimum Node Size
+      type: Integer
+      default: 10
+      min: 1
+      max: 100
+      description:
+          R: >
+            Minimum number of observations in terminal nodes. Higher values
+            create simpler trees and reduce overfitting.
+
+    - name: subsample
+      title: Subsample Fraction
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 1.0
+      description:
+          R: >
+            Fraction of observations used for each tree. Values < 1.0 introduce
+            stochasticity and can improve generalization (stochastic gradient boosting).
+
+    # Cross-validation and model selection
+    - name: cv_folds
+      title: Cross-Validation Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 20
+      description:
+          R: >
+            Number of folds for cross-validation to determine optimal number of
+            trees and prevent overfitting. Set to 0 to disable cross-validation.
+
+    - name: early_stopping
+      title: Early Stopping
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use early stopping based on cross-validation to prevent overfitting.
+            Stops training when validation error stops improving.
+
+    - name: patience
+      title: Early Stopping Patience
+      type: Integer
+      default: 10
+      min: 1
+      max: 100
+      description:
+          R: >
+            Number of iterations without improvement before early stopping.
+            Higher values allow more exploration but may lead to overfitting.
+
+    # Regularization (for xgboost)
+    - name: reg_alpha
+      title: L1 Regularization
+      type: Number
+      default: 0.0
+      min: 0.0
+      max: 10.0
+      description:
+          R: >
+            L1 (Lasso) regularization parameter for XGBoost. Higher values
+            increase sparsity by driving coefficients to zero.
+
+    - name: reg_lambda
+      title: L2 Regularization
+      type: Number
+      default: 1.0
+      min: 0.0
+      max: 10.0
+      description:
+          R: >
+            L2 (Ridge) regularization parameter for XGBoost. Higher values
+            reduce overfitting by penalizing large coefficients.
+
+    # Variable importance and selection
+    - name: variable_selection
+      title: Automatic Variable Selection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform automatic variable selection during boosting. Variables
+            with low importance are excluded from final model.
+
+    - name: importance_threshold
+      title: Importance Threshold
+      type: Number
+      default: 0.01
+      min: 0.0
+      max: 1.0
+      description:
+          R: >
+            Minimum relative importance for variable inclusion in final model.
+            Variables below this threshold are excluded.
+
+    # Output options
+    - name: show_convergence
+      title: Show Convergence
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display convergence diagnostics including training and validation
+            error curves, optimal stopping point, and convergence statistics.
+
+    - name: show_importance
+      title: Show Variable Importance
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate and display variable importance measures based on
+            the frequency and improvement of splits.
+
+    - name: show_predictions
+      title: Show Predictions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate survival predictions and risk scores for the training data.
+            Useful for model evaluation and risk stratification.
+
+    # Visualization options
+    - name: plot_convergence
+      title: Convergence Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot training and validation error curves showing convergence
+            behavior and optimal stopping point.
+
+    - name: plot_importance
+      title: Variable Importance Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate variable importance plot showing relative importance
+            of predictors in the boosted model.
+
+    - name: plot_partial
+      title: Partial Dependence Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create partial dependence plots for top variables showing
+            marginal effect on survival hazard.
+
+    - name: plot_survival
+      title: Risk Group Survival Curves
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot Kaplan-Meier curves for risk groups defined by boosted
+            model predictions with statistical comparisons.
+
+    # Advanced options
+    - name: interaction_depth
+      title: Interaction Depth
+      type: Integer
+      default: 1
+      min: 1
+      max: 5
+      description:
+          R: >
+            Maximum order of variable interactions to consider. Higher values
+            capture complex interactions but increase computational complexity.
+
+    - name: bag_fraction
+      title: Bag Fraction
+      type: Number
+      default: 0.5
+      min: 0.1
+      max: 1.0
+      description:
+          R: >
+            Fraction of variables randomly selected for each tree (for gbm).
+            Introduces randomness and can improve generalization.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for reproducible results. Change to get different
+            random splits and variable selections.
+
+...

@@ -1,0 +1,484 @@
+---
+name: adaptivelasso
+title: Adaptive LASSO for Cox Models
+menuGroup: jsurvivalD
+menuSubgroup: Machine Learning
+menuSubtitle: Advanced penalized regression with adaptive variable selection
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >
+        Adaptive LASSO for Cox proportional hazards models with data-driven penalty
+        selection and improved variable selection properties. Unlike standard LASSO,
+        the adaptive LASSO uses weights based on initial parameter estimates to
+        provide consistent variable selection (oracle property) and reduced bias
+        for non-zero coefficients. This implementation supports multiple weight
+        calculation methods, cross-validation for optimal penalty selection,
+        stability selection for robust variable identification, and comprehensive
+        model diagnostics. Particularly effective for high-dimensional survival
+        data where traditional methods fail, genomic studies with many biomarkers,
+        and clinical prediction models requiring sparse, interpretable solutions.
+        The method automatically handles tied survival times, stratified analysis,
+        and provides uncertainty quantification through bootstrap procedures.
+    R:
+        dontrun: false
+        usage: >
+            result <- adaptivelasso(
+                data = mydata,
+                time = "time_to_event",
+                event = "event_indicator",
+                predictors = c("age", "stage", "biomarker1", "biomarker2"),
+                weight_method = "ridge",
+                cv_folds = 10,
+                stability_selection = TRUE,
+                alpha = 1.0
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time to event variable (numeric). For right-censored data, this is the 
+            time from study entry to event or censoring.
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable. For survival analysis: 0 = censored, 1 = event.
+            For competing risks: 0 = censored, 1+ = different event types.
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables to include in the adaptive LASSO Cox model. Can include
+            continuous, ordinal, and nominal variables. Automatic standardization
+            is applied for optimal penalty performance.
+
+    - name: strata
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Optional stratification variable for stratified Cox regression.
+            Creates separate baseline hazards for each stratum.
+
+    # Model specification
+    - name: weight_method
+      title: Weight Calculation Method
+      type: List
+      options:
+        - title: Ridge Regression Weights
+          name: ridge
+        - title: Univariate Cox Weights
+          name: univariate
+        - title: Full Cox Model Weights
+          name: cox
+        - title: Marginal Correlation Weights
+          name: correlation
+        - title: Equal Weights (Standard LASSO)
+          name: equal
+      default: ridge
+      description:
+          R: >
+            Method for calculating adaptive weights. Ridge provides stable weights
+            with shrinkage, univariate uses individual Cox regressions, full Cox
+            uses complete model (may be unstable), correlation uses marginal associations.
+
+    - name: alpha
+      title: Elastic Net Mixing Parameter
+      type: Number
+      default: 1.0
+      min: 0.0
+      max: 1.0
+      description:
+          R: >
+            Elastic net mixing parameter. 1.0 = pure LASSO, 0.0 = ridge regression,
+            intermediate values combine both penalties for better performance
+            with correlated predictors.
+
+    - name: gamma
+      title: Adaptive Weight Power
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 5.0
+      description:
+          R: >
+            Power parameter for adaptive weights calculation. Higher values
+            increase penalty differences between variables, promoting stronger
+            variable selection but potentially increasing instability.
+
+    # Cross-validation and model selection
+    - name: cv_folds
+      title: Cross-Validation Folds
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+      description:
+          R: >
+            Number of folds for cross-validation to select optimal penalty parameter.
+            More folds provide better estimates but increase computation time.
+
+    - name: cv_measure
+      title: CV Performance Measure
+      type: List
+      options:
+        - title: Partial Likelihood Deviance
+          name: deviance
+        - title: C-index
+          name: C
+        - title: Integrated Brier Score
+          name: brier
+        - title: Time-dependent AUC
+          name: auc
+      default: deviance
+      description:
+          R: >
+            Performance measure for cross-validation. Deviance is computationally
+            efficient, C-index focuses on discrimination, Brier score accounts
+            for calibration, AUC provides time-specific performance.
+
+    - name: lambda_sequence
+      title: Lambda Sequence
+      type: List
+      options:
+        - title: Automatic (Recommended)
+          name: auto
+        - title: Custom Range
+          name: custom
+        - title: Single Value
+          name: single
+      default: auto
+      description:
+          R: >
+            How to specify the penalty parameter sequence. Automatic uses
+            data-driven range, custom allows user specification, single
+            tests only one value.
+
+    - name: lambda_min_ratio
+      title: Lambda Min Ratio
+      type: Number
+      default: 0.001
+      min: 1e-6
+      max: 0.1
+      description:
+          R: >
+            Ratio of smallest to largest lambda value in automatic sequence.
+            Smaller values explore stronger penalties but may lead to
+            computational difficulties.
+
+    - name: n_lambda
+      title: Number of Lambda Values
+      type: Integer
+      default: 100
+      min: 10
+      max: 500
+      description:
+          R: >
+            Number of lambda values in the regularization path. More values
+            provide finer resolution but increase computation time.
+
+    # Stability selection
+    - name: stability_selection
+      title: Stability Selection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform stability selection to identify robust variable selection
+            patterns across bootstrap samples. Provides more reliable variable
+            selection than single model fitting.
+
+    - name: stability_threshold
+      title: Stability Threshold
+      type: Number
+      default: 0.6
+      min: 0.5
+      max: 0.95
+      description:
+          R: >
+            Minimum selection frequency for variables in stability selection.
+            Higher thresholds provide more conservative variable selection
+            but may miss important predictors.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description:
+          R: >
+            Number of bootstrap samples for stability selection and confidence
+            intervals. More samples provide more stable estimates.
+
+    - name: subsampling_ratio
+      title: Subsampling Ratio
+      type: Number
+      default: 0.8
+      min: 0.5
+      max: 0.95
+      description:
+          R: >
+            Proportion of data used in each bootstrap sample for stability
+            selection. Smaller ratios increase selection variability.
+
+    # Model diagnostics and validation
+    - name: proportional_hazards
+      title: Check Proportional Hazards
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test proportional hazards assumption for selected variables using
+            scaled Schoenfeld residuals and time-interaction tests.
+
+    - name: influence_diagnostics
+      title: Influence Diagnostics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate influence diagnostics including dfbeta, leverage, and
+            outlier detection for robust model assessment.
+
+    - name: goodness_of_fit
+      title: Goodness of Fit Tests
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform goodness of fit assessment including model deviance,
+            concordance statistics, and calibration measures.
+
+    # Prediction and risk scores
+    - name: risk_groups
+      title: Number of Risk Groups
+      type: Integer
+      default: 3
+      min: 2
+      max: 10
+      description:
+          R: >
+            Number of risk groups for stratification based on linear predictor.
+            Used for Kaplan-Meier curves and risk group analysis.
+
+    - name: time_points
+      title: Prediction Time Points
+      type: String
+      default: "1, 2, 5"
+      description:
+          R: >
+            Comma-separated list of time points for survival probability
+            predictions. Empty string uses data-driven quantiles.
+
+    - name: baseline_survival
+      title: Estimate Baseline Survival
+      type: Bool
+      default: true
+      description:
+          R: >
+            Estimate and plot baseline survival function for the adaptive
+            LASSO Cox model using Breslow estimator.
+
+    # Output options
+    - name: show_coefficients
+      title: Show Coefficients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display coefficient estimates for selected variables with
+            standard errors and confidence intervals.
+
+    - name: show_selection_path
+      title: Show Selection Path
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display complete regularization path showing how coefficients
+            change with penalty parameter.
+
+    - name: show_cv_results
+      title: Show CV Results
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display cross-validation results including optimal lambda
+            selection and performance across penalty values.
+
+    - name: show_diagnostics
+      title: Show Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model diagnostics including proportional
+            hazards tests, influence measures, and residual analysis.
+
+    # Visualization options
+    - name: plot_selection_path
+      title: Regularization Path Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot coefficient paths as function of penalty parameter
+            showing variable selection progression.
+
+    - name: plot_cv_curve
+      title: Cross-Validation Curve
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot cross-validation performance curve with optimal lambda
+            selection and confidence bands.
+
+    - name: plot_stability
+      title: Stability Selection Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot stability selection results showing selection frequencies
+            across bootstrap samples.
+
+    - name: plot_survival_curves
+      title: Risk Group Survival Curves
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot Kaplan-Meier survival curves for risk groups defined
+            by adaptive LASSO linear predictor.
+
+    - name: plot_baseline_hazard
+      title: Baseline Hazard Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot estimated baseline hazard function and cumulative
+            baseline hazard from the final model.
+
+    - name: plot_diagnostics
+      title: Diagnostic Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create diagnostic plots including residuals, influential
+            observations, and proportional hazards assessment.
+
+    # Advanced options
+    - name: tie_method
+      title: Tied Times Method
+      type: List
+      options:
+        - title: Breslow (Default)
+          name: breslow
+        - title: Efron
+          name: efron
+      default: breslow
+      description:
+          R: >
+            Method for handling tied survival times. Efron provides better
+            approximation but is computationally more intensive.
+
+    - name: standardize
+      title: Standardize Predictors
+      type: Bool
+      default: true
+      description:
+          R: >
+            Standardize predictors before fitting. Recommended for optimal
+            penalty performance with mixed-scale variables.
+
+    - name: intercept
+      title: Include Intercept
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include intercept term in Cox model. Generally not needed
+            for survival analysis but may be useful in special cases.
+
+    - name: parallel_computing
+      title: Parallel Computing
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use parallel computing for cross-validation and bootstrap
+            procedures to reduce computation time.
+
+    - name: n_cores
+      title: Number of Cores
+      type: Integer
+      default: 2
+      min: 1
+      max: 8
+      description:
+          R: >
+            Number of CPU cores for parallel computation when enabled.
+            More cores speed up CV and bootstrap but use more memory.
+
+    - name: convergence_threshold
+      title: Convergence Threshold
+      type: Number
+      default: 1e-7
+      min: 1e-10
+      max: 1e-4
+      description:
+          R: >
+            Convergence threshold for coordinate descent algorithm.
+            Smaller values provide more precise solutions but increase
+            computation time.
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Integer
+      default: 10000
+      min: 1000
+      max: 100000
+      description:
+          R: >
+            Maximum iterations for coordinate descent algorithm.
+            Increase if convergence warnings occur.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for cross-validation folds and bootstrap sampling.
+            Ensures reproducible results across analyses.
+
+...

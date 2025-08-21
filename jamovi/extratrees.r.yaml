@@ -1,0 +1,116 @@
+---
+name: extratrees
+title: Extremely Randomized Trees for Survival
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: TODO
+      type: Html
+      visible: true
+
+    - name: forestSummary
+      title: Forest Summary
+      type: Table
+      visible: (show_forest_summary)
+      rows: 0
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+
+    - name: variableImportance
+      title: Variable Importance
+      type: Table
+      visible: (show_importance)
+      rows: 0
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: importance
+          title: Importance
+          type: number
+          format: zto
+        - name: se
+          title: Standard Error
+          type: number
+          format: zto
+        - name: rank
+          title: Rank
+          type: integer
+        - name: pvalue
+          title: P-value
+          type: number
+          format: zto,pvalue
+
+    - name: oobPredictions
+      title: Out-of-Bag Predictions
+      type: Table
+      visible: (show_oob_predictions)
+      rows: 0
+      columns:
+        - name: case_id
+          title: Case ID
+          type: integer
+        - name: observed_time
+          title: Observed Time
+          type: number
+          format: zto
+        - name: event_status
+          title: Event Status
+          type: integer
+        - name: predicted_risk
+          title: Predicted Risk
+          type: number
+          format: zto
+        - name: risk_group
+          title: Risk Group
+          type: text
+
+    - name: importancePlot
+      title: Variable Importance Plot
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_importance)
+      renderFun: .plotImportance
+      requiresData: true
+
+    - name: oobErrorPlot
+      title: Out-of-Bag Error Convergence
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_oob_error)
+      renderFun: .plotOobError
+      requiresData: true
+
+    - name: survivalPlot
+      title: Risk Group Survival Curves
+      type: Image
+      width: 800
+      height: 600
+      visible: (plot_survival)
+      renderFun: .plotSurvival
+      requiresData: true
+
+    - name: partialPlots
+      title: Partial Dependence Plots
+      type: Image
+      width: 800
+      height: 600
+      visible: (plot_partial)
+      renderFun: .plotPartial
+      requiresData: true
+
+refs:
+    - ExtraTrees
+    - Survival
+    - ranger
+    - randomForestSRC
+    - ClinicoPathJamoviModule
+...

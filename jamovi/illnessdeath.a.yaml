@@ -1,0 +1,486 @@
+---
+name: illnessdeath
+title: Illness-Death Multi-State Models
+menuGroup: jsurvivalD
+menuSubgroup: Multi-State Analysis
+menuSubtitle: Three-state models for disease progression with recovery and mortality
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >
+        Illness-death multi-state models for analyzing disease progression through
+        three states: healthy (state 0), ill (state 1), and death (state 2).
+        This framework models transitions between states with separate hazard
+        functions, enabling analysis of disease onset, recovery rates, and
+        differential mortality risks. The implementation supports both
+        non-parametric and parametric approaches, competing risks formulation,
+        reversible and irreversible illness states, time-dependent covariates,
+        and comprehensive transition probability estimation. Particularly valuable
+        for chronic disease studies, cancer progression analysis, hospital
+        readmission studies, and any scenario involving intermediate health
+        states with potential recovery. The model provides state occupancy
+        probabilities, mean sojourn times, and transition-specific hazard ratios
+        with clinical interpretation frameworks for evidence-based medicine.
+    R:
+        dontrun: false
+        usage: >
+            result <- illnessdeath(
+                data = mydata,
+                time_entry = "entry_time",
+                time_exit = "exit_time", 
+                state_from = "from_state",
+                state_to = "to_state",
+                covariates = c("age", "treatment", "stage"),
+                reversible_illness = FALSE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time_entry
+      title: Entry Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time of entry into the current state. For interval data, this is
+            the start time of the observation interval.
+
+    - name: time_exit
+      title: Exit Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time of exit from the current state or censoring time.
+            Must be greater than or equal to entry time.
+
+    - name: state_from
+      title: From State Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Starting state for each transition. Should be coded as
+            0 = healthy, 1 = ill, 2 = death (absorbing state).
+
+    - name: state_to
+      title: To State Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Destination state for each transition. Should be coded as
+            0 = healthy, 1 = ill, 2 = death. Use same value as from_state for censoring.
+
+    - name: subject_id
+      title: Subject ID Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Unique identifier for each subject. Required for tracking
+            individuals through multiple state transitions.
+
+    - name: covariates
+      title: Covariate Variables
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables affecting transition hazards. Can be time-fixed
+            or time-varying. Applied to all transitions unless specified otherwise.
+
+    # Model specification
+    - name: model_structure
+      title: Model Structure
+      type: List
+      options:
+        - title: Standard Illness-Death
+          name: standard
+        - title: Reversible Illness
+          name: reversible
+        - title: Progressive Disease
+          name: progressive
+        - title: Competing Risks
+          name: competing
+      default: standard
+      description:
+          R: >
+            Type of illness-death model. Standard allows 0→1, 1→2, 0→2 transitions.
+            Reversible adds 1→0. Progressive restricts to forward transitions.
+            Competing treats illness and death as competing from healthy state.
+
+    - name: transition_specific
+      title: Transition-Specific Covariates
+      type: Bool
+      default: false
+      description:
+          R: >
+            Allow different covariate effects for each transition type.
+            When TRUE, provides separate hazard ratios for each transition.
+
+    - name: baseline_hazard
+      title: Baseline Hazard Specification
+      type: List
+      options:
+        - title: Non-parametric (Cox-type)
+          name: nonparametric
+        - title: Weibull
+          name: weibull
+        - title: Exponential
+          name: exponential
+        - title: Piecewise Constant
+          name: piecewise
+        - title: Spline-based
+          name: spline
+      default: nonparametric
+      description:
+          R: >
+            Specification for baseline hazard functions. Non-parametric provides
+            flexibility, parametric options enable extrapolation and smooth estimates.
+
+    - name: common_baseline
+      title: Common Baseline Hazard
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use same baseline hazard shape for all transitions (with different scales).
+            Reduces parameters and increases precision when transitions are similar.
+
+    # Time-varying effects
+    - name: time_varying_covariates
+      title: Time-Varying Covariates
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Subset of covariates that vary over time. Requires careful
+            data structure with time-updated covariate values.
+
+    - name: time_varying_effects
+      title: Time-Varying Effects
+      type: Bool
+      default: false
+      description:
+          R: >
+            Allow covariate effects to change over time using
+            time-interaction terms or spline-based methods.
+
+    - name: interaction_terms
+      title: Interaction Terms
+      type: String
+      default: ""
+      description:
+          R: >
+            Specify interaction terms as comma-separated pairs (e.g., 'age:treatment, stage:age').
+            Interactions can be transition-specific or applied globally.
+
+    # Estimation method
+    - name: estimation_method
+      title: Estimation Method
+      type: List
+      options:
+        - title: Maximum Likelihood
+          name: ml
+        - title: Partial Likelihood (Cox-type)
+          name: partial
+        - title: Bayesian MCMC
+          name: bayesian
+        - title: Penalized Likelihood
+          name: penalized
+      default: partial
+      description:
+          R: >
+            Method for parameter estimation. Partial likelihood is standard for
+            semi-parametric models, ML for parametric, Bayesian for uncertainty
+            quantification, penalized for high-dimensional problems.
+
+    - name: tie_method
+      title: Tied Times Method
+      type: List
+      options:
+        - title: Breslow
+          name: breslow
+        - title: Efron
+          name: efron
+        - title: Exact
+          name: exact
+      default: breslow
+      description:
+          R: >
+            Method for handling tied transition times. Efron provides better
+            approximation, exact is computationally intensive but most accurate.
+
+    # Prediction and probabilities
+    - name: prediction_times
+      title: Prediction Time Points
+      type: String
+      default: "1, 2, 5, 10"
+      description:
+          R: >
+            Comma-separated time points for state occupation probability
+            predictions and transition probability matrices.
+
+    - name: prediction_horizon
+      title: Prediction Horizon
+      type: Number
+      default: 10
+      min: 0.1
+      description:
+          R: >
+            Maximum time horizon for probability predictions and
+            state occupation forecasts.
+
+    - name: transition_probabilities
+      title: Calculate Transition Probabilities
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compute transition probability matrices P(s,t) giving probabilities
+            of being in each state at time t given state at time s.
+
+    - name: sojourn_times
+      title: Calculate Sojourn Times
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate expected sojourn times (mean time spent) in each state
+            before transition to another state or censoring.
+
+    # Bootstrap and confidence intervals
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for transition probabilities
+            and state occupation probabilities.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 500
+      min: 100
+      max: 5000
+      description:
+          R: >
+            Number of bootstrap samples for confidence interval estimation.
+            More samples provide more stable intervals but increase computation.
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Confidence level for all interval estimates including
+            hazard ratios and transition probabilities.
+
+    # Model validation
+    - name: goodness_of_fit
+      title: Goodness of Fit Tests
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform goodness of fit tests for multi-state model including
+            Markov assumption testing and transition-specific model checks.
+
+    - name: residual_analysis
+      title: Residual Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate and analyze residuals for each transition including
+            martingale, deviance, and Schoenfeld residuals.
+
+    - name: cross_validation
+      title: Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform cross-validation to assess prediction accuracy
+            for state occupation probabilities.
+
+    # Output options
+    - name: show_transition_summary
+      title: Show Transition Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display summary of observed transitions including counts,
+            rates, and basic descriptive statistics.
+
+    - name: show_hazard_ratios
+      title: Show Hazard Ratios
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display hazard ratios for each transition with confidence
+            intervals and significance tests.
+
+    - name: show_state_probabilities
+      title: Show State Probabilities
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display state occupation probabilities over time with
+            confidence bands and clinical interpretation.
+
+    - name: show_sojourn_analysis
+      title: Show Sojourn Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display expected sojourn times in each state with
+            bootstrap confidence intervals.
+
+    # Visualization options
+    - name: plot_transition_diagram
+      title: Transition Diagram
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create visual diagram showing possible transitions between
+            states with hazard ratios and confidence intervals.
+
+    - name: plot_state_probabilities
+      title: State Probability Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot state occupation probabilities over time showing
+            evolution of population distribution across states.
+
+    - name: plot_transition_hazards
+      title: Transition-Specific Hazards
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot hazard functions for each possible transition
+            with baseline hazards and covariate effects.
+
+    - name: plot_cumulative_incidence
+      title: Cumulative Incidence Functions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot cumulative incidence functions for each destination
+            state starting from each initial state.
+
+    - name: plot_sojourn_distributions
+      title: Sojourn Time Distributions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot distributions of sojourn times in each state
+            with empirical and model-based estimates.
+
+    - name: plot_residuals
+      title: Residual Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create residual plots for model diagnostics including
+            transition-specific residual analysis.
+
+    # Advanced options
+    - name: left_truncation
+      title: Handle Left Truncation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Account for left truncation when subjects enter study
+            after disease onset or state transitions.
+
+    - name: interval_censoring
+      title: Handle Interval Censoring
+      type: Bool
+      default: false
+      description:
+          R: >
+            Handle interval-censored transition times when exact
+            transition times are unknown but intervals are available.
+
+    - name: competing_mortality
+      title: Separate Mortality by Cause
+      type: Bool
+      default: false
+      description:
+          R: >
+            Distinguish between disease-related and other-cause mortality
+            in the death state for competing risks analysis.
+
+    - name: stratification_variable
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable for stratified analysis allowing different baseline
+            hazards for each stratum while maintaining same covariate effects.
+
+    - name: frailty_model
+      title: Include Frailty
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include shared frailty term to account for unobserved
+            heterogeneity affecting all transitions for each individual.
+
+    - name: penalization_parameter
+      title: Penalization Parameter
+      type: Number
+      default: 0.0
+      min: 0.0
+      max: 10.0
+      description:
+          R: >
+            Penalization parameter for regularized estimation with
+            high-dimensional covariates. 0 = no penalization.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap sampling and any stochastic
+            procedures to ensure reproducible results.
+
+...
