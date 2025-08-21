@@ -1,0 +1,302 @@
+---
+name: survivalbart
+jrs: '1.1'
+title: Analysis Results
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: todo
+      title: Analysis Todo
+      type: Html
+      visible: false
+
+    - name: modelSummary
+      title: BART Model Summary
+      type: Table
+      visible: (show_model_summary)
+      clearWith:
+        - time
+        - event
+        - predictors
+        - model_type
+        - n_trees
+        - n_burn
+        - n_post
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: posterior_mean
+          title: Posterior Mean
+          type: number
+          format: zto
+        - name: posterior_sd
+          title: Posterior SD
+          type: number
+          format: zto
+        - name: credible_lower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: credible_upper
+          title: Upper CI
+          type: number
+          format: zto
+        - name: effective_sample_size
+          title: ESS
+          type: integer
+
+    - name: variableImportance
+      title: Variable Importance
+      type: Table
+      visible: (show_variable_importance)
+      clearWith:
+        - predictors
+        - variable_selection
+        - n_post
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: inclusion_probability
+          title: Inclusion Probability
+          type: number
+          format: pc
+        - name: split_frequency
+          title: Split Frequency
+          type: number
+          format: zto
+        - name: relative_importance
+          title: Relative Importance
+          type: number
+          format: zto
+        - name: marginal_effect
+          title: Marginal Effect
+          type: number
+          format: zto
+        - name: importance_rank
+          title: Rank
+          type: integer
+
+    - name: survivalSummary
+      title: Survival Function Summary
+      type: Table
+      visible: (show_survival_summary)
+      clearWith:
+        - time
+        - event
+        - predict_times
+        - survival_quantiles
+      columns:
+        - name: summary_type
+          title: Summary Type
+          type: text
+        - name: time_point
+          title: Time Point
+          type: number
+          format: zto
+        - name: posterior_mean
+          title: Mean
+          type: number
+          format: zto
+        - name: credible_lower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: credible_upper
+          title: Upper CI
+          type: number
+          format: zto
+        - name: posterior_sd
+          title: SD
+          type: number
+          format: zto
+
+    - name: convergenceDiagnostics
+      title: MCMC Convergence Diagnostics
+      type: Table
+      visible: (show_convergence)
+      clearWith:
+        - n_chains
+        - n_burn
+        - n_post
+        - convergence_diagnostics
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: rhat
+          title: R̂
+          type: number
+          format: zto
+        - name: effective_sample_size
+          title: ESS
+          type: integer
+        - name: mcmc_se
+          title: MCMC SE
+          type: number
+          format: zto
+        - name: autocorr_lag1
+          title: Autocorr (lag 1)
+          type: number
+          format: zto
+        - name: convergence_status
+          title: Status
+          type: text
+
+    - name: crossValidationResults
+      title: Cross-Validation Results
+      type: Table
+      visible: (cross_validation)
+      clearWith:
+        - cv_folds
+        - cross_validation
+      columns:
+        - name: fold
+          title: Fold
+          type: integer
+        - name: log_likelihood
+          title: Log-Likelihood
+          type: number
+          format: zto
+        - name: c_index
+          title: C-Index
+          type: number
+          format: zto
+        - name: brier_score
+          title: Brier Score
+          type: number
+          format: zto
+        - name: prediction_error
+          title: Prediction Error
+          type: number
+          format: zto
+
+    - name: posteriorPredictive
+      title: Posterior Predictive Checks
+      type: Table
+      visible: (posterior_prediction)
+      clearWith:
+        - posterior_prediction
+        - model_type
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: observed_value
+          title: Observed
+          type: number
+          format: zto
+        - name: posterior_mean
+          title: Posterior Mean
+          type: number
+          format: zto
+        - name: posterior_sd
+          title: Posterior SD
+          type: number
+          format: zto
+        - name: p_value
+          title: Bayesian p-value
+          type: number
+          format: zto
+
+    - name: interactionEffects
+      title: Detected Interactions
+      type: Table
+      visible: (n_trees >= 100)
+      clearWith:
+        - predictors
+        - alpha
+        - beta
+      columns:
+        - name: variable1
+          title: Variable 1
+          type: text
+        - name: variable2
+          title: Variable 2
+          type: text
+        - name: interaction_strength
+          title: Interaction Strength
+          type: number
+          format: zto
+        - name: frequency
+          title: Frequency
+          type: number
+          format: pc
+        - name: marginal_contribution
+          title: Marginal Contribution
+          type: number
+          format: zto
+
+    - name: survivalCurvesPlot
+      title: Survival Curves with Credible Bands
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_survival_curves)
+      requiresData: true
+      clearWith:
+        - time
+        - event
+        - credible_level
+
+    - name: variableImportancePlot
+      title: Variable Importance
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_variable_importance)
+      requiresData: true
+      clearWith:
+        - variable_selection
+        - predictors
+
+    - name: tracePlot
+      title: MCMC Trace Plots
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_trace)
+      requiresData: true
+      clearWith:
+        - n_chains
+        - n_burn
+        - n_post
+
+    - name: posteriorPredictivePlot
+      title: Posterior Predictive Checks
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_posterior_predictive)
+      requiresData: true
+      clearWith:
+        - posterior_prediction
+
+    - name: partialDependencePlot
+      title: Partial Dependence Effects
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_partial_dependence)
+      requiresData: true
+      clearWith:
+        - predictors
+        - variable_selection
+
+    - name: interactionsPlot
+      title: Variable Interactions
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_interactions)
+      requiresData: true
+      clearWith:
+        - predictors
+        - alpha
+        - beta
+
+...

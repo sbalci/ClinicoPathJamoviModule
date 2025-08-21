@@ -1,0 +1,130 @@
+---
+name: gradientboosting
+title: Gradient Boosting for Survival Analysis
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: TODO
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      visible: (show_convergence)
+      rows: 0
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+
+    - name: convergenceStats
+      title: Convergence Statistics
+      type: Table
+      visible: (show_convergence)
+      rows: 0
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: training
+          title: Training
+          type: number
+          format: zto
+        - name: validation
+          title: Validation
+          type: number
+          format: zto
+        - name: optimal_trees
+          title: Optimal Trees
+          type: integer
+
+    - name: variableImportance
+      title: Variable Importance
+      type: Table
+      visible: (show_importance)
+      rows: 0
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: importance
+          title: Relative Importance
+          type: number
+          format: pc
+        - name: rank
+          title: Rank
+          type: integer
+        - name: selected
+          title: Selected
+          type: text
+
+    - name: predictions
+      title: Model Predictions
+      type: Table
+      visible: (show_predictions)
+      rows: 0
+      columns:
+        - name: case_id
+          title: Case ID
+          type: integer
+        - name: risk_score
+          title: Risk Score
+          type: number
+          format: zto
+        - name: predicted_risk
+          title: Predicted Risk
+          type: number
+          format: pc
+        - name: risk_group
+          title: Risk Group
+          type: text
+
+    - name: convergencePlot
+      title: Convergence Diagnostics
+      type: Image
+      width: 800
+      height: 600
+      visible: (plot_convergence)
+      renderFun: .plotConvergence
+      requiresData: true
+
+    - name: importancePlot
+      title: Variable Importance Plot
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_importance)
+      renderFun: .plotImportance
+      requiresData: true
+
+    - name: partialPlots
+      title: Partial Dependence Plots
+      type: Image
+      width: 800
+      height: 600
+      visible: (plot_partial)
+      renderFun: .plotPartial
+      requiresData: true
+
+    - name: survivalPlot
+      title: Risk Group Survival Curves
+      type: Image
+      width: 800
+      height: 600
+      visible: (plot_survival)
+      renderFun: .plotSurvival
+      requiresData: true
+
+refs:
+    - GradientBoosting
+    - Survival
+    - mboost
+    - gbm
+    - xgboost
+    - ClinicoPathJamoviModule
+...

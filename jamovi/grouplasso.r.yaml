@@ -1,0 +1,316 @@
+---
+name: grouplasso
+jrs: '1.1'
+title: Analysis Results
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: todo
+      title: Analysis Todo
+      type: Html
+      visible: false
+
+    - name: groupSummary
+      title: Group Structure Summary
+      type: Table
+      visible: (show_group_summary)
+      clearWith:
+        - predictors
+        - group_definition
+        - group_structure
+      columns:
+        - name: group_id
+          title: Group ID
+          type: integer
+        - name: group_name
+          title: Group Name
+          type: text
+        - name: variables
+          title: Variables
+          type: text
+        - name: group_size
+          title: Size
+          type: integer
+        - name: group_weight
+          title: Weight
+          type: number
+          format: zto
+        - name: selected
+          title: Selected
+          type: text
+        - name: selection_order
+          title: Entry Order
+          type: integer
+
+    - name: coefficients
+      title: Group LASSO Coefficients
+      type: Table
+      visible: (show_coefficients)
+      clearWith:
+        - time
+        - event
+        - predictors
+        - penalty_type
+        - cv_folds
+      columns:
+        - name: group_id
+          title: Group
+          type: integer
+        - name: variable
+          title: Variable
+          type: text
+        - name: coefficient
+          title: Coefficient
+          type: number
+          format: zto
+        - name: exp_coefficient
+          title: Hazard Ratio
+          type: number
+          format: zto
+        - name: group_norm
+          title: Group Norm
+          type: number
+          format: zto
+        - name: relative_importance
+          title: Relative Importance
+          type: number
+          format: zto
+        - name: selected
+          title: Selected
+          type: text
+
+    - name: pathSummary
+      title: Regularization Path Summary
+      type: Table
+      visible: (show_path_summary)
+      clearWith:
+        - lambda_sequence
+        - n_lambda
+        - penalty_type
+      columns:
+        - name: step
+          title: Step
+          type: integer
+        - name: lambda
+          title: Lambda
+          type: number
+          format: zto
+        - name: n_groups_selected
+          title: Groups Selected
+          type: integer
+        - name: n_variables_selected
+          title: Variables Selected
+          type: integer
+        - name: deviance
+          title: Deviance
+          type: number
+          format: zto
+        - name: df
+          title: Degrees of Freedom
+          type: number
+          format: zto
+
+    - name: cvResults
+      title: Cross-Validation Results
+      type: Table
+      visible: (show_cv_results)
+      clearWith:
+        - cv_folds
+        - cv_measure
+        - lambda_sequence
+      columns:
+        - name: criterion
+          title: Criterion
+          type: text
+        - name: lambda_min
+          title: Lambda Min
+          type: number
+          format: zto
+        - name: lambda_1se
+          title: Lambda 1SE
+          type: number
+          format: zto
+        - name: cv_error_min
+          title: Min CV Error
+          type: number
+          format: zto
+        - name: cv_error_1se
+          title: 1SE CV Error
+          type: number
+          format: zto
+        - name: groups_min
+          title: Groups (Min)
+          type: integer
+        - name: groups_1se
+          title: Groups (1SE)
+          type: integer
+
+    - name: stabilityResults
+      title: Stability Selection Results
+      type: Table
+      visible: (stability_selection)
+      clearWith:
+        - stability_threshold
+        - bootstrap_samples
+      columns:
+        - name: group_id
+          title: Group ID
+          type: integer
+        - name: group_name
+          title: Group Name
+          type: text
+        - name: selection_frequency
+          title: Selection Frequency
+          type: number
+          format: pc
+        - name: stability_score
+          title: Stability Score
+          type: number
+          format: zto
+        - name: stable_selection
+          title: Stable Selection
+          type: text
+        - name: first_selected
+          title: First Selected (Lambda)
+          type: number
+          format: zto
+
+    - name: modelPerformance
+      title: Model Performance
+      type: Table
+      clearWith:
+        - time
+        - event
+        - predictors
+        - penalty_type
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: confidence_interval
+          title: 95% CI
+          type: text
+        - name: description
+          title: Description
+          type: text
+
+    - name: nestedCVResults
+      title: Nested Cross-Validation
+      type: Table
+      visible: (nested_cv)
+      clearWith:
+        - cv_folds
+        - inner_cv_folds
+        - nested_cv
+      columns:
+        - name: outer_fold
+          title: Outer Fold
+          type: integer
+        - name: optimal_lambda
+          title: Optimal Lambda
+          type: number
+          format: zto
+        - name: n_groups_selected
+          title: Groups Selected
+          type: integer
+        - name: performance
+          title: Performance
+          type: number
+          format: zto
+        - name: training_error
+          title: Training Error
+          type: number
+          format: zto
+
+    - name: permutationResults
+      title: Permutation Test Results
+      type: Table
+      visible: (permutation_test)
+      clearWith:
+        - n_permutations
+        - permutation_test
+      columns:
+        - name: test_statistic
+          title: Test Statistic
+          type: text
+        - name: observed_value
+          title: Observed Value
+          type: number
+          format: zto
+        - name: permutation_mean
+          title: Permutation Mean
+          type: number
+          format: zto
+        - name: permutation_sd
+          title: Permutation SD
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto
+
+    - name: pathPlot
+      title: Group Regularization Path
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_regularization_path)
+      requiresData: true
+      clearWith:
+        - predictors
+        - penalty_type
+        - lambda_sequence
+
+    - name: cvPlot
+      title: Cross-Validation Curve
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_cv_curve)
+      requiresData: true
+      clearWith:
+        - cv_folds
+        - cv_measure
+
+    - name: importancePlot
+      title: Group Importance
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_group_importance)
+      requiresData: true
+      clearWith:
+        - show_coefficients
+        - penalty_type
+
+    - name: stabilityPlot
+      title: Stability Selection
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_stability)
+      requiresData: true
+      clearWith:
+        - stability_selection
+        - stability_threshold
+
+    - name: groupStructurePlot
+      title: Group Structure Visualization
+      type: Image
+      width: 600
+      height: 400
+      visible: (plot_group_structure)
+      requiresData: true
+      clearWith:
+        - group_definition
+        - group_structure
+
+...

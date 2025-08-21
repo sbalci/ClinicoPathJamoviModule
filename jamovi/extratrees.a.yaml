@@ -1,0 +1,374 @@
+---
+name: extratrees
+title: Extremely Randomized Trees for Survival
+menuGroup: jsurvivalD
+menuSubgroup: Machine Learning
+menuSubtitle: Ultra-fast random forest with extreme randomization
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >
+        Extremely Randomized Trees (Extra Trees) for survival analysis using the ranger
+        package implementation. This method extends random forests by introducing additional
+        randomization in both variable selection and split point selection, leading to
+        increased bias but reduced variance and computational efficiency. The algorithm
+        is particularly effective for high-dimensional survival data, large datasets,
+        and scenarios requiring fast training and prediction. Features include built-in
+        variable importance measures, out-of-bag error estimation, support for competing
+        risks, and excellent scalability. Ideal for exploratory analysis, baseline
+        modeling, and ensemble methods in survival prediction tasks.
+    R:
+        dontrun: false
+        usage: >
+            result <- extratrees(
+                data = mydata,
+                time = "time_to_event",
+                event = "event_indicator",
+                predictors = c("age", "stage", "biomarker1", "biomarker2"),
+                num_trees = 500,
+                mtry = "sqrt",
+                min_node_size = 10,
+                splitrule = "extratrees"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time to event variable (numeric). For right-censored data, this is the 
+            time from study entry to event or censoring.
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable. For survival analysis: 0 = censored, 1 = event.
+            For competing risks: 0 = censored, 1+ = different event types.
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables to use for tree construction. Can include numeric, ordinal,
+            and nominal variables. The algorithm handles mixed-type predictors efficiently.
+
+    - name: strata
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Optional stratification variable for stratified survival analysis.
+            Creates separate baseline hazards for each stratum.
+
+    # Forest parameters
+    - name: num_trees
+      title: Number of Trees
+      type: Integer
+      default: 500
+      min: 10
+      max: 10000
+      description:
+          R: >
+            Number of trees in the forest. More trees generally improve stability
+            and performance but increase computation time. 500-2000 is typical.
+
+    - name: mtry
+      title: Variables per Split
+      type: List
+      options:
+        - title: Square Root (Default)
+          name: sqrt
+        - title: One Third
+          name: third
+        - title: Half
+          name: half
+        - title: All Variables
+          name: all
+        - title: Custom
+          name: custom
+      default: sqrt
+      description:
+          R: >
+            Number of variables randomly selected at each split. Square root of
+            total variables is default. Smaller values increase randomization.
+
+    - name: mtry_custom
+      title: Custom mtry Value
+      type: Integer
+      min: 1
+      description:
+          R: >
+            Custom number of variables per split when mtry is set to 'custom'.
+            Should be between 1 and total number of predictors.
+
+    - name: min_node_size
+      title: Minimum Node Size
+      type: Integer
+      default: 10
+      min: 1
+      max: 100
+      description:
+          R: >
+            Minimum number of observations in terminal nodes. Larger values
+            create simpler trees and reduce overfitting, smaller values
+            allow more complex patterns.
+
+    - name: max_depth
+      title: Maximum Tree Depth
+      type: Integer
+      default: 0
+      min: 0
+      max: 50
+      description:
+          R: >
+            Maximum depth of trees. 0 means no limit. Deep trees may overfit,
+            while shallow trees may underfit. Usually left unlimited for Extra Trees.
+
+    # Splitting rules
+    - name: splitrule
+      title: Splitting Rule
+      type: List
+      options:
+        - title: Extra Trees (Extreme Randomization)
+          name: extratrees
+        - title: Log-rank
+          name: logrank
+        - title: C-index
+          name: C
+        - title: Maximum Log-rank
+          name: maxstat
+      default: extratrees
+      description:
+          R: >
+            Splitting criterion. 'extratrees' uses extreme randomization,
+            'logrank' uses log-rank statistic, 'C' optimizes concordance index,
+            'maxstat' uses maximally selected rank statistics.
+
+    - name: num_random_splits
+      title: Random Splits per Variable
+      type: Integer
+      default: 1
+      min: 1
+      max: 20
+      description:
+          R: >
+            Number of random splits to try per variable for Extra Trees rule.
+            Higher values reduce randomization but may improve performance.
+
+    # Sampling parameters
+    - name: sample_fraction
+      title: Sample Fraction
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 1.0
+      description:
+          R: >
+            Fraction of observations sampled for each tree. Values < 1.0 create
+            subsampled forests which can improve generalization and reduce computation.
+
+    - name: replace
+      title: Sample with Replacement
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use bootstrap sampling (with replacement) for each tree. When FALSE,
+            uses subsampling without replacement.
+
+    - name: case_weights
+      title: Case Weights Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Optional variable containing case weights for observations.
+            Higher weights give observations more influence in tree construction.
+
+    # Variable importance
+    - name: importance
+      title: Variable Importance Method
+      type: List
+      options:
+        - title: Permutation Importance
+          name: permutation
+        - title: Impurity Importance
+          name: impurity
+        - title: Both Methods
+          name: both
+        - title: None
+          name: none
+      default: permutation
+      description:
+          R: >
+            Method for calculating variable importance. Permutation importance
+            measures prediction accuracy decrease when variables are permuted.
+            Impurity importance measures decrease in node impurity.
+
+    - name: scale_permutation
+      title: Scale Permutation Importance
+      type: Bool
+      default: true
+      description:
+          R: >
+            Scale permutation importance by standard error. Provides more
+            stable importance measures especially for correlated predictors.
+
+    # Prediction and validation
+    - name: keep_inbag
+      title: Keep In-bag Samples
+      type: Bool
+      default: false
+      description:
+          R: >
+            Store which observations are in-bag for each tree. Required for
+            some post-processing analyses but increases memory usage.
+
+    - name: oob_error
+      title: Calculate OOB Error
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate out-of-bag prediction error. Provides unbiased estimate
+            of model performance without need for separate validation set.
+
+    - name: probability
+      title: Estimate Survival Probabilities
+      type: Bool
+      default: false
+      description:
+          R: >
+            Estimate survival probabilities instead of hazard ratios.
+            Useful for risk prediction and probability-based decisions.
+
+    # Output options
+    - name: show_forest_summary
+      title: Show Forest Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display summary statistics for the Extra Trees forest including
+            OOB error, variable importance rankings, and model parameters.
+
+    - name: show_importance
+      title: Show Variable Importance
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display detailed variable importance measures with rankings
+            and statistical significance tests.
+
+    - name: show_oob_predictions
+      title: Show OOB Predictions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display out-of-bag predictions for model evaluation and
+            risk stratification analysis.
+
+    # Visualization options
+    - name: plot_importance
+      title: Variable Importance Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create variable importance plot showing relative importance
+            of predictors with confidence intervals.
+
+    - name: plot_oob_error
+      title: OOB Error Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot out-of-bag error as function of number of trees to
+            assess convergence and optimal forest size.
+
+    - name: plot_survival
+      title: Risk Group Survival Curves
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create Kaplan-Meier survival curves for risk groups defined
+            by Extra Trees predictions with statistical comparisons.
+
+    - name: plot_partial
+      title: Partial Dependence Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate partial dependence plots for top variables showing
+            marginal effects on survival predictions.
+
+    # Advanced options
+    - name: regularization
+      title: Regularization Factor
+      type: Number
+      default: 1.0
+      min: 0.0
+      max: 10.0
+      description:
+          R: >
+            Regularization parameter for Extra Trees. Values > 1 increase
+            randomization, values < 1 reduce it. 1.0 is standard Extra Trees.
+
+    - name: alpha
+      title: Significance Level
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.5
+      description:
+          R: >
+            Significance level for variable importance testing and
+            confidence intervals in plots.
+
+    - name: num_threads
+      title: Number of Threads
+      type: Integer
+      default: 0
+      min: 0
+      max: 32
+      description:
+          R: >
+            Number of threads for parallel computation. 0 uses all available
+            cores. Parallel computation significantly speeds up training.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for reproducible results. Change to get different
+            random forests and bootstrap samples.
+
+...

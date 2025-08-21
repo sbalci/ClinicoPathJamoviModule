@@ -1,0 +1,269 @@
+---
+name: conditionalinference
+title: Conditional Inference Trees for Survival
+menuGroup: jsurvivalD
+menuSubgroup: Machine Learning
+menuSubtitle: Unbiased recursive partitioning for survival data
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >
+        Conditional Inference Trees for survival analysis using unbiased recursive partitioning.
+        This method addresses the variable selection bias inherent in traditional CART by
+        employing conditional inference procedures. The algorithm separates variable selection
+        from splitting point selection, providing unbiased tree structures particularly
+        valuable for survival data with mixed-type predictors and complex censoring patterns.
+        Features include statistical significance-based stopping criteria, handling of 
+        missing values without surrogate splits, and robust performance with correlated
+        predictors. The method is particularly suitable for exploratory survival analysis
+        and biomarker discovery in clinical research.
+    R:
+        dontrun: false
+        usage: >
+            result <- conditionalinference(
+                data = mydata,
+                time = "time_to_event",
+                event = "event_indicator", 
+                predictors = c("age", "stage", "biomarker"),
+                mincriterion = 0.95,
+                minsplit = 20,
+                minbucket = 7,
+                maxdepth = 5
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time to event variable (numeric). For right-censored data, this is the 
+            time from study entry to event or censoring.
+
+    - name: event
+      title: Event Indicator  
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable. For survival analysis: 0 = censored, 1 = event.
+            For competing risks: 0 = censored, 1+ = different event types.
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables to use for tree construction. Can include numeric, 
+            ordinal, and nominal variables. The algorithm handles mixed-type
+            predictors optimally.
+
+    - name: strata
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Optional stratification variable for stratified survival analysis.
+            Creates separate baseline hazards for each stratum.
+
+    # Conditional Inference Parameters
+    - name: teststat
+      title: Test Statistic
+      type: List
+      options:
+        - title: Quadratic Form
+          name: quad
+        - title: Maximum
+          name: max
+      default: quad
+      description:
+          R: >
+            Test statistic to use. 'quad' uses quadratic form for multivariate tests,
+            'max' uses maximum-type statistic. Quadratic form is more powerful for
+            small effects, maximum-type for large effects.
+
+    - name: testtype
+      title: Test Type
+      type: List  
+      options:
+        - title: Bonferroni
+          name: Bonferroni
+        - title: Monte Carlo
+          name: MonteCarlo
+        - title: Univariate
+          name: Univariate
+        - title: Teststatistic
+          name: Teststatistic
+      default: Bonferroni
+      description:
+          R: >
+            Multiple testing correction method. Bonferroni provides conservative
+            but reliable correction. Monte Carlo uses permutation-based p-values.
+
+    - name: mincriterion
+      title: Minimum Criterion
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.999
+      description:
+          R: >
+            Minimum criterion (1 - p-value) for variable selection. Higher values
+            create more conservative trees with fewer splits. Default 0.95 corresponds
+            to significance level of 0.05.
+
+    - name: minsplit
+      title: Minimum Split
+      type: Integer
+      default: 20
+      min: 2
+      max: 1000
+      description:
+          R: >
+            Minimum number of observations required in a node before splitting.
+            Higher values create simpler trees and reduce overfitting.
+
+    - name: minbucket
+      title: Minimum Bucket
+      type: Integer  
+      default: 7
+      min: 1
+      max: 500
+      description:
+          R: >
+            Minimum number of observations in terminal nodes. Should be smaller
+            than minsplit. Higher values increase tree stability.
+
+    - name: maxdepth
+      title: Maximum Depth
+      type: Integer
+      default: 5
+      min: 1
+      max: 15
+      description:
+          R: >
+            Maximum depth of the tree. Controls tree complexity and prevents
+            overfitting. Deeper trees may overfit, shallower trees may underfit.
+
+    # Monte Carlo Parameters
+    - name: nresample
+      title: Monte Carlo Resamples
+      type: Integer
+      default: 9999
+      min: 1000
+      max: 50000
+      description:
+          R: >
+            Number of Monte Carlo resamples for p-value computation when using
+            Monte Carlo test type. More resamples provide more accurate p-values
+            but increase computation time.
+
+    # Survival-specific options
+    - name: logrank_scores
+      title: Use Log-rank Scores
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use log-rank scores for survival splitting. When TRUE, uses log-rank
+            statistics optimized for survival data. When FALSE, uses standard
+            conditional inference.
+
+    # Output options  
+    - name: show_splits
+      title: Show Split Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display detailed split statistics including test statistics,
+            p-values, and variable importance measures.
+
+    - name: show_nodes
+      title: Show Node Details
+      type: Bool  
+      default: true
+      description:
+          R: >
+            Display detailed information for each terminal node including
+            Kaplan-Meier estimates, risk tables, and survival summaries.
+
+    - name: show_importance
+      title: Variable Importance
+      type: Bool
+      default: true  
+      description:
+          R: >
+            Calculate and display variable importance measures based on
+            the improvement in prediction accuracy.
+
+    # Visualization options
+    - name: plot_tree
+      title: Tree Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate tree structure plot with nodes, splits, and survival curves.
+
+    - name: plot_survival
+      title: Node Survival Curves  
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot Kaplan-Meier survival curves for each terminal node with
+            confidence intervals and risk tables.
+
+    - name: plot_importance
+      title: Importance Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate variable importance plot showing relative importance
+            of predictors in tree construction.
+
+    # Advanced options
+    - name: mtry
+      title: Variables per Split
+      type: Integer
+      min: 1
+      description:
+          R: >
+            Number of variables randomly selected at each split. Leave empty
+            to use all variables. Setting this creates a random forest-like approach.
+
+    - name: replace
+      title: Bootstrap Sampling
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use bootstrap sampling with replacement for tree construction.
+            Creates more robust trees but may reduce interpretability.
+
+    - name: subset
+      title: Subset Sampling
+      type: Number
+      min: 0.1
+      max: 1.0
+      description:
+          R: >
+            Fraction of observations to use for tree construction. Leave empty
+            to use all observations. Useful for large datasets.
+
+...

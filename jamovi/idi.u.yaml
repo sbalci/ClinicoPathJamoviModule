@@ -1,0 +1,195 @@
+---
+name: idi
+title: Integrated Discrimination Improvement (IDI)
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Baseline Model Predictions
+        children:
+          - type: VariablesListBox
+            name: baseline_risk
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: New Model Predictions
+        children:
+          - type: VariablesListBox
+            name: new_risk
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time Variable (Survival)
+        children:
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Subgroup Variable
+        children:
+          - type: VariablesListBox
+            name: subgroup_var
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: TabWidget
+        children:
+          - type: Tab
+            label: Model
+            children:
+              - type: GroupBox
+                label: IDI Configuration
+                children:
+                  - type: ComboBox
+                    name: idi_type
+                  - type: ComboBox
+                    name: discrimination_measure
+                  - type: TextBox
+                    name: trim_proportion
+                    format: number
+
+              - type: GroupBox
+                label: Time Configuration
+                children:
+                  - type: TextBox
+                    name: followup_time
+                    format: number
+
+              - type: GroupBox
+                label: Advanced Options
+                children:
+                  - type: CheckBox
+                    name: calibration_aware
+                  - type: CheckBox
+                    name: time_dependent
+                  - type: CheckBox
+                    name: competing_risks
+
+          - type: Tab
+            label: Analysis
+            children:
+              - type: GroupBox
+                label: Statistical Inference
+                children:
+                  - type: TextBox
+                    name: confidence_level
+                    format: number
+                  - type: TextBox
+                    name: bootstrap_samples
+                    format: integer
+                  - type: ComboBox
+                    name: bootstrap_method
+                  - type: CheckBox
+                    name: hypothesis_test
+                  - type: ComboBox
+                    name: test_method
+
+              - type: GroupBox
+                label: Decomposition Options
+                children:
+                  - type: CheckBox
+                    name: decompose_idi
+                  - type: CheckBox
+                    name: risk_distribution
+                  - type: CheckBox
+                    name: discrimination_slope
+                  - type: CheckBox
+                    name: relative_improvement
+
+          - type: Tab
+            label: Validation
+            children:
+              - type: GroupBox
+                label: Cross-Validation
+                children:
+                  - type: CheckBox
+                    name: cross_validation
+                  - type: TextBox
+                    name: cv_folds
+                    format: integer
+
+              - type: GroupBox
+                label: Sensitivity Analysis
+                children:
+                  - type: CheckBox
+                    name: sensitivity_analysis
+
+              - type: GroupBox
+                label: Outlier Detection
+                children:
+                  - type: CheckBox
+                    name: outlier_detection
+                  - type: ComboBox
+                    name: outlier_method
+
+              - type: GroupBox
+                label: Subgroup Analysis
+                children:
+                  - type: CheckBox
+                    name: stratified_analysis
+
+              - type: GroupBox
+                label: Missing Data
+                children:
+                  - type: ComboBox
+                    name: missing_handling
+
+          - type: Tab
+            label: Output
+            children:
+              - type: GroupBox
+                label: Tables
+                children:
+                  - type: CheckBox
+                    name: show_summary
+                  - type: CheckBox
+                    name: show_distributions
+                  - type: CheckBox
+                    name: show_discrimination
+                  - type: CheckBox
+                    name: show_validation
+
+              - type: GroupBox
+                label: Plots
+                children:
+                  - type: CheckBox
+                    name: plot_risk_distributions
+                  - type: CheckBox
+                    name: plot_discrimination
+                  - type: CheckBox
+                    name: plot_scatter
+                  - type: CheckBox
+                    name: plot_bootstrap
+                  - type: CheckBox
+                    name: plot_sensitivity
+                  - type: CheckBox
+                    name: plot_outliers
+
+              - type: GroupBox
+                label: Options
+                children:
+                  - type: TextBox
+                    name: alpha_level
+                    format: number
+                  - type: TextBox
+                    name: random_seed
+                    format: integer
+
+...

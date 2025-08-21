@@ -1,0 +1,318 @@
+---
+name: adaptivelasso
+jrs: '1.1'
+title: Analysis Results
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: todo
+      title: Analysis Todo
+      type: Html
+      visible: false
+
+    - name: coefficients
+      title: Selected Variables and Coefficients
+      type: Table
+      visible: (show_coefficients)
+      clearWith:
+        - time
+        - event
+        - predictors
+        - weight_method
+        - alpha
+        - cv_folds
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: coefficient
+          title: Coefficient
+          type: number
+          format: zto
+        - name: exp_coefficient
+          title: Hazard Ratio
+          type: number
+          format: zto
+        - name: std_error
+          title: SE
+          type: number
+          format: zto
+        - name: lower_ci
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+        - name: adaptive_weight
+          title: Adaptive Weight
+          type: number
+          format: zto
+
+    - name: selectionPath
+      title: Regularization Path Summary
+      type: Table
+      visible: (show_selection_path)
+      clearWith:
+        - predictors
+        - lambda_sequence
+        - n_lambda
+      columns:
+        - name: step
+          title: Step
+          type: integer
+        - name: lambda
+          title: Lambda
+          type: number
+          format: zto
+        - name: n_selected
+          title: Variables Selected
+          type: integer
+        - name: deviance
+          title: Deviance
+          type: number
+          format: zto
+        - name: cv_error
+          title: CV Error
+          type: number
+          format: zto
+
+    - name: cvResults
+      title: Cross-Validation Results
+      type: Table
+      visible: (show_cv_results)
+      clearWith:
+        - cv_folds
+        - cv_measure
+        - lambda_sequence
+      columns:
+        - name: criterion
+          title: Criterion
+          type: text
+        - name: lambda_min
+          title: Lambda Min
+          type: number
+          format: zto
+        - name: lambda_1se
+          title: Lambda 1SE
+          type: number
+          format: zto
+        - name: cv_error_min
+          title: Min CV Error
+          type: number
+          format: zto
+        - name: cv_error_1se
+          title: 1SE CV Error
+          type: number
+          format: zto
+        - name: n_variables_min
+          title: Variables (Min)
+          type: integer
+        - name: n_variables_1se
+          title: Variables (1SE)
+          type: integer
+
+    - name: stabilityResults
+      title: Stability Selection Results
+      type: Table
+      visible: (stability_selection)
+      clearWith:
+        - stability_threshold
+        - bootstrap_samples
+        - subsampling_ratio
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: selection_frequency
+          title: Selection Frequency
+          type: number
+          format: pc
+        - name: stability_score
+          title: Stability Score
+          type: number
+          format: zto
+        - name: stable_selection
+          title: Stable Selection
+          type: text
+        - name: error_bound
+          title: Error Bound
+          type: number
+          format: zto
+
+    - name: modelDiagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (show_diagnostics)
+      clearWith:
+        - time
+        - event
+        - predictors
+        - proportional_hazards
+      columns:
+        - name: diagnostic
+          title: Diagnostic
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: performanceMetrics
+      title: Model Performance
+      type: Table
+      visible: (goodness_of_fit)
+      clearWith:
+        - time
+        - event
+        - predictors
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: confidence_interval
+          title: 95% CI
+          type: text
+        - name: description
+          title: Description
+          type: text
+
+    - name: riskGroups
+      title: Risk Group Analysis
+      type: Table
+      visible: (risk_groups > 2)
+      clearWith:
+        - risk_groups
+        - time
+        - event
+      columns:
+        - name: risk_group
+          title: Risk Group
+          type: text
+        - name: n_subjects
+          title: N
+          type: integer
+        - name: n_events
+          title: Events
+          type: integer
+        - name: median_survival
+          title: Median Survival
+          type: number
+          format: zto
+        - name: survival_range
+          title: Survival Range
+          type: text
+        - name: hazard_ratio
+          title: Hazard Ratio
+          type: number
+          format: zto
+
+    - name: predictions
+      title: Survival Predictions
+      type: Table
+      visible: (time_points != "")
+      clearWith:
+        - time_points
+        - baseline_survival
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+          format: zto
+        - name: baseline_survival
+          title: Baseline Survival
+          type: number
+          format: zto
+        - name: survival_lower
+          title: Lower CI
+          type: number
+          format: zto
+        - name: survival_upper
+          title: Upper CI
+          type: number
+          format: zto
+
+    - name: pathPlot
+      title: Regularization Path
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_selection_path)
+      requiresData: true
+      clearWith:
+        - predictors
+        - lambda_sequence
+
+    - name: cvPlot
+      title: Cross-Validation Curve
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_cv_curve)
+      requiresData: true
+      clearWith:
+        - cv_folds
+        - cv_measure
+
+    - name: stabilityPlot
+      title: Stability Selection
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_stability)
+      requiresData: true
+      clearWith:
+        - stability_selection
+        - stability_threshold
+
+    - name: survivalPlot
+      title: Risk Group Survival Curves
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_survival_curves)
+      requiresData: true
+      clearWith:
+        - risk_groups
+        - time
+        - event
+
+    - name: baselineHazardPlot
+      title: Baseline Hazard Function
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_baseline_hazard)
+      requiresData: true
+      clearWith:
+        - baseline_survival
+        - time
+        - event
+
+    - name: diagnosticsPlot
+      title: Model Diagnostics
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_diagnostics)
+      requiresData: true
+      clearWith:
+        - proportional_hazards
+        - influence_diagnostics
+
+...

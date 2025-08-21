@@ -1,0 +1,522 @@
+---
+name: grouplasso
+title: Group LASSO for Survival Analysis
+menuGroup: jsurvivalD
+menuSubgroup: Machine Learning
+menuSubtitle: Penalized regression with group-wise variable selection
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >
+        Group LASSO for Cox proportional hazards models enabling simultaneous
+        selection of pre-defined variable groups while maintaining within-group
+        structure. This method extends traditional LASSO by applying penalties
+        at the group level, making it ideal for categorical variables with
+        multiple dummy codes, grouped biomarkers, or structured predictors like
+        gene pathways. The implementation supports overlapping groups, adaptive
+        group weights, sparse group LASSO combining group and individual penalties,
+        and comprehensive cross-validation for optimal penalty selection.
+        Particularly valuable for genomic survival analysis, clinical prediction
+        models with natural variable groupings, and scenarios requiring
+        interpretable group-wise feature selection with preserved biological
+        or clinical structure.
+    R:
+        dontrun: false
+        usage: >
+            result <- grouplasso(
+                data = mydata,
+                time = "time_to_event",
+                event = "event_indicator",
+                predictors = c("age", "stage", "biomarker1", "biomarker2"),
+                group_structure = "age:1, stage:2, biomarker1:3, biomarker2:3",
+                penalty_type = "group_lasso",
+                cv_folds = 10
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time to event variable (numeric). For right-censored data, this is the 
+            time from study entry to event or censoring.
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable. For survival analysis: 0 = censored, 1 = event.
+            For competing risks: 0 = censored, 1+ = different event types.
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables to include in the group LASSO Cox model. Variables can be
+            grouped based on biological, clinical, or statistical criteria.
+            Factor variables are automatically converted to dummy variables.
+
+    - name: strata
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Optional stratification variable for stratified Cox regression.
+            Creates separate baseline hazards for each stratum.
+
+    # Group structure definition
+    - name: group_definition
+      title: Group Definition Method
+      type: List
+      options:
+        - title: Automatic by Variable Type
+          name: automatic
+        - title: Custom Group Assignment
+          name: custom
+        - title: Factor-Based Grouping
+          name: factor_based
+        - title: Pathway/Biological Groups
+          name: biological
+      default: automatic
+      description:
+          R: >
+            Method for defining variable groups. Automatic groups by data type,
+            custom allows manual specification, factor-based groups dummy variables
+            from same factor, biological supports pathway-based groupings.
+
+    - name: group_structure
+      title: Group Structure
+      type: String
+      default: ""
+      description:
+          R: >
+            Custom group assignment as comma-separated list. Format: 'var1:group1, var2:group1, var3:group2'.
+            Only used when group_definition is 'custom'. Groups can overlap.
+
+    - name: factor_grouping
+      title: Factor Variable Grouping
+      type: Bool
+      default: true
+      description:
+          R: >
+            Automatically group dummy variables from the same factor variable.
+            Ensures that factor variables are selected/excluded as complete units.
+
+    # Penalty specification
+    - name: penalty_type
+      title: Penalty Type
+      type: List
+      options:
+        - title: Group LASSO
+          name: group_lasso
+        - title: Sparse Group LASSO
+          name: sparse_group
+        - title: Adaptive Group LASSO
+          name: adaptive_group
+        - title: Overlapping Group LASSO
+          name: overlapping
+      default: group_lasso
+      description:
+          R: >
+            Type of group penalty. Group LASSO selects entire groups, sparse group
+            combines group and individual penalties, adaptive uses data-driven weights,
+            overlapping handles variables belonging to multiple groups.
+
+    - name: alpha
+      title: Sparsity Parameter
+      type: Number
+      default: 0.5
+      min: 0.0
+      max: 1.0
+      description:
+          R: >
+            Mixing parameter for sparse group LASSO. 0 = pure group LASSO,
+            1 = pure individual LASSO, intermediate values combine both penalties.
+            Only used for sparse group LASSO.
+
+    - name: group_weights
+      title: Group Weight Method
+      type: List
+      options:
+        - title: Equal Weights
+          name: equal
+        - title: Square Root of Group Size
+          name: sqrt_size
+        - title: Group Size
+          name: group_size
+        - title: Adaptive Weights
+          name: adaptive
+        - title: Custom Weights
+          name: custom
+      default: sqrt_size
+      description:
+          R: >
+            Method for calculating group-specific penalty weights. Square root
+            of group size is standard, adaptive uses initial estimates,
+            custom allows user-specified weights.
+
+    - name: custom_weights
+      title: Custom Group Weights
+      type: String
+      default: ""
+      description:
+          R: >
+            Custom weights for each group as comma-separated values.
+            Order should match group numbering. Only used with custom weights.
+
+    # Cross-validation and model selection
+    - name: cv_folds
+      title: Cross-Validation Folds
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+      description:
+          R: >
+            Number of folds for cross-validation to select optimal penalty parameter.
+            More folds provide better estimates but increase computation time.
+
+    - name: cv_measure
+      title: CV Performance Measure
+      type: List
+      options:
+        - title: Partial Likelihood Deviance
+          name: deviance
+        - title: C-index
+          name: C
+        - title: Integrated Brier Score
+          name: brier
+      default: deviance
+      description:
+          R: >
+            Performance measure for cross-validation. Deviance is standard
+            for Cox models, C-index focuses on discrimination, Brier score
+            provides calibration-aware selection.
+
+    - name: lambda_sequence
+      title: Lambda Sequence
+      type: List
+      options:
+        - title: Automatic (Default)
+          name: auto
+        - title: Custom Range
+          name: custom
+        - title: Single Value
+          name: single
+      default: auto
+      description:
+          R: >
+            Specification of penalty parameter sequence. Automatic uses
+            data-driven range, custom allows user-defined range.
+
+    - name: n_lambda
+      title: Number of Lambda Values
+      type: Integer
+      default: 50
+      min: 10
+      max: 200
+      description:
+          R: >
+            Number of lambda values in the regularization path. More values
+            provide finer resolution but increase computation time.
+
+    - name: lambda_min_ratio
+      title: Lambda Min Ratio
+      type: Number
+      default: 0.01
+      min: 1e-6
+      max: 0.1
+      description:
+          R: >
+            Ratio of smallest to largest lambda in automatic sequence.
+            Smaller values explore stronger penalties.
+
+    # Algorithm settings
+    - name: algorithm
+      title: Optimization Algorithm
+      type: List
+      options:
+        - title: Coordinate Descent
+          name: coordinate
+        - title: Proximal Gradient
+          name: proximal
+        - title: ADMM
+          name: admm
+      default: coordinate
+      description:
+          R: >
+            Optimization algorithm for group LASSO. Coordinate descent is
+            standard and efficient, proximal gradient handles complex penalties,
+            ADMM works well for overlapping groups.
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Maximum iterations for optimization algorithm. Increase if
+            convergence warnings occur.
+
+    - name: tolerance
+      title: Convergence Tolerance
+      type: Number
+      default: 1e-6
+      min: 1e-10
+      max: 1e-3
+      description:
+          R: >
+            Convergence tolerance for optimization. Smaller values provide
+            more precise solutions but increase computation time.
+
+    # Group selection and interpretation
+    - name: selection_threshold
+      title: Group Selection Threshold
+      type: Number
+      default: 1e-8
+      min: 1e-12
+      max: 1e-3
+      description:
+          R: >
+            Threshold for determining selected groups. Groups with maximum
+            coefficient magnitude below this value are considered unselected.
+
+    - name: stability_selection
+      title: Stability Selection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform stability selection across bootstrap samples to identify
+            robust group selection patterns and reduce selection variability.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description:
+          R: >
+            Number of bootstrap samples for stability selection.
+            More samples provide more stable group selection.
+
+    - name: stability_threshold
+      title: Stability Threshold
+      type: Number
+      default: 0.6
+      min: 0.5
+      max: 0.95
+      description:
+          R: >
+            Minimum selection frequency for groups in stability selection.
+            Higher thresholds provide more conservative selection.
+
+    # Model validation and diagnostics
+    - name: nested_cv
+      title: Nested Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform nested cross-validation for unbiased performance estimation.
+            Provides honest assessment of model performance with optimal penalties.
+
+    - name: inner_cv_folds
+      title: Inner CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+      description:
+          R: >
+            Number of inner CV folds for nested cross-validation.
+            Used for penalty selection within each outer fold.
+
+    - name: permutation_test
+      title: Permutation Test
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform permutation test to assess statistical significance
+            of group selection and overall model performance.
+
+    - name: n_permutations
+      title: Number of Permutations
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description:
+          R: >
+            Number of permutations for significance testing.
+            More permutations provide more accurate p-values.
+
+    # Output and visualization options
+    - name: show_group_summary
+      title: Show Group Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display summary of group definitions, sizes, and selection status
+            with penalty parameter information.
+
+    - name: show_coefficients
+      title: Show Coefficients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display coefficient estimates for selected variables organized
+            by groups with selection indicators.
+
+    - name: show_path_summary
+      title: Show Regularization Path
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display summary of regularization path showing group entry
+            and exit points along penalty sequence.
+
+    - name: show_cv_results
+      title: Show CV Results
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display cross-validation results including optimal penalty
+            selection and performance metrics.
+
+    # Visualization options
+    - name: plot_regularization_path
+      title: Group Regularization Path
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot group-wise coefficient paths showing how groups enter/exit
+            the model as penalty increases.
+
+    - name: plot_cv_curve
+      title: Cross-Validation Curve
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot cross-validation performance curve with optimal penalty
+            selection and confidence bands.
+
+    - name: plot_group_importance
+      title: Group Importance Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Visualize relative importance of selected groups based on
+            coefficient norms and selection frequency.
+
+    - name: plot_stability
+      title: Stability Selection Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot stability selection results showing group selection
+            frequencies across bootstrap samples.
+
+    - name: plot_group_structure
+      title: Group Structure Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Visualize group structure and variable assignments with
+            overlap indicators for complex grouping schemes.
+
+    # Advanced options
+    - name: standardize
+      title: Standardize Variables
+      type: Bool
+      default: true
+      description:
+          R: >
+            Standardize variables before fitting. Recommended for optimal
+            penalty performance across different variable scales.
+
+    - name: center_groups
+      title: Center Within Groups
+      type: Bool
+      default: false
+      description:
+          R: >
+            Center variables within their respective groups before applying
+            penalties. Can improve performance for heterogeneous groups.
+
+    - name: adaptive_weights_method
+      title: Adaptive Weights Method
+      type: List
+      options:
+        - title: Group-wise Ridge
+          name: ridge
+        - title: Group-wise Univariate
+          name: univariate
+        - title: Group-wise OLS
+          name: ols
+      default: ridge
+      description:
+          R: >
+            Method for calculating adaptive weights for groups.
+            Ridge provides stable estimates, univariate uses marginal effects.
+
+    - name: warm_start
+      title: Warm Start
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use warm start initialization for faster convergence along
+            the regularization path.
+
+    - name: parallel_computing
+      title: Parallel Computing
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use parallel computing for cross-validation and bootstrap
+            procedures to reduce computation time.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for cross-validation folds and bootstrap sampling.
+            Ensures reproducible results across analyses.
+
+...

@@ -1,0 +1,407 @@
+---
+name: netreclassification
+title: Net Reclassification Improvement (NRI)
+menuGroup: meddecideD
+menuSubgroup: Performance Metrics
+menuSubtitle: Advanced model improvement assessment with reclassification analysis
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >
+        Net Reclassification Improvement (NRI) analysis for assessing the clinical
+        utility of adding new biomarkers or risk factors to existing prediction models.
+        NRI quantifies how well a new model reclassifies individuals into more
+        appropriate risk categories compared to a baseline model. This implementation
+        supports both categorical NRI (with predefined risk thresholds) and numeric
+        NRI (risk-free approach). The analysis includes confidence intervals via
+        bootstrap, statistical significance testing, and comprehensive visualization
+        of reclassification patterns. Essential for biomarker validation studies,
+        clinical decision making, and demonstrating incremental value of new
+        predictors in medical research. Particularly valuable for risk prediction
+        model development and validation in cardiovascular, oncology, and other
+        clinical domains where risk stratification drives treatment decisions.
+    R:
+        dontrun: false
+        usage: >
+            result <- netreclassification(
+                data = mydata,
+                outcome = "event_indicator",
+                baseline_risk = "baseline_predictions",
+                new_risk = "new_model_predictions",
+                risk_categories = c(0.05, 0.10, 0.20),
+                time_point = 5,
+                bootstrap_samples = 1000
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Binary outcome variable (0/1) indicating event occurrence.
+            For time-to-event data, this should be event status at
+            the specified time point.
+
+    - name: baseline_risk
+      title: Baseline Model Predictions
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Predicted risks or probabilities from the baseline (reference) model.
+            Should be on probability scale (0-1) for risk predictions.
+
+    - name: new_risk
+      title: New Model Predictions
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Predicted risks or probabilities from the new (enhanced) model
+            that includes additional predictors or biomarkers.
+
+    - name: time_var
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time to event variable for survival data analysis.
+            Required when using time-to-event outcomes.
+
+    - name: followup_time
+      title: Follow-up Time Point
+      type: Number
+      default: 5
+      min: 0.1
+      description:
+          R: >
+            Time point for survival analysis (years). Events occurring
+            after this time are considered censored for NRI calculation.
+
+    # Risk categorization
+    - name: nri_type
+      title: NRI Type
+      type: List
+      options:
+        - title: Categorical NRI
+          name: categorical
+        - title: Continuous NRI
+          name: numeric
+        - title: Both Methods
+          name: both
+      default: categorical
+      description:
+          R: >
+            Type of NRI analysis. Categorical uses predefined risk thresholds,
+            numeric (risk-free) compares all risk changes, both provides
+            comprehensive assessment.
+
+    - name: risk_thresholds
+      title: Risk Thresholds
+      type: String
+      default: "0.05, 0.10, 0.20"
+      description:
+          R: >
+            Comma-separated risk thresholds for categorical NRI (e.g., 5%, 10%, 20%).
+            These define clinically meaningful risk categories for decision making.
+
+    - name: custom_categories
+      title: Custom Categories
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use custom category labels instead of automatic threshold-based naming.
+            Allows for more clinically meaningful category descriptions.
+
+    - name: category_labels
+      title: Category Labels
+      type: String
+      default: "Low, Intermediate, High, Very High"
+      description:
+          R: >
+            Comma-separated labels for risk categories when using custom categories.
+            Should match the number of categories defined by thresholds.
+
+    # Statistical inference
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Confidence level for NRI confidence intervals and hypothesis testing.
+            0.95 provides 95% confidence intervals.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap samples for confidence interval estimation.
+            More samples provide more stable estimates but increase computation time.
+
+    - name: bootstrap_method
+      title: Bootstrap Method
+      type: List
+      options:
+        - title: Percentile Method
+          name: percentile
+        - title: Bias-Corrected (BCa)
+          name: bca
+        - title: Basic Bootstrap
+          name: basic
+      default: bca
+      description:
+          R: >
+            Bootstrap confidence interval method. BCa provides bias-corrected
+            and accelerated intervals with better coverage properties.
+
+    - name: hypothesis_test
+      title: Hypothesis Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform hypothesis test for NRI = 0. Tests whether the new model
+            provides significant reclassification improvement.
+
+    # Decomposition analysis
+    - name: decompose_nri
+      title: Decompose NRI
+      type: Bool
+      default: true
+      description:
+          R: >
+            Decompose total NRI into contributions from events and non-events.
+            Provides insight into which population drives the improvement.
+
+    - name: direction_analysis
+      title: Direction Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Analyze upward vs downward reclassification patterns separately.
+            Shows whether improvement comes from better risk stratification.
+
+    - name: show_transitions
+      title: Show Transition Matrix
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display detailed reclassification transition matrix showing
+            movement between all risk categories.
+
+    # Clinical interpretation
+    - name: clinical_cutoffs
+      title: Clinical Risk Cutoffs
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use clinically established risk cutoffs (e.g., ACC/AHA guidelines)
+            instead of data-driven thresholds for cardiovascular risk.
+
+    - name: treatment_threshold
+      title: Treatment Threshold
+      type: Number
+      default: 0.075
+      min: 0.01
+      max: 0.5
+      description:
+          R: >
+            Risk threshold for treatment initiation. Used to calculate
+            clinical decision metrics and treatment reclassification.
+
+    - name: cost_effectiveness
+      title: Cost-Effectiveness Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include cost-effectiveness considerations in reclassification analysis.
+            Requires additional cost and utility parameters.
+
+    # Validation and sensitivity
+    - name: cross_validation
+      title: Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform k-fold cross-validation to assess stability of NRI estimates
+            and reduce optimism bias in model comparisons.
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+      description:
+          R: >
+            Number of folds for cross-validation when enabled.
+            5-fold CV provides good balance of bias and variance.
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform sensitivity analysis by varying risk thresholds to assess
+            robustness of NRI conclusions.
+
+    # Output options
+    - name: show_summary
+      title: Show NRI Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive NRI summary including overall NRI,
+            decomposed components, and statistical significance.
+
+    - name: show_reclassification
+      title: Show Reclassification Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display detailed reclassification cross-tabulation showing
+            movement patterns between baseline and new model categories.
+
+    - name: show_performance
+      title: Show Performance Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comparative performance metrics (C-statistic, calibration)
+            for baseline and new models alongside NRI results.
+
+    # Visualization options
+    - name: plot_reclassification
+      title: Reclassification Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create reclassification plot showing risk distribution changes
+            and movement patterns between models.
+
+    - name: plot_risk_distribution
+      title: Risk Distribution Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot risk distributions for baseline and new models separately
+            for events and non-events with category boundaries.
+
+    - name: plot_improvement
+      title: NRI Components Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Visualize NRI decomposition showing contributions from events
+            and non-events with confidence intervals.
+
+    - name: plot_sensitivity
+      title: Sensitivity Analysis Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create plots showing how NRI varies with different risk thresholds
+            to assess robustness of conclusions.
+
+    # Advanced options
+    - name: competing_risks
+      title: Competing Risks
+      type: Bool
+      default: false
+      description:
+          R: >
+            Account for competing risks in survival analysis. Modifies
+            NRI calculation for settings with multiple event types.
+
+    - name: missing_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Multiple Imputation
+          name: imputation
+        - title: Inverse Probability Weighting
+          name: ipw
+      default: complete
+      description:
+          R: >
+            Method for handling missing data in risk predictions.
+            Multiple imputation provides most robust results.
+
+    - name: stratified_analysis
+      title: Stratified Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform stratified NRI analysis by important subgroups
+            (age, sex, baseline risk level) to assess consistency.
+
+    - name: subgroup_var
+      title: Subgroup Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable defining subgroups for stratified analysis.
+            Each level will receive separate NRI calculation.
+
+    - name: alpha_level
+      title: Significance Level
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.2
+      description:
+          R: >
+            Type I error rate for hypothesis testing and confidence intervals.
+            Standard value is 0.05 for 95% confidence.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap sampling and cross-validation.
+            Ensures reproducible results across analyses.
+
+...

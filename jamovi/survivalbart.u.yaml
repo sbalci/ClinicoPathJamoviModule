@@ -1,0 +1,206 @@
+---
+name: survivalbart
+title: Bayesian Additive Regression Trees (BART) for Survival
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Indicator
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Predictor Variables
+        children:
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stratification Variable
+        children:
+          - type: VariablesListBox
+            name: strata
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: TabWidget
+        children:
+          - type: Tab
+            label: Model
+            children:
+              - type: GroupBox
+                label: BART Model Configuration
+                children:
+                  - type: ComboBox
+                    name: model_type
+                  - type: ComboBox
+                    name: prior_distribution
+                  - type: TextBox
+                    name: n_trees
+                    format: integer
+
+              - type: GroupBox
+                label: Tree Structure Priors
+                children:
+                  - type: TextBox
+                    name: alpha
+                    format: number
+                  - type: TextBox
+                    name: beta
+                    format: number
+                  - type: TextBox
+                    name: k
+                    format: number
+
+              - type: GroupBox
+                label: Error Variance Prior
+                children:
+                  - type: TextBox
+                    name: q
+                    format: number
+                  - type: TextBox
+                    name: nu
+                    format: number
+
+          - type: Tab
+            label: MCMC
+            children:
+              - type: GroupBox
+                label: MCMC Settings
+                children:
+                  - type: TextBox
+                    name: n_burn
+                    format: integer
+                  - type: TextBox
+                    name: n_post
+                    format: integer
+                  - type: TextBox
+                    name: n_thin
+                    format: integer
+                  - type: TextBox
+                    name: n_chains
+                    format: integer
+
+              - type: GroupBox
+                label: Advanced MCMC
+                children:
+                  - type: CheckBox
+                    name: adaptive_scaling
+                  - type: CheckBox
+                    name: parallel_chains
+                  - type: CheckBox
+                    name: memory_optimization
+
+          - type: Tab
+            label: Variables
+            children:
+              - type: GroupBox
+                label: Variable Selection
+                children:
+                  - type: CheckBox
+                    name: variable_selection
+                  - type: CheckBox
+                    name: sparse_prior
+                  - type: TextBox
+                    name: selection_alpha
+                    format: number
+
+          - type: Tab
+            label: Prediction
+            children:
+              - type: GroupBox
+                label: Prediction Settings
+                children:
+                  - type: TextBox
+                    name: predict_times
+                  - type: TextBox
+                    name: survival_quantiles
+                  - type: TextBox
+                    name: credible_level
+                    format: number
+
+              - type: GroupBox
+                label: Cure Models
+                children:
+                  - type: CheckBox
+                    name: probit_link
+                  - type: ComboBox
+                    name: cure_fraction_prior
+
+          - type: Tab
+            label: Validation
+            children:
+              - type: GroupBox
+                label: Model Validation
+                children:
+                  - type: CheckBox
+                    name: cross_validation
+                  - type: TextBox
+                    name: cv_folds
+                    format: integer
+
+              - type: GroupBox
+                label: Diagnostics
+                children:
+                  - type: CheckBox
+                    name: convergence_diagnostics
+                  - type: CheckBox
+                    name: posterior_prediction
+
+          - type: Tab
+            label: Output
+            children:
+              - type: GroupBox
+                label: Tables
+                children:
+                  - type: CheckBox
+                    name: show_model_summary
+                  - type: CheckBox
+                    name: show_variable_importance
+                  - type: CheckBox
+                    name: show_survival_summary
+                  - type: CheckBox
+                    name: show_convergence
+
+              - type: GroupBox
+                label: Plots
+                children:
+                  - type: CheckBox
+                    name: plot_survival_curves
+                  - type: CheckBox
+                    name: plot_variable_importance
+                  - type: CheckBox
+                    name: plot_trace
+                  - type: CheckBox
+                    name: plot_posterior_predictive
+                  - type: CheckBox
+                    name: plot_partial_dependence
+                  - type: CheckBox
+                    name: plot_interactions
+
+              - type: GroupBox
+                label: Options
+                children:
+                  - type: TextBox
+                    name: random_seed
+                    format: integer
+
+...

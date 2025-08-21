@@ -1,0 +1,421 @@
+---
+name: sparsegrouplasso
+title: Sparse Group LASSO
+menuGroup: ClinicoPath
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: Sparse Group LASSO regularization for survival analysis
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology', package='ClinicoPath')
+            
+            sparsegrouplasso(data = histopathology,
+                           time_var = 'OverallSurvival',
+                           event_var = 'Death',
+                           pred_vars = c('Age', 'Grade', 'LVI', 'PNI'),
+                           group_definition = 'factor_based',
+                           alpha_sgl = 0.95,
+                           lambda_sequence = 'auto')
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time_var
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: the time-to-event variable
+
+    - name: event_var
+      title: Event Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: the event indicator variable (0/1 or FALSE/TRUE)
+
+    - name: pred_vars
+      title: Predictor Variables
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: the predictor variables for the model
+
+    - name: group_definition
+      title: Group Definition Method
+      type: List
+      options:
+        - name: factor_based
+          title: Factor-Based Grouping
+        - name: custom
+          title: Custom Groups
+        - name: pathway_based
+          title: Pathway-Based
+        - name: variable_type
+          title: Variable Type-Based
+        - name: correlation_based
+          title: Correlation-Based
+      default: factor_based
+      description:
+          R: method for defining variable groups
+
+    - name: custom_groups
+      title: Custom Group Specification
+      type: String
+      default: ""
+      description:
+          R: >
+            custom group specification as comma-separated lists.
+            Example: "1,2;3,4,5;6" for three groups
+
+    - name: pathway_info
+      title: Pathway Information
+      type: Variable
+      permitted:
+        - factor
+      description:
+          R: variable containing pathway/cluster information for grouping
+
+    - name: correlation_threshold
+      title: Correlation Threshold
+      type: Number
+      min: 0
+      max: 1
+      default: 0.7
+      description:
+          R: correlation threshold for correlation-based grouping
+
+    - name: alpha_sgl
+      title: Sparse Group LASSO Alpha
+      type: Number
+      min: 0
+      max: 1
+      default: 0.95
+      description:
+          R: >
+            mixing parameter between group LASSO (0) and LASSO (1).
+            Default 0.95 emphasizes sparsity within groups
+
+    - name: lambda_sequence
+      title: Lambda Sequence
+      type: List
+      options:
+        - name: auto
+          title: Automatic (Cross-Validation)
+        - name: custom
+          title: Custom Sequence
+        - name: adaptive
+          title: Adaptive Selection
+      default: auto
+      description:
+          R: method for selecting regularization parameter sequence
+
+    - name: custom_lambda
+      title: Custom Lambda Values
+      type: String
+      default: ""
+      description:
+          R: >
+            custom lambda values as comma-separated numbers.
+            Example: "0.001,0.01,0.1,1"
+
+    - name: lambda_min_ratio
+      title: Lambda Min Ratio
+      type: Number
+      min: 0.001
+      max: 0.5
+      default: 0.001
+      description:
+          R: ratio of smallest to largest lambda value
+
+    - name: n_lambda
+      title: Number of Lambda Values
+      type: Integer
+      min: 10
+      max: 200
+      default: 100
+      description:
+          R: number of lambda values in the sequence
+
+    - name: selection_criterion
+      title: Model Selection Criterion
+      type: List
+      options:
+        - name: cv_deviance
+          title: Cross-Validation Deviance
+        - name: cv_c_index
+          title: Cross-Validation C-Index
+        - name: aic
+          title: Akaike Information Criterion
+        - name: bic
+          title: Bayesian Information Criterion
+        - name: ebic
+          title: Extended BIC
+      default: cv_deviance
+      description:
+          R: criterion for selecting optimal lambda
+
+    - name: cv_folds
+      title: Cross-Validation Folds
+      type: Integer
+      min: 3
+      max: 20
+      default: 10
+      description:
+          R: number of folds for cross-validation
+
+    - name: cv_repeats
+      title: CV Repeats
+      type: Integer
+      min: 1
+      max: 10
+      default: 1
+      description:
+          R: number of repeated cross-validation runs
+
+    - name: ebic_gamma
+      title: EBIC Gamma Parameter
+      type: Number
+      min: 0
+      max: 1
+      default: 1
+      description:
+          R: gamma parameter for Extended BIC (0 = standard BIC)
+
+    - name: weight_type
+      title: Adaptive Weight Type
+      type: List
+      options:
+        - name: none
+          title: No Adaptive Weights
+        - name: ridge_based
+          title: Ridge-Based Weights
+        - name: univariate_based
+          title: Univariate-Based Weights
+        - name: lasso_based
+          title: LASSO-Based Weights
+      default: none
+      description:
+          R: type of adaptive weights for penalty terms
+
+    - name: weight_power
+      title: Weight Power
+      type: Number
+      min: 0.5
+      max: 5
+      default: 1
+      description:
+          R: power parameter for adaptive weights
+
+    - name: standardize_vars
+      title: Standardize Variables
+      type: Bool
+      default: true
+      description:
+          R: whether to standardize predictor variables
+
+    - name: center_vars
+      title: Center Variables
+      type: Bool
+      default: true
+      description:
+          R: whether to center predictor variables
+
+    - name: orthogonalize_groups
+      title: Orthogonalize Groups
+      type: Bool
+      default: false
+      description:
+          R: whether to orthogonalize variables within groups
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: maximum number of iterations for optimization
+
+    - name: convergence_threshold
+      title: Convergence Threshold
+      type: Number
+      min: 1e-8
+      max: 1e-3
+      default: 1e-6
+      description:
+          R: convergence threshold for optimization
+
+    - name: warm_start
+      title: Warm Start
+      type: Bool
+      default: true
+      description:
+          R: whether to use warm start for lambda sequence
+
+    - name: parallel_cv
+      title: Parallel Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: whether to use parallel processing for CV
+
+    - name: seed_value
+      title: Random Seed
+      type: Integer
+      default: 42
+      description:
+          R: random seed for reproducible results
+
+    - name: show_summary
+      title: Show Summary Table
+      type: Bool
+      default: true
+      description:
+          R: show model summary table
+
+    - name: show_coefficients
+      title: Show Coefficient Table
+      type: Bool
+      default: true
+      description:
+          R: show coefficient estimates table
+
+    - name: show_groups
+      title: Show Group Structure
+      type: Bool
+      default: true
+      description:
+          R: show group structure table
+
+    - name: show_path
+      title: Show Solution Path
+      type: Bool
+      default: false
+      description:
+          R: show complete regularization path
+
+    - name: show_performance
+      title: Show Performance Metrics
+      type: Bool
+      default: true
+      description:
+          R: show model performance metrics
+
+    - name: show_validation
+      title: Show Validation Results
+      type: Bool
+      default: true
+      description:
+          R: show cross-validation results
+
+    - name: plot_cv_error
+      title: Plot CV Error
+      type: Bool
+      default: true
+      description:
+          R: plot cross-validation error curve
+
+    - name: plot_coefficients
+      title: Plot Coefficient Path
+      type: Bool
+      default: true
+      description:
+          R: plot coefficient regularization path
+
+    - name: plot_groups
+      title: Plot Group Selection
+      type: Bool
+      default: true
+      description:
+          R: plot group selection pattern
+
+    - name: plot_sparsity
+      title: Plot Sparsity Pattern
+      type: Bool
+      default: false
+      description:
+          R: plot sparsity pattern across lambda values
+
+    - name: plot_stability
+      title: Plot Stability Selection
+      type: Bool
+      default: false
+      description:
+          R: plot stability selection results
+
+    - name: alpha_level
+      title: Alpha Level
+      type: Number
+      min: 0.01
+      max: 0.1
+      default: 0.05
+      description:
+          R: significance level for confidence intervals
+
+    - name: confidence_intervals
+      title: Calculate Confidence Intervals
+      type: Bool
+      default: false
+      description:
+          R: whether to calculate bootstrap confidence intervals
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      min: 100
+      max: 2000
+      default: 500
+      description:
+          R: number of bootstrap samples for confidence intervals
+
+    - name: stability_selection
+      title: Stability Selection
+      type: Bool
+      default: false
+      description:
+          R: whether to perform stability selection
+
+    - name: stability_threshold
+      title: Stability Threshold
+      type: Number
+      min: 0.5
+      max: 0.95
+      default: 0.8
+      description:
+          R: threshold for stability selection
+
+    - name: stability_subsample
+      title: Stability Subsample Ratio
+      type: Number
+      min: 0.5
+      max: 0.9
+      default: 0.8
+      description:
+          R: subsample ratio for stability selection
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: true
+      description:
+          R: show explanations for the analysis
+...

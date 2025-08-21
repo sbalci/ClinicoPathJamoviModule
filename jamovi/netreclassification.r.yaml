@@ -1,0 +1,270 @@
+---
+name: netreclassification
+jrs: '1.1'
+title: Analysis Results
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: todo
+      title: Analysis Todo
+      type: Html
+      visible: false
+
+    - name: summary
+      title: NRI Summary
+      type: Table
+      visible: (show_summary)
+      clearWith:
+        - outcome
+        - baseline_risk
+        - new_risk
+        - nri_type
+        - risk_thresholds
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto
+        - name: lower_ci
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: reclassification
+      title: Reclassification Cross-Tabulation
+      type: Table
+      visible: (show_reclassification)
+      clearWith:
+        - baseline_risk
+        - new_risk
+        - risk_thresholds
+        - nri_type
+      columns:
+        - name: baseline_category
+          title: Baseline Category
+          type: text
+        - name: new_low
+          title: Low Risk
+          type: integer
+        - name: new_intermediate
+          title: Intermediate Risk
+          type: integer
+        - name: new_high
+          title: High Risk
+          type: integer
+        - name: new_very_high
+          title: Very High Risk
+          type: integer
+        - name: total
+          title: Total
+          type: integer
+
+    - name: decomposition
+      title: NRI Decomposition
+      type: Table
+      visible: (decompose_nri)
+      clearWith:
+        - outcome
+        - baseline_risk
+        - new_risk
+        - nri_type
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: events_contribution
+          title: Events Contribution
+          type: number
+          format: zto
+        - name: nonevents_contribution
+          title: Non-Events Contribution
+          type: number
+          format: zto
+        - name: total_nri
+          title: Total NRI
+          type: number
+          format: zto
+        - name: significance
+          title: Significance
+          type: text
+
+    - name: performance
+      title: Model Performance Comparison
+      type: Table
+      visible: (show_performance)
+      clearWith:
+        - outcome
+        - baseline_risk
+        - new_risk
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: c_statistic
+          title: C-Statistic
+          type: number
+          format: zto
+        - name: c_statistic_ci
+          title: C-Statistic CI
+          type: text
+        - name: calibration_slope
+          title: Calibration Slope
+          type: number
+          format: zto
+        - name: brier_score
+          title: Brier Score
+          type: number
+          format: zto
+        - name: r_squared
+          title: R²
+          type: number
+          format: zto
+
+    - name: transitions
+      title: Detailed Transition Matrix
+      type: Table
+      visible: (show_transitions)
+      clearWith:
+        - baseline_risk
+        - new_risk
+        - risk_thresholds
+      columns:
+        - name: transition_type
+          title: Transition
+          type: text
+        - name: events_n
+          title: Events (n)
+          type: integer
+        - name: events_percent
+          title: Events (%)
+          type: number
+          format: pc
+        - name: nonevents_n
+          title: Non-Events (n)
+          type: integer
+        - name: nonevents_percent
+          title: Non-Events (%)
+          type: number
+          format: pc
+        - name: net_benefit
+          title: Net Benefit
+          type: number
+          format: zto
+
+    - name: subgroupAnalysis
+      title: Subgroup Analysis
+      type: Table
+      visible: (stratified_analysis)
+      clearWith:
+        - subgroup_var
+        - outcome
+        - baseline_risk
+        - new_risk
+      columns:
+        - name: subgroup
+          title: Subgroup
+          type: text
+        - name: n_subjects
+          title: N
+          type: integer
+        - name: nri_estimate
+          title: NRI
+          type: number
+          format: zto
+        - name: nri_ci
+          title: 95% CI
+          type: text
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto
+
+    - name: sensitivityTable
+      title: Sensitivity Analysis
+      type: Table
+      visible: (sensitivity_analysis)
+      clearWith:
+        - risk_thresholds
+        - outcome
+        - baseline_risk
+        - new_risk
+      columns:
+        - name: threshold_set
+          title: Threshold Set
+          type: text
+        - name: nri_categorical
+          title: Categorical NRI
+          type: number
+          format: zto
+        - name: nri_continuous
+          title: Continuous NRI
+          type: number
+          format: zto
+        - name: consistency
+          title: Consistency
+          type: text
+
+    - name: reclassificationPlot
+      title: Reclassification Visualization
+      type: Image
+      width: 600
+      height: 500
+      visible: (plot_reclassification)
+      requiresData: true
+      clearWith:
+        - baseline_risk
+        - new_risk
+        - risk_thresholds
+
+    - name: riskDistributionPlot
+      title: Risk Distribution Comparison
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_risk_distribution)
+      requiresData: true
+      clearWith:
+        - outcome
+        - baseline_risk
+        - new_risk
+
+    - name: improvementPlot
+      title: NRI Components Analysis
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_improvement)
+      requiresData: true
+      clearWith:
+        - decompose_nri
+        - confidence_level
+
+    - name: sensitivityPlot
+      title: Sensitivity Analysis Plot
+      type: Image
+      width: 500
+      height: 400
+      visible: (plot_sensitivity)
+      requiresData: true
+      clearWith:
+        - sensitivity_analysis
+        - risk_thresholds
+
+...

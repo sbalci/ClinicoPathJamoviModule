@@ -1,0 +1,199 @@
+title: Bayesian Model Averaging
+name: bayesianma
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Variable
+        children:
+          - type: VariablesListBox
+            name: event_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Predictor Variables
+        children:
+          - type: VariablesListBox
+            name: pred_vars
+            isTarget: true
+  - type: CollapseBox
+    label: Priors
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: prior_type
+          - type: ComboBox
+            name: model_selection_method
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_summary
+          - type: CheckBox
+            name: show_coefficients
+          - type: CheckBox
+            name: show_model_space
+          - type: CheckBox
+            name: show_inclusion_probs
+          - type: CheckBox
+            name: plot_model_probs
+          - type: CheckBox
+            name: show_top_models
+          - type: CheckBox
+            name: plot_inclusion_probs
+          - type: CheckBox
+            name: show_diagnostics
+          - type: CheckBox
+            name: plot_coefficients
+          - type: CheckBox
+            name: show_predictions
+          - type: CheckBox
+            name: plot_convergence
+          - type: CheckBox
+            name: plot_model_space
+          - type: CheckBox
+            name: plot_predictions
+          - type: CheckBox
+            name: showExplanations
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: occam_ratio
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: prior_inclusion_prob
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: temperature_ladder
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: beta_alpha
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: proposal_variance
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: beta_beta
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: variable_selection_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: complexity_penalty
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: uncertainty_quantification
+      - type: CheckBox
+        name: prediction_intervals
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: mcmc_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: credible_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: mcmc_chains
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: model_diagnostics
+      - type: CheckBox
+        name: sensitivity_analysis
+      - type: CheckBox
+        name: cross_validation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: mcmc_iterations
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cv_folds
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: burn_in
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: parallel_processing
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: thinning
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: seed_value
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: convergence_diagnostic

@@ -1,0 +1,492 @@
+---
+name: survivalbart
+title: Bayesian Additive Regression Trees (BART) for Survival
+menuGroup: jsurvivalD
+menuSubgroup: Machine Learning
+menuSubtitle: Nonparametric Bayesian ensemble learning for survival analysis
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >
+        Bayesian Additive Regression Trees (BART) for survival analysis providing
+        flexible nonparametric modeling with automatic variable selection and
+        interaction detection. BART combines an ensemble of weak learners (trees)
+        with Bayesian priors to create a powerful predictive model that naturally
+        handles nonlinear relationships, interactions, and variable selection
+        without requiring preprocessing. The method provides full posterior
+        distributions for predictions, built-in uncertainty quantification,
+        and robust performance across diverse survival scenarios. Particularly
+        effective for complex survival data with unknown functional forms,
+        high-dimensional predictors, mixed variable types, and scenarios requiring
+        individualized survival predictions with credible intervals. Implementation
+        supports both accelerated failure time and proportional hazards formulations
+        with comprehensive posterior inference and model diagnostics.
+    R:
+        dontrun: false
+        usage: >
+            result <- survivalbart(
+                data = mydata,
+                time = "time_to_event",
+                event = "event_indicator",
+                predictors = c("age", "stage", "biomarker1", "biomarker2"),
+                model_type = "aft",
+                n_trees = 200,
+                n_burn = 1000,
+                n_post = 2000
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time to event variable (numeric). For right-censored data, this is the 
+            time from study entry to event or censoring.
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Event indicator variable. For survival analysis: 0 = censored, 1 = event.
+            Binary coding required for current BART implementation.
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables to include in the BART survival model. Can include
+            numeric, ordinal, and nominal variables. BART automatically
+            handles variable types and interactions without preprocessing.
+
+    - name: strata
+      title: Stratification Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Optional stratification variable for stratified survival analysis.
+            Creates separate BART models for each stratum.
+
+    # Model specification
+    - name: model_type
+      title: Survival Model Type
+      type: List
+      options:
+        - title: Accelerated Failure Time (AFT)
+          name: aft
+        - title: Proportional Hazards
+          name: ph
+        - title: Mixture Cure Model
+          name: cure
+      default: aft
+      description:
+          R: >
+            Type of survival model. AFT models log-survival times directly,
+            PH models log-hazard ratios, cure models handle long-term survivors
+            with mixture of cured and susceptible populations.
+
+    - name: prior_distribution
+      title: Error Distribution
+      type: List
+      options:
+        - title: Normal
+          name: normal
+        - title: Logistic
+          name: logistic
+        - title: Student t
+          name: t
+        - title: Extreme Value (Weibull)
+          name: extreme_value
+      default: normal
+      description:
+          R: >
+            Prior distribution for error terms in AFT model. Normal corresponds
+            to log-normal survival times, extreme value to Weibull survival,
+            logistic to log-logistic survival.
+
+    # BART parameters
+    - name: n_trees
+      title: Number of Trees
+      type: Integer
+      default: 200
+      min: 50
+      max: 1000
+      description:
+          R: >
+            Number of trees in the BART ensemble. More trees provide greater
+            flexibility but increase computation time. 100-300 is typical range.
+
+    - name: alpha
+      title: Tree Structure Prior (α)
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Controls tree depth through splitting probability. Higher values
+            favor shallower trees, lower values allow deeper trees and
+            more complex interactions.
+
+    - name: beta
+      title: Tree Structure Prior (β)
+      type: Number
+      default: 2.0
+      min: 0.5
+      max: 5.0
+      description:
+          R: >
+            Controls tree depth through splitting probability formula.
+            Higher values discourage deep splits, promoting simpler trees.
+
+    - name: k
+      title: Prior Scale Parameter
+      type: Number
+      default: 2.0
+      min: 0.5
+      max: 10.0
+      description:
+          R: >
+            Scale parameter for terminal node prior. Controls magnitude
+            of individual tree contributions to overall ensemble.
+
+    - name: q
+      title: Error Variance Prior Quantile
+      type: Number
+      default: 0.90
+      min: 0.75
+      max: 0.99
+      description:
+          R: >
+            Quantile for error variance prior specification. Higher values
+            assume less noise in the survival process.
+
+    - name: nu
+      title: Error Variance Prior Degrees of Freedom
+      type: Number
+      default: 3.0
+      min: 1.0
+      max: 10.0
+      description:
+          R: >
+            Degrees of freedom for inverse chi-square prior on error variance.
+            Lower values allow more uncertainty in variance estimation.
+
+    # MCMC settings
+    - name: n_burn
+      title: Burn-in Iterations
+      type: Integer
+      default: 1000
+      min: 500
+      max: 10000
+      description:
+          R: >
+            Number of burn-in MCMC iterations to discard. Should be sufficient
+            for convergence to stationary distribution.
+
+    - name: n_post
+      title: Posterior Iterations
+      type: Integer
+      default: 2000
+      min: 1000
+      max: 20000
+      description:
+          R: >
+            Number of posterior MCMC iterations to keep for inference.
+            More iterations provide more precise posterior estimates.
+
+    - name: n_thin
+      title: Thinning Factor
+      type: Integer
+      default: 1
+      min: 1
+      max: 20
+      description:
+          R: >
+            Keep every nth posterior sample to reduce autocorrelation.
+            Higher values reduce effective sample size but may improve mixing.
+
+    - name: n_chains
+      title: Number of Chains
+      type: Integer
+      default: 1
+      min: 1
+      max: 4
+      description:
+          R: >
+            Number of independent MCMC chains. Multiple chains enable
+            convergence diagnostics and robust posterior inference.
+
+    # Variable selection and importance
+    - name: variable_selection
+      title: Variable Selection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include variable selection probabilities in BART model.
+            Automatically identifies relevant predictors and reduces
+            overfitting with irrelevant variables.
+
+    - name: sparse_prior
+      title: Sparse Variable Prior
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use sparse Dirichlet prior for variable selection probabilities.
+            Promotes sparser models with fewer active variables.
+
+    - name: selection_alpha
+      title: Variable Selection Alpha
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+      description:
+          R: >
+            Concentration parameter for Dirichlet prior on variable
+            selection probabilities. Higher values favor uniform selection.
+
+    # Prediction and survival curves
+    - name: predict_times
+      title: Prediction Time Points
+      type: String
+      default: "1, 2, 5"
+      description:
+          R: >
+            Comma-separated list of time points for survival probability
+            predictions. Empty string uses data-driven quantiles.
+
+    - name: survival_quantiles
+      title: Survival Quantiles
+      type: String
+      default: "0.25, 0.5, 0.75"
+      description:
+          R: >
+            Comma-separated list of quantiles for survival time predictions.
+            Provides percentile-based survival time estimates.
+
+    - name: credible_level
+      title: Credible Interval Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Level for posterior credible intervals on all estimates.
+            0.95 provides 95% credible intervals.
+
+    # Model validation and diagnostics
+    - name: cross_validation
+      title: Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform k-fold cross-validation to assess out-of-sample
+            performance and model generalization.
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+      description:
+          R: >
+            Number of folds for cross-validation. More folds provide
+            better performance estimates but increase computation.
+
+    - name: convergence_diagnostics
+      title: Convergence Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compute MCMC convergence diagnostics including effective
+            sample sizes, autocorrelation, and potential scale reduction.
+
+    - name: posterior_prediction
+      title: Posterior Predictive Checks
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform posterior predictive checks to assess model adequacy
+            by comparing observed data to posterior predictive distributions.
+
+    # Output options
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model summary including BART parameters,
+            convergence diagnostics, and posterior summaries.
+
+    - name: show_variable_importance
+      title: Show Variable Importance
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display variable importance measures based on selection
+            frequencies and splitting criteria across all trees.
+
+    - name: show_survival_summary
+      title: Show Survival Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display survival function summaries including median survival
+            times and survival probabilities at key time points.
+
+    - name: show_convergence
+      title: Show Convergence Results
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display MCMC convergence diagnostics and chain mixing
+            assessment for model validation.
+
+    # Visualization options
+    - name: plot_survival_curves
+      title: Survival Curves Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Plot individual and population-level survival curves with
+            posterior credible bands showing uncertainty.
+
+    - name: plot_variable_importance
+      title: Variable Importance Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create variable importance plot showing inclusion probabilities
+            and splitting frequencies across the ensemble.
+
+    - name: plot_trace
+      title: MCMC Trace Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate trace plots for key model parameters to assess
+            MCMC convergence and mixing.
+
+    - name: plot_posterior_predictive
+      title: Posterior Predictive Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create posterior predictive check plots comparing observed
+            survival patterns to model predictions.
+
+    - name: plot_partial_dependence
+      title: Partial Dependence Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate partial dependence plots showing marginal effects
+            of individual variables on survival hazard.
+
+    - name: plot_interactions
+      title: Interaction Effects Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Visualize detected interactions between variables with
+            strength and confidence measures.
+
+    # Advanced options
+    - name: probit_link
+      title: Use Probit Link
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use probit link for binary outcomes in cure models.
+            Alternative to logit link for mixture component modeling.
+
+    - name: cure_fraction_prior
+      title: Cure Fraction Prior
+      type: List
+      options:
+        - title: Beta(1,1) - Uniform
+          name: uniform
+        - title: Beta(0.5,0.5) - Jeffreys
+          name: jeffreys
+        - title: Beta(2,2) - Symmetric
+          name: symmetric
+      default: uniform
+      description:
+          R: >
+            Prior distribution for cure fraction in cure models.
+            Uniform is non-informative, Jeffreys is scale-invariant.
+
+    - name: adaptive_scaling
+      title: Adaptive MCMC Scaling
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use adaptive scaling of MCMC proposals to optimize
+            acceptance rates and improve sampling efficiency.
+
+    - name: parallel_chains
+      title: Parallel Chain Execution
+      type: Bool
+      default: false
+      description:
+          R: >
+            Run MCMC chains in parallel for faster computation
+            when multiple chains are specified.
+
+    - name: memory_optimization
+      title: Memory Optimization
+      type: Bool
+      default: true
+      description:
+          R: >
+            Use memory-efficient storage for large ensembles
+            and datasets to reduce memory footprint.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for reproducible MCMC sampling and
+            tree ensemble generation.
+
+...

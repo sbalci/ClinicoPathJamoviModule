@@ -1,0 +1,487 @@
+---
+name: idi
+title: Integrated Discrimination Improvement (IDI)
+menuGroup: meddecideD
+menuSubgroup: Performance Metrics
+menuSubtitle: Model improvement assessment through discrimination analysis
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: >
+        Integrated Discrimination Improvement (IDI) analysis for assessing
+        the incremental value of new biomarkers or risk factors in prediction
+        models. IDI quantifies the improvement in model discrimination by
+        measuring the difference in predicted probabilities between events
+        and non-events for the new model compared to the baseline model.
+        Unlike NRI which focuses on reclassification, IDI provides a
+        numeric measure of discrimination improvement without requiring
+        risk categories. The analysis includes confidence intervals through
+        bootstrap methods, statistical significance testing, and decomposition
+        into event and non-event components. Essential for biomarker validation,
+        model enhancement assessment, and demonstrating clinical utility of
+        new predictors in medical research. Particularly valuable when
+        numeric risk improvement is more relevant than categorical
+        reclassification, such as in precision medicine applications.
+    R:
+        dontrun: false
+        usage: >
+            result <- idi(
+                data = mydata,
+                outcome = "event_indicator",
+                baseline_risk = "baseline_predictions",
+                new_risk = "new_model_predictions",
+                time_point = 5,
+                bootstrap_samples = 1000
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Binary outcome variable (0/1) indicating event occurrence.
+            For time-to-event data, this should be event status at
+            the specified time point.
+
+    - name: baseline_risk
+      title: Baseline Model Predictions
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Predicted risks or probabilities from the baseline (reference) model.
+            Should be on probability scale (0-1) for optimal IDI interpretation.
+
+    - name: new_risk
+      title: New Model Predictions
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Predicted risks or probabilities from the new (enhanced) model
+            that includes additional predictors or biomarkers.
+
+    - name: time_var
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time to event variable for survival data analysis.
+            Required when using time-to-event outcomes with IDI.
+
+    - name: followup_time
+      title: Follow-up Time Point
+      type: Number
+      default: 5
+      min: 0.1
+      description:
+          R: >
+            Time point for survival analysis (years). Events occurring
+            after this time are censored for IDI calculation.
+
+    # IDI calculation options
+    - name: idi_type
+      title: IDI Calculation Type
+      type: List
+      options:
+        - title: Standard IDI
+          name: standard
+        - title: Relative IDI
+          name: relative
+        - title: Scaled IDI
+          name: scaled
+        - title: All Methods
+          name: all
+      default: standard
+      description:
+          R: >
+            Type of IDI calculation. Standard uses absolute differences,
+            relative scales by baseline discrimination, scaled normalizes
+            by outcome prevalence, all provides comprehensive assessment.
+
+    - name: discrimination_measure
+      title: Discrimination Measure
+      type: List
+      options:
+        - title: Mean Difference
+          name: mean_diff
+        - title: Median Difference
+          name: median_diff
+        - title: Trimmed Mean
+          name: trimmed_mean
+        - title: Robust Difference
+          name: robust
+      default: mean_diff
+      description:
+          R: >
+            Method for calculating discrimination differences. Mean difference
+            is standard, median is robust to outliers, trimmed mean balances
+            both approaches, robust uses M-estimators.
+
+    - name: trim_proportion
+      title: Trimmed Mean Proportion
+      type: Number
+      default: 0.1
+      min: 0.0
+      max: 0.4
+      description:
+          R: >
+            Proportion of extreme values to trim when using trimmed mean.
+            0.1 trims 10% from each tail, providing robust estimation.
+
+    # Statistical inference
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Confidence level for IDI confidence intervals and hypothesis testing.
+            0.95 provides 95% confidence intervals.
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap samples for confidence interval estimation.
+            More samples provide more stable estimates but increase computation time.
+
+    - name: bootstrap_method
+      title: Bootstrap Method
+      type: List
+      options:
+        - title: Percentile Method
+          name: percentile
+        - title: Bias-Corrected (BCa)
+          name: bca
+        - title: Basic Bootstrap
+          name: basic
+        - title: Studentized Bootstrap
+          name: studentized
+      default: bca
+      description:
+          R: >
+            Bootstrap confidence interval method. BCa provides bias-corrected
+            intervals with better coverage, studentized accounts for variance
+            changes, percentile is simple and robust.
+
+    - name: hypothesis_test
+      title: Hypothesis Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform hypothesis test for IDI = 0. Tests whether the new model
+            provides significant discrimination improvement.
+
+    - name: test_method
+      title: Test Method
+      type: List
+      options:
+        - title: Bootstrap Test
+          name: bootstrap
+        - title: Asymptotic Test
+          name: asymptotic
+        - title: Permutation Test
+          name: permutation
+        - title: Robust Test
+          name: robust
+      default: bootstrap
+      description:
+          R: >
+            Method for hypothesis testing. Bootstrap is recommended for
+            most situations, asymptotic assumes normality, permutation
+            is distribution-free, robust handles outliers.
+
+    # Decomposition and analysis
+    - name: decompose_idi
+      title: Decompose IDI
+      type: Bool
+      default: true
+      description:
+          R: >
+            Decompose IDI into contributions from events and non-events.
+            Provides insight into which population drives the improvement.
+
+    - name: risk_distribution
+      title: Analyze Risk Distributions
+      type: Bool
+      default: true
+      description:
+          R: >
+            Analyze and compare risk score distributions between baseline
+            and new models for events and non-events separately.
+
+    - name: discrimination_slope
+      title: Calculate Discrimination Slopes
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate discrimination slopes (difference in means) for
+            baseline and new models with confidence intervals.
+
+    - name: relative_improvement
+      title: Calculate Relative Improvement
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate relative improvement as percentage increase in
+            discrimination over baseline model performance.
+
+    # Validation and sensitivity
+    - name: cross_validation
+      title: Cross-Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform k-fold cross-validation to assess stability of IDI estimates
+            and reduce optimism bias in model comparisons.
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+      description:
+          R: >
+            Number of folds for cross-validation when enabled.
+            5-fold CV provides good balance of bias and variance.
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform sensitivity analysis by varying follow-up times and
+            examining IDI stability across different time horizons.
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: false
+      description:
+          R: >
+            Detect and analyze outliers in risk predictions that may
+            disproportionately influence IDI calculations.
+
+    - name: outlier_method
+      title: Outlier Detection Method
+      type: List
+      options:
+        - title: IQR Method
+          name: iqr
+        - title: Z-Score Method
+          name: zscore
+        - title: Modified Z-Score
+          name: modified_zscore
+        - title: Isolation Forest
+          name: isolation
+      default: iqr
+      description:
+          R: >
+            Method for outlier detection. IQR is simple and robust,
+            Z-score assumes normality, modified Z-score is more robust,
+            isolation forest handles complex patterns.
+
+    # Output options
+    - name: show_summary
+      title: Show IDI Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive IDI summary including overall IDI,
+            decomposed components, and statistical significance.
+
+    - name: show_distributions
+      title: Show Risk Distributions
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display risk distribution summaries for baseline and new models
+            separately for events and non-events.
+
+    - name: show_discrimination
+      title: Show Discrimination Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display discrimination slopes and related measures for
+            both baseline and new models with improvements.
+
+    - name: show_validation
+      title: Show Validation Results
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display cross-validation and sensitivity analysis results
+            when these options are enabled.
+
+    # Visualization options
+    - name: plot_risk_distributions
+      title: Risk Distribution Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create plots showing risk score distributions for baseline
+            and new models separated by outcome status.
+
+    - name: plot_discrimination
+      title: Discrimination Improvement Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Visualize discrimination improvement showing mean differences
+            and IDI components with confidence intervals.
+
+    - name: plot_scatter
+      title: Risk Score Scatter Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create scatter plot of baseline vs new model risk scores
+            colored by outcome status to visualize improvement patterns.
+
+    - name: plot_bootstrap
+      title: Bootstrap Distribution Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Plot bootstrap distribution of IDI estimates showing
+            sampling variability and confidence interval construction.
+
+    - name: plot_sensitivity
+      title: Sensitivity Analysis Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Create plots showing IDI variation across different
+            analysis parameters and time points.
+
+    - name: plot_outliers
+      title: Outlier Analysis Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Visualize detected outliers and their influence on
+            IDI calculations with and without outliers.
+
+    # Advanced options
+    - name: competing_risks
+      title: Competing Risks
+      type: Bool
+      default: false
+      description:
+          R: >
+            Account for competing risks in survival analysis. Modifies
+            IDI calculation for settings with multiple event types.
+
+    - name: stratified_analysis
+      title: Stratified Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform stratified IDI analysis by important subgroups to
+            assess consistency of improvement across populations.
+
+    - name: subgroup_var
+      title: Subgroup Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable defining subgroups for stratified analysis.
+            Each level will receive separate IDI calculation.
+
+    - name: missing_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: Complete Cases Only
+          name: complete
+        - title: Multiple Imputation
+          name: imputation
+        - title: Inverse Probability Weighting
+          name: ipw
+      default: complete
+      description:
+          R: >
+            Method for handling missing data in risk predictions.
+            Multiple imputation provides most robust results.
+
+    - name: calibration_aware
+      title: Calibration-Aware IDI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Adjust IDI calculation to account for model calibration.
+            Uses calibrated probabilities for more accurate assessment.
+
+    - name: time_dependent
+      title: Time-Dependent IDI
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate time-dependent IDI for survival models showing
+            how discrimination improvement varies over time.
+
+    - name: alpha_level
+      title: Significance Level
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.2
+      description:
+          R: >
+            Type I error rate for hypothesis testing and confidence intervals.
+            Standard value is 0.05 for 95% confidence.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      min: 1
+      max: 999999
+      description:
+          R: >
+            Random seed for bootstrap sampling and cross-validation.
+            Ensures reproducible results across analyses.
+
+...
