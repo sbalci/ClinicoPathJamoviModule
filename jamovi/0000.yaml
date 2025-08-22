@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.34
+version: 0.0.31.36
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-20'
+date: '2025-08-22'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -3348,6 +3348,33 @@ analyses:
       modeling
 
       for analysis of genomic, proteomic, and other high-dimensional datasets.
+  - title: Cohen's Kappa Agreement
+    name: cohenskappa
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Diagnostic Statistics
+    menuTitle: Cohen's Kappa Agreement
+    menuSubtitle: Two-Rater Agreement Analysis
+    description: >
+      Cohen's kappa and weighted kappa for two-rater agreement analysis.
+
+      Essential for assessing agreement between two pathologists, diagnostic
+      reproducibility,
+
+      and quality assurance in clinical pathology practice.
+  - title: Method Comparison Analysis
+    name: methodcomparison
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Diagnostic Statistics
+    menuTitle: Method Comparison Analysis
+    menuSubtitle: Bland-Altman & Method Comparison
+    description: |
+      Comprehensive method comparison analysis including Bland-Altman plots,
+      Passing-Bablok regression, and Deming regression. Essential for validating
+      new laboratory methods, diagnostic tests, and measurement techniques.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

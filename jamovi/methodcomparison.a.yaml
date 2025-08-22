@@ -1,0 +1,223 @@
+---
+name: methodcomparison
+title: Method Comparison Analysis
+menuGroup: meddecideT
+menuSubgroup: Diagnostic Statistics
+menuSubtitle: 'Bland-Altman & Method Comparison'
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive method comparison analysis including Bland-Altman plots,
+        Passing-Bablok regression, and Deming regression. Essential for validating
+        new laboratory methods, diagnostic tests, and measurement techniques.
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: method1
+      title: 'Reference Method (X)'
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+
+    - name: method2
+      title: 'Test Method (Y)'
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+
+    - name: grouping
+      title: 'Grouping Variable (Optional)'
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+
+    - name: comparison_method
+      title: 'Comparison Method'
+      type: List
+      options:
+          - title: 'Bland-Altman Analysis'
+            name: bland_altman
+          - title: 'Passing-Bablok Regression'
+            name: passing_bablok
+          - title: 'Deming Regression'
+            name: deming
+          - title: 'All Methods'
+            name: all
+      default: bland_altman
+      description: 'Primary method comparison approach'
+
+    - name: confidence_level
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description: 'Confidence level for limits of agreement and regression'
+
+    - name: bland_altman_options
+      title: 'Bland-Altman Options'
+      type: Bool
+      default: true
+      description: 'Enable Bland-Altman specific analysis options'
+
+    - name: limits_method
+      title: 'Limits of Agreement Method'
+      type: List
+      options:
+          - title: 'Standard (±1.96 SD)'
+            name: standard
+          - title: 'Exact (t-distribution)'
+            name: exact
+          - title: 'Bootstrap'
+            name: bootstrap
+      default: standard
+      description: 'Method for calculating limits of agreement'
+
+    - name: proportional_bias
+      title: 'Test for Proportional Bias'
+      type: Bool
+      default: true
+      description: 'Test if bias changes with measurement magnitude'
+
+    - name: outlier_detection
+      title: 'Outlier Detection'
+      type: Bool
+      default: true
+      description: 'Identify potential outliers in method comparison'
+
+    - name: passing_bablok_options
+      title: 'Passing-Bablok Options'
+      type: Bool
+      default: false
+      description: 'Enable Passing-Bablok specific analysis options'
+
+    - name: pb_alpha
+      title: 'Significance Level (Passing-Bablok)'
+      type: Number
+      default: 0.05
+      min: 0.01
+      max: 0.10
+      description: 'Significance level for Passing-Bablok regression'
+
+    - name: deming_options
+      title: 'Deming Regression Options'
+      type: Bool
+      default: false
+      description: 'Enable Deming regression specific options'
+
+    - name: error_ratio
+      title: 'Error Variance Ratio (λ)'
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+      description: 'Ratio of error variances (σ²y/σ²x) for Deming regression'
+
+    - name: correlation_analysis
+      title: 'Correlation Analysis'
+      type: Bool
+      default: true
+      description: 'Include Pearson and Spearman correlation analysis'
+
+    - name: regression_comparison
+      title: 'Regression Comparison'
+      type: Bool
+      default: true
+      description: 'Compare ordinary least squares vs method comparison regressions'
+
+    - name: clinical_limits
+      title: 'Clinical Acceptability Limits'
+      type: Bool
+      default: false
+      description: 'Specify clinical acceptability criteria'
+
+    - name: clinical_lower
+      title: 'Lower Clinical Limit'
+      type: Number
+      default: -10
+      description: 'Lower bound for clinically acceptable difference'
+
+    - name: clinical_upper
+      title: 'Upper Clinical Limit'
+      type: Number
+      default: 10
+      description: 'Upper bound for clinically acceptable difference'
+
+    - name: transformation
+      title: 'Data Transformation'
+      type: List
+      options:
+          - title: 'None'
+            name: none
+          - title: 'Log Transformation'
+            name: log
+          - title: 'Square Root'
+            name: sqrt
+          - title: 'Box-Cox'
+            name: boxcox
+      default: none
+      description: 'Apply transformation to improve normality'
+
+    - name: plots_options
+      title: 'Visualization Options'
+      type: Bool
+      default: true
+      description: 'Control plot generation and formatting'
+
+    - name: bland_altman_plot
+      title: 'Bland-Altman Plot'
+      type: Bool
+      default: true
+      description: 'Generate Bland-Altman plot with limits of agreement'
+
+    - name: scatter_plot
+      title: 'Method Comparison Scatter Plot'
+      type: Bool
+      default: true
+      description: 'Scatter plot with regression lines'
+
+    - name: residual_plots
+      title: 'Residual Analysis Plots'
+      type: Bool
+      default: false
+      description: 'Generate residual plots for regression diagnostics'
+
+    - name: mountain_plot
+      title: 'Mountain Plot'
+      type: Bool
+      default: false
+      description: 'Generate mountain plot (percentile-based differences)'
+
+    - name: missing_treatment
+      title: 'Missing Data Treatment'
+      type: List
+      options:
+          - title: 'Complete Cases Only'
+            name: complete
+          - title: 'Pairwise Deletion'
+            name: pairwise
+      default: complete
+      description: 'How to handle missing data'
+
+    - name: bootstrap_samples
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description: 'Number of bootstrap samples for confidence intervals'
+

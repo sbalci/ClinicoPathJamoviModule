@@ -1,0 +1,72 @@
+title: Cohen's Kappa Agreement
+name: cohenskappa
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: First Rater
+        children:
+          - type: VariablesListBox
+            name: rater1
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Second Rater
+        children:
+          - type: VariablesListBox
+            name: rater2
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: kappa_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: ci_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_samples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: exact_agreement
+      - type: CheckBox
+        name: marginal_homogeneity
+      - type: CheckBox
+        name: agreement_plot
+      - type: CheckBox
+        name: confusion_matrix
+      - type: CheckBox
+        name: category_analysis
+      - type: CheckBox
+        name: interpretation_guide
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: missing_treatment
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: minimum_categories
+        format: number

@@ -1,0 +1,173 @@
+name: cohenskappa
+title: Cohen's Kappa Agreement
+jrs: '1.1'
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      clearWith:
+          - rater1
+          - rater2
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: true
+
+    - name: kappaTable
+      title: Kappa Statistics
+      type: Table
+      visible: true
+      columns:
+          - name: method
+            title: Method
+            type: text
+          - name: kappa
+            title: Kappa
+            type: number
+          - name: se
+            title: Standard Error
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+          - name: z_value
+            title: Z-value
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: agreementStats
+      title: Agreement Statistics
+      type: Table
+      visible: (exact_agreement)
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: value
+            title: Value
+            type: number
+          - name: percentage
+            title: Percentage
+            type: number
+          - name: description
+            title: Description
+            type: text
+
+    - name: confusionMatrix
+      title: Confusion Matrix
+      type: Table
+      visible: (confusion_matrix)
+      columns:
+          - name: rater1_category
+            title: Rater 1
+            type: text
+          - name: rater2_categories
+            title: Rater 2 Categories
+            type: text
+
+    - name: categoryStats
+      title: Category-Specific Agreement
+      type: Table
+      visible: (category_analysis)
+      columns:
+          - name: category
+            title: Category
+            type: text
+          - name: n_cases
+            title: N Cases
+            type: integer
+          - name: agreement_count
+            title: Agreements
+            type: integer
+          - name: agreement_rate
+            title: Agreement Rate
+            type: number
+          - name: kappa_contribution
+            title: Kappa Contribution
+            type: number
+
+    - name: marginalTest
+      title: Marginal Homogeneity Test
+      type: Table
+      visible: (marginal_homogeneity)
+      columns:
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: bootstrapResults
+      title: Bootstrap Confidence Intervals
+      type: Table
+      visible: (ci_method:bootstrap || ci_method:both)
+      columns:
+          - name: method
+            title: Method
+            type: text
+          - name: kappa
+            title: Kappa
+            type: number
+          - name: boot_lower
+            title: Bootstrap Lower
+            type: number
+          - name: boot_upper
+            title: Bootstrap Upper
+            type: number
+          - name: boot_samples
+            title: Bootstrap Samples
+            type: integer
+
+    - name: agreementPlot
+      title: Agreement Visualization
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotAgreement
+      visible: (agreement_plot)
+      clearWith:
+          - rater1
+          - rater2
+          - kappa_type
+
+    - name: confusionHeatmap
+      title: Agreement Heatmap
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotConfusionHeatmap
+      visible: (confusion_matrix)
+      clearWith:
+          - rater1
+          - rater2
+
+    - name: interpretationGuide
+      title: Clinical Interpretation Guidelines
+      type: Html
+      visible: (interpretation_guide)
+
+    - name: technicalNotes
+      title: Technical Notes and Assumptions
+      type: Html
+      visible: true
