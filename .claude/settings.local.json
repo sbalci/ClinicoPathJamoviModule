@@ -91,7 +91,11 @@
       "Bash(do cp /tmp/$module.* jamovi/)",
       "Bash(git add:*)",
       "Bash(/tmp/fix_suggested_types.sh:*)",
-      "Bash(do echo \"Fixing $file\")"
+      "Bash(do echo \"Fixing $file\")",
+      "Bash(do echo \"--- $func ---\")",
+      "Bash(do echo \"=== $func ===\")",
+      "Bash(do if grep -q \"jrs:\" jamovi/$func.r.yaml)",
+      "Bash(else echo \"$func: ⚠ missing jrs\")"
     ],
     "deny": []
   }

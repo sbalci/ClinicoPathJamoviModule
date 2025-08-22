@@ -1,0 +1,269 @@
+name: methodcomparison
+title: Method Comparison Analysis
+jrs: '1.1'
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      clearWith:
+          - method1
+          - method2
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: true
+
+    - name: descriptiveStats
+      title: Descriptive Statistics
+      type: Table
+      visible: true
+      columns:
+          - name: method
+            title: Method
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: mean
+            title: Mean
+            type: number
+          - name: sd
+            title: SD
+            type: number
+          - name: median
+            title: Median
+            type: number
+          - name: min
+            title: Minimum
+            type: number
+          - name: max
+            title: Maximum
+            type: number
+
+    - name: correlationTable
+      title: Correlation Analysis
+      type: Table
+      visible: (correlation_analysis)
+      columns:
+          - name: correlation_type
+            title: Correlation
+            type: text
+          - name: r
+            title: r
+            type: number
+          - name: r_squared
+            title: R²
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+
+    - name: blandAltmanStats
+      title: Bland-Altman Analysis
+      type: Table
+      visible: (comparison_method:bland_altman || comparison_method:all)
+      columns:
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: value
+            title: Value
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: passingBablokResults
+      title: Passing-Bablok Regression
+      type: Table
+      visible: (comparison_method:passing_bablok || comparison_method:all)
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+          - name: test_result
+            title: Test Result
+            type: text
+
+    - name: demingResults
+      title: Deming Regression
+      type: Table
+      visible: (comparison_method:deming || comparison_method:all)
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+          - name: se
+            title: Standard Error
+            type: number
+          - name: lower_ci
+            title: Lower CI
+            type: number
+          - name: upper_ci
+            title: Upper CI
+            type: number
+
+    - name: regressionComparison
+      title: Regression Method Comparison
+      type: Table
+      visible: (regression_comparison)
+      columns:
+          - name: method
+            title: Method
+            type: text
+          - name: intercept
+            title: Intercept
+            type: number
+          - name: slope
+            title: Slope
+            type: number
+          - name: r_squared
+            title: R²
+            type: number
+          - name: rmse
+            title: RMSE
+            type: number
+
+    - name: biasAnalysis
+      title: Bias Analysis
+      type: Table
+      visible: (proportional_bias)
+      columns:
+          - name: bias_type
+            title: Bias Type
+            type: text
+          - name: statistic
+            title: Test Statistic
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: outlierAnalysis
+      title: Outlier Analysis
+      type: Table
+      visible: (outlier_detection)
+      columns:
+          - name: observation
+            title: Observation
+            type: integer
+          - name: method1_value
+            title: Method 1
+            type: number
+          - name: method2_value
+            title: Method 2
+            type: number
+          - name: difference
+            title: Difference
+            type: number
+          - name: standardized_residual
+            title: Std. Residual
+            type: number
+          - name: outlier_flag
+            title: Outlier
+            type: text
+
+    - name: clinicalAssessment
+      title: Clinical Acceptability Assessment
+      type: Table
+      visible: (clinical_limits)
+      columns:
+          - name: criterion
+            title: Criterion
+            type: text
+          - name: result
+            title: Result
+            type: text
+          - name: percentage_within
+            title: Percent Within Limits
+            type: number
+          - name: clinical_interpretation
+            title: Clinical Interpretation
+            type: text
+
+    - name: blandAltmanPlot
+      title: Bland-Altman Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotBlandAltman
+      visible: (bland_altman_plot)
+      clearWith:
+          - method1
+          - method2
+          - limits_method
+
+    - name: scatterPlot
+      title: Method Comparison Scatter Plot
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotScatter
+      visible: (scatter_plot)
+      clearWith:
+          - method1
+          - method2
+          - comparison_method
+
+    - name: residualPlots
+      title: Residual Analysis
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotResiduals
+      visible: (residual_plots)
+      clearWith:
+          - method1
+          - method2
+          - comparison_method
+
+    - name: mountainPlot
+      title: Mountain Plot
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .plotMountain
+      visible: (mountain_plot)
+      clearWith:
+          - method1
+          - method2
+
+    - name: methodGuidance
+      title: Method Comparison Guidelines
+      type: Html
+      visible: true
+
+    - name: technicalNotes
+      title: Technical Notes and Assumptions
+      type: Html
+      visible: true
