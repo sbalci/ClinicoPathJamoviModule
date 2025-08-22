@@ -5,6 +5,7 @@
 \title{Cohen's Kappa Agreement}
 \usage{
 cohenskappa(
+  data,
   rater1,
   rater2,
   kappa_type = "cohen",
@@ -22,6 +23,8 @@ cohenskappa(
 )
 }
 \arguments{
+\item{data}{The data as a data frame.}
+
 \item{rater1}{.}
 
 \item{rater2}{.}

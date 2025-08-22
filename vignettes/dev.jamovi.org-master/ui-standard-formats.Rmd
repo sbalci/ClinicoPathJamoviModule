@@ -1,0 +1,14 @@
+---
+title: "Standard UI Formats"
+output: html_document
+---
+
+The following are the standard jamovi formats for use with the format property of UI controls:
+
+| Format | Description |
+| ------ | ----------- |
+`variable` |
+`term` |
+`number` |
+`bool` |
+`string` |

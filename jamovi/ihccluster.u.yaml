@@ -1,0 +1,199 @@
+title: IHC Clustering Analysis
+name: ihccluster
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  # ============ VARIABLE SELECTION ============
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Categorical IHC Markers (pos/neg, 0/1/2/3)
+        children:
+          - type: VariablesListBox
+            name: catVars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Continuous IHC Markers (H-scores, % positivity)
+        children:
+          - type: VariablesListBox
+            name: contVars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Case Identifier (optional)
+        children:
+          - type: VariablesListBox
+            name: caseId
+            maxItemCount: 1
+            isTarget: true
+  
+  # ============ CLUSTERING PARAMETERS ============
+  - type: CollapseBox
+    label: Clustering Settings
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Clustering Method
+          - type: ComboBox
+            name: method
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Number of Clusters
+          - type: TextBox
+            name: nClusters
+            format: number
+            enable: (!autoSelectK)
+          
+      - type: CheckBox
+        name: autoSelectK
+        label: Automatically select optimal k
+      
+      - type: LayoutBox
+        margin: large
+        enable: (autoSelectK)
+        children:
+          - type: Label
+            label: Range for automatic k selection
+          - type: ComboBox
+            name: kRange
+  
+  # ============ DATA PREPROCESSING ============
+  - type: CollapseBox
+    label: Data Preprocessing
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: scaleContVars
+        label: Scale continuous variables (z-score)
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Missing Data Handling
+          - type: ComboBox
+            name: handleMissing
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Variable Weights (comma-separated, optional)
+          - type: TextBox
+            name: weights
+            format: string
+  
+  # ============ ADVANCED OPTIONS ============
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: consensusClustering
+        label: Perform consensus clustering
+      
+      - type: LayoutBox
+        margin: large
+        enable: (consensusClustering)
+        children:
+          - type: Label
+            label: Bootstrap iterations
+          - type: TextBox
+            name: nBootstrap
+            format: number
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Random seed (for reproducibility)
+          - type: TextBox
+            name: seed
+            format: number
+  
+  # ============ VISUALIZATION OPTIONS ============
+  - type: CollapseBox
+    label: Visualizations
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: showSilhouette
+        label: Silhouette plot (cluster quality)
+      - type: CheckBox
+        name: showHeatmap
+        label: Expression heatmap
+      - type: CheckBox
+        name: showDendrogram
+        label: Dendrogram (hierarchical only)
+        enable: (method == 'hierarchical')
+      - type: CheckBox
+        name: showPCAPlot
+        label: PCA/MCA plot
+      - type: CheckBox
+        name: showBoxplots
+        label: Marker distribution boxplots
+      
+      - type: LayoutBox
+        margin: large
+        enable: (showHeatmap)
+        children:
+          - type: Label
+            label: Heatmap scaling
+          - type: ComboBox
+            name: heatmapScale
+  
+  # ============ OUTPUT TABLES ============
+  - type: CollapseBox
+    label: Output Tables
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: markerSummary
+        label: Marker summary statistics
+      - type: CheckBox
+        name: clusterProfiles
+        label: Cluster characteristic profiles
+      - type: CheckBox
+        name: associationTests
+        label: Marker-cluster association tests
+      - type: CheckBox
+        name: exportClusters
+        label: Export cluster assignments
+  
+  # ============ CLINICAL CORRELATIONS ============
+  - type: CollapseBox
+    label: Clinical Correlations (optional)
+    collapsed: true
+    children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Clinical Variables
+            children:
+              - type: VariablesListBox
+                name: clinicalVars
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Survival Time
+            children:
+              - type: VariablesListBox
+                name: survivalTime
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Survival Event (0/1)
+            children:
+              - type: VariablesListBox
+                name: survivalEvent
+                maxItemCount: 1
+                isTarget: true

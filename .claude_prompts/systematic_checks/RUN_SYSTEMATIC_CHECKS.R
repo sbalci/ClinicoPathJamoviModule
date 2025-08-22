@@ -1,5 +1,5 @@
 # Run Systematic Checks for ClinicoPath Module Functions
-# 
+#
 # This script demonstrates how to use the systematic checking system
 # to evaluate all functions in the module for quality and completeness.
 
@@ -30,26 +30,26 @@ lassocox_report <- generate_detailed_report("lassocox", lassocox_results, "repor
 priority_functions <- c(
   # Survival Analysis Functions
   "lassocox",           # LASSO Cox Regression
-  "survival",           # Basic Survival Analysis  
+  "survival",           # Basic Survival Analysis
   "multisurvival",      # Multi-group Survival
   "simonmakuch",        # Time-dependent Survival
   "competingsurvival",  # Competing Risks
-  
+
   # Decision Analysis Functions
   "decisiongraph",      # Decision Trees/Markov
   "decision",           # Decision Analysis
   "decisioncurve",      # Decision Curves
-  
+
   # Descriptive Functions
   "crosstable",         # Cross Tables
   "tableone",           # Table One
   "gtsummary",          # GT Summary Tables
-  
+
   # Plotting Functions
   "jjbarstats",         # Bar Plots with Stats
   "jjscatterstats",     # Scatter Plots with Stats
   "survivalplot",       # Survival Plots
-  
+
   # Diagnostic Functions
   "coxdiagnostics",     # Cox Model Diagnostics
   "agreement",          # Agreement Analysis
@@ -74,33 +74,33 @@ priority_summary <- data.frame(
 for(func_name in priority_functions) {
   cat("\n", strrep("-", 30), "\n")
   cat("Checking:", func_name, "\n")
-  
+
   # Check if function files exist
   files_exist <- all(file.exists(c(
     file.path("jamovi", paste0(func_name, ".a.yaml")),
     file.path("R", paste0(func_name, ".b.R")),
     file.path("jamovi", paste0(func_name, ".r.yaml"))
   )))
-  
+
   if(files_exist) {
     tryCatch({
       results <- systematic_function_check(func_name)
       priority_results[[func_name]] <- results
-      
+
       # Add to summary
-      status <- if(length(results$recommendations) == 0) "PASS" else 
+      status <- if(length(results$recommendations) == 0) "PASS" else
                 if(length(results$recommendations) <= 2) "MINOR_ISSUES" else "NEEDS_WORK"
-      
+
       options_ratio <- if(!is.null(results$option_usage)) {
         paste0(sum(results$option_usage), "/", length(results$option_usage))
       } else "N/A"
-      
+
       outputs_ratio <- if(!is.null(results$output_population)) {
         paste0(sum(results$output_population), "/", length(results$output_population))
       } else "N/A"
-      
+
       error_count <- if(!is.null(results$error_handling)) sum(results$error_handling) else 0
-      
+
       priority_summary <- rbind(priority_summary, data.frame(
         Function = func_name,
         Status = status,
@@ -111,7 +111,7 @@ for(func_name in priority_functions) {
         ErrorHandling = error_count,
         stringsAsFactors = FALSE
       ))
-      
+
     }, error = function(e) {
       cat("  ❌ Error checking", func_name, ":", e$message, "\n")
       priority_summary <<- rbind(priority_summary, data.frame(
@@ -120,7 +120,7 @@ for(func_name in priority_functions) {
         Issues = NA,
         FilesOK = FALSE,
         OptionsUsed = "ERROR",
-        OutputsPopulated = "ERROR", 
+        OutputsPopulated = "ERROR",
         ErrorHandling = 0,
         stringsAsFactors = FALSE
       ))
@@ -218,7 +218,7 @@ writeLines(next_steps, "reports/quality_assessment_report.md")
 
 cat("\nReports generated:\n")
 cat("- reports/function_check_summary.csv\n")
-cat("- reports/quality_assessment_report.md\n") 
+cat("- reports/quality_assessment_report.md\n")
 cat("- reports/lassocox_detailed_report.md\n")
 
 cat("\n🎯 Use these reports to systematically improve module quality!\n")

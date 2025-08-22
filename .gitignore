@@ -53,3 +53,4 @@ backups/
 /doc/
 /Meta/
 /test_backups
+/.claude_prompts

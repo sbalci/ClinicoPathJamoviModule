@@ -1,0 +1,334 @@
+name: ihccluster
+title: IHC Clustering Analysis
+jrs: '1.1'
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      clearWith:
+          - catVars
+          - contVars
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: true
+      clearWith:
+          - catVars
+          - contVars
+          - vars
+          - method
+          - nClusters
+          - autoSelectK
+          - kRange
+          - scaleContVars
+          - weights
+          - handleMissing
+          - consensusClustering
+          - seed
+
+    - name: clusterSizes
+      title: Cluster Sizes
+      type: Table
+      visible: true
+      clearWith:
+          - catVars
+          - contVars
+          - vars
+          - method
+          - nClusters
+          - autoSelectK
+          - kRange
+          - scaleContVars
+          - weights
+          - handleMissing
+          - consensusClustering
+          - seed
+      columns:
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: "n"
+            title: "N"
+            type: integer
+          - name: percent
+            title: Percentage
+            type: number
+            format: zto,pc
+
+    - name: silhouetteStats
+      title: Silhouette Statistics
+      type: Table
+      visible: (autoSelectK)
+      columns:
+          - name: k
+            title: k
+            type: integer
+          - name: avg_silhouette
+            title: Avg Silhouette
+            type: number
+          - name: selected
+            title: Selected
+            type: text
+
+    - name: clusterProfiles
+      title: Cluster Profiles
+      type: Table
+      visible: (clusterProfiles)
+      columns:
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: marker
+            title: Marker
+            type: text
+          - name: summary
+            title: Summary
+            type: text
+
+    - name: markerSummary
+      title: Marker Summary by Cluster
+      type: Table
+      visible: (markerSummary)
+      columns:
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: marker
+            title: Marker
+            type: text
+          - name: type
+            title: Type
+            type: text
+          - name: mean_median
+            title: Mean/Median
+            type: text
+          - name: sd_iqr
+            title: SD/IQR
+            type: text
+          - name: range
+            title: Range
+            type: text
+
+    - name: associationTests
+      title: Marker-Cluster Associations
+      type: Table
+      visible: (associationTests)
+      columns:
+          - name: marker
+            title: Marker
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: effect_size
+            title: Effect Size
+            type: text
+
+    - name: clinicalComparison
+      title: Clinical Variables by Cluster
+      type: Table
+      visible: (clinicalVars)
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: summary
+            title: Summary
+            type: text
+
+    - name: consensusStats
+      title: Consensus Clustering Stability
+      type: Table
+      visible: (consensusClustering)
+      columns:
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: stability
+            title: Stability
+            type: number
+          - name: core_samples
+            title: Core Samples
+            type: integer
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: silhouettePlot
+      title: Silhouette Plot
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotSilhouette
+      visible: (showSilhouette)
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+
+    - name: heatmapPlot
+      title: Expression Heatmap
+      type: Image
+      width: 900
+      height: 700
+      renderFun: .plotHeatmap
+      visible: (showHeatmap)
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - heatmapScale
+
+    - name: dendrogramPlot
+      title: Dendrogram
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .plotDendrogram
+      visible: (showDendrogram && method:hierarchical)
+      clearWith:
+          - catVars
+          - contVars
+          - nClusters
+
+    - name: pcaPlot
+      title: PCA/MCA Plot
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plotPCA
+      visible: (showPCAPlot)
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+
+    - name: boxplotPlot
+      title: Marker Distributions by Cluster
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .plotBoxplots
+      visible: (showBoxplots)
+      clearWith:
+          - contVars
+          - nClusters
+
+    - name: survivalPlot
+      title: Survival Analysis by Cluster
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plotSurvival
+      visible: false
+      clearWith:
+          - survivalTime
+          - survivalEvent
+          - nClusters
+
+    - name: medoidInfo
+      title: Cluster Medoids (Representative Cases)
+      type: Table
+      visible: (method:pam)
+      columns:
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: medoid_id
+            title: Medoid Case ID
+            type: text
+          - name: description
+            title: Profile Description
+            type: text
+
+    - name: interpretationGuide
+      title: Clinical Interpretation
+      type: Html
+      visible: true
+
+    - name: technicalNotes
+      title: Technical Notes
+      type: Html
+      visible: true
+
+    # Legacy result tables for backward compatibility
+    - name: sizes
+      title: Cluster Sizes (Legacy)
+      type: Table
+      visible: false
+      columns:
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: "n"
+            title: "N"
+            type: integer
+
+    - name: modes
+      title: Cluster Modes (Legacy)
+      type: Table
+      visible: false
+      columns:
+          - name: cluster
+            title: Cluster
+            type: text
+
+    - name: distr
+      title: Distributions (Legacy)
+      type: Table  
+      visible: false
+      columns:
+          - name: marker
+            title: Marker
+            type: text
+          - name: cluster
+            title: Cluster
+            type: text
+          - name: level
+            title: Level
+            type: text
+          - name: "n"
+            title: "N"
+            type: integer
+          - name: pct
+            title: Percentage
+            type: number
+
+    - name: assoc
+      title: Association Tests (Legacy)
+      type: Table
+      visible: false
+      columns:
+          - name: marker
+            title: Marker
+            type: text
+          - name: p
+            title: p-value
+            type: number
+            format: zto,pvalue
+
+    - name: text
+      title: Analysis Notes (Legacy)
+      type: Preformatted
+      visible: false

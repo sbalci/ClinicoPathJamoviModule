@@ -1,0 +1,24 @@
+
+div.main-container {
+    max-width: 700px ;
+}
+
+.h1, .h2, .h3, h1, h2, h3 {
+    margin-bottom: 20px;
+}
+
+div.section.level2,
+div.section.level3 {
+    margin-top: 30px ;
+}
+
+div.figure {
+    text-align: center ;
+    margin-top: 20px ;
+    margin-bottom: 30px ;
+}
+
+table {
+    margin-left: auto ;
+    margin-right: auto ;
+}

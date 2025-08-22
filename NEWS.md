@@ -1,5 +1,35 @@
 # ClinicoPath News
 
+## Version 0.0.31.36
+
+### 🗓️ **August 22, 2025 - IHC Clustering Analysis Enhancement**
+
+#### 🧪 **IHC Clustering Analysis (ihccluster) - Complete Interface Modernization**
+
+##### **Streamlined User Interface**
+*   **Organized Sections:** Redesigned interface with 6 logical sections: Variable Selection, Clustering Settings, Data Preprocessing, Advanced Options, Visualizations, Output Tables, and Clinical Correlations
+*   **Legacy Cleanup:** Complete removal of all legacy options (k, autoK, showSil, assocTests, vars) while maintaining full functionality through modern equivalents
+*   **Conditional Controls:** Smart enabling/disabling of dependent options (cluster range only available with auto-selection, dendrogram only for hierarchical clustering)
+*   **Collapsible Sections:** Clean organization with appropriate default collapsed/expanded states for optimal workflow
+
+##### **Enhanced User Guidance System**
+*   **Interactive Welcome Guide:** Step-by-step instructions with variable type examples, clustering method comparisons, and configuration guidance
+*   **Technical Implementation Details:** Comprehensive documentation of distance metrics, algorithm comparisons, quality assessment guidelines, and package dependencies
+*   **Clinical Interpretation Framework:** Practical guidance for treatment selection, prognosis, validation checklists, best practices, and limitation awareness
+*   **Context-Sensitive Help:** Dynamic guidance that adapts based on selected variables and configuration choices
+
+##### **Modernized Codebase Architecture**
+*   **Unified Variable Handling:** Seamless integration of categorical and continuous IHC markers with proper Gower distance implementation
+*   **Clean Option Mapping:** Direct modern option usage (catVars, nClusters, autoSelectK, showSilhouette, associationTests) without legacy compatibility layers
+*   **Robust State Management:** Proper jamovi state management patterns with setState() for analysis persistence and reproducibility
+*   **Comprehensive Error Handling:** Enhanced validation with informative error messages and graceful degradation
+
+##### **Preserved Advanced Functionality**
+*   **Mixed Data Clustering:** Full support for categorical (pos/neg, 0/1/2/3) and continuous (H-scores, % positivity) markers with appropriate distance calculations
+*   **Multiple Algorithms:** PAM (k-medoids), hierarchical clustering, and MCA/PCA + k-means with algorithm-specific optimizations
+*   **Quality Assessment:** Silhouette analysis for optimal k selection, consensus clustering for stability, and comprehensive association testing
+*   **Clinical Integration:** Optional survival analysis integration and clinical variable correlation testing
+
 ## Version 0.0.31.35
 
 ### 🗓️ **August 20, 2025 - Advanced Machine Learning & Regularization Methods**
