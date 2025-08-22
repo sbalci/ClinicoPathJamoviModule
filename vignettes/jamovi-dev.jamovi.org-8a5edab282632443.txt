@@ -1,0 +1,3753 @@
+Directory structure:
+└── jamovi-dev.jamovi.org/
+    ├── README.md
+    ├── _site.yml
+    ├── api_analysis-definition.Rmd
+    ├── api_module-definition.Rmd
+    ├── api_results-definition.Rmd
+    ├── api_results-elements.Rmd
+    ├── api_table.Rmd
+    ├── api_ui-definition.Rmd
+    ├── dev-jamovi-org.Rproj
+    ├── index.Rmd
+    ├── info_project-structure.Rmd
+    ├── piwik.html
+    ├── styles.css
+    ├── tuts0101-getting-started.Rmd
+    ├── tuts0102-creating-a-module.Rmd
+    ├── tuts0103-creating-an-analysis.Rmd
+    ├── tuts0104-implementing-an-analysis.Rmd
+    ├── tuts0105-creating-rich-results.Rmd
+    ├── tuts0105-debugging-an-analysis.Rmd
+    ├── tuts0106-adding-plots.Rmd
+    ├── tuts0107-distributing-modules.Rmd
+    ├── tuts0108-additional-notes.Rmd
+    ├── tuts0201-data-binding.Rmd
+    ├── tuts0201-dynamic-tables.Rmd
+    ├── tuts0202-handling-data.Rmd
+    ├── tuts0203-state.Rmd
+    ├── ui-advanced-customisation.Rmd
+    ├── ui-advanced-design.Rmd
+    ├── ui-basecontrol.Rmd
+    ├── ui-basic-design.Rmd
+    ├── ui-checkbox.Rmd
+    ├── ui-collapsebox.Rmd
+    ├── ui-combobox.Rmd
+    ├── ui-custom-format.Rmd
+    ├── ui-label.Rmd
+    ├── ui-layoutbox.Rmd
+    ├── ui-listbox.Rmd
+    ├── ui-optioncontrol.Rmd
+    ├── ui-parentcontrol.Rmd
+    ├── ui-radiobutton.Rmd
+    ├── ui-standard-formats.Rmd
+    ├── ui-supplier.Rmd
+    ├── ui-targetlayoutbox.Rmd
+    ├── ui-termlabel.Rmd
+    ├── ui-textbox.Rmd
+    ├── ui-variablelabel.Rmd
+    └── ui-variablesupplier.Rmd
+
+================================================
+FILE: README.md
+================================================
+# dev-jamovi-org
+
+
+================================================
+FILE: _site.yml
+================================================
+name: "jamovi-dev"
+navbar:
+  title: "dev.jamovi.org"
+  type: inverse
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Tutorial"
+      menu:
+        - text: Basic
+        - text: 1 - Getting Started
+          href: tuts0101-getting-started.html
+        - text: 2 - Creating a Module
+          href: tuts0102-creating-a-module.html
+        - text: 3 - Creating an Analysis
+          href: tuts0103-creating-an-analysis.html
+        - text: 4 - Implementing an Analysis
+          href: tuts0104-implementing-an-analysis.html
+        - text: 5 - Debugging an Analysis
+          href: tuts0105-debugging-an-analysis.html
+        - text: 6 - Creating Rich Results
+          href: tuts0105-creating-rich-results.html
+        - text: 7 - Adding Plots
+          href: tuts0106-adding-plots.html
+        - text: 8 - Distributing Modules
+          href: tuts0107-distributing-modules.html
+        - text: 9 - Additional Notes
+          href: tuts0108-additional-notes.html
+        - text: Intermediate
+        - text: 1 - Dynamic Tables
+          href: tuts0201-dynamic-tables.html
+        - text: 2 - Handling Data
+          href: tuts0202-handling-data.html
+        - text: 3 - State
+          href: tuts0203-state.html
+        - text: User Interface
+        - text: 1 - Basic UI Design
+          href: ui-basic-design.html
+        - text: 2 - Advanced UI Design
+          href: ui-advanced-design.html
+        - text: 3 - Advanced Customisation
+          href: ui-advanced-customisation.html
+    - text: API
+      menu:
+        - text: yaml
+        - text: Module Definition (0000.yaml)
+          href: api_module-definition.html
+        - text: Analysis Definition (.a.yaml)
+          href: api_analysis-definition.html
+        - text: Results Definition (.r.yaml)
+          href: api_results-definition.html
+        - text: User Interface Definition (.u.yaml)
+          href: api_ui-definition.html
+        - text: R
+        - text: Results Elements
+          href: api_results-elements.html
+        - text: Table
+          href: api_table.html
+    - text: "Misc"
+      menu:
+        - text: "Project Structure"
+          href: info_project-structure.html
+output:
+    html_document:
+        highlight: haddock
+        toc: true
+        toc_float: true
+        css: styles.css
+        includes:
+            in_header: piwik.html
+
+
+
+================================================
+FILE: api_analysis-definition.Rmd
+================================================
+---
+title: "Analysis Definition"
+---
+
+.a.yaml files
+
+## Header
+
+the analysis definition is a yaml file in the `jamovi/` directory, with the extension `.a.yaml`. the analysis definition describes the analysis, the way it appears in menus, and the options it requires. the file is named to match the name of the analysis it describes, but converted to lowercase. an example is `ttestis.a.yaml`:
+
+```
+---
+name:  TTestIS
+title: Independent Samples T-Test
+menuGroup: T-Tests
+version: '1.0.0'
+jas: '1.0'
+
+options:
+    - name: ...
+      type: ...
+    - name: ...
+      type: ...
+```
+
+property     | function
+-------------|-----------------------------------------
+name         | the name of the analysis. camel case. underscores are discouraged, dots are verboten.
+title        | the title of the analysis in title case.
+version      | the version of the analysis. should make use of [semantic versioning](http://semver.org).
+jas          | the `jamovi analysis spec`. should be '1.0'. must be wrapped in quotes to prevent it being interpretted as a number.
+menuGroup    | the name of the top level menu where the analysis should appear.
+menuSubgroup | (optional) places the menu entry under a subheading.
+menuTitle    | (optional) the title to be used in the menu. if unspecified, then the `title` is used.
+menuSubtitle | (optional) additional text placed to the lower right of the menu entry.
+options      | an array of options that the analysis requires. these are described in greater detail below.
+
+## Options
+
+options represent the options that an analysis requires in order to run. when a jamovi module is used as an R package, they represent the arguments to the function. when used in jamovi itself, they represent the user interface (UI) options presented to the user.
+
+each option has a name, a type, and some additional properties which are described in greater detail below.
+
+when a value is specified by the user (either through the jamovi user interface, or through a function argument), the option checks the value and produces an error if the value is not suitable. the checks performed by each option are also detailed below.
+
+the different option types are as follows:
+
+### Data
+
+`Data` is used for analyses which require data (almost all of them). if used, it should be the first of the options, and should always be called `data`. it has no additional properties.
+
+#### example
+
+```
+    - name: data
+      type: Data
+```
+
+### Bool
+
+`Bool` is used for true/false values, and is typically represented in the UI as a checkbox.
+
+#### properties
+
+ - title
+ - default: `false`
+ 
+#### example
+```
+    - name: bf
+      type: Bool
+      title: Bayes factor
+      default: false
+```
+#### checks
+
+ - the value must be `true` or `false`
+
+### Integer
+
+`Integer` is used for values which need to be whole numbers. For 'floating point' numbers, use `Number` instead.
+
+#### properties
+
+ - title
+ - default: `0`
+ - min: `-Inf`
+ - max: `Inf`
+
+#### checks
+
+ - the value must be a whole number
+ - the value must fall between the `min` and the `max`
+
+### Number
+
+`Number` is used for values which need to be numeric. For whole numbers, use `Integer` instead.
+
+#### properties
+
+ - title
+ - default: `0.0`
+ - min: `-Inf`
+ - max: `Inf`
+
+#### example
+```
+    - name: ciWidth
+      type: Number
+      title: Confidence level
+      min: 50
+      max: 99.9
+      default: 95
+```
+#### checks
+
+ - the value must be a number
+ - the value must fall between the `min` and the `max`
+
+### List
+
+`List` is used where only one of several values may be specified, and only one at a time. In the UI, these are typically represented as either a listbox, or a set of radio buttons.
+
+#### properties
+
+ - title
+ - options
+ - default: `<the first of options>`
+ 
+`options` must be specified as an array of strings
+
+#### checks
+
+ - the value must be one of the options
+
+### Variable
+
+`Variable` is used where a variable/column from the data set needs to be specified. In the UI, these are typically represented as a 'drop box', where variables can be dragged and dropped.
+
+ - title
+ - suggested: `[]`
+ - permitted: `[continuous, ordinal, nominal, nominaltext]`
+ - rejectInf: `true`
+ - rejectMissing: `false`
+
+The value of `Variable` is a string (in R, a character vector of length 1) containing the assigned variable name. If nothing is assigned it has a value of `null`.
+
+#### checks
+
+ - whether the value is a string
+ - whether the variable exists in the data set
+ - whether the variable type is permitted
+ - whether the variable contains non-finite values (if `rejectInf` is true)
+ - whether the variable contains missing values (if `rejectMissing` is true)
+
+### Variables
+
+`Variables` is used where multiple variables/columns from the data set need to be specified. In the UI, these are typically represented as a 'drop box', where variables can be dragged and dropped.
+
+ - title
+ - suggested: `[]`
+ - permitted: `[continuous, ordinal, nominal, nominaltext]`
+ - rejectInf: `true`
+ - rejectMissing: `false`
+
+The value is an array of strings (in R, a character vector). If nothing is assigned to `Variables` it's value is an empty array (in R, a character vector of length 0).
+
+#### checks
+
+ - whether the variable exists in the data set
+ - whether the variable type is permitted
+ - whether the variable contains non-finite values (if `rejectInf` is true)
+ - whether the variable contains missing values (if `rejectMissing` is true)
+
+
+
+================================================
+FILE: api_module-definition.Rmd
+================================================
+---
+title: "Module Definition"
+---
+
+0000.yaml files
+
+Coming soon!
+
+
+
+================================================
+FILE: api_results-definition.Rmd
+================================================
+---
+title: "Results Definition"
+---
+
+.r.yaml files
+
+### (In Progress)
+
+## Header
+
+the results definition is a yaml file in the `jamovi/` directory, with the extension `.r.yaml`. the results definition describes the results produced by the analysis. the file is named to match the name of the analysis, but converted to lowercase. an example is `ttestis.r.yaml`:
+
+```
+---
+name:  TTestIS
+title: Independent Samples T-Test
+jrs: '1.0'
+
+items:
+    - name: ...
+      type: ...
+    - name: ...
+      type: ...
+```
+
+property     | function
+-------------|-----------------------------------------
+name         | the name of the analysis. must correspond to the filename.
+title        | the title to display at the top of the results.
+jrs          | the `jamovi results spec`. should be '1.0'. must be wrapped in quotes to prevent it being interpretted as a number.
+items        | an array of results elements that make up the results. these are described in greater detail below.
+
+## Results
+
+each results element has the following properties:
+
+ - name
+ - type
+ - title
+ - visible: `true`
+ - clearWith: `*`
+ 
+different results element types have different additional properties.
+
+the different results element types are as follows:
+
+### Preformatted
+
+Preformatted represents the simplest of results elements. it is simply a block of preformattd text.
+
+it has no additional properties.
+
+### Table
+
+Table is the most common result element in the results from jamovi analyses. Tables are represented as rich HTML tables in jamovi, and as nicely formatted ascii tables in an interactive R session.
+
+properties:
+
+property           | default | description  
+-------------------|---------|---------------------------------------
+columns            |         | an array of columns objects, see below
+rows               | `0`     | an integer specifying the number of rows, or a data-binding where one row is created per element of the bound value
+swapRowsColumns    | `false` | whether the rows and columns should be swapped
+notes              | `[ ]`   | an array of strings which appear as additional notes in the footnotes of the table.
+
+#### Column
+
+properties:
+
+property     | default  | description  
+-------------|----------|---------------------------------------
+name         |          | the name of the column, a string
+title        |          | the title that appears at the top of the column
+type         | `number` | either `number` (aligned right), `integer` (aligned right, displayed to zero decimal places) or `text` (aligned left)
+format       |          | (optional) a string with comma separated values; `zto`, `pvalue`
+content      |          | (optional) the content to appear in the cells of the column.
+visible      | `true`   | `true`, `false` or a data-binding. the column will be visible if the bound value isn't `false` or `null`
+superTitle   |          | (optional) a title to appear above the title of the column
+combineBelow | `false`  | if multiple adjacent cells in the column contain the same value, they will be combined into a single cell
+
+### Image
+
+properties:
+
+ - width
+ - height
+ - renderFun
+ - requiresData
+
+### Group
+
+properties:
+
+ - items
+
+### Array
+
+properties:
+
+ - items
+ - template
+
+
+
+
+================================================
+FILE: api_results-elements.Rmd
+================================================
+---
+title: Results Elements
+---
+
+This document describes the properties and methods of the results elements:
+
+ - Image
+ - Group
+ - Array
+ - Preformatted
+ - Html
+
+Table is described [here](api_table.html).
+
+The values of properties can be accessed using the `$` operator. For example, to retrieve the title of an element, one can go:
+
+```
+element$title
+```
+
+The methods of a results elements are called using the `$` operator as well. For example:
+
+```
+element$setTitle('An awesome title')
+```
+
+## Elements
+
+The following properties and methods are common to all results elements
+
+### Properties
+
+#### name
+
+a string specifying the name of the element
+
+#### title
+
+a string specifying the title of the element
+
+#### visible
+
+`TRUE` or `FALSE`, whether the element is visible or not
+
+#### status
+
+a string, one of `'complete'`, `'error'`, `'inited'`, `'running'`
+
+#### rowKeys
+
+a list of 'keys'
+
+#### state
+
+the state
+
+### Methods
+
+#### setStatus(status)
+
+sets the element's status, should be one of `'complete'`, `'error'`, `'inited'`, `'running'`
+
+#### setVisible(visible=TRUE)
+
+overrides the elements default visibility
+
+#### setTitle(title)
+
+sets the element's title
+
+#### setError(message)
+
+sets the element's status to 'error', and assigns the error message
+
+#### setState(object)
+
+sets the state object on the element
+
+
+
+
+
+================================================
+FILE: api_table.Rmd
+================================================
+---
+title: Table
+---
+
+This document describes the properties and methods of a jamovi table object.
+
+The values of properties can be accessed using the `$` operator, followed by the name. For example, to retrieve the title of a table, one can go:
+
+```
+table$title
+```
+
+The methods of a table object are called using the `$` operator as well. For example:
+
+```
+table$setRow(rowKey=1, values=list(t=2.3, df=2, p=0.45))
+```
+
+## Properties
+
+### name
+
+a string specifying the name of the table
+
+### title
+
+a string specifying the title of the table
+
+### visible
+
+`TRUE` or `FALSE`, whether the table is visible or not
+
+### status
+
+a string, one of `'complete'`, `'error'`, `'inited'`, `'running'`
+
+### rowKeys
+
+a list of 'keys'
+
+### state
+
+the state
+
+## Methods
+
+### setStatus(status)
+
+sets the table's status, should be one of `'complete'`, `'error'`, `'inited'`, `'running'`
+
+### setVisible(visible=TRUE)
+
+overrides the tables default visibility
+
+### setTitle(title)
+
+sets the table's title
+
+### setError(message)
+
+sets the table's status to 'error', and assigns the error message
+
+### setState(object)
+
+sets the state object on the table
+
+### addColumn(name, ...)
+
+adds a new column to the table, the following arguments are possible:
+
+ argument       | type    | details
+----------------|---------|------------------------------------------
+ `name`         | string  | the name of the column
+ `index`        | integer | the index to insert the column at. if unspecified, the column is appended.
+ `title`        | string  | the title to appear at the top of the column. if unspecified, the name is used.
+ `superTitle`   | string  | the title to appear above column titles
+ `visible`      | `TRUE`/`FALSE` or a string | whether the column should be visible. if a string is specified, this must be a data-binding to an option.
+ `content`      | string  | either a string that will be placed in every cell, or a data-binding
+ `type`         | string  | 'integer', 'number' or 'text'; text is left aligned, numbers are right aligned, integers are formatted to zero decimal places
+ `format`       | string  | a comma separated list of values, such as 'zto', 'pvalue'
+ `combineBelow` | `TRUE`/`FALSE` | if TRUE, when cells in the column are contiguous, and contain the same value, the lower cells will be made blank.
+
+### addRow(rowKey, values)
+
+Adds a row to the table. `rowKey` is an object which uniquely identifies the row -- for many cases, simply providing the index is sufficient. `values` is a named list with the values to place in the cells of that row. The names must correspond to the column names. Not all column values must be provided, and if a blank row is desired, the values argument can be omitted entirely.
+
+### deleteRows()
+
+Deletes all the rows in the table
+
+### setRow(rowKey, values)
+
+Sets the values in an existing row. `rowKey` is a key uniquely identifying the row, and `values` is a named list of values. The names must correspond to the column names. Not all column values need to be provided.
+
+Note that you must explicitly name the rowKey argument: `setRow(rowKey=...)` to differentiate from `setRow(rowNo=...)`.
+
+### setRow(rowNo, values)
+
+Sets the values in an existing row. `rowNo` is a number specifying the row number, and `values` is a named list of values. The names must correspond to the column names. Not all column values need to be provided.
+
+Note that you must explicitly name the rowNo argument when calling this method: `setRow(rowNo=...)` to differentiate from `setRow(rowKey=...)`.
+
+### addFormat(rowKey, col, format)
+### addFormat(rowNo,  col, format)
+
+Adds additional formatting to a cell. `col` can be an index or a name. format can be one of:
+
+ - `Cell.BEGIN_GROUP`
+ - `Cell.END_GROUP`
+ - `Cell.BEGIN_END_GROUP`
+ - `Cell.NEGATIVE`
+
+Cell.BEGIN_GROUP adds additional padding above the cell. Cell.END_GROUP adds additional padding below the cell. Cell.NEGATIVE colours the value red.
+
+### setCell(rowKey, col, value)
+### setCell(rowNo,  col, value)
+
+Sets the value of a cell. Generally setRow() is more efficient.
+
+### getCell(rowKey, col)
+### getCell(rowNo,  col)
+
+Retrieves a cell.
+
+### addFootnote(rowKey, col, note)
+### addFootnote(rowNo,  col, note)
+
+Adds a footnote to the cell.
+
+### addSymbol(rowKey, col, symbol)
+### addSymbol(rowNo,  col, symbol)
+
+Adds a symbol to a cell -- for example an asterisk denoting significance.
+
+### setNote(key, note, init=TRUE)
+
+setNote() adds (or clears) a note placed in the footer of the table.
+
+ - `key`: a string identifying the note
+ - `note`: a string representing the text of the note (or NULL)
+ - `init`: whether this be considered an `init` note
+
+Specifying a `note` of NULL causes the note to be removed.
+
+`init` notes are those that are added during the *init* phase. `init` notes are typically based on the values of the options. For example, if the user has specified an alternative hypothesis --- that population one is greater than population two --- the analysis could add a note indicating this. In contrast, `non-init` notes are created in the *run* phase. An example might be the number of subjects that were excluded from the analysis as a result of containing missing values. `init` notes are typically based on the values of options, where as `non-init` notes depend on the data.
+
+In practice, when an analysis is changed or re-run, `init` notes are not restored from state; they are simply recreated during the `init` phase. In contrast, `non-init` notes are restored from state.
+
+Note that if the text of the note will always be the same, it is recommended to set the note in the `.r.yaml` file instead.
+
+
+
+================================================
+FILE: api_ui-definition.Rmd
+================================================
+---
+title: "User-interface Definition"
+---
+
+The UI YAML is pretty straight forward. It follows a tree structure that defines the child/parent relationship between the controls.
+The top level or root control is the first thing that is described by the UI YAML.
+
+##Properties
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`name`  | The name of the analysis. | Unique string
+`title`  | Sets the title to be displayed at the top of the option panel. | string
+`jus`  | Defines the syntax version used by the u.yaml file. | string of form 'number.number' 
+`stage`  | Sets the stage display filter. | 0 - Released\
+1 - In development\
+2 - Proposed
+`compilerMode` | Sets the compiler interaction mode. | *enum*: tame, aggressive
+`children`  | Sets the child control definitions. | Array of valid control definitions.
+
+###Example
+
+```YAML
+name:  descriptives
+title: Descriptives
+jus:   '2.0'
+stage: 0
+compilerMode: tame
+children:
+      #array of child definitions
+```
+
+###Further Detail
+
+The root control is a [`ParentControl`](ui-parentcontrol.html) and as the name suggests serves as a parent to child controls. All parent controls contain the property `children` which defines an array of control definitions to be embedded. All UI design happens within the `children` node of the root control. Control definitions are added here in the form we design.
+
+When controls are added to the root control they are added in a list form, from top to bottom of the options panel.
+
+## Controls
+
+There are many different controls that can be used within the jamovi options UI panel. Each control has been designed for a specific option type(s). For example, a `CheckBox` is designed around a `Bool` option type, where as a `ComboBox` displays and writes data to a `List` option. Jamovi provides a solid array of basic controls to cover all the current option types. Controls will continue to be developed as jamovi grows but the current list covers most use cases.
+
+When adding child controls to any `ParentControl`, at the very least the `type` property needs to be specified (as well as the minimum requirements for that control).
+
+```YAML
+name:  descriptives
+title: Descriptives
+jus:   '2.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+    - type: Label
+      label: jamovi is great?
+    - type: Label
+      label: Of cause it is!
+
+```
+ 
+Now we can add, move or adjust any control to meet our needs. Here is a list of controls that can make that possible:
+
+###Base Control
+
+- [BaseControl (abstract)](ui-basecontrol.html)
+
+###Layout Controls
+
+- [ParentControl (abstract)](ui-parentcontrol.html)
+- [LayoutBox](ui-layoutbox.html)
+- [CollapseBox](ui-collapsebox.html)
+- [Supplier](ui-supplier.html)
+- [VariableSupplier](ui-variablesupplier.html)
+- [TargetLayoutBox](ui-targetlayoutbox.html)
+
+####Parent Controls
+
+- [CheckBox](ui-checkbox.html)
+- [RadioButton](ui-radiobutton.html)
+- [Label](ui-label.html)
+
+###Option Controls
+
+- [TextBox](ui-textbox.html)
+- [CheckBox](ui-checkbox.html)
+- [RadioButton](ui-radiobutton.html)
+- [ComboBox](ui-combobox.html)
+- [Label](ui-label.html)
+- [ListBox](ui-listbox.html)
+- [VariableLabel](ui-variablelabel.html)
+- [TermLabel](ui-termlabel.html)
+
+### Display Controls
+
+- [Label](ui-label.html)
+
+
+
+================================================
+FILE: dev-jamovi-org.Rproj
+================================================
+Version: 1.0
+
+RestoreWorkspace: Default
+SaveWorkspace: Default
+AlwaysSaveHistory: Default
+
+EnableCodeIndexing: Yes
+UseSpacesForTab: Yes
+NumSpacesForTab: 4
+Encoding: UTF-8
+
+RnwWeave: Sweave
+LaTeX: pdfLaTeX
+
+BuildType: Website
+
+
+
+================================================
+FILE: index.Rmd
+================================================
+---
+title: "Home"
+---
+
+Hi, and welcome to [dev.jamovi.org](https://dev.jamovi.org), the developer hub for [jamovi](https://www.jamovi.org).
+
+Here you will find resources that cover the development of analyses for jamovi (and R). It's still a work in progress, and we'll be adding to it over time, but the current tutorial series has everything you need to get up and running.
+
+There are forums available at [forum.jamovi.org](https://forum.jamovi.org), so if you have questions about developing modules for jamovi, or feedback on how we can improve the developer hub, we're keen to hear from you there.
+
+contact \<at\> jamovi.org
+
+For those interested in the jamovi platform, it is hosted on GitHub [here](https://github.com/jamovi/jamovi). Don't forget to 'star' us!
+
+Tutorial: [Getting Started](tuts0101-getting-started.html)
+
+## News
+
+### 28-02-2020
+
+Versions 1.2.5 and newer of jamovi on macOS are notarized (This is a requirement Apple have introduced. Without notarization, the user is presented with an error message, and encouraged to move jamovi to the bin! Apple are jerks). Unfortunately, notarized versions of jamovi do not work with `jmvtools`, and it looks like getting them to work together won't be possible.
+
+For development, use an unsigned version of jamovi [available here](https://www.jamovi.org/downloads/jamovi-unsigned.zip).
+
+When starting this version on macOS catalina and newer, the first time you try and start it it will present the nasty error. Hit cancel. Then right-click (cmd-click) on jamovi, select 'Open' from the menu, and then it will give you the option to run it. Once jamovi has been run once, it will start in the usual way from then on.
+
+Apologies for the inconvenience and that Apple are jerks.
+
+### 08-07-2019
+
+We've refined the advanced UI customization in jamovi 1.0.4 and newer. This is not backwards compatible, so we discourage its use in existing modules for the time being (Until the 1.0.4+ is is in broader use). People developing or releasing modules for the first time are encouraged to make use of it. More info [here](ui-advanced-customisation.html).
+
+### 09-06-2017
+
+We've added a new document to our tutorial series describing how jamovi analyses can use *state*. State is used with longer running analyses, and allows the analysis to re-use results that were calculated previously. This can lead to much faster analyses, and a much nicer user experience.
+
+Read more about *state* [here](tuts0203-state.html).
+
+### 20-04-2017 Changes to dev tools for jamovi 0.7.3
+
+We've just released a beta of jamovi 0.7.3 (available from [here](https://www.jamovi.org/download.html)), which brings some significant improvements, and minor changes to developing jamovi modules.
+
+#### Changes to dependency resolution
+
+In the past, we're had a number of difficulties with dependency resolution for jamovi modules. Sometimes jmvtools would install more dependencies than were necessary, and other times not enough. This stemmed from contamination of the R library path, from R packages installed on the system. In this release we've successfully isolated the system libraries from the jmvtools, and only the required dependencies will now be installed.
+
+#### Improvements to .u.yaml files
+
+Previously, .u.yaml files (the UI definition) were automatically generated from .a.yaml files (the analysis definition). This was sometimes problematic when additional changes were made to the .a.yaml files. It wasn't always clear which changes should be propagated to the .u.yaml files, and which should not.
+
+In the 0.7.3, the .a.yaml and .u.yaml files work together. The .u.yaml file, by default, contains minimal information (mostly just describing the layout), and the property values, for example labels, are taken directly from the .a.yaml file. For many people, they will only need to edit the .a.yaml file, and jmvtools can take care of the .u.yaml file itself. More documentation for UI Design will be coming soon.
+
+.u.yaml files using this new scheme will have the `jus`, near the top of the file, specified as `2.0`. .u.yaml files using the older `jus` of `1.0` will be automatically upgraded. Upgraded files will be placed in `tame` `compilerMode` (explained next), you may want to change it to `aggressive`.
+
+#### `compilerMode`: aggressive vs tame
+
+jmvtools also introduces a new option in .u.yaml files: `compilerMode`. By default, .u.yaml files are created in `aggressive` mode. This means that jmvtools will take a heavy handed approach when updating the .u.yaml files. If new options are added to the .a.yaml file, it will aggressively add them into the .u.yaml file, overwriting any manual changes.
+
+In contrast, the `compilerMode` of `tame` does not overwrite manual changes in the u.yaml. The trade off is that it often can't position UI elements as optimally.
+
+We recommend beginning with your .u.yaml files in `aggressive` `compilerMode`, and when you begin to refine your UI by adding custom changes to your .u.yaml files swap over to `tame` `compilerMode` so that your changes are preserved. Again, for a lot of people, `aggressive` mode will be all that they will ever need.
+
+#### Outstanding issues
+
+For the time being, changes to the .a.yaml and/or the .u.yaml files, will still require you to shut jamovi down and restart it before you'll see the changes to the UI. We hope to fix this issue in the next few weeks.
+
+On windows, jmvtools is still not able to find the jamovi installation by default. You will still need to pass the `home` option, or set the `jamovi_home` option.
+
+### 02-04-2017 Added dev mode to jamovi 0.7.2.7
+
+jamovi 0.7.2.7 Adds dev mode, providing a stack trace when an analysis errors for whatever reason. The tutorial has been updated to describe this: [Debugging an Analysis](tuts0105-debugging-an-analysis.html)
+
+
+
+================================================
+FILE: info_project-structure.Rmd
+================================================
+---
+title: "project structure"
+---
+
+the jamovi source structure contains the following components:
+
+directory | contents                       | build command | artifacts |
+----------|--------------------------------|---------------|-----------|
+electron/ | the electron app which represents the entry point of the program | `npm install` | default_app.asar
+server/   | the server code written in python and built on top of tornado    | `python3 setup.py \` `build_ext --inplace` | jamovi.server (python module)
+engine/   | the background processing engine, written in C++ and making use of R | `make` | jamovi-engine (an executable)
+client/   | the html, javascript and css which make up the user interface for jamovi. | `npm install` | js, css, html |
+examples/ | the example data sets | (these can be copied verbatim)
+platform/ | platform specific files, icons, etc.
+
+the `electron/`, `server/`, `engine/` and `client/` subprojects can be built by navigating into their directories and issuing the build command listed in the table above.
+
+## final structure
+
+after building each of these subprojects, the results of the builds are assembled into a final tree for installation. the final jamovi folder structure for ubuntu is as follows:
+
+```
+/usr/lib/jamovi/
+├── bin/
+|   ├── locales/
+|   |   └── ...
+|   ├── resources/
+|   |   ├── electron.asar
+|   |   └── default_app.asar
+|   ├── jamovi
+|   ├── env.conf
+|   └── ...
+└── Resources
+    ├── jamovi
+    │   ├── client/
+    |   |   └── assets/
+    |   |   |   └── ...
+    |   |   └── ...
+    |   ├── examples/
+    |   |   └── ...
+    |   └── server/
+    |       └── jamovi/server/
+    └── modules
+        ├── base
+        |   └── R/
+        |       └── ...
+        └── jmv/
+            └── ...
+
+```
+
+## `bin/`
+
+the electron executable is the entry point for jamovi. it represents a combined web browser interface and nodejs interpreter. in constructing the `bin/` folder, its contents are simply taken from electron release archives (available from https://electron.atom.io), with three exceptions:
+
+- the `jamovi` executable
+- resources/default_app.asar
+- `env.conf`
+
+the `jamovi` executable is simply the `electron` executable renamed.
+
+the `resources/default_app.asar` is the default electron app which electron goes looking for when it starts up. this needs to be replaced with the `default_app.asar` produced by the electron component of jamovi (from the `electron/` folder in the repo).
+
+`env.conf` contains the path settings and environmental variables that jamovi requires. variables which end in `PATH` or `HOME` are resolved relative to the `env.conf`. on ubuntu, it's contents are:
+
+```
+[ENV]
+
+R_HOME=/usr/lib/R
+R_LIBS=/usr/lib/R/site-library:/usr/lib/R/library
+PYTHONPATH=../Resources/jamovi/server
+
+JAMOVI_HOME=..
+JAMOVI_MODULES_PATH=../Resources/modules
+JAMOVI_EXAMPLES_PATH=../Resources/jamovi/examples
+JAMOVI_CLIENT_PATH=../Resources/jamovi/client
+JAMOVI_SERVER_CMD=/usr/bin/python3 -u -m jamovi.server 0
+
+```
+
+## `Resources/jamovi/client`
+
+this folder contains the following files from the `client/` subproject:
+    
+- `index.html`
+- `main.js`
+- `main.css`
+- `analysisui.html`
+- `analysisui.js`
+- `analysisui.css`
+- `resultsview.html`
+- `resultsview.js`
+- `resultsview.css`
+- `assets/*`
+    
+## `Resources/jamovi/server`
+
+this folder should contain the following files and folders from the `server` subproject:
+
+- `jamovi/server/`
+- `jamovi/core.*.so`
+- `jamovi/__init__.py`
+- `jamovi/__pycache__`
+
+note that the `PYTHONPATH` in `env.conf` is `Resources/jamovi/server`, so the final path of the `jamovi/server/` directory will look a bit silly: `Resources/jamovi/server/jamovi/server`
+
+## `Resources/jamovi/examples`
+
+this is just the contents from the `examples/` subfolder
+
+
+
+================================================
+FILE: piwik.html
+================================================
+[Empty file]
+
+
+================================================
+FILE: styles.css
+================================================
+
+div.main-container {
+    max-width: 700px ;
+}
+
+.h1, .h2, .h3, h1, h2, h3 {
+    margin-bottom: 20px;
+}
+
+div.section.level2,
+div.section.level3 {
+    margin-top: 30px ;
+}
+
+div.figure {
+    text-align: center ;
+    margin-top: 20px ;
+    margin-bottom: 30px ;
+}
+
+table {
+    margin-left: auto ;
+    margin-right: auto ;
+}
+
+
+
+================================================
+FILE: tuts0101-getting-started.Rmd
+================================================
+---
+title: "Getting Started"
+---
+
+Before we begin, analyses in jamovi are written in the [R programming language](https://www.r-project.org/). This tutorial assumes you have some knowledge of  R, and ideally some experience in writing R packages.
+
+That out of the way, let's begin!
+
+Development of modules for jamovi requires the `jmvtools` package. In this tutorial we will:
+
+1. install `jmvtools`
+2. ensure that `jmvtools` can find jamovi
+3. build and install a jamovi module from GitHub
+
+## Install `jmvtools`
+
+`jmvtools` is available from the jamovi repo, and can be installed in R with:
+
+```{r eval=FALSE }
+install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+```
+
+## Check `jmvtools` can find jamovi
+
+Now you have `jmvtools` installed, we can check whether it can locate your jamovi installation:
+
+```{r eval=FALSE }
+jmvtools::check()
+```
+
+`jmvtools` searches for jamovi in what might be considered 'usual places`, such as:
+
+- `/Applications`
+- `/usr/lib/jamovi`
+- `C:\Program Files`
+
+If `jmvtools` can't find it, you can specify the path in the call to `check()`:
+
+```{r eval=FALSE }
+jmvtools::check(home='C:\\Users\\jonathon\\Documents\\jamovi')
+```
+
+(you should substitute in your own path, unless your username *is* jonathon, and you've got jamovi in your documents folder).
+
+If you have to specify this path, you can set this for the remainder of the session with `options()`:
+
+```{r eval=FALSE }
+options(jamovi_home='C:\\Users\\jonathon\\Documents\\jamovi')
+```
+
+## Install a Module
+
+Now we have `jmvtools` installed and working, we can use it to build and install a module. If you haven't already, start up jamovi. Next we'll download a module from GitHub, build and install it. we'll use the [Base R](https://github.com/jamovi/jmvbaseR) module -- you can download it using the direct link [here](https://github.com/jamovi/jmvbaseR/archive/master.zip).
+
+Unzip the source directory and open the project file `jmvbaseR.Rproj` in RStudio (or just set your working directory to the source's directory). Now we can call the `install()` function:
+
+```{r eval=FALSE }
+jmvtools::install()   # not to be mistaken for devtools::install()
+```
+
+This will build the module, and install it into jamovi.
+
+If you turn now to your open jamovi window, you'll see a new 'Base R' menu has appeared on the ribbon, with a set of new analyses. The ability to install and update jamovi analyses from R turns out to be pretty nifty, because as we'll see in the next section, we can make changes to an analysis, run `jmvtools::install()` again, and immediately see those changes reflected in jamovi. This makes developing and testing jamovi analyses a breeze!
+
+![](tuts0101-getting-started-baseR.png){ width=551px }
+
+
+Next: [Creating a Module](tuts0102-creating-a-module.html)
+
+
+
+================================================
+FILE: tuts0102-creating-a-module.Rmd
+================================================
+---
+title: "Creating a Module"
+---
+
+In this section we will create a jamovi module from scratch, and install it into jamovi. This section builds on knowledge from the previous: *[Getting Started](tuts0101-getting-started.Rmd)*.
+
+The easiest way to create a module for jamovi is with the `create()` function from the `jmvtools` package:
+
+```{r eval=FALSE }
+jmvtools::create('SuperAwesome')
+```
+
+This will create a module called `SuperAwesome` in the current working directory. If we now look at the contents of the freshly minted SuperAwesome, we will find:
+
+```
+SuperAwesome/
+├── DESCRIPTION
+├── NAMESPACE
+├── jamovi/
+|   └── 0000.yaml
+└── R/
+```
+
+This should seem suspiciously familiar to anyone who's worked on R packages before. That's because jamovi modules *are* R packages, but with that additional `jamovi/0000.yaml` file. With that file, this package becomes a dual citizen: it can be built into an R package, and it can be built into a jamovi module.
+
+If you take a look in the `0000.yaml` file, you'll notice it contains a very similar set of values to the `DESCRIPTION` file. However, as we add analyses to the module, they will come to be listed in this file as well. In the early stages of development, there's not much need to interact with this file, so we'll return to it later.
+
+Next: [Creating an Analysis](tuts0103-creating-an-analysis.html)
+
+
+
+================================================
+FILE: tuts0103-creating-an-analysis.Rmd
+================================================
+---
+title: "Creating an Analysis"
+---
+
+## T-Test
+
+In this section, having previously [created a module](tuts0102-creating-a-module.html), we are going to add a t-test analysis to it.
+
+An *independent samples t-test* is typically used to determine whether two groups differ on some variable. For example, you may be interested in whether children from one neighbourhood are a different height than children from another neighbourhood. In this case, a data set would have one row for each child - one column would contain their heights, the other column would contain which neighbourhood they are from.
+
+For those familiar with the `t.test` function built into R, if the columns were `height` and `neighbourhood`, the test could be run:
+
+```{r eval=FALSE }
+t.test(height ~ neighbourhood, data=data)
+```
+
+In this next section, we are going to create a t-test jamovi analysis which makes use of this function.
+
+## Creating an Analysis
+
+The easiest way to begin an analysis for a jamovi module is to use the `addAnalysis()` function from the `jmvtools` package. First we'll set the working directory to the `SuperAwesome` directory (created by `jmvtools::create()` in the previous section), and then call `addAnalysis()`
+
+```{r eval=FALSE }
+setwd('SuperAwesome')
+jmvtools::addAnalysis(name='ttest', title='Independent Samples T-Test')
+```
+## Anatomy of an Analysis
+
+If we now look at the `SuperAwesome` module's source tree, we have:
+
+```
+SuperAwesome/
+├── DESCRIPTION
+├── NAMESPACE
+├── jamovi/
+|   ├── ttest.a.yaml
+|   ├── ttest.r.yaml
+|   ├── ttest.u.yaml
+|   └── 0000.yaml
+└── R/
+    ├── ttest.h.R
+    └── ttest.b.R
+```
+
+At this point I'm a little embarrassed to say that there are **5** files per analysis. This structure does make things a lot more manageable, so although it may seem excessive at first, there's a good rationale behind it. Just bear with me, it's not as overwhelming as it seems.
+
+file          | contains                               | api |
+------------- | ---------------------------------------| --- |
+ttest.a.yaml  | The *analysis definition* contains all the meta information about the analysis, describes the arguments and ui options it receives, etc. We'll cover this in the tutorial next. | [API](api_analysis-definition.html)
+ttest.r.yaml  | The *results definition* contains all the information about the way the results for the analysis are displayed. | [API](api_results-definition.html)
+ttest.u.yaml  | The *ui definition* is automatically generated from the `.a.yaml` file. For many analyses this will produce a good result, and won't need further editing. | [API](api_ui-definition.html)
+ttest.h.R     | The *header file* is automatically generated from the `.a.yaml` and `.r.yaml` files above, and makes writing your analysis a lot easier. You don't ever need to look at this file, and you certainly shouldn't edit it. |
+ttest.b.R     | The *analysis implementation* is where you'll write your analysis, and where you'll spend most of your time when developing jamovi analyses. As we'll see, this is an empty template waiting for an implementation. |
+
+## The Analysis Definition
+
+First up, we'll look at the *analysis definition* in the `ttest.a.yaml` file. yaml is a simple, easy to read text format for structured data. If you're new to yaml, you can read more about the format [here](http://yaml.org/spec/1.2/spec.html), but that probably won't be necessary. It's intuitive and readable, and you'll probably have no trouble picking it up.
+
+`jmvtools::addAnalysis()` creates a default `.a.yaml` file with a handful of basic options. Happily for this tutorial, these happen to correspond to the options that a t-test requires. Our generated `ttest.a.yaml` file is as follows:
+
+```{yaml }
+---
+name:  ttest
+title: Independent Samples T-Test
+jas:     "1.1"
+version: "1.0.0"
+
+options:
+    - name: data
+      type: Data
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+
+    - name: alt
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: notEqual
+          title: Not equal
+        - name: oneGreater
+          title: One greater
+        - name: twoGreater
+          title: Two greater
+      default: notEqual
+
+    - name: varEq
+      title: Assume equal variances
+      type: Bool
+      default: true
+```
+
+At the top of the file is information about the analysis:
+
+```{yaml }
+---
+name:  ttest
+title: Independent Samples T-Test
+jas:     "1.1"
+version: "1.0.0"
+...
+```
+
+The name is a unique identifier for the analysis, but it also corresponds to the name of the R function which will be made available from the package. As such, the usual constraints on function names apply: it must begin with a letter, and can only be made up of letters and numbers (jamovi disallows analysis names with dots in them).
+
+The title of the analysis is how the analysis appears in menus, help text, and in the results. Next is the `jas` or 'jamovi analysis spec'; you should just leave this at '1.1'. Next, we have the analysis version. Each analysis is versioned in jamovi, and you should make use of [semantic versioning](http://semver.org/) (but let's not worry about that for now).
+
+The options come next; `data`, `dep`, `group`, `alt` and `varEq`. When used as an R package, these options correspond to the arguments passed to the analysis R function. In this case they will be:
+
+```{r eval=FALSE }
+ttestIS(data, dep, group, alt='not equal', varEq=FALSE)
+```
+
+(If you peek inside `ttest.h.R`, you'll find this exact function has been generated.)
+
+When used in jamovi, these options correspond to the UI options for the analysis. Let's look at that now. Install the module we've just created and open up jamovi (or open up jamovi first, then install the module --- the order doesn't matter):
+
+```{r eval=FALSE }
+jmvtools::install()
+
+```
+
+(Note that if your module has additional dependencies, these will be installed by `jmvtools::install()` at this stage as well. You can read more about additional dependencies in [Additional Notes](tuts0108-additional-notes.html) at the end of this tutorial.)
+
+The `SuperAwesome` menu will now be available, and will contain `Independent Samples T-Test`.
+
+![](tuts0103-creating-an-analysis-menu.png){ width=407px }
+
+Selecting this analysis will bring up the UI:
+
+![](tuts0103-creating-an-analysis-ui.png){ width=400px }
+
+We can see how the UI elements created, correspond to the analyses' options. Revisiting the `dep` and `group` options from `ttestis.a.yaml`:
+
+```{yaml }
+...
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+...
+```
+
+We see they are of type `Variable`. This means they require the user to provide a column from the data set. As can be seen in the UI, they are represented as 'drop targets', where columns from the data set can be assigned through drag and drop.
+
+Turning to the option `alt`:
+
+```{yaml }
+...
+    - name: alt
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: notEqual
+          title: Not equal
+        - name: oneGreater
+          title: One greater
+        - name: twoGreater
+          title: Two greater
+      default: notEqual
+...
+```
+
+`alt` is of type list, which has been turned into a drop down list, allowing the user to choose between the options.
+
+Finally, looking at `varEq`:
+
+```{yaml }
+...
+    - name: varEq
+      title: Assume equal variances
+      type: Bool
+      default: true
+```
+
+We see that options of type `Bool` are represented as checkboxes.
+
+There are a number of different option types. A more comprehensive description of each of them, and their properties is available in the [API](api_analysis-definition.html).
+
+Of course, our analysis doesn't actually do anything yet -- we haven't written any R code.
+
+[Implementing an Analysis](tuts0104-implementing-an-analysis.html)
+
+
+
+================================================
+FILE: tuts0104-implementing-an-analysis.Rmd
+================================================
+---
+title: "Implementing an Analysis"
+---
+
+In this section we will add the implementation, that is the R code, to perform our t-test analysis.
+
+In jamovi analyses, the implementation lives in the `.b.R` file, so if we look in our `ttest.b.R` file we see:
+
+```{r eval=FALSE }
+# This file is a generated template, your changes will not be overwritten
+
+#' @rdname jamovi
+#' @export
+ttestClass <- R6::R6Class(
+    "ttestClass",
+    inherit = ttestBase,
+    private = list(
+        .run = function() {
+
+            # `self$data` contains the data
+            # `self$options` contains the options
+            # `self$results` contains the results object (to populate)
+
+        })
+)
+
+```
+
+This is another file that our call to `jmvtools::create()` created. Now this may appear unfamiliar, and might not look like most of the R code you've written, but that's OK, you don't really need to know what's going on here. What *is* going on here is that the analysis is represented by an R6 class. For the curious, you can read more about R6 classes [here](https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html), but all you really need to know is that you write your analysis in the `.run` function, and you can safely ignore the rest.
+
+You'll also notice that the `.run()` function receives no arguments. We access the values that the user specified (either in the jamovi ui, or as arguments to the generated `ttestIS()` function) through `self`. Again, this may seem a little unfamiliar, but it is very straight forward.
+
+As covered in the [previous section](tuts0103-creating-an-analysis.html), our t-test has four options (as defined in `ttest.a.yaml`), `dep`, `group`, `alt` and `varEq`, we can access the values for each of these in our analysis with:
+
+ - `self$options$dep`
+ - `self$options$group`
+ - `self$options$alt`
+ - `self$options$varEq`
+
+Additionally, `ttest.a.yaml` defined the special `data` option, which means we can access the data provided by the user as a data frame (either the data loaded in jamovi, or the data passed as an argument to `ttestIS()` function in R), with:
+
+```{r eval=FALSE }
+self$data
+```
+
+Now we have access to the options, and access to the data, we can begin writing our analysis as follows:
+
+```{r eval=FALSE }
+ttestClass <- R6::R6Class("ttestClass",
+    inherit=ttestBase,
+    private=list(
+        .run=function() {
+
+            formula <- paste(self$options$dep, '~', self$options$group)
+            formula <- as.formula(formula)
+        
+            results <- t.test(formula, self$data)
+        
+            print(results)
+        })
+)
+```
+
+First, we take the values of `self$options$dep` and `self$options$group`, which are both strings and assemble them into a formula. Then we can call the `t.test()` function passing in this formula, and the `self$data` data frame. Finally, we print the result.
+
+Now this analysis will and does work; however when running in jamovi, the result of the print statement will appear at the terminal, rather than in the application's results area (where the user would like it). To remedy this, rather than simply printing the results, we assign the results to the analysis' results object. When run in an R session, the results will still be printed, but when run in jamovi, the results will appear in the results panel. We assign to the analysis' result object using (you guessed it), `self$results`. Our new function will now read:
+
+```{r eval=FALSE }
+ttestClass <- R6::R6Class("ttestClass",
+    inherit=ttestBase,
+    private=list(
+        .run=function() {
+
+            formula <- paste(self$options$dep, '~', self$options$group)
+            formula <- as.formula(formula)
+        
+            results <- t.test(formula, self$data, var.equal=self$options$varEq)
+        
+            self$results$text$setContent(results)
+        })
+)
+```
+
+In this new function, we get the results element called `text` from `self$results`, and call `setContent()` with the results from the t-test. We'll cover results elements in greater depth in the next section, but for now this is all you need to know.
+
+So now our analysis is implemented, it's time to install it and try it out. Install the module with the usual:
+
+```{r eval=FALSE }
+jmvtools::install()
+```
+
+Now open the `Tooth Growth` data set from the jamovi examples (File -> Examples -> Tooth Growth). Assign the `len` column to the `Dependent Variable`, and the `supp` column to the `Grouping Variable`. You should have something like the following:
+
+![](tuts0104-implementing-an-analysis.png){ width=1260px }
+
+Similarly, we can install this module as an R package using the `devtools` package (not to be confused with `jmvtools`), and run the same analysis in an interactive R session:
+
+```{r, eval=FALSE}
+devtools::install()
+library(SuperAwesome)
+data(ToothGrowth)
+ttest(data=ToothGrowth, dep='len', group='supp')
+```
+```
+ Independent Samples T-Test
+
+	Two Sample t-test
+
+data:  len by supp
+t = 1.9153, df = 58, p-value = 0.06039
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.1670064  7.5670064
+sample estimates:
+mean in group OJ mean in group VC 
+        20.66333         16.96333 
+```
+
+Before we continue, astute readers will have realised that assembling our formula with `paste` is problematic. If either column name has spaces or special characters, paste will produce a bad formula. For example, if the user specified a dependent variable called `the fish` --- the resultant formula would be `the fish~group`, and the call to `as.formula()` would fail:
+
+```{r, eval=FALSE}
+as.formula('the fish~group')
+```
+```
+## Error in parse(text = x, keep.source = FALSE) : 
+##   <text>:1:5: unexpected symbol
+## 1: the fish
+##         ^
+```
+
+The names of the columns making up the formula need to be escaped, or quoted. Fortunately, `jmvcore` provides the function `constructFormula()`, which assembles simple formulas appropriately escaping column names:
+
+```{r, eval=FALSE}
+constructFormula('the fish', c('group'))
+```
+```
+## [1] "`the fish`~group"
+```
+
+We can modify our analysis to use this instead:
+
+```{r, eval=FALSE}
+ttestISClass <- R6Class("ttestISClass",
+    inherit=ttestISBase,
+    private=list(
+        .run=function() {
+
+            formula <- constructFormula(self$options$dep, self$options$group)
+            formula <- as.formula(formula)
+        
+            results <- t.test(formula, self$data)
+        
+            self$results$text$setContent(results)
+        })
+)
+```
+
+The `jmvcore` package contains many such useful functions. It would be worth checking them out.
+
+Next: [Debugging an Analysis](tuts0105-debugging-an-analysis.html)
+
+
+
+
+================================================
+FILE: tuts0105-creating-rich-results.Rmd
+================================================
+---
+title: "Creating Rich Results"
+---
+
+In this section, we will add rich results to our analysis; a nice APA formatted table like this:
+
+![](tuts0105-creating-rich-results-apa.png){ width=337px }
+
+Rich results are visually appealing, and make it easier for users of your module to 'parse' and understand the results your module produces. A lot of people find statistics challenging, so we might as well make them as accessible and easy to read as possible.
+
+## The Results Definition
+
+In order to provide rich results, we need to add some entries into the results definition. This is the `ttest.r.yaml` file which was created earlier in this tutorial series:
+
+```{yaml }
+---
+name:  ttest
+title: Independent Samples T-Test
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Independent Samples T-Test
+      type:  Preformatted
+```
+
+This is pretty similar to the `ttest.a.yaml` file; there's a name, a title, and a jamovi results spec (`jrs`) (note, this is different to the `jas` in the `.a.yaml` file). `items` comes next, and it describes all the items that make up the results. For example, the results could be made up of two tables and a plot. Each item in the results is listed here.
+
+At present, the results contains a single `Preformatted` results item called `text` with the title `Independent Samples T-Test`. If you think back to the [previous section](tuts0104-implementing-an-analysis.html), we accessed a results object with the following:
+
+```{r eval=FALSE}
+self$results$text
+```
+
+Now you can see where this seemingly arbitrary name `text` came from. This is how different results items are accessed.
+
+## Adding a Table
+
+Let's add a table for our t-test results. For the time being, we'll leave the existing 'Preformatted' results item and add the table underneath. This will let us check that the results we populate the table with are correct.
+
+Modify `ttest.r.yaml` so it reads:
+
+```{yaml }
+---
+name:  ttest
+title: Independent Samples T-Test
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Independent Samples T-Test
+      type:  Preformatted
+
+    - name:  ttest
+      title: Independent Samples T-Test
+      type: Table
+      rows:  1
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: t
+          type: number
+        - name: df
+          type: integer
+        - name: p
+          type: number
+          format: zto,pvalue
+```
+
+With these modifications, we've added a new table called `ttest` with the title `Independent Samples T-Test`. We've also specified that it is to have 1 row, and that it has four columns; `var`, `t`, `df` and `p`. Notice that we've specified an empty string for the title of column `var`. If a title isn't specified the column name is used instead.
+
+The `type` for each column is specified as either `text`, `number` or `integer`. The type affects the way the column is formatted. `text` columns have their content left aligned, `number` and `integer` columns have their content right aligned. `integer` columns are formatted as whole numbers (no decimal places).
+
+The `format` field is a string of comma separated values. It provides additional information on how a column should be formatted. In the case of the p column, it has two formats applied, `zto` and `pvalue`. `zto` indicates that a value ranges between zero and one; this causes it to be rendered to a fixed number of decimal places. In contrast, values without this format are formatted to a fixed number of significant figures. This makes the biggest difference with values close to zero; without `zto` the value 0.006 would be rendered `0.00600` (3 significant figures), where as with `zto` it would be rendered `0.006` (3 decimal places). With values like correlation co-efficients and other values which range between zero and one, the latter is generally preferred.
+
+The other format is `pvalue`, which indicates that values in this column are [p-values](https://en.wikipedia.org/wiki/P-value). If any of these values drop below a threshold (.001 by default), they will be replaced with `< .001`.
+
+Now that we've set up our table, we can see what it looks like by reinstalling the module:
+
+```{r eval=FALSE}
+jmvtools::install()
+```
+
+If you return to jamovi now, you'll see that the installed module has been updated and our earlier analysis has been rerun. The table we added is now visible in the results. This is pretty handy: whenever you reinstall a module, it is updated immediately. Your results should now look as follows:
+
+![](tuts0105-creating-rich-results-blank-table.png){ width=509px }
+
+## Populating a Table
+
+Now we've created a table, let's fill it in with the values from the t-test. For this, we need to extract the actual values from the t-test object returned by R's `t.test` function. Rather awkwardly, analyses in R don't return consistent results objects; there's generally no predictable way to know how to access the underlying values. Some R functions return lists, others return S3 objects, others S4. Some require reading the values with indices (`[[x]]`), others require the use of slots (`@`). It generally requires a bit of trial and error to figure out how to access the underlying values of a results object. One useful function for this is the `mode()` function. For example, we can call mode on a `t.test` results object like so:
+
+```{r}
+results <- t.test(1:5)
+mode(results)
+```
+
+This tells us that the results object from the t.test function is a list (although somewhat in disguise). We can then use the functions we normally use on lists, for example:
+
+```{r}
+results <- t.test(1:5)
+names(results)
+```
+
+With a little more tinkering we can figure out that `results$statistic` contains the *t* statistic, `results$parameter` contains the degrees of freedom, and `results$p.value` contains the p value (that last one probably didn't require that much tinkering).
+
+We can assign each of these values to the row in our table with the `setRow()` function:
+
+```{r eval=FALSE}
+table <- self$results$ttest
+table$setRow(rowNo=1, values=list(
+    var=self$options$dep,
+    t=results$statistic,
+    df=results$parameter,
+    p=results$p.value
+))
+```
+
+Now if we reinstall our module:
+
+```{r eval=FALSE}
+jmvtools::install()
+```
+
+Our results in jamovi should look something like this:
+
+![](tuts0105-creating-rich-results-filled-table.png){ width=509px }
+
+Now we have everything working, let's remove the text results:
+
+```{r eval=FALSE}
+ttestISClass <- R6Class("ttestISClass",
+    inherit=ttestISBase,
+    private=list(
+        .run=function() {
+
+            formula <- constructFormula(self$options$dep, self$options$group)
+            formula <- as.formula(formula)
+        
+            results <- t.test(formula, self$data)
+        
+            table <- self$results$ttest
+            
+            table$setRow(rowNo=1, values=list(
+                var=self$options$dep,
+                t=results$statistic,
+                df=results$parameter,
+                p=results$p.value
+            ))
+        })
+)
+```
+
+then perform a reinstall with `jmvtools::install()`. Now we have a nice, attractive, minimalist t-test.
+
+![](tuts0105-creating-rich-results-final-table.png){ width=287px }
+
+Let's also take a look at running this analysis in an R session. We can install the package into R with:
+
+```{r, eval=FALSE}
+devtools::install()  # note here we're using devtools, not jmvtools
+```
+
+and run the analysis with:
+
+```{r, eval=FALSE}
+library(SuperAwesome)
+data("ToothGrowth")
+ttest(ToothGrowth, dep='len', group='supp')
+```
+
+```
+ Independent Samples T-Test
+
+ Independent Samples T-Test     
+ ────────────────────────────── 
+          t       df    p       
+ ────────────────────────────── 
+   len    1.92    55    0.061   
+ ────────────────────────────── 
+```
+
+As can be seen, a nicely formatted table has been generated in R as well. Everything is maintained, right down to the number of decimal places. In this way jamovi can make R packages --- even if you have no intention of publishing as jamovi modules --- more attractive, easier to read, and more consistent too.
+
+Next: [Adding Plots](tuts0106-adding-plots.html)
+
+
+
+================================================
+FILE: tuts0105-debugging-an-analysis.Rmd
+================================================
+---
+title: "Debugging an Analysis"
+---
+
+Hopefully you got throw the last section without encountering any errors in your analysis. In this section, we'll explore how to debug an analysis which is going wrong. For example, if we change our `.run()` function to produce an error:
+
+```
+ttestISClass <- R6Class("ttestISClass",
+    inherit=ttestISBase,
+    private=list(
+        .run=function() {
+
+            t.test(c(Inf, 3))  # <-- produces an error!
+        })
+)
+```
+
+We receive the following error message.
+
+![](tuts0105-debugging-an-analysis-error.png){ width=290px }
+
+In this example, our code is only one line of code, so we can be reasonably confident where the problem lies. However, in practice software can be two or three or even more lines of code. In more complex situations, it can be handy to have a 'stack trace' which tells us where the problem occurred. jamovi can be placed in 'dev mode', which displays stack traces when errors occur. dev mode can be toggled from the app menu to the top right of the jamovi window:
+
+![](tuts0105-debugging-an-analysis-dev-mode.png){ width=294px }
+
+With dev mode turned on, we can see the stack trace and see that the call to `t.test(c(Inf, 3))` is responsible for the error.
+
+![](tuts0105-debugging-an-analysis-stack.png){ width=356px }
+
+When developing jamovi modules, it's best to just leave dev mode on.
+
+Next: [Creating Rich Results](tuts0105-creating-rich-results.html)
+
+
+
+
+================================================
+FILE: tuts0106-adding-plots.Rmd
+================================================
+---
+title: "Adding Plots"
+---
+
+In this section, we'll add a plot to the t-test analysis we've been developing in this series. A plot is another item to appear in the results, so we'll add another entry into our `ttest.r.yaml` file:
+
+```{yaml }
+---
+name:  ttest
+title: Independent Samples T-Test
+jrs:   '1.1'
+
+items:
+    - name:  ttest
+      title: Independent Samples T-Test
+      type: Table
+      rows:  1
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: t
+          type: number
+        - name: df
+          type: integer
+        - name: p
+          type: number
+          format: zto,pvalue
+    
+    - name: plot
+      title: Descriptives Plot
+      type: Image
+      width:  400
+      height: 300
+      renderFun: .plot
+```
+
+Same as before, we define an item with a `name`, `title` and a `type`; in this case the type is `Image`. Additionally, we define `renderFun` which is the name of the function responsible for rendering the image. Whatever we specify as the render function, we must add as a *private member function* to `ttestClass` in `ttest.b.R`:
+
+```{r eval=FALSE }
+#' @export
+ttestClass <- R6::R6Class(
+    "ttestClass",
+    inherit = ttestBase,
+    private = list(
+        .run = function() {
+            formula <- paste(self$options$dep, '~', self$options$group)
+            formula <- as.formula(formula)
+            
+            results <- t.test(formula, self$data)
+            
+            table <- self$results$ttest
+            table$setRow(rowNo=1, values=list(
+                var=self$options$dep,
+                t=results$statistic,
+                df=results$parameter,
+                p=results$p.value
+            ))
+        },
+        .plot=function(image, ...) {  # <-- the plot function
+        
+        })
+)
+```
+
+## Adding ggplot2
+
+We're going to use `ggplot2` for plotting, so make sure you have that installed. To use ggplot2 in this package/module, we need to add some entries into the DESCRIPTION and NAMESPACE files. We add ggplot2 to the imports line in the DESCRIPTION, so it reads:
+
+```
+Imports: jmvcore, R6, ggplot2
+```
+
+and we'll add the following line into NAMESPACE:
+
+```
+import(ggplot2)
+```
+
+These entries are standard for using R code from other packages in a package. More information is available in [Writing R Extensions](https://cran.r-project.org/doc/manuals/r-release/R-exts.html).
+
+Now we have ggplot2 ready, we can proceed with using it in our analysis.
+
+## Implementing Plots
+
+In jamovi modules, plotting occurs in two stages; first the data for the plot is prepared, then the plot is rendered. The two stages mean that if the image is resized, or the user requests a different file format, only the rendering needs to be performed again --- the data preparation needs only to occur once.
+
+For the t-test, we're going to plot a mean for each of the groups, and the standard errors. In `ggplot2`, we're required to assemble these 'plot points' into a data frame, which we will do as follows:
+
+```{r eval=FALSE}
+    means  <- aggregate(formula, self$data, mean)[,2]
+    ses    <- aggregate(formula, self$data, function(x) sd(x)/sqrt(length(x)))[,2]
+    sel    <- means - ses  # standard error lower bound
+    seu    <- means + ses  # standard error upper bound
+    levels <- base::levels(self$data[[self$options$group]])
+    plotData <- data.frame(level=levels, mean=means, sel=sel, seu=seu)
+```
+```
+##   level     mean      sel      seu
+## 1    OJ 20.66333 19.45733 21.86934
+## 2    VC 16.96333 15.45417 18.47250
+```
+
+This plot data we assign to the image using the `setState()` function:
+
+```{r eval=FALSE}
+    image <- self$results$plot
+    image$setState(plotData)
+```
+
+Next, we'll add the plotting code into the `.plot()` function we created:
+
+```{r eval=FALSE}
+    .plot=function(image, ...) {
+        plotData <- image$state
+        plot <- ggplot(plotData, aes(x=level, y=mean)) +
+            geom_errorbar(aes(ymin=sel, ymax=seu, width=.1)) +
+            geom_point(aes(x=level, y=mean)) +
+            labs(title=self$options$dep)
+        print(plot)
+        TRUE
+    }
+```
+
+The plot function accepts an argument `image`, which corresponds to the image object we called `setState()` on. We can retrieve the state object from this image with `image$state`, which we can see is being assigned to `plotData`.
+
+Following this are a number of calls to `ggplot2` functions. A full discussion of how to use ggplot2 is **well and truly** beyond the scope of this document, but there are many excellent resources available online.
+
+Next we explicitly print the ggplot object. When using ggplot interactively in an R session, calling `ggplot()` leads to the creation of the plot, however, when calling ggplot from inside a function, it is necessary to explicitly call `print()`.
+
+The final statement is `TRUE` which is the return value. Don't forget this! Returning true notifies the rendering system that you have plotted something. If you don't return true, your plot will not appear. There are situations where the user may not have specified enough information for plotting, in which case the function should return `FALSE`.
+
+So this is our final `ttest.b.R` file:
+
+```{r eval=FALSE }
+#' @export
+ttestClass <- R6::R6Class(
+    "ttestClass",
+    inherit = ttestBase,
+    private = list(
+        .run = function() {
+            formula <- paste(self$options$dep, '~', self$options$group)
+            formula <- as.formula(formula)
+            
+            results <- t.test(formula, self$data)
+            
+            table <- self$results$ttest
+            table$setRow(rowNo=1, values=list(
+                var=self$options$dep,
+                t=results$statistic,
+                df=results$parameter,
+                p=results$p.value
+            ))
+            
+            means  <- aggregate(formula, self$data, mean)[,2]
+            ses    <- aggregate(formula, self$data, function(x) sd(x)/sqrt(length(x)))[,2]
+            sel    <- means - ses  # standard error lower bound
+            seu    <- means + ses  # standard error upper bound
+            levels <- base::levels(self$data[[self$options$group]])
+            plotData <- data.frame(level=levels, mean=means, sel=sel, seu=seu)
+            
+            image <- self$results$plot
+            image$setState(plotData)
+        },
+        .plot=function(image, ...) {
+            plotData <- image$state
+            plot <- ggplot(plotData, aes(x=level, y=mean)) +
+                geom_errorbar(aes(ymin=sel, ymax=seu, width=.1)) +
+                geom_point(aes(x=level, y=mean)) +
+                labs(title=self$options$dep)
+            print(plot)
+            TRUE
+        })
+)
+```
+
+And these are our final results, including the plot:
+
+![](tuts0106-adding-plots-final.png){width=441px}
+
+Next: [Distributing Modules](tuts0107-distributing-modules.html)
+
+
+
+================================================
+FILE: tuts0107-distributing-modules.Rmd
+================================================
+---
+title: "Distributing Modules"
+---
+
+Calls to `jmvtools::install()` produce a file with the extension `.jmo` in the current working directory. This file *is* your module, and can be distributed to other people, to 'side-load'. This is a good way to distribute your module during testing, where you might want to send it to a handful of people. People can side-load modules from within the jamovi store (accessible from a menu at the top right of jamovi).
+
+Once you are satisfied that your module is ready for broader distribution, we encourage you to submit it to the jamovi store. This makes your module browseable and discoverable by anyone using jamovi.
+
+If you have a module you would like to submit to the jamovi store, do get in touch with us: [contact@jamovi.org](mailto:contact@jamovi.org)
+
+
+
+================================================
+FILE: tuts0108-additional-notes.Rmd
+================================================
+---
+title: "Additional Notes"
+---
+
+## Dependencies
+
+`jmvtools::install()` also downloads all your packages dependencies (listed in `DESCRIPTION`), and bundles them into your module. This ensures that the module has everything it needs, and also that a module will always use predictable dependency versions. This results in larger module file sizes, but arguably is a small price to pay for reproducibility given how inexpensive disk space is.
+
+## Namespaces
+
+We recommend you minimise import statements in your `NAMESPACE` file. These can lead to substantial delays when your package is loading, as *all* listed imports in the `NAMESPACE` file are loaded whether they are required or not.
+
+Instead, access functions with their full namespace, i.e.:
+
+```
+stats::t.test(...)
+```
+
+With this approach, dependencies are only loaded when they are required. This improves start-up time (the delay between a user selecting one of your analyses, and results appearing for the first time), and can lead to a significant reduction in the amount of RAM your module uses.
+
+
+
+================================================
+FILE: tuts0201-data-binding.Rmd
+================================================
+---
+title: "Tables"
+---
+
+## Dynamic Tables
+
+In the previous tutorial series, we looked at [constructing and populating tables](tuts0105-creating-rich-results.html). The .r.yaml file contained:
+
+```
+...
+    - name:  ttest
+      title: Independent Samples T-Test
+      type: Table
+      rows:  1
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: t
+          type: number
+        - name: df
+          type: integer
+        - name: p
+          type: number
+          format: zto,pvalue
+```
+
+That is, the results contained a table called `ttest` with the title 'Independent Samples T-Test', with 4 columns and 1 row.
+
+In practice however, the number of rows in the table often isn't fixed. They may vary based on the options the user has selected, or based on the results of the analysis itself. In this tutorial, we will concentrate on the former.
+
+In the previous tutorial series, we created a t-test analysis. It allowed the user to specify a single dependent variable, and a single grouping variable. However, we could make this analysis more convenient by allowing people to specify *multiple* dependent variables. For example, a data set might contain the columns 'gender', 'height' and 'weight'. By allowing multiple dependent variables, the user could specify 'height' and 'weight' as the dependent variables, and 'gender' as the grouping variable. Our analysis could then perform multiple t-tests (one for each dependent variable). The resulting table might look something like this:
+
+![TODO]()
+
+The first thing we need to do is change the dependent variable in the .a.yaml file, from `Variable` to `Variables`.
+
+```
+---
+name:  ttest
+title: Independent Samples T-Test
+menuGroup: SuperAwesome
+version: '1.0.0'
+jas: '1.1'
+
+options:
+    - name: data
+      type: Data
+
+    - name: deps                  # <-- let's add an s
+      title: Dependent Variables  # <-- and another s
+      type: Variables             # <-- Variables with an s!
+      
+...
+```
+
+**NOTE** there is currently a bug in jmvtools, where the UI is not updated appropriately. In this scenario, jmvtools *should* update the .u.yaml file to accept multiple variables, however this does not happen. It is possible to update the .u.yaml file by hand, but it's generally easiest to simply delete the .u.yaml file, and let jmvtools create one from scratch. This is something which will be fixed in the coming weeks.
+
+**NOTE** that you will have to shut jamovi down, and restart it in order to see changes to the analysis UI.
+
+As we have changed the name and type of the `dep` variable, our t-test will no longer work. For now, you should comment out or delete the content of the `.run()` function of the t-test analysis, otherwise it will produce a number of errors. We will return to it later in this tutorial.
+
+Having performed these modifications, your t-test UI should look something like:
+
+![TODO]()
+
+As can be seen, multiple dependent variables can now be specified.
+
+Now let's return to our .y.raml file, to the `rows` value in particular:
+
+```
+...
+- name:  ttest
+      title: Independent Samples T-Test
+      type: Table
+      rows: 1
+...
+```
+
+What we now want, is not 1 row, but rather 1 row *per* dependent variable. If one variable is assigned to the option `deps`, then we want the table to have 1 row. If two variables are assigned to the option `deps`, then the table should have two rows, etc.
+
+The way we do this, is with what's called 'data-binding'. Data-binding is where we 'bind' a particular property of a results object, to an option. In this case, we want to 'bind' the number of rows to the `deps` option. We do this be specifying the option inside of parentheses (or brackets).
+
+```
+...
+- name:  ttest
+      title: Independent Samples T-Test
+      type: Table
+      rows: (deps)
+...
+```
+
+When bound in this way, the number of rows in the table always matches the number of variables specified by the user. Let's reinstall our module and see this in action:
+
+![TODO]()
+
+As can be seen, our table grows and shrinks accordingly. But we can do one better. The first column should contain the variable name, and although we can add this using the Table's `setRow()` function, there is a better way to do this. We can specify the `content` of the column in the .r.yaml file.
+
+The `content` in the .r.yaml file can be a string literal, but it can also be a data-binding as well. When the rows of a table are bound to an option, each row has a key associated with it. When bound to an option of type `Variables`, each row's key corresponds to the Variable for that row. This allows us to bind the content of a column, to each row's key, as follows:
+
+```
+items:
+    - name:  ttest
+      title: Independent Samples T-Test
+      type:  Table
+      rows:  (deps)
+      columns:
+        - name: var
+          title: ''
+          type: text
+          content: ($key)  # <- here!
+```
+
+`$key` is a special value which maps to the row's key. Make this change, and reinstall the module with `jmvtools::install()`. As can be seen the first column is now filled in appropriately.
+
+![TODO]()
+
+Data-binding is nice, because it often leads to much simpler code. The .yaml files are able to take care of a lot of aspects of the results objects, and allows the R code (in the .b.R files) to be much simpler, and focused on performing the calculations. In computer science, this is called *[separation of concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)*.
+
+Now all we need do is fill the values of the table in. We can do this using either the `rowKey` or the `rowNo`.
+
+```
+    .run=function() {
+    
+        table <- self$results$ttest
+    
+        for (dep in self$options$deps) {
+    
+            formula <- jmvcore::constructFormula(dep, self$options$group)
+            formula <- as.formula(formula)
+        
+            results <- t.test(formula, self$data)
+        
+            table$setRow(rowKey=dep, values=list(  # set by rowKey!
+                t=results$statistic,
+                df=results$parameter,
+                p=results$p.value
+            ))
+        }
+    }
+```
+
+Note that this analysis will not work if you specify a nominal or ordinal variable as a dependent. This we will handle in the next tutorial.
+
+
+
+================================================
+FILE: tuts0201-dynamic-tables.Rmd
+================================================
+---
+title: "Dynamic Tables"
+---
+
+In the previous tutorial series, we looked at [constructing and populating tables](tuts0105-creating-rich-results.html). The .r.yaml file contained:
+
+```
+...
+    - name:  ttest
+      title: Independent Samples T-Test
+      type: Table
+      rows:  1
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: t
+          type: number
+        - name: df
+          type: integer
+        - name: p
+          type: number
+          format: zto,pvalue
+```
+
+That is, the results contained a table called `ttest` with the title 'Independent Samples T-Test', with 4 columns and 1 row.
+
+In practice however, the number of rows in the table often isn't fixed. They may vary based on the options the user has selected, or based on the results of the analysis itself. In this tutorial, we will concentrate on the former.
+
+In the previous tutorial series, we created a t-test analysis. It allowed the user to specify a single dependent variable, and a single grouping variable. However, we could make this analysis more convenient by allowing people to specify *multiple* dependent variables. For example, a data set might contain the columns 'gender', 'height' and 'weight'. By allowing multiple dependent variables, the user could specify 'height' and 'weight' as the dependent variables, and 'gender' as the grouping variable. Our analysis could then perform multiple t-tests (one for each dependent variable). The resulting analysis might look something like this:
+
+![](tuts0201-dynamic-tables-final.png)
+
+The first thing we need to do is change the dependent variable in the .a.yaml file, from `Variable` to `Variables`.
+
+```
+---
+name:  ttest
+title: Independent Samples T-Test
+menuGroup: SuperAwesome
+version: '1.0.0'
+jas: '1.1'
+
+options:
+    - name: data
+      type: Data
+
+    - name: deps                  # <-- let's add an s
+      title: Dependent Variables  # <-- and another s
+      type: Variables             # <-- Variables with an s!
+      
+...
+```
+
+**NOTE** there is currently a bug in jmvtools, where the UI is not updated appropriately. In this scenario, jmvtools *should* update the .u.yaml file to accept multiple variables, however this does not happen. It is possible to update the .u.yaml file by hand, but it's generally easiest to simply delete the .u.yaml file, and let jmvtools create one from scratch. This is something which will be fixed in the coming weeks.
+
+**NOTE** that you will have to shut jamovi down, and restart it in order to see changes to the analysis UI.
+
+As we have changed the name and type of the `dep` variable, our t-test will no longer work. For now, you should comment out or delete the content of the `.run()` function of the t-test analysis, otherwise it will produce a number of errors. We will return to it later in this tutorial.
+
+Having performed these modifications, your t-test UI should look something like:
+
+![](tuts0201-dynamic-tables-ui.png)
+
+As can be seen, multiple dependent variables can now be specified.
+
+Now let's return to our .y.raml file, to the `rows` value in particular:
+
+```
+...
+- name:  ttest
+      title: Independent Samples T-Test
+      type: Table
+      rows: 1
+...
+```
+
+What we now want, is not 1 row, but rather 1 row *per* dependent variable. If one variable is assigned to the option `deps`, then we want the table to have 1 row. If two variables are assigned to the option `deps`, then the table should have two rows, etc.
+
+The way we do this, is with what's called 'data-binding'. Data-binding is where we 'bind' a particular property of a results object, to an option. In this case, we want to 'bind' the number of rows to the `deps` option. We do this be specifying the option inside of parentheses (or brackets).
+
+```
+...
+- name:  ttest
+      title: Independent Samples T-Test
+      type: Table
+      rows: (deps)
+...
+```
+
+When bound in this way, the number of rows in the table always matches the number of variables specified by the user. Let's reinstall our module and see this in action:
+
+![](tuts0201-dynamic-tables-blank.png)
+
+As can be seen, our table grows and shrinks accordingly. But we can do one better. The first column should contain the variable name, and although we can add this using the Table's `setRow()` function, there is a better way to do this. We can specify the `content` of the column in the .r.yaml file.
+
+The `content` in the .r.yaml file can be a string literal, but it can also be a data-binding as well. When the rows of a table are bound to an option, each row has a key associated with it. When bound to an option of type `Variables`, each row's key corresponds to the Variable for that row. This allows us to bind the content of a column, to each row's key, as follows:
+
+```
+items:
+    - name:  ttest
+      title: Independent Samples T-Test
+      type:  Table
+      rows:  (deps)
+      columns:
+        - name: var
+          title: ''
+          type: text
+          content: ($key)  # <- here!
+```
+
+`$key` is a special value which maps to the row's key. Make this change, and reinstall the module with `jmvtools::install()`. As can be seen the first column is now filled in appropriately.
+
+![](tuts0201-dynamic-tables-bound.png)
+
+Data-binding is nice, because it often leads to much simpler code. The .yaml files are able to take care of a lot of aspects of the results objects, and allows the R code (in the .b.R files) to be much simpler, and focused on performing the calculations. In computer science, this is called *[separation of concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)*.
+
+Now all we need do is add our analysis implementation to the .b.R file. We can fill the table in using either the `rowKey` or the `rowNo`.
+
+```
+    .run=function() {
+    
+        table <- self$results$ttest
+    
+        for (dep in self$options$deps) {
+    
+            formula <- jmvcore::constructFormula(dep, self$options$group)
+            formula <- as.formula(formula)
+        
+            results <- t.test(formula, self$data)
+        
+            table$setRow(rowKey=dep, values=list(  # set by rowKey!
+                t=results$statistic,
+                df=results$parameter,
+                p=results$p.value
+            ))
+        }
+    }
+```
+
+We can now reinstall the module using `jmvtools::install()` (Note that this analysis will not work if you specify a nominal or ordinal variable as a dependent. So be sure to either use a continuous variable, or change the type of the variable to continuous before assigning it as a dependent. We will look at the correct way to handle nominal and ordinal variables in the next tutorial). You should have something like the following:
+
+![](tuts0201-dynamic-tables-final.png)
+
+
+
+
+
+================================================
+FILE: tuts0202-handling-data.Rmd
+================================================
+---
+title: Handling Data
+---
+
+So far in these tutorials, we haven't really examined what the `self$data` data frame *actually* contains. It contains the data from the dataset which is displayed in the spreadsheet view, but exactly how these values map to the R type system is a bit nuanced.
+
+In jamovi there are four variable types:
+
+ - <img src="assets/variable-nominal-text.svg" width="16px"> Nominal Text
+ - <img src="assets/variable-nominal.svg"      width="16px"> Nominal
+ - <img src="assets/variable-ordinal.svg"      width="16px"> Ordinal
+ - <img src="assets/variable-continuous.svg"   width="16px"> Continuous
+
+`Nominal Text` variables only ever have 'text' values, so will come through in the `self$data` data frame simply as factors. `Continuous` variables only ever have numeric values, so in the `self$data` data frame, they are of type numeric. However, the `Nominal` and `Ordinal` variable types are a little more tricky. These can have *both* numeric *and* text values.
+
+(**NOTE** jamovi currently doesn't support assigning text values (labels) to Nominal and Ordinal variables. This will be added in the future.)
+
+Further, there are situations where you want to treat a `Nominal` or `Ordinal` variable as a factor (i.e. when it is used as the grouping variable for a t-test), but other times where you want to use it as a number (i.e. when taking a mean of say, Likert items). (Some would argue that this should never happen -- you should never be taking the mean of a categorial variable, and that's possibly true -- but some people do still find it useful).
+
+The other advantage of the 'dual nature' of `Nominal` variables, is that it means the users can ignore the variable type if they don't want to worry about it. When working with large datasets, the process of going through and setting up all the columns, making sure they have the correct variable type, etc. can be long and tedious. So only using the variable type as a guide can make it easier for the user. This is also consistent with the way that many statistical software work, including SPSS.
+
+So whether a `Nominal` variable should be treated as a factor or a continuous variable should be determined by context. For example, for an ANCOVA, variables assigned to 'factors' should be treated as factors, and variables assigned to 'covariates' should be treated as numeric. Avoid *inferring* how the user wants to treat the variable based on its type, i.e. avoid an 'independent variables' option, where if the user assigns a nominal variable, it is treated as a factor, and if the user assigns a continuous variable, it is treated as a covariate -- this is *implied* behaviour, and users make mistakes.
+
+In jamovi, by default, `Nominal` and `Ordinal` variables in `self$data` come through as factors. The numeric values for each column are attached to the column as an attribute. You don't need to interact with this attribute directly, but there are situations where it's good to know it's there.
+
+One issue to do with these attributes, is that a number of R functions in the `base` package have no respect for attributes. Using the functions `na.omit`, `subset` and likely others on `self$data`, results in the discarding of these attributes. For this reason, it is better to convert these columns to the types you want to use (so the attributes are no longer needed) *before* using these functions.
+
+To convert a `Nominal` or `Ordinal` variable (which come through as factors) to a numeric, `jmvcore` provides the `toNumeric()` function. To convert in the other direction, from a numeric to a factor, you can use the `factor()` or `as.factor()` functions built into R. If `toNumeric()` is called on a variable which is already numeric, it has no effect. Similarly, if `as.factor()` is called on a variable which is already a factor, it has no effect. So you can call these on every column, without needing to check whether they are already the correct type.
+
+Returning to our ANCOVA example, which requires a single numeric dependent variable, one or more factors as factors, and one or more covariates as numeric, we might begin the `.run()` function as follows:
+
+```{r dontrun=TRUE}
+    .run = function() {
+        
+        # read the option values into shorter variable names
+        
+        dep  <- self$options$dep
+        facs <- self$options$factors
+        covs <- self$options$covs
+        
+        # get the data
+        
+        data <- self$data
+        
+        # convert to appropriate data types
+        
+        data[[dep]] <- jmvcore::toNumeric(data[[dep]])
+        for (fac in facs)
+            data[[fac]] <- as.factor(data[[fac]])
+        for (cov in covs)
+            data[[cov]] <- jmvcore::toNumeric(data[[cov]])
+        
+        # data is now all of the appropriate type we can begin!
+        
+        data <- na.omit(data)
+        
+        ...
+    }
+```
+
+In this way, one of the first things you will do in the `.run()` function, is setting up all the columns from `self$data` to be the correct types.
+
+
+
+
+================================================
+FILE: tuts0203-state.Rmd
+================================================
+---
+title: State
+---
+
+The analyses demonstrated in the tutorial series so far, have been completely *state*-less. This means that each time an analysis is run, (for example, in response to a user checking a checkbox) it runs the analysis from beginning to end. In many cases, this isn't very efficient. A user may run a t-test, and then select a checkbox requesting descriptives. Without *state*, an analysis will recalculate the t-test results every time the analysis is changed, even when the changed option has no impact on the t-test results.
+
+For many analyses, this isn't a problem -- indeed, a t-test runs very quickly, so recalculating with every option change doesn't really pose a problem; the user still receives the results near instantaneously. However, some analyses can take a considerable amount of time to run, and re-running these in their entirety with every change leads to long delays and a poor user experience. The solution to this problem is *state*.
+
+In using state, an analysis retains information from when it was previously run. If a user makes a change to an existing analysis, the analysis can make use of the results that were calculated previously. Using the example of a t-test, if the user checks a checkbox requesting an additional table of descriptives, the analysis can re-use the t-test results from the last time the analysis ran. However, if the user changes an option which affects the t-test results -- say, the type of t-test -- then the analysis should not re-use the earlier t-test results. Whether earlier results should be used or not is determined by the `clearWith` property.
+
+## `clearWith`
+
+Each results element in the .r.yaml file can have a `clearWith` property specified. If no `clearWith` property is specified, then the default value of `*` is used, which means the `Table` or `Image` will be cleared if *any* option changes; *no* earlier results will ever be used. So far in this tutorial series, all analyses have behaved in this way.
+
+Specifying a `clearWith` property lets us specify the circumstances where results should be re-used, and when not. For example, returning to our *t-test*, our `.a.yaml` file might contain the following options:
+
+```{yaml }
+    - name: data
+      type: Data
+
+    - name: deps
+      title: Dependent Variables
+      type: Variables
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+
+    - name: alt
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: notEqual
+          title: Not equal
+        - name: oneGreater
+          title: One greater
+        - name: twoGreater
+          title: Two greater
+      default: notEqual
+
+    - name: varEq
+      title: Assume equal variances
+      type: Bool
+      default: true
+```
+
+We could add the `clearWith` property to the t-test results table in the `.r.yaml` file as follows:
+
+```{yaml }
+items:
+    - name:  ttest
+      title: Independent Samples T-Test
+      type:  Table
+      rows:  (deps)
+      
+      clearWith:  # <-- here
+        - group
+        - alt
+        - varEq
+        
+      columns:
+        - name: var
+          title: ''
+          type: text
+          content: ($key)
+```
+
+This `clearWith` specifies that the table is to be cleared if any of the options `group`, `alt` or `varEq` change. Take note that we *haven't* added the `deps` option to this list. When the user adds additional dependent variables, we don't want it to clear the existing rows. You can see what happens by running this example, and adding multiple dependent variables one at a time.
+
+Before we added this `clearWith` property, adding another dependent variable caused the whole table to be cleared before being filled back in again. Now with `clearWith` (without `deps` listed), adding an additional dependent variable just adds another row, which is then filled in. The old rows are not cleared. This new behaviour minimises the amount the results flicker, and allows the user to see clearly what has changed in the results in response to their actions.
+
+However, it should be noted that we haven't actually reduced the amount of calculations being performed. Although the table is no longer cleared when certain options are changed, our analysis implementation in the `.b.R` file still loops over all the dependent variables and performs a t-test for each. It then overrides the value already in the table with this newly calculated value; the exact same value. This isn't a problem, because the t-test runs very quickly, but we can modify our `.b.R` file to not calculate values which are already present in the table. We find out what parts of the table are already filled in with the `isFilled()` method.
+
+## `isFilled()`
+
+The `isFilled()` method can be called with any of the following:
+
+`table$isFilled()`
+
+`table$isFilled(rowNo=i, col)`
+
+`table$isFilled(rowKey=key, col)`
+
+By specifying or omitting different arguments, it is possible to query whether the whole table is filled, whether a particular row or column is filled, or whether a particular cell is filled. `isFilled()` returns either `TRUE` or `FALSE`.
+
+Let's return to our t-test example, to the `.b.R` file. We might modify our `.run()` function as follows:
+
+```
+    .run=function() {
+    
+        table <- self$results$ttest
+    
+        for (dep in self$options$deps) {
+        
+            if ( ! table$isFilled(rowKey=dep)) {  # <- this if statement!
+    
+                formula <- jmvcore::constructFormula(dep, self$options$group)
+                formula <- as.formula(formula)
+            
+                results <- t.test(formula, self$data)
+            
+                table$setRow(rowKey=dep, values=list(  # set by rowKey!
+                    t=results$statistic,
+                    df=results$parameter,
+                    p=results$p.value
+                ))
+            }
+        }
+    }
+```
+
+We've added an if-statement which checks if the row is already filled. If it is already filled in then it won't call the `t.test()` function or spend time populating the row. In this way we can skip calculations if the appropriate results are already filled in.
+
+## `setState()`
+
+However, sometimes we don't want to just store the final results; sometimes we want to store the intermediate objects as well. For example, we may want to create a fit object, and then reuse this same fit object the next time the analysis is run.
+
+State can be saved and recovered from any results element, i.e. an `Image` or a `Table`, using the `setState()` method and `state` property:
+
+```
+table$setState(object)
+object <- table$state
+```
+
+`$state` will return `NULL` if no state has been set.
+
+Note that the `clearWith` property also applies to the state attached to a results element. The same mechanism can be used to selectively clear the state or not, depending on what options have changed.
+
+When using `setState()` and `state`, an analysis will typically try and retrieve the state as one of the first things it does. If the state doesn't exist (`state` has a value of `NULL`), then the analysis will perform the calculations to create the object it requires and `setState()` that object onto a results element. Following this, the analysis can populate the tables and images from that object. Alternatively, if the state can be retrieved, then the analysis can bypass the initial time-consuming construction of the object, and just use the one from last time to populate the tables and images.
+
+**WARNING** some R objects, when serialised, take up a lot of space. If these objects are large, then the save and restore process between analyses will be very sluggish. As such, it's worth investigating how large the objects you want to store will be. The following will give you the serialized size of an object in bytes:
+
+```
+length(serialize(object), connection=NULL)
+```
+
+
+
+
+
+================================================
+FILE: ui-advanced-customisation.Rmd
+================================================
+---
+title: "Advanced customisation of the options UI"
+output: html_document
+---
+
+Sometimes the `.u.yaml` file alone doesn't provide enough flexibility for an analysis options UI. More complex UIs can be achieved through writing additional javascript that provides more complex behaviour. This allows much greater freedom and flexibility, and allows you to design an options UI completely from scratch if necessary.
+
+The options UI is customised through attaching javascript 'event handler' functions to the user interface. These then respond to events such as a UI 'loaded' event, or an option 'changed' event in response to a user interaction.
+
+Additional UI functions are defined in a javascript file with a `.js` suffix, and are placed in the `jamovi/js` folder of the module. The name of the .js file should match the names of the other .yaml files for that analysis. For example:
+
+  - `ttest.a.yaml`
+  - `ttest.r.yaml`
+  - `ttest.u.yaml`
+  - `js/ttest.js`
+
+The events .js files follow the `CommonJS` javascript module spec, assigning each of the event handlers and functions to an object which is assigned to `module.exports`.
+
+*IMPORTANT:* For customisations to function, the `jus` property in the `u.yaml` file needs to be set to `3.0`.
+
+For example:
+
+```yaml
+name: ttest
+title: T-Test
+jus: '3.0'
+compilerMode: tame
+children:
+  - type: ComboBox
+    name: ttestType
+```
+
+```javascript
+    module.exports = {
+
+        // event handlers and functions are defined here
+
+        // this is an example of an event handler
+        view_loaded: function(ui, event) {
+            // do something
+        },
+
+        // this is another example of an event handler
+        ttestType_changed: function(ui, event) {
+            let value = this.calculateValue();
+            // do something
+        },
+
+        // this is an example of an auxiliary function
+        calculateValue: function() {
+            // do something
+        }
+    };
+```
+
+In the above example, the `view_loaded(...)` event handler is invoked with a `loaded` event when the analysis options UI is created for the first time. Similarly, a `changed` event is fired, and the event handler function `ttestType_changed(...)` is invoked when the user changes the value of the `ttestType` option.
+
+Note that jamovi ships with the Chrome developer tools, so it's possible to invoke these, and have access to the debugger, DOM viewer, etc. The dev tools are invoked by pressing `F10`. (Note that sometimes jamovi's internal iframes prevent this key stroke from registering. You sometimes need to click the blue bar along the top to move the focus back to the main window, before the `F10` keystroke will register.)
+
+### Events
+
+Event handlers are added by naming the function with the following pattern. Option name, followed by an underscore, followed by the event name. `{optionName}_{eventName}`
+
+For example: `ttestType_changed`
+
+jamovi will automatically attach the event handler `ttestType_changed(...)` to the `changed` event of the `ttestType` option when the analysis is run.
+
+#### View
+
+| Event    | Description                                     |
+| -------- | -------------                                   |
+| creating | Invoked at the very beginning of the options panel creation, before anything is added to the DOM.   |
+| loaded   | Invoked after the options panel has been created and the DOM has been populated. The same analysis options panel persists as long as jamovi is still running, and is shared by all analyses of the same type, so this is only invoked once. This is the most common event to use for customising the UI. |
+| updated  | Invoked when the user selects a different analysis (of the same type) and the options need to change to reflect the new analysis' option values (This is also called when the user inserts a new analysis, when an option panel for that analysis type already exists). |
+
+#### All controls
+
+| Event           | Description                                     |
+| -------------   | -------------                                   |
+| changing | Invoked before the value of the control is changed.    |
+| changed  | Invoked after the value of the control is changed.     |
+
+
+#### ListBox
+
+| Event           | Description                                         |
+| -------------   | -------------                                       |
+| listItemAdded   | Invoked when a control is added to a list box.      |
+| listItemRemoved | Invoked when a control is removed from a list box.  |
+
+#### Suppliers
+
+| Event    | Description                                            |
+| -------- | ------------------------------------------------------ |
+| updated  | Invoked when a variable name or level name is changes. |
+
+*IMPORTANT NOTE:* The use of the `updated` event is required for all `Supplier` and `VariableSupplier` controls (under certain conditions). If it is not implemented then jamovi will display the following error:
+
+
+> Error: The use of a 'VariableSupplier' control, with the property > populate: 'manual', requires an 'updated' event handler to be assigned.
+
+or
+
+> Error: The use of a 'Supplier' control requires an 'updated' event handler to be assigned.
+
+These suppliers require manual population and therefore need to be appropriately  updated in response to variable or level name changes.
+
+
+#### Custom Control
+
+| Event    | Description                                            |
+| -------- | ------------------------------------------------------ |
+| creating | Invoked during the creation phase of the options panel. Allows for access to the custom control for customisation before it is made visible.  |
+| updated  | Invoked when a variable name or level name is changes. |
+
+### Event handlers
+
+All event handlers are invoked with two arguments; the `ui`, and the `event`. The ui is a convenience object containing all the other controls in the options panel and the DOM. All the option controls are available in the ui argument as properties. For example:
+
+```javascript
+    ttestType_changed(ui, event) {
+        let ttype = ui.ttestType.value()
+        if (ttype === 'welchs')
+            ui.priorWidth.setValue(0.707)
+    }
+```
+
+In this example, when the user changes the `ttestType` option to `welchs`, the `priorWidth` option is changed to `0.707`. All options have the `.value()` and `.setValue()` methods.
+
+Note that each change to the values of the options triggers the re-running of the analysis. If multiple option values need to change in response to an event, it is better to batch these changes together, to prevent the analysis being restarted again and again. Option changes can be batched together with the `ui.view.model.options` `beginEdit()` and `endEdit()` functions as follows:
+
+```javascript
+ui.view.model.options.beginEdit();
+ui.figWidth.setValue(400);
+ui.figHeight.setValue(300);
+ui.view.model.options.endEdit();
+```
+
+In this example, changing the `figWidth` and `figHeight` options only triggers the re-running of the analysis once.
+
+### Accessing the DOM
+
+The DOM for the root of options UI can be accessed from the ui through the `view` property:
+
+    ui.view.el  | the root DOM node
+    ui.view.$el | the root DOM node as a jQuery object
+
+It is also possible to inspect the DOM using the chrome dev tools shipped with jamovi. (To access these, click the blue bar at the top of jamovi, and press `F10`.)
+
+Additionally, the DOM elements for most of the option controls are accessible through the `el` and `$el` property. i.e.
+
+```
+let figWidth = ui.figWidth.el
+let $figWidth = ui.figWidth.$el
+```
+
+## Adding a custom control
+
+Sometimes the controls built into jamovi do not provide the behaviour your analysis requires. In this scenario, it's possible to create a 'custom control' which is placed within the DOM.
+
+A control of type `CustomControl` allows for this possibility, when added to the `.u.yaml` file, and the `creating` event is handled in the javascript.
+
+For example,
+
+The description of the control in the `u.yaml`
+
+```yaml
+- type: CustomControl
+  name: ttestType
+```
+
+and the event handler for the the `.js`
+
+```javascript
+
+    ttestType_creating: function(ui, event) {
+        let $element = ui.ttestType.$el;
+        // in this instance, the $element object represents the root DOM node
+        // of the custom control. sub-nodes can be added to this node, and the
+        // control will be laid out by the layout manager in the final options
+        // UI
+    }
+
+```
+
+## Options UI from scratch
+
+Sometimes an analysis requires a very radical UI design that can't be accommodated by the standard UI controls or a custom control. If this is the case, an entirely custom UI may need to be developed.
+
+To achieve this, the options and their types are defined as usual in the `.a.yaml` file, however, each option is marked as `hidden: true`. This prevents `jmvtools` from (re)adding the standard UI controls into the `.u.yaml` file, allowing you to implement them yourself.
+
+To construct the UI, all the DOM setup for the custom panel should occur in a `creating` event handler for the `view` control.
+
+```javascript
+'use strict';
+
+module.exports = {
+
+    view_creating: function(ui, event) {
+        let $panel = ui.view.$el;
+        // in this instance, the $panel object represents the root DOM node
+        // of the options panel. sub-nodes can be added to this node.
+    }
+}
+```
+
+
+
+================================================
+FILE: ui-advanced-design.Rmd
+================================================
+---
+title: "Advanced UI Design"
+output: html_document
+---
+
+## Controls
+
+There are three different categories of controls:
+
+ - [Layout Controls](api_ui-definition.html)
+ - [Option Controls](api_ui-definition.html)
+ - [Display Controls](api_ui-definition.html)
+
+Layout controls are used to control the layout child controls in the UI. Option controls allow the user to change the values of options for analyses. We've already seen some of these; the `CheckBox`, the `ComboBox`, etc. Display controls are for presenting static information such as labels.
+
+### Option Controls
+
+As already seen earlier in this tutorial series, different option controls are 'bound' to different analysis options. The name of the option control typically needs to match the name of the option it is bound to. Changing the option control leads to changes to the underlying option, resulting in changes to the analysis.
+
+Not all controls can be bound to *any* option. It wouldn't be meaningful to bind a checkbox to a `List` option for example. The following lists the different option types, and the control types that can be bound to each:
+
+### `Bool`
+
+**You can use** : [`CheckBox`](ui-checkbox.html)
+
+```{yaml }
+- type: CheckBox
+  name: #optionName
+```
+
+**Or you can use** : [`Label`](ui-label.html)
+
+This control is read only.
+
+```{yaml }
+- type: Label
+  name: #optionName
+  format: bool
+```
+
+------------------
+
+### `Integer`
+
+**You can use** : [`TextBox`](ui-textbox.html)
+
+Allows for the value to be edited.
+
+```{yaml }
+- type: TextBox
+  name: #optionName
+  format: number
+```
+
+**Or you can use** : [`Label`](ui-label.html)
+
+This control is read only.
+
+```{yaml }
+- type: Label
+  name: #optionName
+  format: number
+```
+
+---------------
+
+### `Number`
+
+**You can use** : [`TextBox`](ui-textbox.html)
+
+Allows for the value to be edited.
+
+```{yaml }
+- type: TextBox
+  name: #optionName
+  format: number
+```
+
+**Or you can use** : [`Label`](ui-label.html)
+
+This control is read only.
+
+```{yaml }
+- type: Label
+  name: #optionName
+  format: number
+```
+
+----------------
+
+### `String`
+
+**You can use** : [`TextBox`](ui-textbox.html)
+
+Allows for the value to be edited.
+
+```{yaml }
+- type: TextBox
+  name: #optionName
+```
+
+**Or you can use** : [`Label`](ui-label.html)
+
+This control is read only.
+
+```{yaml }
+- type: Label
+  name: #optionName
+```
+
+-----------------
+
+### `List`
+
+**You can use** : [`ComboBox`](ui-combobox.html)
+
+```{yaml }
+- type: ComboBox
+  name: #optionName
+```
+
+**Or you can use** : [`RadioButton`](ui-radiobutton.html)
+
+Use multiple `RadioButton`'s linked to the different sub-options.
+
+```{yaml }
+- type: RadioButton
+  name: #uniqueName_1
+  optionName: #optionName
+  optionPart: #optionPartName_1
+
+- type: RadioButton
+  name: #uniqueName_2
+  optionName: #optionName
+  optionPart: #optionPartName_2
+
+
+
+- type: RadioButton
+  name: #uniqueName_N
+  optionName: #optionName
+  optionPart: #optionPartName_N
+
+```
+
+----------------
+
+### `NMXList`
+
+**You can use** : [`CheckBox`](ui-checkbox.html)
+
+Use multiple CheckBox's linked to the different sub-options.
+
+```{yaml }
+- type: CheckBox
+  name: #uniqueName_1
+  optionName: #optionName
+  optionPart: #optionPartName_1
+
+- type: CheckBox
+  name: #uniqueName_2
+  optionName: #optionName
+  optionPart: #optionPartName_2
+
+
+
+- type: CheckBox
+  name: #uniqueName_N
+  optionName: #optionName
+  optionPart: #optionPartName_N
+
+```
+
+----------------
+
+
+### `Variable`
+
+**You can use** : [`VariablesListBox`](ui-variableslistbox.html)
+
+```{yaml }
+- type: VariableListBox
+  name: #optionName
+  isTarget: true
+  maxItemCount: 1
+```
+
+**Or you can use** : [`ListBox`](ui-listbox.html)
+
+```{yaml }
+- type: ListBox
+  name: #optionName
+  isTarget: true
+  maxItemCount: 1
+  template:
+    type: VariableLabel
+```
+
+-----------------
+
+### `Variables`
+
+**You can use** : [`VariablesListBox`](ui-variableslistbox.html)
+
+```{yaml }
+- type: VariableListBox
+  isTarget: true
+  name: #optionName
+```
+
+**Or you can use** : [`ListBox`](ui-listbox.html)
+
+```{yaml }
+- type: ListBox
+  name: #optionName
+  isTarget: true
+  template:
+    type: VariableLabel
+```
+
+------------------
+
+### `Terms`
+
+**You can use** : [`ListBox`](ui-listbox.html)
+
+```{yaml }
+- type: ListBox
+  name: #optionName
+  isTarget: true
+  template:
+    type: TermLabel
+```
+
+------------------
+
+### `Pairs`
+
+**You can use** : [`VariablesListBox`](ui-variableslistbox.html)
+
+```{yaml }
+  - type: VariablesListBox
+    name: #optionName
+    isTarget: true
+    columns:
+      - name: i1
+        template:
+          type: VariableLabel
+      - name: i2
+        template:
+          type: VariableLabel
+```
+
+**Or you can use** : [`ListBox`](ui-listbox.html)
+
+```{yaml }
+  - type: ListBox
+    name: #optionName
+    isTarget: true
+    columns:
+      - name: i1
+        template:
+          type: VariableLabel
+      - name: i2
+        template:
+          type: VariableLabel
+```
+
+------------------
+
+### `Array`
+
+
+**You can use** : [`ListBox`](ui-listbox.html)
+
+```{yaml }
+- type: ListBox
+  name: #optionName
+  template:
+    type: #depends on the option
+```
+
+This is jamovi's most complicated control. The setup of it's UI definition depends heavily on the way the option is setup. A more detailed explanation can be found [here](ui-listbox.html).
+
+------------------
+
+Next: [Advanced customisation of the options UI](ui-advanced-customisation.html)
+
+
+
+================================================
+FILE: ui-basecontrol.Rmd
+================================================
+---
+title: "BaseControl"
+output: html_document
+---
+
+**This control type is abstract and can not be used directly.**
+
+Every jamovi user control inherits from `BaseControl`.
+
+##Properties
+
+All jamovi controls have the following properties.
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`type`  | Set the type of control, for a list of types click [here](ui-advanced-design.html#Controls). | enum of valid Control names
+`name`  | The name of the control. This allows for access to the control when customizing behavior, for example enabling/disabling. It needs to be unique to all other controls. | Unique string
+`stage` | This is the stage of development. The control will only be visible in the appropriate jamovi instance. | 0 : released [always visible]\
+1 : under development\
+2 : proposed
+`margin`  | The level of spacing around the control when displayed. | *enum*: small, normal, large, none
+`cell`   | The zero-based row and column index where the control is to be placed within the parent `LayoutBox`. | object consisting of\
+`row`: row index\
+`column`: column index
+`stretchFactor`   | A stretch factor greater than zero will cause the control to fill the available horizontal space by an amount proportional to the sum of all other sibling `stretchFactors` defined in the same row. It is important to note that when specifying a non-zero `stretchFactor` on a control, it is required that the parent of the control also have a non-zero `stretchFactor`. Failing to do so will result in unhelpful layout. | number >= 0
+`horizontalAlignment`   | Specifies the horizontal alignment of the control when placed in the parent `LayoutBox` cell | *enum*: left, center, right
+`verticalAlignment`   | Specifies the vertical alignment of the control when placed in the parent `LayoutBox` cell | *enum*: top, center, bottom
+`minWidth`   | Specifies the minimum width of the `LayoutBox` cell into which the control will be placed. | number >= 0
+`minHeight`   | Specifies the minimum height of the `LayoutBox` cell into which the control will be placed. | number >= 0
+`maxWidth`   | Specifies the maximum width of the `LayoutBox` cell into which the control will be placed. | number >= 0
+`maxHeight`   | Specifies the maximum height of the `LayoutBox` cell into which the control will be placed. | number >= 0
+
+------------------------------------
+
+##Controls
+
+Below is a list of controls that inherit from `BaseControl`.
+
+###Layout Controls
+
+- [LayoutBox](ui-layoutbox.html)
+- [CollapseBox](ui-collapsebox.html)
+- [Supplier](ui-supplier.html)
+- [VariableSupplier](ui-variablesupplier.html)
+- [TargetLayoutBox](ui-targetlayoutbox.html)
+
+####Parent Controls
+
+- [CheckBox](ui-checkbox.html)
+- [RadioButton](ui-radiobutton.html)
+- [Label](ui-label.html)
+
+###Option Controls
+
+- [TextBox](ui-textbox.html)
+- [CheckBox](ui-checkbox.html)
+- [RadioButton](ui-radiobutton.html)
+- [ComboBox](ui-combobox.html)
+- [Label](ui-label.html)
+- [ListBox](ui-listbox.html)
+- [VariableLabel](ui-variablelabel.html)
+- [TermLabel](ui-termlabel.html)
+
+### Display Controls
+
+- [Label](ui-label.html)
+
+
+================================================
+FILE: ui-basic-design.Rmd
+================================================
+---
+title: "UI Design"
+output: html_document
+---
+
+UIs for jamovi analyses are defined in the .u.yaml file (A refresher on the files and the relationship between them is described [here](tuts0103-creating-an-analysis.html)). This describes what sort of control each option is represented by (i.e. a dropdown list, or some radio buttons), and the order and the layout in which they will appear.
+
+### `aggressive` vs `tame` compiler mode
+
+By default, .u.yaml files are in `aggressive` compiler mode. This means when installing jamovi modules with `jmvtools::install()` the .u.yaml files are regenerated and replaced each time. This is good early on in the development process, but as development progresses, getting a UI *just right* or adding custom behaviour requires hand editing of the .u.yaml files. To prevent jmvtools from simply replacing all your changes, the .u.yaml file can be placed in `tame` mode. In `tame` mode the compiler respects your changes, and will not interfere with your adjustments. The trade-off is that the compiler often can't insert new controls into the UI as optimally.
+
+To begin with we'd encourage you to leave your .u.yaml files in `aggressive` mode.
+
+### Controls
+
+As we've seen earlier in this tutorial series with our t-test example, each option is represented by one or more controls. Our list option was represented by a list box, boolean options were represented by checkboxes, and Variable options were represented as a box that variables could be dragged to.
+
+Let's take a look at UI, and the .u.yaml file which is responsible for it:
+
+![](ui-basic-design.png)
+
+```
+title: Independent Samples T-Test
+name: ttestIS
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+
+children:
+
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+
+      - type: TargetLayoutBox
+        label: Dependent Variables
+        children:
+          - type: VariablesListBox
+            name: deps
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: alt
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: varEq
+```
+
+As can be seen, controls are arranged in a hierarchy. At the very top is a control of type `VariableSupplier`. It has two children: `deps` of type `VariablesListBox` and `group` of type `VariableListBox`. Together, these three controls create the variables list, and the 'Dependent Variables' and 'Grouping Variable' drop targets.
+
+Next is a `LayoutBox` which contains the hypothesis `ComboBox`, followed by another `LayoutBox` containing the equality of variances `CheckBox`. By default, items are laid out in a grid from top to bottom.
+
+TODO: how to layout controls in other configurations, group headings, etc.
+
+Next: [Advanced UI Design](ui-advanced-design.html)
+
+
+
+================================================
+FILE: ui-checkbox.Rmd
+================================================
+---
+title: "CheckBox"
+output: html_document
+---
+
+**Inherits from [`OptionControl`](ui-optioncontrol.html), [`ParentControl`](ui-parentcontrol.html)**
+
+## Properties
+
+There are no `CheckBox` specific properties. All behavior can be achieved using the inherited properties of `OptionControl` and `ParentControl`.
+
+## Supported Option Types
+
+- `Bool`
+- `NMXList`
+
+### `Bool`
+
+When `CheckBox` is bound to a `Bool` option type the behavior is very simple. When the option is `TRUE`, the `CheckBox` is checked.
+
+Below is an example of a simple `Bool` option and a `CheckBox` that has been associated with it.
+
+*Option Definition*
+```{yaml}
+- name: descStats
+  title: Descriptive statistics
+  type: Bool
+  default: false
+  description:
+      R: >
+        `TRUE` or `FALSE` (default), provide descriptive statistics
+```
+
+*UI Control Definition*
+```{yaml}
+- type: CheckBox
+  name: descStats
+```
+
+Note that the `optionName` property of the `CheckBox` is not specified and therefore the *option binding* will use the `name` property of the control for the binding process instead (see [OptionControl](ui-optioncontrol.html) for more details).
+
+There is also no need to specify the `label` property of this `OptionControl` as the `title` property of the option is adequate and will be automatically used by the `CheckBox`. This means that a `CheckBox` can be defined in two lines! If the `title` property of the option is not appropriate for the control then a `label` property can be added to the `CheckBox` to override it.
+
+----------------
+
+### `NMXList`
+
+When `CheckBox` is bound to an `NMXList` a few more properties are needed for it to work.
+
+The below example shows an option with the name `effectSize`. This option has a property called `options` which describes three non-mutually exclusive sub-options that are possible within the options output. An `NMXList` returns an array of one or all of these sub-options.
+
+Now a `CheckBox` can be used to manipulate an 'NMXList' option by adding or removing a specified sub-option from the underlying array.
+
+*Option Definition*
+```{yaml}
+- name: effectSize
+  type: NMXList
+  title: Effect Size
+  options:
+      - name: eta
+        title: η²
+      - name: partEta
+        title: partial η²
+      - name: omega
+        title: ω²
+```
+
+To achieve this two properties will need to be added to the `CheckBox` definition: `optionName` and `optionPart`. Both these properties are inherited from [`OptionControl`](ui-optioncontrol.html). As has been described in `OptionControl` documentation, `optionName` is used to determine what option the `CheckBox` should bind to. Under normal circumstances, it is not necessary to use `optionName` as the property `name` can be used for the same effect. This however, becomes a problem for defining a `CheckBox` that is linked to an `NMXList` as the `name` property also has a requirement to be unique across all controls. It is not allowed to have two checkboxes (or any other control for that matter) with the same name. Because of this, when binding to an `MNXList` we are required to give the `CheckBox` a unique name and use the `optionName` to bind to the desired `NMXList`.
+
+Now binding solely to an `NMXList` is not a valid configuration for a `CheckBox` as it requires a boolean data type to operate correctly. To overcome this, the `CheckBox` definition will need to not *just* bind to the `NMXList` but also to one of the sub-options. This is achieved using the `optionPart` property. By assigning the name of the desired sub-option to this property, the `CheckBox` will operate base on that sub-options existence in the underlying array.
+
+*UI Control Definition*
+```{yaml}
+- type: CheckBox
+  name: effectSize_eta
+  optionName: effectSize
+  optionPart: eta
+  
+- type: CheckBox
+  name: effectSize_partEta
+  optionName: effectSize
+  optionPart: partEta
+  
+- type: CheckBox
+  name: effectSize_omega
+  optionName: effectSize
+  optionPart: omega
+
+```
+
+Three `CheckBox`'s for the three sub-options of the option `NMXList`.
+
+
+================================================
+FILE: ui-collapsebox.Rmd
+================================================
+---
+title: "CollapseBox"
+output: html_document
+---
+
+**Inherits from [`LayoutBox`](ui-layoutbox.html)**
+
+The `CollapseBox` is a `LayoutBox` that can be collapsed down to a label so that advanced options can be hidden until needed.
+
+## Properties
+
+In addition to any inherited properties, a `CollapseBox` supports:
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`collapsed`  | Sets the initial collapsed state of the control. | boolean
+`label`  | Sets the text that will be displayed in the label bar of the control. | string
+
+----------------------------------------
+
+
+================================================
+FILE: ui-combobox.Rmd
+================================================
+---
+title: "ComboBox"
+output: html_document
+---
+
+**Inherits from [`OptionControl`](ui-optioncontrol.html)**
+
+A `ComboBox` displays the selected value from a preset list of options.
+
+##Properties
+
+In addition to any inherited properties, a `ComboBox` supports:
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`options` | Sets the options to be displayed in the drop-down list. This property is to be used as an override of the `options` property of the underlying option. | array of objects consisting of\
+`name`: reference name\
+`title`: display text
+
+## Supported Option Types
+
+- `List`
+
+### `List`
+
+When the option binding is to a `List` a few properties are needed for it to work.
+
+The below example shows an option with the name `ss`. This option has a property called `options` which describes three mutually exclusive sub-options that are possible values for the options output. A `List` returns the name of one of these sub-options as a string.
+
+Now a `ComboBox` can be used to manipulate a 'List' option by changing its value to the option selected in the drop-down.
+
+*Option Definition*
+```{yaml}
+- name: ss
+  title: Sum of squares
+  type: List
+  options:
+    - title: Type 1
+      name: '1'
+    - title: Type 2
+      name: '2'
+    - title: Type 3
+      name: '3'
+  default: '3'
+  description:
+      R: >
+        `'1'`, `'2'` or `'3'` (default), the sum of squares
+        to use
+```
+
+A `ComboBox` can completely encapsulate a `List` option which makes its definition very simple. The control will use the options `title` as a `label` and `options` as the contents for the drop-down. `Label` and `options` can be defined in the control definition if it is required to override the values of the option.
+
+*UI Control Definition*
+```{yaml}
+- type: ComboBox
+  name: ss
+```
+
+
+================================================
+FILE: ui-custom-format.Rmd
+================================================
+---
+title: "Custom Formats"
+output: html_document
+---
+
+Cooming soon!
+
+
+================================================
+FILE: ui-label.Rmd
+================================================
+---
+title: "Label"
+output: html_document
+---
+
+A `Label` is a simple control that displays text. It can take two inheritance forms depending on how it is setup. The first is a *static label* and the second is an *option label*.
+
+##Option Label
+**Inherits from (`OptionControl`](ui-optioncontrol.html), [`ParentControl`](ui-parentcontrol.html)**
+
+A `Label` is by default an *option label* unless the `label` property is defined. An option `Label` will populate its display using the underlying option to which it has been assigned. For further information about option binding see [`OptionControl`](ui-optioncontrol.html).
+
+### Properties
+
+When bound to an option, there are no `Label` specific properties. All behavior can be achieved using the inherited properties of [`OptionControl`](ui-optioncontrol.html) and [`OptionControl`](ui-optioncontrol.html).
+
+-------------
+
+##Static Label
+**Inherits from [`BaseControl`](ui-basecontrol.html), [`ParentControl`](ui-parentcontrol.html)**
+
+A static `Label` is created when the `label` property of the control is defined. In this form the `Label` control acts like any old label.
+
+###Properties
+
+In addition to any inherited properties, a `Label` supports:
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`label`  | Sets the text to be displayed by the control. | string
+
+###Example
+
+```{yaml}
+- type: Label
+  label: Percentile Values
+  children:
+    - type: CheckBox
+      name: quart
+```
+
+
+
+
+----------------------------------------
+
+
+================================================
+FILE: ui-layoutbox.Rmd
+================================================
+---
+title: "LayoutBox"
+output: html_document
+---
+
+**Inherits from [`BaseControl`](ui-basecontrol.html), [`ParentControl`](ui-parentcontrol.html)**
+
+A `LayoutBox` allows a designer to control the layout of its child controls. A `LayoutBox` does not display anything itself but purely serves as a frame for placing other controls. It can be used as a list (default), inline list, or grid.
+
+##Properties
+
+In addition to any inherited properties, a `LayoutBox` supports:
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`style`  | Determines how the automatic layout behavior of the control. | *enum*: list, inline
+
+###Further Details
+
+####`style`
+
+-	`list`: Children will be added in a vertical manner starting at `cell` position `column: 0, row: 0`.
+-	`inline`: Children will be added in a horizontal manner starting at `cell` position `column: 0, row: 0`.
+
+To add to a `LayoutBox` in a grid format, use the `cell` property of the child control. As the `LayoutBox` is positioning its `children` it will use the `cell` property of the control to place it correctly. The `cell` property of a child control overrides the auto positioning of the `style` property. If a child control does not have a `cell` property defined it will use the `style` property to automatically place it based on the position of the previous child.
+
+----------------------------------------
+
+
+================================================
+FILE: ui-listbox.Rmd
+================================================
+---
+title: "ListBox"
+output: html_document
+---
+
+Cooming soon!
+
+
+================================================
+FILE: ui-optioncontrol.Rmd
+================================================
+---
+title: "OptionControl"
+output: html_document
+---
+
+**Inherits from [`BaseControl`](ui-basecontrol.html)**\
+**This control type is abstract and can not be used directly.**
+
+This is the abstract base of all controls that can be bound to an option. These types of controls allow a user to see and/or set the value of an option that has been defined in the `*.a.yaml`.
+
+##Properties
+
+In addition to any inherited properties, an `OptionControl` supports:
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`name`  | Sets the unique name for the control. If `optionName` is not defined `name` will be used to data-bind to an option. | Unique string (or option name)
+`optionName`  | Sets the name of the option to which the control is to be data bound. If this property is omitted and `name` property is used instead. | defined option name
+`optionPart`  | Sets the name of the sub-option to which the control is to be data bound. Some controls don't bind to a whole option but only to part. For example, a `RadioButton` binds to a sub-option of the underlying `List` option. See [here](ui-radiobutton.html) for an example.  | defined option part name
+`label`  | Sets the text to be displayed by the control's label. NOTE: not all controls have labels. In the circumstance that a control does not have a label, a defined `label` property is ignored. | string
+`enable`  | Sets the a data-binding string to control the enable state of the control.  | string
+
+### Further Details
+
+####`enable` 
+
+This property is what's called a 'data-binding'. Data-binding is where the value of a particular property is bound to the value of another UI control. When the value of the control changes, so does the respective property value. For example we may want to bind to the value of a `CheckBox` (TRUE/FALSE) to the enabling/disabling feature of a `TextBox`. This would be achieved by specifying the name of the control to which you would like to bind inside of parentheses (or brackets).
+
+```{yaml}
+- type: CheckBox
+  name: pcEqGr
+  label: Cut points for
+  style: inline
+  verticalAlignment: center
+  children:
+    - type: TextBox
+      name: pcNEqGr
+      label: ""
+      suffix: equal groups
+      format: number
+      inputPattern: "[0-9]+"
+      enable: (pcEqGr)
+```
+
+In the above example, the `TextBox` named `pcNEqGr` would enable when the `CheckBox` named `pcEqGr` is checked.
+
+---------------
+
+#### `label`
+
+The `label` property of an `OptionControl` serves only to override the `title` property of the underlying option. If the `label` property is not defined, the control will use the `title` property of the underlying option. This results in the UI control definition being minimal, only describing information when necessary.
+
+*Option Definition*
+```{yaml}
+- name: descStats
+  title: Descriptive statistics
+  type: Bool
+  default: false
+  description:
+      R: >
+        `TRUE` or `FALSE` (default), provide descriptive statistics
+```
+
+*UI Control Definition*
+```{yaml}
+- type: CheckBox
+  name: descStats
+```
+
+
+
+##Events
+
+Event      | Description                               | 
+------------- | ------------------------------------------|
+*change*  | Fires when the value of the control has changed.
+*changing*  | Fires when the value of the control is about to change.
+
+
+##Controls
+
+Below is a list of controls that inherit from `OptionControl`.
+
+###Option Controls
+
+- [TextBox](ui-textbox.html)
+- [CheckBox](ui-checkbox.html)
+- [RadioButton](ui-radiobutton.html)
+- [ComboBox](ui-combobox.html)
+- [Label](ui-label.html)
+- [ListBox](ui-listbox.html)
+- [VariableLabel](ui-variablelabel.html)
+- [TermLabel](ui-termlabel.html)
+
+
+
+
+================================================
+FILE: ui-parentcontrol.Rmd
+================================================
+---
+title: "ParentControl"
+output: html_document
+---
+
+**This control type is abstract and can not be used directly.**
+
+##Properties
+
+A control that inherits from a `ParentControl` supports the embedding of child controls through the `children` property.
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`children`  | An array of control definitions that are to be embedded into the parent control. | Array of valid Controls
+
+If the control is also a Display Control (e.i. `RadioButton` or `CheckBox`) another property is available.
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`style`  | Sets the layout position of child controls relative the parent  | *enum*: list, inline, list-inline, inline-list
+
+###Further Details
+
+####`style`
+
+- `list`: Children are placed below the parent in a vertical list.
+- `inline`: Children are placed to the right of the parent in a horizontal list.
+- `list-inline`: Children are placed below the parent in a horizontal list.
+- `inline-list`: Children are placed to the right of the parent in a vertical list.
+
+##Controls
+
+Below is a list of controls that inherit from `ParentControl`.
+
+###Layout Controls
+
+- [LayoutBox](ui-layoutbox.html)
+- [CollapseBox](ui-collapsebox.html)
+- [Supplier](ui-supplier.html)
+- [VariableSupplier](ui-variablesupplier.html)
+- [TargetLayoutBox](ui-targetlayoutbox.html)
+
+####Parent Controls
+
+- [CheckBox](ui-checkbox.html)
+- [RadioButton](ui-radiobutton.html)
+- [Label](ui-label.html)
+
+-------------------------------------
+
+
+================================================
+FILE: ui-radiobutton.Rmd
+================================================
+---
+title: "RadioButton"
+output: html_document
+---
+
+**Inherits from [`OptionControl`](ui-optioncontrol.html), [`ParentControl`](ui-parentcontrol.html)**
+
+## Properties
+
+There are no `CheckBox` specific properties. All behavior can be achieved using the inherited properties of `OptionControl` and `ParentControl`.
+
+## Supported Option Types
+
+- `List`
+
+### `List`
+
+When the option binding is to a `List` a few properties are needed for it to work.
+
+The below example shows an option with the name `plotError`. This option has a property called `options` which describes three mutually exclusive sub-options that are possible values for the options output. A `List` returns the name of one of these sub-options as a string.
+
+Now a `RadioButton` can be used to manipulate a 'List' option by changing its value to a specified sub-option name.
+
+*Option Definition*
+```{yaml}
+- name: plotError
+  title: Error Bar Definition
+  type: List
+  options:
+    - name: none
+      title: None
+    - name: ci
+      title: Confidence interval
+    - name: se
+      title: Standard Error
+  default: ci
+  description:
+      R: >
+        `'none'`, `'ci'` (default), or `'se'`. Use no error
+        bars, use confidence intervals, or use standard errors on the
+        plots, respectively
+```
+
+To achieve this two properties will need to be added to the `RadioButton` definition `optionName` and `optionPart`. Both these properties are inherited from `OptionControl`. As has been described in `OptionControl` documentation, `optionName` is used to determine what option the `RadioButton` should bind to. Under normal circumstances, it is not necessary to use `optionName` as the property `name` can be used for the same effect. This however, becomes a problem for defining a `RadioButton` that is linked to an `List` as the `name` property also has the requirement to be unique to that UI control. It is not allowed to have two radio buttons (or any other control for that matter) with the same name. Because of this, when binding to an `List` with a `RadioButton` we are required to give that `RadioButton` a unique name and use the `optionName` to bind to the desired `List`.
+
+Now binding solely to a `List` is not a valid configuration for a `RadioButton` as it requires a boolean data type to operate correctly. To overcome this, the `RadioButton` definition will need to not *just* bind to the `List` but also to one of the sub-options. This is achieved using the `optionPart` property. By assigning the name of the desired sub-option to this property, the `RadioButton` will operate base on that sub-options name.
+
+*UI Control Definition*
+```{yaml}
+- type: RadioButton
+  name: plotError_none
+  optionName: plotError
+  optionPart: none
+- type: RadioButton
+  name: plotError_ci
+  optionName: plotError
+  optionPart: ci
+  children:
+    - type: TextBox
+      name: ciWidth
+      label: Interval
+      suffix: '%'
+      format: number
+      inputPattern: '[0-9]+'
+      enable: (plotError_ci)
+- type: RadioButton
+  name: plotError_se
+  optionName: plotError
+  optionPart: se
+
+```
+
+Three `RadioButton`'s for the three sub-options of the option bound `List`.
+
+
+================================================
+FILE: ui-standard-formats.Rmd
+================================================
+---
+title: "Standard UI Formats"
+output: html_document
+---
+
+The following are the standard jamovi formats for use with the format property of UI controls:
+
+| Format | Description |
+| ------ | ----------- |
+`variable` |
+`term` |
+`number` |
+`bool` |
+`string` |
+
+
+
+================================================
+FILE: ui-supplier.Rmd
+================================================
+---
+title: "Supplier"
+output: html_document
+---
+
+Cooming soon!
+
+
+================================================
+FILE: ui-targetlayoutbox.Rmd
+================================================
+---
+title: "TargetLayoutBox"
+output: html_document
+---
+
+Cooming soon!
+
+
+================================================
+FILE: ui-termlabel.Rmd
+================================================
+---
+title: "TermLabel"
+output: html_document
+---
+Cooming soon!
+
+
+================================================
+FILE: ui-textbox.Rmd
+================================================
+---
+title: "TextBox"
+output: html_document
+---
+
+**Inherits from [`OptionControl`](ui-optioncontrol.html)**
+
+A textbox allows for the displaying and editing of the value of an option in text form.
+
+##Properties
+
+In addition to any inherited properties, a `TextBox` supports:
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`format` | Sets the format definition that the `TextBox` should use to perform string manipulations with. If no format is specified `string` is assumed. | Name of a [standard format](ui-standard-formats.html)\
+or a [custom format](ui-custom-format.html) include
+`suffix`  | Sets the text to be placed to the right of the textbox.  | string
+`inputPattern` | Sets the input string filter for determining valid inputs. For example, a number `TextBox` would have `inputPattern: '[0-9]+'`   | regular expression string
+`alignText`  | Set the horizontal alignment of the text within the `TextBox`. | enum: left, center, right
+`borderless`  | Toggles whether the control has a visible border or not. This is mainly used when a `TextBox` is add to the `template` of a `ListBox`. | bool
+
+## Supported Option Types ##
+
+- `String`
+- `Integer`
+- `Number`
+- Any format that has both toString() and parsing capabilities.
+
+##Example
+
+```{yaml}
+  - type: CheckBox
+    name: logOdds
+    children:
+      - type: TextBox
+        name: ciWidth
+        suffix: '%'
+        format: number
+        inputPattern: '[0-9]+'
+        enable: (logOdds)
+
+```
+
+The above example adds a `TextBox` as a child control to a `CheckBox`.
+
+
+================================================
+FILE: ui-variablelabel.Rmd
+================================================
+---
+title: "VariableLabel"
+output: html_document
+---
+Cooming soon!
+
+
+================================================
+FILE: ui-variablesupplier.Rmd
+================================================
+---
+title: "VariableSupplier"
+output: html_document
+---
+
+Cooming soon!
+

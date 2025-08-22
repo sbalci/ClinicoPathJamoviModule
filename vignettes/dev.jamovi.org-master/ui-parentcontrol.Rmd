@@ -1,0 +1,49 @@
+---
+title: "ParentControl"
+output: html_document
+---
+
+**This control type is abstract and can not be used directly.**
+
+##Properties
+
+A control that inherits from a `ParentControl` supports the embedding of child controls through the `children` property.
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`children`  | An array of control definitions that are to be embedded into the parent control. | Array of valid Controls
+
+If the control is also a Display Control (e.i. `RadioButton` or `CheckBox`) another property is available.
+
+Property      | Description                               | Form                 |
+------------- | ------------------------------------------| -------------------- |
+`style`  | Sets the layout position of child controls relative the parent  | *enum*: list, inline, list-inline, inline-list
+
+###Further Details
+
+####`style`
+
+- `list`: Children are placed below the parent in a vertical list.
+- `inline`: Children are placed to the right of the parent in a horizontal list.
+- `list-inline`: Children are placed below the parent in a horizontal list.
+- `inline-list`: Children are placed to the right of the parent in a vertical list.
+
+##Controls
+
+Below is a list of controls that inherit from `ParentControl`.
+
+###Layout Controls
+
+- [LayoutBox](ui-layoutbox.html)
+- [CollapseBox](ui-collapsebox.html)
+- [Supplier](ui-supplier.html)
+- [VariableSupplier](ui-variablesupplier.html)
+- [TargetLayoutBox](ui-targetlayoutbox.html)
+
+####Parent Controls
+
+- [CheckBox](ui-checkbox.html)
+- [RadioButton](ui-radiobutton.html)
+- [Label](ui-label.html)
+
+-------------------------------------

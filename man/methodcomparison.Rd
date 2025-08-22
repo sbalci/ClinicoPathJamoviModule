@@ -5,6 +5,7 @@
 \title{Method Comparison Analysis}
 \usage{
 methodcomparison(
+  data,
   method1,
   method2,
   grouping,
@@ -34,6 +35,8 @@ methodcomparison(
 )
 }
 \arguments{
+\item{data}{The data as a data frame.}
+
 \item{method1}{.}
 
 \item{method2}{.}

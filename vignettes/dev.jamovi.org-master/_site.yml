@@ -1,0 +1,70 @@
+name: "jamovi-dev"
+navbar:
+  title: "dev.jamovi.org"
+  type: inverse
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Tutorial"
+      menu:
+        - text: Basic
+        - text: 1 - Getting Started
+          href: tuts0101-getting-started.html
+        - text: 2 - Creating a Module
+          href: tuts0102-creating-a-module.html
+        - text: 3 - Creating an Analysis
+          href: tuts0103-creating-an-analysis.html
+        - text: 4 - Implementing an Analysis
+          href: tuts0104-implementing-an-analysis.html
+        - text: 5 - Debugging an Analysis
+          href: tuts0105-debugging-an-analysis.html
+        - text: 6 - Creating Rich Results
+          href: tuts0105-creating-rich-results.html
+        - text: 7 - Adding Plots
+          href: tuts0106-adding-plots.html
+        - text: 8 - Distributing Modules
+          href: tuts0107-distributing-modules.html
+        - text: 9 - Additional Notes
+          href: tuts0108-additional-notes.html
+        - text: Intermediate
+        - text: 1 - Dynamic Tables
+          href: tuts0201-dynamic-tables.html
+        - text: 2 - Handling Data
+          href: tuts0202-handling-data.html
+        - text: 3 - State
+          href: tuts0203-state.html
+        - text: User Interface
+        - text: 1 - Basic UI Design
+          href: ui-basic-design.html
+        - text: 2 - Advanced UI Design
+          href: ui-advanced-design.html
+        - text: 3 - Advanced Customisation
+          href: ui-advanced-customisation.html
+    - text: API
+      menu:
+        - text: yaml
+        - text: Module Definition (0000.yaml)
+          href: api_module-definition.html
+        - text: Analysis Definition (.a.yaml)
+          href: api_analysis-definition.html
+        - text: Results Definition (.r.yaml)
+          href: api_results-definition.html
+        - text: User Interface Definition (.u.yaml)
+          href: api_ui-definition.html
+        - text: R
+        - text: Results Elements
+          href: api_results-elements.html
+        - text: Table
+          href: api_table.html
+    - text: "Misc"
+      menu:
+        - text: "Project Structure"
+          href: info_project-structure.html
+output:
+    html_document:
+        highlight: haddock
+        toc: true
+        toc_float: true
+        css: styles.css
+        includes:
+            in_header: piwik.html

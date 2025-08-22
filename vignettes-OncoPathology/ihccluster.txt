@@ -1,0 +1,495 @@
+How can i cluster 6 immunohistochemistry stains to subgroup expression patterns using R
+
+Great question. Here’s a practical, end-to-end R workflow to cluster cases based on 6 IHC stains (any mix of binary/ordinal/continuous like % positivity or H-score), then visualize and evaluate the subgroups.
+
+⸻
+
+1) Prepare your data
+
+# packages
+
+library(tidyverse)
+library(cluster)        # daisy (Gower), pam, silhouette
+library(factoextra)     # visualizing clusters
+library(NbClust)        # multiple indices for k
+library(ComplexHeatmap) # publication-quality heatmaps
+library(circlize)       # color functions for heatmap
+set.seed(42)
+
+# ---- Example data structure ----
+
+# rows = cases, columns = 6 IHC stains + optional covariates
+
+# Replace this with your real data frame `ihc`
+
+n <- 150
+ihc <- tibble(
+  case_id = paste0("C", seq_len(n)),
+  GATA6 = rnorm(n, 150, 40),            # H-score 0-300
+  CK17  = rbinom(n, 1, 0.4),            # binary
+  p63   = sample(0:3, n, TRUE),         # 0/1/2/3 ordinal intensity
+  CK5_6 = rnorm(n, 100, 35),            # H-score
+  CD44  = rbeta(n, 2, 5) * 100,         # % positivity
+  FOXI1 = rnorm(n, 30, 20)              # % positivity
+)
+
+# If some markers are ordinal or binary, encode suitably
+
+ihc_pre <- ihc %>%
+  mutate(
+    CK17  = factor(CK17, levels = c(0,1), labels = c("neg","pos")),
+    p63   = ordered(p63, levels = 0:3)   # ordered factor
+  )
+
+markers <- c("GATA6","CK17","p63","CK5_6","CD44","FOXI1")
+X <- ihc_pre %>% select(all_of(markers))
+row_ids <- ihc_pre$case_id
+
+Why this matters:
+ • Using numeric scales directly mixes units; use a distance that handles heterogeneous data (Gower) to avoid arbitrary scaling.
+ • Ordered factors preserve ordinality (e.g., 0<1<2<3).
+
+⸻
+
+2) Choose an appropriate distance
+
+Use Gower distance (works with numeric, binary, and ordered factors). You can give continuous markers higher or lower weight if needed.
+
+# Optional: feature weights (equal by default). Example: emphasize GATA6 & CK5/6
+
+w <- rep(1, length(markers))
+names(w) <- markers
+w[c("GATA6","CK5_6")] <- 1.2
+
+# Compute Gower
+
+d_gower <- daisy(X, metric = "gower", weights = w)
+summary(d_gower)
+
+⸻
+
+3) Pick a clustering algorithm
+ • PAM (k-medoids) on Gower is robust and gives actual medoid cases.
+ • Hierarchical (e.g., Ward) works best on Euclidean, but can still be used on Gower with caution (average/complete linkage).
+
+I recommend starting with PAM.
+
+⸻
+
+4) Determine the optimal number of clusters (k)
+
+Try several k and inspect average silhouette widths. You can also use NbClust (works mainly with Euclidean; use as a heuristic) or the gap statistic (for numeric). For mixed data, silhouette over Gower is straightforward.
+
+sil_df <- map_df(2:8, \(k) {
+  pam_fit <- pam(d_gower, k = k, diss = TRUE)
+  tibble(k = k, avg_sil = mean(silhouette[pam_fit](, "sil_width")))
+})
+
+sil_df %>% arrange(desc(avg_sil))
+
+# Pick k with highest avg_sil (and a clinically meaningful split)
+
+best_k <- sil_df$k[which.max(sil_df$avg_sil)]
+best_k
+
+⸻
+
+5) Fit clustering and inspect quality
+
+pam_fit <- pam(d_gower, k = best_k, diss = TRUE)
+cluster_id <- factor(pam_fit$clustering, labels = paste0("Cluster", seq_len(best_k)))
+
+# Silhouette plot
+
+fviz_silhouette(silhouette(pam_fit), label = FALSE)
+
+⸻
+
+6) Summarize marker profiles by cluster
+
+ihc_clusters <- ihc_pre %>%
+  mutate(cluster = cluster_id)
+
+# Quick summary: numeric => mean/SD, factor => counts/%
+
+num_vars <- X %>% select(where(is.numeric)) %>% names()
+cat_vars <- X %>% select(!where(is.numeric)) %>% names()
+
+summ_num <- ihc_clusters %>%
+  group_by(cluster) %>%
+  summarise(across(all_of(num_vars),
+                   list(mean = ~mean(.x, na.rm=TRUE),
+                        sd = ~sd(.x, na.rm=TRUE)),
+                   .names = "{.col}_{.fn}"))
+
+summ_cat <- ihc_clusters %>%
+  select(cluster, all_of(cat_vars)) %>%
+  pivot_longer(-cluster, names_to="marker", values_to="level") %>%
+  group_by(cluster, marker, level) %>%
+  summarise(n = n(), .groups="drop") %>%
+  group_by(cluster, marker) %>%
+  mutate(pct = 100*n/sum(n)) %>%
+  arrange(marker, cluster, desc(pct))
+summ_num
+summ_cat
+
+⸻
+
+7) Heatmap visualization (with appropriate scales)
+
+For mixed data in a heatmap, use purely numeric inputs. Convert categorical markers to numeric scores (e.g., 0/1 for CK17, 0–3 for p63). Optionally z-score continuous markers by column so patterns are comparable.
+
+# Convert to numeric matrix for heatmap
+
+X_num <- ihc_pre %>%
+  transmute(
+    GATA6 = as.numeric(GATA6),
+    CK17  = as.numeric(as.integer(CK17) - 1),  # neg=0, pos=1
+    p63   = as.numeric(p63),                    # 0..3 kept
+    CK5_6 = as.numeric(CK5_6),
+    CD44  = as.numeric(CD44),
+    FOXI1 = as.numeric(FOXI1)
+  ) %>%
+  as.matrix()
+
+# z-score continuous columns only (optional but recommended)
+
+cont_cols <- c("GATA6","CK5_6","CD44","FOXI1")
+X_scaled <- X_num
+X_scaled[, cont_cols] <- scale(X_num[, cont_cols])
+
+# Order by clusters
+
+ord <- order(cluster_id)
+mat <- t(X_scaled[ord, ])  # genes/markers as rows
+cl_anno <- data.frame(Cluster = cluster_id[ord])
+rownames(cl_anno) <- row_ids[ord]
+
+# Colors: blue-white-red for z-scores; grayscale for categorical-like
+
+col_fun <- colorRamp2(c(-2, 0, 2), c("#2c7bb6","#ffffbf","#d7191c"))
+
+Heatmap(mat,
+        name = "z/score",
+        col = col_fun,
+        column_title = "Cases",
+        row_title = "IHC markers",
+        top_annotation = HeatmapAnnotation(df = cl_anno),
+        cluster_rows = TRUE,     # cluster markers
+        cluster_columns = FALSE, # keep cases ordered by cluster
+        show_column_names = FALSE)
+
+⸻
+
+8) Alternative: Hierarchical clustering
+
+If you prefer hierarchical clustering, you can transform to numeric and use Euclidean/ Ward.D2:
+
+d_euc <- dist(X_scaled, method = "euclidean")
+hc <- hclust(d_euc, method = "ward.D2")
+plot(hc)
+
+# cut tree
+
+hc_k <- cutree(hc, k = best_k)
+table(hc_k)
+
+⸻
+
+9) Robustness: consensus clustering (optional but recommended)
+
+For stability across resamples:
+
+# Simple bootstrap for PAM stability
+
+B <- 100
+assignments <- matrix(NA, nrow = nrow(X), ncol = B,
+                      dimnames = list(row_ids, NULL))
+
+for (b in 1:B) {
+  idx <- sample(seq_len(nrow(X)), replace = TRUE)
+  d_b  <- daisy(X[idx, , drop=FALSE], metric = "gower")
+  pam_b <- pam(d_b, k = best_k, diss = TRUE)
+
+# Map back: assign only in-bag samples
+
+  assignments[row_ids[idx], b] <- paste0("C", pam_b$clustering)
+}
+
+# Co-clustering proportion matrix
+
+co <- matrix(0, nrow=nrow(X), ncol=nrow(X), dimnames=list(row_ids,row_ids))
+for (b in 1:B) {
+  lab <- assignments[, b]
+  inbag <- !is.na(lab)
+  same <- outer(lab[inbag], lab[inbag], `==`)
+  co[inbag, inbag] <- co[inbag, inbag] + same
+}
+co <- co / B
+
+# Heatmap of stability (higher = more stable)
+
+Heatmap(co[ord, ord], name = "co-cluster", col = colorRamp2(c(0,1), c("white","black")),
+        show_row_names = FALSE, show_column_names = FALSE)
+
+⸻
+
+10) Associate clusters with pathology/clinical variables
+
+After clustering, test whether clusters differ in outcomes or clinicopathologic features.
+
+# Example: compare GATA6 across clusters (ANOVA/Kruskal)
+
+kruskal.test(GATA6 ~ cluster, data = ihc_clusters)
+
+# For categorical outcomes
+
+# chisq.test(table(ihc_clusters$cluster, ihc_clusters$grade))
+
+⸻
+
+11) Practical tips
+ • Missing data: daisy() ignores NAs pairwise. If many NAs, consider imputation (e.g., mice) or sensitivity analyses.
+ • Scaling: When converting to numeric heatmaps, z-score continuous markers so one high-variance stain doesn’t dominate the visual.
+ • Weights: If certain stains are clinically more important, adjust weights in daisy().
+ • Interpretability: Use PAM medoids to show “representative cases” per cluster (use pam_fit$medoids).
+ • Reproducibility: Fix seeds; record versions; export figures.
+
+⸻
+
+Minimal “drop-in” template (replace ihc with your data)
+
+library(tidyverse); library(cluster); library(factoextra); library(ComplexHeatmap); library(circlize)
+
+markers <- c("GATA6","CK17","p63","CK5_6","CD44","FOXI1")
+ihc_pre <- ihc %>%
+  mutate(
+    CK17 = factor(CK17, levels=c(0,1), labels=c("neg","pos")),
+    p63  = ordered(p63, levels = sort(unique(p63)))
+  )
+X <- ihc_pre %>% select(all_of(markers))
+row_ids <- ihc_pre$case_id
+
+d_gower <- daisy(X, metric="gower")
+sil <- map_df(2:8, \(k){pam_fit <- pam(d_gower, k, diss=TRUE)
+  tibble(k=k, avg_sil=mean(silhouette[pam_fit](,"sil_width")))})
+best_k <- sil$k[which.max(sil$avg_sil)]
+
+pam_fit <- pam(d_gower, k=best_k, diss=TRUE)
+ihc_cl <- ihc_pre %>% mutate(cluster = factor(pam_fit$clustering))
+
+X_num <- ihc_pre %>%
+  transmute(
+    GATA6 = as.numeric(GATA6),
+    CK17  = as.numeric(as.integer(CK17)-1),
+    p63   = as.numeric(p63),
+    CK5_6 = as.numeric(CK5_6),
+    CD44  = as.numeric(CD44),
+    FOXI1 = as.numeric(FOXI1)
+  ) %>% as.matrix()
+cont_cols <- intersect(colnames(X_num), c("GATA6","CK5_6","CD44","FOXI1"))
+X_num[, cont_cols] <- scale(X_num[, cont_cols])
+
+ord <- order(ihc_cl$cluster)
+cl_anno <- data.frame(Cluster = ihc_cl$cluster[ord]); rownames(cl_anno) <- row_ids[ord]
+col_fun <- colorRamp2(c(-2,0,2), c("#2c7bb6","#ffffbf","#d7191c"))
+Heatmap(t(X_num[ord,]), name="z/score", col=col_fun,
+        top_annotation = HeatmapAnnotation(df = cl_anno),
+        cluster_rows=TRUE, cluster_columns=FALSE, show_column_names=FALSE)
+
+⸻
+
+If you share a small sample (or variable types for each stain and how you record them—binary/ordinal/H-score), I can tailor the code to your exact dataset (including imputation, batch correction, and publication-ready figures).
+
+They are all categorical
+
+Perfect—when all 6 stains are categorical (binary or multi-level), you have three solid routes:
+ 1. distance on categorical data → PAM (k-medoids)
+ 2. k-modes (built for nominal data)
+ 3. MCA (multiple correspondence analysis) → cluster on components
+
+Below are ready-to-run templates for each. Pick one; PAM on Gower and MCA+k-means are my go-tos.
+
+⸻
+
+A) PAM on Gower (handles all-categorical cleanly)
+
+# packages
+
+library(tidyverse)
+library(cluster)        # daisy (Gower), pam, silhouette
+library(factoextra)     # visuals
+
+set.seed(42)
+
+# --- your data: rows = cases, 6 categorical stains as factors ---
+
+# Example shape (replace with your df `ihc`)
+
+# ihc <- tibble(case_id, GATA6_cat, CK17_cat, p63_cat, CK5_6_cat, CD44_cat, FOXI1_cat)
+
+markers <- c("GATA6_cat","CK17_cat","p63_cat","CK5_6_cat","CD44_cat","FOXI1_cat")
+
+# Ensure all are factors (ordered/nominal—both OK)
+
+ihc_cat <- ihc %>%
+  mutate(across(all_of(markers), ~ as.factor(.)))
+
+X <- ihc_cat %>% select(all_of(markers))
+row_ids <- ihc_cat$case_id
+
+# Gower dissimilarity for categorical data
+
+d <- daisy(X, metric = "gower")  # for factors -> simple matching
+
+# Choose k by silhouette
+
+sil_df <- map_df(2:8, \(k) {
+  fit <- pam(d, k = k, diss = TRUE)
+  tibble(k = k, avg_sil = mean(silhouette[fit](, "sil_width")))
+})
+best_k <- sil_df$k[which.max(sil_df$avg_sil)]
+best_k; sil_df %>% arrange(desc(avg_sil))
+
+# Final clustering
+
+pam_fit <- pam(d, k = best_k, diss = TRUE)
+clusters <- factor(pam_fit$clustering, labels = paste0("C", seq_len(best_k)))
+
+# Inspect
+
+table(clusters)
+fviz_silhouette(silhouette(pam_fit), label = FALSE)
+
+# Marker distribution per cluster
+
+summary_tbl <- ihc_cat %>%
+  mutate(cluster = clusters) %>%
+  pivot_longer(all_of(markers), names_to = "marker", values_to = "level") %>%
+  count(cluster, marker, level) %>%
+  group_by(cluster, marker) %>%
+  mutate(pct = 100*n/sum(n)) %>%
+  arrange(marker, cluster, desc(pct))
+summary_tbl
+
+Notes
+ • With factors, daisy(..., "gower") reduces to a simple matching distance (1 if level differs, 0 if same), averaged across variables.
+ • PAM is robust and yields medoid cases (representatives) via pam_fit$medoids.
+
+⸻
+
+B) k-modes (purpose-built for nominal data)
+
+library(klaR)
+library(tidyverse)
+
+set.seed(42)
+
+X <- ihc %>%
+  select(all_of(markers)) %>%
+  mutate(across(everything(), as.factor)))
+
+# Try k = 2..8, pick the smallest total within-cluster dissimilarity (cost)
+
+grid <- map_df(2:8, \(k) {
+  fit <- kmodes(X, modes = k, iter.max = 50, weighted = FALSE)  # Huang’s algorithm
+  tibble(k = k, cost = fit$withindiff)
+})
+best_k <- grid$k[which.min(grid$cost)]
+best_k; grid %>% arrange(cost)
+
+fit <- kmodes(X, modes = best_k, iter.max = 100)
+clusters <- factor(fit$cluster, labels = paste0("C", seq_len(best_k)))
+
+# Mode profiles (most frequent level per cluster)
+
+fit$modes  # a row per cluster, mode per stain
+
+# Distribution table
+
+table(clusters)
+
+Notes
+ • k-modes minimizes mismatches; very interpretable: each cluster is summarized by mode levels of the stains.
+
+⸻
+
+C) MCA → k-means (great for visual + separation)
+
+library(FactoMineR)
+library(factoextra)
+library(tidyverse)
+
+set.seed(42)
+
+X <- ihc %>%
+  select(all_of(markers)) %>%
+  mutate(across(everything(), as.factor)))
+
+# MCA on categorical variables
+
+mca <- MCA(X, graph = FALSE)
+
+# Choose number of components to keep (e.g., enough to explain ~70–80%)
+
+eig <- mca$eig
+cumpct <- cumsum(eig[, "cumulative percentage of variance"])
+nc <- which[cumpct >= 75](1)  # keep components up to ~75% inertia
+scores <- mca$ind$coord[, 1:nc, drop = FALSE]
+
+# Pick k by silhouette on Euclidean in MCA space
+
+sil_df <- map_df(2:8, \(k) {
+  cl <- kmeans(scale(scores), centers = k, nstart = 50)
+  sil <- cluster::silhouette(cl$cluster, dist(scale(scores)))
+  tibble(k = k, avg_sil = mean(sil[, "sil_width"]))
+})
+best_k <- sil_df$k[which.max(sil_df$avg_sil)]
+best_k; sil_df %>% arrange(desc(avg_sil))
+
+km <- kmeans(scale(scores), centers = best_k, nstart = 100)
+clusters <- factor(km$cluster, labels = paste0("C", seq_len(best_k)))
+
+# MCA biplot with clusters
+
+fviz_mca_ind(mca, habillage = clusters, addEllipses = TRUE, repel = TRUE)
+
+Notes
+ • MCA transforms categorical patterns into continuous components using a chi-square geometry; clustering in this space often separates profiles more cleanly and gives nice contribution/quality metrics for interpretation (fviz_contrib, dimdesc).
+
+⸻
+
+Which should you use?
+ • Most robust start: PAM on Gower (A).
+ • Most interpretable prototypes: k-modes (B) shows stain modes per cluster.
+ • Best for figures & interpretation of axes: MCA + k-means (C).
+
+You can run A and B, compare agreement (Adjusted Rand Index via mclust::adjustedRandIndex) and pick the one that aligns with pathology knowledge.
+
+⸻
+
+Quick add-ons
+
+Cluster–marker association tests
+
+# Per stain: are levels distributed differently by cluster?
+
+ihc %>%
+  mutate(cluster = clusters) %>%
+  summarise(across(all_of(markers),
+                   ~ list(chisq.test(table(cluster, .x))$p.value))) %>%
+  unnest_wider(everything())
+
+Export cluster medoids (PAM)
+
+pam_fit$medoids  # case IDs that represent clusters
+
+Confusion between methods
+
+library(mclust)
+ari <- adjustedRandIndex(as.integer(clusters), as.integer(clusters_from_other_method))
+ari
+
+⸻
+
+If you paste a small anonymized snippet (levels of each stain + a dozen rows), I’ll plug it straight into one of these and return cluster counts, silhouette, and a ready figure.

@@ -7,7 +7,7 @@ This document defines a suite of specialized LLM-based agents designed to stream
 * **meddecide**: Implements decision curve analysis, diagnostic decision models, and clinical decision support tools.
 * **jjstatsplot**: Generates statistical plots (e.g., waterfall plots, swimmer plots, heatmaps) for Jamovi modules.
 * **jsurvival**: Provides survival analysis routines, including Kaplan–Meier, Cox proportional hazards, and multi-state models.
-* **clinicoPathDescriptives**: Offers descriptive statistics and advanced tables/visualizations tailored to anatomic and surgical pathologists.
+* **ClinicoPathDescriptives**: Offers descriptive statistics and advanced tables/visualizations tailored to anatomic and surgical pathologists.
 
 Each agent encapsulates a focused set of responsibilities and expertise, enabling efficient collaboration with Large Language Models (LLMs) for code generation, debugging, documentation, quality assurance, refactoring, and domain-specific analysis.
 
@@ -20,6 +20,23 @@ Each agent encapsulates a focused set of responsibilities and expertise, enablin
 5. **Integrate Output**: Incorporate the generated code, documentation, tests, or analyses into your Jamovi module project.
 
 ---
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [How to Use This Document](#how-to-use-this-document)
+- [Agents Overview](#agents-overview)
+- [Agent Handoffs & Workflow](#agent-handoffs--workflow)
+- [Per-Agent Acceptance Checklists](#per-agent-acceptance-checklists)
+- [Decision Boundaries: Which Agent When](#decision-boundaries-which-agent-when)
+- [Implementation Patterns (Informed by Repositories and Jamovi Dev Docs)](#implementation-patterns-informed-by-repositories-and-jamovi-dev-docs)
+- [YAML Configuration Files](#yaml-configuration-files)
+- [R6 Analysis Class Patterns (`.b.R`)](#r6-analysis-class-patterns-br)
+- [End-to-End Examples of Agent Workflow](#end-to-end-examples-of-agent-workflow)
+- [Style & Naming Conventions (Jamovi + R)](#style--naming-conventions-jamovi--r)
+- [Appendix: Common Jamovi Module Components](#appendix-common-jamovi-module-components)
+- [Security & PHI Considerations](#security--phi-considerations)
+- [Versioning](#versioning)
 
 ## Agents Overview
 
@@ -40,7 +57,159 @@ Each agent encapsulates a focused set of responsibilities and expertise, enablin
 
 Each agent is described in detail below.
 
+# Agent Handoffs & Workflow
+
+1. **Plan** → *ModuleArchitectAgent* drafts skeleton (folders, DESCRIPTION, jamovi-module.yml).
+2. **Specify** → *YAMLConfigAgent* defines `.a.yaml`, `.u.yaml`, `.r.yaml` options and UI.
+3. **Implement** → *RFunctionGenAgent* adds core R functions; *PlotDesignAgent* designs figures.
+4. **Validate** → *TestQAAgent* writes unit & integration tests; *BugTrackerAgent* triages failures.
+5. **Refine** → *RefactorAgent* improves clarity/performance; *DocumentationAgent* updates help.
+6. **Ship** → *CIIntegrationAgent* ensures build/lint/tests on GitHub Actions; *ReleaseManagerAgent* prepares notes and version bump.
+
+> Tip: When switching agents, include a 1–3 bullet "context handoff" (inputs, decisions, TODOs) to keep LLMs aligned.
+
 ---
+
+## Per-Agent Acceptance Checklists
+
+> Use these as the “definition of done” before handoffs. Each checklist has three parts: **Inputs**, **Outputs**, and **Tests/Verification**.
+
+### ModuleArchitectAgent
+- **Inputs**
+  - Target module name and short description
+  - Supported jamovi/jmvcore versions
+  - Initial set of analyses (names only)
+- **Outputs**
+  - `DESCRIPTION` with Imports and minimum versions
+  - `jamovi-module.yml` with module metadata and compatibility
+  - Folders scaffolded: `R/`, `analyses/`, `man/`, `inst/`, `resources/`, `tests/testthat/`
+  - One minimal analysis stub wired via `.a.yaml`, `.u.yaml`, `.r.yaml`
+- **Tests/Verification**
+  - `R CMD check` passes locally with no ERRORs
+  - `jamovi-module.yml` loads in jamovi (dry-run) without schema errors
+
+### YAMLConfigAgent
+- **Inputs**
+  - Analysis name, option list, desired UI groups
+- **Outputs**
+  - `.a.yaml` (options + menu)
+  - `.u.yaml` (controls referencing `.a.yaml` options)
+  - `.r.yaml` (results with `clearWith`, `visible`, `renderFun`)
+- **Tests/Verification**
+  - All option names are referenced exactly in R6 via `self$options$...`
+  - All result names are referenced exactly in R6 via `self$results$...`
+  - YAML passes lint (no duplicate keys; anchors resolved)
+
+### RFunctionGenAgent
+- **Inputs**
+  - Function/analysis name, exact option names & types, example dataset or schema
+- **Outputs**
+  - R function(s) with roxygen2 docs
+  - R6 `.b.R` implementation filling all declared results
+  - Clear error messages via `jmvcore::reject()` for invalid inputs
+- **Tests/Verification**
+  - Unit tests cover: small n, single-level factor, missing values, numeric/string parsing
+  - Deterministic results with fixed seeds
+  - No unhandled warnings; messages are actionable
+
+### PlotDesignAgent
+- **Inputs**
+  - Purpose of plot, expected aesthetics, inputs (columns), optional theme
+- **Outputs**
+  - ggplot code compatible with jamovi image renderer (`.plotX`)
+  - Axis titles, legends, captions; accessibility (sufficient font size)
+- **Tests/Verification**
+  - Plot object has expected geoms/scales in tests (class/layers)
+  - Works with empty/small data without crashing (shows informative message)
+
+### TestQAAgent
+- **Inputs**
+  - Functions/analyses to test; expected behaviors and edge cases
+- **Outputs**
+  - `tests/testthat/test-<name>.R` with unit + integration tests
+  - Golden tests for plots (class/layers), snapshot tests for tables where feasible
+- **Tests/Verification**
+  - All tests pass locally; failures are reproducible
+  - Coverage for core branches (≥80% for critical modules)
+
+### RefactorAgent
+- **Inputs**
+  - Target files/functions, pain points (complexity, duplication, speed)
+- **Outputs**
+  - Clear diffs with behavior preserved
+  - Private helpers extracted; names follow conventions
+- **Tests/Verification**
+  - Pre/post tests identical; microbenchmarks not worse (>10% slowdown triggers rework)
+
+### BugTrackerAgent
+- **Inputs**
+  - Repro steps, data snippet, current/expected behavior
+- **Outputs**
+  - Minimal reproducible example (MRE)
+  - Root-cause hypothesis and proposed patch
+- **Tests/Verification**
+  - Regression test added; issue cannot be reproduced after fix
+
+### CIIntegrationAgent
+- **Inputs**
+  - Supported R versions and OS matrix
+- **Outputs**
+  - GitHub Actions workflow running: R CMD check, lintr, testthat; cache of packages; artifact upload
+- **Tests/Verification**
+  - CI green on PR; artifacts include `00check.log`
+
+### DocumentationAgent
+- **Inputs**
+  - Functions/analyses to document; references for methods
+- **Outputs**
+  - Roxygen2 docs; vignettes or README section; inline examples
+- **Tests/Verification**
+  - `devtools::document()` runs cleanly; examples run without error
+
+### VisualizationUXAgent
+- **Inputs**
+  - Table/plot outputs to style; accessibility requirements
+- **Outputs**
+  - Improved table layouts (DT opts), tooltips/help text, theme toggles if applicable
+- **Tests/Verification**
+  - Manual QA checklist passes for readability, focus order, keyboard nav (where applicable)
+
+### DomainExpertAgent
+- **Inputs**
+  - Clinical/statistical question; dataset schema; acceptance thresholds
+- **Outputs**
+  - Review notes on assumptions, references, recommended defaults
+- **Tests/Verification**
+  - Citations included; choices align with referenced guidelines
+
+### ReleaseManagerAgent
+- **Inputs**
+  - Changelog items, breaking changes, PR list
+- **Outputs**
+  - Version bump (SEMVER), release notes, tagged release instructions
+- **Tests/Verification**
+  - Module builds from a clean clone; version appears in jamovi About/help
+
+---
+
+## Decision Boundaries: Which Agent When
+
+| Situation / Signal                                                                 | Choose this Agent         | Do this first                                                            | Not this                                                                 |
+|------------------------------------------------------------------------------------|---------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| New module or analysis scaffold needed                                             | ModuleArchitectAgent      | Confirm module name, jmvcore version, target analyses                    | Writing R functions before YAML exists                                   |
+| You know the options/UI but not the compute yet                                    | YAMLConfigAgent           | Draft `.a.yaml`, `.u.yaml`, `.r.yaml` and validate names                 | Implementing `.b.R` without stable option names                          |
+| Core statistics or data-wrangling logic required                                   | RFunctionGenAgent         | Provide option names/types; sample data                                  | Plot styling before compute is correct                                   |
+| Plot looks wrong or needs publication quality                                      | PlotDesignAgent           | Freeze the data/columns that feed the plot                               | Rewriting analysis logic                                                  |
+| Unsure if changes break existing behavior                                          | TestQAAgent               | List expected behaviors & edge cases                                     | Manual ad-hoc testing only                                               |
+| Code works but is messy/slow                                                       | RefactorAgent             | Identify hotspots; set performance budgets                               | Adding features during refactor                                          |
+| Error reported by users; need reproducible steps                                   | BugTrackerAgent           | Capture MRE (data + steps + expected vs actual)                          | Large refactors before isolating bug                                     |
+| Ensure PRs don’t regress; add checks/lint                                          | CIIntegrationAgent        | Define R version matrix; cache key strategy                              | Only local testing                                                       |
+| Gaps in help text, method references, examples                                     | DocumentationAgent        | Collect method references; decide example datasets                       | Shipping code without docs                                               |
+| Table is cluttered; need better UX/accessibility                                   | VisualizationUXAgent      | Specify user personas & accessibility needs                              | Changing compute to “fix” layout                                         |
+| Need clinical/statistical justification or defaults                                | DomainExpertAgent         | Provide context, outcomes, minimal clinically important differences      | Copying defaults from unrelated modules                                  |
+| Preparing a release, bumping version, writing notes                                | ReleaseManagerAgent       | Compile changes, breaking notes                                          | Merging to main without tagging/release notes                            |
+
+# Implementation Patterns (Informed by Repositories and Jamovi Dev Docs)
 
 # Implementation Patterns (Informed by Repositories and Jamovi Dev Docs)
 
@@ -77,6 +246,55 @@ ClinicoPath statistical modules (meddecide, jjstatsplot, ClinicoPathDescriptives
 By examining real-world examples and official guidelines, we see how inputs flow from UI to R code and how outputs are formatted for display.
 
 ## YAML Configuration Files
+
+## Prompt Templates (copy‑paste ready)
+
+### ModuleArchitectAgent
+```
+You are ModuleArchitectAgent. Create the initial skeleton for the jamovi module `<module_name>`. Include:
+- DESCRIPTION with Imports: jmvcore (>=2.5.0), survival, ggplot2
+- jamovi-module.yml with version `<semver>`, compatible jmvcore
+- Folders: R/, man/, inst/, resources/, analyses/
+- A minimal analysis stub named `<analysis_name>` wired through `.a.yaml`, `.u.yaml`, `.r.yaml`.
+Output: file tree, key files with brief contents, and next steps.
+```
+
+### RFunctionGenAgent
+```
+You are RFunctionGenAgent. Implement `<function_name>` for module `<module_name>`.
+Inputs (from options): `<inputs>`.
+Tasks: validate, compute, return structures consumable by jmvcore (tables/images). Use tidyverse style; include roxygen2.
+Edge cases: small n, single-factor level, missing values.
+Tests: provide `testthat` examples with fixed seeds.
+```
+
+### YAMLConfigAgent
+```
+You are YAMLConfigAgent. Draft `.a.yaml`, `.u.yaml`, `.r.yaml` for analysis `<analysis_name>`.
+- `.a.yaml`: options (names, types, defaults, constraints), refs
+- `.u.yaml`: UI layout mapping to options
+- `.r.yaml`: results (tables/plots), clearWith, visible, renderFun hooks
+Return: three YAML blocks ready to paste.
+```
+
+### TestQAAgent
+```
+You are TestQAAgent. Write unit & integration tests for `<function_or_analysis>`.
+- Deterministic seeds
+- Golden-file test for plot object (class & layers)
+- Error messages for invalid inputs
+Return: `tests/testthat/test-<name>.R`
+```
+
+### PlotDesignAgent
+```
+You are PlotDesignAgent. Produce a publication-quality ggplot for `<purpose>` following jamovi themes. Return code only; no images. Accept `ggtheme` parameter.
+```
+
+### CIIntegrationAgent
+```
+You are CIIntegrationAgent. Provide a GitHub Actions workflow that runs R CMD check, lintr, and testthat on push & PR; caches R packages; uploads check artifacts.
+```
 
 ### 1. Analysis Definition (`.a.yaml`)
 
@@ -921,6 +1139,14 @@ kappaSizeCIClass <- R6::R6Class(
 
 ---
 
+## Style & Naming Conventions (Jamovi + R)
+
+- **Case**: Use `UpperCamelCase` for R6 classes (e.g., `DecisionClass`), `snake_case` for private helpers (e.g., `private$.compute_metrics`).
+- **Options/Results**: Options in `.a.yaml` must map 1:1 to `self$options$...`; result names in `.r.yaml` must match `self$results$...`.
+- **Messages**: Prefer actionable errors (what went wrong + how to fix). Use `jmvcore::reject()` for user-facing validation.
+- **Dependencies**: Minimize; prefer base R + widely used packages. Gate optional deps with `requireNamespace()`.
+- **Docs**: Every user-facing function has roxygen2 with examples; analyses include `refs:` for citations.
+
 ## Appendix: Common Jamovi Module Components
 
 1. **jmvcore Basics**:
@@ -946,6 +1172,7 @@ kappaSizeCIClass <- R6::R6Class(
        label: "Significance Level"
        default: 0.05
      ```
+
    * **`.r.yaml`**: Maps UI options to R function parameters. Example:
 
      ```yaml
@@ -955,6 +1182,7 @@ kappaSizeCIClass <- R6::R6Class(
          time: time_col
          status: status_col
      ```
+
    * **`.a.yaml`**: Registers analyses. Example:
 
      ```yaml
@@ -997,9 +1225,16 @@ kappaSizeCIClass <- R6::R6Class(
 
 ---
 
+## Security & PHI Considerations
+
+- **No PHI in examples/tests**: Use synthetic or de-identified data.
+- **Reproducibility**: Record package versions in `DESCRIPTION` and lockfiles when possible.
+- **Data Handling**: Avoid writing to user disk by default; if needed, ask for a user-selected path via options.
+- **Privacy**: When using LLM agents, redact identifiers in prompts and outputs.
+
 ## Versioning
 
-This `AGENTS.md` file is versioned at **v1.0.2**. Future updates should follow semantic versioning, reflecting changes to agent responsibilities, new agents, or prompt guidelines.
+This `AGENTS.md` file is versioned at **v1.1.0**. Future updates should follow semantic versioning, reflecting changes to agent responsibilities, new agents, or prompt guidelines.
 
 ---
 
