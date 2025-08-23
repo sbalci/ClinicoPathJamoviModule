@@ -43,13 +43,16 @@ diagnostic category.}
 study design: - Mann-Whitney U: Compare 2 independent groups -
 Kruskal-Wallis: Compare 3+ independent groups   - Wilcoxon Signed-Rank:
 Compare paired samples - Friedman: Compare repeated measures (3+ time
-points)}
+points) - Cochran's Q: Compare proportions/binary outcomes across 3+
+matched groups - Page's Trend: Test for ordered trends in repeated measures
+(alternative to Friedman)}
 
 \item{effect_size}{Calculate appropriate effect sizes for non-parametric
 tests: - Mann-Whitney: rank-biserial correlation (r) - Kruskal-Wallis:
 eta-squared based on H statistic (eta²) - Wilcoxon: matched pairs
 rank-biserial correlation - Friedman: Kendall's W (coefficient of
-concordance)}
+concordance) - Cochran's Q: Effect size W (Kendall's coefficient of
+concordance) - Page's Trend: Kendall's tau for trend and Kendall's W}
 
 \item{confidence_intervals}{Calculate bootstrap confidence intervals for
 effect sizes. Provides 95\\% confidence intervals using bias-corrected and
