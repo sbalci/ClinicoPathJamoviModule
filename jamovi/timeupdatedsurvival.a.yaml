@@ -1,0 +1,184 @@
+---
+name: timeupdatedsurvival
+title: Time-Updated Survival Estimates
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Dynamic Models, Time-Varying Effects, Temporal Analysis'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs time-updated survival estimates using dynamic regression models 
+        for survival data. This analysis allows for time-varying effects of covariates, 
+        dynamic hazard functions, and temporal changes in survival relationships. 
+        Multiple modeling approaches are supported including Aalen additive models, 
+        Cox-Aalen hybrid models, and dynamic regression with time-updated coefficients.
+    R:
+        dontrun: false
+        usage: |
+            # example will be added
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: timeVar
+      title: Survival Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Survival time variable (numeric)
+
+    - name: statusVar
+      title: Event Status Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Event indicator (0=censored, 1=event)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Predictive variables for time-updated regression analysis
+
+    - name: timeVaryingCovs
+      title: Time-Varying Covariates (optional)
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables with time-varying effects
+
+    - name: stratificationVar
+      title: Stratification Variable (optional)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable for stratified analysis
+
+    - name: modelType
+      title: Model Type
+      type: List
+      options:
+        - title: Dynamic Regression (timereg)
+          name: dynreg
+        - title: Aalen Additive Model
+          name: aalen
+        - title: Cox-Aalen Hybrid Model
+          name: coxaalen
+        - title: Time-Varying Cox Model
+          name: timevarycox
+        - title: Flexible Parametric Model
+          name: flexparam
+      default: dynreg
+      description:
+          R: >
+            Type of time-updated survival model
+
+    - name: timePoints
+      title: Time Points for Estimates
+      type: String
+      description:
+          R: >
+            Comma-separated time points for survival estimates (e.g., 6,12,24,60)
+      default: '6,12,24,36,60'
+
+    - name: bandwidthMethod
+      title: Bandwidth Selection
+      type: List
+      options:
+        - title: Automatic Selection
+          name: auto
+        - title: Cross-Validation
+          name: cv
+        - title: Manual Specification
+          name: manual
+      default: auto
+      description:
+          R: >
+            Method for bandwidth selection in smoothing
+
+    - name: manualBandwidth
+      title: Manual Bandwidth
+      type: Number
+      description:
+          R: >
+            Bandwidth value for manual specification
+      default: 1.0
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: Number
+      description:
+          R: >
+            Confidence level for intervals
+      default: 0.95
+      min: 0.01
+      max: 0.99
+
+    - name: plotType
+      title: Plot Type
+      type: List
+      options:
+        - title: Time-Varying Coefficients
+          name: coefficients
+        - title: Cumulative Effects
+          name: cumulative
+        - title: Hazard Functions
+          name: hazards
+        - title: Survival Curves
+          name: survival
+        - title: All Plots
+          name: all
+      default: coefficients
+      description:
+          R: >
+            Type of plots to display
+
+    - name: showTable
+      title: Show Results Table
+      type: Bool
+      description:
+          R: >
+            Display time-updated parameter estimates table
+      default: true
+
+    - name: showPlots
+      title: Show Diagnostic Plots
+      type: Bool
+      description:
+          R: >
+            Display time-updated survival plots
+      default: true
+
+    - name: showGoFTests
+      title: Show Goodness-of-Fit Tests
+      type: Bool
+      description:
+          R: >
+            Display model goodness-of-fit assessments
+      default: true
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      description:
+          R: >
+            Display interpretation and methodology explanations
+      default: true

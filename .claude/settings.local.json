@@ -95,7 +95,8 @@
       "Bash(do echo \"--- $func ---\")",
       "Bash(do echo \"=== $func ===\")",
       "Bash(do if grep -q \"jrs:\" jamovi/$func.r.yaml)",
-      "Bash(else echo \"$func: ⚠ missing jrs\")"
+      "Bash(else echo \"$func: ⚠ missing jrs\")",
+      "WebFetch(domain:www.rdocumentation.org)"
     ],
     "deny": [],
     "additionalDirectories": [

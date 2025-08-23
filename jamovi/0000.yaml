@@ -3616,6 +3616,21 @@ analyses:
       certain period. Multiple  estimation methods are supported including
       Kaplan-Meier weights, landmark  approaches, and inverse probability
       weighting.
+  - title: Time-Updated Survival Estimates
+    name: timeupdatedsurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Time-Updated Survival Estimates
+    menuSubtitle: Dynamic Models, Time-Varying Effects, Temporal Analysis
+    description: >-
+      Performs time-updated survival estimates using dynamic regression models 
+      for survival data. This analysis allows for time-varying effects of
+      covariates,  dynamic hazard functions, and temporal changes in survival
+      relationships.  Multiple modeling approaches are supported including Aalen
+      additive models,  Cox-Aalen hybrid models, and dynamic regression with
+      time-updated coefficients.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
