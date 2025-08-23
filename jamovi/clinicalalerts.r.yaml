@@ -1,0 +1,193 @@
+---
+name: clinicalalerts
+title: Clinical Alert & Threshold Monitoring
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Analysis Summary  
+      type: Html
+      visible: (alert_summary || detailed_alerts)
+
+    - name: alertSummary
+      title: Alert Summary by Priority
+      type: Table
+      visible: (alert_summary)
+      columns:
+        - name: priority_level
+          title: Priority Level
+          type: text
+          
+        - name: alert_count
+          title: Alert Count
+          type: integer
+          
+        - name: percentage
+          title: Percentage
+          type: number
+          format: zto
+          
+        - name: response_time
+          title: Required Response Time
+          type: text
+          
+        - name: clinical_significance
+          title: Clinical Significance
+          type: text
+
+    - name: detailedAlerts
+      title: Detailed Alert Analysis
+      type: Table
+      visible: (detailed_alerts)
+      columns:
+        - name: variable
+          title: Clinical Variable
+          type: text
+          
+        - name: value
+          title: Measured Value
+          type: number
+          
+        - name: priority
+          title: Alert Priority
+          type: text
+          
+        - name: threshold_type
+          title: Threshold Type
+          type: text
+          
+        - name: patient_id
+          title: Patient ID
+          type: text
+          
+        - name: time_point
+          title: Time Point
+          type: text
+          
+        - name: alert_message
+          title: Alert Message
+          type: text
+          
+        - name: clinical_action
+          title: Recommended Action
+          type: text
+
+    - name: clinicalRecommendations
+      title: Evidence-Based Clinical Recommendations
+      type: Table
+      visible: (clinical_recommendations)
+      columns:
+        - name: category
+          title: Category
+          type: text
+          
+        - name: recommendation
+          title: Clinical Recommendation
+          type: text
+          
+        - name: priority
+          title: Priority
+          type: text
+          
+        - name: timeframe
+          title: Timeframe
+          type: text
+          
+        - name: evidence_level
+          title: Evidence Level
+          type: text
+
+    - name: patientAnalysis
+      title: Patient-Specific Alert Analysis
+      type: Table
+      visible: (patient_analysis)
+      columns:
+        - name: patient_id
+          title: Patient ID
+          type: text
+          
+        - name: total_alerts
+          title: Total Alerts
+          type: integer
+          
+        - name: critical_alerts
+          title: Critical Alerts
+          type: integer
+          
+        - name: high_alerts  
+          title: High Priority Alerts
+          type: integer
+          
+        - name: risk_level
+          title: Risk Level
+          type: text
+          
+        - name: recommended_action
+          title: Recommended Action
+          type: text
+
+    - name: trendAnalysis
+      title: Temporal Trend Analysis
+      type: Table
+      visible: (trend_analysis)
+      columns:
+        - name: analysis_type
+          title: Analysis Type
+          type: text
+          
+        - name: finding
+          title: Finding
+          type: text
+          
+        - name: clinical_significance
+          title: Clinical Significance
+          type: text
+
+    - name: alertDashboard
+      title: Clinical Alert Dashboard
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (alert_dashboard)
+
+    - name: thresholdPlots
+      title: Threshold Violation Plots
+      type: Image
+      width: 800
+      height: 500
+      requiresData: true
+      visible: (threshold_plots)
+
+    - name: trendPlots
+      title: Temporal Trend Plots
+      type: Image
+      width: 800
+      height: 400
+      requiresData: true
+      visible: (trend_plots)
+
+    - name: interpretationGuide
+      title: Clinical Interpretation Guidelines
+      type: Html
+      visible: (interpretation_guide)
+
+    - name: evidenceReferences
+      title: Evidence & References
+      type: Html
+      visible: (evidence_references)
+
+    - name: qualityMetrics
+      title: Quality Assurance Metrics
+      type: Html
+      visible: (quality_metrics)
+
+    - name: technicalNotes
+      title: Technical Notes & Methodology
+      type: Html
+      visible: false

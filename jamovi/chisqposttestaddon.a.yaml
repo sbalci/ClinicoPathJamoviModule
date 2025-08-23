@@ -1,6 +1,7 @@
 ---
 name: chisqposttestaddon
 title: Chi-Square Post-Hoc Analysis
+menuGroup: conttablesplus
 version: '0.0.31'
 jas: '1.2'
 addonFor: 'jmv::conttables'

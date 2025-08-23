@@ -1175,7 +1175,7 @@ analyses:
   - title: Advanced TNM Stage Migration Analysis
     name: stagemigration
     ns: ClinicoPath
-    menuGroup: OncoPathologyT
+    menuGroup: OncoPathologyD
     menuSubgroup: Stage Migration Analysis
     menuTitle: Advanced TNM Stage Migration Analysis
     menuSubtitle: State-of-the-Art Staging System Validation
@@ -1215,7 +1215,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Decision
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1257,7 +1257,7 @@ analyses:
   - title: Confidence Interval Approach for the Number of Subjects Required
     name: kappaSizeCI
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Power Analysis
     menuTitle: Confidence Interval Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on Kappa confidence
@@ -1268,7 +1268,7 @@ analyses:
   - title: Lowest Expected Value for a fixed sample size
     name: kappaSizeFixedN
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Power Analysis
     menuTitle: Lowest Expected Value for a fixed sample size
     menuSubtitle: Find lower Kappa based on sample size
@@ -1279,7 +1279,7 @@ analyses:
   - title: Power Approach for the Number of Subjects Required
     name: kappaSizePower
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Power Analysis
     menuTitle: Power Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on power
@@ -1290,7 +1290,7 @@ analyses:
   - title: ROC Analysis
     name: psychopdaroc
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: ROC Analysis, AUC, Cutpoints
@@ -1335,7 +1335,7 @@ analyses:
   - title: Screening Test Calculator
     name: screeningcalculator
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Screening Test Calculator
     menuSubgroup: Decision
     menuSubtitle: Calculate disease probability based on test characteristics
@@ -1352,7 +1352,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Analyze combined test results
@@ -1365,7 +1365,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision
     menuSubtitle: Sequential Test Analysis
@@ -1385,7 +1385,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -1412,7 +1412,7 @@ analyses:
   - title: Bayesian Decision Curve Analysis
     name: bayesdca
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Bayesian Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Bayesian Decision Curve Analysis
@@ -1456,7 +1456,7 @@ analyses:
   - title: Dendrogram
     name: dendrogram
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Dendrogram
     menuSubgroup: Drafts
     ribbon: analyses
@@ -1659,7 +1659,7 @@ analyses:
   - title: Positive Predictive Value
     name: ppv
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuTitle: Positive Predictive Value
     menuSubgroup: Research Design
     ribbon: analyses
@@ -2641,7 +2641,7 @@ analyses:
     name: timevarycox
     ns: ClinicoPath
     category: analyses
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Time-Varying Covariates Cox Regression
     menuSubtitle: Cox regression with time-varying covariates
@@ -2655,7 +2655,7 @@ analyses:
     name: weightedlogrank
     ns: ClinicoPath
     category: analyses
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Weighted Log-Rank Tests
     menuSubtitle: Advanced weighted survival comparison tests
@@ -2934,7 +2934,7 @@ analyses:
     name: parametricfrailty
     ns: ClinicoPath
     category: analyses
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuTitle: Parametric Frailty Models
     description: >
       Implements parametric frailty models for survival analysis with clustered
@@ -2946,7 +2946,7 @@ analyses:
     name: causespecifichazards
     ns: ClinicoPath
     category: analyses
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuTitle: Cause-Specific Hazards Models
     description: >
       Implements cause-specific hazards modeling for competing risks analysis.
@@ -2958,7 +2958,7 @@ analyses:
     name: treeadvanced
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Advanced Clinical Decision Trees
     menuSubtitle: Enhanced CART with Advanced Validation
@@ -2974,7 +2974,7 @@ analyses:
     name: treecompare
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Clinical Tree Algorithm Comparison
     menuSubtitle: Compare Decision Tree Algorithms
@@ -2989,7 +2989,7 @@ analyses:
     name: treeensemble
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Clinical Random Forest Analysis
     menuSubtitle: Random Forest for Clinical Research
@@ -3005,7 +3005,7 @@ analyses:
     name: treemedical
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Clinical Decision Support
     menuTitle: Medical Decision Trees
     menuSubtitle: Simple Clinical Decision Trees
@@ -3017,6 +3017,22 @@ analyses:
 
       clinical validation, performance metrics, and medical interpretation
       guidelines.
+  - title: Clinical Alert & Threshold Monitoring
+    name: clinicalalerts
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathT
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Clinical Alert & Threshold Monitoring
+    menuSubtitle: Real-time Clinical Parameter Monitoring
+    description: >
+      Clinical Alert and Threshold Monitoring System provides real-time
+      monitoring 
+
+      of clinical parameters with customizable alert thresholds and
+      priority-based 
+
+      warnings for evidence-based clinical decision support.
   - title: Direct Binomial Regression for Competing Risks
     name: directbinomial
     ns: ClinicoPath
@@ -3033,7 +3049,7 @@ analyses:
     name: flexcomprisk
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: jsurvival Competing Risks
     menuTitle: Flexible Competing Risks Models
     description: >
@@ -3044,7 +3060,7 @@ analyses:
     name: markovmultistate
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: jsurvival Multi-State Models
     menuTitle: Markov Multi-State Models
     description: >
@@ -3055,7 +3071,7 @@ analyses:
     name: semimarkov
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: jsurvival Multi-State Models
     menuTitle: Semi-Markov Models
     description: >
@@ -3066,7 +3082,7 @@ analyses:
     name: hiddenmarkov
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: jsurvival Multi-State Models
     menuTitle: Hidden Markov Models for Survival
     description: >
@@ -3352,7 +3368,7 @@ analyses:
     name: cohenskappa
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Diagnostic Statistics
     menuTitle: Cohen's Kappa Agreement
     menuSubtitle: Two-Rater Agreement Analysis
@@ -3367,7 +3383,7 @@ analyses:
     name: methodcomparison
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Diagnostic Statistics
     menuTitle: Method Comparison Analysis
     menuSubtitle: Bland-Altman & Method Comparison
@@ -3379,7 +3395,7 @@ analyses:
     name: likelihoodratio
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideD
     menuSubgroup: Diagnostic Statistics
     menuTitle: Likelihood Ratio Analysis
     menuSubtitle: Likelihood ratios and diagnostic test evaluation
@@ -3395,11 +3411,11 @@ analyses:
     description: Clusters cases based on immunohistochemistry (IHC) staining patterns.
   - title: Chi-Square Post-Hoc Analysis
     name: chisqposttestaddon
-    ns: JamoviTest
+    ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT
-    menuTitle: conttables
-    addonFor: 'jmv::conttables'
+    menuGroup: conttablesplus
+    menuTitle: Chi-Square Post-Hoc Analysis
+    addonFor: jmv::conttables
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
