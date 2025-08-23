@@ -7,13 +7,10 @@
 ihccluster(
   data,
   catVars,
-  contVars,
-  vars,
+  contVars = NULL,
   caseId,
   method = "pam",
-  k,
-  autoK,
-  nClusters,
+  nClusters = 3,
   autoSelectK = TRUE,
   kRange = "medium",
   scaleContVars = TRUE,
@@ -28,15 +25,13 @@ ihccluster(
   showDendrogram = TRUE,
   showPCAPlot = TRUE,
   showBoxplots = TRUE,
-  showSil = FALSE,
-  assocTests = FALSE,
   markerSummary = TRUE,
   clusterProfiles = TRUE,
   associationTests = TRUE,
   exportClusters = FALSE,
   clinicalVars,
-  survivalTime,
-  survivalEvent
+  survivalTime = NULL,
+  survivalEvent = NULL
 )
 }
 \arguments{
@@ -47,16 +42,9 @@ ihccluster(
 \item{contVars}{H-scores (0-300), \\% positivity (0-100), or other
 continuous measures}
 
-\item{vars}{Legacy option: categorical stain variables (use catVars
-instead)}
-
 \item{caseId}{Case identifier for tracking}
 
 \item{method}{Clustering algorithm to use}
-
-\item{k}{Legacy option: use nClusters instead}
-
-\item{autoK}{Legacy option: use autoSelectK instead}
 
 \item{nClusters}{Leave blank for automatic selection using silhouette}
 
@@ -88,10 +76,6 @@ markers)}
 \item{showPCAPlot}{Show dimension reduction plot with clusters}
 
 \item{showBoxplots}{Show boxplots of continuous markers by cluster}
-
-\item{showSil}{Legacy option: use showSilhouette instead}
-
-\item{assocTests}{Legacy option: use associationTests instead}
 
 \item{markerSummary}{Summary statistics for each marker by cluster}
 
@@ -143,7 +127,14 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Clusters cases based on immunohistochemistry (IHC) staining patterns.
-Supports both categorical (pos/neg, intensity levels) and continuous
-(H-score, \\% positivity) markers. Uses Gower distance to handle mixed
-data types appropriately.
+}
+\details{
+\strong{Variable Types:}
+\itemize{
+\item Categorical: pos/neg, intensity levels (0/1/2/3), ordinal scales
+\item Continuous: H-scores (0-300), \\% positivity (0-100), expression levels
+\item Mixed: Any combination of categorical and continuous markers
+}
+
+Uses Gower distance to handle mixed data types appropriately.
 }

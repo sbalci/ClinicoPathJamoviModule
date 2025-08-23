@@ -3021,7 +3021,7 @@ analyses:
     name: clinicalalerts
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathT
+    menuGroup: ClinicoPathD
     menuSubgroup: Clinical Decision Support
     menuTitle: Clinical Alert & Threshold Monitoring
     menuSubtitle: Real-time Clinical Parameter Monitoring
@@ -3033,6 +3033,25 @@ analyses:
       priority-based 
 
       warnings for evidence-based clinical decision support.
+  - title: Treatment Optimization Framework
+    name: treatmentoptim
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathT
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Treatment Optimization Framework
+    menuSubtitle: Personalized Treatment Selection & Safety Analysis
+    description: >
+      Treatment Optimization Framework provides personalized treatment
+      selection,
+
+      drug interaction screening, and dose optimization based on individual
+      patient
+
+      characteristics, medical history, and evidence-based clinical guidelines
+      for
+
+      optimal therapeutic decision-making.
   - title: Direct Binomial Regression for Competing Risks
     name: directbinomial
     ns: ClinicoPath
