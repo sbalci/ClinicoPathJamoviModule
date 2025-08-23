@@ -6,446 +6,237 @@ bayesiandiagnosticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            testVariable = NULL,
-            referenceStandard = NULL,
-            centerVariable = NULL,
-            analysisType = "probability_update",
-            priorType = "noninformative",
-            priorSensitivityAlpha = 1,
-            priorSensitivityBeta = 1,
-            priorSpecificityAlpha = 1,
-            priorSpecificityBeta = 1,
-            priorPrevalenceAlpha = 1,
-            priorPrevalenceBeta = 1,
-            mcmcSamples = 5000,
-            mcmcBurnin = 1000,
-            mcmcChains = 3,
-            mcmcThin = 1,
-            credibleLevel = 0.95,
-            credibleType = "hpd",
-            calculatePostTest = TRUE,
-            priorProbabilityRange = "clinical",
-            customPriorMin = 1,
-            customPriorMax = 80,
-            specificPriorProbs = "5, 10, 25, 50",
-            modelComparison = FALSE,
-            comparisonCriteria = "waic",
-            hierarchicalModel = "fixed",
-            showPosteriorSummary = TRUE,
-            showDiagnosticMeasures = TRUE,
-            showPostTestTable = TRUE,
-            showModelComparison = FALSE,
-            showConvergenceDiagnostics = TRUE,
-            showBayesianInterpretation = TRUE,
-            plotPosteriors = TRUE,
-            plotPostTest = TRUE,
-            plotConvergence = TRUE,
-            plotModelComparison = FALSE,
-            plotCredibleRegions = TRUE,
-            robustPriors = FALSE,
-            adaptiveSampling = TRUE,
-            parallelProcessing = TRUE,
-            randomSeed = 12345,
-            expertElicitation = FALSE,
-            expertSensitivityMean = 80,
-            expertSensitivitySD = 10,
-            expertSpecificityMean = 85,
-            expertSpecificitySD = 10, ...) {
+            test_result = NULL,
+            disease_status = NULL,
+            covariates = NULL,
+            analysis_type = "single_test",
+            prior_type = "fixed_prior",
+            prior_prob = 0.1,
+            alpha_prior = 1,
+            beta_prior = 1,
+            test_sequence = "test1,test2,test3",
+            credible_level = 0.95,
+            mcmc_samples = 5000,
+            burnin_samples = 1000,
+            likelihood_method = "exact",
+            posterior_summary = TRUE,
+            diagnostic_plots = TRUE,
+            sensitivity_analysis = FALSE,
+            model_comparison = FALSE,
+            predictive_checking = FALSE,
+            multilevel_structure = FALSE,
+            overdispersion_model = FALSE,
+            conditional_independence = TRUE,
+            network_analysis = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
                 name="bayesiandiagnostic",
-                requiresData=TRUE,
+                requiresData=FALSE,
                 ...)
 
-            private$..testVariable <- jmvcore::OptionVariable$new(
-                "testVariable",
-                testVariable,
+            private$..test_result <- jmvcore::OptionVariable$new(
+                "test_result",
+                test_result,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..disease_status <- jmvcore::OptionVariable$new(
+                "disease_status",
+                disease_status,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..covariates <- jmvcore::OptionVariables$new(
+                "covariates",
+                covariates,
                 suggested=list(
                     "continuous",
                     "nominal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
-            private$..referenceStandard <- jmvcore::OptionVariable$new(
-                "referenceStandard",
-                referenceStandard,
-                suggested=list(
-                    "nominal"),
-                permitted=list(
-                    "factor"))
-            private$..centerVariable <- jmvcore::OptionVariable$new(
-                "centerVariable",
-                centerVariable,
-                suggested=list(
-                    "nominal"),
-                permitted=list(
-                    "factor"))
-            private$..analysisType <- jmvcore::OptionList$new(
-                "analysisType",
-                analysisType,
+                    "factor"),
+                default=NULL)
+            private$..analysis_type <- jmvcore::OptionList$new(
+                "analysis_type",
+                analysis_type,
                 options=list(
-                    "probability_update",
-                    "beta_binomial",
-                    "hierarchical",
-                    "model_averaging"),
-                default="probability_update")
-            private$..priorType <- jmvcore::OptionList$new(
-                "priorType",
-                priorType,
+                    "single_test",
+                    "test_chain",
+                    "parallel_tests",
+                    "hierarchical_bayes",
+                    "beta_binomial"),
+                default="single_test")
+            private$..prior_type <- jmvcore::OptionList$new(
+                "prior_type",
+                prior_type,
                 options=list(
-                    "noninformative",
-                    "weakly_informative",
-                    "informative",
-                    "expert"),
-                default="noninformative")
-            private$..priorSensitivityAlpha <- jmvcore::OptionNumber$new(
-                "priorSensitivityAlpha",
-                priorSensitivityAlpha,
+                    "fixed_prior",
+                    "empirical_prior",
+                    "reference_prior",
+                    "informative_prior",
+                    "hierarchical_prior"),
+                default="fixed_prior")
+            private$..prior_prob <- jmvcore::OptionNumber$new(
+                "prior_prob",
+                prior_prob,
+                default=0.1,
                 min=0.001,
-                default=1)
-            private$..priorSensitivityBeta <- jmvcore::OptionNumber$new(
-                "priorSensitivityBeta",
-                priorSensitivityBeta,
-                min=0.001,
-                default=1)
-            private$..priorSpecificityAlpha <- jmvcore::OptionNumber$new(
-                "priorSpecificityAlpha",
-                priorSpecificityAlpha,
-                min=0.001,
-                default=1)
-            private$..priorSpecificityBeta <- jmvcore::OptionNumber$new(
-                "priorSpecificityBeta",
-                priorSpecificityBeta,
-                min=0.001,
-                default=1)
-            private$..priorPrevalenceAlpha <- jmvcore::OptionNumber$new(
-                "priorPrevalenceAlpha",
-                priorPrevalenceAlpha,
-                min=0.001,
-                default=1)
-            private$..priorPrevalenceBeta <- jmvcore::OptionNumber$new(
-                "priorPrevalenceBeta",
-                priorPrevalenceBeta,
-                min=0.001,
-                default=1)
-            private$..mcmcSamples <- jmvcore::OptionInteger$new(
-                "mcmcSamples",
-                mcmcSamples,
-                min=1000,
-                max=50000,
-                default=5000)
-            private$..mcmcBurnin <- jmvcore::OptionInteger$new(
-                "mcmcBurnin",
-                mcmcBurnin,
-                min=100,
-                max=10000,
-                default=1000)
-            private$..mcmcChains <- jmvcore::OptionInteger$new(
-                "mcmcChains",
-                mcmcChains,
-                min=1,
-                max=8,
-                default=3)
-            private$..mcmcThin <- jmvcore::OptionInteger$new(
-                "mcmcThin",
-                mcmcThin,
-                min=1,
-                max=50,
-                default=1)
-            private$..credibleLevel <- jmvcore::OptionNumber$new(
-                "credibleLevel",
-                credibleLevel,
+                max=0.999)
+            private$..alpha_prior <- jmvcore::OptionNumber$new(
+                "alpha_prior",
+                alpha_prior,
+                default=1,
+                min=0.1,
+                max=100)
+            private$..beta_prior <- jmvcore::OptionNumber$new(
+                "beta_prior",
+                beta_prior,
+                default=1,
+                min=0.1,
+                max=100)
+            private$..test_sequence <- jmvcore::OptionString$new(
+                "test_sequence",
+                test_sequence,
+                default="test1,test2,test3")
+            private$..credible_level <- jmvcore::OptionNumber$new(
+                "credible_level",
+                credible_level,
+                default=0.95,
                 min=0.8,
-                max=0.99,
-                default=0.95)
-            private$..credibleType <- jmvcore::OptionList$new(
-                "credibleType",
-                credibleType,
+                max=0.99)
+            private$..mcmc_samples <- jmvcore::OptionInteger$new(
+                "mcmc_samples",
+                mcmc_samples,
+                default=5000,
+                min=1000,
+                max=20000)
+            private$..burnin_samples <- jmvcore::OptionInteger$new(
+                "burnin_samples",
+                burnin_samples,
+                default=1000,
+                min=100,
+                max=5000)
+            private$..likelihood_method <- jmvcore::OptionList$new(
+                "likelihood_method",
+                likelihood_method,
                 options=list(
-                    "hpd",
-                    "equal_tailed",
-                    "both"),
-                default="hpd")
-            private$..calculatePostTest <- jmvcore::OptionBool$new(
-                "calculatePostTest",
-                calculatePostTest,
+                    "exact",
+                    "asymptotic",
+                    "bootstrap",
+                    "bayesian_bootstrap"),
+                default="exact")
+            private$..posterior_summary <- jmvcore::OptionBool$new(
+                "posterior_summary",
+                posterior_summary,
                 default=TRUE)
-            private$..priorProbabilityRange <- jmvcore::OptionList$new(
-                "priorProbabilityRange",
-                priorProbabilityRange,
-                options=list(
-                    "clinical",
-                    "full",
-                    "low",
-                    "high",
-                    "custom"),
-                default="clinical")
-            private$..customPriorMin <- jmvcore::OptionNumber$new(
-                "customPriorMin",
-                customPriorMin,
-                min=0.01,
-                max=99,
-                default=1)
-            private$..customPriorMax <- jmvcore::OptionNumber$new(
-                "customPriorMax",
-                customPriorMax,
-                min=1,
-                max=99.99,
-                default=80)
-            private$..specificPriorProbs <- jmvcore::OptionString$new(
-                "specificPriorProbs",
-                specificPriorProbs,
-                default="5, 10, 25, 50")
-            private$..modelComparison <- jmvcore::OptionBool$new(
-                "modelComparison",
-                modelComparison,
+            private$..diagnostic_plots <- jmvcore::OptionBool$new(
+                "diagnostic_plots",
+                diagnostic_plots,
+                default=TRUE)
+            private$..sensitivity_analysis <- jmvcore::OptionBool$new(
+                "sensitivity_analysis",
+                sensitivity_analysis,
                 default=FALSE)
-            private$..comparisonCriteria <- jmvcore::OptionList$new(
-                "comparisonCriteria",
-                comparisonCriteria,
-                options=list(
-                    "dic",
-                    "waic",
-                    "loo",
-                    "bayes_factors"),
-                default="waic")
-            private$..hierarchicalModel <- jmvcore::OptionList$new(
-                "hierarchicalModel",
-                hierarchicalModel,
-                options=list(
-                    "fixed",
-                    "random_intercept",
-                    "random_slope_intercept",
-                    "full_hierarchical"),
-                default="fixed")
-            private$..showPosteriorSummary <- jmvcore::OptionBool$new(
-                "showPosteriorSummary",
-                showPosteriorSummary,
-                default=TRUE)
-            private$..showDiagnosticMeasures <- jmvcore::OptionBool$new(
-                "showDiagnosticMeasures",
-                showDiagnosticMeasures,
-                default=TRUE)
-            private$..showPostTestTable <- jmvcore::OptionBool$new(
-                "showPostTestTable",
-                showPostTestTable,
-                default=TRUE)
-            private$..showModelComparison <- jmvcore::OptionBool$new(
-                "showModelComparison",
-                showModelComparison,
+            private$..model_comparison <- jmvcore::OptionBool$new(
+                "model_comparison",
+                model_comparison,
                 default=FALSE)
-            private$..showConvergenceDiagnostics <- jmvcore::OptionBool$new(
-                "showConvergenceDiagnostics",
-                showConvergenceDiagnostics,
-                default=TRUE)
-            private$..showBayesianInterpretation <- jmvcore::OptionBool$new(
-                "showBayesianInterpretation",
-                showBayesianInterpretation,
-                default=TRUE)
-            private$..plotPosteriors <- jmvcore::OptionBool$new(
-                "plotPosteriors",
-                plotPosteriors,
-                default=TRUE)
-            private$..plotPostTest <- jmvcore::OptionBool$new(
-                "plotPostTest",
-                plotPostTest,
-                default=TRUE)
-            private$..plotConvergence <- jmvcore::OptionBool$new(
-                "plotConvergence",
-                plotConvergence,
-                default=TRUE)
-            private$..plotModelComparison <- jmvcore::OptionBool$new(
-                "plotModelComparison",
-                plotModelComparison,
+            private$..predictive_checking <- jmvcore::OptionBool$new(
+                "predictive_checking",
+                predictive_checking,
                 default=FALSE)
-            private$..plotCredibleRegions <- jmvcore::OptionBool$new(
-                "plotCredibleRegions",
-                plotCredibleRegions,
-                default=TRUE)
-            private$..robustPriors <- jmvcore::OptionBool$new(
-                "robustPriors",
-                robustPriors,
+            private$..multilevel_structure <- jmvcore::OptionBool$new(
+                "multilevel_structure",
+                multilevel_structure,
                 default=FALSE)
-            private$..adaptiveSampling <- jmvcore::OptionBool$new(
-                "adaptiveSampling",
-                adaptiveSampling,
-                default=TRUE)
-            private$..parallelProcessing <- jmvcore::OptionBool$new(
-                "parallelProcessing",
-                parallelProcessing,
-                default=TRUE)
-            private$..randomSeed <- jmvcore::OptionInteger$new(
-                "randomSeed",
-                randomSeed,
-                default=12345)
-            private$..expertElicitation <- jmvcore::OptionBool$new(
-                "expertElicitation",
-                expertElicitation,
+            private$..overdispersion_model <- jmvcore::OptionBool$new(
+                "overdispersion_model",
+                overdispersion_model,
                 default=FALSE)
-            private$..expertSensitivityMean <- jmvcore::OptionNumber$new(
-                "expertSensitivityMean",
-                expertSensitivityMean,
-                min=1,
-                max=100,
-                default=80)
-            private$..expertSensitivitySD <- jmvcore::OptionNumber$new(
-                "expertSensitivitySD",
-                expertSensitivitySD,
-                min=1,
-                max=50,
-                default=10)
-            private$..expertSpecificityMean <- jmvcore::OptionNumber$new(
-                "expertSpecificityMean",
-                expertSpecificityMean,
-                min=1,
-                max=100,
-                default=85)
-            private$..expertSpecificitySD <- jmvcore::OptionNumber$new(
-                "expertSpecificitySD",
-                expertSpecificitySD,
-                min=1,
-                max=50,
-                default=10)
+            private$..conditional_independence <- jmvcore::OptionBool$new(
+                "conditional_independence",
+                conditional_independence,
+                default=TRUE)
+            private$..network_analysis <- jmvcore::OptionBool$new(
+                "network_analysis",
+                network_analysis,
+                default=FALSE)
 
-            self$.addOption(private$..testVariable)
-            self$.addOption(private$..referenceStandard)
-            self$.addOption(private$..centerVariable)
-            self$.addOption(private$..analysisType)
-            self$.addOption(private$..priorType)
-            self$.addOption(private$..priorSensitivityAlpha)
-            self$.addOption(private$..priorSensitivityBeta)
-            self$.addOption(private$..priorSpecificityAlpha)
-            self$.addOption(private$..priorSpecificityBeta)
-            self$.addOption(private$..priorPrevalenceAlpha)
-            self$.addOption(private$..priorPrevalenceBeta)
-            self$.addOption(private$..mcmcSamples)
-            self$.addOption(private$..mcmcBurnin)
-            self$.addOption(private$..mcmcChains)
-            self$.addOption(private$..mcmcThin)
-            self$.addOption(private$..credibleLevel)
-            self$.addOption(private$..credibleType)
-            self$.addOption(private$..calculatePostTest)
-            self$.addOption(private$..priorProbabilityRange)
-            self$.addOption(private$..customPriorMin)
-            self$.addOption(private$..customPriorMax)
-            self$.addOption(private$..specificPriorProbs)
-            self$.addOption(private$..modelComparison)
-            self$.addOption(private$..comparisonCriteria)
-            self$.addOption(private$..hierarchicalModel)
-            self$.addOption(private$..showPosteriorSummary)
-            self$.addOption(private$..showDiagnosticMeasures)
-            self$.addOption(private$..showPostTestTable)
-            self$.addOption(private$..showModelComparison)
-            self$.addOption(private$..showConvergenceDiagnostics)
-            self$.addOption(private$..showBayesianInterpretation)
-            self$.addOption(private$..plotPosteriors)
-            self$.addOption(private$..plotPostTest)
-            self$.addOption(private$..plotConvergence)
-            self$.addOption(private$..plotModelComparison)
-            self$.addOption(private$..plotCredibleRegions)
-            self$.addOption(private$..robustPriors)
-            self$.addOption(private$..adaptiveSampling)
-            self$.addOption(private$..parallelProcessing)
-            self$.addOption(private$..randomSeed)
-            self$.addOption(private$..expertElicitation)
-            self$.addOption(private$..expertSensitivityMean)
-            self$.addOption(private$..expertSensitivitySD)
-            self$.addOption(private$..expertSpecificityMean)
-            self$.addOption(private$..expertSpecificitySD)
+            self$.addOption(private$..test_result)
+            self$.addOption(private$..disease_status)
+            self$.addOption(private$..covariates)
+            self$.addOption(private$..analysis_type)
+            self$.addOption(private$..prior_type)
+            self$.addOption(private$..prior_prob)
+            self$.addOption(private$..alpha_prior)
+            self$.addOption(private$..beta_prior)
+            self$.addOption(private$..test_sequence)
+            self$.addOption(private$..credible_level)
+            self$.addOption(private$..mcmc_samples)
+            self$.addOption(private$..burnin_samples)
+            self$.addOption(private$..likelihood_method)
+            self$.addOption(private$..posterior_summary)
+            self$.addOption(private$..diagnostic_plots)
+            self$.addOption(private$..sensitivity_analysis)
+            self$.addOption(private$..model_comparison)
+            self$.addOption(private$..predictive_checking)
+            self$.addOption(private$..multilevel_structure)
+            self$.addOption(private$..overdispersion_model)
+            self$.addOption(private$..conditional_independence)
+            self$.addOption(private$..network_analysis)
         }),
     active = list(
-        testVariable = function() private$..testVariable$value,
-        referenceStandard = function() private$..referenceStandard$value,
-        centerVariable = function() private$..centerVariable$value,
-        analysisType = function() private$..analysisType$value,
-        priorType = function() private$..priorType$value,
-        priorSensitivityAlpha = function() private$..priorSensitivityAlpha$value,
-        priorSensitivityBeta = function() private$..priorSensitivityBeta$value,
-        priorSpecificityAlpha = function() private$..priorSpecificityAlpha$value,
-        priorSpecificityBeta = function() private$..priorSpecificityBeta$value,
-        priorPrevalenceAlpha = function() private$..priorPrevalenceAlpha$value,
-        priorPrevalenceBeta = function() private$..priorPrevalenceBeta$value,
-        mcmcSamples = function() private$..mcmcSamples$value,
-        mcmcBurnin = function() private$..mcmcBurnin$value,
-        mcmcChains = function() private$..mcmcChains$value,
-        mcmcThin = function() private$..mcmcThin$value,
-        credibleLevel = function() private$..credibleLevel$value,
-        credibleType = function() private$..credibleType$value,
-        calculatePostTest = function() private$..calculatePostTest$value,
-        priorProbabilityRange = function() private$..priorProbabilityRange$value,
-        customPriorMin = function() private$..customPriorMin$value,
-        customPriorMax = function() private$..customPriorMax$value,
-        specificPriorProbs = function() private$..specificPriorProbs$value,
-        modelComparison = function() private$..modelComparison$value,
-        comparisonCriteria = function() private$..comparisonCriteria$value,
-        hierarchicalModel = function() private$..hierarchicalModel$value,
-        showPosteriorSummary = function() private$..showPosteriorSummary$value,
-        showDiagnosticMeasures = function() private$..showDiagnosticMeasures$value,
-        showPostTestTable = function() private$..showPostTestTable$value,
-        showModelComparison = function() private$..showModelComparison$value,
-        showConvergenceDiagnostics = function() private$..showConvergenceDiagnostics$value,
-        showBayesianInterpretation = function() private$..showBayesianInterpretation$value,
-        plotPosteriors = function() private$..plotPosteriors$value,
-        plotPostTest = function() private$..plotPostTest$value,
-        plotConvergence = function() private$..plotConvergence$value,
-        plotModelComparison = function() private$..plotModelComparison$value,
-        plotCredibleRegions = function() private$..plotCredibleRegions$value,
-        robustPriors = function() private$..robustPriors$value,
-        adaptiveSampling = function() private$..adaptiveSampling$value,
-        parallelProcessing = function() private$..parallelProcessing$value,
-        randomSeed = function() private$..randomSeed$value,
-        expertElicitation = function() private$..expertElicitation$value,
-        expertSensitivityMean = function() private$..expertSensitivityMean$value,
-        expertSensitivitySD = function() private$..expertSensitivitySD$value,
-        expertSpecificityMean = function() private$..expertSpecificityMean$value,
-        expertSpecificitySD = function() private$..expertSpecificitySD$value),
+        test_result = function() private$..test_result$value,
+        disease_status = function() private$..disease_status$value,
+        covariates = function() private$..covariates$value,
+        analysis_type = function() private$..analysis_type$value,
+        prior_type = function() private$..prior_type$value,
+        prior_prob = function() private$..prior_prob$value,
+        alpha_prior = function() private$..alpha_prior$value,
+        beta_prior = function() private$..beta_prior$value,
+        test_sequence = function() private$..test_sequence$value,
+        credible_level = function() private$..credible_level$value,
+        mcmc_samples = function() private$..mcmc_samples$value,
+        burnin_samples = function() private$..burnin_samples$value,
+        likelihood_method = function() private$..likelihood_method$value,
+        posterior_summary = function() private$..posterior_summary$value,
+        diagnostic_plots = function() private$..diagnostic_plots$value,
+        sensitivity_analysis = function() private$..sensitivity_analysis$value,
+        model_comparison = function() private$..model_comparison$value,
+        predictive_checking = function() private$..predictive_checking$value,
+        multilevel_structure = function() private$..multilevel_structure$value,
+        overdispersion_model = function() private$..overdispersion_model$value,
+        conditional_independence = function() private$..conditional_independence$value,
+        network_analysis = function() private$..network_analysis$value),
     private = list(
-        ..testVariable = NA,
-        ..referenceStandard = NA,
-        ..centerVariable = NA,
-        ..analysisType = NA,
-        ..priorType = NA,
-        ..priorSensitivityAlpha = NA,
-        ..priorSensitivityBeta = NA,
-        ..priorSpecificityAlpha = NA,
-        ..priorSpecificityBeta = NA,
-        ..priorPrevalenceAlpha = NA,
-        ..priorPrevalenceBeta = NA,
-        ..mcmcSamples = NA,
-        ..mcmcBurnin = NA,
-        ..mcmcChains = NA,
-        ..mcmcThin = NA,
-        ..credibleLevel = NA,
-        ..credibleType = NA,
-        ..calculatePostTest = NA,
-        ..priorProbabilityRange = NA,
-        ..customPriorMin = NA,
-        ..customPriorMax = NA,
-        ..specificPriorProbs = NA,
-        ..modelComparison = NA,
-        ..comparisonCriteria = NA,
-        ..hierarchicalModel = NA,
-        ..showPosteriorSummary = NA,
-        ..showDiagnosticMeasures = NA,
-        ..showPostTestTable = NA,
-        ..showModelComparison = NA,
-        ..showConvergenceDiagnostics = NA,
-        ..showBayesianInterpretation = NA,
-        ..plotPosteriors = NA,
-        ..plotPostTest = NA,
-        ..plotConvergence = NA,
-        ..plotModelComparison = NA,
-        ..plotCredibleRegions = NA,
-        ..robustPriors = NA,
-        ..adaptiveSampling = NA,
-        ..parallelProcessing = NA,
-        ..randomSeed = NA,
-        ..expertElicitation = NA,
-        ..expertSensitivityMean = NA,
-        ..expertSensitivitySD = NA,
-        ..expertSpecificityMean = NA,
-        ..expertSpecificitySD = NA)
+        ..test_result = NA,
+        ..disease_status = NA,
+        ..covariates = NA,
+        ..analysis_type = NA,
+        ..prior_type = NA,
+        ..prior_prob = NA,
+        ..alpha_prior = NA,
+        ..beta_prior = NA,
+        ..test_sequence = NA,
+        ..credible_level = NA,
+        ..mcmc_samples = NA,
+        ..burnin_samples = NA,
+        ..likelihood_method = NA,
+        ..posterior_summary = NA,
+        ..diagnostic_plots = NA,
+        ..sensitivity_analysis = NA,
+        ..model_comparison = NA,
+        ..predictive_checking = NA,
+        ..multilevel_structure = NA,
+        ..overdispersion_model = NA,
+        ..conditional_independence = NA,
+        ..network_analysis = NA)
 )
 
 bayesiandiagnosticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -453,44 +244,134 @@ bayesiandiagnosticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        priorSummary = function() private$.items[["priorSummary"]],
+        likelihoodTable = function() private$.items[["likelihoodTable"]],
         posteriorSummary = function() private$.items[["posteriorSummary"]],
-        diagnosticMeasures = function() private$.items[["diagnosticMeasures"]],
-        postTestTable = function() private$.items[["postTestTable"]],
+        bayesianUpdates = function() private$.items[["bayesianUpdates"]],
+        hierarchicalResults = function() private$.items[["hierarchicalResults"]],
         modelComparison = function() private$.items[["modelComparison"]],
-        convergenceDiagnostics = function() private$.items[["convergenceDiagnostics"]],
-        posteriorPlots = function() private$.items[["posteriorPlots"]],
-        postTestPlots = function() private$.items[["postTestPlots"]],
-        convergencePlots = function() private$.items[["convergencePlots"]],
-        modelComparisonPlots = function() private$.items[["modelComparisonPlots"]],
-        credibleRegionPlots = function() private$.items[["credibleRegionPlots"]],
-        priorPosteriorComparison = function() private$.items[["priorPosteriorComparison"]],
-        interpretationGuide = function() private$.items[["interpretationGuide"]],
         sensitivityAnalysis = function() private$.items[["sensitivityAnalysis"]],
-        expertElicitationSummary = function() private$.items[["expertElicitationSummary"]]),
+        predictiveChecks = function() private$.items[["predictiveChecks"]],
+        priorPosteriorPlot = function() private$.items[["priorPosteriorPlot"]],
+        likelihoodPlot = function() private$.items[["likelihoodPlot"]],
+        posteriorPredictivePlot = function() private$.items[["posteriorPredictivePlot"]],
+        sensitivityPlot = function() private$.items[["sensitivityPlot"]],
+        networkDiagram = function() private$.items[["networkDiagram"]],
+        methodExplanation = function() private$.items[["methodExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Bayesian Diagnostic Methods")
+                title="Bayesian Diagnostic Probability Updates")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
-                title="Analysis Guide",
+                title="Analysis Instructions",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="posteriorSummary",
-                title="Posterior Summary Statistics",
-                rows=7,
-                visible="(showPosteriorSummary)",
+                name="priorSummary",
+                title="Prior Distribution Summary",
+                visible="(posterior_summary)",
+                rows=1,
                 clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType",
-                    "priorType",
-                    "mcmcSamples"),
+                    "prior_type",
+                    "prior_prob",
+                    "alpha_prior",
+                    "beta_prior"),
+                columns=list(
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="median", 
+                        `title`="Median", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="mode", 
+                        `title`="Mode", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="variance", 
+                        `title`="Variance", 
+                        `type`="number", 
+                        `format`="zto:6"),
+                    list(
+                        `name`="lower_ci", 
+                        `title`="Lower CI", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="upper_ci", 
+                        `title`="Upper CI", 
+                        `type`="number", 
+                        `format`="zto:4"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="likelihoodTable",
+                title="Diagnostic Test Likelihood",
+                visible=TRUE,
+                rows=1,
+                clearWith=list(
+                    "test_result",
+                    "disease_status",
+                    "analysis_type"),
+                columns=list(
+                    list(
+                        `name`="test_outcome", 
+                        `title`="Test Result", 
+                        `type`="text"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="lr_positive", 
+                        `title`="LR+", 
+                        `type`="number", 
+                        `format`="zto:3"),
+                    list(
+                        `name`="lr_negative", 
+                        `title`="LR-", 
+                        `type`="number", 
+                        `format`="zto:3"),
+                    list(
+                        `name`="se_sensitivity", 
+                        `title`="SE(Sens)", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="se_specificity", 
+                        `title`="SE(Spec)", 
+                        `type`="number", 
+                        `format`="zto:4"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="posteriorSummary",
+                title="Posterior Distribution Summary",
+                visible="(posterior_summary)",
+                rows=1,
+                clearWith=list(
+                    "test_result",
+                    "disease_status",
+                    "prior_type",
+                    "analysis_type"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -500,111 +381,138 @@ bayesiandiagnosticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `name`="posterior_mean", 
                         `title`="Posterior Mean", 
                         `type`="number", 
-                        `format`="zto;dp:4"),
+                        `format`="zto:4"),
                     list(
                         `name`="posterior_median", 
                         `title`="Posterior Median", 
                         `type`="number", 
-                        `format`="zto;dp:4"),
+                        `format`="zto:4"),
+                    list(
+                        `name`="posterior_mode", 
+                        `title`="Posterior Mode", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="posterior_sd", 
+                        `title`="Posterior SD", 
+                        `type`="number", 
+                        `format`="zto:4"),
                     list(
                         `name`="credible_lower", 
-                        `title`="Credible Lower", 
+                        `title`="Lower Credible", 
                         `type`="number", 
-                        `format`="zto;dp:4"),
+                        `format`="zto:4"),
                     list(
                         `name`="credible_upper", 
-                        `title`="Credible Upper", 
+                        `title`="Upper Credible", 
                         `type`="number", 
-                        `format`="zto;dp:4"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Clinical Interpretation", 
-                        `type`="text"))))
+                        `format`="zto:4"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="diagnosticMeasures",
-                title="Diagnostic Performance Measures",
+                name="bayesianUpdates",
+                title="Bayesian Probability Updates",
+                visible=TRUE,
                 rows=1,
-                visible="(showDiagnosticMeasures)",
                 clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType"),
+                    "test_result",
+                    "disease_status",
+                    "prior_prob",
+                    "analysis_type"),
                 columns=list(
                     list(
-                        `name`="measure", 
-                        `title`="Performance Measure", 
+                        `name`="test_sequence", 
+                        `title`="Test Step", 
+                        `type`="text"),
+                    list(
+                        `name`="prior_prob", 
+                        `title`="Prior Probability", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="likelihood_ratio", 
+                        `title`="Likelihood Ratio", 
+                        `type`="number", 
+                        `format`="zto:3"),
+                    list(
+                        `name`="posterior_prob", 
+                        `title`="Posterior Probability", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="bayes_factor", 
+                        `title`="Bayes Factor", 
+                        `type`="number", 
+                        `format`="zto:3"),
+                    list(
+                        `name`="odds_ratio", 
+                        `title`="Post-test Odds", 
+                        `type`="number", 
+                        `format`="zto:3"),
+                    list(
+                        `name`="probability_gain", 
+                        `title`="Information Gain", 
+                        `type`="number", 
+                        `format`="zto:4"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="hierarchicalResults",
+                title="Hierarchical Bayesian Results",
+                visible="(multilevel_structure)",
+                rows=1,
+                clearWith=list(
+                    "test_result",
+                    "disease_status",
+                    "analysis_type",
+                    "covariates"),
+                columns=list(
+                    list(
+                        `name`="level", 
+                        `title`="Hierarchical Level", 
+                        `type`="text"),
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
                         `type`="text"),
                     list(
                         `name`="estimate", 
-                        `title`="Posterior Estimate", 
+                        `title`="Estimate", 
                         `type`="number", 
-                        `format`="zto;dp:4"),
+                        `format`="zto:4"),
                     list(
-                        `name`="credible_interval", 
-                        `title`="95% Credible Interval", 
-                        `type`="text"),
-                    list(
-                        `name`="clinical_utility", 
-                        `title`="Clinical Utility", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="postTestTable",
-                title="Post-test Probabilities",
-                visible="(showPostTestTable && calculatePostTest)",
-                clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType",
-                    "priorProbabilityRange",
-                    "specificPriorProbs"),
-                columns=list(
-                    list(
-                        `name`="prior_probability", 
-                        `title`="Prior Probability (%)", 
+                        `name`="se", 
+                        `title`="SE", 
                         `type`="number", 
-                        `format`="dp:1"),
+                        `format`="zto:4"),
                     list(
-                        `name`="post_test_positive", 
-                        `title`="Post-test if Positive (%)", 
+                        `name`="tau_squared", 
+                        `title`="\u03C4\u00B2", 
                         `type`="number", 
-                        `format`="dp:1"),
+                        `format`="zto:6"),
                     list(
-                        `name`="post_pos_credible_lower", 
-                        `title`="Credible Lower", 
+                        `name`="i_squared", 
+                        `title`="I\u00B2", 
                         `type`="number", 
-                        `format`="dp:1"),
+                        `format`="zto:3"),
                     list(
-                        `name`="post_pos_credible_upper", 
-                        `title`="Credible Upper", 
+                        `name`="credible_lower", 
+                        `title`="Lower CI", 
                         `type`="number", 
-                        `format`="dp:1"),
+                        `format`="zto:4"),
                     list(
-                        `name`="post_test_negative", 
-                        `title`="Post-test if Negative (%)", 
+                        `name`="credible_upper", 
+                        `title`="Upper CI", 
                         `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="post_neg_credible_lower", 
-                        `title`="Credible Lower", 
-                        `type`="number", 
-                        `format`="dp:1"),
-                    list(
-                        `name`="post_neg_credible_upper", 
-                        `title`="Credible Upper", 
-                        `type`="number", 
-                        `format`="dp:1"))))
+                        `format`="zto:4"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelComparison",
                 title="Bayesian Model Comparison",
-                visible="(showModelComparison && modelComparison)",
+                visible="(model_comparison)",
+                rows=1,
                 clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType",
-                    "comparisonCriteria"),
+                    "analysis_type",
+                    "multilevel_structure",
+                    "overdispersion_model"),
                 columns=list(
                     list(
                         `name`="model", 
@@ -614,232 +522,181 @@ bayesiandiagnosticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `name`="dic", 
                         `title`="DIC", 
                         `type`="number", 
-                        `format`="dp:2"),
+                        `format`="zto:2"),
                     list(
                         `name`="waic", 
                         `title`="WAIC", 
                         `type`="number", 
-                        `format`="dp:2"),
+                        `format`="zto:2"),
                     list(
-                        `name`="loo", 
-                        `title`="LOO", 
+                        `name`="loo_ic", 
+                        `title`="LOO-IC", 
                         `type`="number", 
-                        `format`="dp:2"),
+                        `format`="zto:2"),
+                    list(
+                        `name`="marginal_likelihood", 
+                        `title`="Log ML", 
+                        `type`="number", 
+                        `format`="zto:2"),
+                    list(
+                        `name`="bayes_factor", 
+                        `title`="Bayes Factor", 
+                        `type`="number", 
+                        `format`="zto:2"),
                     list(
                         `name`="model_weight", 
                         `title`="Model Weight", 
                         `type`="number", 
-                        `format`="zto;dp:4"),
-                    list(
-                        `name`="ranking", 
-                        `title`="Model Ranking", 
-                        `type`="integer"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="convergenceDiagnostics",
-                title="MCMC Convergence Diagnostics",
-                rows=3,
-                visible="(showConvergenceDiagnostics)",
-                clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType",
-                    "mcmcSamples",
-                    "mcmcChains"),
-                columns=list(
-                    list(
-                        `name`="diagnostic", 
-                        `title`="Diagnostic", 
-                        `type`="text"),
-                    list(
-                        `name`="sensitivity", 
-                        `title`="Sensitivity", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="specificity", 
-                        `title`="Specificity", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="prevalence", 
-                        `title`="Prevalence", 
-                        `type`="number", 
-                        `format`="dp:3"),
-                    list(
-                        `name`="overall_status", 
-                        `title`="Overall Status", 
-                        `type`="text"))))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="posteriorPlots",
-                title="Posterior Distributions",
-                width=600,
-                height=400,
-                visible="(plotPosteriors)",
-                renderFun=".posteriorPlots",
-                clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType",
-                    "priorType",
-                    "credibleLevel")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="postTestPlots",
-                title="Post-test Probability Curves",
-                width=600,
-                height=400,
-                visible="(plotPostTest && calculatePostTest)",
-                renderFun=".postTestPlots",
-                clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType",
-                    "priorProbabilityRange")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="convergencePlots",
-                title="MCMC Convergence Plots",
-                width=800,
-                height=500,
-                visible="(plotConvergence)",
-                renderFun=".convergencePlots",
-                clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType",
-                    "mcmcSamples",
-                    "mcmcChains")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="modelComparisonPlots",
-                title="Model Comparison Plots",
-                width=600,
-                height=400,
-                visible="(plotModelComparison && modelComparison)",
-                renderFun=".modelComparisonPlots",
-                clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType",
-                    "comparisonCriteria")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="credibleRegionPlots",
-                title="Credible Region Plots",
-                width=600,
-                height=500,
-                visible="(plotCredibleRegions)",
-                renderFun=".credibleRegionPlots",
-                clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "analysisType",
-                    "credibleLevel",
-                    "credibleType")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="priorPosteriorComparison",
-                title="Prior vs Posterior Comparison",
-                width=700,
-                height=400,
-                visible="(priorType != 'noninformative')",
-                renderFun=".priorPosteriorComparison",
-                clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "priorType",
-                    "priorSensitivityAlpha",
-                    "priorSensitivityBeta",
-                    "priorSpecificityAlpha",
-                    "priorSpecificityBeta")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="interpretationGuide",
-                title="Bayesian Interpretation Guide",
-                visible="(showBayesianInterpretation)"))
+                        `format`="zto:4"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="sensitivityAnalysis",
                 title="Prior Sensitivity Analysis",
-                visible="(priorType == 'informative')",
+                visible="(sensitivity_analysis)",
+                rows=1,
                 clearWith=list(
-                    "testVariable",
-                    "referenceStandard",
-                    "priorSensitivityAlpha",
-                    "priorSensitivityBeta",
-                    "priorSpecificityAlpha",
-                    "priorSpecificityBeta"),
+                    "prior_type",
+                    "alpha_prior",
+                    "beta_prior"),
                 columns=list(
                     list(
-                        `name`="prior_scenario", 
-                        `title`="Prior Scenario", 
+                        `name`="prior_specification", 
+                        `title`="Prior", 
                         `type`="text"),
                     list(
-                        `name`="sens_posterior_mean", 
-                        `title`="Sensitivity (Mean)", 
+                        `name`="posterior_mean", 
+                        `title`="Post. Mean", 
                         `type`="number", 
-                        `format`="zto;dp:3"),
+                        `format`="zto:4"),
                     list(
-                        `name`="sens_credible_width", 
-                        `title`="Sensitivity CI Width", 
+                        `name`="posterior_median", 
+                        `title`="Post. Median", 
                         `type`="number", 
-                        `format`="dp:3"),
+                        `format`="zto:4"),
                     list(
-                        `name`="spec_posterior_mean", 
-                        `title`="Specificity (Mean)", 
+                        `name`="credible_width", 
+                        `title`="CI Width", 
                         `type`="number", 
-                        `format`="zto;dp:3"),
+                        `format`="zto:4"),
                     list(
-                        `name`="spec_credible_width", 
-                        `title`="Specificity CI Width", 
+                        `name`="kl_divergence", 
+                        `title`="KL Divergence", 
                         `type`="number", 
-                        `format`="dp:3"),
+                        `format`="zto:4"),
                     list(
-                        `name`="robustness_assessment", 
+                        `name`="robustness_index", 
                         `title`="Robustness", 
-                        `type`="text"))))
+                        `type`="number", 
+                        `format`="zto:4"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="expertElicitationSummary",
-                title="Expert Prior Elicitation Summary",
-                visible="(expertElicitation)",
+                name="predictiveChecks",
+                title="Posterior Predictive Checks",
+                visible="(predictive_checking)",
+                rows=1,
                 clearWith=list(
-                    "expertSensitivityMean",
-                    "expertSensitivitySD",
-                    "expertSpecificityMean",
-                    "expertSpecificitySD"),
+                    "test_result",
+                    "disease_status",
+                    "analysis_type"),
                 columns=list(
                     list(
-                        `name`="parameter", 
-                        `title`="Parameter", 
+                        `name`="statistic", 
+                        `title`="Test Statistic", 
                         `type`="text"),
                     list(
-                        `name`="expert_mean", 
-                        `title`="Expert Estimate", 
+                        `name`="observed", 
+                        `title`="Observed", 
                         `type`="number", 
-                        `format`="zto;dp:3"),
+                        `format`="zto:4"),
                     list(
-                        `name`="expert_uncertainty", 
-                        `title`="Expert Uncertainty (SD)", 
+                        `name`="predicted_mean", 
+                        `title`="Predicted Mean", 
                         `type`="number", 
-                        `format`="dp:3"),
+                        `format`="zto:4"),
                     list(
-                        `name`="implied_beta_alpha", 
-                        `title`="Implied Beta \u03B1", 
+                        `name`="predicted_sd", 
+                        `title`="Predicted SD", 
                         `type`="number", 
-                        `format`="dp:2"),
+                        `format`="zto:4"),
                     list(
-                        `name`="implied_beta_beta", 
-                        `title`="Implied Beta \u03B2", 
+                        `name`="p_value", 
+                        `title`="Bayesian p-value", 
                         `type`="number", 
-                        `format`="dp:2"),
+                        `format`="zto:4"),
                     list(
-                        `name`="effective_sample_size", 
-                        `title`="Effective Sample Size", 
-                        `type`="number", 
-                        `format`="dp:1"))))}))
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="priorPosteriorPlot",
+                title="Prior vs Posterior Distributions",
+                visible="(diagnostic_plots)",
+                requiresData=TRUE,
+                width=700,
+                height=500,
+                renderFun=".plotPriorPosterior",
+                clearWith=list(
+                    "test_result",
+                    "disease_status",
+                    "prior_type",
+                    "analysis_type")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="likelihoodPlot",
+                title="Likelihood Function Plot",
+                visible="(diagnostic_plots)",
+                requiresData=TRUE,
+                width=700,
+                height=500,
+                renderFun=".plotLikelihood",
+                clearWith=list(
+                    "test_result",
+                    "disease_status",
+                    "likelihood_method")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="posteriorPredictivePlot",
+                title="Posterior Predictive Distribution",
+                visible="(predictive_checking)",
+                requiresData=TRUE,
+                width=700,
+                height=500,
+                renderFun=".plotPosteriorPredictive",
+                clearWith=list(
+                    "test_result",
+                    "disease_status",
+                    "analysis_type")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="sensitivityPlot",
+                title="Prior Sensitivity Analysis Plot",
+                visible="(sensitivity_analysis)",
+                requiresData=TRUE,
+                width=700,
+                height=500,
+                renderFun=".plotSensitivity",
+                clearWith=list(
+                    "prior_type",
+                    "alpha_prior",
+                    "beta_prior")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="networkDiagram",
+                title="Diagnostic Network Diagram",
+                visible="(network_analysis)",
+                requiresData=TRUE,
+                width=800,
+                height=600,
+                renderFun=".plotNetworkDiagram",
+                clearWith=list(
+                    "test_sequence",
+                    "conditional_independence")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="methodExplanation",
+                title="Method and Interpretation",
+                visible=TRUE))}))
 
 bayesiandiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "bayesiandiagnosticBase",
@@ -849,7 +706,7 @@ bayesiandiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 package = "ClinicoPath",
                 name = "bayesiandiagnostic",
-                version = c(0,0,1),
+                version = c(0,0,3),
                 options = options,
                 results = bayesiandiagnosticResults$new(options=options),
                 data = data,
@@ -859,218 +716,132 @@ bayesiandiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'na')
         }))
 
-#' Bayesian Diagnostic Methods
+#' Bayesian Diagnostic Probability Updates
 #'
-#' Comprehensive Bayesian diagnostic methods for medical decision-making and 
-#' test evaluation.
+#' Bayesian diagnostic probability calculations with prior probability 
+#' updates.
+#' Implements likelihood ratios, posterior probability calculations, and
+#' diagnostic test chain analysis with sequential updating.
 #' 
-#' **Key Features:**
-#' - Bayesian diagnostic probability updates with post-test probability 
-#' calculations
-#' - Bayesian credible intervals as alternatives to frequentist confidence 
-#' intervals
-#' - Beta-binomial models for overdispersed diagnostic accuracy data
-#' - Hierarchical Bayesian models for multi-center diagnostic studies
-#' 
-#' **Applications:**
-#' - Clinical diagnostic test evaluation with uncertainty quantification
-#' - Multi-center diagnostic accuracy studies with center-specific effects
-#' - Prior information integration from expert knowledge or literature
-#' - Bayesian model averaging for diagnostic test combinations
-#' - Complex diagnostic workflows with dependency modeling
-#' 
-#' @param data The data as a data frame containing diagnostic test results and
-#'   reference standard.
-#' @param testVariable Diagnostic test results (continuous or categorical)
-#' @param referenceStandard True disease status (binary: positive/negative)
-#' @param centerVariable Variable for multi-center or multi-study analysis
-#' @param analysisType Type of Bayesian diagnostic analysis
-#' @param priorType Type of prior distribution to use
-#' @param priorSensitivityAlpha Beta prior alpha parameter for sensitivity
-#' @param priorSensitivityBeta Beta prior beta parameter for sensitivity
-#' @param priorSpecificityAlpha Beta prior alpha parameter for specificity
-#' @param priorSpecificityBeta Beta prior beta parameter for specificity
-#' @param priorPrevalenceAlpha Beta prior alpha parameter for prevalence
-#' @param priorPrevalenceBeta Beta prior beta parameter for prevalence
-#' @param mcmcSamples Number of MCMC samples for posterior inference
-#' @param mcmcBurnin Number of burn-in samples to discard
-#' @param mcmcChains Number of parallel MCMC chains
-#' @param mcmcThin MCMC thinning interval
-#' @param credibleLevel Credible interval probability level
-#' @param credibleType Type of credible interval calculation
-#' @param calculatePostTest Calculate Bayesian post-test probabilities
-#' @param priorProbabilityRange Range of prior probabilities for post-test
-#'   calculation
-#' @param customPriorMin Minimum prior probability for custom range
-#' @param customPriorMax Maximum prior probability for custom range
-#' @param specificPriorProbs Specific prior probability values for detailed
-#'   analysis
-#' @param modelComparison Compare multiple Bayesian models
-#' @param comparisonCriteria Criteria for Bayesian model comparison
-#' @param hierarchicalModel Hierarchical structure for multi-center studies
-#' @param showPosteriorSummary Show posterior means, medians, and credible
-#'   intervals
-#' @param showDiagnosticMeasures Show sensitivity, specificity, PPV, NPV with
-#'   credible intervals
-#' @param showPostTestTable Show post-test probabilities at different prior
-#'   probabilities
-#' @param showModelComparison Show model comparison statistics
-#' @param showConvergenceDiagnostics Show MCMC convergence assessment
-#' @param showBayesianInterpretation Show interpretation of Bayesian results
-#' @param plotPosteriors Plot posterior distributions for diagnostic
-#'   parameters
-#' @param plotPostTest Plot post-test probabilities vs prior probabilities
-#' @param plotConvergence Plot MCMC trace plots and diagnostics
-#' @param plotModelComparison Plot model comparison and averaging results
-#' @param plotCredibleRegions Plot credible regions for diagnostic performance
-#' @param robustPriors Use robust priors less sensitive to outliers
-#' @param adaptiveSampling Use adaptive MCMC for improved sampling efficiency
-#' @param parallelProcessing Use parallel processing for MCMC chains
-#' @param randomSeed Random seed for reproducible results
-#' @param expertElicitation Enable expert knowledge incorporation
-#' @param expertSensitivityMean Expert estimate of test sensitivity
-#' @param expertSensitivitySD Expert uncertainty about sensitivity estimate
-#' @param expertSpecificityMean Expert estimate of test specificity
-#' @param expertSpecificitySD Expert uncertainty about specificity estimate
+#'
+#' @examples
+#' # Example: Bayesian diagnostic update
+#' bayesiandiagnostic(
+#'     data = diagnostic_data,
+#'     test_result = test_outcome,
+#'     disease_status = actual_disease,
+#'     prior_prob = 0.15,
+#'     analysis_type = "single_test"
+#' )
+#'
+#' @param test_result Test result variable for diagnostic analysis
+#' @param disease_status Gold standard disease status variable
+#' @param covariates Covariates for risk-stratified diagnostic analysis
+#' @param analysis_type Statistical approach for diagnostic probability
+#'   updates
+#' @param prior_type Prior probability specification approach
+#' @param prior_prob Prior probability of disease in the population
+#' @param alpha_prior Alpha parameter for informative beta prior
+#' @param beta_prior Beta parameter for informative beta prior
+#' @param test_sequence Sequential test names for chain analysis
+#' @param credible_level Level for Bayesian credible intervals
+#' @param mcmc_samples MCMC iterations for posterior sampling
+#' @param burnin_samples MCMC burn-in iterations
+#' @param likelihood_method Approach for computing diagnostic likelihood
+#' @param posterior_summary Whether to compute posterior summary statistics
+#' @param diagnostic_plots Whether to create diagnostic probability plots
+#' @param sensitivity_analysis Whether to perform prior sensitivity analysis
+#' @param model_comparison Whether to perform Bayesian model comparison
+#' @param predictive_checking Whether to perform posterior predictive checks
+#' @param multilevel_structure Whether to use hierarchical Bayesian modeling
+#' @param overdispersion_model Whether to model overdispersion in diagnostic
+#'   accuracy
+#' @param conditional_independence Whether tests are conditionally independent
+#'   given disease status
+#' @param network_analysis Whether to use Bayesian network modeling
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$priorSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$likelihoodTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$posteriorSummary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$diagnosticMeasures} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$postTestTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$bayesianUpdates} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$hierarchicalResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$convergenceDiagnostics} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$posteriorPlots} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$postTestPlots} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$convergencePlots} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$modelComparisonPlots} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$credibleRegionPlots} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$priorPosteriorComparison} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$sensitivityAnalysis} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$expertElicitationSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$predictiveChecks} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$priorPosteriorPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$likelihoodPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$posteriorPredictivePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$sensitivityPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$networkDiagram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$posteriorSummary$asDF}
+#' \code{results$priorSummary$asDF}
 #'
-#' \code{as.data.frame(results$posteriorSummary)}
+#' \code{as.data.frame(results$priorSummary)}
 #'
 #' @export
 bayesiandiagnostic <- function(
-    data,
-    testVariable,
-    referenceStandard,
-    centerVariable,
-    analysisType = "probability_update",
-    priorType = "noninformative",
-    priorSensitivityAlpha = 1,
-    priorSensitivityBeta = 1,
-    priorSpecificityAlpha = 1,
-    priorSpecificityBeta = 1,
-    priorPrevalenceAlpha = 1,
-    priorPrevalenceBeta = 1,
-    mcmcSamples = 5000,
-    mcmcBurnin = 1000,
-    mcmcChains = 3,
-    mcmcThin = 1,
-    credibleLevel = 0.95,
-    credibleType = "hpd",
-    calculatePostTest = TRUE,
-    priorProbabilityRange = "clinical",
-    customPriorMin = 1,
-    customPriorMax = 80,
-    specificPriorProbs = "5, 10, 25, 50",
-    modelComparison = FALSE,
-    comparisonCriteria = "waic",
-    hierarchicalModel = "fixed",
-    showPosteriorSummary = TRUE,
-    showDiagnosticMeasures = TRUE,
-    showPostTestTable = TRUE,
-    showModelComparison = FALSE,
-    showConvergenceDiagnostics = TRUE,
-    showBayesianInterpretation = TRUE,
-    plotPosteriors = TRUE,
-    plotPostTest = TRUE,
-    plotConvergence = TRUE,
-    plotModelComparison = FALSE,
-    plotCredibleRegions = TRUE,
-    robustPriors = FALSE,
-    adaptiveSampling = TRUE,
-    parallelProcessing = TRUE,
-    randomSeed = 12345,
-    expertElicitation = FALSE,
-    expertSensitivityMean = 80,
-    expertSensitivitySD = 10,
-    expertSpecificityMean = 85,
-    expertSpecificitySD = 10) {
+    test_result,
+    disease_status,
+    covariates = NULL,
+    analysis_type = "single_test",
+    prior_type = "fixed_prior",
+    prior_prob = 0.1,
+    alpha_prior = 1,
+    beta_prior = 1,
+    test_sequence = "test1,test2,test3",
+    credible_level = 0.95,
+    mcmc_samples = 5000,
+    burnin_samples = 1000,
+    likelihood_method = "exact",
+    posterior_summary = TRUE,
+    diagnostic_plots = TRUE,
+    sensitivity_analysis = FALSE,
+    model_comparison = FALSE,
+    predictive_checking = FALSE,
+    multilevel_structure = FALSE,
+    overdispersion_model = FALSE,
+    conditional_independence = TRUE,
+    network_analysis = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("bayesiandiagnostic requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(testVariable)) testVariable <- jmvcore::resolveQuo(jmvcore::enquo(testVariable))
-    if ( ! missing(referenceStandard)) referenceStandard <- jmvcore::resolveQuo(jmvcore::enquo(referenceStandard))
-    if ( ! missing(centerVariable)) centerVariable <- jmvcore::resolveQuo(jmvcore::enquo(centerVariable))
-    if (missing(data))
-        data <- jmvcore::marshalData(
-            parent.frame(),
-            `if`( ! missing(testVariable), testVariable, NULL),
-            `if`( ! missing(referenceStandard), referenceStandard, NULL),
-            `if`( ! missing(centerVariable), centerVariable, NULL))
-
-    for (v in referenceStandard) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in centerVariable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    if ( ! missing(test_result)) test_result <- jmvcore::resolveQuo(jmvcore::enquo(test_result))
+    if ( ! missing(disease_status)) disease_status <- jmvcore::resolveQuo(jmvcore::enquo(disease_status))
+    if ( ! missing(covariates)) covariates <- jmvcore::resolveQuo(jmvcore::enquo(covariates))
 
     options <- bayesiandiagnosticOptions$new(
-        testVariable = testVariable,
-        referenceStandard = referenceStandard,
-        centerVariable = centerVariable,
-        analysisType = analysisType,
-        priorType = priorType,
-        priorSensitivityAlpha = priorSensitivityAlpha,
-        priorSensitivityBeta = priorSensitivityBeta,
-        priorSpecificityAlpha = priorSpecificityAlpha,
-        priorSpecificityBeta = priorSpecificityBeta,
-        priorPrevalenceAlpha = priorPrevalenceAlpha,
-        priorPrevalenceBeta = priorPrevalenceBeta,
-        mcmcSamples = mcmcSamples,
-        mcmcBurnin = mcmcBurnin,
-        mcmcChains = mcmcChains,
-        mcmcThin = mcmcThin,
-        credibleLevel = credibleLevel,
-        credibleType = credibleType,
-        calculatePostTest = calculatePostTest,
-        priorProbabilityRange = priorProbabilityRange,
-        customPriorMin = customPriorMin,
-        customPriorMax = customPriorMax,
-        specificPriorProbs = specificPriorProbs,
-        modelComparison = modelComparison,
-        comparisonCriteria = comparisonCriteria,
-        hierarchicalModel = hierarchicalModel,
-        showPosteriorSummary = showPosteriorSummary,
-        showDiagnosticMeasures = showDiagnosticMeasures,
-        showPostTestTable = showPostTestTable,
-        showModelComparison = showModelComparison,
-        showConvergenceDiagnostics = showConvergenceDiagnostics,
-        showBayesianInterpretation = showBayesianInterpretation,
-        plotPosteriors = plotPosteriors,
-        plotPostTest = plotPostTest,
-        plotConvergence = plotConvergence,
-        plotModelComparison = plotModelComparison,
-        plotCredibleRegions = plotCredibleRegions,
-        robustPriors = robustPriors,
-        adaptiveSampling = adaptiveSampling,
-        parallelProcessing = parallelProcessing,
-        randomSeed = randomSeed,
-        expertElicitation = expertElicitation,
-        expertSensitivityMean = expertSensitivityMean,
-        expertSensitivitySD = expertSensitivitySD,
-        expertSpecificityMean = expertSpecificityMean,
-        expertSpecificitySD = expertSpecificitySD)
+        test_result = test_result,
+        disease_status = disease_status,
+        covariates = covariates,
+        analysis_type = analysis_type,
+        prior_type = prior_type,
+        prior_prob = prior_prob,
+        alpha_prior = alpha_prior,
+        beta_prior = beta_prior,
+        test_sequence = test_sequence,
+        credible_level = credible_level,
+        mcmc_samples = mcmc_samples,
+        burnin_samples = burnin_samples,
+        likelihood_method = likelihood_method,
+        posterior_summary = posterior_summary,
+        diagnostic_plots = diagnostic_plots,
+        sensitivity_analysis = sensitivity_analysis,
+        model_comparison = model_comparison,
+        predictive_checking = predictive_checking,
+        multilevel_structure = multilevel_structure,
+        overdispersion_model = overdispersion_model,
+        conditional_independence = conditional_independence,
+        network_analysis = network_analysis)
 
     analysis <- bayesiandiagnosticClass$new(
         options = options,

@@ -1,0 +1,330 @@
+name: betabinomialdiagnostic
+title: Beta-Binomial Diagnostic Accuracy Models
+menuGroup: ClinicoPath
+menuSubgroup: meddecide
+version: '0.0.3'
+jas: '1.2'
+description:
+    main: |
+        Beta-binomial models for overdispersed diagnostic accuracy data.
+        Handles heterogeneity in sensitivity and specificity across studies or
+        centers using beta-binomial distributions with flexible correlation structures.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Beta-binomial diagnostic accuracy analysis
+            betabinomialdiagnostic(
+                data = diagnostic_data,
+                test_result = test_outcome,
+                disease_status = true_disease,
+                study_id = study_center,
+                overdispersion_model = "beta_binomial"
+            )
+
+options:
+    - name: test_result
+      title: Test Result Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          ui: Test result (positive/negative)
+          R: |
+              Test result variable
+
+    - name: disease_status
+      title: Disease Status Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description:
+          ui: True disease status (gold standard)
+          R: |
+              Gold standard disease status
+
+    - name: study_id
+      title: Study/Center ID
+      type: Variable
+      suggested: [nominal, id]
+      permitted: [factor, id]
+      default: null
+      description:
+          ui: Study or center identifier for hierarchical modeling
+          R: |
+              Clustering variable for multi-center studies
+
+    - name: covariates
+      title: Study-Level Covariates
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          ui: Study-level predictors for meta-regression
+          R: |
+              Covariates for explaining between-study heterogeneity
+
+    - name: overdispersion_model
+      title: Overdispersion Model
+      type: List
+      options:
+          - name: beta_binomial
+            title: Beta-Binomial Model
+          - name: logit_normal
+            title: Logit-Normal Random Effects
+          - name: probit_normal
+            title: Probit-Normal Random Effects
+          - name: compound_beta
+            title: Compound Beta Distribution
+          - name: dirichlet_multinomial
+            title: Dirichlet-Multinomial (>2 categories)
+      default: beta_binomial
+      description:
+          ui: Type of overdispersion model
+          R: |
+              Statistical model for overdispersed diagnostic data
+
+    - name: correlation_structure
+      title: Correlation Structure
+      type: List
+      options:
+          - name: independent
+            title: Independent Sensitivity/Specificity
+          - name: correlated
+            title: Correlated Sensitivity/Specificity
+          - name: conditional_dependent
+            title: Conditionally Dependent Tests
+          - name: hierarchical
+            title: Hierarchical Correlation
+      default: independent
+      description:
+          ui: Correlation between sensitivity and specificity
+          R: |
+              Assumed correlation structure
+
+    - name: estimation_method
+      title: Estimation Method
+      type: List
+      options:
+          - name: maximum_likelihood
+            title: Maximum Likelihood (ML)
+          - name: restricted_ml
+            title: Restricted ML (REML)
+          - name: bayesian_mcmc
+            title: Bayesian MCMC
+          - name: method_of_moments
+            title: Method of Moments
+          - name: quasi_likelihood
+            title: Quasi-Likelihood
+      default: maximum_likelihood
+      description:
+          ui: Parameter estimation approach
+          R: |
+              Method for estimating model parameters
+
+    - name: heterogeneity_test
+      title: Heterogeneity Testing
+      type: Bool
+      default: true
+      description:
+          ui: Test for between-study heterogeneity
+          R: |
+              Whether to test for heterogeneity
+
+    - name: tau_squared_method
+      title: Heterogeneity Variance Estimator
+      type: List
+      options:
+          - name: dersimonian_laird
+            title: DerSimonian-Laird
+          - name: restricted_ml
+            title: Restricted ML
+          - name: paule_mandel
+            title: Paule-Mandel
+          - name: empirical_bayes
+            title: Empirical Bayes
+          - name: hunter_schmidt
+            title: Hunter-Schmidt
+      default: dersimonian_laird
+      description:
+          ui: Method for estimating between-study variance
+          R: |
+              Estimator for τ² (heterogeneity variance)
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          ui: Confidence level for intervals
+          R: |
+              Confidence level for parameter estimates
+
+    - name: alpha_prior
+      title: Beta Prior Alpha (Sensitivity)
+      type: Number
+      default: 1
+      min: 0.1
+      max: 100
+      description:
+          ui: Beta prior alpha parameter for sensitivity
+          R: |
+              Prior alpha for sensitivity in Bayesian models
+
+    - name: beta_prior
+      title: Beta Prior Beta (Sensitivity)
+      type: Number
+      default: 1
+      min: 0.1
+      max: 100
+      description:
+          ui: Beta prior beta parameter for sensitivity
+          R: |
+              Prior beta for sensitivity in Bayesian models
+
+    - name: alpha_prior_spec
+      title: Beta Prior Alpha (Specificity)
+      type: Number
+      default: 1
+      min: 0.1
+      max: 100
+      description:
+          ui: Beta prior alpha parameter for specificity
+          R: |
+              Prior alpha for specificity in Bayesian models
+
+    - name: beta_prior_spec
+      title: Beta Prior Beta (Specificity)
+      type: Number
+      default: 1
+      min: 0.1
+      max: 100
+      description:
+          ui: Beta prior beta parameter for specificity
+          R: |
+              Prior beta for specificity in Bayesian models
+
+    - name: mcmc_iterations
+      title: MCMC Iterations
+      type: Integer
+      default: 10000
+      min: 1000
+      max: 50000
+      description:
+          ui: Number of MCMC iterations (Bayesian models)
+          R: |
+              MCMC iterations for posterior sampling
+
+    - name: burnin_iterations
+      title: Burn-in Iterations
+      type: Integer
+      default: 2000
+      min: 100
+      max: 10000
+      description:
+          ui: Number of burn-in iterations to discard
+          R: |
+              MCMC burn-in iterations
+
+    - name: thin_factor
+      title: Thinning Factor
+      type: Integer
+      default: 5
+      min: 1
+      max: 20
+      description:
+          ui: MCMC thinning factor
+          R: |
+              Keep every nth MCMC sample
+
+    - name: convergence_diagnostics
+      title: Convergence Diagnostics
+      type: Bool
+      default: true
+      description:
+          ui: Perform MCMC convergence diagnostics
+          R: |
+              Whether to check MCMC convergence
+
+    - name: prediction_intervals
+      title: Prediction Intervals
+      type: Bool
+      default: true
+      description:
+          ui: Calculate prediction intervals for future studies
+          R: |
+              Whether to compute prediction intervals
+
+    - name: forest_plot
+      title: Forest Plot
+      type: Bool
+      default: true
+      description:
+          ui: Generate forest plots for sensitivity and specificity
+          R: |
+              Whether to create forest plots
+
+    - name: summary_roc_curve
+      title: Summary ROC Curve
+      type: Bool
+      default: true
+      description:
+          ui: Plot summary ROC curve with confidence region
+          R: |
+              Whether to plot summary ROC curve
+
+    - name: residual_plots
+      title: Residual Diagnostic Plots
+      type: Bool
+      default: false
+      description:
+          ui: Generate residual plots for model diagnostics
+          R: |
+              Whether to create residual diagnostic plots
+
+    - name: influence_diagnostics
+      title: Influence Diagnostics
+      type: Bool
+      default: false
+      description:
+          ui: Assess influence of individual studies
+          R: |
+              Whether to perform influence analysis
+
+    - name: publication_bias
+      title: Publication Bias Assessment
+      type: Bool
+      default: false
+      description:
+          ui: Test for publication bias (funnel plots, tests)
+          R: |
+              Whether to assess publication bias
+
+    - name: subgroup_analysis
+      title: Subgroup Analysis
+      type: Bool
+      default: false
+      description:
+          ui: Perform subgroup analyses if covariates provided
+          R: |
+              Whether to conduct subgroup analyses
+
+    - name: robust_variance
+      title: Robust Variance Estimation
+      type: Bool
+      default: false
+      description:
+          ui: Use robust/sandwich variance estimators
+          R: |
+              Whether to use robust standard errors
+
+    - name: finite_sample_correction
+      title: Finite Sample Correction
+      type: Bool
+      default: true
+      description:
+          ui: Apply finite sample corrections for small studies
+          R: |
+              Whether to apply small sample corrections

@@ -1,0 +1,268 @@
+name: bayesiandiagnostic
+title: Bayesian Diagnostic Probability Updates
+menuGroup: ClinicoPath
+menuSubgroup: meddecide
+version: '0.0.3'
+jas: '1.2'
+description:
+    main: |
+        Bayesian diagnostic probability calculations with prior probability updates.
+        Implements likelihood ratios, posterior probability calculations, and
+        diagnostic test chain analysis with sequential updating.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Bayesian diagnostic update
+            bayesiandiagnostic(
+                data = diagnostic_data,
+                test_result = test_outcome,
+                disease_status = actual_disease,
+                prior_prob = 0.15,
+                analysis_type = "single_test"
+            )
+
+options:
+    - name: test_result
+      title: Test Result Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          ui: Test result (positive/negative or ordinal)
+          R: |
+              Test result variable for diagnostic analysis
+
+    - name: disease_status
+      title: Disease Status Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description:
+          ui: True disease status (gold standard)
+          R: |
+              Gold standard disease status variable
+
+    - name: covariates
+      title: Patient Characteristics
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          ui: Variables for stratified analysis
+          R: |
+              Covariates for risk-stratified diagnostic analysis
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+          - name: single_test
+            title: Single Test Analysis
+          - name: test_chain
+            title: Sequential Test Chain
+          - name: parallel_tests
+            title: Parallel Test Combination
+          - name: hierarchical_bayes
+            title: Hierarchical Bayesian Model
+          - name: beta_binomial
+            title: Beta-Binomial Model
+      default: single_test
+      description:
+          ui: Type of Bayesian diagnostic analysis
+          R: |
+              Statistical approach for diagnostic probability updates
+
+    - name: prior_type
+      title: Prior Specification
+      type: List
+      options:
+          - name: fixed_prior
+            title: Fixed Prior Probability
+          - name: empirical_prior
+            title: Empirical Bayes Prior
+          - name: reference_prior
+            title: Reference/Uniform Prior
+          - name: informative_prior
+            title: Informative Beta Prior
+          - name: hierarchical_prior
+            title: Hierarchical Prior
+      default: fixed_prior
+      description:
+          ui: Method for specifying prior probabilities
+          R: |
+              Prior probability specification approach
+
+    - name: prior_prob
+      title: Prior Disease Probability
+      type: Number
+      default: 0.1
+      min: 0.001
+      max: 0.999
+      description:
+          ui: Prior probability of disease (prevalence)
+          R: |
+              Prior probability of disease in the population
+
+    - name: alpha_prior
+      title: Beta Prior Alpha
+      type: Number
+      default: 1
+      min: 0.1
+      max: 100
+      description:
+          ui: Beta distribution alpha parameter for prior
+          R: |
+              Alpha parameter for informative beta prior
+
+    - name: beta_prior
+      title: Beta Prior Beta
+      type: Number
+      default: 1
+      min: 0.1
+      max: 100
+      description:
+          ui: Beta distribution beta parameter for prior
+          R: |
+              Beta parameter for informative beta prior
+
+    - name: test_sequence
+      title: Test Sequence (comma-separated)
+      type: String
+      default: "test1,test2,test3"
+      description:
+          ui: Names of tests in sequential order
+          R: |
+              Sequential test names for chain analysis
+
+    - name: credible_level
+      title: Credible Interval Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          ui: Credible interval coverage probability
+          R: |
+              Level for Bayesian credible intervals
+
+    - name: mcmc_samples
+      title: MCMC Samples
+      type: Integer
+      default: 5000
+      min: 1000
+      max: 20000
+      description:
+          ui: Number of MCMC samples for hierarchical models
+          R: |
+              MCMC iterations for posterior sampling
+
+    - name: burnin_samples
+      title: Burn-in Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 5000
+      description:
+          ui: Number of burn-in samples to discard
+          R: |
+              MCMC burn-in iterations
+
+    - name: likelihood_method
+      title: Likelihood Calculation
+      type: List
+      options:
+          - name: exact
+            title: Exact Likelihood
+          - name: asymptotic
+            title: Asymptotic Approximation
+          - name: bootstrap
+            title: Bootstrap Likelihood
+          - name: bayesian_bootstrap
+            title: Bayesian Bootstrap
+      default: exact
+      description:
+          ui: Method for likelihood calculation
+          R: |
+              Approach for computing diagnostic likelihood
+
+    - name: posterior_summary
+      title: Posterior Summary Statistics
+      type: Bool
+      default: true
+      description:
+          ui: Calculate posterior means, medians, and intervals
+          R: |
+              Whether to compute posterior summary statistics
+
+    - name: diagnostic_plots
+      title: Diagnostic Plots
+      type: Bool
+      default: true
+      description:
+          ui: Generate prior/posterior distribution plots
+          R: |
+              Whether to create diagnostic probability plots
+
+    - name: sensitivity_analysis
+      title: Prior Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          ui: Assess robustness to prior specification
+          R: |
+              Whether to perform prior sensitivity analysis
+
+    - name: model_comparison
+      title: Bayesian Model Comparison
+      type: Bool
+      default: false
+      description:
+          ui: Compare different diagnostic models using DIC/WAIC
+          R: |
+              Whether to perform Bayesian model comparison
+
+    - name: predictive_checking
+      title: Posterior Predictive Checking
+      type: Bool
+      default: false
+      description:
+          ui: Validate model fit using posterior predictive distributions
+          R: |
+              Whether to perform posterior predictive checks
+
+    - name: multilevel_structure
+      title: Multilevel Structure
+      type: Bool
+      default: false
+      description:
+          ui: Account for hierarchical data structure (centers, studies)
+          R: |
+              Whether to use hierarchical Bayesian modeling
+
+    - name: overdispersion_model
+      title: Overdispersion Modeling
+      type: Bool
+      default: false
+      description:
+          ui: Use beta-binomial for overdispersed diagnostic data
+          R: |
+              Whether to model overdispersion in diagnostic accuracy
+
+    - name: conditional_independence
+      title: Test Conditional Independence
+      type: Bool
+      default: true
+      description:
+          ui: Assume conditional independence of test results
+          R: |
+              Whether tests are conditionally independent given disease status
+
+    - name: network_analysis
+      title: Diagnostic Network Analysis
+      type: Bool
+      default: false
+      description:
+          ui: Model complex diagnostic pathways as Bayesian networks
+          R: |
+              Whether to use Bayesian network modeling
