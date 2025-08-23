@@ -296,7 +296,7 @@ pseudosurvivalClass <- R6::R6Class(
 
             regression_method <- self$options$regression_method
 
-            html <- "<h3>Pseudo-Observation Regression Results</h3>"
+            html <- "<h3>Direct Regression on Survival Function Results</h3>"
 
             tryCatch({
 
@@ -307,69 +307,208 @@ pseudosurvivalClass <- R6::R6Class(
                     X <- matrix(1, nrow = nrow(analysis_data), ncol = 1)
                 }
 
-                # For demonstration, use simple linear regression approach
-                # (In practice, would use proper pseudo-observation methods)
-
+                # Proper jackknife pseudo-observation implementation for direct regression on survival function
+                
                 if (outcome_type == "survival" && length(time_points) > 0) {
-                    # Use first time point as example
-                    target_time <- time_points[1]
-
-                    # Simple approach: estimate survival at target time
-                    km_fit <- survfit(surv_obj ~ 1, data = analysis_data)
-                    surv_est <- summary(km_fit, times = target_time, extend = TRUE)$surv
-
-                    # Create pseudo outcome (simplified)
-                    pseudo_outcome <- ifelse(analysis_data$time >= target_time, 1,
-                                           ifelse(analysis_data$status == 1, 0, surv_est))
-
-                    # Fit regression
-                    if (regression_method == "ols") {
-                        if (length(covariates) > 0) {
-                            reg_formula <- as.formula(paste("pseudo_outcome ~", paste(covariates, collapse = " + ")))
-                            model <- lm(reg_formula, data = data.frame(pseudo_outcome = pseudo_outcome, analysis_data))
-                        } else {
-                            model <- lm(pseudo_outcome ~ 1)
+                    
+                    n <- nrow(analysis_data)
+                    results_by_time <- list()
+                    
+                    for (tp_idx in seq_along(time_points)) {
+                        target_time <- time_points[tp_idx]
+                        
+                        html <- paste0(html, "<h4>Direct Regression at Time t = ", target_time, "</h4>")
+                        
+                        # Step 1: Calculate overall Kaplan-Meier survival estimate at target time
+                        km_fit_all <- survfit(surv_obj ~ 1, data = analysis_data)
+                        S_hat_t <- private$.getSurvProbAtTime(km_fit_all, target_time)
+                        
+                        if (is.na(S_hat_t) || S_hat_t <= 0) {
+                            html <- paste0(html, "<p>Warning: Cannot estimate survival at time ", target_time, " - insufficient data</p>")
+                            next
                         }
-
-                        model_summary <- summary(model)
-
-                        html <- paste0(html, "<h4>Linear Regression Results (Time = ", target_time, ")</h4>")
-                        html <- paste0(html, "<table class='jamovi-table'>")
-                        html <- paste0(html, "<tr><td><b>R-squared:</b></td><td>", round(model_summary$r.squared, 4), "</td></tr>")
-                        html <- paste0(html, "<tr><td><b>Adjusted R-squared:</b></td><td>", round(model_summary$adj.r.squared, 4), "</td></tr>")
-                        html <- paste0(html, "<tr><td><b>F-statistic:</b></td><td>", round(model_summary$fstatistic[1], 3), "</td></tr>")
-                        html <- paste0(html, "<tr><td><b>p-value:</b></td><td>", format.pval(pf(model_summary$fstatistic[1], model_summary$fstatistic[2], model_summary$fstatistic[3], lower.tail = FALSE)), "</td></tr>")
-                        html <- paste0(html, "</table>")
-
-                        # Coefficient table
-                        if (length(covariates) > 0) {
-                            coef_table <- model_summary$coefficients
-                            html <- paste0(html, "<h4>Coefficient Estimates</h4>")
+                        
+                        # Step 2: Calculate jackknife pseudo-observations using leave-one-out
+                        pseudo_values <- numeric(n)
+                        
+                        for (i in 1:n) {
+                            # Leave-one-out: exclude observation i
+                            loo_data <- analysis_data[-i, ]
+                            loo_surv <- Surv(loo_data$time, loo_data$status)
+                            
+                            # Fit KM without observation i
+                            km_fit_loo <- survfit(loo_surv ~ 1)
+                            S_hat_minus_i_t <- private$.getSurvProbAtTime(km_fit_loo, target_time)
+                            
+                            if (is.na(S_hat_minus_i_t)) {
+                                S_hat_minus_i_t <- S_hat_t  # fallback
+                            }
+                            
+                            # Calculate jackknife pseudo-observation
+                            # θ̂_i = n * θ̂ - (n-1) * θ̂_{-i}
+                            pseudo_values[i] <- n * S_hat_t - (n - 1) * S_hat_minus_i_t
+                            
+                            # Bound pseudo-observations to [0,1] for survival probabilities
+                            pseudo_values[i] <- max(0, min(1, pseudo_values[i]))
+                        }
+                        
+                        # Step 3: Fit regression model with pseudo-observations as outcome
+                        regression_data <- data.frame(
+                            pseudo_surv = pseudo_values,
+                            analysis_data[covariates]
+                        )
+                        
+                        # Choose regression method
+                        if (regression_method == "ols") {
+                            # Ordinary Least Squares
+                            if (length(covariates) > 0) {
+                                reg_formula <- as.formula(paste("pseudo_surv ~", paste(covariates, collapse = " + ")))
+                                model <- lm(reg_formula, data = regression_data)
+                            } else {
+                                model <- lm(pseudo_surv ~ 1, data = regression_data)
+                            }
+                            
+                            model_summary <- summary(model)
+                            
+                            # Model fit statistics
                             html <- paste0(html, "<table class='jamovi-table'>")
-                            html <- paste0(html, "<tr><th>Variable</th><th>Estimate</th><th>SE</th><th>t value</th><th>Pr(&gt;|t|)</th></tr>")
-
+                            html <- paste0(html, "<tr><td><b>Target Time:</b></td><td>", target_time, "</td></tr>")
+                            html <- paste0(html, "<tr><td><b>Overall Survival at t:</b></td><td>", round(S_hat_t, 4), "</td></tr>")
+                            html <- paste0(html, "<tr><td><b>R-squared:</b></td><td>", round(model_summary$r.squared, 4), "</td></tr>")
+                            html <- paste0(html, "<tr><td><b>Adjusted R-squared:</b></td><td>", round(model_summary$adj.r.squared, 4), "</td></tr>")
+                            html <- paste0(html, "<tr><td><b>Residual SE:</b></td><td>", round(model_summary$sigma, 4), "</td></tr>")
+                            
+                            if (length(covariates) > 0) {
+                                html <- paste0(html, "<tr><td><b>F-statistic:</b></td><td>", round(model_summary$fstatistic[1], 3), "</td></tr>")
+                                html <- paste0(html, "<tr><td><b>F p-value:</b></td><td>", format.pval(pf(model_summary$fstatistic[1], model_summary$fstatistic[2], model_summary$fstatistic[3], lower.tail = FALSE)), "</td></tr>")
+                            }
+                            html <- paste0(html, "</table>")
+                            
+                            # Coefficient table with clinical interpretation
+                            coef_table <- model_summary$coefficients
+                            html <- paste0(html, "<h5>Regression Coefficients - Direct Effects on Survival Probability</h5>")
+                            html <- paste0(html, "<table class='jamovi-table'>")
+                            html <- paste0(html, "<tr><th>Variable</th><th>Coefficient</th><th>SE</th><th>t-value</th><th>p-value</th><th>95% CI</th><th>Clinical Interpretation</th></tr>")
+                            
                             for (i in 1:nrow(coef_table)) {
                                 var_name <- rownames(coef_table)[i]
-                                estimate <- round(coef_table[i, "Estimate"], 4)
-                                se <- round(coef_table[i, "Std. Error"], 4)
-                                t_val <- round(coef_table[i, "t value"], 3)
-                                p_val <- format.pval(coef_table[i, "Pr(>|t|)"])
-
+                                estimate <- coef_table[i, "Estimate"]
+                                se <- coef_table[i, "Std. Error"]
+                                t_val <- coef_table[i, "t value"]
+                                p_val <- coef_table[i, "Pr(>|t|)"]
+                                
+                                # 95% Confidence interval
+                                ci_lower <- estimate - 1.96 * se
+                                ci_upper <- estimate + 1.96 * se
+                                ci_str <- paste0("[", round(ci_lower, 4), ", ", round(ci_upper, 4), "]")
+                                
+                                # Clinical interpretation
+                                if (var_name == "(Intercept)") {
+                                    interpretation <- paste0("Baseline survival probability: ", round(estimate, 3))
+                                } else {
+                                    abs_effect <- abs(estimate)
+                                    direction <- ifelse(estimate > 0, "increases", "decreases")
+                                    interpretation <- paste0("1-unit increase ", direction, " survival probability by ", round(abs_effect, 3), 
+                                                           " (", round(abs_effect * 100, 1), " percentage points)")
+                                }
+                                
                                 html <- paste0(html, "<tr>")
                                 html <- paste0(html, "<td>", var_name, "</td>")
-                                html <- paste0(html, "<td>", estimate, "</td>")
-                                html <- paste0(html, "<td>", se, "</td>")
-                                html <- paste0(html, "<td>", t_val, "</td>")
-                                html <- paste0(html, "<td>", p_val, "</td>")
+                                html <- paste0(html, "<td>", round(estimate, 4), "</td>")
+                                html <- paste0(html, "<td>", round(se, 4), "</td>")
+                                html <- paste0(html, "<td>", round(t_val, 3), "</td>")
+                                html <- paste0(html, "<td>", format.pval(p_val), "</td>")
+                                html <- paste0(html, "<td>", ci_str, "</td>")
+                                html <- paste0(html, "<td>", interpretation, "</td>")
                                 html <- paste0(html, "</tr>")
                             }
                             html <- paste0(html, "</table>")
+                            
+                            # Model diagnostics
+                            residuals <- residuals(model)
+                            fitted_vals <- fitted(model)
+                            
+                            html <- paste0(html, "<h5>Model Diagnostics</h5>")
+                            html <- paste0(html, "<table class='jamovi-table'>")
+                            html <- paste0(html, "<tr><td><b>Mean Residual:</b></td><td>", round(mean(residuals), 6), "</td></tr>")
+                            html <- paste0(html, "<tr><td><b>Residual Range:</b></td><td>[", round(min(residuals), 4), ", ", round(max(residuals), 4), "]</td></tr>")
+                            html <- paste0(html, "<tr><td><b>Predicted Range:</b></td><td>[", round(min(fitted_vals), 4), ", ", round(max(fitted_vals), 4), "]</td></tr>")
+                            html <- paste0(html, "</table>")
+                            
+                        } else if (regression_method == "gee") {
+                            # Generalized Estimating Equations (more robust)
+                            if (requireNamespace("geepack", quietly = TRUE)) {
+                                
+                                # Add subject ID for GEE
+                                regression_data$id <- seq_len(nrow(regression_data))
+                                
+                                if (length(covariates) > 0) {
+                                    gee_formula <- as.formula(paste("pseudo_surv ~", paste(covariates, collapse = " + ")))
+                                    gee_model <- geepack::geeglm(gee_formula, data = regression_data, 
+                                                               id = id, family = gaussian(), corstr = "independence")
+                                } else {
+                                    gee_model <- geepack::geeglm(pseudo_surv ~ 1, data = regression_data, 
+                                                               id = id, family = gaussian(), corstr = "independence")
+                                }
+                                
+                                gee_summary <- summary(gee_model)
+                                
+                                html <- paste0(html, "<h5>GEE Results (Robust Standard Errors)</h5>")
+                                html <- paste0(html, "<table class='jamovi-table'>")
+                                html <- paste0(html, "<tr><td><b>Target Time:</b></td><td>", target_time, "</td></tr>")
+                                html <- paste0(html, "<tr><td><b>Overall Survival at t:</b></td><td>", round(S_hat_t, 4), "</td></tr>")
+                                html <- paste0(html, "<tr><td><b>Working Correlation:</b></td><td>Independence</td></tr>")
+                                html <- paste0(html, "</table>")
+                                
+                                # GEE coefficient table
+                                gee_coef <- gee_summary$coefficients
+                                html <- paste0(html, "<table class='jamovi-table'>")
+                                html <- paste0(html, "<tr><th>Variable</th><th>Estimate</th><th>Robust SE</th><th>Wald Z</th><th>p-value</th></tr>")
+                                
+                                for (i in 1:nrow(gee_coef)) {
+                                    var_name <- rownames(gee_coef)[i]
+                                    estimate <- round(gee_coef[i, "Estimate"], 4)
+                                    se <- round(gee_coef[i, "Std.err"], 4)
+                                    z_val <- round(gee_coef[i, "Wald"], 3)
+                                    p_val <- format.pval(gee_coef[i, "Pr(>|W|)"])
+                                    
+                                    html <- paste0(html, "<tr>")
+                                    html <- paste0(html, "<td>", var_name, "</td>")
+                                    html <- paste0(html, "<td>", estimate, "</td>")
+                                    html <- paste0(html, "<td>", se, "</td>")
+                                    html <- paste0(html, "<td>", z_val, "</td>")
+                                    html <- paste0(html, "<td>", p_val, "</td>")
+                                    html <- paste0(html, "</tr>")
+                                }
+                                html <- paste0(html, "</table>")
+                            } else {
+                                html <- paste0(html, "<p>GEE method requires geepack package</p>")
+                            }
                         }
+                        
+                        results_by_time[[as.character(target_time)]] <- list(
+                            time = target_time,
+                            survival_est = S_hat_t,
+                            pseudo_values = pseudo_values,
+                            model = model
+                        )
+                    }
+                    
+                    # Summary across all time points
+                    if (length(results_by_time) > 1) {
+                        html <- paste0(html, "<h4>Summary Across Time Points</h4>")
+                        html <- paste0(html, "<p>Direct regression on survival function completed for ", length(results_by_time), " time points. ")
+                        html <- paste0(html, "This method allows direct modeling of the survival probability as a function of covariates at specific time points, ")
+                        html <- paste0(html, "providing an alternative to proportional hazards modeling.</p>")
+                        
+                        html <- paste0(html, "<p><b>Methodological Note:</b> Jackknife pseudo-observations enable direct regression on the survival function S(t|X) = P(T > t | X). ")
+                        html <- paste0(html, "The regression coefficients represent the direct effect of covariates on survival probability, ")
+                        html <- paste0(html, "making interpretation more straightforward than hazard ratios.</p>")
                     }
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Pseudo-regression error: ", e$message, "</p>")
+                html <- paste0(html, "<p>Direct regression error: ", e$message, "</p>")
             })
 
             self$results$regression_results$setContent(html)
@@ -636,6 +775,23 @@ pseudosurvivalClass <- R6::R6Class(
             html <- paste0(html, "<p>This would include evaluation of different tau values for RMST and robustness checks.</p>")
 
             self$results$sensitivity_results$setContent(html)
+        },
+
+        .getSurvProbAtTime = function(fit, time) {
+            # Helper method to get survival probability at specific time from survfit object
+            if (length(fit$time) == 0 || time <= 0) {
+                return(1.0)
+            }
+            
+            # Find the largest time point <= target time
+            valid_times <- fit$time[fit$time <= time]
+            if (length(valid_times) == 0) {
+                return(1.0)  # No events before target time
+            }
+            
+            # Get the survival probability at the largest time <= target time
+            idx <- which(fit$time == max(valid_times))[1]
+            return(fit$surv[idx])
         }
     )
 )

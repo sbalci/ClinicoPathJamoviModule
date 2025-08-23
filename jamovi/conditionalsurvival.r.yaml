@@ -1,0 +1,69 @@
+---
+name: conditionalsurvival
+title: Conditional Survival Estimation
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: 'Analysis'
+      type: Html
+      visible: (showExplanations)
+
+    - name: condsurvTable
+      title: 'Conditional Survival Probabilities'
+      type: Table
+      visible: (showTable)
+      rows: 1
+      clearWith:
+        - timeVar
+        - outcomeVar
+        - conditionVar
+        - conditionTime
+        - method
+        - timePoints
+      columns:
+        - name: time
+          title: 'Time Point'
+          type: number
+          format: zto
+        - name: condtime
+          title: 'Conditioning Time'
+          type: number
+          format: zto
+        - name: condprob
+          title: 'Conditional Survival'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'Standard Error'
+          type: number
+          format: zto:4
+        - name: lower
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: upper
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+
+    - name: survplot
+      title: 'Conditional Survival Plot'
+      type: Image
+      visible: (showPlot)
+      requiresData: true
+      width: 600
+      height: 450
+      renderFun: .plot
+      clearWith:
+        - timeVar
+        - outcomeVar
+        - conditionVar
+        - conditionTime
+        - method
+        - plotType
+
+    - name: methodExplanation
+      title: 'Method and Interpretation'
+      type: Html
+      visible: (showExplanations)

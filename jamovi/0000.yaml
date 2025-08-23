@@ -3600,6 +3600,22 @@ analyses:
       covariate effects on  recurrent event rates, with options for marginal
       rate models, accelerated rate  models, and gamma frailty models to handle
       within-subject correlation.
+  - title: Conditional Survival Estimation
+    name: conditionalsurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Conditional Survival Estimation
+    menuSubtitle: Conditional Survival, Landmark Analysis, Advanced Methods
+    description: >-
+      Performs conditional survival estimation, which calculates the
+      probability  of surviving beyond a specific time point given survival to a
+      conditioning  time point. This analysis is particularly useful for
+      updating prognosis  estimates for patients who have already survived a
+      certain period. Multiple  estimation methods are supported including
+      Kaplan-Meier weights, landmark  approaches, and inverse probability
+      weighting.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
