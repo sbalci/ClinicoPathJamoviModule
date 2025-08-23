@@ -1,0 +1,218 @@
+---
+name: conditionalgee
+title: Conditional GEE for Recurrent Events Gap Times
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'GEE Models for Gap Times, Recurrent Events'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Conditional Generalized Estimating Equations for analyzing gap times between recurrent 
+        events. This analysis models the time between consecutive event occurrences conditional 
+        on previous event history, accounting for within-subject correlation and providing 
+        robust population-average estimates of covariate effects on inter-event times.
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology', package='ClinicoPath')
+
+options:
+    - name: data
+      type: Data
+
+    - name: subjectID
+      title: Subject ID
+      type: Variable
+      suggested:
+          - id
+      permitted:
+          - factor
+          - id
+
+    - name: gap_time
+      title: Gap Time
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+
+    - name: event_number
+      title: Event Number/Order
+      type: Variable
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+          - nominal
+      permitted:
+          - numeric
+          - factor
+
+    - name: time_varying_covariates
+      title: Time-Varying Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+          - nominal
+      permitted:
+          - numeric
+          - factor
+
+    - name: baseline_covariates
+      title: Baseline Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+          - nominal
+      permitted:
+          - numeric
+          - factor
+
+    - name: distribution_family
+      title: Distribution Family
+      type: List
+      options:
+          - name: exponential
+            title: Exponential
+          - name: weibull
+            title: Weibull
+          - name: gamma
+            title: Gamma
+          - name: lognormal
+            title: Log-normal
+      default: weibull
+
+    - name: correlation_structure
+      title: Correlation Structure
+      type: List
+      options:
+          - name: exchangeable
+            title: Exchangeable
+          - name: ar1
+            title: AR(1)
+          - name: unstructured
+            title: Unstructured
+          - name: independence
+            title: Independence
+      default: exchangeable
+
+    - name: link_function
+      title: Link Function
+      type: List
+      options:
+          - name: log
+            title: Log Link
+          - name: identity
+            title: Identity Link
+          - name: sqrt
+            title: Square Root Link
+      default: log
+
+    - name: conditioning_set
+      title: Conditioning Set
+      type: List
+      options:
+          - name: previous_gap
+            title: Previous Gap Time
+          - name: cumulative_history
+            title: Cumulative History
+          - name: event_order
+            title: Event Order Only
+          - name: custom
+            title: Custom Conditioning
+      default: previous_gap
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Integer
+      min: 50
+      max: 1000
+      default: 200
+
+    - name: tolerance
+      title: Convergence Tolerance
+      type: Number
+      min: 1e-8
+      max: 1e-3
+      default: 1e-6
+
+    - name: robust_se
+      title: Robust Standard Errors
+      type: Bool
+      default: true
+
+    - name: include_diagnostics
+      title: Include Model Diagnostics
+      type: Bool
+      default: true
+
+    - name: include_predictions
+      title: Include Gap Time Predictions
+      type: Bool
+      default: true
+
+    - name: plotGapTimes
+      title: Plot Gap Time Patterns
+      type: Bool
+      default: true
+
+    - name: plotCorrelation
+      title: Plot Correlation Structure
+      type: Bool
+      default: true
+
+    - name: plotResiduals
+      title: Plot Model Residuals
+      type: Bool
+      default: false
+
+    - name: plotPredictions
+      title: Plot Gap Time Predictions
+      type: Bool
+      default: false
+
+    - name: showEducation
+      title: Show Educational Content
+      type: Bool
+      default: true
+
+    - name: showInterpretation
+      title: Show Result Interpretation
+      type: Bool
+      default: true
+
+    - name: exportResults
+      title: Export Results to Table
+      type: Bool
+      default: false
+...

@@ -1,0 +1,219 @@
+---
+name: jointfrailty
+title: Joint Frailty Models for Recurrent Events
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Joint Models for Recurrent and Terminal Events'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Joint frailty models for simultaneous analysis of recurrent and terminal events. 
+        This analysis models both the recurrent event process and terminal event process 
+        jointly, accounting for their association through shared frailty terms and providing 
+        comprehensive risk assessment for subjects experiencing multiple types of events.
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology', package='ClinicoPath')
+
+options:
+    - name: data
+      type: Data
+
+    - name: subjectID
+      title: Subject ID
+      type: Variable
+      suggested:
+          - id
+      permitted:
+          - factor
+          - id
+
+    - name: time
+      title: Event Time
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+
+    - name: terminal_time
+      title: Terminal Event Time
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+
+    - name: terminal_event
+      title: Terminal Event Indicator
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+          - nominal
+      permitted:
+          - numeric
+          - factor
+
+    - name: recurrent_covariates
+      title: Recurrent Event Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+          - nominal
+      permitted:
+          - numeric
+          - factor
+
+    - name: terminal_covariates
+      title: Terminal Event Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+          - nominal
+      permitted:
+          - numeric
+          - factor
+
+    - name: frailty_distribution
+      title: Frailty Distribution
+      type: List
+      options:
+          - name: gamma
+            title: Gamma Distribution
+          - name: lognormal
+            title: Log-normal Distribution
+          - name: positive_stable
+            title: Positive Stable Distribution
+      default: gamma
+
+    - name: recurrent_baseline
+      title: Recurrent Events Baseline
+      type: List
+      options:
+          - name: weibull
+            title: Weibull
+          - name: exponential
+            title: Exponential
+          - name: splines
+            title: Splines
+      default: weibull
+
+    - name: terminal_baseline
+      title: Terminal Event Baseline  
+      type: List
+      options:
+          - name: weibull
+            title: Weibull
+          - name: exponential
+            title: Exponential
+          - name: splines
+            title: Splines
+      default: weibull
+
+    - name: association_type
+      title: Association Type
+      type: List
+      options:
+          - name: shared_frailty
+            title: Shared Frailty
+          - name: copula
+            title: Copula Association
+          - name: joint_random_effects
+            title: Joint Random Effects
+      default: shared_frailty
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+
+    - name: max_iterations
+      title: Maximum Iterations
+      type: Integer
+      min: 100
+      max: 5000
+      default: 1000
+
+    - name: convergence_tolerance
+      title: Convergence Tolerance
+      type: Number
+      min: 1e-8
+      max: 1e-3
+      default: 1e-6
+
+    - name: include_predictions
+      title: Include Individual Predictions
+      type: Bool
+      default: true
+
+    - name: include_residuals
+      title: Include Residual Analysis
+      type: Bool
+      default: true
+
+    - name: plotRecurrentHazard
+      title: Plot Recurrent Hazard Function
+      type: Bool
+      default: true
+
+    - name: plotTerminalHazard
+      title: Plot Terminal Hazard Function
+      type: Bool
+      default: true
+
+    - name: plotFrailtyDistribution
+      title: Plot Frailty Distribution
+      type: Bool
+      default: true
+
+    - name: plotSurvivalPredictions
+      title: Plot Survival Predictions
+      type: Bool
+      default: false
+
+    - name: plotResiduals
+      title: Plot Model Residuals
+      type: Bool
+      default: false
+
+    - name: showEducation
+      title: Show Educational Content
+      type: Bool
+      default: true
+
+    - name: showInterpretation
+      title: Show Result Interpretation
+      type: Bool
+      default: true
+
+    - name: exportResults
+      title: Export Results to Table
+      type: Bool
+      default: false
+...

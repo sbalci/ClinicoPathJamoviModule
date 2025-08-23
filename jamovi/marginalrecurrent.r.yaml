@@ -1,0 +1,265 @@
+---
+name: marginalrecurrent
+title: Marginal Models for Recurrent Events
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis Summary
+      type: Html
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+
+    - name: modelfit
+      title: Model Fit Summary
+      type: Table
+      rows: 1
+      columns:
+        - name: model
+          title: Model Type
+          type: text
+        - name: subjects
+          title: Subjects
+          type: integer
+        - name: events
+          title: Total Events
+          type: integer
+        - name: baseline
+          title: Baseline Function
+          type: text
+        - name: loglik
+          title: Log-Likelihood
+          type: number
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - model_type
+          - baseline_type
+
+    - name: coefficients
+      title: Model Coefficients
+      type: Table
+      columns:
+        - name: covariate
+          title: Covariate
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: z
+          title: z-value
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: lower
+          title: Lower CI
+          type: number
+        - name: upper
+          title: Upper CI
+          type: number
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - model_type
+          - confidence_level
+
+    - name: cumulativeRate
+      title: Cumulative Rate Function
+      type: Table
+      visible: (include_cumulative)
+      columns:
+        - name: time
+          title: Time
+          type: number
+        - name: cumrate
+          title: Cumulative Rate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: lower
+          title: Lower CI
+          type: number
+        - name: upper
+          title: Upper CI
+          type: number
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - include_cumulative
+
+    - name: survivalFunction
+      title: Survival Function
+      type: Table
+      visible: (include_survival)
+      columns:
+        - name: time
+          title: Time
+          type: number
+        - name: survival
+          title: Survival
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: lower
+          title: Lower CI
+          type: number
+        - name: upper
+          title: Upper CI
+          type: number
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - include_survival
+
+    - name: goodnessOfFit
+      title: Goodness of Fit Tests
+      type: Table
+      rows: 3
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: Interpretation
+          type: text
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - model_type
+
+    - name: educationalContent
+      title: Educational Overview
+      type: Html
+      visible: (showEducation)
+      clearWith:
+          - model_type
+          - baseline_type
+
+    - name: interpretationContent
+      title: Results Interpretation
+      type: Html
+      visible: (showInterpretation)
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+
+    - name: recurrentEventsPlot
+      title: Recurrent Event Processes
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .recurrentEventsPlot
+      visible: (plotRecurrentEvents)
+      requiresData: true
+      clearWith:
+          - subjectID
+          - time
+          - event
+
+    - name: cumulativePlot
+      title: Cumulative Rate Function
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .cumulativePlot
+      visible: (plotCumulative)
+      requiresData: true
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - include_cumulative
+
+    - name: survivalPlot
+      title: Survival Function
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .survivalPlot
+      visible: (plotSurvival)
+      requiresData: true
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - include_survival
+
+    - name: residualsPlot
+      title: Model Residuals
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .residualsPlot
+      visible: (plotResiduals)
+      requiresData: true
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - model_type
+
+    - name: exportTable
+      title: Exported Results
+      type: Table
+      visible: (exportResults)
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - exportResults
+
+refs:
+    - reReg
+    - survival
+    - ClinicoPathJamoviModule
+
+...

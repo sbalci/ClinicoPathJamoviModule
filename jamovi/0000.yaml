@@ -3558,6 +3558,48 @@ analyses:
       healthcare 
 
       system optimization through evidence-based population health insights.
+  - title: Conditional GEE for Recurrent Events Gap Times
+    name: conditionalgee
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Conditional GEE for Recurrent Events Gap Times
+    menuSubtitle: GEE Models for Gap Times, Recurrent Events
+    description: >-
+      Conditional Generalized Estimating Equations for analyzing gap times
+      between recurrent  events. This analysis models the time between
+      consecutive event occurrences conditional  on previous event history,
+      accounting for within-subject correlation and providing  robust
+      population-average estimates of covariate effects on inter-event times.
+  - title: Joint Frailty Models for Recurrent Events
+    name: jointfrailty
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Joint Frailty Models for Recurrent Events
+    menuSubtitle: Joint Models for Recurrent and Terminal Events
+    description: >-
+      Joint frailty models for simultaneous analysis of recurrent and terminal
+      events.  This analysis models both the recurrent event process and
+      terminal event process  jointly, accounting for their association through
+      shared frailty terms and providing  comprehensive risk assessment for
+      subjects experiencing multiple types of events.
+  - title: Marginal Models for Recurrent Events
+    name: marginalrecurrent
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Marginal Models for Recurrent Events
+    menuSubtitle: Marginal Rate Models, Accelerated Models for Recurrent Events
+    description: >-
+      Marginal models for analyzing recurrent event data using rate-based
+      approaches.  This analysis provides population-average estimates of
+      covariate effects on  recurrent event rates, with options for marginal
+      rate models, accelerated rate  models, and gamma frailty models to handle
+      within-subject correlation.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

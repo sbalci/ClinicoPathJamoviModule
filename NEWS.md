@@ -2,6 +2,22 @@
 
 ## Version 0.0.31.38
 
+### 🗓️ **August 23, 2025 - Chi-Square Post-Hoc Analysis Enhancement and Advanced Clinical Analytics**
+
+#### 🧮 **Chi-Square Post-Hoc Tests (chisqposttest) - Enhanced Pairwise Comparison Analysis**
+
+##### **Improved Variable Name Display and Table Structure**
+*   **Enhanced Variable Name Presentation:** Added comprehensive variable name display alongside factor levels in contingency tables for improved clinical interpretation
+*   **Fixed HTML Table Structure:** Resolved malformed table issues by implementing proper htmltools tag structure with `htmltools::tags$th()` and `htmltools::tags$td()`
+*   **Variable Scope Resolution:** Fixed variable passing issues by updating method signatures to properly pass row and column variable names throughout the analysis pipeline
+*   **Restored Pairwise Comparison Tables:** Ensured that detailed 2x2 contingency tables are always displayed for each pairwise comparison regardless of overall test significance
+
+##### **Enhanced Clinical Interpretability**
+*   **Dual-Level Information Display:** Tables now show both variable names (e.g., "LVI", "PNI") and their corresponding factor levels for complete clinical context
+*   **Improved Visual Styling:** Enhanced table presentation with proper font sizing and color coding for variable names vs. factor levels
+*   **Complete Pairwise Analysis:** Restored functionality to display individual 2x2 tables with respective chi-square analysis and clinical explanations for each comparison
+*   **Statistical Accuracy:** Maintained all statistical calculations while improving presentation and fixing structural issues
+
 ### 🗓️ **August 23, 2025 - Patient Monitoring Dashboard and Treatment Optimization Implementation**
 
 #### 📊 **Patient Monitoring Dashboard (patientdashboard) - Real-Time Clinical Analytics**

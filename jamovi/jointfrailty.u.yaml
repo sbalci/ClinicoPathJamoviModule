@@ -1,0 +1,124 @@
+title: Joint Frailty Models for Recurrent Events
+name: jointfrailty
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Subject ID
+        children:
+          - type: VariablesListBox
+            name: subjectID
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Time
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Indicator
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Terminal Event Time
+        children:
+          - type: VariablesListBox
+            name: terminal_time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Terminal Event Indicator
+        children:
+          - type: VariablesListBox
+            name: terminal_event
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Recurrent Event Covariates
+        children:
+          - type: VariablesListBox
+            name: recurrent_covariates
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Terminal Event Covariates
+        children:
+          - type: VariablesListBox
+            name: terminal_covariates
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: frailty_distribution
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: recurrent_baseline
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: terminal_baseline
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: association_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: max_iterations
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: convergence_tolerance
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: include_predictions
+      - type: CheckBox
+        name: include_residuals
+      - type: CheckBox
+        name: plotRecurrentHazard
+      - type: CheckBox
+        name: plotTerminalHazard
+      - type: CheckBox
+        name: plotFrailtyDistribution
+      - type: CheckBox
+        name: plotSurvivalPredictions
+      - type: CheckBox
+        name: plotResiduals
+      - type: CheckBox
+        name: showEducation
+      - type: CheckBox
+        name: showInterpretation
+      - type: CheckBox
+        name: exportResults
