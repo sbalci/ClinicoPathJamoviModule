@@ -1,0 +1,168 @@
+---
+name: pagetrendtest
+title: Page's Trend Test for Ordered Alternatives
+menuGroup: ClinicoPathDescriptives
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Page's trend test for detecting ordered alternatives in repeated measures data.
+        This test is used when there is a specific predicted ordering of the treatment 
+        effects or time points, making it more powerful than the general Friedman test
+        when the alternative hypothesis specifies a trend or ordered pattern.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            pagetrendtest(
+                dependent = "measurement_value",
+                subject = "patient_id", 
+                within = "time_point",
+                trend_direction = "increasing"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: dependent
+      title: Dependent Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Continuous or ordinal dependent variable measured repeatedly
+
+    - name: subject
+      title: Subject ID
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Variable identifying subjects/cases for repeated measurements
+
+    - name: within
+      title: Within-Subjects Factor
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Factor variable indicating the repeated measure conditions/time points (must be orderable)
+
+    - name: trend_direction
+      title: Expected Trend Direction
+      type: List
+      options:
+        - name: increasing
+          title: Increasing Trend
+        - name: decreasing
+          title: Decreasing Trend
+        - name: custom
+          title: Custom Ordering
+      default: increasing
+      description:
+          R: >
+            Expected direction of trend across conditions
+
+    - name: custom_order
+      title: Custom Order (comma-separated)
+      type: String
+      description:
+          R: >
+            Custom ordering of factor levels when trend_direction is 'custom' (e.g., 'baseline,week1,month1,month6')
+
+    - name: method
+      title: Test Method
+      type: List
+      options:
+        - name: asymptotic
+          title: Asymptotic (Normal)
+        - name: exact
+          title: Exact (Small samples)
+        - name: permutation
+          title: Permutation Test
+      default: asymptotic
+      description:
+          R: >
+            Method for calculating p-values
+
+    - name: alpha
+      title: Significance Level
+      type: Number
+      min: 0.01
+      max: 0.10
+      default: 0.05
+      description:
+          R: >
+            Alpha level for hypothesis testing
+
+    - name: effect_size
+      title: Effect Size Measures
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include effect size measures (Page's L coefficient and trend strength)
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for confidence intervals
+
+    - name: show_ranks
+      title: Rank Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed rank analysis and trend components
+
+    - name: show_descriptives
+      title: Descriptive Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show descriptive statistics for each condition
+
+    - name: friedman_comparison
+      title: Compare with Friedman Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include comparison with standard Friedman test
+
+    - name: show_assumptions
+      title: Assumption Assessment
+      type: Bool
+      default: true
+      description:
+          R: >
+            Assess assumptions and provide recommendations
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide clinical interpretation guidance for results

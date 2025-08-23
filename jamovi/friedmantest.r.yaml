@@ -1,0 +1,291 @@
+---
+name: friedmantest
+title: Friedman Test for Non-Parametric Repeated Measures
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: dataInfo
+      title: 'Data Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - dependent
+        - subject
+        - within
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: descriptiveStats
+      title: 'Descriptive Statistics'
+      type: Table
+      visible: (show_descriptives)
+      rows: 1
+      clearWith:
+        - show_descriptives
+        - dependent
+        - within
+      columns:
+        - name: condition
+          title: 'Condition'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: median
+          title: 'Median'
+          type: number
+          format: zto:3
+        - name: q1
+          title: 'Q1'
+          type: number
+          format: zto:3
+        - name: q3
+          title: 'Q3'
+          type: number
+          format: zto:3
+        - name: iqr
+          title: 'IQR'
+          type: number
+          format: zto:3
+        - name: mean_rank
+          title: 'Mean Rank'
+          type: number
+          format: zto:2
+
+    - name: friedmanTest
+      title: 'Friedman Test Results'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - dependent
+        - subject
+        - within
+        - method
+      columns:
+        - name: statistic
+          title: 'Chi-square'
+          type: number
+          format: zto:4
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: significance
+          title: 'Significance'
+          type: text
+        - name: conclusion
+          title: 'Conclusion'
+          type: text
+
+    - name: effectSize
+      title: 'Effect Size Measures'
+      type: Table
+      visible: (effect_size)
+      rows: 1
+      clearWith:
+        - effect_size
+        - dependent
+        - within
+      columns:
+        - name: measure
+          title: 'Effect Size'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: rankAnalysis
+      title: 'Rank Analysis'
+      type: Table
+      visible: (show_ranks)
+      rows: 1
+      clearWith:
+        - show_ranks
+        - dependent
+        - within
+      columns:
+        - name: condition
+          title: 'Condition'
+          type: text
+        - name: mean_rank
+          title: 'Mean Rank'
+          type: number
+          format: zto:2
+        - name: rank_sum
+          title: 'Rank Sum'
+          type: number
+          format: zto:1
+        - name: expected_rank
+          title: 'Expected Rank'
+          type: number
+          format: zto:2
+        - name: deviation
+          title: 'Deviation'
+          type: number
+          format: zto:2
+
+    - name: pairwiseComparisons
+      title: 'Post-hoc Pairwise Comparisons'
+      type: Table
+      visible: (posthoc)
+      rows: 1
+      clearWith:
+        - posthoc
+        - posthoc_method
+        - correction
+        - dependent
+        - within
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: mean_rank_diff
+          title: 'Mean Rank Difference'
+          type: number
+          format: zto:2
+        - name: test_statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto:4
+        - name: p_value_raw
+          title: 'Raw p-value'
+          type: number
+          format: zto:4
+        - name: p_value_adjusted
+          title: 'Adjusted p-value'
+          type: number
+          format: zto:4
+        - name: significance
+          title: 'Significance'
+          type: text
+        - name: effect_size
+          title: 'Effect Size'
+          type: number
+          format: zto:3
+
+    - name: assumptionAssessment
+      title: 'Assumption Assessment'
+      type: Table
+      visible: (show_assumptions)
+      rows: 1
+      clearWith:
+        - show_assumptions
+        - dependent
+        - subject
+        - within
+      columns:
+        - name: assumption
+          title: 'Assumption'
+          type: text
+        - name: status
+          title: 'Status'
+          type: text
+        - name: details
+          title: 'Details'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: clinicalInterpretation
+      title: 'Clinical Interpretation Guide'
+      type: Table
+      visible: (clinical_interpretation)
+      rows: 1
+      clearWith:
+        - clinical_interpretation
+        - dependent
+        - within
+        - alpha
+      columns:
+        - name: aspect
+          title: 'Clinical Aspect'
+          type: text
+        - name: finding
+          title: 'Statistical Finding'
+          type: text
+        - name: interpretation
+          title: 'Clinical Interpretation'
+          type: text
+        - name: recommendation
+          title: 'Clinical Recommendation'
+          type: text
+
+    - name: boxplotByCondition
+      title: 'Box Plot by Condition'
+      type: Image
+      visible: true
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotBoxplotByCondition
+      clearWith:
+        - dependent
+        - within
+
+    - name: meanRankPlot
+      title: 'Mean Rank Comparison'
+      type: Image
+      visible: (show_ranks)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotMeanRanks
+      clearWith:
+        - show_ranks
+        - dependent
+        - within
+
+    - name: pairwiseComparisonPlot
+      title: 'Post-hoc Comparison Matrix'
+      type: Image
+      visible: (posthoc)
+      requiresData: true
+      width: 600
+      height: 600
+      renderFun: .plotPairwiseComparisons
+      clearWith:
+        - posthoc
+        - correction
+        - dependent
+        - within
+
+    - name: profilePlot
+      title: 'Individual Profile Plot'
+      type: Image
+      visible: true
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotProfiles
+      clearWith:
+        - dependent
+        - subject
+        - within
+
+    - name: methodExplanation
+      title: 'Method and Clinical Context'
+      type: Html
+      visible: true

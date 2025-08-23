@@ -1,0 +1,244 @@
+---
+name: cochranq
+title: Cochran's Q Test for Paired Categorical Data
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: dataInfo
+      title: 'Data Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - variables
+        - id
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: cochranQTest
+      title: 'Cochran''s Q Test Results'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - variables
+        - method
+        - alpha
+      columns:
+        - name: statistic
+          title: 'Q Statistic'
+          type: number
+          format: zto:4
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: significance
+          title: 'Significance'
+          type: text
+        - name: conclusion
+          title: 'Conclusion'
+          type: text
+
+    - name: effectSize
+      title: 'Effect Size Measures'
+      type: Table
+      visible: (effect_size)
+      rows: 1
+      clearWith:
+        - effect_size
+        - variables
+      columns:
+        - name: measure
+          title: 'Effect Size'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: responsePatterns
+      title: 'Response Pattern Analysis'
+      type: Table
+      visible: (show_pattern)
+      rows: 1
+      clearWith:
+        - show_pattern
+        - variables
+      columns:
+        - name: pattern
+          title: 'Response Pattern'
+          type: text
+        - name: frequency
+          title: 'Frequency'
+          type: integer
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: zto:2
+        - name: clinical_meaning
+          title: 'Clinical Interpretation'
+          type: text
+
+    - name: pairwiseComparisons
+      title: 'Post-hoc Pairwise Comparisons'
+      type: Table
+      visible: (posthoc)
+      rows: 1
+      clearWith:
+        - posthoc
+        - correction
+        - variables
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: mcnemar_statistic
+          title: 'McNemar χ²'
+          type: number
+          format: zto:4
+        - name: p_value_raw
+          title: 'Raw p-value'
+          type: number
+          format: zto:4
+        - name: p_value_adjusted
+          title: 'Adjusted p-value'
+          type: number
+          format: zto:4
+        - name: significance
+          title: 'Significance'
+          type: text
+        - name: effect_size
+          title: 'Effect Size'
+          type: number
+          format: zto:4
+
+    - name: marginalFrequencies
+      title: 'Marginal Frequencies'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - variables
+      columns:
+        - name: variable
+          title: 'Variable'
+          type: text
+        - name: positive_responses
+          title: 'Positive Responses'
+          type: integer
+        - name: negative_responses
+          title: 'Negative Responses'
+          type: integer
+        - name: proportion_positive
+          title: 'Proportion Positive'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'CI for Proportion'
+          type: text
+
+    - name: assumptionTesting
+      title: 'Assumption Assessment'
+      type: Table
+      visible: (show_assumptions)
+      rows: 1
+      clearWith:
+        - show_assumptions
+        - variables
+      columns:
+        - name: assumption
+          title: 'Assumption'
+          type: text
+        - name: status
+          title: 'Status'
+          type: text
+        - name: details
+          title: 'Details'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: clinicalInterpretation
+      title: 'Clinical Interpretation Guide'
+      type: Table
+      visible: (clinical_interpretation)
+      rows: 1
+      clearWith:
+        - clinical_interpretation
+        - variables
+        - alpha
+      columns:
+        - name: aspect
+          title: 'Clinical Aspect'
+          type: text
+        - name: finding
+          title: 'Statistical Finding'
+          type: text
+        - name: interpretation
+          title: 'Clinical Interpretation'
+          type: text
+        - name: recommendation
+          title: 'Clinical Recommendation'
+          type: text
+
+    - name: responsePatternPlot
+      title: 'Response Pattern Visualization'
+      type: Image
+      visible: (show_pattern)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotResponsePatterns
+      clearWith:
+        - show_pattern
+        - variables
+
+    - name: marginalProportionsPlot
+      title: 'Marginal Proportions Plot'
+      type: Image
+      visible: true
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotMarginalProportions
+      clearWith:
+        - variables
+
+    - name: pairwiseComparisonPlot
+      title: 'Pairwise Comparison Heatmap'
+      type: Image
+      visible: (posthoc)
+      requiresData: true
+      width: 600
+      height: 600
+      renderFun: .plotPairwiseComparisons
+      clearWith:
+        - posthoc
+        - correction
+        - variables
+
+    - name: methodExplanation
+      title: 'Method and Clinical Context'
+      type: Html
+      visible: true

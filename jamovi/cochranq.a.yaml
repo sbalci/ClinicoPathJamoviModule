@@ -1,0 +1,143 @@
+---
+name: cochranq
+title: Cochran's Q Test for Paired Categorical Data
+menuGroup: ClinicoPathDescriptives
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Cochran's Q test for analyzing paired categorical (binary) data with more than two 
+        time points or conditions. This is the extension of McNemar's test for repeated 
+        measures with binary outcomes, commonly used in clinical studies to test for 
+        changes in treatment response or diagnostic agreement across multiple time points.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            cochranq(
+                variables = c("baseline", "month1", "month3", "month6"),
+                id = "patient_id",
+                method = "asymptotic"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: variables
+      title: Paired Binary Variables
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Binary variables measured at different time points or conditions (minimum 3 variables required)
+
+    - name: id
+      title: Subject ID (optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Optional subject identifier for paired data structure validation
+
+    - name: method
+      title: Test Method
+      type: List
+      options:
+        - name: asymptotic
+          title: Asymptotic (Chi-square)
+        - name: exact
+          title: Exact (Small samples)
+        - name: monte_carlo
+          title: Monte Carlo
+      default: asymptotic
+      description:
+          R: >
+            Method for calculating p-values
+
+    - name: alpha
+      title: Significance Level
+      type: Number
+      min: 0.01
+      max: 0.10
+      default: 0.05
+      description:
+          R: >
+            Alpha level for hypothesis testing
+
+    - name: posthoc
+      title: Post-hoc Pairwise Comparisons
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform pairwise post-hoc comparisons when Q test is significant
+
+    - name: correction
+      title: Multiple Comparison Correction
+      type: List
+      options:
+        - name: bonferroni
+          title: Bonferroni
+        - name: holm
+          title: Holm
+        - name: fdr
+          title: False Discovery Rate (BH)
+        - name: none
+          title: None
+      default: bonferroni
+      description:
+          R: >
+            Multiple comparison correction method for post-hoc tests
+
+    - name: effect_size
+      title: Effect Size Measures
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include effect size measures (Kendall's W coefficient of concordance)
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for confidence intervals
+
+    - name: show_pattern
+      title: Response Pattern Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed response pattern analysis and frequencies
+
+    - name: show_assumptions
+      title: Assumption Testing
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test assumptions for Cochran's Q test validity
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide clinical interpretation guidance for results
