@@ -3659,6 +3659,17 @@ analyses:
 
       centers using beta-binomial distributions with flexible correlation
       structures.
+  - title: Hierarchical Bayesian Diagnostic Models
+    name: hierarchicalbayes
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: meddecide
+    menuTitle: Hierarchical Bayesian Diagnostic Models
+    description: |
+      Hierarchical Bayesian models for multi-center diagnostic studies.
+      Implements bivariate meta-analysis of diagnostic accuracy with
+      between-study heterogeneity and correlation structures.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

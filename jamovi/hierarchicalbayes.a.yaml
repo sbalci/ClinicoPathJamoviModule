@@ -1,0 +1,347 @@
+name: hierarchicalbayes
+title: Hierarchical Bayesian Diagnostic Models
+menuGroup: ClinicoPath
+menuSubgroup: meddecide
+version: '0.0.3'
+jas: '1.2'
+description:
+    main: |
+        Hierarchical Bayesian models for multi-center diagnostic studies.
+        Implements bivariate meta-analysis of diagnostic accuracy with
+        between-study heterogeneity and correlation structures.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Hierarchical Bayesian diagnostic meta-analysis
+            hierarchicalbayes(
+                data = multicenter_data,
+                tp = true_positives,
+                fp = false_positives,
+                fn = false_negatives,
+                tn = true_negatives,
+                study_id = center,
+                model_type = "bivariate_normal"
+            )
+
+options:
+    - name: tp
+      title: True Positives
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Number of true positive cases per study
+          R: |
+              True positive counts by study/center
+
+    - name: fp
+      title: False Positives
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Number of false positive cases per study
+          R: |
+              False positive counts by study/center
+
+    - name: fn
+      title: False Negatives
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Number of false negative cases per study
+          R: |
+              False negative counts by study/center
+
+    - name: tn
+      title: True Negatives
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          ui: Number of true negative cases per study
+          R: |
+              True negative counts by study/center
+
+    - name: study_id
+      title: Study/Center Identifier
+      type: Variable
+      suggested: [nominal, id]
+      permitted: [factor, id]
+      description:
+          ui: Study or center identifier
+          R: |
+              Unique identifier for each study/center
+
+    - name: study_covariates
+      title: Study-Level Covariates
+      type: Variables
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+      default: null
+      description:
+          ui: Study characteristics for meta-regression
+          R: |
+              Covariates explaining between-study heterogeneity
+
+    - name: model_type
+      title: Hierarchical Model Type
+      type: List
+      options:
+          - name: bivariate_normal
+            title: Bivariate Normal Model
+          - name: hsroc
+            title: Hierarchical SROC Model
+          - name: trivariate
+            title: Trivariate Model (Disease Prevalence)
+          - name: mixture_model
+            title: Mixture Model for Outliers
+          - name: zero_inflated
+            title: Zero-Inflated Model
+      default: bivariate_normal
+      description:
+          ui: Type of hierarchical Bayesian model
+          R: |
+              Statistical model for hierarchical meta-analysis
+
+    - name: correlation_model
+      title: Sensitivity-Specificity Correlation
+      type: List
+      options:
+          - name: unstructured
+            title: Unstructured Correlation
+          - name: independent
+            title: Independent (Zero Correlation)
+          - name: fixed_positive
+            title: Fixed Positive Correlation
+          - name: fixed_negative
+            title: Fixed Negative Correlation
+      default: unstructured
+      description:
+          ui: Correlation structure between sensitivity and specificity
+          R: |
+              Assumed correlation between diagnostic measures
+
+    - name: prior_specification
+      title: Prior Specification
+      type: List
+      options:
+          - name: weakly_informative
+            title: Weakly Informative Priors
+          - name: non_informative
+            title: Non-Informative Priors
+          - name: informative
+            title: Informative Priors
+          - name: empirical_bayes
+            title: Empirical Bayes Priors
+          - name: expert_elicited
+            title: Expert-Elicited Priors
+      default: weakly_informative
+      description:
+          ui: Prior distribution specification approach
+          R: |
+              Method for specifying prior distributions
+
+    - name: mcmc_chains
+      title: Number of MCMC Chains
+      type: Integer
+      default: 4
+      min: 2
+      max: 8
+      description:
+          ui: Number of parallel MCMC chains
+          R: |
+              Parallel chains for convergence assessment
+
+    - name: mcmc_iterations
+      title: MCMC Iterations per Chain
+      type: Integer
+      default: 20000
+      min: 5000
+      max: 100000
+      description:
+          ui: Number of iterations per MCMC chain
+          R: |
+              Total iterations including warmup
+
+    - name: warmup_iterations
+      title: Warmup/Burn-in Iterations
+      type: Integer
+      default: 10000
+      min: 2500
+      max: 50000
+      description:
+          ui: Number of warmup iterations to discard
+          R: |
+              Burn-in period for MCMC sampling
+
+    - name: thin_interval
+      title: Thinning Interval
+      type: Integer
+      default: 1
+      min: 1
+      max: 10
+      description:
+          ui: Keep every nth iteration
+          R: |
+              Thinning to reduce autocorrelation
+
+    - name: adapt_delta
+      title: Adapt Delta (HMC Control)
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.999
+      description:
+          ui: Target acceptance rate for HMC/NUTS
+          R: |
+              Controls step size adaptation in HMC
+
+    - name: max_treedepth
+      title: Maximum Tree Depth (NUTS)
+      type: Integer
+      default: 15
+      min: 10
+      max: 20
+      description:
+          ui: Maximum tree depth for NUTS sampler
+          R: |
+              Controls exploration in NUTS algorithm
+
+    - name: credible_level
+      title: Credible Interval Level
+      type: Number
+      default: 0.95
+      min: 0.8
+      max: 0.99
+      description:
+          ui: Credible interval coverage probability
+          R: |
+              Level for Bayesian credible intervals
+
+    - name: prediction_interval
+      title: Prediction Intervals
+      type: Bool
+      default: true
+      description:
+          ui: Calculate prediction intervals for new studies
+          R: |
+              Whether to compute predictive distributions
+
+    - name: cross_validation
+      title: Leave-One-Out Cross-Validation
+      type: Bool
+      default: false
+      description:
+          ui: Perform LOO-CV for model validation
+          R: |
+              Whether to perform cross-validation
+
+    - name: posterior_predictive
+      title: Posterior Predictive Checks
+      type: Bool
+      default: true
+      description:
+          ui: Generate posterior predictive distributions
+          R: |
+              Whether to perform posterior predictive checking
+
+    - name: convergence_diagnostics
+      title: Convergence Diagnostics
+      type: Bool
+      default: true
+      description:
+          ui: Compute R-hat, ESS, and other diagnostics
+          R: |
+              Whether to assess MCMC convergence
+
+    - name: model_comparison
+      title: Model Comparison Metrics
+      type: Bool
+      default: true
+      description:
+          ui: Calculate WAIC, LOO-IC, and Bayes factors
+          R: |
+              Whether to compute model comparison metrics
+
+    - name: forest_plots
+      title: Forest Plots
+      type: Bool
+      default: true
+      description:
+          ui: Generate forest plots with credible intervals
+          R: |
+              Whether to create forest plots
+
+    - name: sroc_curves
+      title: Summary ROC Curves
+      type: Bool
+      default: true
+      description:
+          ui: Plot hierarchical SROC curves
+          R: |
+              Whether to plot SROC curves
+
+    - name: trace_plots
+      title: MCMC Trace Plots
+      type: Bool
+      default: false
+      description:
+          ui: Generate trace plots for convergence assessment
+          R: |
+              Whether to create MCMC trace plots
+
+    - name: density_plots
+      title: Posterior Density Plots
+      type: Bool
+      default: true
+      description:
+          ui: Plot posterior distributions
+          R: |
+              Whether to create posterior density plots
+
+    - name: pairs_plots
+      title: Pairs Plots
+      type: Bool
+      default: false
+      description:
+          ui: Generate pairs plots for parameter correlations
+          R: |
+              Whether to create parameter correlation plots
+
+    - name: shrinkage_plots
+      title: Shrinkage Plots
+      type: Bool
+      default: false
+      description:
+          ui: Visualize shrinkage of study estimates
+          R: |
+              Whether to plot shrinkage effects
+
+    - name: meta_regression
+      title: Meta-Regression Analysis
+      type: Bool
+      default: false
+      description:
+          ui: Perform meta-regression if covariates provided
+          R: |
+              Whether to conduct meta-regression
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: true
+      description:
+          ui: Identify potential outlier studies
+          R: |
+              Whether to perform outlier analysis
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          ui: Assess sensitivity to prior specifications
+          R: |
+              Whether to perform sensitivity analysis
