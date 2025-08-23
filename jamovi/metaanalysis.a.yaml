@@ -1,0 +1,379 @@
+---
+name: metaanalysis
+title: Meta-Analysis & Evidence Synthesis
+menuGroup: OncoPathologyF
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Comprehensive meta-analysis and evidence synthesis including forest plots, heterogeneity testing,
+        publication bias assessment, diagnostic test accuracy meta-analysis, and network meta-analysis.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            metaanalysis(
+                effect_size = "effect",
+                variance = "variance",
+                analysis_type = "generic",
+                model_type = "random_effects"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: effect_size
+      title: Effect Size
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Effect size variable (e.g., log odds ratio, Cohen's d, log hazard ratio)
+
+    - name: variance
+      title: Variance/SE
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Variance or standard error of the effect size
+
+    - name: study_id
+      title: Study Identifier
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Study identifier for each effect size (required for meta-analysis)
+
+    - name: sample_size
+      title: Sample Size (optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Sample size for each study (optional, used for sensitivity analysis)
+
+    - name: year
+      title: Publication Year (optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Publication year for temporal trend analysis and publication bias assessment
+
+    - name: analysis_type
+      title: Meta-Analysis Type
+      type: List
+      options:
+        - name: generic
+          title: Generic Meta-Analysis
+        - name: diagnostic_accuracy
+          title: Diagnostic Test Accuracy
+        - name: network
+          title: Network Meta-Analysis
+        - name: individual_patient
+          title: Individual Patient Data
+      default: generic
+      description:
+          R: >
+            Type of meta-analysis to perform
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+        - name: fixed_effects
+          title: Fixed-Effects Model
+        - name: random_effects
+          title: Random-Effects Model
+        - name: mixed_effects
+          title: Mixed-Effects Model
+      default: random_effects
+      description:
+          R: >
+            Statistical model for meta-analysis
+
+    - name: effect_measure
+      title: Effect Measure
+      type: List
+      options:
+        - name: mean_difference
+          title: Mean Difference
+        - name: standardized_mean_diff
+          title: Standardized Mean Difference
+        - name: odds_ratio
+          title: Odds Ratio (log)
+        - name: risk_ratio
+          title: Risk Ratio (log)
+        - name: hazard_ratio
+          title: Hazard Ratio (log)
+        - name: correlation
+          title: Correlation Coefficient
+      default: odds_ratio
+      description:
+          R: >
+            Type of effect measure being meta-analyzed
+
+    - name: heterogeneity_method
+      title: Heterogeneity Estimation
+      type: List
+      options:
+        - name: dersimonian_laird
+          title: DerSimonian-Laird
+        - name: restricted_ml
+          title: Restricted Maximum Likelihood
+        - name: maximum_likelihood
+          title: Maximum Likelihood
+        - name: empirical_bayes
+          title: Empirical Bayes
+        - name: paule_mandel
+          title: Paule-Mandel
+      default: dersimonian_laird
+      description:
+          R: >
+            Method for estimating between-study heterogeneity (tau-squared)
+
+    # Diagnostic Test Accuracy specific options
+    - name: true_positives
+      title: True Positives
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            True positives for diagnostic test accuracy meta-analysis
+
+    - name: false_positives
+      title: False Positives
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            False positives for diagnostic test accuracy meta-analysis
+
+    - name: false_negatives
+      title: False Negatives
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            False negatives for diagnostic test accuracy meta-analysis
+
+    - name: true_negatives
+      title: True Negatives
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            True negatives for diagnostic test accuracy meta-analysis
+
+    - name: dta_model_type
+      title: DTA Model Type
+      type: List
+      options:
+        - name: bivariate
+          title: Bivariate Model
+        - name: hsroc
+          title: Hierarchical SROC
+        - name: univariate
+          title: Univariate Analysis
+      default: bivariate
+      description:
+          R: >
+            Model type for diagnostic test accuracy meta-analysis
+
+    # Network Meta-Analysis options
+    - name: treatment_arm
+      title: Treatment Arm
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Treatment arm identifier for network meta-analysis
+
+    - name: comparison_arm
+      title: Comparison Arm  
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Comparison arm identifier for network meta-analysis
+
+    - name: network_method
+      title: Network Method
+      type: List
+      options:
+        - name: frequentist
+          title: Frequentist Network MA
+        - name: bayesian
+          title: Bayesian Network MA
+        - name: mixed_treatment
+          title: Mixed Treatment Comparison
+      default: frequentist
+      description:
+          R: >
+            Statistical approach for network meta-analysis
+
+    # Publication Bias Assessment
+    - name: publication_bias
+      title: Assess Publication Bias
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform publication bias assessment using funnel plots and statistical tests
+
+    - name: bias_tests
+      title: Publication Bias Tests
+      type: List
+      options:
+        - name: egger
+          title: Egger's Test
+        - name: begg
+          title: Begg's Test
+        - name: trim_fill
+          title: Trim-and-Fill
+        - name: all_tests
+          title: All Tests
+      default: all_tests
+      description:
+          R: >
+            Statistical tests for publication bias assessment
+
+    # Subgroup and Meta-Regression
+    - name: subgroup_var
+      title: Subgroup Variable (optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Categorical variable for subgroup analysis
+
+    - name: moderator_vars
+      title: Moderator Variables (optional)
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Variables for meta-regression analysis
+
+    - name: meta_regression
+      title: Perform Meta-Regression
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform meta-regression analysis with moderator variables
+
+    # Sensitivity Analysis
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform sensitivity analysis including leave-one-out and influence diagnostics
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Detect outlying studies using standardized residuals and influence measures
+
+    # Forest Plot Options
+    - name: forest_plot_options
+      title: Forest Plot Customization
+      type: Bool
+      default: true
+      description:
+          R: >
+            Enable forest plot customization options
+
+    - name: prediction_interval
+      title: Include Prediction Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include prediction intervals in forest plots and results
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for confidence and prediction intervals
+
+    # Advanced Options
+    - name: robust_methods
+      title: Use Robust Methods
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use robust methods for outlier-resistant meta-analysis
+
+    - name: small_sample_correction
+      title: Small Sample Correction
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply small sample corrections (Hartung-Knapp adjustment)
+
+    - name: knha_adjustment
+      title: Knapp-Hartung Adjustment
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply Knapp-Hartung adjustment for random-effects models

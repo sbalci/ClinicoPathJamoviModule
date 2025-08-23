@@ -3670,6 +3670,59 @@ analyses:
       Hierarchical Bayesian models for multi-center diagnostic studies.
       Implements bivariate meta-analysis of diagnostic accuracy with
       between-study heterogeneity and correlation structures.
+  - title: Laboratory Quality Control Statistics
+    name: qualitycontrol
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyE
+    menuTitle: Laboratory Quality Control Statistics
+    description: >
+      Comprehensive laboratory quality control statistics including control
+      charts (Shewhart, CUSUM, EWMA),  sigma metrics, method validation
+      protocols, and reference interval establishment for clinical laboratory
+      management.
+  - title: Meta-Analysis & Evidence Synthesis
+    name: metaanalysis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyF
+    menuTitle: Meta-Analysis & Evidence Synthesis
+    description: >
+      Comprehensive meta-analysis and evidence synthesis including forest plots,
+      heterogeneity testing, publication bias assessment, diagnostic test
+      accuracy meta-analysis, and network meta-analysis.
+  - title: Conditional Survival Analysis
+    name: condsurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyAdvanced
+    menuTitle: Conditional Survival Analysis
+    description: >
+      Conditional survival analysis for calculating the probability of surviving
+      an additional  time period given that a patient has already survived a
+      certain time. Essential for  long-term prognosis and dynamic patient
+      counseling in clinical practice.
+  - title: Time-Updated Survival Estimates
+    name: timeupdatesurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyAdvanced
+    menuTitle: Time-Updated Survival Estimates
+    description: >
+      Time-updated survival estimates using time-varying regression coefficients
+      and  dynamic hazard functions. Incorporates real-time patient information
+      updates  for precision medicine and personalized survival prediction.
+  - title: Advanced Flexible Parametric Survival Models
+    name: flexparametricadv
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathologyAdvanced
+    menuTitle: Advanced Flexible Parametric Survival Models
+    description: >
+      Advanced flexible parametric survival models using Royston-Parmar
+      framework,  spline-based hazard and survival functions, and transformation
+      models.  Provides smooth survival curves with clinical interpretability
+      and extrapolation capabilities.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

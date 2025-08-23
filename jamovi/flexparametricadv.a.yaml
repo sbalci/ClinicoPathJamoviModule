@@ -1,0 +1,264 @@
+---
+name: flexparametricadv
+title: Advanced Flexible Parametric Survival Models
+menuGroup: OncoPathologyAdvanced
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Advanced flexible parametric survival models using Royston-Parmar framework, 
+        spline-based hazard and survival functions, and transformation models. 
+        Provides smooth survival curves with clinical interpretability and extrapolation capabilities.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            flexparametricadv(
+                time = "time_variable",
+                status = "status_variable",
+                covariates = c("age", "treatment"),
+                spline_df = 3,
+                model_type = "royston_parmar"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time-to-event or follow-up time variable (numeric)
+
+    - name: status
+      title: Event Status
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Event indicator variable (1/TRUE = event occurred, 0/FALSE = censored)
+
+    - name: covariates
+      title: Covariates (optional)
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Optional covariates for covariate-adjusted flexible parametric models
+
+    - name: group
+      title: Group Variable (optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Optional grouping variable for stratified analysis
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+        - name: royston_parmar
+          title: Royston-Parmar Splines
+        - name: restricted_cubic
+          title: Restricted Cubic Splines
+        - name: natural_splines
+          title: Natural Splines
+        - name: b_splines
+          title: B-Splines
+        - name: transformation_model
+          title: Transformation Models
+      default: royston_parmar
+      description:
+          R: >
+            Type of flexible parametric model to fit
+
+    - name: spline_function
+      title: Spline Function
+      type: List
+      options:
+        - name: log_hazard
+          title: Log Cumulative Hazard
+        - name: log_odds
+          title: Log Cumulative Odds
+        - name: probit
+          title: Probit (Inverse Normal)
+        - name: log_survival
+          title: Log Survival Function
+      default: log_hazard
+      description:
+          R: >
+            Function to be modeled with splines (scale parameter)
+
+    - name: spline_df
+      title: Degrees of Freedom
+      type: Integer
+      min: 1
+      max: 10
+      default: 3
+      description:
+          R: >
+            Degrees of freedom for spline basis functions
+
+    - name: knot_placement
+      title: Knot Placement Method
+      type: List
+      options:
+        - name: quantiles
+          title: Equally-Spaced Quantiles
+        - name: equal_time
+          title: Equally-Spaced Time
+        - name: automatic
+          title: Automatic Selection
+        - name: custom
+          title: Custom Knots
+      default: quantiles
+      description:
+          R: >
+            Method for placing internal knots
+
+    - name: custom_knots
+      title: Custom Knot Positions
+      type: String
+      description:
+          R: >
+            Comma-separated list of custom knot positions (when custom knot placement selected)
+
+    - name: boundary_knots
+      title: Boundary Knots
+      type: List
+      options:
+        - name: automatic
+          title: Automatic (Min/Max)
+        - name: percentiles
+          title: 5th/95th Percentiles
+        - name: custom
+          title: Custom Boundaries
+      default: automatic
+      description:
+          R: >
+            Boundary knot placement method
+
+    - name: time_ratio
+      title: Time Ratio Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include time ratio (acceleration factor) analysis
+
+    - name: relative_survival
+      title: Relative Survival
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform relative survival analysis (requires expected survival rates)
+
+    - name: expected_rates
+      title: Expected Survival Rates Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Variable containing expected survival rates for relative survival analysis
+
+    - name: prediction_times
+      title: Prediction Time Points
+      type: String
+      default: '1, 2, 5, 10'
+      description:
+          R: >
+            Comma-separated list of time points for survival predictions
+
+    - name: extrapolation_time
+      title: Extrapolation Time
+      type: Number
+      min: 0
+      default: 20
+      description:
+          R: >
+            Maximum time for survival curve extrapolation
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for confidence intervals
+
+    - name: model_comparison
+      title: Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare flexible parametric models with standard parametric models
+
+    - name: goodness_of_fit
+      title: Goodness of Fit Tests
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform goodness of fit tests and model diagnostics
+
+    - name: hazard_analysis
+      title: Hazard Function Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate hazard function estimates and plots
+
+    - name: derivative_analysis
+      title: Derivative Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include analysis of hazard function derivatives (acceleration/deceleration)
+
+    - name: bootstrap_validation
+      title: Bootstrap Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform bootstrap validation of model predictions
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      min: 100
+      max: 2000
+      default: 500
+      description:
+          R: >
+            Number of bootstrap samples for validation (when bootstrap enabled)

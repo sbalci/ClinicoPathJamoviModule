@@ -1,0 +1,415 @@
+---
+name: metaanalysis
+title: Meta-Analysis & Evidence Synthesis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: studySummary
+      title: 'Study Summary Statistics'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - effect_size
+        - variance
+        - study_id
+      columns:
+        - name: study
+          title: 'Study'
+          type: text
+        - name: effect_size
+          title: 'Effect Size'
+          type: number
+          format: zto:4
+        - name: standard_error
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: weight
+          title: 'Weight (%)'
+          type: number
+          format: zto:2
+        - name: sample_size
+          title: 'n'
+          type: integer
+
+    - name: overallResults
+      title: 'Overall Meta-Analysis Results'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - effect_size
+        - variance
+        - model_type
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: pooled_effect
+          title: 'Pooled Effect'
+          type: number
+          format: zto:4
+        - name: standard_error
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: z_value
+          title: 'z-value'
+          type: number
+          format: zto:3
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: prediction_interval
+          title: 'Prediction Interval'
+          type: text
+          visible: (prediction_interval)
+
+    - name: heterogeneityAssessment
+      title: 'Heterogeneity Assessment'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - effect_size
+        - variance
+        - heterogeneity_method
+      columns:
+        - name: statistic
+          title: 'Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: publicationBiasResults
+      title: 'Publication Bias Assessment'
+      type: Table
+      visible: (publication_bias)
+      rows: 1
+      clearWith:
+        - publication_bias
+        - bias_tests
+      columns:
+        - name: test
+          title: 'Test'
+          type: text
+        - name: statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: subgroupAnalysis
+      title: 'Subgroup Analysis'
+      type: Table
+      visible: (subgroup_var)
+      rows: 1
+      clearWith:
+        - subgroup_var
+        - effect_size
+      columns:
+        - name: subgroup
+          title: 'Subgroup'
+          type: text
+        - name: studies
+          title: 'Studies'
+          type: integer
+        - name: pooled_effect
+          title: 'Pooled Effect'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: heterogeneity_i2
+          title: 'I² (%)'
+          type: number
+          format: zto:1
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+
+    - name: metaRegressionResults
+      title: 'Meta-Regression Results'
+      type: Table
+      visible: (meta_regression)
+      rows: 1
+      clearWith:
+        - meta_regression
+        - moderator_vars
+      columns:
+        - name: moderator
+          title: 'Moderator'
+          type: text
+        - name: coefficient
+          title: 'Coefficient'
+          type: number
+          format: zto:4
+        - name: standard_error
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: t_value
+          title: 't-value'
+          type: number
+          format: zto:3
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: r_squared
+          title: 'R²'
+          type: number
+          format: zto:4
+
+    - name: diagnosticAccuracyResults
+      title: 'Diagnostic Test Accuracy Meta-Analysis'
+      type: Table
+      visible: (analysis_type:diagnostic_accuracy)
+      rows: 1
+      clearWith:
+        - analysis_type
+        - dta_model_type
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: pooled_estimate
+          title: 'Pooled Estimate'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: prediction_region
+          title: 'Prediction Region'
+          type: text
+        - name: heterogeneity
+          title: 'Heterogeneity'
+          type: text
+
+    - name: networkResults
+      title: 'Network Meta-Analysis Results'
+      type: Table
+      visible: (analysis_type:network)
+      rows: 1
+      clearWith:
+        - analysis_type
+        - network_method
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: effect_estimate
+          title: 'Effect Estimate'
+          type: number
+          format: zto:4
+        - name: credible_interval
+          title: 'Credible Interval'
+          type: text
+        - name: probability_best
+          title: 'P(Best)'
+          type: number
+          format: zto:4
+        - name: ranking
+          title: 'Ranking'
+          type: text
+
+    - name: sensitivityAnalysis
+      title: 'Sensitivity Analysis'
+      type: Table
+      visible: (sensitivity_analysis)
+      rows: 1
+      clearWith:
+        - sensitivity_analysis
+      columns:
+        - name: analysis
+          title: 'Sensitivity Analysis'
+          type: text
+        - name: excluded_studies
+          title: 'Excluded Studies'
+          type: text
+        - name: pooled_effect
+          title: 'Pooled Effect'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: i2_change
+          title: 'Δ I²'
+          type: number
+          format: zto:1
+
+    - name: outlierAnalysis
+      title: 'Outlier Detection'
+      type: Table
+      visible: (outlier_detection)
+      rows: 1
+      clearWith:
+        - outlier_detection
+      columns:
+        - name: study
+          title: 'Study'
+          type: text
+        - name: standardized_residual
+          title: 'Std. Residual'
+          type: number
+          format: zto:3
+        - name: leverage
+          title: 'Leverage'
+          type: number
+          format: zto:4
+        - name: cooks_distance
+          title: "Cook's Distance"
+          type: number
+          format: zto:4
+        - name: outlier_flag
+          title: 'Outlier'
+          type: text
+
+    - name: modelFitStatistics
+      title: 'Model Fit and Comparison'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - model_type
+        - effect_size
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: log_likelihood
+          title: 'Log-Likelihood'
+          type: number
+          format: zto:2
+        - name: aic
+          title: 'AIC'
+          type: number
+          format: zto:2
+        - name: bic
+          title: 'BIC'
+          type: number
+          format: zto:2
+        - name: deviance
+          title: 'Deviance'
+          type: number
+          format: zto:2
+
+    - name: forestPlot
+      title: 'Forest Plot'
+      type: Image
+      visible: true
+      requiresData: true
+      width: 1000
+      height: 700
+      renderFun: .plotForest
+      clearWith:
+        - effect_size
+        - variance
+        - model_type
+
+    - name: funnelPlot
+      title: 'Funnel Plot'
+      type: Image
+      visible: (publication_bias)
+      requiresData: true
+      width: 700
+      height: 600
+      renderFun: .plotFunnel
+      clearWith:
+        - effect_size
+        - variance
+        - publication_bias
+
+    - name: heterogeneityPlot
+      title: 'Heterogeneity Exploration Plot'
+      type: Image
+      visible: true
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotHeterogeneity
+      clearWith:
+        - effect_size
+        - variance
+
+    - name: metaRegressionPlot
+      title: 'Meta-Regression Plot'
+      type: Image
+      visible: (meta_regression)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotMetaRegression
+      clearWith:
+        - meta_regression
+        - moderator_vars
+
+    - name: srocPlot
+      title: 'Summary ROC Plot'
+      type: Image
+      visible: (analysis_type:diagnostic_accuracy)
+      requiresData: true
+      width: 800
+      height: 800
+      renderFun: .plotSROC
+      clearWith:
+        - analysis_type
+        - true_positives
+
+    - name: networkPlot
+      title: 'Network Diagram'
+      type: Image
+      visible: (analysis_type:network)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotNetwork
+      clearWith:
+        - analysis_type
+        - treatment_arm
+
+    - name: methodExplanation
+      title: 'Method and Interpretation Guide'
+      type: Html
+      visible: true

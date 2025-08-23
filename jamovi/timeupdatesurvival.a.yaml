@@ -1,0 +1,209 @@
+---
+name: timeupdatesurvival
+title: Time-Updated Survival Estimates
+menuGroup: OncoPathologyAdvanced
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Time-updated survival estimates using time-varying regression coefficients and 
+        dynamic hazard functions. Incorporates real-time patient information updates 
+        for precision medicine and personalized survival prediction.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            timeupdatesurvival(
+                time = "time_variable",
+                status = "status_variable",
+                covariates = c("age", "treatment"),
+                update_times = c(0.5, 1, 2),
+                method = "aalen_additive"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time-to-event or follow-up time variable (numeric)
+
+    - name: status
+      title: Event Status
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Event indicator variable (1/TRUE = event occurred, 0/FALSE = censored)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Covariates for time-varying coefficient analysis
+
+    - name: id
+      title: Subject ID (optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Subject identifier for longitudinal data and repeated measurements
+
+    - name: update_times
+      title: Update Time Points
+      type: String
+      default: '0.5, 1, 2, 5'
+      description:
+          R: >
+            Comma-separated list of time points for coefficient updates (e.g., "0.5, 1, 2, 5")
+
+    - name: method
+      title: Analysis Method
+      type: List
+      options:
+        - name: aalen_additive
+          title: Aalen Additive Hazards
+        - name: cox_time_varying
+          title: Cox Time-Varying Coefficients
+        - name: smoothing_splines
+          title: Smoothing Splines
+        - name: kernel_weighted
+          title: Kernel-Weighted Estimation
+        - name: local_likelihood
+          title: Local Likelihood
+      default: aalen_additive
+      description:
+          R: >
+            Method for estimating time-varying regression coefficients
+
+    - name: smoothing_method
+      title: Smoothing Method
+      type: List
+      options:
+        - name: lowess
+          title: LOWESS
+        - name: splines
+          title: Cubic Splines
+        - name: kernel
+          title: Kernel Smoothing
+        - name: local_regression
+          title: Local Regression
+      default: lowess
+      description:
+          R: >
+            Smoothing method for time-varying coefficient estimation
+
+    - name: bandwidth
+      title: Bandwidth/Span
+      type: Number
+      min: 0.1
+      max: 2.0
+      default: 0.5
+      description:
+          R: >
+            Bandwidth parameter for smoothing (0.1 to 2.0)
+
+    - name: degrees_freedom
+      title: Degrees of Freedom
+      type: Integer
+      min: 2
+      max: 20
+      default: 4
+      description:
+          R: >
+            Degrees of freedom for spline-based methods
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for confidence bands
+
+    - name: prediction_horizon
+      title: Prediction Horizon
+      type: Number
+      min: 0.1
+      max: 20
+      default: 5.0
+      description:
+          R: >
+            Time horizon for dynamic survival predictions
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      min: 50
+      max: 1000
+      default: 200
+      description:
+          R: >
+            Number of bootstrap samples for confidence band estimation
+
+    - name: include_residuals
+      title: Include Residual Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include residual analysis and model diagnostics
+
+    - name: dynamic_prediction
+      title: Dynamic Prediction
+      type: Bool
+      default: true
+      description:
+          R: >
+            Enable dynamic survival prediction with updated coefficients
+
+    - name: individual_profiles
+      title: Individual Coefficient Profiles
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate individual-level time-varying coefficient profiles
+
+    - name: significance_testing
+      title: Significance Testing
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform tests for time-varying coefficients vs. constant coefficients
+
+    - name: model_comparison
+      title: Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare time-varying models with standard Cox regression
