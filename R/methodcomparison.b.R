@@ -102,6 +102,11 @@ methodcomparisonClass <- R6::R6Class(
             if (self$options$correlation_analysis) {
                 private$.populateCorrelationTable(method1, method2)
             }
+            
+            # Concordance correlation coefficient
+            if (self$options$concordance_correlation) {
+                private$.populateConcordanceTable(method1, method2)
+            }
 
             # Method-specific analyses
             if (self$options$comparison_method %in% c("bland_altman", "all")) {
@@ -203,6 +208,153 @@ methodcomparisonClass <- R6::R6Class(
                 lower_ci = spearman_test$conf.int[1],
                 upper_ci = spearman_test$conf.int[2],
                 p_value = spearman_test$p.value
+            ))
+        },
+
+        .populateConcordanceTable = function(method1, method2) {
+            if (!requireNamespace('DescTools', quietly = TRUE)) {
+                # If DescTools not available, calculate CCC manually
+                private$.calculateCCCManually(method1, method2)
+                return()
+            }
+            
+            table <- self$results$concordanceTable
+            conf_level <- self$options$confidence_level
+            
+            tryCatch({
+                # Calculate CCC using DescTools
+                ccc_result <- DescTools::CCC(method1, method2, conf.level = conf_level)
+                
+                # Extract values
+                ccc_value <- ccc_result$rho.c
+                ccc_ci <- ccc_result$conf.int
+                
+                # Calculate precision and accuracy components
+                r <- cor(method1, method2, use = "complete.obs")
+                mean1 <- mean(method1, na.rm = TRUE)
+                mean2 <- mean(method2, na.rm = TRUE)
+                var1 <- var(method1, na.rm = TRUE)
+                var2 <- var(method2, na.rm = TRUE)
+                
+                bias_correction <- 2 * r * sqrt(var1) * sqrt(var2) / (var1 + var2 + (mean1 - mean2)^2)
+                precision <- r
+                accuracy <- 2 / (1 + var1/var2 + var2/var1 + (mean1 - mean2)^2/(sqrt(var1) * sqrt(var2)))
+                
+                # Interpretation
+                ccc_interp <- if (ccc_value >= 0.99) "Almost perfect agreement"
+                              else if (ccc_value >= 0.95) "Substantial agreement"
+                              else if (ccc_value >= 0.90) "Moderate agreement"
+                              else if (ccc_value >= 0.75) "Fair agreement"
+                              else "Poor agreement"
+                
+                # Add rows to table
+                table$addRow(rowKey = "ccc", values = list(
+                    measure = "Concordance Correlation Coefficient",
+                    estimate = ccc_value,
+                    lower_ci = ccc_ci[1],
+                    upper_ci = ccc_ci[2],
+                    interpretation = ccc_interp
+                ))
+                
+                table$addRow(rowKey = "precision", values = list(
+                    measure = "Precision (Correlation)",
+                    estimate = precision,
+                    lower_ci = NA,
+                    upper_ci = NA,
+                    interpretation = paste("r =", round(precision, 4))
+                ))
+                
+                table$addRow(rowKey = "accuracy", values = list(
+                    measure = "Accuracy (Bias correction)",
+                    estimate = accuracy,
+                    lower_ci = NA,
+                    upper_ci = NA,
+                    interpretation = paste("C_b =", round(bias_correction, 4))
+                ))
+                
+            }, error = function(e) {
+                # Fallback to manual calculation
+                private$.calculateCCCManually(method1, method2)
+            })
+        },
+        
+        .calculateCCCManually = function(method1, method2) {
+            table <- self$results$concordanceTable
+            
+            # Manual CCC calculation (Lin 1989)
+            # Remove missing values
+            complete_cases <- complete.cases(method1, method2)
+            x <- method1[complete_cases]
+            y <- method2[complete_cases]
+            
+            if (length(x) < 3) {
+                table$addRow(rowKey = "error", values = list(
+                    measure = "Error",
+                    estimate = NA,
+                    lower_ci = NA,
+                    upper_ci = NA,
+                    interpretation = "Insufficient data for CCC calculation"
+                ))
+                return()
+            }
+            
+            # Calculate CCC components
+            mean_x <- mean(x)
+            mean_y <- mean(y)
+            var_x <- var(x)
+            var_y <- var(y)
+            cov_xy <- cov(x, y)
+            r <- cor(x, y)
+            
+            # Lin's CCC formula
+            ccc <- (2 * cov_xy) / (var_x + var_y + (mean_x - mean_y)^2)
+            
+            # Approximate confidence interval (Fisher's Z transformation)
+            n <- length(x)
+            z_ccc <- 0.5 * log((1 + ccc)/(1 - ccc))
+            se_z <- 1/sqrt(n - 3)
+            alpha <- 1 - self$options$confidence_level
+            z_critical <- qnorm(1 - alpha/2)
+            
+            z_lower <- z_ccc - z_critical * se_z
+            z_upper <- z_ccc + z_critical * se_z
+            
+            ccc_lower <- (exp(2 * z_lower) - 1) / (exp(2 * z_lower) + 1)
+            ccc_upper <- (exp(2 * z_upper) - 1) / (exp(2 * z_upper) + 1)
+            
+            # Interpretation
+            ccc_interp <- if (ccc >= 0.99) "Almost perfect agreement"
+                          else if (ccc >= 0.95) "Substantial agreement"
+                          else if (ccc >= 0.90) "Moderate agreement"
+                          else if (ccc >= 0.75) "Fair agreement"
+                          else "Poor agreement"
+            
+            table$addRow(rowKey = "ccc_manual", values = list(
+                measure = "Concordance Correlation Coefficient",
+                estimate = ccc,
+                lower_ci = ccc_lower,
+                upper_ci = ccc_upper,
+                interpretation = ccc_interp
+            ))
+            
+            # Add precision and accuracy decomposition
+            precision <- r
+            accuracy <- 2 / (1 + var_x/var_y + var_y/var_x + (mean_x - mean_y)^2/(sqrt(var_x) * sqrt(var_y)))
+            
+            table$addRow(rowKey = "precision_manual", values = list(
+                measure = "Precision (Correlation)",
+                estimate = precision,
+                lower_ci = NA,
+                upper_ci = NA,
+                interpretation = "Measures how far observations deviate from the best-fit line"
+            ))
+            
+            table$addRow(rowKey = "accuracy_manual", values = list(
+                measure = "Accuracy (Location shift)",
+                estimate = accuracy,
+                lower_ci = NA,
+                upper_ci = NA,
+                interpretation = "Measures how far the best-fit line deviates from 45° line"
             ))
         },
 

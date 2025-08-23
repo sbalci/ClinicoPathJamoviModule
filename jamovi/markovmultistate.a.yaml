@@ -1,7 +1,7 @@
 ---
 name: markovmultistate
 title: Markov Multi-State Models
-menuGroup: SurvivalT
+menuGroup: SurvivalD
 menuSubgroup: jsurvival Multi-State Models
 version: '0.0.1'
 jas: '1.2'

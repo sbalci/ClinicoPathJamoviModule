@@ -20,6 +20,7 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             deming_options = FALSE,
             error_ratio = 1,
             correlation_analysis = TRUE,
+            concordance_correlation = TRUE,
             regression_comparison = TRUE,
             clinical_limits = FALSE,
             clinical_lower = -10,
@@ -120,6 +121,10 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "correlation_analysis",
                 correlation_analysis,
                 default=TRUE)
+            private$..concordance_correlation <- jmvcore::OptionBool$new(
+                "concordance_correlation",
+                concordance_correlation,
+                default=TRUE)
             private$..regression_comparison <- jmvcore::OptionBool$new(
                 "regression_comparison",
                 regression_comparison,
@@ -193,6 +198,7 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..deming_options)
             self$.addOption(private$..error_ratio)
             self$.addOption(private$..correlation_analysis)
+            self$.addOption(private$..concordance_correlation)
             self$.addOption(private$..regression_comparison)
             self$.addOption(private$..clinical_limits)
             self$.addOption(private$..clinical_lower)
@@ -221,6 +227,7 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         deming_options = function() private$..deming_options$value,
         error_ratio = function() private$..error_ratio$value,
         correlation_analysis = function() private$..correlation_analysis$value,
+        concordance_correlation = function() private$..concordance_correlation$value,
         regression_comparison = function() private$..regression_comparison$value,
         clinical_limits = function() private$..clinical_limits$value,
         clinical_lower = function() private$..clinical_lower$value,
@@ -248,6 +255,7 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..deming_options = NA,
         ..error_ratio = NA,
         ..correlation_analysis = NA,
+        ..concordance_correlation = NA,
         ..regression_comparison = NA,
         ..clinical_limits = NA,
         ..clinical_lower = NA,
@@ -270,6 +278,7 @@ methodcomparisonResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         summary = function() private$.items[["summary"]],
         descriptiveStats = function() private$.items[["descriptiveStats"]],
         correlationTable = function() private$.items[["correlationTable"]],
+        concordanceTable = function() private$.items[["concordanceTable"]],
         blandAltmanStats = function() private$.items[["blandAltmanStats"]],
         passingBablokResults = function() private$.items[["passingBablokResults"]],
         demingResults = function() private$.items[["demingResults"]],
@@ -367,6 +376,35 @@ methodcomparisonResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="concordanceTable",
+                title="Concordance Correlation Coefficient",
+                visible="(concordance_correlation)",
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="lower_ci", 
+                        `title`="Lower CI", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="upper_ci", 
+                        `title`="Upper CI", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="blandAltmanStats",
@@ -649,6 +687,8 @@ methodcomparisonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param error_ratio Ratio of error variances (σ²y/σ²x) for Deming regression
 #' @param correlation_analysis Include Pearson and Spearman correlation
 #'   analysis
+#' @param concordance_correlation Calculate Lin concordance correlation
+#'   coefficient for agreement assessment
 #' @param regression_comparison Compare ordinary least squares vs method
 #'   comparison regressions
 #' @param clinical_limits Specify clinical acceptability criteria
@@ -670,6 +710,7 @@ methodcomparisonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$descriptiveStats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$correlationTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$concordanceTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$passingBablokResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$demingResults} \tab \tab \tab \tab \tab a table \cr
@@ -708,6 +749,7 @@ methodcomparison <- function(
     deming_options = FALSE,
     error_ratio = 1,
     correlation_analysis = TRUE,
+    concordance_correlation = TRUE,
     regression_comparison = TRUE,
     clinical_limits = FALSE,
     clinical_lower = -10,
@@ -751,6 +793,7 @@ methodcomparison <- function(
         deming_options = deming_options,
         error_ratio = error_ratio,
         correlation_analysis = correlation_analysis,
+        concordance_correlation = concordance_correlation,
         regression_comparison = regression_comparison,
         clinical_limits = clinical_limits,
         clinical_lower = clinical_lower,

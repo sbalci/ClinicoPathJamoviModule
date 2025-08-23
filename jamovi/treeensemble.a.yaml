@@ -1,7 +1,7 @@
 ---
 name: treeensemble
 title: Clinical Random Forest Analysis
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Random Forest for Clinical Research
 version: '0.0.31'

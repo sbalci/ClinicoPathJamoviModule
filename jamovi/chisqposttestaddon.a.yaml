@@ -1,0 +1,10 @@
+---
+name: chisqposttestaddon
+title: Chi-Square Post-Hoc Analysis
+version: '0.0.31'
+jas: '1.2'
+addonFor: 'jmv::conttables'
+export: false
+
+options: []
+...

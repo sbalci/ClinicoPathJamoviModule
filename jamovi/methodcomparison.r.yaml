@@ -66,6 +66,30 @@ items:
             type: number
             format: zto,pvalue
 
+    - name: concordanceTable
+      title: Concordance Correlation Coefficient
+      type: Table
+      visible: (concordance_correlation)
+      columns:
+          - name: measure
+            title: Measure
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+            format: zto:4
+          - name: lower_ci
+            title: Lower CI
+            type: number
+            format: zto:4
+          - name: upper_ci
+            title: Upper CI
+            type: number
+            format: zto:4
+          - name: interpretation
+            title: Interpretation
+            type: text
+
     - name: blandAltmanStats
       title: Bland-Altman Analysis
       type: Table

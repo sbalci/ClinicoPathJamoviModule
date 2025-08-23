@@ -82,6 +82,8 @@ children:
       - type: CheckBox
         name: correlation_analysis
       - type: CheckBox
+        name: concordance_correlation
+      - type: CheckBox
         name: regression_comparison
       - type: CheckBox
         name: clinical_limits

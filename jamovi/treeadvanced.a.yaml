@@ -1,7 +1,7 @@
 ---
 name: treeadvanced
 title: Advanced Clinical Decision Trees
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Enhanced CART with Advanced Validation
 version: '0.0.31'

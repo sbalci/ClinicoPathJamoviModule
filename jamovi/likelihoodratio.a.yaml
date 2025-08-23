@@ -1,0 +1,346 @@
+---
+name: likelihoodratio
+title: Likelihood Ratio Analysis
+menuGroup: meddecideD
+menuSubgroup: Diagnostic Statistics  
+menuSubtitle: 'Likelihood ratios and diagnostic test evaluation'
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive likelihood ratio analysis for diagnostic test evaluation.
+        
+        **Key Features:**
+        - Positive and negative likelihood ratios with confidence intervals
+        - Diagnostic odds ratios and clinical utility measures
+        - Youden Index for optimal cutpoint determination
+        - Post-test probability calculations across prevalence ranges
+        - Predictive value curves and clinical interpretation guides
+        
+        **Applications:**
+        - Laboratory test validation and comparison
+        - Biomarker evaluation and cutpoint optimization
+        - Diagnostic accuracy assessment in pathology
+        - Clinical decision support tool evaluation
+        - Method comparison and diagnostic performance studies
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame containing test results and reference standard.
+
+    # ============ VARIABLE SPECIFICATION ============
+    - name: testVariable
+      title: 'Test Variable'
+      type: Variable
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description: 'Diagnostic test results (continuous or categorical)'
+
+    - name: referenceStandard
+      title: 'Reference Standard (Gold Standard)'
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description: 'True disease status (binary: positive/negative)'
+
+    - name: groupVariable
+      title: 'Stratification Variable (optional)'
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description: 'Variable for stratified analysis (e.g., subgroups, centers)'
+
+    # ============ ANALYSIS TYPE ============
+    - name: analysisType
+      title: 'Analysis Type'
+      type: List
+      options:
+          - title: 'Binary Test (Positive/Negative)'
+            name: binary
+          - title: 'Continuous Test with Cutpoint'
+            name: continuous
+          - title: 'Multiple Level Test (Ordinal)'
+            name: multilevel
+      default: binary
+      description: 'Type of diagnostic test data'
+
+    - name: testDirection
+      title: 'Test Direction'
+      type: List
+      options:
+          - title: 'Higher values indicate disease'
+            name: higher
+          - title: 'Lower values indicate disease'
+            name: lower
+          - title: 'Auto-detect optimal direction'
+            name: auto
+      default: higher
+      description: 'Direction of test values relative to disease presence'
+
+    # ============ CUTPOINT DETERMINATION ============
+    - name: cutpointMethod
+      title: 'Cutpoint Selection Method'
+      type: List
+      options:
+          - title: 'User-specified cutpoint'
+            name: manual
+          - title: 'Youden Index (maximize Se + Sp - 1)'
+            name: youden
+          - title: 'Minimize cost-weighted errors'
+            name: cost
+          - title: 'ROC01 (closest to top-left corner)'
+            name: roc01
+          - title: 'Concordance probability method'
+            name: concordance
+      default: youden
+      description: 'Method for determining optimal cutpoint'
+
+    - name: manualCutpoint
+      title: 'Manual Cutpoint Value'
+      type: Number
+      description: 'User-specified cutpoint value'
+
+    - name: costRatio
+      title: 'Cost Ratio (False Positive : False Negative)'
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1
+      description: 'Relative cost of false positive vs false negative'
+
+    # ============ LIKELIHOOD RATIO CALCULATIONS ============
+    - name: confidenceLevel
+      title: 'Confidence Level'
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description: 'Confidence level for likelihood ratio confidence intervals'
+
+    - name: ciMethod
+      title: 'Confidence Interval Method'
+      type: List
+      options:
+          - title: 'Log transformation (recommended)'
+            name: log
+          - title: 'Bootstrap percentile'
+            name: bootstrap
+          - title: 'Exact binomial'
+            name: exact
+      default: log
+      description: 'Method for calculating confidence intervals'
+
+    - name: bootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Integer
+      min: 1000
+      max: 10000
+      default: 2000
+      description: 'Number of bootstrap samples for CI calculation'
+
+    # ============ POST-TEST PROBABILITY ============
+    - name: calculatePostTest
+      title: 'Calculate Post-test Probabilities'
+      type: Bool
+      default: true
+      description: 'Calculate post-test probabilities for different prevalences'
+
+    - name: prevalenceRange
+      title: 'Prevalence Range for Analysis'
+      type: List
+      options:
+          - title: 'Full range (1% to 99%)'
+            name: full
+          - title: 'Clinical range (5% to 50%)'
+            name: clinical
+          - title: 'Low prevalence (1% to 20%)'
+            name: low
+          - title: 'High prevalence (20% to 80%)'
+            name: high
+          - title: 'Custom range'
+            name: custom
+      default: clinical
+      description: 'Range of disease prevalence for post-test probability analysis'
+
+    - name: customPrevalenceMin
+      title: 'Minimum Prevalence (%)'
+      type: Number
+      min: 0.1
+      max: 99
+      default: 5
+      description: 'Minimum prevalence for custom range'
+
+    - name: customPrevalenceMax
+      title: 'Maximum Prevalence (%)'
+      type: Number
+      min: 1
+      max: 99.9
+      default: 50
+      description: 'Maximum prevalence for custom range'
+
+    - name: specificPrevalences
+      title: 'Specific Prevalences (%, comma-separated)'
+      type: String
+      default: '10, 25, 50'
+      description: 'Specific prevalence values for detailed analysis'
+
+    # ============ DIAGNOSTIC PERFORMANCE MEASURES ============ 
+    - name: calculateDOR
+      title: 'Calculate Diagnostic Odds Ratio'
+      type: Bool
+      default: true
+      description: 'Calculate diagnostic odds ratio and confidence interval'
+
+    - name: calculateNRI
+      title: 'Calculate Net Reclassification Improvement'
+      type: Bool
+      default: false
+      description: 'Calculate NRI for comparing diagnostic tests'
+
+    - name: compareVariable
+      title: 'Comparison Test Variable'
+      type: Variable
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description: 'Second test for comparison (NRI calculation)'
+
+    # ============ PREDICTIVE VALUE ANALYSIS ============
+    - name: predictiveValueCurves
+      title: 'Generate Predictive Value Curves'
+      type: Bool
+      default: true
+      description: 'Generate PPV and NPV curves across prevalence range'
+
+    - name: clinicalThresholds
+      title: 'Clinical Decision Thresholds'
+      type: String
+      default: '0.15, 0.85'
+      description: 'Clinical probability thresholds for decision making (comma-separated)'
+
+    # ============ STRATIFIED ANALYSIS ============
+    - name: performStratified
+      title: 'Perform Stratified Analysis'
+      type: Bool
+      default: false
+      description: 'Analyze likelihood ratios within subgroups'
+
+    - name: testHomogeneity
+      title: 'Test Homogeneity Across Strata'
+      type: Bool
+      default: false
+      description: 'Test for homogeneity of likelihood ratios across strata'
+
+    # ============ OUTPUT OPTIONS ============
+    - name: showSummaryTable
+      title: 'Summary Statistics Table'
+      type: Bool
+      default: true
+      description: 'Show summary of diagnostic performance measures'
+
+    - name: showCrosstabulation
+      title: '2×2 Contingency Table'
+      type: Bool
+      default: true
+      description: 'Show detailed crosstabulation with cell counts'
+
+    - name: showLikelihoodRatios
+      title: 'Likelihood Ratios Table'
+      type: Bool
+      default: true
+      description: 'Show positive and negative likelihood ratios with CI'
+
+    - name: showPostTestProbs
+      title: 'Post-test Probabilities Table'
+      type: Bool
+      default: true
+      description: 'Show post-test probabilities at different prevalences'
+
+    - name: showOptimalCutpoint
+      title: 'Optimal Cutpoint Analysis'
+      type: Bool
+      default: true
+      description: 'Show optimal cutpoint determination results'
+
+    - name: showDiagnosticOdds
+      title: 'Diagnostic Odds Ratio'
+      type: Bool
+      default: true
+      description: 'Show diagnostic odds ratio with confidence interval'
+
+    - name: showClinicalInterpretation
+      title: 'Clinical Interpretation Guide'
+      type: Bool
+      default: true
+      description: 'Show clinical interpretation and usage guidelines'
+
+    # ============ VISUALIZATION OPTIONS ============
+    - name: plotROC
+      title: 'ROC Curve'
+      type: Bool
+      default: true
+      description: 'Generate ROC curve with optimal cutpoint marked'
+
+    - name: plotPredictiveValues
+      title: 'Predictive Value Curves'
+      type: Bool
+      default: true
+      description: 'Plot PPV and NPV across prevalence range'
+
+    - name: plotLikelihoodRatios
+      title: 'Likelihood Ratio Nomogram'
+      type: Bool
+      default: true
+      description: 'Generate likelihood ratio nomogram for clinical use'
+
+    - name: plotPostTestProbabilities
+      title: 'Post-test Probability Plot'
+      type: Bool
+      default: true
+      description: 'Visualize post-test probabilities vs prevalence'
+
+    - name: plotDistributions
+      title: 'Test Result Distributions'
+      type: Bool
+      default: false
+      description: 'Show distributions of test results by disease status'
+
+    # ============ ADVANCED OPTIONS ============
+    - name: correctContinuity
+      title: 'Continuity Correction'
+      type: Bool
+      default: true
+      description: 'Apply continuity correction for zero cells in 2×2 table'
+
+    - name: exactTests
+      title: 'Use Exact Tests'
+      type: Bool
+      default: false
+      description: 'Use exact tests instead of asymptotic approximations'
+
+    - name: smoothROC
+      title: 'Smooth ROC Curve'
+      type: Bool
+      default: false
+      description: 'Apply smoothing to ROC curve estimation'
+
+    - name: randomSeed
+      title: 'Random Seed'
+      type: Integer
+      default: 42
+      description: 'Random seed for reproducible bootstrap results'
