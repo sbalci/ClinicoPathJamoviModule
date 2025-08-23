@@ -1,0 +1,277 @@
+title: Likelihood Ratio Analysis
+name: likelihoodratio
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  # ============ VARIABLE SELECTION ============
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Diagnostic Test Variable
+        children:
+          - type: VariablesListBox
+            name: testVariable
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Reference Standard (Gold Standard)
+        children:
+          - type: VariablesListBox
+            name: referenceStandard
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stratification Variable (optional)
+        children:
+          - type: VariablesListBox
+            name: groupVariable
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Comparison Test (optional)
+        children:
+          - type: VariablesListBox
+            name: compareVariable
+            maxItemCount: 1
+            isTarget: true
+
+  # ============ ANALYSIS SETTINGS ============
+  - type: CollapseBox
+    label: Analysis Settings
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Analysis Type
+          - type: ComboBox
+            name: analysisType
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Test Direction (higher/lower values = disease)
+          - type: ComboBox
+            name: testDirection
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Confidence Level
+          - type: TextBox
+            name: confidenceLevel
+            format: number
+            suffix: '%'
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: CI Calculation Method
+          - type: ComboBox
+            name: ciMethod
+
+  # ============ CUTPOINT DETERMINATION ============
+  - type: CollapseBox
+    label: Cutpoint Determination
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Cutpoint Selection Method
+          - type: ComboBox
+            name: cutpointMethod
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Manual Cutpoint Value
+          - type: TextBox
+            name: manualCutpoint
+            format: number
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: 'Cost Ratio (False Positive : False Negative)'
+          - type: TextBox
+            name: costRatio
+            format: number
+
+  # ============ POST-TEST PROBABILITY ANALYSIS ============
+  - type: CollapseBox
+    label: Post-test Probability Analysis
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: calculatePostTest
+        label: Calculate post-test probabilities
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Prevalence Range for Analysis
+          - type: ComboBox
+            name: prevalenceRange
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Custom Prevalence Range (%)
+          - type: TextBox
+            name: customPrevalenceMin
+            format: number
+            suffix: '% to'
+          - type: TextBox
+            name: customPrevalenceMax
+            format: number
+            suffix: '%'
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Specific Prevalences for Detailed Analysis
+          - type: TextBox
+            name: specificPrevalences
+            format: string
+            suffix: '(%, comma-separated)'
+
+  # ============ DIAGNOSTIC MEASURES ============
+  - type: CollapseBox
+    label: Additional Diagnostic Measures
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: calculateDOR
+        label: Calculate diagnostic odds ratio
+      
+      - type: CheckBox
+        name: calculateNRI
+        label: Calculate net reclassification improvement (requires comparison test)
+      
+      - type: CheckBox
+        name: predictiveValueCurves
+        label: Generate predictive value curves
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Clinical Decision Thresholds
+          - type: TextBox
+            name: clinicalThresholds
+            format: string
+            suffix: '(probabilities, comma-separated)'
+
+  # ============ STRATIFIED ANALYSIS ============
+  - type: CollapseBox
+    label: Stratified Analysis
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: performStratified
+        label: Perform stratified analysis
+      
+      - type: CheckBox
+        name: testHomogeneity
+        label: Test homogeneity across strata
+        enable: (performStratified)
+
+  # ============ OUTPUT TABLES ============
+  - type: CollapseBox
+    label: Output Tables
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: showSummaryTable
+        label: Summary statistics table
+      - type: CheckBox
+        name: showCrosstabulation
+        label: 2×2 contingency table
+      - type: CheckBox
+        name: showLikelihoodRatios
+        label: Likelihood ratios table
+      - type: CheckBox
+        name: showPostTestProbs
+        label: Post-test probabilities table
+      - type: CheckBox
+        name: showOptimalCutpoint
+        label: Optimal cutpoint analysis
+        enable: (analysisType:continuous)
+      - type: CheckBox
+        name: showDiagnosticOdds
+        label: Diagnostic odds ratio
+      - type: CheckBox
+        name: showClinicalInterpretation
+        label: Clinical interpretation guide
+
+  # ============ VISUALIZATION OPTIONS ============
+  - type: CollapseBox
+    label: Visualizations
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: plotROC
+        label: ROC curve
+      - type: CheckBox
+        name: plotPredictiveValues
+        label: Predictive value curves
+      - type: CheckBox
+        name: plotLikelihoodRatios
+        label: Likelihood ratio nomogram
+      - type: CheckBox
+        name: plotPostTestProbabilities
+        label: Post-test probability plot
+      - type: CheckBox
+        name: plotDistributions
+        label: Test result distributions by disease status
+        enable: (analysisType:continuous)
+
+  # ============ ADVANCED OPTIONS ============
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: correctContinuity
+        label: Apply continuity correction for zero cells
+      
+      - type: CheckBox
+        name: exactTests
+        label: Use exact tests instead of asymptotic approximations
+      
+      - type: CheckBox
+        name: smoothROC
+        label: Apply smoothing to ROC curve
+        enable: (plotROC)
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Bootstrap Samples
+          - type: TextBox
+            name: bootstrapSamples
+            format: number
+      
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Random Seed
+          - type: TextBox
+            name: randomSeed
+            format: number

@@ -1,7 +1,7 @@
 ---
 name:  kappaSizePower
 title: Power Approach for the Number of Subjects Required
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: Power Analysis
 menuSubtitle: Find sample size based on power
 version: '0.0.31'

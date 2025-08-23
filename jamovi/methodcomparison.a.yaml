@@ -1,7 +1,7 @@
 ---
 name: methodcomparison
 title: Method Comparison Analysis
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: Diagnostic Statistics
 menuSubtitle: 'Bland-Altman & Method Comparison'
 version: '0.0.31'
@@ -132,6 +132,12 @@ options:
       type: Bool
       default: true
       description: 'Include Pearson and Spearman correlation analysis'
+
+    - name: concordance_correlation
+      title: 'Concordance Correlation Coefficient (CCC)'
+      type: Bool
+      default: true
+      description: 'Calculate Lin concordance correlation coefficient for agreement assessment'
 
     - name: regression_comparison
       title: 'Regression Comparison'

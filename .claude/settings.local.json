@@ -97,6 +97,9 @@
       "Bash(do if grep -q \"jrs:\" jamovi/$func.r.yaml)",
       "Bash(else echo \"$func: ⚠ missing jrs\")"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "/Users/serdarbalci/Documents/GitHub/conttablesplus"
+    ]
   }
 }

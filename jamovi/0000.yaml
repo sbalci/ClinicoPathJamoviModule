@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.36
+version: 0.0.31.38
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <drserdarbalci@gmail.com>
-date: '2025-08-22'
+date: '2025-08-23'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -3375,6 +3375,15 @@ analyses:
       Comprehensive method comparison analysis including Bland-Altman plots,
       Passing-Bablok regression, and Deming regression. Essential for validating
       new laboratory methods, diagnostic tests, and measurement techniques.
+  - title: Likelihood Ratio Analysis
+    name: likelihoodratio
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Diagnostic Statistics
+    menuTitle: Likelihood Ratio Analysis
+    menuSubtitle: Likelihood ratios and diagnostic test evaluation
+    description: Comprehensive likelihood ratio analysis for diagnostic test evaluation.
   - title: IHC Clustering Analysis
     name: ihccluster
     ns: ClinicoPath
@@ -3384,6 +3393,13 @@ analyses:
     menuTitle: IHC Clustering Analysis
     menuSubtitle: Cluster cases by IHC expression patterns
     description: Clusters cases based on immunohistochemistry (IHC) staining patterns.
+  - title: Chi-Square Post-Hoc Analysis
+    name: chisqposttestaddon
+    ns: JamoviTest
+    category: analyses
+    menuGroup: ExplorationT
+    menuTitle: conttables
+    addonFor: 'jmv::conttables'
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

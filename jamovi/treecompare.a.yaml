@@ -1,7 +1,7 @@
 ---
 name: treecompare
 title: Clinical Tree Algorithm Comparison
-menuGroup: meddecideT
+menuGroup: meddecideD
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Compare Decision Tree Algorithms
 version: '0.0.31'

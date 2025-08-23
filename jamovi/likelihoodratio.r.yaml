@@ -1,0 +1,293 @@
+name: likelihoodratio
+title: Likelihood Ratio Analysis
+jrs: '1.1'
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      clearWith:
+          - testVariable
+          - referenceStandard
+
+    - name: summaryTable
+      title: Diagnostic Performance Summary
+      type: Table
+      visible: (showSummaryTable)
+      clearWith:
+          - testVariable
+          - referenceStandard
+          - cutpointMethod
+          - manualCutpoint
+      columns:
+          - name: measure
+            title: Measure
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto,pc:2
+          - name: ci_lower
+            title: 95% CI Lower
+            type: number
+            format: zto,pc:2
+          - name: ci_upper
+            title: 95% CI Upper
+            type: number
+            format: zto,pc:2
+          - name: interpretation
+            title: Clinical Interpretation
+            type: text
+
+    - name: crosstabulation
+      title: 2×2 Contingency Table
+      type: Table
+      visible: (showCrosstabulation)
+      clearWith:
+          - testVariable
+          - referenceStandard
+          - cutpointMethod
+      columns:
+          - name: test_result
+            title: Test Result
+            type: text
+          - name: disease_positive
+            title: Disease Positive
+            type: integer
+          - name: disease_negative
+            title: Disease Negative
+            type: integer
+          - name: total
+            title: Total
+            type: integer
+
+    - name: likelihoodRatios
+      title: Likelihood Ratios
+      type: Table
+      visible: (showLikelihoodRatios)
+      clearWith:
+          - testVariable
+          - referenceStandard
+          - confidenceLevel
+          - ciMethod
+      columns:
+          - name: ratio_type
+            title: Likelihood Ratio
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto:3
+          - name: ci_lower
+            title: 95% CI Lower
+            type: number
+            format: zto:3
+          - name: ci_upper  
+            title: 95% CI Upper
+            type: number
+            format: zto:3
+          - name: interpretation
+            title: Clinical Significance
+            type: text
+
+    - name: optimalCutpoint
+      title: Optimal Cutpoint Analysis
+      type: Table
+      visible: (showOptimalCutpoint && analysisType:continuous)
+      clearWith:
+          - testVariable
+          - referenceStandard
+          - cutpointMethod
+          - costRatio
+      columns:
+          - name: method
+            title: Selection Method
+            type: text
+          - name: cutpoint
+            title: Optimal Cutpoint
+            type: number
+          - name: sensitivity
+            title: Sensitivity
+            type: number
+            format: zto,pc:2
+          - name: specificity
+            title: Specificity
+            type: number  
+            format: zto,pc:2
+          - name: youden_index
+            title: Youden Index
+            type: number
+            format: zto:3
+          - name: criterion_value
+            title: Criterion Value
+            type: number
+            format: zto:3
+
+    - name: postTestProbabilities
+      title: Post-test Probabilities
+      type: Table
+      visible: (showPostTestProbs)
+      clearWith:
+          - testVariable
+          - referenceStandard
+          - specificPrevalences
+      columns:
+          - name: prevalence
+            title: Prior Probability (%)
+            type: number
+            format: zto,pc:1
+          - name: positive_test_post
+            title: Post-test if Positive (%)
+            type: number
+            format: zto,pc:1
+          - name: negative_test_post
+            title: Post-test if Negative (%)
+            type: number
+            format: zto,pc:1
+          - name: clinical_utility
+            title: Clinical Utility
+            type: text
+
+    - name: diagnosticOddsRatio
+      title: Diagnostic Odds Ratio
+      type: Table
+      visible: (showDiagnosticOdds)
+      clearWith:
+          - testVariable
+          - referenceStandard
+      columns:
+          - name: measure
+            title: Measure
+            type: text
+          - name: value
+            title: Value
+            type: number
+            format: zto:2
+          - name: ci_lower
+            title: 95% CI Lower
+            type: number
+            format: zto:2
+          - name: ci_upper
+            title: 95% CI Upper
+            type: number
+            format: zto:2
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+
+    - name: stratifiedAnalysis
+      title: Stratified Analysis
+      type: Table
+      visible: (performStratified)
+      clearWith:
+          - testVariable
+          - referenceStandard
+          - groupVariable
+      columns:
+          - name: stratum
+            title: Stratum
+            type: text
+          - name: lr_positive
+            title: LR+
+            type: number
+            format: zto:2
+          - name: lr_negative
+            title: LR-
+            type: number
+            format: zto:2
+          - name: dor
+            title: DOR
+            type: number
+            format: zto:2
+          - name: sample_size
+            title: N
+            type: integer
+
+    - name: homogeneityTest
+      title: Test for Homogeneity Across Strata
+      type: Table
+      visible: (testHomogeneity && performStratified)
+      clearWith:
+          - testVariable
+          - referenceStandard
+          - groupVariable
+      columns:
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Test Statistic
+            type: number
+            format: zto:3
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation & Usage Guidelines
+      type: Html
+      visible: (showClinicalInterpretation)
+
+    - name: rocCurve
+      title: ROC Curve
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotROC
+      visible: (plotROC)
+      clearWith:
+          - testVariable
+          - referenceStandard
+          - cutpointMethod
+
+    - name: predictiveValueCurves
+      title: Predictive Value Curves
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotPredictiveValues
+      visible: (plotPredictiveValues)
+      clearWith:
+          - testVariable
+          - referenceStandard
+          - prevalenceRange
+
+    - name: likelihoodNomogram
+      title: Likelihood Ratio Nomogram
+      type: Image  
+      width: 800
+      height: 600
+      renderFun: .plotNomogram
+      visible: (plotLikelihoodRatios)
+      clearWith:
+          - testVariable
+          - referenceStandard
+
+    - name: postTestPlot
+      title: Post-test Probability vs Prevalence
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotPostTest
+      visible: (plotPostTestProbabilities)
+      clearWith:
+          - testVariable
+          - referenceStandard
+
+    - name: distributionPlot
+      title: Test Result Distributions by Disease Status
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotDistributions
+      visible: (plotDistributions && analysisType:continuous)
+      clearWith:
+          - testVariable
+          - referenceStandard

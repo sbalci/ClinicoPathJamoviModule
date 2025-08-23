@@ -50,7 +50,6 @@ children:
           - type: TextBox
             name: nClusters
             format: number
-            enable: (!autoSelectK)
           
       - type: CheckBox
         name: autoSelectK
@@ -58,7 +57,6 @@ children:
       
       - type: LayoutBox
         margin: large
-        enable: (autoSelectK)
         children:
           - type: Label
             label: Range for automatic k selection
@@ -102,7 +100,6 @@ children:
       
       - type: LayoutBox
         margin: large
-        enable: (consensusClustering)
         children:
           - type: Label
             label: Bootstrap iterations
@@ -133,7 +130,6 @@ children:
       - type: CheckBox
         name: showDendrogram
         label: Dendrogram (hierarchical only)
-        enable: (method == 'hierarchical')
       - type: CheckBox
         name: showPCAPlot
         label: PCA/MCA plot
@@ -143,7 +139,6 @@ children:
       
       - type: LayoutBox
         margin: large
-        enable: (showHeatmap)
         children:
           - type: Label
             label: Heatmap scaling

@@ -228,3 +228,4 @@ When updating documentation links in README.Rmd, ensure they point to these subm
 - in .u.yaml Label is not allowed to have the additional property "visible"
 - in .u.yaml description is not allowed
 - in .a.yaml type: Level is not allowed to have default
+- official jamovi documentation is here './vignettes/dev.jamovi.org-master'
