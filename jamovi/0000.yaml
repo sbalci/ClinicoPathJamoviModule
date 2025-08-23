@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.38
+version: 0.0.31.39
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -3090,6 +3090,60 @@ analyses:
       evidence-based 
 
       diagnostic decision-making and clinical assessment optimization.
+  - title: Imaging Findings Correlation
+    name: imagingcorrelation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Imaging Findings Correlation
+    menuSubtitle: Multi-Modal Diagnostic Data Integration
+    description: >
+      Imaging Findings Correlation provides comprehensive multi-modal
+      diagnostic 
+
+      data integration by correlating imaging findings with laboratory results, 
+
+      clinical presentations, and pathological data for enhanced diagnostic 
+
+      accuracy and clinical decision support through evidence-based pattern 
+
+      recognition and cross-modality validation.
+  - title: Patient Monitoring Dashboard
+    name: patientdashboard
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Patient Monitoring Dashboard
+    menuSubtitle: Real-Time Clinical Analytics and Monitoring
+    description: |
+      Patient Monitoring Dashboard provides real-time clinical analytics with 
+      continuous patient status visualization through interactive dashboards 
+      featuring vital signs monitoring, laboratory trend analysis, alert 
+      threshold management, and clinical decision support for comprehensive 
+      patient care coordination and clinical workflow optimization.
+  - title: Population Health Analytics
+    name: populationhealth
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Population Health Analytics
+    menuSubtitle: Cohort-Level Health Status Monitoring
+    description: >
+      Population Health Analytics provides comprehensive cohort-level health
+      status 
+
+      monitoring and epidemiological analysis with population health metrics,
+      risk 
+
+      stratification, geographic health mapping, and predictive health outcome 
+
+      modeling for public health surveillance, population management, and
+      healthcare 
+
+      system optimization through evidence-based population health insights.
   - title: Direct Binomial Regression for Competing Risks
     name: directbinomial
     ns: ClinicoPath
@@ -3473,6 +3527,37 @@ analyses:
     menuGroup: conttablesplus
     menuTitle: Chi-Square Post-Hoc Analysis
     addonFor: jmv::conttables
+  - title: Patient Monitoring Dashboard
+    name: patientdashboard
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuTitle: Patient Monitoring Dashboard
+    description: |
+      Patient Monitoring Dashboard provides real-time clinical analytics with 
+      continuous patient status visualization through interactive dashboards 
+      featuring vital signs monitoring, laboratory trend analysis, alert 
+      threshold management, and clinical decision support for comprehensive 
+      patient care coordination and clinical workflow optimization.
+  - title: Population Health Analytics
+    name: populationhealth
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuTitle: Population Health Analytics
+    description: >
+      Population Health Analytics provides comprehensive cohort-level health
+      status 
+
+      monitoring and epidemiological analysis with population health metrics,
+      risk 
+
+      stratification, geographic health mapping, and predictive health outcome 
+
+      modeling for public health surveillance, population management, and
+      healthcare 
+
+      system optimization through evidence-based population health insights.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

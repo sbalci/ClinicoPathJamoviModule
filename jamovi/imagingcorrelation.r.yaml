@@ -1,0 +1,377 @@
+---
+name: imagingcorrelation
+title: Imaging Findings Correlation
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis Summary
+      type: Html
+      refs: [imagingFindings]
+
+    - name: correlationTable
+      title: Multi-Modal Correlation Analysis
+      type: Table
+      rows: (imagingFindings)
+      visible: (correlation_analysis)
+      clearWith:
+        - imagingFindings
+        - labResults
+        - clinicalVars
+        - correlation_method
+      columns:
+        - name: imaging_finding
+          title: Imaging Finding
+          type: text
+        - name: correlated_variable
+          title: Correlated Variable
+          type: text
+        - name: modality_type
+          title: Modality Type
+          type: text
+        - name: correlation_coefficient
+          title: Correlation (r)
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: confidence_interval
+          title: 95% CI
+          type: text
+        - name: clinical_significance
+          title: Clinical Significance
+          type: text
+
+    - name: concordanceTable
+      title: Diagnostic Concordance Assessment
+      type: Table
+      visible: (concordance_assessment)
+      clearWith:
+        - imagingFindings
+        - labResults
+        - pathologyData
+        - concordance_assessment
+      columns:
+        - name: modality_1
+          title: Modality 1
+          type: text
+        - name: modality_2
+          title: Modality 2
+          type: text
+        - name: concordance_rate
+          title: Concordance Rate
+          type: number
+          format: pc
+        - name: kappa_statistic
+          title: Kappa (κ)
+          type: number
+          format: zto
+        - name: agreement_level
+          title: Agreement Level
+          type: text
+        - name: discordant_cases
+          title: Discordant Cases
+          type: integer
+        - name: clinical_impact
+          title: Clinical Impact
+          type: text
+
+    - name: diagnosticPerformanceTable
+      title: Diagnostic Performance Metrics
+      type: Table
+      visible: (sensitivity_specificity)
+      clearWith:
+        - imagingFindings
+        - pathologyData
+        - sensitivity_specificity
+      columns:
+        - name: imaging_test
+          title: Imaging Test
+          type: text
+        - name: reference_standard
+          title: Reference Standard
+          type: text
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: specificity
+          title: Specificity
+          type: number
+          format: pc
+        - name: ppv
+          title: PPV
+          type: number
+          format: pc
+        - name: npv
+          title: NPV
+          type: number
+          format: pc
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: pc
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+
+    - name: patternRecognitionTable
+      title: Diagnostic Pattern Recognition
+      type: Table
+      visible: (pattern_recognition)
+      clearWith:
+        - imagingFindings
+        - labResults
+        - clinicalVars
+        - pattern_recognition
+      columns:
+        - name: pattern_id
+          title: Pattern ID
+          type: text
+        - name: pattern_description
+          title: Pattern Description
+          type: text
+        - name: frequency
+          title: Frequency
+          type: number
+          format: pc
+        - name: imaging_components
+          title: Imaging Components
+          type: text
+        - name: lab_components
+          title: Lab Components
+          type: text
+        - name: clinical_components
+          title: Clinical Components
+          type: text
+        - name: diagnostic_association
+          title: Diagnostic Association
+          type: text
+        - name: confidence_score
+          title: Confidence Score
+          type: number
+          format: pc
+
+    - name: lesionCharacterizationTable
+      title: Lesion Characterization Analysis
+      type: Table
+      visible: (lesion_characterization)
+      clearWith:
+        - imagingFindings
+        - imagingModality
+        - lesion_characterization
+      columns:
+        - name: lesion_id
+          title: Lesion ID
+          type: text
+        - name: location
+          title: Anatomical Location
+          type: text
+        - name: size
+          title: Size (mm)
+          type: text
+        - name: morphology
+          title: Morphology
+          type: text
+        - name: enhancement_pattern
+          title: Enhancement Pattern
+          type: text
+        - name: diffusion_characteristics
+          title: Diffusion/Signal
+          type: text
+        - name: metabolic_activity
+          title: Metabolic Activity
+          type: text
+        - name: classification
+          title: Classification
+          type: text
+
+    - name: stagingCorrelationTable
+      title: Disease Staging Correlation
+      type: Table
+      visible: (staging_correlation)
+      clearWith:
+        - imagingFindings
+        - pathologyData
+        - staging_correlation
+      columns:
+        - name: imaging_stage
+          title: Imaging Stage
+          type: text
+        - name: pathology_stage
+          title: Pathology Stage
+          type: text
+        - name: concordance
+          title: Concordance
+          type: text
+        - name: upstaging_rate
+          title: Upstaging Rate
+          type: number
+          format: pc
+        - name: downstaging_rate
+          title: Downstaging Rate
+          type: number
+          format: pc
+        - name: clinical_implications
+          title: Clinical Implications
+          type: text
+
+    - name: treatmentResponseTable
+      title: Treatment Response Assessment
+      type: Table
+      visible: (treatment_response)
+      clearWith:
+        - imagingFindings
+        - temporal_analysis
+        - treatment_response
+      columns:
+        - name: timepoint
+          title: Time Point
+          type: text
+        - name: response_category
+          title: Response Category
+          type: text
+        - name: size_change
+          title: Size Change (%)
+          type: number
+          format: zto
+        - name: metabolic_change
+          title: Metabolic Change
+          type: text
+        - name: recist_criteria
+          title: RECIST Criteria
+          type: text
+        - name: clinical_correlation
+          title: Clinical Correlation
+          type: text
+
+    - name: radiomicsTable
+      title: Radiomics Feature Analysis
+      type: Table
+      visible: (radiomics_analysis)
+      clearWith:
+        - imagingFindings
+        - radiomics_analysis
+      columns:
+        - name: feature_category
+          title: Feature Category
+          type: text
+        - name: feature_name
+          title: Feature Name
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: z_score
+          title: Z-Score
+          type: number
+          format: zto
+        - name: percentile
+          title: Percentile
+          type: number
+          format: zto
+        - name: diagnostic_relevance
+          title: Diagnostic Relevance
+          type: text
+
+    - name: integratedDiagnosticSummary
+      title: Integrated Diagnostic Summary
+      type: Html
+      visible: (report_generation)
+      clearWith:
+        - imagingFindings
+        - labResults
+        - clinicalVars
+        - pathologyData
+        - report_generation
+
+    - name: clinicalRecommendations
+      title: Clinical Recommendations
+      type: Html
+      visible: (clinical_guidelines)
+      clearWith:
+        - imagingFindings
+        - clinical_guidelines
+        - diagnostic_confidence
+
+    - name: confidenceAssessment
+      title: Diagnostic Confidence Assessment
+      type: Html
+      visible: (diagnostic_confidence)
+      clearWith:
+        - imagingFindings
+        - labResults
+        - diagnostic_confidence
+
+    - name: correlationPlot
+      title: Multi-Modal Correlation Plot
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .correlationPlot
+      visible: (correlation_plots)
+      requiresData: true
+      clearWith:
+        - imagingFindings
+        - labResults
+        - clinicalVars
+        - correlation_plots
+
+    - name: concordancePlot
+      title: Diagnostic Concordance Plot
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .concordancePlot
+      visible: (concordance_plots)
+      requiresData: true
+      clearWith:
+        - imagingFindings
+        - pathologyData
+        - concordance_plots
+
+    - name: heatmapPlot
+      title: Correlation Heatmap
+      type: Image
+      width: 700
+      height: 700
+      renderFun: .heatmapPlot
+      visible: (heatmap_visualization)
+      requiresData: true
+      clearWith:
+        - imagingFindings
+        - labResults
+        - clinicalVars
+        - heatmap_visualization
+
+    - name: networkPlot
+      title: Diagnostic Network Diagram
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .networkPlot
+      visible: (network_diagram)
+      requiresData: true
+      clearWith:
+        - imagingFindings
+        - labResults
+        - clinicalVars
+        - pathologyData
+        - network_diagram
+
+    - name: rocPlot
+      title: ROC Curve Analysis
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .rocPlot
+      visible: (roc_curves)
+      requiresData: true
+      clearWith:
+        - imagingFindings
+        - pathologyData
+        - roc_curves

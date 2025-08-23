@@ -1,0 +1,338 @@
+---
+name: patientdashboard
+title: Patient Monitoring Dashboard
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Dashboard Overview
+      type: Html
+      refs: [patientID, vitals]
+
+    - name: patientSummary
+      title: Patient Summary
+      type: Html
+      clearWith:
+        - patientID
+        - vitals
+        - labValues
+
+    - name: vitalsTable
+      title: Current Vital Signs
+      type: Table
+      rows: (vitals)
+      clearWith:
+        - vitals
+        - patientID
+        - alert_thresholds
+      columns:
+        - name: parameter
+          title: Vital Sign
+          type: text
+        - name: current_value
+          title: Current Value
+          type: number
+          format: zto
+        - name: normal_range
+          title: Normal Range
+          type: text
+        - name: status
+          title: Status
+          type: text
+        - name: trend
+          title: Trend
+          type: text
+        - name: last_updated
+          title: Last Updated
+          type: text
+
+    - name: labValuesTable
+      title: Laboratory Values Status
+      type: Table
+      rows: (labValues)
+      visible: (labValues)
+      clearWith:
+        - labValues
+        - patientID
+        - alert_thresholds
+      columns:
+        - name: test_name
+          title: Laboratory Test
+          type: text
+        - name: current_result
+          title: Current Result
+          type: number
+          format: zto
+        - name: reference_range
+          title: Reference Range
+          type: text
+        - name: status
+          title: Status
+          type: text
+        - name: trend_direction
+          title: Trend
+          type: text
+        - name: collection_time
+          title: Collection Time
+          type: text
+
+    - name: activeAlertsTable
+      title: Active Clinical Alerts
+      type: Table
+      visible: (alert_system)
+      clearWith:
+        - vitals
+        - labValues
+        - alert_system
+        - alert_priority
+      columns:
+        - name: alert_time
+          title: Alert Time
+          type: text
+        - name: priority
+          title: Priority
+          type: text
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto
+        - name: threshold
+          title: Threshold
+          type: text
+        - name: status
+          title: Status
+          type: text
+        - name: response_time
+          title: Response Time
+          type: text
+
+    - name: riskAssessmentTable
+      title: Risk Assessment
+      type: Table
+      visible: (risk_stratification)
+      clearWith:
+        - vitals
+        - labValues
+        - risk_stratification
+      columns:
+        - name: risk_category
+          title: Risk Category
+          type: text
+        - name: score
+          title: Score
+          type: number
+          format: zto
+        - name: risk_level
+          title: Risk Level
+          type: text
+        - name: factors
+          title: Contributing Factors
+          type: text
+        - name: recommendations
+          title: Recommendations
+          type: text
+
+    - name: trendAnalysisTable
+      title: Trend Analysis Summary
+      type: Table
+      visible: (trend_analysis)
+      clearWith:
+        - vitals
+        - labValues
+        - trend_analysis
+        - time_window
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: trend_type
+          title: Trend Type
+          type: text
+        - name: change_rate
+          title: Change Rate
+          type: number
+          format: zto
+        - name: statistical_significance
+          title: Significance
+          type: text
+        - name: clinical_relevance
+          title: Clinical Relevance
+          type: text
+
+    - name: medicationTable
+      title: Medication Status
+      type: Table
+      visible: (medications)
+      clearWith:
+        - medications
+        - medication_reconciliation
+      columns:
+        - name: medication_name
+          title: Medication
+          type: text
+        - name: dose
+          title: Dose
+          type: text
+        - name: frequency
+          title: Frequency
+          type: text
+        - name: last_administered
+          title: Last Administered
+          type: text
+        - name: next_due
+          title: Next Due
+          type: text
+        - name: compliance_status
+          title: Compliance
+          type: text
+
+    - name: qualityMetricsTable
+      title: Quality Metrics
+      type: Table
+      visible: (quality_metrics)
+      clearWith:
+        - quality_metrics
+        - workflow_optimization
+      columns:
+        - name: metric_name
+          title: Quality Metric
+          type: text
+        - name: current_value
+          title: Current Value
+          type: number
+          format: zto
+        - name: target_value
+          title: Target
+          type: number
+          format: zto
+        - name: performance_status
+          title: Status
+          type: text
+        - name: trend
+          title: Trend
+          type: text
+
+    - name: workflowAnalysisTable
+      title: Workflow Analysis
+      type: Table
+      visible: (workflow_optimization)
+      clearWith:
+        - workflow_optimization
+        - performance_analytics
+      columns:
+        - name: workflow_step
+          title: Workflow Step
+          type: text
+        - name: average_time
+          title: Average Time (min)
+          type: number
+          format: zto
+        - name: efficiency_score
+          title: Efficiency Score
+          type: number
+          format: zto
+        - name: bottlenecks
+          title: Bottlenecks
+          type: text
+        - name: improvement_suggestions
+          title: Improvements
+          type: text
+
+    - name: clinicalSummaryReport
+      title: Clinical Summary Report
+      type: Html
+      visible: (summary_reports)
+      clearWith:
+        - patientID
+        - vitals
+        - labValues
+        - summary_reports
+
+    - name: predictiveAnalytics
+      title: Predictive Analytics
+      type: Html
+      visible: (predictive_analytics)
+      clearWith:
+        - vitals
+        - labValues
+        - predictive_analytics
+
+    - name: patientOutcomes
+      title: Patient Outcomes
+      type: Html
+      visible: (patient_outcomes)
+      clearWith:
+        - patient_outcomes
+        - quality_metrics
+
+    - name: vitalsPlot
+      title: Vital Signs Trends
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .vitalsPlot
+      visible: (trend_plots)
+      requiresData: true
+      clearWith:
+        - vitals
+        - timestamps
+        - trend_plots
+
+    - name: labTrendsPlot
+      title: Laboratory Trends
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .labTrendsPlot
+      visible: (trend_plots)
+      requiresData: true
+      clearWith:
+        - labValues
+        - timestamps
+        - trend_plots
+
+    - name: alertDashboardPlot
+      title: Alert Management Dashboard
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .alertDashboardPlot
+      visible: (alert_dashboard)
+      requiresData: true
+      clearWith:
+        - vitals
+        - labValues
+        - alert_system
+        - alert_dashboard
+
+    - name: riskDashboardPlot
+      title: Risk Assessment Dashboard
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .riskDashboardPlot
+      visible: (risk_dashboard)
+      requiresData: true
+      clearWith:
+        - vitals
+        - labValues
+        - risk_stratification
+        - risk_dashboard
+
+    - name: interactiveDashboard
+      title: Interactive Patient Monitor
+      type: Image
+      width: 1200
+      height: 800
+      renderFun: .interactiveDashboard
+      visible: (interactive_plots)
+      requiresData: true
+      clearWith:
+        - patientID
+        - vitals
+        - labValues
+        - interactive_plots
+        - realtime_monitoring

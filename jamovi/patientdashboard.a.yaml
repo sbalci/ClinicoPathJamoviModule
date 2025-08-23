@@ -1,0 +1,288 @@
+---
+name: patientdashboard
+title: Patient Monitoring Dashboard
+menuGroup: ClinicoPathD
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Patient Monitoring Dashboard provides real-time clinical analytics with 
+        continuous patient status visualization through interactive dashboards 
+        featuring vital signs monitoring, laboratory trend analysis, alert 
+        threshold management, and clinical decision support for comprehensive 
+        patient care coordination and clinical workflow optimization.
+        
+    R:
+        dontrun: false
+        usage: |
+            data('patient_monitoring', package='ClinicoPath')
+            
+            # Basic patient monitoring dashboard
+            patientdashboard(patient_monitoring, 
+                           patientID = 'PatientID',
+                           vitals = c('HeartRate', 'BloodPressure', 'Temperature'),
+                           labValues = c('Glucose', 'Creatinine', 'Hemoglobin'),
+                           realtime_monitoring = TRUE,
+                           alert_system = TRUE)
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+
+    - name: patientID
+      title: Patient Identifier
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - id
+      description:
+          R: Unique patient identifier for individual patient tracking
+
+    - name: vitals
+      title: Vital Signs
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Vital signs parameters (heart rate, blood pressure, temperature, etc.)
+
+    - name: labValues
+      title: Laboratory Values
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Laboratory test results for trend monitoring and analysis
+
+    - name: timestamps
+      title: Time Stamps
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Date/time variables for temporal analysis and trending (optional)
+
+    - name: clinicalNotes
+      title: Clinical Notes/Events
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: Clinical events, interventions, and annotations (optional)
+
+    - name: medications
+      title: Medication Data
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: Medication administration records and dosing information (optional)
+
+    - name: realtime_monitoring
+      title: Real-Time Monitoring
+      type: Bool
+      default: true
+      description:
+          R: Enable real-time data streaming and continuous monitoring updates
+
+    - name: alert_system
+      title: Clinical Alert System
+      type: Bool
+      default: true
+      description:
+          R: Activate threshold-based alerting system for critical values
+
+    - name: trend_analysis
+      title: Trend Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform statistical trend analysis on vital signs and lab values
+
+    - name: risk_stratification
+      title: Risk Stratification
+      type: Bool
+      default: true
+      description:
+          R: Calculate patient risk scores and stratification levels
+
+    - name: dashboard_type
+      title: Dashboard Type
+      type: List
+      options:
+        - name: comprehensive
+          title: Comprehensive Overview
+        - name: critical_care
+          title: Critical Care Focus
+        - name: ward_monitoring
+          title: Ward Monitoring
+        - name: emergency
+          title: Emergency Department
+      default: comprehensive
+      description:
+          R: Type of clinical dashboard optimized for specific care settings
+
+    - name: monitoring_frequency
+      title: Monitoring Frequency
+      type: List
+      options:
+        - name: continuous
+          title: Continuous (Real-time)
+        - name: every_15min
+          title: Every 15 Minutes
+        - name: hourly
+          title: Hourly
+        - name: every_4hrs
+          title: Every 4 Hours
+        - name: daily
+          title: Daily
+      default: hourly
+      description:
+          R: Frequency of data updates and monitoring intervals
+
+    - name: alert_thresholds
+      title: Alert Threshold Configuration
+      type: List
+      options:
+        - name: standard
+          title: Standard Clinical Thresholds
+        - name: pediatric
+          title: Pediatric-Specific Thresholds
+        - name: geriatric
+          title: Geriatric-Specific Thresholds
+        - name: icu
+          title: ICU Critical Thresholds
+        - name: custom
+          title: Custom Thresholds
+      default: standard
+      description:
+          R: Clinical threshold configuration based on patient population
+
+    - name: time_window
+      title: Monitoring Time Window (hours)
+      type: Integer
+      min: 1
+      max: 168
+      default: 24
+      description:
+          R: Time window for displaying historical data and trends
+
+    - name: alert_priority
+      title: Alert Priority Levels
+      type: Bool
+      default: true
+      description:
+          R: Enable priority-based alert classification (Critical, High, Medium, Low)
+
+    - name: predictive_analytics
+      title: Predictive Analytics
+      type: Bool
+      default: false
+      description:
+          R: Enable predictive modeling for early warning system
+
+    - name: clinical_pathways
+      title: Clinical Pathways Integration
+      type: Bool
+      default: true
+      description:
+          R: Integrate with clinical care pathways and protocols
+
+    - name: medication_reconciliation
+      title: Medication Reconciliation
+      type: Bool
+      default: false
+      description:
+          R: Include medication reconciliation and interaction checking
+
+    - name: family_communication
+      title: Family Communication Tools
+      type: Bool
+      default: false
+      description:
+          R: Enable family/caregiver communication and updates
+
+    - name: quality_metrics
+      title: Quality Metrics Tracking
+      type: Bool
+      default: true
+      description:
+          R: Track healthcare quality indicators and outcomes
+
+    - name: workflow_optimization
+      title: Workflow Optimization
+      type: Bool
+      default: true
+      description:
+          R: Analyze and optimize clinical workflow efficiency
+
+    - name: interactive_plots
+      title: Interactive Visualization
+      type: Bool
+      default: true
+      description:
+          R: Create interactive plots and charts for data exploration
+
+    - name: trend_plots
+      title: Trend Visualization
+      type: Bool
+      default: true
+      description:
+          R: Generate time-series trend plots for vital signs and lab values
+
+    - name: alert_dashboard
+      title: Alert Management Dashboard
+      type: Bool
+      default: true
+      description:
+          R: Display comprehensive alert management and response tracking
+
+    - name: risk_dashboard
+      title: Risk Assessment Dashboard
+      type: Bool
+      default: true
+      description:
+          R: Show patient risk stratification and early warning scores
+
+    - name: medication_dashboard
+      title: Medication Management Dashboard
+      type: Bool
+      default: false
+      description:
+          R: Display medication administration and reconciliation dashboard
+
+    - name: summary_reports
+      title: Clinical Summary Reports
+      type: Bool
+      default: true
+      description:
+          R: Generate automated clinical summary reports
+
+    - name: performance_analytics
+      title: Performance Analytics
+      type: Bool
+      default: false
+      description:
+          R: Analyze clinical team performance and efficiency metrics
+
+    - name: patient_outcomes
+      title: Patient Outcomes Tracking
+      type: Bool
+      default: true
+      description:
+          R: Track and analyze patient outcome measures and quality indicators

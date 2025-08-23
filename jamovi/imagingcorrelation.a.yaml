@@ -1,0 +1,279 @@
+---
+name: imagingcorrelation
+title: Imaging Findings Correlation
+menuGroup: ClinicoPathD
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Imaging Findings Correlation provides comprehensive multi-modal diagnostic 
+        data integration by correlating imaging findings with laboratory results, 
+        clinical presentations, and pathological data for enhanced diagnostic 
+        accuracy and clinical decision support through evidence-based pattern 
+        recognition and cross-modality validation.
+        
+    R:
+        dontrun: false
+        usage: |
+            data('clinicaldata', package='ClinicoPath')
+            
+            # Basic imaging correlation analysis
+            imagingcorrelation(clinicaldata, 
+                             imagingFindings = c('CT_Finding', 'MRI_Finding', 'PET_Finding'), 
+                             labResults = c('Biomarker1', 'Biomarker2'),
+                             clinicalVars = c('Symptoms', 'Signs'),
+                             correlation_analysis = TRUE,
+                             concordance_assessment = TRUE)
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+
+    - name: imagingFindings
+      title: Imaging Findings
+      type: Variables
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: Imaging findings from various modalities (CT, MRI, PET, ultrasound, X-ray)
+
+    - name: labResults
+      title: Laboratory Results
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Laboratory test results and biomarkers for correlation analysis (optional)
+
+    - name: clinicalVars
+      title: Clinical Variables
+      type: Variables
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: Clinical symptoms, signs, and examination findings (optional)
+
+    - name: pathologyData
+      title: Pathology Results
+      type: Variables
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: Pathological findings and histopathology results for validation (optional)
+
+    - name: imagingModality
+      title: Imaging Modality Types
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: Type of imaging modality for each finding (CT, MRI, PET, etc.) (optional)
+
+    - name: correlation_analysis
+      title: Multi-Modal Correlation Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform comprehensive correlation analysis across imaging, lab, and clinical data
+
+    - name: concordance_assessment
+      title: Diagnostic Concordance Assessment
+      type: Bool
+      default: true
+      description:
+          R: Evaluate concordance between different diagnostic modalities
+
+    - name: pattern_recognition
+      title: Pattern Recognition Analysis
+      type: Bool
+      default: true
+      description:
+          R: Identify diagnostic patterns across multiple data modalities
+
+    - name: sensitivity_specificity
+      title: Diagnostic Performance Metrics
+      type: Bool
+      default: true
+      description:
+          R: Calculate sensitivity, specificity, PPV, NPV for imaging findings
+
+    - name: integration_method
+      title: Data Integration Method
+      type: List
+      options:
+        - name: weighted_fusion
+          title: Weighted Data Fusion
+        - name: bayesian_integration
+          title: Bayesian Integration
+        - name: ensemble_voting
+          title: Ensemble Voting
+        - name: hierarchical_fusion
+          title: Hierarchical Fusion
+      default: weighted_fusion
+      description:
+          R: Method for integrating multi-modal diagnostic data
+
+    - name: correlation_method
+      title: Correlation Analysis Method
+      type: List
+      options:
+        - name: pearson
+          title: Pearson Correlation
+        - name: spearman
+          title: Spearman Correlation
+        - name: kendall
+          title: Kendall's Tau
+        - name: polychoric
+          title: Polychoric Correlation
+      default: spearman
+      description:
+          R: Statistical method for correlation analysis
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for statistical calculations and intervals
+
+    - name: minimum_correlation
+      title: Minimum Correlation Threshold
+      type: Number
+      min: 0.1
+      max: 0.9
+      default: 0.3
+      description:
+          R: Minimum correlation coefficient to report as significant
+
+    - name: radiomics_analysis
+      title: Radiomics Feature Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform advanced radiomics feature extraction and analysis
+
+    - name: texture_analysis
+      title: Image Texture Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze texture features from imaging data for pattern detection
+
+    - name: lesion_characterization
+      title: Lesion Characterization
+      type: Bool
+      default: true
+      description:
+          R: Comprehensive lesion characterization across imaging modalities
+
+    - name: temporal_analysis
+      title: Temporal Change Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze temporal changes in imaging findings over time
+
+    - name: anatomical_correlation
+      title: Anatomical Location Correlation
+      type: Bool
+      default: true
+      description:
+          R: Correlate findings based on anatomical location and distribution
+
+    - name: staging_correlation
+      title: Disease Staging Correlation
+      type: Bool
+      default: true
+      description:
+          R: Correlate imaging findings with disease staging and progression
+
+    - name: treatment_response
+      title: Treatment Response Assessment
+      type: Bool
+      default: false
+      description:
+          R: Evaluate treatment response using imaging criteria (RECIST, mRECIST, etc.)
+
+    - name: ai_assisted
+      title: AI-Assisted Analysis
+      type: Bool
+      default: false
+      description:
+          R: Use AI/ML models for enhanced pattern recognition and prediction
+
+    - name: correlation_plots
+      title: Correlation Visualization Plots
+      type: Bool
+      default: true
+      description:
+          R: Create comprehensive correlation visualization plots
+
+    - name: concordance_plots
+      title: Concordance Analysis Plots
+      type: Bool
+      default: true
+      description:
+          R: Generate concordance plots between diagnostic modalities
+
+    - name: heatmap_visualization
+      title: Correlation Heatmaps
+      type: Bool
+      default: true
+      description:
+          R: Create heatmaps showing multi-modal correlations
+
+    - name: network_diagram
+      title: Diagnostic Network Diagram
+      type: Bool
+      default: false
+      description:
+          R: Generate network diagrams showing relationships between findings
+
+    - name: roc_curves
+      title: ROC Curve Analysis
+      type: Bool
+      default: true
+      description:
+          R: Generate ROC curves for diagnostic performance assessment
+
+    - name: clinical_guidelines
+      title: Clinical Guidelines Integration
+      type: Bool
+      default: true
+      description:
+          R: Integrate evidence-based imaging guidelines and recommendations
+
+    - name: diagnostic_confidence
+      title: Diagnostic Confidence Assessment
+      type: Bool
+      default: true
+      description:
+          R: Calculate and report diagnostic confidence levels for integrated findings
+
+    - name: report_generation
+      title: Integrated Diagnostic Report
+      type: Bool
+      default: true
+      description:
+          R: Generate comprehensive integrated diagnostic report with recommendations

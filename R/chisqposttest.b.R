@@ -412,7 +412,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Create detailed HTML table for individual pairwise comparisons
-        .createDetailedComparisonHTML = function(pairwise_results) {
+        .createDetailedComparisonHTML = function(pairwise_results, row_var_name = NULL, col_var_name = NULL) {
             if (length(pairwise_results) == 0) return("")
             
             comparison_divs <- lapply(seq_along(pairwise_results), function(i) {
@@ -449,7 +449,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 
                 # Create contingency table using htmltools
-                contingency_table <- private$.createContingencyTableHTML(subtable)
+                contingency_table <- private$.createContingencyTableHTML(subtable, row_var_name, col_var_name)
                 
                 # Wrap in comparison div
                 htmltools::div(
@@ -470,25 +470,55 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Helper function to create main contingency table HTML
-        .createMainContingencyTableHTML = function(contTable, expValues = NULL) {
+        .createMainContingencyTableHTML = function(contTable, expValues = NULL, row_var_name = NULL, col_var_name = NULL) {
             row_names <- rownames(contTable)
             col_names <- colnames(contTable)
             
-            # Create header row
-            header_cells <- c(
-                htmltools::th(style = "border: 1px solid #666; padding: 8px; text-align: center;", ""),
-                lapply(col_names, function(col) {
-                    htmltools::th(style = "border: 1px solid #666; padding: 8px; text-align: center;", col)
-                })
+            # Create header row with variable names
+            header_cells <- list(
+                htmltools::tags$th(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f8f9fa;", 
+                    htmltools::div(
+                        style = "font-weight: bold; color: #495057;",
+                        if (!is.null(col_var_name)) paste0(col_var_name, " →") else "",
+                        htmltools::br(),
+                        if (!is.null(row_var_name)) paste0(row_var_name, " ↓") else ""
+                    )
+                )
             )
-            header_row <- htmltools::tr(style = "background-color: #e3f2fd;", header_cells)
+            
+            # Add column headers with variable name context
+            for (col in col_names) {
+                header_cells[[length(header_cells) + 1]] <- htmltools::tags$th(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #e3f2fd;", 
+                    htmltools::div(
+                        style = "font-weight: bold;",
+                        if (!is.null(col_var_name)) {
+                            list(
+                                htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", col_var_name),
+                                htmltools::div(style = "font-size: 13px; color: #212529;", col)
+                            )
+                        } else {
+                            col
+                        }
+                    )
+                )
+            }
+            header_row <- htmltools::tags$tr(style = "background-color: #e3f2fd;", header_cells)
             
             # Create data rows
             data_rows <- lapply(seq_along(row_names), function(i) {
                 row_cells <- list(
-                    htmltools::th(
-                        style = "border: 1px solid #666; padding: 8px; background-color: #e3f2fd; font-weight: bold;",
-                        row_names[i]
+                    htmltools::tags$th(
+                        style = "border: 1px solid #e1e5e9; padding: 8px; background-color: #e3f2fd; font-weight: bold;",
+                        if (!is.null(row_var_name)) {
+                            htmltools::div(
+                                htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", row_var_name),
+                                htmltools::div(style = "font-size: 13px; color: #212529;", row_names[i])
+                            )
+                        } else {
+                            row_names[i]
+                        }
                     )
                 )
                 
@@ -504,21 +534,21 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     
                     row_cells <- c(row_cells, list(
-                        htmltools::td(
-                            style = "border: 1px solid #666; padding: 8px; text-align: center;",
+                        htmltools::tags$td(
+                            style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
                             cell_content
                         )
                     ))
                 }
                 
-                htmltools::tr(row_cells)
+                htmltools::tags$tr(row_cells)
             })
             
-            # Create complete table
-            table_content <- htmltools::table(
-                style = "border-collapse: collapse; width: 100%; margin: 10px 0;",
-                htmltools::thead(header_row),
-                htmltools::tbody(data_rows)
+            # Create complete table with jamovi-like styling
+            table_content <- htmltools::tags$table(
+                style = "border-collapse: collapse; width: 100%; margin: 15px 0; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);",
+                htmltools::tags$thead(header_row),
+                htmltools::tags$tbody(data_rows)
             )
             
             # Add explanation if expected values are shown
@@ -534,7 +564,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Helper function to create contingency table HTML using htmltools
-        .createContingencyTableHTML = function(subtable) {
+        .createContingencyTableHTML = function(subtable, row_var_name = NULL, col_var_name = NULL) {
             row_names <- rownames(subtable)
             col_names <- colnames(subtable)
             row_totals <- rowSums(subtable)
@@ -542,12 +572,44 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             grand_total <- sum(subtable)
             
             # Create table header
-            header_row <- htmltools::tr(
+            header_row <- htmltools::tags$tr(
                 style = "background-color: #e3f2fd;",
-                htmltools::th(style = "border: 1px solid #666; padding: 8px; text-align: center;", ""),
-                htmltools::th(style = "border: 1px solid #666; padding: 8px; text-align: center;", col_names[1]),
-                htmltools::th(style = "border: 1px solid #666; padding: 8px; text-align: center;", col_names[2]),
-                htmltools::th(style = "border: 1px solid #666; padding: 8px; text-align: center;", htmltools::strong("Total"))
+                htmltools::tags$th(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f8f9fa;", 
+                    if (!is.null(col_var_name) || !is.null(row_var_name)) {
+                        htmltools::div(
+                            style = "font-weight: bold; color: #495057; font-size: 11px;",
+                            if (!is.null(col_var_name)) paste0(col_var_name, " →") else "",
+                            htmltools::br(),
+                            if (!is.null(row_var_name)) paste0(row_var_name, " ↓") else ""
+                        )
+                    } else {
+                        ""
+                    }
+                ),
+                htmltools::tags$th(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", 
+                    if (!is.null(col_var_name)) {
+                        htmltools::div(
+                            htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", col_var_name),
+                            htmltools::div(style = "font-size: 13px; color: #212529;", col_names[1])
+                        )
+                    } else {
+                        col_names[1]
+                    }
+                ),
+                htmltools::tags$th(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", 
+                    if (!is.null(col_var_name)) {
+                        htmltools::div(
+                            htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", col_var_name),
+                            htmltools::div(style = "font-size: 13px; color: #212529;", col_names[2])
+                        )
+                    } else {
+                        col_names[2]
+                    }
+                ),
+                htmltools::tags$th(style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", htmltools::strong("Total"))
             )
             
             # Create data rows
@@ -555,21 +617,28 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 row_pct1 <- round(subtable[j, 1] / row_totals[j] * 100, 1)
                 row_pct2 <- round(subtable[j, 2] / row_totals[j] * 100, 1)
                 
-                htmltools::tr(
-                    htmltools::td(
-                        style = "border: 1px solid #666; padding: 8px; background-color: #e3f2fd; font-weight: bold;", 
-                        row_names[j]
+                htmltools::tags$tr(
+                    htmltools::tags$td(
+                        style = "border: 1px solid #e1e5e9; padding: 8px; background-color: #e3f2fd; font-weight: bold;", 
+                        if (!is.null(row_var_name)) {
+                            htmltools::div(
+                                htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", row_var_name),
+                                htmltools::div(style = "font-size: 13px; color: #212529;", row_names[j])
+                            )
+                        } else {
+                            row_names[j]
+                        }
                     ),
-                    htmltools::td(
-                        style = "border: 1px solid #666; padding: 8px; text-align: center;",
+                    htmltools::tags$td(
+                        style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
                         subtable[j, 1], htmltools::br(), htmltools::tags$small(paste0("(", row_pct1, "%)"))
                     ),
-                    htmltools::td(
-                        style = "border: 1px solid #666; padding: 8px; text-align: center;",
+                    htmltools::tags$td(
+                        style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
                         subtable[j, 2], htmltools::br(), htmltools::tags$small(paste0("(", row_pct2, "%)"))
                     ),
-                    htmltools::td(
-                        style = "border: 1px solid #666; padding: 8px; text-align: center; font-weight: bold;",
+                    htmltools::tags$td(
+                        style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; font-weight: bold;",
                         row_totals[j]
                     )
                 )
@@ -579,28 +648,28 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             col_pct1 <- round(col_totals[1] / grand_total * 100, 1)
             col_pct2 <- round(col_totals[2] / grand_total * 100, 1)
             
-            total_row <- htmltools::tr(
+            total_row <- htmltools::tags$tr(
                 style = "background-color: #f5f5f5; font-weight: bold;",
-                htmltools::td(style = "border: 1px solid #666; padding: 8px;", "Total"),
-                htmltools::td(
-                    style = "border: 1px solid #666; padding: 8px; text-align: center;",
+                htmltools::tags$td(style = "border: 1px solid #e1e5e9; padding: 8px;", "Total"),
+                htmltools::tags$td(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
                     col_totals[1], htmltools::br(), htmltools::tags$small(paste0("(", col_pct1, "%)"))
                 ),
-                htmltools::td(
-                    style = "border: 1px solid #666; padding: 8px; text-align: center;",
+                htmltools::tags$td(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
                     col_totals[2], htmltools::br(), htmltools::tags$small(paste0("(", col_pct2, "%)"))
                 ),
-                htmltools::td(
-                    style = "border: 1px solid #666; padding: 8px; text-align: center;",
+                htmltools::tags$td(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
                     grand_total
                 )
             )
             
             # Build complete table
-            htmltools::table(
+            htmltools::tags$table(
                 style = "border-collapse: collapse; width: 100%; margin: 10px 0;",
-                htmltools::thead(header_row),
-                htmltools::tbody(data_rows, total_row)
+                htmltools::tags$thead(header_row),
+                htmltools::tags$tbody(data_rows, total_row)
             )
         },
         
@@ -755,7 +824,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Helper method to perform chi-square test and populate results
-        .performChiSquareTest = function(contTable) {
+        .performChiSquareTest = function(contTable, rows = NULL, cols = NULL) {
             # Perform Chi-Square Test ----
             chiSqTest <- stats::chisq.test(contTable, correct = FALSE)
 
@@ -772,14 +841,14 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Format contingency table with optional expected values ----
             expValues <- if (self$options$exp) chiSqTest$expected else NULL
-            tableHtml <- private$.createMainContingencyTableHTML(contTable, expValues)
+            tableHtml <- private$.createMainContingencyTableHTML(contTable, expValues, rows, cols)
             self$results$contingencyTable$setContent(tableHtml)
             
             return(chiSqTest)
         },
         
         # Helper method to handle residuals analysis
-        .handleResidualsAnalysis = function(chiSqTest, contTable) {
+        .handleResidualsAnalysis = function(chiSqTest, contTable, rows = NULL, cols = NULL) {
             if (!self$options$showResiduals) return()
             
             # Use custom cutoff if provided
@@ -788,7 +857,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Create residuals interpretation panel and results using htmltools
             residuals_panel <- private$.createEducationalPanel("residuals")
-            residuals_table <- private$.createResidualsTableHTML(residuals_analysis, contTable)
+            residuals_table <- private$.createResidualsTableHTML(residuals_analysis, contTable, rows, cols)
             
             # Combine panel and table
             full_content <- htmltools::div(
@@ -808,29 +877,56 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Helper method to create residuals table using htmltools
-        .createResidualsTableHTML = function(residuals_analysis, contTable) {
+        .createResidualsTableHTML = function(residuals_analysis, contTable, row_var_name = NULL, col_var_name = NULL) {
             row_names <- rownames(contTable)
             col_names <- colnames(contTable)
             
-            # Create header row
-            header_cells <- c(
-                htmltools::th(style = "border: 1px solid #666; padding: 8px;", ""),
-                lapply(col_names, function(col) {
-                    htmltools::th(
-                        style = "border: 1px solid #666; padding: 8px; text-align: center;", 
-                        col
+            # Create header row with variable names
+            header_cells <- list(
+                htmltools::tags$th(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; background-color: #f8f9fa;", 
+                    htmltools::div(
+                        style = "font-weight: bold; color: #495057;",
+                        if (!is.null(col_var_name)) paste0(col_var_name, " →") else "",
+                        htmltools::br(),
+                        if (!is.null(row_var_name)) paste0(row_var_name, " ↓") else ""
                     )
-                })
+                )
             )
-            header_row <- htmltools::tr(style = "background-color: #e8f5e8;", header_cells)
+            
+            # Add column headers with variable name context
+            for (col in col_names) {
+                header_cells[[length(header_cells) + 1]] <- htmltools::tags$th(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #e8f5e8;", 
+                    htmltools::div(
+                        style = "font-weight: bold;",
+                        if (!is.null(col_var_name)) {
+                            list(
+                                htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", col_var_name),
+                                htmltools::div(style = "font-size: 13px; color: #212529;", col)
+                            )
+                        } else {
+                            col
+                        }
+                    )
+                )
+            }
+            header_row <- htmltools::tags$tr(style = "background-color: #e8f5e8;", header_cells)
             
             # Create data rows
             data_rows <- lapply(seq_along(row_names), function(i) {
                 # Row header
                 row_cells <- list(
-                    htmltools::td(
-                        style = "border: 1px solid #666; padding: 8px; font-weight: bold; background-color: #f5f5f5;",
-                        row_names[i]
+                    htmltools::tags$td(
+                        style = "border: 1px solid #e1e5e9; padding: 8px; font-weight: bold; background-color: #f5f5f5;",
+                        if (!is.null(row_var_name)) {
+                            htmltools::div(
+                                htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", row_var_name),
+                                htmltools::div(style = "font-size: 13px; color: #212529;", row_names[i])
+                            )
+                        } else {
+                            row_names[i]
+                        }
                     )
                 )
                 
@@ -843,16 +939,16 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Determine cell styling based on significance
                     cell_style <- if (is_significant) {
                         if (residual_val > 0) {
-                            "border: 1px solid #666; padding: 8px; text-align: center; background-color: #ffebee; color: #c62828; font-weight: bold;"
+                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #ffebee; color: #c62828; font-weight: bold;"
                         } else {
-                            "border: 1px solid #666; padding: 8px; text-align: center; background-color: #e3f2fd; color: #1565c0; font-weight: bold;"
+                            "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #e3f2fd; color: #1565c0; font-weight: bold;"
                         }
                     } else {
-                        "border: 1px solid #666; padding: 8px; text-align: center; background-color: #f9f9f9;"
+                        "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f9f9f9;"
                     }
                     
                     row_cells <- c(row_cells, list(
-                        htmltools::td(
+                        htmltools::tags$td(
                             style = cell_style,
                             residual_val,
                             htmltools::br(),
@@ -861,24 +957,25 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ))
                 }
                 
-                htmltools::tr(row_cells)
+                htmltools::tags$tr(row_cells)
             })
             
-            # Create complete table
-            htmltools::table(
-                style = "border-collapse: collapse; width: 100%; margin: 15px 0;",
-                htmltools::thead(header_row),
-                htmltools::tbody(data_rows)
+            # Create complete table with jamovi-like styling
+            htmltools::tags$table(
+                style = "border-collapse: collapse; width: 100%; margin: 15px 0; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);",
+                htmltools::tags$thead(header_row),
+                htmltools::tags$tbody(data_rows)
             )
         },
         
         # Helper method to handle post-hoc testing
-        .handlePostHocTesting = function(chiSqTest, contTable) {
-            if (chiSqTest$p.value >= self$options$sig) {
-                # Chi-square not significant, no post-hoc testing needed
+        .handlePostHocTesting = function(chiSqTest, contTable, rows = NULL, cols = NULL) {
+            overall_significant <- chiSqTest$p.value < self$options$sig
+            
+            if (!overall_significant) {
+                # Chi-square not significant - show note but continue with detailed tables if requested
                 self$results$multipleTestingInfo$setContent(
-                    "<div style='padding: 15px; background-color: #d4edda; border: 1px solid #c3e6cb;'><strong>Note:</strong> Overall chi-square test is not significant (p ≥ 0.05). Post-hoc pairwise comparisons are not recommended when the overall test is non-significant.</div>")
-                return()
+                    "<div style='padding: 15px; background-color: #d4edda; border: 1px solid #c3e6cb;'><strong>Note:</strong> Overall chi-square test is not significant (p ≥ 0.05). Post-hoc pairwise comparisons are not recommended when the overall test is non-significant, but detailed tables are shown below for educational purposes.</div>")
             }
             
             adjustMethod <- self$options$posthoc
@@ -938,7 +1035,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Create detailed comparison tables (conditional)
                 if (self$options$showDetailedTables) {
-                    detailed_html <- private$.createDetailedComparisonHTML(pairwise_results)
+                    detailed_html <- private$.createDetailedComparisonHTML(pairwise_results, rows, cols)
                     self$results$detailedComparisons$setContent(detailed_html)
                 }
             } else {
@@ -961,10 +1058,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             contTable <- private$.createContingencyTable(data_info$data, data_info$rows, data_info$cols, data_info$counts)
             
             # Perform chi-square test and populate results
-            chiSqTest <- private$.performChiSquareTest(contTable)
+            chiSqTest <- private$.performChiSquareTest(contTable, data_info$rows, data_info$cols)
             
             # Handle residuals analysis
-            private$.handleResidualsAnalysis(chiSqTest, contTable)
+            private$.handleResidualsAnalysis(chiSqTest, contTable, data_info$rows, data_info$cols)
             
             # Create educational overview panel (conditional)
             if (self$options$showEducational) {
@@ -973,7 +1070,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Handle post-hoc testing
-            private$.handlePostHocTesting(chiSqTest, contTable)
+            private$.handlePostHocTesting(chiSqTest, contTable, data_info$rows, data_info$cols)
             
             # Handle export functionality
             if (self$options$exportResults) {

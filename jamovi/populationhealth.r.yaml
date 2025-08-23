@@ -1,0 +1,494 @@
+---
+name: populationhealth
+title: Population Health Analytics
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Population Health Overview
+      type: Html
+      refs: [patientID, healthOutcomes, demographics]
+
+    - name: populationSummary
+      title: Population Summary
+      type: Html
+      clearWith:
+        - patientID
+        - healthOutcomes
+        - demographics
+        - geographic
+
+    - name: demographicsTable
+      title: Population Demographics
+      type: Table
+      rows: (demographics)
+      clearWith:
+        - demographics
+        - population_stratification
+      columns:
+        - name: demographic_category
+          title: Demographic Category
+          type: text
+        - name: subgroup
+          title: Subgroup
+          type: text
+        - name: population_size
+          title: Population Size
+          type: integer
+        - name: percentage
+          title: Percentage
+          type: number
+          format: zto
+        - name: health_status
+          title: Health Status
+          type: text
+        - name: risk_level
+          title: Risk Level
+          type: text
+
+    - name: healthOutcomesTable
+      title: Population Health Outcomes
+      type: Table
+      rows: (healthOutcomes)
+      clearWith:
+        - healthOutcomes
+        - demographics
+        - population_stratification
+      columns:
+        - name: outcome_measure
+          title: Health Outcome
+          type: text
+        - name: population_mean
+          title: Population Mean
+          type: number
+          format: zto
+        - name: standard_deviation
+          title: Standard Deviation
+          type: number
+          format: zto
+        - name: median_value
+          title: Median
+          type: number
+          format: zto
+        - name: percentile_25
+          title: 25th Percentile
+          type: number
+          format: zto
+        - name: percentile_75
+          title: 75th Percentile
+          type: number
+          format: zto
+        - name: healthy_range
+          title: Healthy Range
+          type: text
+        - name: population_status
+          title: Population Status
+          type: text
+
+    - name: riskStratificationTable
+      title: Population Risk Stratification
+      type: Table
+      visible: (risk_stratification)
+      clearWith:
+        - healthOutcomes
+        - demographics
+        - riskFactors
+        - risk_stratification
+      columns:
+        - name: risk_category
+          title: Risk Category
+          type: text
+        - name: population_count
+          title: Population Count
+          type: integer
+        - name: percentage_population
+          title: Percentage of Population
+          type: number
+          format: zto
+        - name: risk_factors
+          title: Primary Risk Factors
+          type: text
+        - name: health_indicators
+          title: Health Indicators
+          type: text
+        - name: intervention_priority
+          title: Intervention Priority
+          type: text
+        - name: estimated_outcomes
+          title: Projected Outcomes
+          type: text
+
+    - name: geographicAnalysisTable
+      title: Geographic Health Analysis
+      type: Table
+      visible: (geographic_analysis)
+      clearWith:
+        - geographic
+        - healthOutcomes
+        - geographic_analysis
+      columns:
+        - name: geographic_region
+          title: Geographic Region
+          type: text
+        - name: population_size
+          title: Population Size
+          type: integer
+        - name: health_score
+          title: Health Score
+          type: number
+          format: zto
+        - name: primary_concerns
+          title: Primary Health Concerns
+          type: text
+        - name: resource_availability
+          title: Resource Availability
+          type: text
+        - name: disparity_index
+          title: Health Disparity Index
+          type: number
+          format: zto
+
+    - name: temporalTrendsTable
+      title: Population Health Trends
+      type: Table
+      visible: (temporal_trends)
+      clearWith:
+        - timeVariable
+        - healthOutcomes
+        - temporal_trends
+      columns:
+        - name: time_period
+          title: Time Period
+          type: text
+        - name: outcome_measure
+          title: Health Outcome
+          type: text
+        - name: trend_direction
+          title: Trend Direction
+          type: text
+        - name: change_rate
+          title: Rate of Change
+          type: number
+          format: zto
+        - name: statistical_significance
+          title: Statistical Significance
+          type: text
+        - name: clinical_significance
+          title: Clinical Significance
+          type: text
+        - name: contributing_factors
+          title: Contributing Factors
+          type: text
+
+    - name: healthDisparitiesTable
+      title: Health Disparities Analysis
+      type: Table
+      visible: (health_disparities)
+      clearWith:
+        - demographics
+        - healthOutcomes
+        - health_disparities
+      columns:
+        - name: comparison_groups
+          title: Comparison Groups
+          type: text
+        - name: health_outcome
+          title: Health Outcome
+          type: text
+        - name: disparity_measure
+          title: Disparity Measure
+          type: text
+        - name: disparity_value
+          title: Disparity Value
+          type: number
+          format: zto
+        - name: statistical_significance
+          title: Statistical Significance
+          type: text
+        - name: effect_size
+          title: Effect Size
+          type: text
+        - name: equity_recommendations
+          title: Equity Recommendations
+          type: text
+
+    - name: predictiveModelingTable
+      title: Population Health Predictions
+      type: Table
+      visible: (predictive_modeling)
+      clearWith:
+        - healthOutcomes
+        - demographics
+        - riskFactors
+        - predictive_modeling
+      columns:
+        - name: prediction_model
+          title: Prediction Model
+          type: text
+        - name: target_outcome
+          title: Target Outcome
+          type: text
+        - name: prediction_accuracy
+          title: Model Accuracy
+          type: number
+          format: zto
+        - name: predicted_trend
+          title: Predicted Trend
+          type: text
+        - name: confidence_interval
+          title: Confidence Interval
+          type: text
+        - name: risk_population
+          title: At-Risk Population
+          type: integer
+        - name: intervention_recommendations
+          title: Intervention Recommendations
+          type: text
+
+    - name: surveillanceTable
+      title: Public Health Surveillance
+      type: Table
+      visible: (surveillance_system)
+      clearWith:
+        - healthOutcomes
+        - demographics
+        - timeVariable
+        - surveillance_system
+      columns:
+        - name: surveillance_indicator
+          title: Surveillance Indicator
+          type: text
+        - name: current_status
+          title: Current Status
+          type: text
+        - name: threshold_value
+          title: Alert Threshold
+          type: number
+          format: zto
+        - name: trend_status
+          title: Trend Status
+          type: text
+        - name: alert_level
+          title: Alert Level
+          type: text
+        - name: recommended_action
+          title: Recommended Action
+          type: text
+
+    - name: qualityMetricsTable
+      title: Population Health Quality Metrics
+      type: Table
+      visible: (quality_metrics)
+      clearWith:
+        - healthOutcomes
+        - demographics
+        - quality_metrics
+      columns:
+        - name: quality_indicator
+          title: Quality Indicator
+          type: text
+        - name: current_value
+          title: Current Value
+          type: number
+          format: zto
+        - name: target_value
+          title: Target Value
+          type: number
+          format: zto
+        - name: performance_status
+          title: Performance Status
+          type: text
+        - name: benchmark_comparison
+          title: Benchmark Comparison
+          type: text
+        - name: improvement_opportunity
+          title: Improvement Opportunity
+          type: text
+
+    - name: interventionAnalysisTable
+      title: Intervention Impact Analysis
+      type: Table
+      visible: (intervention_analysis)
+      clearWith:
+        - healthOutcomes
+        - timeVariable
+        - intervention_analysis
+      columns:
+        - name: intervention_type
+          title: Intervention Type
+          type: text
+        - name: target_population
+          title: Target Population
+          type: text
+        - name: implementation_period
+          title: Implementation Period
+          type: text
+        - name: outcome_measure
+          title: Outcome Measure
+          type: text
+        - name: baseline_value
+          title: Baseline Value
+          type: number
+          format: zto
+        - name: post_intervention_value
+          title: Post-Intervention Value
+          type: number
+          format: zto
+        - name: effect_size
+          title: Effect Size
+          type: number
+          format: zto
+        - name: statistical_significance
+          title: Statistical Significance
+          type: text
+
+    - name: resourceAllocationTable
+      title: Healthcare Resource Allocation
+      type: Table
+      visible: (resource_allocation)
+      clearWith:
+        - demographics
+        - geographic
+        - healthcareUtilization
+        - resource_allocation
+      columns:
+        - name: resource_category
+          title: Resource Category
+          type: text
+        - name: current_allocation
+          title: Current Allocation
+          type: text
+        - name: population_need
+          title: Population Need
+          type: text
+        - name: gap_analysis
+          title: Gap Analysis
+          type: text
+        - name: optimization_recommendation
+          title: Optimization Recommendation
+          type: text
+        - name: expected_impact
+          title: Expected Impact
+          type: text
+
+    - name: populationReport
+      title: Population Health Report
+      type: Html
+      clearWith:
+        - patientID
+        - healthOutcomes
+        - demographics
+        - geographic
+
+    - name: executiveSummary
+      title: Executive Summary
+      type: Html
+      visible: (analysis_scope)
+      clearWith:
+        - healthOutcomes
+        - demographics
+        - analysis_scope
+
+    - name: populationDashboard
+      title: Population Health Dashboard
+      type: Html
+      visible: (interactive_dashboard)
+      clearWith:
+        - patientID
+        - healthOutcomes
+        - demographics
+        - interactive_dashboard
+
+    - name: populationOverviewPlot
+      title: Population Health Overview
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .populationOverviewPlot
+      visible: (population_visualization)
+      requiresData: true
+      clearWith:
+        - healthOutcomes
+        - demographics
+        - population_visualization
+
+    - name: geographicHealthMap
+      title: Geographic Health Map
+      type: Image
+      width: 1000
+      height: 700
+      renderFun: .geographicHealthMap
+      visible: (geographic_mapping)
+      requiresData: true
+      clearWith:
+        - geographic
+        - healthOutcomes
+        - geographic_mapping
+
+    - name: temporalTrendsPlot
+      title: Population Health Trends
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .temporalTrendsPlot
+      visible: (trend_visualization)
+      requiresData: true
+      clearWith:
+        - timeVariable
+        - healthOutcomes
+        - trend_visualization
+
+    - name: riskStratificationPlot
+      title: Population Risk Stratification
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .riskStratificationPlot
+      visible: (risk_stratification)
+      requiresData: true
+      clearWith:
+        - healthOutcomes
+        - demographics
+        - riskFactors
+        - risk_stratification
+
+    - name: healthDisparityPlot
+      title: Health Disparities Visualization
+      type: Image
+      width: 900
+      height: 700
+      renderFun: .healthDisparityPlot
+      visible: (disparity_plots)
+      requiresData: true
+      clearWith:
+        - demographics
+        - healthOutcomes
+        - disparity_plots
+
+    - name: predictiveModelingPlot
+      title: Predictive Health Outcomes
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .predictiveModelingPlot
+      visible: (predictive_modeling)
+      requiresData: true
+      clearWith:
+        - healthOutcomes
+        - timeVariable
+        - predictive_modeling
+
+    - name: interactivePopulationDashboard
+      title: Interactive Population Health Dashboard
+      type: Image
+      width: 1200
+      height: 800
+      renderFun: .interactivePopulationDashboard
+      visible: (interactive_dashboard)
+      requiresData: true
+      clearWith:
+        - patientID
+        - healthOutcomes
+        - demographics
+        - geographic
+        - interactive_dashboard

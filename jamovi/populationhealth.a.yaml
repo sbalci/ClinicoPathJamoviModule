@@ -1,0 +1,316 @@
+---
+name: populationhealth
+title: Population Health Analytics
+menuGroup: ClinicoPathD
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Population Health Analytics provides comprehensive cohort-level health status 
+        monitoring and epidemiological analysis with population health metrics, risk 
+        stratification, geographic health mapping, and predictive health outcome 
+        modeling for public health surveillance, population management, and healthcare 
+        system optimization through evidence-based population health insights.
+        
+    R:
+        dontrun: false
+        usage: |
+            data('population_health', package='ClinicoPath')
+            
+            # Basic population health analytics
+            populationhealth(population_health, 
+                           patientID = 'PatientID',
+                           healthOutcomes = c('BMI', 'BloodPressure', 'Cholesterol'),
+                           demographics = c('Age', 'Gender', 'Ethnicity'),
+                           geographic = 'ZipCode',
+                           risk_stratification = TRUE,
+                           predictive_modeling = TRUE)
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+
+    - name: patientID
+      title: Patient Identifier
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - id
+      description:
+          R: Unique patient identifier for population tracking and analysis
+
+    - name: healthOutcomes
+      title: Health Outcome Variables
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Health outcome measures (BMI, blood pressure, lab values, disease indicators)
+
+    - name: demographics
+      title: Demographic Variables
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: Demographic characteristics (age, gender, ethnicity, socioeconomic status)
+
+    - name: geographic
+      title: Geographic Variables
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: Geographic identifiers (zip code, county, region, coordinates) (optional)
+
+    - name: timeVariable
+      title: Time Variable
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Time variables for temporal health trend analysis (optional)
+
+    - name: riskFactors
+      title: Risk Factor Variables
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: Risk factors (smoking, lifestyle, comorbidities, environmental) (optional)
+
+    - name: healthcareUtilization
+      title: Healthcare Utilization
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Healthcare utilization metrics (visits, admissions, procedures) (optional)
+
+    - name: population_stratification
+      title: Population Stratification
+      type: Bool
+      default: true
+      description:
+          R: Enable population stratification analysis by demographics and risk factors
+
+    - name: risk_stratification
+      title: Risk Stratification
+      type: Bool
+      default: true
+      description:
+          R: Perform population-level risk stratification and early identification
+
+    - name: geographic_analysis
+      title: Geographic Health Analysis
+      type: Bool
+      default: true
+      description:
+          R: Enable geographic health mapping and spatial analysis
+
+    - name: temporal_trends
+      title: Temporal Trend Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze temporal trends in population health outcomes
+
+    - name: health_disparities
+      title: Health Disparities Analysis
+      type: Bool
+      default: true
+      description:
+          R: Assess health disparities across demographic and socioeconomic groups
+
+    - name: predictive_modeling
+      title: Predictive Health Modeling
+      type: Bool
+      default: true
+      description:
+          R: Enable predictive modeling for population health outcomes
+
+    - name: population_type
+      title: Population Type
+      type: List
+      options:
+        - name: general
+          title: General Population
+        - name: chronic_disease
+          title: Chronic Disease Cohort
+        - name: preventive_care
+          title: Preventive Care Population
+        - name: high_risk
+          title: High-Risk Population
+        - name: pediatric
+          title: Pediatric Population
+        - name: geriatric
+          title: Geriatric Population
+      default: general
+      description:
+          R: Type of population for specialized analysis approaches
+
+    - name: analysis_scope
+      title: Analysis Scope
+      type: List
+      options:
+        - name: comprehensive
+          title: Comprehensive Analysis
+        - name: surveillance
+          title: Public Health Surveillance
+        - name: intervention
+          title: Intervention Assessment
+        - name: outcomes
+          title: Outcomes Research
+        - name: quality
+          title: Quality Improvement
+      default: comprehensive
+      description:
+          R: Scope of population health analysis
+
+    - name: geographic_level
+      title: Geographic Analysis Level
+      type: List
+      options:
+        - name: individual
+          title: Individual Level
+        - name: neighborhood
+          title: Neighborhood Level
+        - name: county
+          title: County Level
+        - name: state
+          title: State Level
+        - name: regional
+          title: Regional Level
+        - name: national
+          title: National Level
+      default: county
+      description:
+          R: Geographic level for spatial health analysis
+
+    - name: time_window
+      title: Analysis Time Window (months)
+      type: Integer
+      min: 1
+      max: 120
+      default: 12
+      description:
+          R: Time window for population health analysis and trending
+
+    - name: risk_threshold
+      title: Risk Stratification Threshold
+      type: Number
+      min: 0.1
+      max: 0.9
+      default: 0.7
+      description:
+          R: Threshold for high-risk population identification
+
+    - name: disparity_analysis
+      title: Health Disparity Methods
+      type: Bool
+      default: true
+      description:
+          R: Enable advanced health disparity analysis methods
+
+    - name: social_determinants
+      title: Social Determinants Integration
+      type: Bool
+      default: true
+      description:
+          R: Include social determinants of health in analysis
+
+    - name: intervention_analysis
+      title: Intervention Impact Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze impact of population health interventions
+
+    - name: comparative_analysis
+      title: Comparative Population Analysis
+      type: Bool
+      default: true
+      description:
+          R: Enable comparison across different population segments
+
+    - name: quality_metrics
+      title: Population Health Quality Metrics
+      type: Bool
+      default: true
+      description:
+          R: Calculate population health quality and performance indicators
+
+    - name: surveillance_system
+      title: Public Health Surveillance
+      type: Bool
+      default: true
+      description:
+          R: Enable public health surveillance and monitoring capabilities
+
+    - name: outcome_prediction
+      title: Health Outcome Prediction
+      type: Bool
+      default: true
+      description:
+          R: Predict future population health outcomes and trends
+
+    - name: resource_allocation
+      title: Healthcare Resource Allocation
+      type: Bool
+      default: false
+      description:
+          R: Analyze healthcare resource allocation and optimization
+
+    - name: population_visualization
+      title: Population Health Visualization
+      type: Bool
+      default: true
+      description:
+          R: Create comprehensive population health visualizations
+
+    - name: geographic_mapping
+      title: Geographic Health Mapping
+      type: Bool
+      default: true
+      description:
+          R: Generate geographic health maps and spatial visualizations
+
+    - name: trend_visualization
+      title: Trend Visualization
+      type: Bool
+      default: true
+      description:
+          R: Create temporal trend visualizations for population health
+
+    - name: disparity_plots
+      title: Health Disparity Plots
+      type: Bool
+      default: true
+      description:
+          R: Generate health disparity and equity visualizations
+
+    - name: interactive_dashboard
+      title: Interactive Population Dashboard
+      type: Bool
+      default: true
+      description:
+          R: Create interactive population health dashboards and monitoring tools
