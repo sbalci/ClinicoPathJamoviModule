@@ -3723,6 +3723,42 @@ analyses:
       framework,  spline-based hazard and survival functions, and transformation
       models.  Provides smooth survival curves with clinical interpretability
       and extrapolation capabilities.
+  - title: Cochran's Q Test for Paired Categorical Data
+    name: cochranq
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuTitle: Cochran's Q Test for Paired Categorical Data
+    description: >
+      Cochran's Q test for analyzing paired categorical (binary) data with more
+      than two  time points or conditions. This is the extension of McNemar's
+      test for repeated  measures with binary outcomes, commonly used in
+      clinical studies to test for  changes in treatment response or diagnostic
+      agreement across multiple time points.
+  - title: Friedman Test for Non-Parametric Repeated Measures
+    name: friedmantest
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuTitle: Friedman Test for Non-Parametric Repeated Measures
+    description: >
+      Friedman test for non-parametric analysis of repeated measures data with
+      continuous  or ordinal outcomes. This is the non-parametric alternative to
+      repeated measures  ANOVA when normality assumptions are violated. It tests
+      whether the median values  differ significantly across multiple related
+      measurements or time points.
+  - title: Page's Trend Test for Ordered Alternatives
+    name: pagetrendtest
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuTitle: Page's Trend Test for Ordered Alternatives
+    description: >
+      Page's trend test for detecting ordered alternatives in repeated measures
+      data. This test is used when there is a specific predicted ordering of the
+      treatment  effects or time points, making it more powerful than the
+      general Friedman test when the alternative hypothesis specifies a trend or
+      ordered pattern.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

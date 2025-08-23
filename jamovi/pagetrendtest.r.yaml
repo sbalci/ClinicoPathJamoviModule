@@ -1,0 +1,317 @@
+---
+name: pagetrendtest
+title: Page's Trend Test for Ordered Alternatives
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: dataInfo
+      title: 'Data Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - dependent
+        - subject
+        - within
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: trendOrdering
+      title: 'Trend Ordering'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - within
+        - trend_direction
+        - custom_order
+      columns:
+        - name: position
+          title: 'Position'
+          type: integer
+        - name: condition
+          title: 'Condition'
+          type: text
+        - name: expected_rank
+          title: 'Expected Rank'
+          type: number
+          format: zto:1
+        - name: trend_weight
+          title: 'Trend Weight'
+          type: number
+          format: zto:2
+
+    - name: descriptiveStats
+      title: 'Descriptive Statistics by Condition'
+      type: Table
+      visible: (show_descriptives)
+      rows: 1
+      clearWith:
+        - show_descriptives
+        - dependent
+        - within
+      columns:
+        - name: condition
+          title: 'Condition'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: median
+          title: 'Median'
+          type: number
+          format: zto:3
+        - name: mean
+          title: 'Mean'
+          type: number
+          format: zto:3
+        - name: sd
+          title: 'SD'
+          type: number
+          format: zto:3
+        - name: iqr
+          title: 'IQR'
+          type: number
+          format: zto:3
+        - name: mean_rank
+          title: 'Mean Rank'
+          type: number
+          format: zto:2
+
+    - name: pageTrendTest
+      title: 'Page''s Trend Test Results'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - dependent
+        - subject
+        - within
+        - trend_direction
+        - method
+      columns:
+        - name: statistic
+          title: 'L Statistic'
+          type: number
+          format: zto:4
+        - name: expected_value
+          title: 'Expected L'
+          type: number
+          format: zto:4
+        - name: variance
+          title: 'Variance'
+          type: number
+          format: zto:4
+        - name: standardized
+          title: 'Standardized L'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: significance
+          title: 'Significance'
+          type: text
+        - name: conclusion
+          title: 'Conclusion'
+          type: text
+
+    - name: effectSize
+      title: 'Effect Size and Trend Strength'
+      type: Table
+      visible: (effect_size)
+      rows: 1
+      clearWith:
+        - effect_size
+        - dependent
+        - within
+      columns:
+        - name: measure
+          title: 'Effect Size'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: rankAnalysis
+      title: 'Rank Analysis and Trend Components'
+      type: Table
+      visible: (show_ranks)
+      rows: 1
+      clearWith:
+        - show_ranks
+        - dependent
+        - within
+        - trend_direction
+      columns:
+        - name: condition
+          title: 'Condition'
+          type: text
+        - name: mean_rank
+          title: 'Observed Mean Rank'
+          type: number
+          format: zto:2
+        - name: expected_rank
+          title: 'Expected Rank'
+          type: number
+          format: zto:2
+        - name: rank_contribution
+          title: 'Rank Contribution to L'
+          type: number
+          format: zto:2
+        - name: trend_alignment
+          title: 'Trend Alignment'
+          type: text
+
+    - name: friedmanComparison
+      title: 'Comparison with Friedman Test'
+      type: Table
+      visible: (friedman_comparison)
+      rows: 1
+      clearWith:
+        - friedman_comparison
+        - dependent
+        - within
+      columns:
+        - name: test
+          title: 'Test'
+          type: text
+        - name: statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto:4
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: power_advantage
+          title: 'Power Advantage'
+          type: text
+
+    - name: assumptionAssessment
+      title: 'Assumption Assessment'
+      type: Table
+      visible: (show_assumptions)
+      rows: 1
+      clearWith:
+        - show_assumptions
+        - dependent
+        - subject
+        - within
+      columns:
+        - name: assumption
+          title: 'Assumption'
+          type: text
+        - name: status
+          title: 'Status'
+          type: text
+        - name: details
+          title: 'Details'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: clinicalInterpretation
+      title: 'Clinical Interpretation Guide'
+      type: Table
+      visible: (clinical_interpretation)
+      rows: 1
+      clearWith:
+        - clinical_interpretation
+        - dependent
+        - within
+        - trend_direction
+      columns:
+        - name: aspect
+          title: 'Clinical Aspect'
+          type: text
+        - name: finding
+          title: 'Statistical Finding'
+          type: text
+        - name: interpretation
+          title: 'Clinical Interpretation'
+          type: text
+        - name: recommendation
+          title: 'Clinical Recommendation'
+          type: text
+
+    - name: trendPlot
+      title: 'Trend Visualization'
+      type: Image
+      visible: true
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotTrend
+      clearWith:
+        - dependent
+        - within
+        - trend_direction
+
+    - name: rankTrendPlot
+      title: 'Rank Trend Analysis'
+      type: Image
+      visible: (show_ranks)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotRankTrend
+      clearWith:
+        - show_ranks
+        - dependent
+        - within
+        - trend_direction
+
+    - name: comparisonPlot
+      title: 'Page vs Friedman Comparison'
+      type: Image
+      visible: (friedman_comparison)
+      requiresData: true
+      width: 600
+      height: 400
+      renderFun: .plotComparison
+      clearWith:
+        - friedman_comparison
+        - dependent
+        - within
+
+    - name: profilePlot
+      title: 'Individual Profile Plot with Trend'
+      type: Image
+      visible: true
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotProfilesWithTrend
+      clearWith:
+        - dependent
+        - subject
+        - within
+        - trend_direction
+
+    - name: methodExplanation
+      title: 'Method and Clinical Context'
+      type: Html
+      visible: true
