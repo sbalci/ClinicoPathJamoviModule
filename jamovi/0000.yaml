@@ -3052,6 +3052,25 @@ analyses:
       for
 
       optimal therapeutic decision-making.
+  - title: Differential Diagnosis Assistance
+    name: differentialdiagnosis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathT
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Differential Diagnosis Assistance
+    menuSubtitle: Bayesian Diagnostic Reasoning & Probability Analysis
+    description: >
+      Differential Diagnosis Assistance provides Bayesian diagnostic reasoning
+      with 
+
+      multi-factorial clinical presentation analysis to generate ranked
+      differential 
+
+      diagnoses with likelihood ratios and diagnostic probabilities for
+      evidence-based 
+
+      clinical decision support and diagnostic accuracy optimization.
   - title: Direct Binomial Regression for Competing Risks
     name: directbinomial
     ns: ClinicoPath

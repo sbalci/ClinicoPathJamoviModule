@@ -1,5 +1,41 @@
 # ClinicoPath News
 
+## Version 0.0.31.38
+
+### 🗓️ **August 23, 2025 - Treatment Optimization Framework Implementation**
+
+#### 🏥 **Treatment Optimization Framework (treatmentoptim) - Comprehensive Clinical Decision Support**
+
+##### **Personalized Treatment Selection Engine**
+*   **Multi-Model Prediction Framework:** Advanced machine learning integration with Logistic Regression, Random Forest, Gradient Boosting, and Ensemble methods for individualized treatment response prediction
+*   **Evidence-Based Recommendation System:** Automated treatment ranking based on predicted response rates, confidence intervals, risk-benefit analysis, and clinical evidence quality assessment
+*   **Patient-Specific Modeling:** Comprehensive patient characteristic integration including demographics, comorbidities, biomarkers, and clinical history for personalized therapeutic decision-making
+*   **Confidence Quantification:** Statistical uncertainty assessment with configurable confidence levels (50-99%) and prediction interval reporting for clinical decision support
+
+##### **Comprehensive Drug Interaction Screening**
+*   **Multi-Level Safety Analysis:** Complete medication interaction screening with Critical, Major, Moderate, and Minor severity classification and clinical significance assessment
+*   **Mechanism-Based Classification:** Pharmacodynamic and pharmacokinetic interaction identification with detailed mechanism explanations and clinical effect descriptions
+*   **Alternative Therapy Recommendations:** Automated suggestion of safer therapeutic alternatives with equivalent efficacy profiles and reduced interaction potential
+*   **Clinical Management Guidelines:** Evidence-based management strategies including monitoring requirements, dose adjustments, and contraindication assessments
+
+##### **Advanced Dose Optimization System**
+*   **Pharmacokinetic Model Integration:** Population PK/PD modeling with individual patient parameter estimation based on demographics, organ function, and genetic factors
+*   **Multi-Factor Dose Adjustment:** Systematic consideration of age, weight, renal function, hepatic function, drug interactions, and genetic polymorphisms
+*   **Therapeutic Drug Monitoring:** Evidence-based monitoring parameter recommendations with optimal sampling strategies and target concentration ranges
+*   **Safety-Guided Dosing:** Risk-stratified dosing recommendations with organ-specific safety assessments and toxicity prevention strategies
+
+##### **Clinical Decision Support Integration**
+*   **Evidence-Based Guideline Integration:** Seamless incorporation of NCCN, ASCO, FDA, and other major clinical practice guidelines with real-time recommendation updates
+*   **Risk Stratification Framework:** Comprehensive patient risk assessment across cardiovascular, hepatic, renal, and other organ systems with mitigation strategies
+*   **Quality Assurance Metrics:** Built-in validation and outcome tracking systems for continuous improvement of recommendation accuracy
+*   **Multidisciplinary Workflow Support:** Team-based care integration with documentation templates and consultation recommendation systems
+
+##### **Advanced Clinical Analytics**
+*   **Treatment Comparison Engine:** Head-to-head treatment comparison with statistical significance testing, clinical relevance assessment, and patient preference integration
+*   **Outcome Prediction Modeling:** Dynamic prediction models with real-time updating based on patient response and emerging clinical data
+*   **Visualization Suite:** Interactive treatment comparison plots, drug interaction networks, and dose-response relationship visualizations
+*   **Implementation Guidance:** Comprehensive clinical interpretation guides with practical implementation recommendations and quality metrics
+
 ## Version 0.0.31.36
 
 ### 🗓️ **August 22, 2025 - IHC Clustering Analysis Enhancement**

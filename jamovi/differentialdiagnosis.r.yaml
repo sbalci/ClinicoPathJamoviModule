@@ -1,0 +1,233 @@
+---
+name: differentialdiagnosis
+title: Differential Diagnosis Assistance
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Diagnostic Analysis Summary  
+      type: Html
+      visible: (diagnostic_probability || likelihood_ratios)
+
+    - name: diagnosticProbabilities
+      title: Differential Diagnosis Rankings
+      type: Table
+      visible: (differential_ranking)
+      columns:
+        - name: diagnosis
+          title: Diagnosis
+          type: text
+          
+        - name: posterior_probability
+          title: Posterior Probability
+          type: number
+          format: zto
+          
+        - name: prior_probability
+          title: Prior Probability
+          type: number
+          format: zto
+          
+        - name: likelihood_ratio_positive
+          title: LR+
+          type: number
+          
+        - name: likelihood_ratio_negative
+          title: LR-
+          type: number
+          
+        - name: confidence_interval
+          title: 95% Confidence Interval
+          type: text
+          
+        - name: clinical_significance
+          title: Clinical Significance
+          type: text
+          
+        - name: recommendation
+          title: Diagnostic Recommendation
+          type: text
+
+    - name: likelihoodRatios
+      title: Likelihood Ratio Analysis
+      type: Table
+      visible: (likelihood_ratios)
+      columns:
+        - name: clinical_finding
+          title: Clinical Finding
+          type: text
+          
+        - name: finding_present
+          title: Finding Present (LR+)
+          type: number
+          
+        - name: finding_absent
+          title: Finding Absent (LR-)
+          type: number
+          
+        - name: diagnostic_utility
+          title: Diagnostic Utility
+          type: text
+          
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+
+    - name: bayesianAnalysis
+      title: Bayesian Diagnostic Reasoning
+      type: Table
+      visible: (diagnostic_probability)
+      columns:
+        - name: analysis_step
+          title: Reasoning Step
+          type: text
+          
+        - name: prior_probability
+          title: Prior Probability
+          type: number
+          format: zto
+          
+        - name: likelihood
+          title: Likelihood
+          type: number
+          
+        - name: posterior_probability
+          title: Posterior Probability
+          type: number
+          format: zto
+          
+        - name: evidence_strength
+          title: Evidence Strength
+          type: text
+
+    - name: uncertaintyAnalysis
+      title: Diagnostic Uncertainty Assessment
+      type: Table
+      visible: (uncertainty_analysis)
+      columns:
+        - name: uncertainty_source
+          title: Uncertainty Source
+          type: text
+          
+        - name: uncertainty_level
+          title: Uncertainty Level
+          type: text
+          
+        - name: impact_on_diagnosis
+          title: Impact on Diagnosis
+          type: text
+          
+        - name: mitigation_strategy
+          title: Mitigation Strategy
+          type: text
+
+    - name: clinicalContext
+      title: Clinical Context Integration
+      type: Table
+      visible: (clinical_context)
+      columns:
+        - name: context_factor
+          title: Clinical Factor
+          type: text
+          
+        - name: influence_on_probability
+          title: Probability Influence
+          type: text
+          
+        - name: clinical_relevance
+          title: Clinical Relevance
+          type: text
+          
+        - name: evidence_quality
+          title: Evidence Quality
+          type: text
+
+    - name: sensitivityAnalysis
+      title: Diagnostic Sensitivity Analysis
+      type: Table
+      visible: (sensitivity_analysis)
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+          
+        - name: base_case
+          title: Base Case
+          type: number
+          
+        - name: low_estimate
+          title: Low Estimate
+          type: number
+          
+        - name: high_estimate
+          title: High Estimate
+          type: number
+          
+        - name: impact_range
+          title: Impact Range
+          type: text
+
+    - name: modelPerformance
+      title: Diagnostic Model Performance
+      type: Table
+      visible: (confirmedDiagnosis && diagnostic_probability)
+      columns:
+        - name: performance_metric
+          title: Performance Metric
+          type: text
+          
+        - name: value
+          title: Value
+          type: number
+          
+        - name: confidence_interval
+          title: 95% CI
+          type: text
+          
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+
+    - name: diagnosticPlots
+      title: Diagnostic Probability Plots
+      type: Image
+      width: 800
+      height: 600
+      requiresData: true
+      visible: (diagnostic_plots)
+
+    - name: networkDiagram
+      title: Diagnostic Relationship Network
+      type: Image
+      width: 700
+      height: 500
+      requiresData: true
+      visible: (network_diagram)
+
+    - name: probabilityHeatmap
+      title: Probability Heatmap
+      type: Image
+      width: 800
+      height: 400
+      requiresData: true
+      visible: (probability_heatmap)
+
+    - name: clinicalGuidelines
+      title: Evidence-Based Diagnostic Guidelines
+      type: Html
+      visible: (clinical_guidelines)
+
+    - name: differentialExplanation
+      title: Diagnostic Reasoning Explanation
+      type: Html
+      visible: (differential_explanation)
+
+    - name: technicalNotes
+      title: Technical Notes & Methodology
+      type: Html
+      visible: false
