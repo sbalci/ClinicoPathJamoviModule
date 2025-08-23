@@ -1,0 +1,144 @@
+---
+name: conditionalsurvival
+title: Conditional Survival Estimation
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Conditional Survival, Landmark Analysis, Advanced Methods'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Performs conditional survival estimation, which calculates the probability 
+        of surviving beyond a specific time point given survival to a conditioning 
+        time point. This analysis is particularly useful for updating prognosis 
+        estimates for patients who have already survived a certain period. Multiple 
+        estimation methods are supported including Kaplan-Meier weights, landmark 
+        approaches, and inverse probability weighting.
+    R:
+        dontrun: false
+        usage: |
+            # example will be added
+
+options:
+
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: timeVar
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Survival time variable (numeric)
+
+    - name: outcomeVar
+      title: Event/Status Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Event indicator (0=censored, 1=event)
+
+    - name: conditionVar
+      title: Conditioning Variable (optional)
+      type: Variable
+      suggested: [ordinal, nominal, continuous]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variable for conditional survival estimation
+
+    - name: conditionTime
+      title: Conditioning Time Point
+      type: Number
+      description:
+          R: >
+            Time point at which to condition survival (defaults to median follow-up)
+
+    - name: method
+      title: Estimation Method
+      type: List
+      options:
+        - title: Kaplan-Meier Weights
+          name: km
+        - title: Landmark Approach
+          name: landmark  
+        - title: Inverse Probability Weighting
+          name: ipw
+        - title: Presmoothed Kaplan-Meier
+          name: pkm
+      default: km
+      description:
+          R: >
+            Method for conditional survival estimation
+
+    - name: bandwidth
+      title: Bandwidth (for smoothing methods)
+      type: Number
+      description:
+          R: >
+            Bandwidth for kernel smoothing (auto-selected if not specified)
+
+    - name: confInt
+      title: Confidence Level
+      type: Number
+      description:
+          R: >
+            Confidence level for intervals
+      default: 0.95
+      min: 0.01
+      max: 0.99
+
+    - name: timePoints
+      title: Specific Time Points
+      type: String
+      description:
+          R: >
+            Comma-separated time points for conditional survival (e.g., 12,24,60)
+      default: ''
+
+    - name: plotType
+      title: Plot Type
+      type: List
+      options:
+        - title: Conditional Survival Curves
+          name: curves
+        - title: Probability Plots  
+          name: probability
+        - title: Both
+          name: both
+      default: curves
+      description:
+          R: >
+            Type of plot to display
+
+    - name: showTable
+      title: Show Results Table
+      type: Bool
+      description:
+          R: >
+            Display conditional survival probabilities table
+      default: true
+
+    - name: showPlot
+      title: Show Survival Plot
+      type: Bool  
+      description:
+          R: >
+            Display conditional survival plot
+      default: true
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      description:
+          R: >
+            Display interpretation and methodology explanations
+      default: true
