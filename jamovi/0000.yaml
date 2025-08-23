@@ -3056,7 +3056,7 @@ analyses:
     name: differentialdiagnosis
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathT
+    menuGroup: ClinicoPathD
     menuSubgroup: Clinical Decision Support
     menuTitle: Differential Diagnosis Assistance
     menuSubtitle: Bayesian Diagnostic Reasoning & Probability Analysis
@@ -3071,6 +3071,25 @@ analyses:
       evidence-based 
 
       clinical decision support and diagnostic accuracy optimization.
+  - title: Laboratory Result Interpretation
+    name: labinterpret
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Laboratory Result Interpretation
+    menuSubtitle: Evidence-Based Lab Analysis & Clinical Correlation
+    description: >
+      Laboratory Result Interpretation provides comprehensive analysis and
+      clinical 
+
+      interpretation of laboratory test results with reference ranges,
+      demographic 
+
+      adjustments, trend analysis, and critical value monitoring for
+      evidence-based 
+
+      diagnostic decision-making and clinical assessment optimization.
   - title: Direct Binomial Regression for Competing Risks
     name: directbinomial
     ns: ClinicoPath

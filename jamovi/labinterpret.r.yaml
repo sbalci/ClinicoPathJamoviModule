@@ -1,0 +1,302 @@
+---
+name: labinterpret
+title: Laboratory Result Interpretation
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis Summary
+      type: Html
+      refs: [labValues]
+
+    - name: interpretationTable
+      title: Laboratory Value Interpretation
+      type: Table
+      rows: (labValues)
+      clearWith:
+        - labValues
+        - patientDemo
+        - reference_source
+        - interpretation_level
+      columns:
+        - name: test
+          title: Laboratory Test
+          type: text
+        - name: value
+          title: Observed Value
+          type: number
+          format: zto
+        - name: units
+          title: Units
+          type: text
+        - name: reference_range
+          title: Reference Range
+          type: text
+        - name: status
+          title: Status
+          type: text
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+        - name: confidence
+          title: Confidence
+          type: number
+          format: pc
+
+    - name: criticalValuesTable
+      title: Critical Values Alert
+      type: Table
+      visible: (critical_values)
+      clearWith:
+        - labValues
+        - critical_values
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: value
+          title: Critical Value
+          type: number
+          format: zto
+        - name: severity
+          title: Severity Level
+          type: text
+        - name: action_required
+          title: Required Action
+          type: text
+        - name: time_sensitivity
+          title: Time Sensitivity
+          type: text
+
+    - name: trendAnalysisTable
+      title: Temporal Trend Analysis
+      type: Table
+      visible: (trend_analysis)
+      clearWith:
+        - labValues
+        - testDates
+        - trend_analysis
+        - trend_window
+      columns:
+        - name: test
+          title: Laboratory Test
+          type: text
+        - name: trend_direction
+          title: Trend Direction
+          type: text
+        - name: slope
+          title: Change Rate
+          type: number
+          format: zto
+        - name: r_squared
+          title: R²
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: clinical_significance
+          title: Clinical Significance
+          type: text
+
+    - name: deltaChecksTable
+      title: Delta Check Analysis
+      type: Table
+      visible: (delta_checks)
+      clearWith:
+        - labValues
+        - testDates
+        - delta_checks
+        - delta_threshold
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: previous_value
+          title: Previous Value
+          type: number
+          format: zto
+        - name: current_value
+          title: Current Value
+          type: number
+          format: zto
+        - name: percent_change
+          title: "% Change"
+          type: number
+          format: pc
+        - name: delta_flag
+          title: Delta Flag
+          type: text
+        - name: clinical_relevance
+          title: Clinical Relevance
+          type: text
+
+    - name: medicationEffectsTable
+      title: Medication Effects Analysis
+      type: Table
+      visible: (medication_interaction)
+      clearWith:
+        - labValues
+        - medicationVars
+        - medication_interaction
+      columns:
+        - name: test
+          title: Laboratory Test
+          type: text
+        - name: medication
+          title: Medication
+          type: text
+        - name: effect_type
+          title: Effect Type
+          type: text
+        - name: magnitude
+          title: Effect Magnitude
+          type: text
+        - name: clinical_impact
+          title: Clinical Impact
+          type: text
+        - name: monitoring_recommendation
+          title: Monitoring Recommendation
+          type: text
+
+    - name: correlationAnalysisTable
+      title: Laboratory Value Correlations
+      type: Table
+      visible: (clinical_correlation)
+      clearWith:
+        - labValues
+        - clinical_correlation
+      columns:
+        - name: test_pair
+          title: Test Combination
+          type: text
+        - name: correlation
+          title: Correlation (r)
+          type: number
+          format: zto
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: clinical_relevance
+          title: Clinical Relevance
+          type: text
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: qualityMetricsTable
+      title: Quality Assessment Indicators
+      type: Table
+      visible: (quality_assessment)
+      clearWith:
+        - labValues
+        - quality_assessment
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: cv_percent
+          title: CV %
+          type: number
+          format: zto
+        - name: analytical_sensitivity
+          title: Analytical Sensitivity
+          type: number
+          format: zto
+        - name: reference_interval_quality
+          title: Reference Interval Quality
+          type: text
+        - name: measurement_uncertainty
+          title: Measurement Uncertainty
+          type: number
+          format: zto
+
+    - name: interpretationSummary
+      title: Clinical Interpretation Summary
+      type: Html
+      visible: (interpretation_report)
+      clearWith:
+        - labValues
+        - patientDemo
+        - interpretation_report
+        - clinical_guidelines
+
+    - name: clinicalRecommendations
+      title: Clinical Recommendations
+      type: Html
+      visible: (clinical_guidelines)
+      clearWith:
+        - labValues
+        - clinical_guidelines
+        - interpretation_level
+
+    - name: interpretationPlot
+      title: Laboratory Value Interpretation
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .interpretationPlot
+      visible: (interpretation_plots)
+      requiresData: true
+      clearWith:
+        - labValues
+        - patientDemo
+        - reference_ranges
+        - interpretation_plots
+
+    - name: trendPlot
+      title: Temporal Trend Analysis
+      type: Image
+      width: 800
+      height: 500
+      renderFun: .trendPlot
+      visible: (trend_plots)
+      requiresData: true
+      clearWith:
+        - labValues
+        - testDates
+        - trend_plots
+        - trend_analysis
+
+    - name: referencePlot
+      title: Reference Range Visualization
+      type: Image
+      width: 700
+      height: 450
+      renderFun: .referencePlot
+      visible: (reference_visualization)
+      requiresData: true
+      clearWith:
+        - labValues
+        - patientDemo
+        - reference_visualization
+        - reference_source
+
+    - name: deltaPlot
+      title: Delta Check Visualization
+      type: Image
+      width: 650
+      height: 400
+      renderFun: .deltaPlot
+      visible: (delta_plots)
+      requiresData: true
+      clearWith:
+        - labValues
+        - testDates
+        - delta_plots
+        - delta_checks
+
+    - name: correlationPlot
+      title: Laboratory Correlation Matrix
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .correlationPlot
+      visible: (correlation_matrix)
+      requiresData: true
+      clearWith:
+        - labValues
+        - correlation_matrix
+        - clinical_correlation

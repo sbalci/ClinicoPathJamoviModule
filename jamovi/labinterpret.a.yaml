@@ -1,0 +1,261 @@
+---
+name: labinterpret
+title: Laboratory Result Interpretation
+menuGroup: ClinicoPathD
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Laboratory Result Interpretation provides comprehensive analysis and clinical 
+        interpretation of laboratory test results with reference ranges, demographic 
+        adjustments, trend analysis, and critical value monitoring for evidence-based 
+        diagnostic decision-making and clinical assessment optimization.
+        
+    R:
+        dontrun: false
+        usage: |
+            data('clinicaldata', package='ClinicoPath')
+            
+            # Basic laboratory interpretation
+            labinterpret(clinicaldata, 
+                        labValues = c('Hemoglobin', 'Glucose', 'Creatinine'), 
+                        patientDemo = c('Age', 'Gender'),
+                        reference_ranges = TRUE,
+                        trend_analysis = TRUE)
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+
+    - name: labValues
+      title: Laboratory Values
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Laboratory test results and biomarker values for interpretation
+
+    - name: patientDemo
+      title: Patient Demographics
+      type: Variables
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: Patient demographic variables (age, gender, ethnicity) for reference range adjustment
+
+    - name: testDates
+      title: Test Dates
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Date/time variables for temporal trend analysis (optional)
+
+    - name: clinicalHistory
+      title: Clinical History Variables
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: Clinical history and comorbidity variables affecting reference ranges (optional)
+
+    - name: medicationVars
+      title: Medication Variables
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: Current medications that may affect laboratory values (optional)
+
+    - name: reference_ranges
+      title: Reference Range Analysis
+      type: Bool
+      default: true
+      description:
+          R: Apply demographic-adjusted reference ranges and normal value analysis
+
+    - name: critical_values
+      title: Critical Value Monitoring
+      type: Bool
+      default: true
+      description:
+          R: Monitor and flag critical laboratory values requiring immediate attention
+
+    - name: trend_analysis
+      title: Temporal Trend Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze laboratory value trends over time with statistical significance testing
+
+    - name: delta_checks
+      title: Delta Check Analysis
+      type: Bool
+      default: true
+      description:
+          R: Perform delta checks for significant changes between consecutive results
+
+    - name: reference_source
+      title: Reference Range Source
+      type: List
+      options:
+        - name: institutional
+          title: Institutional Ranges
+        - name: literature_based
+          title: Literature-Based Ranges
+        - name: demographic_adjusted
+          title: Demographic-Adjusted Ranges
+        - name: custom_ranges
+          title: Custom Reference Ranges
+      default: demographic_adjusted
+      description:
+          R: Source of reference ranges for laboratory value interpretation
+
+    - name: interpretation_level
+      title: Interpretation Detail Level
+      type: List
+      options:
+        - name: basic
+          title: Basic Interpretation
+        - name: comprehensive
+          title: Comprehensive Analysis
+        - name: expert_level
+          title: Expert-Level Interpretation
+        - name: clinical_context
+          title: Clinical Context Integration
+      default: comprehensive
+      description:
+          R: Level of detail for laboratory result interpretation and clinical correlation
+
+    - name: confidence_interval
+      title: Reference Range Confidence Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for reference range calculations and interpretations
+
+    - name: delta_threshold
+      title: Delta Check Threshold (%)
+      type: Number
+      min: 10
+      max: 200
+      default: 50
+      description:
+          R: Percentage change threshold for delta check significance testing
+
+    - name: trend_window
+      title: Trend Analysis Window (days)
+      type: Integer
+      min: 7
+      max: 365
+      default: 90
+      description:
+          R: Time window for temporal trend analysis and pattern detection
+
+    - name: age_adjustment
+      title: Age-Adjusted Reference Ranges
+      type: Bool
+      default: true
+      description:
+          R: Apply age-specific reference ranges for laboratory value interpretation
+
+    - name: gender_adjustment
+      title: Gender-Adjusted Reference Ranges
+      type: Bool
+      default: true
+      description:
+          R: Apply gender-specific reference ranges for laboratory value interpretation
+
+    - name: ethnicity_adjustment
+      title: Ethnicity-Adjusted Reference Ranges
+      type: Bool
+      default: false
+      description:
+          R: Apply ethnicity-specific reference ranges when available
+
+    - name: medication_interaction
+      title: Medication Interaction Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze potential medication effects on laboratory values
+
+    - name: clinical_correlation
+      title: Clinical Correlation Analysis
+      type: Bool
+      default: true
+      description:
+          R: Correlate laboratory results with clinical presentation and history
+
+    - name: quality_assessment
+      title: Quality Assessment Indicators
+      type: Bool
+      default: true
+      description:
+          R: Include quality indicators and analytical performance metrics
+
+    - name: interpretation_plots
+      title: Laboratory Interpretation Plots
+      type: Bool
+      default: true
+      description:
+          R: Create visualization plots for laboratory result interpretation
+
+    - name: trend_plots
+      title: Temporal Trend Plots
+      type: Bool
+      default: true
+      description:
+          R: Create time-series plots showing laboratory value trends
+
+    - name: reference_visualization
+      title: Reference Range Visualization
+      type: Bool
+      default: true
+      description:
+          R: Visualize reference ranges and patient results comparison
+
+    - name: delta_plots
+      title: Delta Check Visualization
+      type: Bool
+      default: false
+      description:
+          R: Create plots showing significant changes between consecutive results
+
+    - name: correlation_matrix
+      title: Laboratory Correlation Matrix
+      type: Bool
+      default: false
+      description:
+          R: Create correlation matrix of laboratory values for pattern analysis
+
+    - name: clinical_guidelines
+      title: Evidence-Based Guidelines Integration
+      type: Bool
+      default: true
+      description:
+          R: Integrate clinical laboratory guidelines and best practice recommendations
+
+    - name: interpretation_report
+      title: Clinical Interpretation Report
+      type: Bool
+      default: true
+      description:
+          R: Generate comprehensive clinical interpretation report with recommendations
