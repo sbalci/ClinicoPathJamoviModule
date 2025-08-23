@@ -1,0 +1,235 @@
+---
+name: differentialdiagnosis
+title: Differential Diagnosis Assistance
+menuGroup: ClinicoPathD
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Differential Diagnosis Assistance provides Bayesian diagnostic reasoning with 
+        multi-factorial clinical presentation analysis to generate ranked differential 
+        diagnoses with likelihood ratios and diagnostic probabilities for evidence-based 
+        clinical decision support and diagnostic accuracy optimization.
+        
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology', package='ClinicoPath')
+            
+            # Basic differential diagnosis analysis
+            differentialdiagnosis(histopathology, 
+                                clinicalFindings = c('Symptom1', 'Symptom2'), 
+                                confirmedDiagnosis = 'Diagnosis',
+                                diagnostic_probability = TRUE,
+                                likelihood_ratios = TRUE)
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+
+    - name: clinicalFindings
+      title: Clinical Findings
+      type: Variables
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: Clinical findings, symptoms, signs, and test results for diagnostic reasoning
+
+    - name: confirmedDiagnosis
+      title: Confirmed Diagnosis
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: Confirmed diagnosis variable for model training and validation (optional)
+
+    - name: demographicVars
+      title: Patient Demographics
+      type: Variables
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: Patient demographic variables (age, gender, ethnicity) affecting disease prevalence
+
+    - name: labResults
+      title: Laboratory Results
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Laboratory test results for diagnostic probability calculation (optional)
+
+    - name: imagingFindings
+      title: Imaging Findings
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: Imaging findings and radiological results (optional)
+
+    - name: diagnostic_probability
+      title: Diagnostic Probability Analysis
+      type: Bool
+      default: true
+      description:
+          R: Calculate Bayesian diagnostic probabilities for differential diagnoses
+
+    - name: likelihood_ratios
+      title: Likelihood Ratio Calculations
+      type: Bool
+      default: true
+      description:
+          R: Calculate positive and negative likelihood ratios for diagnostic tests
+
+    - name: prevalence_adjustment
+      title: Prevalence Adjustment
+      type: Bool
+      default: true
+      description:
+          R: Adjust probabilities based on disease prevalence and demographics
+
+    - name: differential_ranking
+      title: Differential Diagnosis Ranking
+      type: Bool
+      default: true
+      description:
+          R: Rank differential diagnoses by probability and clinical significance
+
+    - name: bayesian_network
+      title: Bayesian Network Analysis
+      type: Bool
+      default: false
+      description:
+          R: Advanced Bayesian network modeling for complex diagnostic relationships
+
+    - name: reasoning_method
+      title: Diagnostic Reasoning Method
+      type: List
+      options:
+        - name: naive_bayes
+          title: Naive Bayes
+        - name: bayesian_network
+          title: Bayesian Network
+        - name: logistic_regression
+          title: Logistic Regression
+        - name: random_forest
+          title: Random Forest
+      default: naive_bayes
+      description:
+          R: Statistical method for diagnostic probability calculation
+
+    - name: prevalence_source
+      title: Prevalence Data Source
+      type: List
+      options:
+        - name: population_based
+          title: Population-Based Estimates
+        - name: clinical_cohort
+          title: Clinical Cohort Data
+        - name: literature_based
+          title: Literature-Based Estimates
+        - name: user_defined
+          title: User-Defined Estimates
+      default: population_based
+      description:
+          R: Source of disease prevalence estimates for prior probability calculation
+
+    - name: confidence_threshold
+      title: Confidence Threshold
+      type: Number
+      min: 0.1
+      max: 0.95
+      default: 0.5
+      description:
+          R: Minimum confidence threshold for diagnostic recommendations
+
+    - name: max_diagnoses
+      title: Maximum Diagnoses to Display
+      type: Integer
+      min: 3
+      max: 20
+      default: 10
+      description:
+          R: Maximum number of differential diagnoses to display in results
+
+    - name: clinical_context
+      title: Clinical Context Integration
+      type: Bool
+      default: true
+      description:
+          R: Integrate clinical context and patient history in diagnostic reasoning
+
+    - name: uncertainty_analysis
+      title: Diagnostic Uncertainty Analysis
+      type: Bool
+      default: true
+      description:
+          R: Analyze and report diagnostic uncertainty and confidence intervals
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform sensitivity analysis for key diagnostic parameters
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.8
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for diagnostic probability intervals
+
+    - name: diagnostic_plots
+      title: Diagnostic Probability Plots
+      type: Bool
+      default: true
+      description:
+          R: Create diagnostic probability and likelihood ratio visualizations
+
+    - name: network_diagram
+      title: Diagnostic Network Diagram
+      type: Bool
+      default: false
+      description:
+          R: Create network diagram of diagnostic relationships
+
+    - name: probability_heatmap
+      title: Probability Heatmap
+      type: Bool
+      default: false
+      description:
+          R: Create heatmap of diagnostic probabilities across findings
+
+    - name: clinical_guidelines
+      title: Clinical Guidelines Integration
+      type: Bool
+      default: true
+      description:
+          R: Integrate evidence-based diagnostic guidelines and recommendations
+
+    - name: differential_explanation
+      title: Diagnostic Reasoning Explanation
+      type: Bool
+      default: true
+      description:
+          R: Provide detailed explanation of diagnostic reasoning process
