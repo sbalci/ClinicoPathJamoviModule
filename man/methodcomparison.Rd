@@ -20,6 +20,7 @@ methodcomparison(
   deming_options = FALSE,
   error_ratio = 1,
   correlation_analysis = TRUE,
+  concordance_correlation = TRUE,
   regression_comparison = TRUE,
   clinical_limits = FALSE,
   clinical_lower = -10,
@@ -68,6 +69,9 @@ options}
 \item{correlation_analysis}{Include Pearson and Spearman correlation
 analysis}
 
+\item{concordance_correlation}{Calculate Lin concordance correlation
+coefficient for agreement assessment}
+
 \item{regression_comparison}{Compare ordinary least squares vs method
 comparison regressions}
 
@@ -102,6 +106,7 @@ A results object containing:
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$descriptiveStats} \tab \tab \tab \tab \tab a table \cr
 \code{results$correlationTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
 \code{results$passingBablokResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$demingResults} \tab \tab \tab \tab \tab a table \cr

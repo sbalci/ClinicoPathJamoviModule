@@ -1,0 +1,242 @@
+---
+name: treatmentoptim
+title: Treatment Optimization Framework
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Analysis Summary  
+      type: Html
+      visible: (treatment_selection || drug_interaction || dose_optimization)
+
+    - name: treatmentSelection
+      title: Personalized Treatment Selection
+      type: Table
+      visible: (treatment_selection)
+      columns:
+        - name: treatment_option
+          title: Treatment Option
+          type: text
+          
+        - name: predicted_response
+          title: Predicted Response
+          type: number
+          format: zto
+          
+        - name: confidence_interval
+          title: 95% Confidence Interval
+          type: text
+          
+        - name: risk_score
+          title: Risk Score
+          type: number
+          
+        - name: benefit_score
+          title: Benefit Score
+          type: number
+          
+        - name: recommendation_rank
+          title: Recommendation Rank
+          type: integer
+          
+        - name: evidence_level
+          title: Evidence Level
+          type: text
+          
+        - name: clinical_notes
+          title: Clinical Considerations
+          type: text
+
+    - name: drugInteractions
+      title: Drug Interaction Analysis
+      type: Table
+      visible: (drug_interaction)
+      columns:
+        - name: drug_combination
+          title: Drug Combination
+          type: text
+          
+        - name: interaction_type
+          title: Interaction Type
+          type: text
+          
+        - name: severity_level
+          title: Severity Level
+          type: text
+          
+        - name: clinical_effect
+          title: Clinical Effect
+          type: text
+          
+        - name: mechanism
+          title: Mechanism
+          type: text
+          
+        - name: management
+          title: Clinical Management
+          type: text
+          
+        - name: alternative_options
+          title: Alternative Options
+          type: text
+
+    - name: doseOptimization
+      title: Dose Optimization Results
+      type: Table
+      visible: (dose_optimization)
+      columns:
+        - name: medication
+          title: Medication
+          type: text
+          
+        - name: recommended_dose
+          title: Recommended Dose
+          type: text
+          
+        - name: dose_range
+          title: Therapeutic Range
+          type: text
+          
+        - name: adjustment_factors
+          title: Adjustment Factors
+          type: text
+          
+        - name: monitoring_parameters
+          title: Monitoring Parameters
+          type: text
+          
+        - name: dose_frequency
+          title: Dosing Frequency
+          type: text
+          
+        - name: clinical_notes
+          title: Clinical Notes
+          type: text
+
+    - name: safetyAssessment
+      title: Safety Assessment & Contraindications
+      type: Table
+      visible: (safety_assessment)
+      columns:
+        - name: safety_category
+          title: Safety Category
+          type: text
+          
+        - name: risk_level
+          title: Risk Level
+          type: text
+          
+        - name: contraindications
+          title: Contraindications
+          type: text
+          
+        - name: precautions
+          title: Precautions
+          type: text
+          
+        - name: monitoring_required
+          title: Monitoring Required
+          type: text
+          
+        - name: risk_mitigation
+          title: Risk Mitigation
+          type: text
+
+    - name: treatmentComparison
+      title: Treatment Option Comparison
+      type: Table
+      visible: (treatment_comparison)
+      columns:
+        - name: comparison_criteria
+          title: Comparison Criteria
+          type: text
+          
+        - name: treatment_a
+          title: Treatment A
+          type: text
+          
+        - name: treatment_b
+          title: Treatment B
+          type: text
+          
+        - name: statistical_difference
+          title: Statistical Significance
+          type: text
+          
+        - name: clinical_difference
+          title: Clinical Significance
+          type: text
+          
+        - name: recommendation
+          title: Recommendation
+          type: text
+
+    - name: predictionModel
+      title: Prediction Model Performance
+      type: Table
+      visible: (treatment_selection && responseVar)
+      columns:
+        - name: model_metric
+          title: Performance Metric
+          type: text
+          
+        - name: value
+          title: Value
+          type: number
+          
+        - name: confidence_interval
+          title: 95% CI
+          type: text
+          
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: treatmentPlots
+      title: Treatment Comparison Plots
+      type: Image
+      width: 800
+      height: 600
+      requiresData: true
+      visible: (treatment_plots)
+
+    - name: interactionNetwork
+      title: Drug Interaction Network
+      type: Image
+      width: 700
+      height: 500
+      requiresData: true
+      visible: (interaction_network)
+
+    - name: doseResponsePlots
+      title: Dose-Response Relationship
+      type: Image
+      width: 800
+      height: 400
+      requiresData: true
+      visible: (dose_response_plots)
+
+    - name: clinicalGuidelines
+      title: Clinical Practice Guidelines
+      type: Html
+      visible: (clinical_guidelines)
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation & Implementation
+      type: Html
+      visible: (clinical_interpretation)
+
+    - name: pharmacokineticModel
+      title: Pharmacokinetic Model Results
+      type: Html
+      visible: (pharmacokinetic_model)
+
+    - name: technicalNotes
+      title: Technical Notes & Methodology
+      type: Html
+      visible: false
