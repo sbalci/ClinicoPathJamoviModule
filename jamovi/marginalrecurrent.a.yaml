@@ -1,0 +1,176 @@
+---
+name: marginalrecurrent
+title: Marginal Models for Recurrent Events
+menuGroup: Survival
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Marginal Rate Models, Accelerated Models for Recurrent Events'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Marginal models for analyzing recurrent event data using rate-based approaches. 
+        This analysis provides population-average estimates of covariate effects on 
+        recurrent event rates, with options for marginal rate models, accelerated rate 
+        models, and gamma frailty models to handle within-subject correlation.
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology', package='ClinicoPath')
+
+options:
+    - name: data
+      type: Data
+
+    - name: subjectID
+      title: Subject ID
+      type: Variable
+      suggested:
+          - id
+      permitted:
+          - factor
+          - id
+
+    - name: time
+      title: Event Time
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+
+    - name: terminal_time
+      title: Terminal Event Time (Optional)
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+
+    - name: terminal_event
+      title: Terminal Event Indicator (Optional)
+      type: Variable
+      suggested:
+          - ordinal
+          - nominal
+      permitted:
+          - factor
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - ordinal
+          - nominal
+      permitted:
+          - numeric
+          - factor
+
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+          - name: marginal
+            title: Marginal Rate Model
+          - name: accelerated
+            title: Accelerated Rate Model
+          - name: gamma_frailty
+            title: Gamma Frailty Model
+      default: marginal
+
+    - name: baseline_type
+      title: Baseline Function
+      type: List
+      options:
+          - name: nonparametric
+            title: Non-parametric
+          - name: weibull
+            title: Weibull
+          - name: loglinear
+            title: Log-linear
+      default: nonparametric
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+
+    - name: bootstrap
+      title: Bootstrap Inference
+      type: Bool
+      default: true
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      min: 100
+      max: 5000
+      default: 1000
+
+    - name: robust_se
+      title: Robust Standard Errors
+      type: Bool
+      default: true
+
+    - name: include_cumulative
+      title: Include Cumulative Rate Function
+      type: Bool
+      default: true
+
+    - name: include_survival
+      title: Include Survival Function
+      type: Bool
+      default: true
+
+    - name: time_points
+      title: Time Points for Estimates
+      type: String
+      default: ""
+
+    - name: plotRecurrentEvents
+      title: Plot Recurrent Event Processes
+      type: Bool
+      default: true
+
+    - name: plotCumulative
+      title: Plot Cumulative Rate Function
+      type: Bool
+      default: true
+
+    - name: plotSurvival
+      title: Plot Survival Function
+      type: Bool
+      default: true
+
+    - name: plotResiduals
+      title: Plot Model Residuals
+      type: Bool
+      default: false
+
+    - name: showEducation
+      title: Show Educational Content
+      type: Bool
+      default: true
+
+    - name: showInterpretation
+      title: Show Result Interpretation
+      type: Bool
+      default: true
+
+    - name: exportResults
+      title: Export Results to Table
+      type: Bool
+      default: false
+...

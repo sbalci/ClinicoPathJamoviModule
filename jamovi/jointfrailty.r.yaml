@@ -1,0 +1,346 @@
+---
+name: jointfrailty
+title: Joint Frailty Models for Recurrent Events
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis Summary
+      type: Html
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - terminal_time
+          - terminal_event
+
+    - name: modelfit
+      title: Joint Model Fit Summary
+      type: Table
+      rows: 1
+      columns:
+        - name: subjects
+          title: Subjects
+          type: integer
+        - name: recurrent_events
+          title: Recurrent Events
+          type: integer
+        - name: terminal_events
+          title: Terminal Events
+          type: integer
+        - name: frailty_dist
+          title: Frailty Distribution
+          type: text
+        - name: association
+          title: Association Type
+          type: text
+        - name: loglik
+          title: Log-Likelihood
+          type: number
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - terminal_time
+          - terminal_event
+          - frailty_distribution
+          - association_type
+
+    - name: recurrentCoefficients
+      title: Recurrent Process Coefficients
+      type: Table
+      columns:
+        - name: covariate
+          title: Covariate
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: z
+          title: z-value
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: hr
+          title: Hazard Ratio
+          type: number
+        - name: hr_lower
+          title: HR Lower CI
+          type: number
+        - name: hr_upper
+          title: HR Upper CI
+          type: number
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+          - recurrent_covariates
+          - confidence_level
+
+    - name: terminalCoefficients
+      title: Terminal Process Coefficients
+      type: Table
+      columns:
+        - name: covariate
+          title: Covariate
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: z
+          title: z-value
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: hr
+          title: Hazard Ratio
+          type: number
+        - name: hr_lower
+          title: HR Lower CI
+          type: number
+        - name: hr_upper
+          title: HR Upper CI
+          type: number
+      clearWith:
+          - terminal_time
+          - terminal_event
+          - covariates
+          - terminal_covariates
+          - confidence_level
+
+    - name: frailtyParameters
+      title: Frailty Model Parameters
+      type: Table
+      rows: 3
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: lower
+          title: Lower CI
+          type: number
+        - name: upper
+          title: Upper CI
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+      clearWith:
+          - frailty_distribution
+          - association_type
+          - confidence_level
+
+    - name: associationMeasures
+      title: Association Between Processes
+      type: Table
+      rows: 2
+      columns:
+        - name: measure
+          title: Association Measure
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: lower
+          title: Lower CI
+          type: number
+        - name: upper
+          title: Upper CI
+          type: number
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+      clearWith:
+          - association_type
+          - confidence_level
+
+    - name: individualPredictions
+      title: Individual Risk Predictions
+      type: Table
+      visible: (include_predictions)
+      columns:
+        - name: subject
+          title: Subject ID
+          type: text
+        - name: frailty_estimate
+          title: Frailty Estimate
+          type: number
+        - name: recurrent_risk
+          title: Recurrent Risk
+          type: number
+        - name: terminal_risk
+          title: Terminal Risk
+          type: number
+        - name: risk_category
+          title: Risk Category
+          type: text
+      clearWith:
+          - subjectID
+          - include_predictions
+          - covariates
+
+    - name: residualAnalysis
+      title: Residual Analysis
+      type: Table
+      visible: (include_residuals)
+      rows: 4
+      columns:
+        - name: residual_type
+          title: Residual Type
+          type: text
+        - name: mean
+          title: Mean
+          type: number
+        - name: sd
+          title: Std. Dev.
+          type: number
+        - name: test_statistic
+          title: Test Statistic
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: Interpretation
+          type: text
+      clearWith:
+          - include_residuals
+          - subjectID
+          - time
+          - event
+
+    - name: educationalContent
+      title: Educational Overview
+      type: Html
+      visible: (showEducation)
+      clearWith:
+          - frailty_distribution
+          - association_type
+
+    - name: interpretationContent
+      title: Results Interpretation
+      type: Html
+      visible: (showInterpretation)
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - terminal_time
+          - terminal_event
+
+    - name: recurrentHazardPlot
+      title: Recurrent Process Hazard Function
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .recurrentHazardPlot
+      visible: (plotRecurrentHazard)
+      requiresData: true
+      clearWith:
+          - subjectID
+          - time
+          - event
+          - covariates
+
+    - name: terminalHazardPlot
+      title: Terminal Process Hazard Function
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .terminalHazardPlot
+      visible: (plotTerminalHazard)
+      requiresData: true
+      clearWith:
+          - terminal_time
+          - terminal_event
+          - terminal_covariates
+
+    - name: frailtyPlot
+      title: Frailty Distribution
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .frailtyPlot
+      visible: (plotFrailtyDistribution)
+      requiresData: true
+      clearWith:
+          - frailty_distribution
+          - subjectID
+
+    - name: predictionsPlot
+      title: Survival Predictions by Frailty
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .predictionsPlot
+      visible: (plotSurvivalPredictions)
+      requiresData: true
+      clearWith:
+          - include_predictions
+          - subjectID
+
+    - name: residualsPlot
+      title: Model Residuals
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .residualsPlot
+      visible: (plotResiduals)
+      requiresData: true
+      clearWith:
+          - include_residuals
+          - subjectID
+
+    - name: exportTable
+      title: Exported Results
+      type: Table
+      visible: (exportResults)
+      columns:
+        - name: component
+          title: Model Component
+          type: text
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+      clearWith:
+          - exportResults
+
+refs:
+    - frailtypack
+    - survival
+    - ClinicoPathJamoviModule
+
+...

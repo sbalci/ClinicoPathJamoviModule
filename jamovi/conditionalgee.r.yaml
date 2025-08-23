@@ -1,0 +1,252 @@
+---
+name: conditionalgee
+title: Conditional GEE for Recurrent Events Gap Times
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Analysis Summary
+      type: Html
+      clearWith:
+          - subjectID
+          - gap_time
+          - event
+          - event_number
+
+    - name: modelfit
+      title: Conditional GEE Model Fit
+      type: Table
+      rows: 1
+      columns:
+        - name: distribution
+          title: Distribution
+          type: text
+        - name: correlation
+          title: Correlation Structure
+          type: text
+        - name: conditioning
+          title: Conditioning Set
+          type: text
+        - name: observations
+          title: Observations
+          type: integer
+        - name: clusters
+          title: Clusters
+          type: integer
+        - name: max_events
+          title: Max Events
+          type: integer
+        - name: link
+          title: Link Function
+          type: text
+      clearWith:
+          - subjectID
+          - gap_time
+          - event
+          - distribution_family
+          - correlation_structure
+          - conditioning_set
+
+    - name: coefficients
+      title: Model Coefficients
+      type: Table
+      columns:
+        - name: covariate
+          title: Covariate
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: wald
+          title: Wald
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: lower
+          title: Lower CI
+          type: number
+        - name: upper
+          title: Upper CI
+          type: number
+      clearWith:
+          - covariates
+          - time_varying_covariates
+          - baseline_covariates
+          - confidence_level
+
+    - name: correlationStructure
+      title: Correlation Parameters
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Std. Error
+          type: number
+        - name: lower
+          title: Lower CI
+          type: number
+        - name: upper
+          title: Upper CI
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+      clearWith:
+          - correlation_structure
+          - confidence_level
+
+    - name: modelDiagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (include_diagnostics)
+      rows: 4
+      columns:
+        - name: diagnostic
+          title: Diagnostic Test
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+        - name: p
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: Interpretation
+          type: text
+      clearWith:
+          - include_diagnostics
+          - distribution_family
+          - correlation_structure
+
+    - name: gapTimePredictions
+      title: Gap Time Predictions
+      type: Table
+      visible: (include_predictions)
+      columns:
+        - name: subject
+          title: Subject ID
+          type: text
+        - name: observed_mean
+          title: Observed Mean
+          type: number
+        - name: predicted_next
+          title: Predicted Next
+          type: number
+        - name: residual
+          title: Residual
+          type: number
+        - name: risk_category
+          title: Risk Category
+          type: text
+      clearWith:
+          - include_predictions
+          - subjectID
+          - gap_time
+          - event_number
+
+    - name: educationalContent
+      title: Educational Overview
+      type: Html
+      visible: (showEducation)
+      clearWith:
+          - distribution_family
+          - correlation_structure
+          - conditioning_set
+
+    - name: interpretationContent
+      title: Results Interpretation
+      type: Html
+      visible: (showInterpretation)
+      clearWith:
+          - subjectID
+          - gap_time
+          - event
+
+    - name: gapTimesPlot
+      title: Gap Time Patterns
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .gapTimePatternsPlot
+      visible: (plotGapTimes)
+      requiresData: true
+      clearWith:
+          - subjectID
+          - gap_time
+          - event_number
+
+    - name: correlationPlot
+      title: Correlation Structure
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .correlationPlot
+      visible: (plotCorrelation)
+      requiresData: true
+      clearWith:
+          - correlation_structure
+          - subjectID
+
+    - name: residualsPlot
+      title: Model Residuals
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .residualsPlot
+      visible: (plotResiduals)
+      requiresData: true
+      clearWith:
+          - include_diagnostics
+          - subjectID
+          - gap_time
+
+    - name: predictionsPlot
+      title: Gap Time Predictions vs Observed
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .predictionsPlot
+      visible: (plotPredictions)
+      requiresData: true
+      clearWith:
+          - include_predictions
+          - subjectID
+          - gap_time
+
+    - name: exportTable
+      title: Exported Results
+      type: Table
+      visible: (exportResults)
+      columns:
+        - name: component
+          title: Model Component
+          type: text
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+      clearWith:
+          - exportResults
+
+refs:
+    - geepack
+    - survival
+    - ClinicoPathJamoviModule
+
+...
