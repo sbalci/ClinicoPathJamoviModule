@@ -1,0 +1,427 @@
+---
+name: betabinomialdiagnostic
+title: Beta-Binomial Diagnostic Accuracy Models
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: 'Model Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - test_result
+        - disease_status
+        - overdispersion_model
+        - estimation_method
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: lower_ci
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: upper_ci
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+        - name: z_value
+          title: 'Z-value'
+          type: number
+          format: zto:3
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+
+    - name: overdispersionParameters
+      title: 'Overdispersion Parameters'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - overdispersion_model
+        - correlation_structure
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: lower_ci
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: upper_ci
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: heterogeneityTests
+      title: 'Heterogeneity Assessment'
+      type: Table
+      visible: (heterogeneity_test)
+      rows: 1
+      clearWith:
+        - test_result
+        - disease_status
+        - study_id
+      columns:
+        - name: statistic_type
+          title: 'Test'
+          type: text
+        - name: statistic_value
+          title: 'Statistic'
+          type: number
+          format: zto:3
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: tau_squared
+          title: 'τ²'
+          type: number
+          format: zto:4
+        - name: i_squared
+          title: 'I²'
+          type: number
+          format: zto:1
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: studyLevelResults
+      title: 'Study-Level Results'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - test_result
+        - disease_status
+        - study_id
+      columns:
+        - name: study
+          title: 'Study'
+          type: text
+        - name: n_diseased
+          title: 'Disease +'
+          type: integer
+        - name: n_non_diseased
+          title: 'Disease -'
+          type: integer
+        - name: sensitivity
+          title: 'Sensitivity'
+          type: number
+          format: zto:4
+        - name: specificity
+          title: 'Specificity'
+          type: number
+          format: zto:4
+        - name: sensitivity_ci_lower
+          title: 'Sens Lower'
+          type: number
+          format: zto:4
+        - name: sensitivity_ci_upper
+          title: 'Sens Upper'
+          type: number
+          format: zto:4
+        - name: specificity_ci_lower
+          title: 'Spec Lower'
+          type: number
+          format: zto:4
+        - name: specificity_ci_upper
+          title: 'Spec Upper'
+          type: number
+          format: zto:4
+
+    - name: pooledEstimates
+      title: 'Pooled Diagnostic Accuracy'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - test_result
+        - disease_status
+        - overdispersion_model
+      columns:
+        - name: measure
+          title: 'Measure'
+          type: text
+        - name: estimate
+          title: 'Pooled Estimate'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: lower_ci
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: upper_ci
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+        - name: prediction_lower
+          title: 'Pred Lower'
+          type: number
+          format: zto:4
+          visible: (prediction_intervals)
+        - name: prediction_upper
+          title: 'Pred Upper'
+          type: number
+          format: zto:4
+          visible: (prediction_intervals)
+
+    - name: correlationResults
+      title: 'Sensitivity-Specificity Correlation'
+      type: Table
+      visible: (correlation_structure:correlated)
+      rows: 1
+      clearWith:
+        - correlation_structure
+        - overdispersion_model
+      columns:
+        - name: correlation_type
+          title: 'Correlation Type'
+          type: text
+        - name: correlation
+          title: 'Correlation'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: lower_ci
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: upper_ci
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+
+    - name: convergenceDiagnostics
+      title: 'MCMC Convergence Diagnostics'
+      type: Table
+      visible: (estimation_method:bayesian_mcmc && convergence_diagnostics)
+      rows: 1
+      clearWith:
+        - mcmc_iterations
+        - burnin_iterations
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: rhat
+          title: 'R̂'
+          type: number
+          format: zto:4
+        - name: effective_n
+          title: 'Effective N'
+          type: integer
+        - name: mcmc_se
+          title: 'MCMC SE'
+          type: number
+          format: zto:6
+        - name: geweke_z
+          title: 'Geweke Z'
+          type: number
+          format: zto:3
+        - name: convergence_status
+          title: 'Status'
+          type: text
+
+    - name: subgroupAnalysis
+      title: 'Subgroup Analysis'
+      type: Table
+      visible: (subgroup_analysis)
+      rows: 1
+      clearWith:
+        - covariates
+        - subgroup_analysis
+      columns:
+        - name: subgroup
+          title: 'Subgroup'
+          type: text
+        - name: n_studies
+          title: 'Studies'
+          type: integer
+        - name: pooled_sensitivity
+          title: 'Pooled Sensitivity'
+          type: number
+          format: zto:4
+        - name: pooled_specificity
+          title: 'Pooled Specificity'
+          type: number
+          format: zto:4
+        - name: q_between
+          title: 'Q-between'
+          type: number
+          format: zto:3
+        - name: p_between
+          title: 'p-value'
+          type: number
+          format: zto:4
+
+    - name: influenceAnalysis
+      title: 'Influence Analysis'
+      type: Table
+      visible: (influence_diagnostics)
+      rows: 1
+      clearWith:
+        - study_id
+        - influence_diagnostics
+      columns:
+        - name: study
+          title: 'Study'
+          type: text
+        - name: cook_distance
+          title: "Cook's D"
+          type: number
+          format: zto:4
+        - name: dffits
+          title: 'DFFITS'
+          type: number
+          format: zto:4
+        - name: leverage
+          title: 'Leverage'
+          type: number
+          format: zto:4
+        - name: influence_flag
+          title: 'Influential'
+          type: text
+
+    - name: publicationBiasTests
+      title: 'Publication Bias Tests'
+      type: Table
+      visible: (publication_bias)
+      rows: 1
+      clearWith:
+        - publication_bias
+      columns:
+        - name: test_name
+          title: 'Test'
+          type: text
+        - name: statistic
+          title: 'Statistic'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: forestPlotSensitivity
+      title: 'Forest Plot - Sensitivity'
+      type: Image
+      visible: (forest_plot)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotForestSensitivity
+      clearWith:
+        - test_result
+        - disease_status
+        - study_id
+
+    - name: forestPlotSpecificity
+      title: 'Forest Plot - Specificity'
+      type: Image
+      visible: (forest_plot)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotForestSpecificity
+      clearWith:
+        - test_result
+        - disease_status
+        - study_id
+
+    - name: summaryROCPlot
+      title: 'Summary ROC Curve'
+      type: Image
+      visible: (summary_roc_curve)
+      requiresData: true
+      width: 700
+      height: 700
+      renderFun: .plotSummaryROC
+      clearWith:
+        - test_result
+        - disease_status
+        - overdispersion_model
+
+    - name: residualPlots
+      title: 'Residual Diagnostic Plots'
+      type: Image
+      visible: (residual_plots)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotResiduals
+      clearWith:
+        - overdispersion_model
+        - residual_plots
+
+    - name: convergencePlots
+      title: 'MCMC Convergence Plots'
+      type: Image
+      visible: (estimation_method:bayesian_mcmc && convergence_diagnostics)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotConvergence
+      clearWith:
+        - mcmc_iterations
+        - convergence_diagnostics
+
+    - name: funnelPlot
+      title: 'Funnel Plot for Publication Bias'
+      type: Image
+      visible: (publication_bias)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotFunnel
+      clearWith:
+        - publication_bias
+
+    - name: methodExplanation
+      title: 'Method and Interpretation'
+      type: Html
+      visible: true

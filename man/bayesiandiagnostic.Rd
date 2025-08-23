@@ -2,204 +2,121 @@
 % Please edit documentation in R/bayesiandiagnostic.h.R
 \name{bayesiandiagnostic}
 \alias{bayesiandiagnostic}
-\title{Bayesian Diagnostic Methods}
+\title{Bayesian Diagnostic Probability Updates}
 \usage{
 bayesiandiagnostic(
-  data,
-  testVariable,
-  referenceStandard,
-  centerVariable,
-  analysisType = "probability_update",
-  priorType = "noninformative",
-  priorSensitivityAlpha = 1,
-  priorSensitivityBeta = 1,
-  priorSpecificityAlpha = 1,
-  priorSpecificityBeta = 1,
-  priorPrevalenceAlpha = 1,
-  priorPrevalenceBeta = 1,
-  mcmcSamples = 5000,
-  mcmcBurnin = 1000,
-  mcmcChains = 3,
-  mcmcThin = 1,
-  credibleLevel = 0.95,
-  credibleType = "hpd",
-  calculatePostTest = TRUE,
-  priorProbabilityRange = "clinical",
-  customPriorMin = 1,
-  customPriorMax = 80,
-  specificPriorProbs = "5, 10, 25, 50",
-  modelComparison = FALSE,
-  comparisonCriteria = "waic",
-  hierarchicalModel = "fixed",
-  showPosteriorSummary = TRUE,
-  showDiagnosticMeasures = TRUE,
-  showPostTestTable = TRUE,
-  showModelComparison = FALSE,
-  showConvergenceDiagnostics = TRUE,
-  showBayesianInterpretation = TRUE,
-  plotPosteriors = TRUE,
-  plotPostTest = TRUE,
-  plotConvergence = TRUE,
-  plotModelComparison = FALSE,
-  plotCredibleRegions = TRUE,
-  robustPriors = FALSE,
-  adaptiveSampling = TRUE,
-  parallelProcessing = TRUE,
-  randomSeed = 12345,
-  expertElicitation = FALSE,
-  expertSensitivityMean = 80,
-  expertSensitivitySD = 10,
-  expertSpecificityMean = 85,
-  expertSpecificitySD = 10
+  test_result,
+  disease_status,
+  covariates = NULL,
+  analysis_type = "single_test",
+  prior_type = "fixed_prior",
+  prior_prob = 0.1,
+  alpha_prior = 1,
+  beta_prior = 1,
+  test_sequence = "test1,test2,test3",
+  credible_level = 0.95,
+  mcmc_samples = 5000,
+  burnin_samples = 1000,
+  likelihood_method = "exact",
+  posterior_summary = TRUE,
+  diagnostic_plots = TRUE,
+  sensitivity_analysis = FALSE,
+  model_comparison = FALSE,
+  predictive_checking = FALSE,
+  multilevel_structure = FALSE,
+  overdispersion_model = FALSE,
+  conditional_independence = TRUE,
+  network_analysis = FALSE
 )
 }
 \arguments{
-\item{data}{The data as a data frame containing diagnostic test results and
-reference standard.}
+\item{test_result}{Test result variable for diagnostic analysis}
 
-\item{testVariable}{Diagnostic test results (continuous or categorical)}
+\item{disease_status}{Gold standard disease status variable}
 
-\item{referenceStandard}{True disease status (binary: positive/negative)}
+\item{covariates}{Covariates for risk-stratified diagnostic analysis}
 
-\item{centerVariable}{Variable for multi-center or multi-study analysis}
+\item{analysis_type}{Statistical approach for diagnostic probability
+updates}
 
-\item{analysisType}{Type of Bayesian diagnostic analysis}
+\item{prior_type}{Prior probability specification approach}
 
-\item{priorType}{Type of prior distribution to use}
+\item{prior_prob}{Prior probability of disease in the population}
 
-\item{priorSensitivityAlpha}{Beta prior alpha parameter for sensitivity}
+\item{alpha_prior}{Alpha parameter for informative beta prior}
 
-\item{priorSensitivityBeta}{Beta prior beta parameter for sensitivity}
+\item{beta_prior}{Beta parameter for informative beta prior}
 
-\item{priorSpecificityAlpha}{Beta prior alpha parameter for specificity}
+\item{test_sequence}{Sequential test names for chain analysis}
 
-\item{priorSpecificityBeta}{Beta prior beta parameter for specificity}
+\item{credible_level}{Level for Bayesian credible intervals}
 
-\item{priorPrevalenceAlpha}{Beta prior alpha parameter for prevalence}
+\item{mcmc_samples}{MCMC iterations for posterior sampling}
 
-\item{priorPrevalenceBeta}{Beta prior beta parameter for prevalence}
+\item{burnin_samples}{MCMC burn-in iterations}
 
-\item{mcmcSamples}{Number of MCMC samples for posterior inference}
+\item{likelihood_method}{Approach for computing diagnostic likelihood}
 
-\item{mcmcBurnin}{Number of burn-in samples to discard}
+\item{posterior_summary}{Whether to compute posterior summary statistics}
 
-\item{mcmcChains}{Number of parallel MCMC chains}
+\item{diagnostic_plots}{Whether to create diagnostic probability plots}
 
-\item{mcmcThin}{MCMC thinning interval}
+\item{sensitivity_analysis}{Whether to perform prior sensitivity analysis}
 
-\item{credibleLevel}{Credible interval probability level}
+\item{model_comparison}{Whether to perform Bayesian model comparison}
 
-\item{credibleType}{Type of credible interval calculation}
+\item{predictive_checking}{Whether to perform posterior predictive checks}
 
-\item{calculatePostTest}{Calculate Bayesian post-test probabilities}
+\item{multilevel_structure}{Whether to use hierarchical Bayesian modeling}
 
-\item{priorProbabilityRange}{Range of prior probabilities for post-test
-calculation}
+\item{overdispersion_model}{Whether to model overdispersion in diagnostic
+accuracy}
 
-\item{customPriorMin}{Minimum prior probability for custom range}
+\item{conditional_independence}{Whether tests are conditionally independent
+given disease status}
 
-\item{customPriorMax}{Maximum prior probability for custom range}
-
-\item{specificPriorProbs}{Specific prior probability values for detailed
-analysis}
-
-\item{modelComparison}{Compare multiple Bayesian models}
-
-\item{comparisonCriteria}{Criteria for Bayesian model comparison}
-
-\item{hierarchicalModel}{Hierarchical structure for multi-center studies}
-
-\item{showPosteriorSummary}{Show posterior means, medians, and credible
-intervals}
-
-\item{showDiagnosticMeasures}{Show sensitivity, specificity, PPV, NPV with
-credible intervals}
-
-\item{showPostTestTable}{Show post-test probabilities at different prior
-probabilities}
-
-\item{showModelComparison}{Show model comparison statistics}
-
-\item{showConvergenceDiagnostics}{Show MCMC convergence assessment}
-
-\item{showBayesianInterpretation}{Show interpretation of Bayesian results}
-
-\item{plotPosteriors}{Plot posterior distributions for diagnostic
-parameters}
-
-\item{plotPostTest}{Plot post-test probabilities vs prior probabilities}
-
-\item{plotConvergence}{Plot MCMC trace plots and diagnostics}
-
-\item{plotModelComparison}{Plot model comparison and averaging results}
-
-\item{plotCredibleRegions}{Plot credible regions for diagnostic performance}
-
-\item{robustPriors}{Use robust priors less sensitive to outliers}
-
-\item{adaptiveSampling}{Use adaptive MCMC for improved sampling efficiency}
-
-\item{parallelProcessing}{Use parallel processing for MCMC chains}
-
-\item{randomSeed}{Random seed for reproducible results}
-
-\item{expertElicitation}{Enable expert knowledge incorporation}
-
-\item{expertSensitivityMean}{Expert estimate of test sensitivity}
-
-\item{expertSensitivitySD}{Expert uncertainty about sensitivity estimate}
-
-\item{expertSpecificityMean}{Expert estimate of test specificity}
-
-\item{expertSpecificitySD}{Expert uncertainty about specificity estimate}
+\item{network_analysis}{Whether to use Bayesian network modeling}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$priorSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$likelihoodTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$posteriorSummary} \tab \tab \tab \tab \tab a table \cr
-\code{results$diagnosticMeasures} \tab \tab \tab \tab \tab a table \cr
-\code{results$postTestTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$bayesianUpdates} \tab \tab \tab \tab \tab a table \cr
+\code{results$hierarchicalResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
-\code{results$convergenceDiagnostics} \tab \tab \tab \tab \tab a table \cr
-\code{results$posteriorPlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$postTestPlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$convergencePlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$modelComparisonPlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$credibleRegionPlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$priorPosteriorComparison} \tab \tab \tab \tab \tab an image \cr
-\code{results$interpretationGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$sensitivityAnalysis} \tab \tab \tab \tab \tab a table \cr
-\code{results$expertElicitationSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$predictiveChecks} \tab \tab \tab \tab \tab a table \cr
+\code{results$priorPosteriorPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$likelihoodPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$posteriorPredictivePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$sensitivityPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$networkDiagram} \tab \tab \tab \tab \tab an image \cr
+\code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$posteriorSummary$asDF}
+\code{results$priorSummary$asDF}
 
-\code{as.data.frame(results$posteriorSummary)}
+\code{as.data.frame(results$priorSummary)}
 }
 \description{
-Comprehensive Bayesian diagnostic methods for medical decision-making and
-test evaluation.
+Bayesian diagnostic probability calculations with prior probability
+updates.
+Implements likelihood ratios, posterior probability calculations, and
+diagnostic test chain analysis with sequential updating.
 }
-\details{
-\strong{Key Features:}
-\itemize{
-\item Bayesian diagnostic probability updates with post-test probability
-calculations
-\item Bayesian credible intervals as alternatives to frequentist confidence
-intervals
-\item Beta-binomial models for overdispersed diagnostic accuracy data
-\item Hierarchical Bayesian models for multi-center diagnostic studies
-}
+\examples{
+# Example: Bayesian diagnostic update
+bayesiandiagnostic(
+    data = diagnostic_data,
+    test_result = test_outcome,
+    disease_status = actual_disease,
+    prior_prob = 0.15,
+    analysis_type = "single_test"
+)
 
-\strong{Applications:}
-\itemize{
-\item Clinical diagnostic test evaluation with uncertainty quantification
-\item Multi-center diagnostic accuracy studies with center-specific effects
-\item Prior information integration from expert knowledge or literature
-\item Bayesian model averaging for diagnostic test combinations
-\item Complex diagnostic workflows with dependency modeling
-}
 }

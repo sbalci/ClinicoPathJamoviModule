@@ -1,0 +1,382 @@
+---
+name: bayesiandiagnostic
+title: Bayesian Diagnostic Probability Updates
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: priorSummary
+      title: 'Prior Distribution Summary'
+      type: Table
+      visible: (posterior_summary)
+      rows: 1
+      clearWith:
+        - prior_type
+        - prior_prob
+        - alpha_prior
+        - beta_prior
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: mean
+          title: 'Mean'
+          type: number
+          format: zto:4
+        - name: median
+          title: 'Median'
+          type: number
+          format: zto:4
+        - name: mode
+          title: 'Mode'
+          type: number
+          format: zto:4
+        - name: variance
+          title: 'Variance'
+          type: number
+          format: zto:6
+        - name: lower_ci
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: upper_ci
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+
+    - name: likelihoodTable
+      title: 'Diagnostic Test Likelihood'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - test_result
+        - disease_status
+        - analysis_type
+      columns:
+        - name: test_outcome
+          title: 'Test Result'
+          type: text
+        - name: sensitivity
+          title: 'Sensitivity'
+          type: number
+          format: zto:4
+        - name: specificity
+          title: 'Specificity'
+          type: number
+          format: zto:4
+        - name: lr_positive
+          title: 'LR+'
+          type: number
+          format: zto:3
+        - name: lr_negative
+          title: 'LR-'
+          type: number
+          format: zto:3
+        - name: se_sensitivity
+          title: 'SE(Sens)'
+          type: number
+          format: zto:4
+        - name: se_specificity
+          title: 'SE(Spec)'
+          type: number
+          format: zto:4
+
+    - name: posteriorSummary
+      title: 'Posterior Distribution Summary'
+      type: Table
+      visible: (posterior_summary)
+      rows: 1
+      clearWith:
+        - test_result
+        - disease_status
+        - prior_type
+        - analysis_type
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: posterior_mean
+          title: 'Posterior Mean'
+          type: number
+          format: zto:4
+        - name: posterior_median
+          title: 'Posterior Median'
+          type: number
+          format: zto:4
+        - name: posterior_mode
+          title: 'Posterior Mode'
+          type: number
+          format: zto:4
+        - name: posterior_sd
+          title: 'Posterior SD'
+          type: number
+          format: zto:4
+        - name: credible_lower
+          title: 'Lower Credible'
+          type: number
+          format: zto:4
+        - name: credible_upper
+          title: 'Upper Credible'
+          type: number
+          format: zto:4
+
+    - name: bayesianUpdates
+      title: 'Bayesian Probability Updates'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - test_result
+        - disease_status
+        - prior_prob
+        - analysis_type
+      columns:
+        - name: test_sequence
+          title: 'Test Step'
+          type: text
+        - name: prior_prob
+          title: 'Prior Probability'
+          type: number
+          format: zto:4
+        - name: likelihood_ratio
+          title: 'Likelihood Ratio'
+          type: number
+          format: zto:3
+        - name: posterior_prob
+          title: 'Posterior Probability'
+          type: number
+          format: zto:4
+        - name: bayes_factor
+          title: 'Bayes Factor'
+          type: number
+          format: zto:3
+        - name: odds_ratio
+          title: 'Post-test Odds'
+          type: number
+          format: zto:3
+        - name: probability_gain
+          title: 'Information Gain'
+          type: number
+          format: zto:4
+
+    - name: hierarchicalResults
+      title: 'Hierarchical Bayesian Results'
+      type: Table
+      visible: (multilevel_structure)
+      rows: 1
+      clearWith:
+        - test_result
+        - disease_status
+        - analysis_type
+        - covariates
+      columns:
+        - name: level
+          title: 'Hierarchical Level'
+          type: text
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: tau_squared
+          title: 'τ²'
+          type: number
+          format: zto:6
+        - name: i_squared
+          title: 'I²'
+          type: number
+          format: zto:3
+        - name: credible_lower
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: credible_upper
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+
+    - name: modelComparison
+      title: 'Bayesian Model Comparison'
+      type: Table
+      visible: (model_comparison)
+      rows: 1
+      clearWith:
+        - analysis_type
+        - multilevel_structure
+        - overdispersion_model
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: dic
+          title: 'DIC'
+          type: number
+          format: zto:2
+        - name: waic
+          title: 'WAIC'
+          type: number
+          format: zto:2
+        - name: loo_ic
+          title: 'LOO-IC'
+          type: number
+          format: zto:2
+        - name: marginal_likelihood
+          title: 'Log ML'
+          type: number
+          format: zto:2
+        - name: bayes_factor
+          title: 'Bayes Factor'
+          type: number
+          format: zto:2
+        - name: model_weight
+          title: 'Model Weight'
+          type: number
+          format: zto:4
+
+    - name: sensitivityAnalysis
+      title: 'Prior Sensitivity Analysis'
+      type: Table
+      visible: (sensitivity_analysis)
+      rows: 1
+      clearWith:
+        - prior_type
+        - alpha_prior
+        - beta_prior
+      columns:
+        - name: prior_specification
+          title: 'Prior'
+          type: text
+        - name: posterior_mean
+          title: 'Post. Mean'
+          type: number
+          format: zto:4
+        - name: posterior_median
+          title: 'Post. Median'
+          type: number
+          format: zto:4
+        - name: credible_width
+          title: 'CI Width'
+          type: number
+          format: zto:4
+        - name: kl_divergence
+          title: 'KL Divergence'
+          type: number
+          format: zto:4
+        - name: robustness_index
+          title: 'Robustness'
+          type: number
+          format: zto:4
+
+    - name: predictiveChecks
+      title: 'Posterior Predictive Checks'
+      type: Table
+      visible: (predictive_checking)
+      rows: 1
+      clearWith:
+        - test_result
+        - disease_status
+        - analysis_type
+      columns:
+        - name: statistic
+          title: 'Test Statistic'
+          type: text
+        - name: observed
+          title: 'Observed'
+          type: number
+          format: zto:4
+        - name: predicted_mean
+          title: 'Predicted Mean'
+          type: number
+          format: zto:4
+        - name: predicted_sd
+          title: 'Predicted SD'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'Bayesian p-value'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: priorPosteriorPlot
+      title: 'Prior vs Posterior Distributions'
+      type: Image
+      visible: (diagnostic_plots)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotPriorPosterior
+      clearWith:
+        - test_result
+        - disease_status
+        - prior_type
+        - analysis_type
+
+    - name: likelihoodPlot
+      title: 'Likelihood Function Plot'
+      type: Image
+      visible: (diagnostic_plots)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotLikelihood
+      clearWith:
+        - test_result
+        - disease_status
+        - likelihood_method
+
+    - name: posteriorPredictivePlot
+      title: 'Posterior Predictive Distribution'
+      type: Image
+      visible: (predictive_checking)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotPosteriorPredictive
+      clearWith:
+        - test_result
+        - disease_status
+        - analysis_type
+
+    - name: sensitivityPlot
+      title: 'Prior Sensitivity Analysis Plot'
+      type: Image
+      visible: (sensitivity_analysis)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotSensitivity
+      clearWith:
+        - prior_type
+        - alpha_prior
+        - beta_prior
+
+    - name: networkDiagram
+      title: 'Diagnostic Network Diagram'
+      type: Image
+      visible: (network_analysis)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotNetworkDiagram
+      clearWith:
+        - test_sequence
+        - conditional_independence
+
+    - name: methodExplanation
+      title: 'Method and Interpretation'
+      type: Html
+      visible: true

@@ -3631,6 +3631,34 @@ analyses:
       relationships.  Multiple modeling approaches are supported including Aalen
       additive models,  Cox-Aalen hybrid models, and dynamic regression with
       time-updated coefficients.
+  - title: Bayesian Diagnostic Probability Updates
+    name: bayesiandiagnostic
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: meddecide
+    menuTitle: Bayesian Diagnostic Probability Updates
+    description: >
+      Bayesian diagnostic probability calculations with prior probability
+      updates.
+
+      Implements likelihood ratios, posterior probability calculations, and
+
+      diagnostic test chain analysis with sequential updating.
+  - title: Beta-Binomial Diagnostic Accuracy Models
+    name: betabinomialdiagnostic
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: meddecide
+    menuTitle: Beta-Binomial Diagnostic Accuracy Models
+    description: >
+      Beta-binomial models for overdispersed diagnostic accuracy data.
+
+      Handles heterogeneity in sensitivity and specificity across studies or
+
+      centers using beta-binomial distributions with flexible correlation
+      structures.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
