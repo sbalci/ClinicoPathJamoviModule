@@ -1,0 +1,185 @@
+---
+name: timeupdatedsurvival
+title: Time-Updated Survival Estimates
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: (showExplanations)
+
+    - name: modelSummary
+      title: 'Model Summary'
+      type: Table
+      visible: (showTable)
+      rows: 1
+      clearWith:
+        - timeVar
+        - statusVar
+        - covariates
+        - modelType
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: zvalue
+          title: 'Z-value'
+          type: number
+          format: zto:3
+        - name: pvalue
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: lower
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: upper
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+
+    - name: timeVaryingEffects
+      title: 'Time-Varying Effects'
+      type: Table
+      visible: (showTable)
+      rows: 1
+      clearWith:
+        - timeVar
+        - statusVar
+        - covariates
+        - timeVaryingCovs
+        - modelType
+      columns:
+        - name: timepoint
+          title: 'Time'
+          type: number
+          format: zto:1
+        - name: variable
+          title: 'Variable'
+          type: text
+        - name: coefficient
+          title: 'Coefficient'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: lower
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: upper
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+
+    - name: survivalEstimates
+      title: 'Time-Updated Survival Estimates'
+      type: Table
+      visible: (showTable)
+      rows: 1
+      clearWith:
+        - timeVar
+        - statusVar
+        - covariates
+        - timePoints
+        - modelType
+      columns:
+        - name: time
+          title: 'Time'
+          type: number
+          format: zto:1
+        - name: survival
+          title: 'Survival Probability'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: lower
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: upper
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+        - name: hazard
+          title: 'Hazard Rate'
+          type: number
+          format: zto:4
+
+    - name: goodnessOfFit
+      title: 'Goodness-of-Fit Tests'
+      type: Table
+      visible: (showGoFTests)
+      rows: 1
+      clearWith:
+        - timeVar
+        - statusVar
+        - covariates
+        - modelType
+      columns:
+        - name: test
+          title: 'Test'
+          type: text
+        - name: statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto:4
+        - name: pvalue
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: timeVaryingPlots
+      title: 'Time-Varying Effects Plot'
+      type: Image
+      visible: (showPlots)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotTimeVarying
+      clearWith:
+        - timeVar
+        - statusVar
+        - covariates
+        - timeVaryingCovs
+        - modelType
+        - plotType
+
+    - name: survivalPlots
+      title: 'Time-Updated Survival Plot'
+      type: Image
+      visible: (showPlots)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotSurvival
+      clearWith:
+        - timeVar
+        - statusVar
+        - covariates
+        - timePoints
+        - modelType
+        - plotType
+
+    - name: methodExplanation
+      title: 'Method and Interpretation'
+      type: Html
+      visible: (showExplanations)

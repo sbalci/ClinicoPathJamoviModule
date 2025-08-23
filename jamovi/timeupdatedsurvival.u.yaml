@@ -1,0 +1,87 @@
+title: Time-Updated Survival Estimates
+name: timeupdatedsurvival
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Survival Time Variable
+        children:
+          - type: VariablesListBox
+            name: timeVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Status Variable
+        children:
+          - type: VariablesListBox
+            name: statusVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time-Varying Covariates (optional)
+        children:
+          - type: VariablesListBox
+            name: timeVaryingCovs
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stratification Variable (optional)
+        children:
+          - type: VariablesListBox
+            name: stratificationVar
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: CollapseBox
+        label: Model Options
+        collapsed: false
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: modelType
+              - type: TextBox
+                name: timePoints
+                format: string
+              - type: ComboBox
+                name: bandwidthMethod
+              - type: TextBox
+                name: manualBandwidth
+                format: number
+                enable: (bandwidthMethod:manual)
+              - type: TextBox
+                name: confidenceLevel
+                format: number
+      - type: CollapseBox
+        label: Display Options
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: plotType
+              - type: CheckBox
+                name: showTable
+              - type: CheckBox
+                name: showPlots
+              - type: CheckBox
+                name: showGoFTests
+              - type: CheckBox
+                name: showExplanations
