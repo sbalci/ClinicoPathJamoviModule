@@ -91,6 +91,10 @@ options:
           name: wilcoxon_signed
         - title: Friedman Test (repeated measures)
           name: friedman
+        - title: Cochran's Q Test (>2 paired groups)
+          name: cochran_q
+        - title: Page's Trend Test (ordered Friedman alternative)
+          name: page_trend
       default: mann_whitney
       description:
           R: >
@@ -99,6 +103,8 @@ options:
             - Kruskal-Wallis: Compare 3+ independent groups  
             - Wilcoxon Signed-Rank: Compare paired samples
             - Friedman: Compare repeated measures (3+ time points)
+            - Cochran's Q: Compare proportions/binary outcomes across 3+ matched groups
+            - Page's Trend: Test for ordered trends in repeated measures (alternative to Friedman)
 
 # Effect Sizes ----
     - name: effect_size
@@ -112,6 +118,8 @@ options:
             - Kruskal-Wallis: eta-squared based on H statistic (η²)
             - Wilcoxon: matched pairs rank-biserial correlation
             - Friedman: Kendall's W (coefficient of concordance)
+            - Cochran's Q: Effect size W (Kendall's coefficient of concordance)
+            - Page's Trend: Kendall's tau for trend and Kendall's W
 
     - name: confidence_intervals
       title: Effect Size Confidence Intervals

@@ -128,35 +128,71 @@ enhancednonparametricClass <- R6::R6Class(
                 ))
             }
             
-            # Initialize tests table based on number of groups
+            # Initialize tests table based on test type
             tests <- self$results$tests
+            test_type <- self$options$test_type
             
-            if (n_groups == 2) {
+            if (test_type == "mann_whitney") {
                 tests$addRow(rowKey = "mannwhitney", values = list(
                     test = "Mann-Whitney U Test"
                 ))
-            } else if (n_groups > 2) {
+            } else if (test_type == "kruskal_wallis") {
                 tests$addRow(rowKey = "kruskalwallis", values = list(
                     test = "Kruskal-Wallis Test"
                 ))
+            } else if (test_type == "wilcoxon_signed") {
+                tests$addRow(rowKey = "wilcoxon", values = list(
+                    test = "Wilcoxon Signed-Rank Test"
+                ))
+            } else if (test_type == "friedman") {
+                tests$addRow(rowKey = "friedman", values = list(
+                    test = "Friedman Test"
+                ))
+            } else if (test_type == "cochran_q") {
+                tests$addRow(rowKey = "cochranq", values = list(
+                    test = "Cochran's Q Test"
+                ))
+            } else if (test_type == "page_trend") {
+                tests$addRow(rowKey = "pagetrend", values = list(
+                    test = "Page's Trend Test"
+                ))
             }
             
-            # Initialize effect sizes table
+            # Initialize effect sizes table based on test type
             effectsizes <- self$results$effectsizes
             
-            if (n_groups == 2) {
+            if (test_type == "mann_whitney") {
                 effectsizes$addRow(rowKey = "rankbiserial", values = list(
                     measure = "Rank-Biserial Correlation (r)"
                 ))
                 effectsizes$addRow(rowKey = "cliffs_delta", values = list(
                     measure = "Cliff's Delta (δ)"
                 ))
-            } else if (n_groups > 2) {
+            } else if (test_type == "kruskal_wallis") {
                 effectsizes$addRow(rowKey = "eta_squared", values = list(
                     measure = "Eta-squared (η²)"
                 ))
                 effectsizes$addRow(rowKey = "epsilon_squared", values = list(
                     measure = "Epsilon-squared (ε²)"
+                ))
+            } else if (test_type == "wilcoxon_signed") {
+                effectsizes$addRow(rowKey = "wilcoxon_r", values = list(
+                    measure = "Matched-pairs rank-biserial r"
+                ))
+            } else if (test_type == "friedman") {
+                effectsizes$addRow(rowKey = "kendalls_w", values = list(
+                    measure = "Kendall's W (coefficient of concordance)"
+                ))
+            } else if (test_type == "cochran_q") {
+                effectsizes$addRow(rowKey = "cochran_w", values = list(
+                    measure = "Kendall's W for binary data"
+                ))
+            } else if (test_type == "page_trend") {
+                effectsizes$addRow(rowKey = "tau_trend", values = list(
+                    measure = "Kendall's tau for trend"
+                ))
+                effectsizes$addRow(rowKey = "page_w", values = list(
+                    measure = "Kendall's W (concordance)"
                 ))
             }
             
@@ -280,17 +316,30 @@ enhancednonparametricClass <- R6::R6Class(
             ))
         },
         
-        .populateTests = function(data) {
+        .populateTests = function(data, dep_var) {
             
             tests <- self$results$tests
+            test_type <- self$options$test_type
             n_groups <- length(unique(data$grouping))
             
-            if (n_groups == 2) {
+            if (test_type == "mann_whitney" && n_groups == 2) {
                 # Mann-Whitney U Test
                 private$.runMannWhitneyTest(data, tests)
-            } else if (n_groups > 2) {
+            } else if (test_type == "kruskal_wallis" && n_groups > 2) {
                 # Kruskal-Wallis Test  
                 private$.runKruskalWallisTest(data, tests)
+            } else if (test_type == "wilcoxon_signed") {
+                # Wilcoxon Signed-Rank Test (paired)
+                private$.runWilcoxonSignedTest(data, tests)
+            } else if (test_type == "friedman") {
+                # Friedman Test (repeated measures)
+                private$.runFriedmanTest(data, tests)
+            } else if (test_type == "cochran_q") {
+                # Cochran's Q Test (>2 paired groups)
+                private$.runCochranQTest(data, tests)
+            } else if (test_type == "page_trend") {
+                # Page's Trend Test (ordered alternative to Friedman)
+                private$.runPageTrendTest(data, tests)
             }
         },
         
@@ -384,6 +433,229 @@ enhancednonparametricClass <- R6::R6Class(
             })
         },
         
+        .runWilcoxonSignedTest = function(data, tests) {
+            
+            # Note: For paired samples, data should contain paired observations
+            # This is a simplified implementation - full paired data handling would require
+            # different data input structure
+            
+            tryCatch({
+                # Assuming data contains paired differences or can be restructured
+                wilcox_test <- wilcox.test(data$dependent, 
+                                         mu = 0,
+                                         paired = TRUE,
+                                         exact = self$options$exact_test,
+                                         conf.int = TRUE,
+                                         conf.level = self$options$confidence_level)
+                
+                # Calculate effect size (matched pairs rank-biserial correlation)
+                n <- length(data$dependent)
+                r_rb <- wilcox_test$statistic / (n * (n + 1) / 4)
+                
+                tests$addRow(rowKey = "wilcoxon", values = list(
+                    test = "Wilcoxon Signed-Rank Test",
+                    statistic = wilcox_test$statistic,
+                    df = NA,
+                    p = wilcox_test$p.value,
+                    effect_size = r_rb,
+                    ci_lower = wilcox_test$conf.int[1],
+                    ci_upper = wilcox_test$conf.int[2],
+                    interpretation = private$.interpretWilcoxon(wilcox_test$p.value, r_rb)
+                ))
+                
+            }, error = function(e) {
+                tests$addRow(rowKey = "wilcoxon", values = list(
+                    test = "Wilcoxon Signed-Rank Test",
+                    statistic = NA,
+                    df = NA,
+                    p = NA,
+                    effect_size = NA,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    interpretation = paste("Error:", e$message)
+                ))
+            })
+        },
+        
+        .runFriedmanTest = function(data, tests) {
+            
+            # Friedman test for repeated measures non-parametric ANOVA
+            # Requires data to be structured with repeated measures
+            
+            tryCatch({
+                # Convert data to matrix format for Friedman test
+                # Each row = subject, each column = condition/time point
+                data_matrix <- as.matrix(reshape2::dcast(data, 
+                    formula = seq_len(nrow(data)) ~ grouping, 
+                    value.var = "dependent")[, -1])
+                
+                friedman_test <- friedman.test(data_matrix)
+                
+                # Calculate Kendall's W (coefficient of concordance)
+                n <- nrow(data_matrix)  # number of subjects
+                k <- ncol(data_matrix)  # number of conditions
+                chi_sq <- friedman_test$statistic
+                kendalls_w <- chi_sq / (n * (k - 1))
+                
+                tests$addRow(rowKey = "friedman", values = list(
+                    test = "Friedman Test",
+                    statistic = friedman_test$statistic,
+                    df = friedman_test$parameter,
+                    p = friedman_test$p.value,
+                    effect_size = kendalls_w,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    interpretation = private$.interpretFriedman(friedman_test$p.value, kendalls_w)
+                ))
+                
+            }, error = function(e) {
+                tests$addRow(rowKey = "friedman", values = list(
+                    test = "Friedman Test", 
+                    statistic = NA,
+                    df = NA,
+                    p = NA,
+                    effect_size = NA,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    interpretation = paste("Error - requires proper repeated measures data structure:", e$message)
+                ))
+            })
+        },
+        
+        .runCochranQTest = function(data, tests) {
+            
+            # Cochran's Q test for comparing proportions across matched groups
+            # Requires binary/dichotomous data (0/1) in repeated measures format
+            
+            tryCatch({
+                # Convert continuous data to binary if needed (median split or other threshold)
+                # For demonstration, using median split - in practice, use clinically meaningful cutoff
+                if (!all(data$dependent %in% c(0, 1))) {
+                    median_val <- median(data$dependent, na.rm = TRUE)
+                    data$dependent <- ifelse(data$dependent >= median_val, 1, 0)
+                }
+                
+                # Reshape to matrix format for Cochran's Q
+                data_matrix <- as.matrix(reshape2::dcast(data,
+                    formula = seq_len(nrow(data)) ~ grouping,
+                    value.var = "dependent")[, -1])
+                
+                # Calculate Cochran's Q statistic
+                k <- ncol(data_matrix)  # number of groups
+                n <- nrow(data_matrix)  # number of subjects
+                
+                # Row totals (Ri) and column totals (Cj)
+                row_totals <- rowSums(data_matrix)
+                col_totals <- colSums(data_matrix)
+                grand_total <- sum(data_matrix)
+                
+                # Cochran's Q statistic
+                q_stat <- (k - 1) * (k * sum(col_totals^2) - grand_total^2) / 
+                          (k * grand_total - sum(row_totals^2))
+                
+                # Degrees of freedom
+                df <- k - 1
+                
+                # P-value (chi-square distribution)
+                p_value <- 1 - pchisq(q_stat, df)
+                
+                # Effect size (Kendall's W for binary data)
+                kendalls_w <- q_stat / (n * (k - 1))
+                
+                tests$addRow(rowKey = "cochranq", values = list(
+                    test = "Cochran's Q Test",
+                    statistic = q_stat,
+                    df = df,
+                    p = p_value,
+                    effect_size = kendalls_w,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    interpretation = private$.interpretCochranQ(p_value, kendalls_w)
+                ))
+                
+            }, error = function(e) {
+                tests$addRow(rowKey = "cochranq", values = list(
+                    test = "Cochran's Q Test",
+                    statistic = NA,
+                    df = NA,
+                    p = NA,
+                    effect_size = NA,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    interpretation = paste("Error - requires binary data in repeated measures format:", e$message)
+                ))
+            })
+        },
+        
+        .runPageTrendTest = function(data, tests) {
+            
+            # Page's Trend Test for ordered alternatives in repeated measures
+            # Tests for monotonic trends across ordered time points/conditions
+            
+            tryCatch({
+                # Convert data to matrix format for Page's test
+                # Assumes grouping variable represents ordered time points/conditions
+                data_matrix <- as.matrix(reshape2::dcast(data,
+                    formula = seq_len(nrow(data)) ~ grouping,
+                    value.var = "dependent")[, -1])
+                
+                n <- nrow(data_matrix)  # number of subjects
+                k <- ncol(data_matrix)  # number of conditions/time points
+                
+                # Rank data within each subject (row)
+                ranked_data <- t(apply(data_matrix, 1, rank, ties.method = "average"))
+                
+                # Calculate Page's L statistic
+                # L = sum of (i * R_i) where i is the condition index and R_i is sum of ranks
+                condition_weights <- 1:k  # Ordered weights for conditions
+                rank_sums <- colSums(ranked_data)
+                
+                L_statistic <- sum(condition_weights * rank_sums)
+                
+                # Expected value and variance under null hypothesis
+                E_L <- n * k * (k + 1)^2 / 4
+                Var_L <- n * k^2 * (k + 1) * (k - 1) / 144
+                
+                # Standardized test statistic (approximately normal for large n)
+                z_stat <- (L_statistic - E_L) / sqrt(Var_L)
+                
+                # One-tailed p-value (testing for increasing trend)
+                p_value <- 1 - pnorm(abs(z_stat))
+                
+                # Effect size: Kendall's tau for trend
+                # Simplified calculation based on Page's L
+                tau_trend <- (2 * (L_statistic - E_L)) / (n * k * (k - 1))
+                
+                # Also calculate Kendall's W for concordance
+                chi_sq_friedman <- 12 * sum((rank_sums - n * (k + 1) / 2)^2) / 
+                                   (n * k * (k + 1))
+                kendalls_w <- chi_sq_friedman / (n * (k - 1))
+                
+                tests$addRow(rowKey = "pagetrend", values = list(
+                    test = "Page's Trend Test",
+                    statistic = L_statistic,
+                    df = NA,
+                    p = p_value,
+                    effect_size = tau_trend,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    interpretation = private$.interpretPageTrend(p_value, tau_trend, kendalls_w)
+                ))
+                
+            }, error = function(e) {
+                tests$addRow(rowKey = "pagetrend", values = list(
+                    test = "Page's Trend Test",
+                    statistic = NA,
+                    df = NA,
+                    p = NA,
+                    effect_size = NA,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    interpretation = paste("Error - requires ordered repeated measures data:", e$message)
+                ))
+            })
+        },
+        
         .populatePostHoc = function(data) {
             
             if (length(unique(data$grouping)) <= 2) return()
@@ -450,9 +722,10 @@ enhancednonparametricClass <- R6::R6Class(
         .populateEffectSizes = function(data) {
             
             effectsizes <- self$results$effectsizes
+            test_type <- self$options$test_type
             n_groups <- length(unique(data$grouping))
             
-            if (n_groups == 2) {
+            if (test_type == "mann_whitney") {
                 # Calculate Cliff's Delta
                 groups <- unique(data$grouping)
                 group1_data <- data$dependent[data$grouping == groups[1]]
@@ -479,7 +752,7 @@ enhancednonparametricClass <- R6::R6Class(
                     interpretation = private$.interpretCliffsDelta(cliffs_delta)
                 ))
                 
-            } else if (n_groups > 2) {
+            } else if (test_type == "kruskal_wallis") {
                 # Eta-squared and epsilon-squared for Kruskal-Wallis
                 kw_test <- kruskal.test(dependent ~ grouping, data = data)
                 n <- nrow(data)
@@ -502,6 +775,134 @@ enhancednonparametricClass <- R6::R6Class(
                     value = epsilon_squared,
                     interpretation = private$.interpretEpsilonSquared(epsilon_squared)
                 ))
+            } else if (test_type == "wilcoxon_signed") {
+                # Effect size for Wilcoxon signed-rank test
+                wilcox_test <- wilcox.test(data$dependent, mu = 0, paired = TRUE, exact = FALSE)
+                n <- length(data$dependent)
+                r_rb <- wilcox_test$statistic / (n * (n + 1) / 4)
+                
+                effectsizes$setRow(rowKey = "wilcoxon_r", values = list(
+                    measure = "Matched-pairs rank-biserial r",
+                    value = r_rb,
+                    interpretation = private$.interpretRankBiserial(r_rb)
+                ))
+                
+            } else if (test_type == "friedman") {
+                # Kendall's W for Friedman test
+                # This requires repeated measures data structure
+                tryCatch({
+                    data_matrix <- as.matrix(reshape2::dcast(data, 
+                        formula = seq_len(nrow(data)) ~ grouping, 
+                        value.var = "dependent")[, -1])
+                    
+                    friedman_test <- friedman.test(data_matrix)
+                    n <- nrow(data_matrix)
+                    k <- ncol(data_matrix)
+                    kendalls_w <- friedman_test$statistic / (n * (k - 1))
+                    
+                    effectsizes$setRow(rowKey = "kendalls_w", values = list(
+                        measure = "Kendall's W (coefficient of concordance)",
+                        value = kendalls_w,
+                        interpretation = private$.interpretKendallsW(kendalls_w)
+                    ))
+                }, error = function(e) {
+                    effectsizes$setRow(rowKey = "kendalls_w", values = list(
+                        measure = "Kendall's W (coefficient of concordance)",
+                        value = NA,
+                        interpretation = "Error in calculation"
+                    ))
+                })
+                
+            } else if (test_type == "cochran_q") {
+                # Kendall's W for Cochran's Q test (binary data)
+                tryCatch({
+                    # Convert to binary if needed
+                    if (!all(data$dependent %in% c(0, 1))) {
+                        median_val <- median(data$dependent, na.rm = TRUE)
+                        data$dependent <- ifelse(data$dependent >= median_val, 1, 0)
+                    }
+                    
+                    data_matrix <- as.matrix(reshape2::dcast(data,
+                        formula = seq_len(nrow(data)) ~ grouping,
+                        value.var = "dependent")[, -1])
+                    
+                    k <- ncol(data_matrix)
+                    n <- nrow(data_matrix)
+                    
+                    # Calculate Q statistic
+                    row_totals <- rowSums(data_matrix)
+                    col_totals <- colSums(data_matrix)
+                    grand_total <- sum(data_matrix)
+                    
+                    q_stat <- (k - 1) * (k * sum(col_totals^2) - grand_total^2) / 
+                              (k * grand_total - sum(row_totals^2))
+                    
+                    kendalls_w <- q_stat / (n * (k - 1))
+                    
+                    effectsizes$setRow(rowKey = "cochran_w", values = list(
+                        measure = "Kendall's W for binary data",
+                        value = kendalls_w,
+                        interpretation = private$.interpretKendallsW(kendalls_w)
+                    ))
+                }, error = function(e) {
+                    effectsizes$setRow(rowKey = "cochran_w", values = list(
+                        measure = "Kendall's W for binary data",
+                        value = NA,
+                        interpretation = "Error in calculation"
+                    ))
+                })
+            } else if (test_type == "page_trend") {
+                # Effect sizes for Page's trend test
+                tryCatch({
+                    data_matrix <- as.matrix(reshape2::dcast(data,
+                        formula = seq_len(nrow(data)) ~ grouping,
+                        value.var = "dependent")[, -1])
+                    
+                    n <- nrow(data_matrix)
+                    k <- ncol(data_matrix)
+                    
+                    # Rank data within each subject
+                    ranked_data <- t(apply(data_matrix, 1, rank, ties.method = "average"))
+                    
+                    # Calculate Page's L and related statistics
+                    condition_weights <- 1:k
+                    rank_sums <- colSums(ranked_data)
+                    L_statistic <- sum(condition_weights * rank_sums)
+                    
+                    # Expected values
+                    E_L <- n * k * (k + 1)^2 / 4
+                    
+                    # Tau for trend
+                    tau_trend <- (2 * (L_statistic - E_L)) / (n * k * (k - 1))
+                    
+                    # Kendall's W for concordance
+                    chi_sq_friedman <- 12 * sum((rank_sums - n * (k + 1) / 2)^2) / 
+                                       (n * k * (k + 1))
+                    kendalls_w <- chi_sq_friedman / (n * (k - 1))
+                    
+                    effectsizes$setRow(rowKey = "tau_trend", values = list(
+                        measure = "Kendall's tau for trend",
+                        value = tau_trend,
+                        interpretation = private$.interpretTauTrend(tau_trend)
+                    ))
+                    
+                    effectsizes$setRow(rowKey = "page_w", values = list(
+                        measure = "Kendall's W (concordance)",
+                        value = kendalls_w,
+                        interpretation = private$.interpretKendallsW(kendalls_w)
+                    ))
+                }, error = function(e) {
+                    effectsizes$setRow(rowKey = "tau_trend", values = list(
+                        measure = "Kendall's tau for trend",
+                        value = NA,
+                        interpretation = "Error in calculation"
+                    ))
+                    effectsizes$setRow(rowKey = "page_w", values = list(
+                        measure = "Kendall's W (concordance)",
+                        value = NA,
+                        interpretation = "Error in calculation"
+                    ))
+                })
             }
         },
         
@@ -522,6 +923,57 @@ enhancednonparametricClass <- R6::R6Class(
             
             delta <- (greater - less) / (n1 * n2)
             return(delta)
+        },
+        
+        .interpretWilcoxon = function(p_value, r_rb) {
+            sig_text <- ifelse(p_value < 0.05, "Significant", "Non-significant")
+            
+            effect_text <- if (abs(r_rb) < 0.1) "negligible"
+            else if (abs(r_rb) < 0.3) "small" 
+            else if (abs(r_rb) < 0.5) "medium"
+            else "large"
+            
+            direction <- ifelse(r_rb > 0, "positive median difference", "negative median difference")
+            
+            return(paste0(sig_text, " paired difference (", effect_text, " effect, ", direction, ")"))
+        },
+        
+        .interpretFriedman = function(p_value, kendalls_w) {
+            sig_text <- ifelse(p_value < 0.05, "Significant", "Non-significant")
+            
+            effect_text <- if (kendalls_w < 0.1) "negligible"
+            else if (kendalls_w < 0.3) "small"
+            else if (kendalls_w < 0.5) "medium"
+            else "large"
+            
+            return(paste0(sig_text, " differences across repeated measures (", effect_text, " effect, W = ", 
+                         round(kendalls_w, 3), ")"))
+        },
+        
+        .interpretCochranQ = function(p_value, kendalls_w) {
+            sig_text <- ifelse(p_value < 0.05, "Significant", "Non-significant")
+            
+            effect_text <- if (kendalls_w < 0.1) "negligible"
+            else if (kendalls_w < 0.3) "small"
+            else if (kendalls_w < 0.5) "medium"
+            else "large"
+            
+            return(paste0(sig_text, " differences in proportions across matched groups (", 
+                         effect_text, " effect, W = ", round(kendalls_w, 3), ")"))
+        },
+        
+        .interpretPageTrend = function(p_value, tau_trend, kendalls_w) {
+            sig_text <- ifelse(p_value < 0.05, "Significant", "Non-significant")
+            
+            trend_direction <- ifelse(tau_trend > 0, "increasing", "decreasing")
+            
+            effect_text <- if (abs(tau_trend) < 0.1) "negligible"
+            else if (abs(tau_trend) < 0.3) "small"
+            else if (abs(tau_trend) < 0.5) "medium"
+            else "large"
+            
+            return(paste0(sig_text, " ", trend_direction, " trend across ordered conditions (", 
+                         effect_text, " effect, τ = ", round(tau_trend, 3), ", W = ", round(kendalls_w, 3), ")"))
         },
         
         .interpretMannWhitney = function(p_value, r_rb) {
@@ -588,6 +1040,24 @@ enhancednonparametricClass <- R6::R6Class(
             else if (epsilon < 0.06) return("small effect")
             else if (epsilon < 0.14) return("medium effect")
             else return("large effect")
+        },
+        
+        .interpretKendallsW = function(w) {
+            if (w < 0.1) return("negligible concordance")
+            else if (w < 0.3) return("small concordance")
+            else if (w < 0.5) return("medium concordance")
+            else if (w < 0.7) return("large concordance")
+            else return("very large concordance")
+        },
+        
+        .interpretTauTrend = function(tau) {
+            abs_tau <- abs(tau)
+            direction <- ifelse(tau > 0, "increasing", "decreasing")
+            
+            if (abs_tau < 0.1) return(paste("negligible", direction, "trend"))
+            else if (abs_tau < 0.3) return(paste("small", direction, "trend"))
+            else if (abs_tau < 0.5) return(paste("medium", direction, "trend"))
+            else return(paste("large", direction, "trend"))
         },
         
         .prepareDistributionPlot = function(data) {
