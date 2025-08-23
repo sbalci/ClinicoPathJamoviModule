@@ -1,0 +1,273 @@
+---
+name: condsurvival
+title: Conditional Survival Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: dataOverview
+      title: 'Data Overview'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - time
+        - status
+        - group
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: overall
+          title: 'Overall'
+          type: text
+        - name: group1
+          title: 'Group 1'
+          type: text
+          visible: (group)
+        - name: group2
+          title: 'Group 2'
+          type: text
+          visible: (group)
+
+    - name: conditionalSurvivalTable
+      title: 'Conditional Survival Probabilities'
+      type: Table
+      visible: (include_tables)
+      rows: 1
+      clearWith:
+        - time
+        - status
+        - conditional_times
+        - prediction_times
+      columns:
+        - name: group
+          title: 'Group'
+          type: text
+          visible: (group)
+        - name: conditional_time
+          title: 'Given Survival to'
+          type: text
+        - name: additional_time
+          title: 'Additional Time'
+          type: text
+        - name: conditional_prob
+          title: 'Conditional Probability'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: patients_at_risk
+          title: 'Patients at Risk'
+          type: integer
+        - name: clinical_interpretation
+          title: 'Clinical Meaning'
+          type: text
+          visible: (clinical_interpretation)
+
+    - name: conditionalImprovementTable
+      title: 'Conditional Survival Improvement'
+      type: Table
+      visible: (include_tables)
+      rows: 1
+      clearWith:
+        - time
+        - status
+        - conditional_times
+      columns:
+        - name: group
+          title: 'Group'
+          type: text
+          visible: (group)
+        - name: conditional_time
+          title: 'Time Point'
+          type: text
+        - name: unconditional_prob
+          title: 'Unconditional'
+          type: number
+          format: zto:4
+        - name: conditional_prob
+          title: 'Conditional'
+          type: number
+          format: zto:4
+        - name: improvement
+          title: 'Improvement'
+          type: number
+          format: zto:4
+        - name: improvement_percent
+          title: 'Improvement (%)'
+          type: number
+          format: zto:1
+
+    - name: dynamicPredictionTable
+      title: 'Dynamic Prediction Results'
+      type: Table
+      visible: (dynamic_prediction)
+      rows: 1
+      clearWith:
+        - time
+        - status
+        - dynamic_prediction
+      columns:
+        - name: patient_time
+          title: 'Patient Survival Time'
+          type: number
+          format: zto:2
+        - name: prediction_time
+          title: 'Prediction Horizon'
+          type: number
+          format: zto:2
+        - name: dynamic_probability
+          title: 'Dynamic Probability'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: risk_category
+          title: 'Risk Category'
+          type: text
+
+    - name: landmarkAnalysisTable
+      title: 'Landmark Analysis Results'
+      type: Table
+      visible: (landmark_analysis)
+      rows: 1
+      clearWith:
+        - time
+        - status
+        - landmark_analysis
+      columns:
+        - name: landmark_time
+          title: 'Landmark Time'
+          type: number
+          format: zto:2
+        - name: patients_at_landmark
+          title: 'Patients at Landmark'
+          type: integer
+        - name: events_after_landmark
+          title: 'Events After Landmark'
+          type: integer
+        - name: landmark_survival
+          title: 'Survival from Landmark'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+
+    - name: modelFitStatistics
+      title: 'Model Fit Statistics'
+      type: Table
+      visible: (survival_method:parametric)
+      rows: 1
+      clearWith:
+        - survival_method
+        - parametric_dist
+      columns:
+        - name: distribution
+          title: 'Distribution'
+          type: text
+        - name: log_likelihood
+          title: 'Log-Likelihood'
+          type: number
+          format: zto:2
+        - name: aic
+          title: 'AIC'
+          type: number
+          format: zto:2
+        - name: bic
+          title: 'BIC'
+          type: number
+          format: zto:2
+        - name: parameters
+          title: 'Parameters'
+          type: text
+
+    - name: groupComparisonTable
+      title: 'Group Comparison Tests'
+      type: Table
+      visible: (group)
+      rows: 1
+      clearWith:
+        - time
+        - status
+        - group
+      columns:
+        - name: conditional_time
+          title: 'Conditional Time'
+          type: text
+        - name: test_statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: significance
+          title: 'Significance'
+          type: text
+
+    - name: conditionalSurvivalPlot
+      title: 'Conditional Survival Curves'
+      type: Image
+      visible: (include_plots)
+      requiresData: true
+      width: 900
+      height: 600
+      renderFun: .plotConditionalSurvival
+      clearWith:
+        - time
+        - status
+        - group
+        - conditional_times
+
+    - name: conditionalImprovementPlot
+      title: 'Conditional Survival Improvement Plot'
+      type: Image
+      visible: (include_plots)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotConditionalImprovement
+      clearWith:
+        - time
+        - status
+        - conditional_times
+
+    - name: dynamicPredictionPlot
+      title: 'Dynamic Prediction Plot'
+      type: Image
+      visible: (include_plots && dynamic_prediction)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotDynamicPrediction
+      clearWith:
+        - time
+        - status
+        - dynamic_prediction
+
+    - name: landmarkPlot
+      title: 'Landmark Analysis Plot'
+      type: Image
+      visible: (include_plots && landmark_analysis)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotLandmarkAnalysis
+      clearWith:
+        - time
+        - status
+        - landmark_analysis
+
+    - name: methodExplanation
+      title: 'Method and Clinical Interpretation'
+      type: Html
+      visible: true

@@ -1,0 +1,306 @@
+---
+name: timeupdatesurvival
+title: Time-Updated Survival Estimates
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: modelSummary
+      title: 'Model Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - time
+        - status
+        - covariates
+        - method
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: timeVaryingCoefficients
+      title: 'Time-Varying Coefficients'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - covariates
+        - method
+        - update_times
+      columns:
+        - name: covariate
+          title: 'Covariate'
+          type: text
+        - name: time_point
+          title: 'Time Point'
+          type: number
+          format: zto:3
+        - name: coefficient
+          title: 'Coefficient'
+          type: number
+          format: zto:4
+        - name: standard_error
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: z_value
+          title: 'z-value'
+          type: number
+          format: zto:3
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+
+    - name: cumulativeCoefficients
+      title: 'Cumulative Regression Functions'
+      type: Table
+      visible: (method:aalen_additive)
+      rows: 1
+      clearWith:
+        - method
+        - update_times
+      columns:
+        - name: covariate
+          title: 'Covariate'
+          type: text
+        - name: time_point
+          title: 'Time'
+          type: number
+          format: zto:3
+        - name: cumulative_coefficient
+          title: 'Cumulative Coefficient'
+          type: number
+          format: zto:4
+        - name: confidence_lower
+          title: 'Lower CI'
+          type: number
+          format: zto:4
+        - name: confidence_upper
+          title: 'Upper CI'
+          type: number
+          format: zto:4
+
+    - name: dynamicPredictions
+      title: 'Dynamic Survival Predictions'
+      type: Table
+      visible: (dynamic_prediction)
+      rows: 1
+      clearWith:
+        - dynamic_prediction
+        - prediction_horizon
+      columns:
+        - name: patient_profile
+          title: 'Patient Profile'
+          type: text
+        - name: current_time
+          title: 'Current Time'
+          type: number
+          format: zto:2
+        - name: prediction_time
+          title: 'Prediction Time'
+          type: number
+          format: zto:2
+        - name: survival_probability
+          title: 'Survival Probability'
+          type: number
+          format: zto:4
+        - name: hazard_ratio
+          title: 'Current Hazard Ratio'
+          type: number
+          format: zto:4
+        - name: risk_category
+          title: 'Risk Category'
+          type: text
+
+    - name: significanceTests
+      title: 'Time-Varying Coefficient Tests'
+      type: Table
+      visible: (significance_testing)
+      rows: 1
+      clearWith:
+        - significance_testing
+        - covariates
+      columns:
+        - name: covariate
+          title: 'Covariate'
+          type: text
+        - name: test_statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: conclusion
+          title: 'Conclusion'
+          type: text
+
+    - name: modelComparison
+      title: 'Model Comparison'
+      type: Table
+      visible: (model_comparison)
+      rows: 1
+      clearWith:
+        - model_comparison
+        - method
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: log_likelihood
+          title: 'Log-Likelihood'
+          type: number
+          format: zto:2
+        - name: aic
+          title: 'AIC'
+          type: number
+          format: zto:2
+        - name: bic
+          title: 'BIC'
+          type: number
+          format: zto:2
+        - name: deviance
+          title: 'Deviance'
+          type: number
+          format: zto:2
+        - name: p_value
+          title: 'p-value vs Cox'
+          type: number
+          format: zto:4
+
+    - name: residualAnalysis
+      title: 'Residual Analysis'
+      type: Table
+      visible: (include_residuals)
+      rows: 1
+      clearWith:
+        - include_residuals
+        - method
+      columns:
+        - name: residual_type
+          title: 'Residual Type'
+          type: text
+        - name: mean
+          title: 'Mean'
+          type: number
+          format: zto:4
+        - name: std_deviation
+          title: 'SD'
+          type: number
+          format: zto:4
+        - name: skewness
+          title: 'Skewness'
+          type: number
+          format: zto:4
+        - name: kurtosis
+          title: 'Kurtosis'
+          type: number
+          format: zto:4
+        - name: normality_test
+          title: 'Normality p-value'
+          type: number
+          format: zto:4
+
+    - name: goodnessOfFit
+      title: 'Goodness of Fit Statistics'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - method
+        - covariates
+      columns:
+        - name: statistic
+          title: 'Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: timeVaryingPlot
+      title: 'Time-Varying Coefficients Plot'
+      type: Image
+      visible: true
+      requiresData: true
+      width: 900
+      height: 600
+      renderFun: .plotTimeVaryingCoefficients
+      clearWith:
+        - covariates
+        - method
+        - smoothing_method
+
+    - name: cumulativePlot
+      title: 'Cumulative Regression Functions Plot'
+      type: Image
+      visible: (method:aalen_additive)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotCumulativeCoefficients
+      clearWith:
+        - method
+        - update_times
+
+    - name: dynamicPredictionPlot
+      title: 'Dynamic Survival Predictions Plot'
+      type: Image
+      visible: (dynamic_prediction)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotDynamicPredictions
+      clearWith:
+        - dynamic_prediction
+        - prediction_horizon
+
+    - name: residualPlots
+      title: 'Residual Analysis Plots'
+      type: Image
+      visible: (include_residuals)
+      requiresData: true
+      width: 900
+      height: 700
+      renderFun: .plotResidualAnalysis
+      clearWith:
+        - include_residuals
+        - method
+
+    - name: smoothingDiagnostics
+      title: 'Smoothing Diagnostics Plot'
+      type: Image
+      visible: true
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotSmoothingDiagnostics
+      clearWith:
+        - smoothing_method
+        - bandwidth
+
+    - name: methodExplanation
+      title: 'Method and Clinical Interpretation'
+      type: Html
+      visible: true

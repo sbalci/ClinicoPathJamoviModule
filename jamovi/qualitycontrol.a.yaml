@@ -1,0 +1,368 @@
+---
+name: qualitycontrol
+title: Laboratory Quality Control Statistics
+menuGroup: OncoPathologyE
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Comprehensive laboratory quality control statistics including control charts (Shewhart, CUSUM, EWMA), 
+        sigma metrics, method validation protocols, and reference interval establishment for clinical laboratory management.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            qualitycontrol(
+                measurement_var = "measurement",
+                analysis_type = "control_charts",
+                control_chart_type = "all_charts"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: measurement_var
+      title: Measurement Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Continuous variable containing laboratory measurement values for quality control analysis
+
+    - name: time_var
+      title: Time Variable (optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Optional time variable for temporal control chart analysis (sequence number, date, time)
+
+    - name: control_level
+      title: Control Level (optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Optional variable indicating control material level (e.g., Level 1, Level 2, Normal, Pathological)
+
+    - name: batch_var
+      title: Batch Variable (optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Optional batch or lot identifier for batch-to-batch variation analysis
+
+    - name: analysis_type
+      title: Primary Analysis Type
+      type: List
+      options:
+        - name: control_charts
+          title: Control Charts
+        - name: sigma_metrics
+          title: Sigma Metrics
+        - name: method_validation
+          title: Method Validation
+        - name: reference_intervals
+          title: Reference Intervals
+        - name: proficiency_testing
+          title: Proficiency Testing
+      default: control_charts
+      description:
+          R: >
+            Primary type of quality control analysis to perform
+
+    - name: control_chart_type
+      title: Control Chart Type
+      type: List
+      options:
+        - name: shewhart
+          title: Shewhart (X-bar, R, S)
+        - name: cusum
+          title: CUSUM
+        - name: ewma
+          title: EWMA (Exponentially Weighted)
+        - name: all_charts
+          title: All Chart Types
+      default: all_charts
+      description:
+          R: >
+            Type of control chart to generate for quality control monitoring
+
+    - name: target_value
+      title: Target Value
+      type: Number
+      description:
+          R: >
+            Target value for control charts and sigma metrics (if known)
+
+    - name: target_sd
+      title: Target Standard Deviation
+      type: Number
+      min: 0
+      description:
+          R: >
+            Target standard deviation for sigma metrics (if known)
+
+    - name: control_limits_method
+      title: Control Limits Method
+      type: List
+      options:
+        - name: classical
+          title: Classical (3-sigma)
+        - name: probability
+          title: Probability-based
+        - name: robust
+          title: Robust estimators
+        - name: custom
+          title: Custom limits
+      default: classical
+      description:
+          R: >
+            Method for calculating control chart limits
+
+    - name: custom_lower_limit
+      title: Custom Lower Control Limit
+      type: Number
+      description:
+          R: >
+            Custom lower control limit (when using custom limits method)
+
+    - name: custom_upper_limit
+      title: Custom Upper Control Limit
+      type: Number
+      description:
+          R: >
+            Custom upper control limit (when using custom limits method)
+
+    - name: cusum_target
+      title: CUSUM Target Value
+      type: Number
+      description:
+          R: >
+            Target value for CUSUM chart (defaults to sample mean)
+
+    - name: cusum_k_value
+      title: CUSUM k Value (Slack Parameter)
+      type: Number
+      min: 0
+      default: 0.5
+      description:
+          R: >
+            CUSUM slack parameter k (typically 0.5 * sigma)
+
+    - name: cusum_h_value
+      title: CUSUM h Value (Decision Interval)
+      type: Number
+      min: 0
+      default: 5.0
+      description:
+          R: >
+            CUSUM decision interval h (typically 4-5 * sigma)
+
+    - name: ewma_lambda
+      title: EWMA Lambda (Smoothing Parameter)
+      type: Number
+      min: 0.01
+      max: 1.0
+      default: 0.2
+      description:
+          R: >
+            EWMA smoothing parameter lambda (0 < λ ≤ 1)
+
+    - name: sigma_calculation
+      title: Sigma Metrics Calculation
+      type: List
+      options:
+        - name: total_error
+          title: Total Error Method
+        - name: bias_imprecision
+          title: Bias + Imprecision Method
+        - name: westgard_rules
+          title: Westgard Multi-Rules
+      default: total_error
+      description:
+          R: >
+            Method for calculating laboratory sigma metrics
+
+    - name: allowable_error
+      title: Total Allowable Error (%)
+      type: Number
+      min: 0
+      default: 10.0
+      description:
+          R: >
+            Total allowable error percentage for sigma metrics calculation
+
+    - name: reference_method
+      title: Reference Interval Method
+      type: List
+      options:
+        - name: parametric
+          title: Parametric (Normal Distribution)
+        - name: nonparametric
+          title: Non-parametric (Percentiles)
+        - name: robust
+          title: Robust Methods
+        - name: horn_method
+          title: Horn's Method
+      default: nonparametric
+      description:
+          R: >
+            Statistical method for establishing reference intervals
+
+    - name: reference_percentile
+      title: Reference Interval Percentile
+      type: List
+      options:
+        - name: '95'
+          title: 95% (2.5-97.5 percentiles)
+        - name: '90'
+          title: 90% (5-95 percentiles)
+        - name: '99'
+          title: 99% (0.5-99.5 percentiles)
+      default: '95'
+      description:
+          R: >
+            Percentile range for reference interval calculation
+
+    - name: outlier_detection
+      title: Outlier Detection Method
+      type: List
+      options:
+        - name: none
+          title: No Outlier Detection
+        - name: dixon
+          title: Dixon's Test
+        - name: tukey
+          title: Tukey's Method (1.5*IQR)
+        - name: chauvenet
+          title: Chauvenet's Criterion
+      default: tukey
+      description:
+          R: >
+            Method for detecting and handling outliers in reference interval estimation
+
+    - name: pt_target_value
+      title: PT Target Value
+      type: Number
+      description:
+          R: >
+            Target value for proficiency testing analysis
+
+    - name: pt_acceptable_range
+      title: PT Acceptable Range (±)
+      type: Number
+      min: 0
+      description:
+          R: >
+            Acceptable range for proficiency testing (±% or ± absolute units)
+
+    - name: validation_components
+      title: Method Validation Components
+      type: List
+      options:
+        - name: precision
+          title: Precision (Repeatability/Reproducibility)
+        - name: accuracy
+          title: Accuracy (Bias Analysis)
+        - name: linearity
+          title: Linearity Assessment
+        - name: comprehensive
+          title: Comprehensive Validation
+      default: comprehensive
+      description:
+          R: >
+            Components of analytical method validation to assess
+
+    - name: precision_design
+      title: Precision Study Design
+      type: List
+      options:
+        - name: ep5_a3
+          title: EP5-A3 (CLSI)
+        - name: ep15_a3
+          title: EP15-A3 (User Verification)
+        - name: nested_anova
+          title: Nested ANOVA Design
+      default: ep5_a3
+      description:
+          R: >
+            Design for precision assessment following laboratory standards
+
+    - name: replicate_days
+      title: Number of Days
+      type: Integer
+      min: 5
+      max: 30
+      default: 20
+      description:
+          R: >
+            Number of days for precision study (CLSI EP5-A3 recommends ≥20 days)
+
+    - name: replicates_per_day
+      title: Replicates per Day
+      type: Integer
+      min: 2
+      max: 10
+      default: 2
+      description:
+          R: >
+            Number of replicates per day for precision study
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.80
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for statistical calculations and intervals
+
+    - name: westgard_rules
+      title: Apply Westgard Multi-Rules
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply Westgard multi-rule quality control decision criteria
+
+    - name: trend_analysis
+      title: Trend Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform statistical trend analysis for systematic changes
+
+    - name: capability_analysis
+      title: Process Capability Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate process capability indices (Cp, Cpk, Pp, Ppk)
+
+    - name: generate_plots
+      title: Generate Quality Control Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate comprehensive quality control visualization plots

@@ -1,0 +1,168 @@
+title: Meta-Analysis & Evidence Synthesis
+name: metaanalysis
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Effect Size Data
+        children:
+          - type: VariablesListBox
+            name: effect_size
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: variance
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: study_id
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: sample_size
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: year
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Diagnostic Test Accuracy Data
+        children:
+          - type: VariablesListBox
+            name: true_positives
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: false_positives
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: false_negatives
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: true_negatives
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Network Meta-Analysis Data
+        children:
+          - type: VariablesListBox
+            name: treatment_arm
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: comparison_arm
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Moderator Variables
+        children:
+          - type: VariablesListBox
+            name: subgroup_var
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: moderator_vars
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: CollapseBox
+        label: Analysis Type
+        collapsed: false
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: analysis_type
+              - type: ComboBox
+                name: model_type
+              - type: ComboBox
+                name: effect_measure
+              - type: ComboBox
+                name: heterogeneity_method
+      - type: CollapseBox
+        label: Diagnostic Test Accuracy Options
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: dta_model_type
+      - type: CollapseBox
+        label: Network Meta-Analysis Options
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: network_method
+      - type: CollapseBox
+        label: Publication Bias Assessment
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: publication_bias
+              - type: ComboBox
+                name: bias_tests
+      - type: CollapseBox
+        label: Meta-Regression & Subgroup Analysis
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: meta_regression
+      - type: CollapseBox
+        label: Sensitivity Analysis
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: sensitivity_analysis
+              - type: CheckBox
+                name: outlier_detection
+      - type: CollapseBox
+        label: Advanced Options
+        collapsed: true
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: forest_plot_options
+              - type: CheckBox
+                name: prediction_interval
+              - type: TextBox
+                name: confidence_level
+                format: number
+              - type: CheckBox
+                name: robust_methods
+              - type: CheckBox
+                name: small_sample_correction
+              - type: CheckBox
+                name: knha_adjustment

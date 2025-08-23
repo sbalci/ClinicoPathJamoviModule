@@ -1,0 +1,186 @@
+---
+name: condsurvival
+title: Conditional Survival Analysis
+menuGroup: OncoPathologyAdvanced
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Conditional survival analysis for calculating the probability of surviving an additional 
+        time period given that a patient has already survived a certain time. Essential for 
+        long-term prognosis and dynamic patient counseling in clinical practice.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            condsurvival(
+                time = "time_variable",
+                status = "status_variable",
+                group = "group_variable",
+                conditional_times = c(1, 2, 5),
+                prediction_times = c(1, 3, 5)
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time-to-event or follow-up time variable (numeric)
+
+    - name: status
+      title: Event Status
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Event indicator variable (1/TRUE = event occurred, 0/FALSE = censored)
+
+    - name: group
+      title: Group Variable (optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Optional grouping variable for stratified conditional survival analysis
+
+    - name: id
+      title: Subject ID (optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Optional subject identifier for longitudinal analysis
+
+    - name: conditional_times
+      title: Conditional Time Points
+      type: String
+      default: '1, 2, 5'
+      description:
+          R: >
+            Comma-separated list of time points for conditional survival (e.g., "1, 2, 5")
+
+    - name: prediction_times
+      title: Additional Survival Times
+      type: String
+      default: '1, 3, 5'
+      description:
+          R: >
+            Comma-separated list of additional survival times to predict (e.g., "1, 3, 5")
+
+    - name: survival_method
+      title: Survival Estimation Method
+      type: List
+      options:
+        - name: kaplan_meier
+          title: Kaplan-Meier
+        - name: fleming_harrington
+          title: Fleming-Harrington
+        - name: parametric
+          title: Parametric
+      default: kaplan_meier
+      description:
+          R: >
+            Method for estimating baseline survival curves
+
+    - name: parametric_dist
+      title: Parametric Distribution
+      type: List
+      options:
+        - name: weibull
+          title: Weibull
+        - name: exponential
+          title: Exponential
+        - name: lognormal
+          title: Log-normal
+        - name: loglogistic
+          title: Log-logistic
+      default: weibull
+      description:
+          R: >
+            Parametric distribution for survival modeling (when parametric method selected)
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for confidence intervals
+
+    - name: time_scale
+      title: Time Scale
+      type: List
+      options:
+        - name: days
+          title: Days
+        - name: months
+          title: Months
+        - name: years
+          title: Years
+      default: years
+      description:
+          R: >
+            Time scale for interpretation and reporting
+
+    - name: include_plots
+      title: Generate Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate conditional survival plots and visualizations
+
+    - name: include_tables
+      title: Include Summary Tables
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include detailed conditional survival probability tables
+
+    - name: dynamic_prediction
+      title: Dynamic Prediction
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable dynamic prediction capabilities for individual patients
+
+    - name: landmark_analysis
+      title: Landmark Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform landmark analysis to address immortal time bias
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation Guide
+      type: Bool
+      default: true
+      description:
+          R: >
+            Include clinical interpretation guidance for conditional survival results

@@ -1,0 +1,400 @@
+---
+name: qualitycontrol
+title: Laboratory Quality Control Statistics
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: descriptiveStats
+      title: 'Descriptive Statistics'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - measurement_var
+        - control_level
+      columns:
+        - name: statistic
+          title: 'Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: controlChartsResults
+      title: 'Control Chart Analysis'
+      type: Table
+      visible: (analysis_type:control_charts)
+      rows: 1
+      clearWith:
+        - measurement_var
+        - control_chart_type
+        - control_limits_method
+      columns:
+        - name: chart_type
+          title: 'Chart Type'
+          type: text
+        - name: center_line
+          title: 'Center Line'
+          type: number
+          format: zto:4
+        - name: lower_control_limit
+          title: 'LCL'
+          type: number
+          format: zto:4
+        - name: upper_control_limit
+          title: 'UCL'
+          type: number
+          format: zto:4
+        - name: out_of_control_points
+          title: 'Out of Control'
+          type: integer
+        - name: performance
+          title: 'Performance'
+          type: text
+
+    - name: sigmaMetrics
+      title: 'Laboratory Sigma Metrics'
+      type: Table
+      visible: (analysis_type:sigma_metrics)
+      rows: 1
+      clearWith:
+        - measurement_var
+        - sigma_calculation
+        - allowable_error
+      columns:
+        - name: component
+          title: 'Component'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: sigma_level
+          title: 'Sigma Level'
+          type: number
+          format: zto:2
+        - name: quality_rating
+          title: 'Quality Rating'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: methodValidation
+      title: 'Method Validation Results'
+      type: Table
+      visible: (analysis_type:method_validation)
+      rows: 1
+      clearWith:
+        - measurement_var
+        - validation_components
+        - precision_design
+      columns:
+        - name: parameter
+          title: 'Validation Parameter'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: specification_limit
+          title: 'Specification'
+          type: number
+          format: zto:4
+        - name: meets_criteria
+          title: 'Meets Criteria'
+          type: text
+
+    - name: precisionComponents
+      title: 'Precision Study Components'
+      type: Table
+      visible: (validation_components:precision || validation_components:comprehensive)
+      rows: 1
+      clearWith:
+        - measurement_var
+        - precision_design
+        - replicate_days
+      columns:
+        - name: component
+          title: 'Precision Component'
+          type: text
+        - name: variance
+          title: 'Variance'
+          type: number
+          format: zto:6
+        - name: standard_deviation
+          title: 'Standard Deviation'
+          type: number
+          format: zto:4
+        - name: coefficient_variation
+          title: 'CV (%)'
+          type: number
+          format: zto:2
+        - name: degrees_freedom
+          title: 'df'
+          type: integer
+
+    - name: referenceIntervals
+      title: 'Reference Interval Establishment'
+      type: Table
+      visible: (analysis_type:reference_intervals)
+      rows: 1
+      clearWith:
+        - measurement_var
+        - reference_method
+        - reference_percentile
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: sample_size
+          title: 'n'
+          type: integer
+        - name: lower_limit
+          title: 'Lower Limit'
+          type: number
+          format: zto:4
+        - name: upper_limit
+          title: 'Upper Limit'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'CI for Limits'
+          type: text
+        - name: validity
+          title: 'Validity Assessment'
+          type: text
+
+    - name: proficiencyTesting
+      title: 'Proficiency Testing Analysis'
+      type: Table
+      visible: (analysis_type:proficiency_testing)
+      rows: 1
+      clearWith:
+        - measurement_var
+        - pt_target_value
+        - pt_acceptable_range
+      columns:
+        - name: statistic
+          title: 'PT Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: z_score
+          title: 'Z-Score'
+          type: number
+          format: zto:3
+        - name: performance_flag
+          title: 'Performance'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: westgardRules
+      title: 'Westgard Multi-Rule Analysis'
+      type: Table
+      visible: (westgard_rules)
+      rows: 1
+      clearWith:
+        - westgard_rules
+        - measurement_var
+      columns:
+        - name: rule
+          title: 'Westgard Rule'
+          type: text
+        - name: description
+          title: 'Description'
+          type: text
+        - name: violations
+          title: 'Violations'
+          type: integer
+        - name: action_required
+          title: 'Action Required'
+          type: text
+
+    - name: trendAnalysis
+      title: 'Statistical Trend Analysis'
+      type: Table
+      visible: (trend_analysis)
+      rows: 1
+      clearWith:
+        - trend_analysis
+        - measurement_var
+        - time_var
+      columns:
+        - name: test
+          title: 'Trend Test'
+          type: text
+        - name: statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: trend_direction
+          title: 'Trend Direction'
+          type: text
+        - name: significance
+          title: 'Significance'
+          type: text
+
+    - name: capabilityAnalysis
+      title: 'Process Capability Analysis'
+      type: Table
+      visible: (capability_analysis)
+      rows: 1
+      clearWith:
+        - capability_analysis
+        - measurement_var
+        - target_value
+      columns:
+        - name: index
+          title: 'Capability Index'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+          format: zto:4
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: outlierAnalysis
+      title: 'Outlier Detection Results'
+      type: Table
+      visible: (outlier_detection != 'none')
+      rows: 1
+      clearWith:
+        - outlier_detection
+        - measurement_var
+      columns:
+        - name: observation
+          title: 'Observation'
+          type: integer
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: test_statistic
+          title: 'Test Statistic'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+        - name: outlier_flag
+          title: 'Outlier'
+          type: text
+
+    - name: qualityGoals
+      title: 'Analytical Quality Goals Assessment'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - measurement_var
+        - allowable_error
+      columns:
+        - name: goal_type
+          title: 'Quality Goal'
+          type: text
+        - name: specification
+          title: 'Specification'
+          type: text
+        - name: current_performance
+          title: 'Current Performance'
+          type: text
+        - name: meets_goal
+          title: 'Meets Goal'
+          type: text
+        - name: improvement_needed
+          title: 'Improvement Needed'
+          type: text
+
+    - name: controlChart
+      title: 'Control Chart'
+      type: Image
+      visible: (generate_plots && analysis_type:control_charts)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotControlChart
+      clearWith:
+        - measurement_var
+        - control_chart_type
+        - time_var
+
+    - name: sigmaMetricsPlot
+      title: 'Sigma Metrics Visualization'
+      type: Image
+      visible: (generate_plots && analysis_type:sigma_metrics)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotSigmaMetrics
+      clearWith:
+        - measurement_var
+        - sigma_calculation
+
+    - name: methodValidationPlot
+      title: 'Method Validation Plot'
+      type: Image
+      visible: (generate_plots && analysis_type:method_validation)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotMethodValidation
+      clearWith:
+        - measurement_var
+        - validation_components
+
+    - name: referenceIntervalsPlot
+      title: 'Reference Interval Plot'
+      type: Image
+      visible: (generate_plots && analysis_type:reference_intervals)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotReferenceIntervals
+      clearWith:
+        - measurement_var
+        - reference_method
+
+    - name: trendPlot
+      title: 'Trend Analysis Plot'
+      type: Image
+      visible: (generate_plots && trend_analysis)
+      requiresData: true
+      width: 800
+      height: 500
+      renderFun: .plotTrendAnalysis
+      clearWith:
+        - measurement_var
+        - time_var
+        - trend_analysis
+
+    - name: methodExplanation
+      title: 'Method and Interpretation Guide'
+      type: Html
+      visible: true
