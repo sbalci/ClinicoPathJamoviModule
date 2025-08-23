@@ -1,0 +1,112 @@
+title: Patient Monitoring Dashboard
+name: patientdashboard
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Patient Identifier
+        children:
+          - type: VariablesListBox
+            name: patientID
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Vital Signs
+        children:
+          - type: VariablesListBox
+            name: vitals
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Laboratory Values
+        children:
+          - type: VariablesListBox
+            name: labValues
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time Stamps
+        children:
+          - type: VariablesListBox
+            name: timestamps
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Clinical Notes/Events
+        children:
+          - type: VariablesListBox
+            name: clinicalNotes
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Medication Data
+        children:
+          - type: VariablesListBox
+            name: medications
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: realtime_monitoring
+      - type: CheckBox
+        name: alert_system
+      - type: CheckBox
+        name: trend_analysis
+      - type: CheckBox
+        name: risk_stratification
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: dashboard_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: monitoring_frequency
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: alert_thresholds
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: time_window
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: alert_priority
+      - type: CheckBox
+        name: predictive_analytics
+      - type: CheckBox
+        name: clinical_pathways
+      - type: CheckBox
+        name: medication_reconciliation
+      - type: CheckBox
+        name: family_communication
+      - type: CheckBox
+        name: quality_metrics
+      - type: CheckBox
+        name: workflow_optimization
+      - type: CheckBox
+        name: interactive_plots
+      - type: CheckBox
+        name: trend_plots
+      - type: CheckBox
+        name: alert_dashboard
+      - type: CheckBox
+        name: risk_dashboard
+      - type: CheckBox
+        name: medication_dashboard
+      - type: CheckBox
+        name: summary_reports
+      - type: CheckBox
+        name: performance_analytics
+      - type: CheckBox
+        name: patient_outcomes

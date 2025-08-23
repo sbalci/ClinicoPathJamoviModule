@@ -1,0 +1,162 @@
+name: imagingcorrelation
+title: Imaging Findings Correlation
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: imagingFindings
+            maxItemCount: 20
+            isTarget: true
+            itemDropBehaviour: overwrite
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 2
+    children:
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: TargetLayoutBox
+            children:
+              - type: VariablesListBox
+                name: labResults
+                maxItemCount: 15
+                isTarget: true
+                itemDropBehaviour: overwrite
+          - type: TargetLayoutBox
+            children:
+              - type: VariablesListBox
+                name: clinicalVars
+                maxItemCount: 15
+                isTarget: true
+                itemDropBehaviour: overwrite
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: TargetLayoutBox
+            children:
+              - type: VariablesListBox
+                name: pathologyData
+                maxItemCount: 10
+                isTarget: true
+                itemDropBehaviour: overwrite
+          - type: TargetLayoutBox
+            children:
+              - type: VariablesListBox
+                name: imagingModality
+                maxItemCount: 5
+                isTarget: true
+                itemDropBehaviour: overwrite
+      - type: CollapseBox
+        label: Analysis Options
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            style: inline
+            children:
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: correlation_analysis
+                  - type: CheckBox
+                    name: concordance_assessment
+                  - type: CheckBox
+                    name: pattern_recognition
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: sensitivity_specificity
+                  - type: CheckBox
+                    name: diagnostic_confidence
+      - type: CollapseBox
+        label: Method Configuration
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: integration_method
+              - type: ComboBox
+                name: correlation_method
+              - type: TextBox
+                name: confidence_level
+                format: number
+              - type: TextBox
+                name: minimum_correlation
+                format: number
+      - type: CollapseBox
+        label: Advanced Imaging Analysis
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            style: inline
+            children:
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: radiomics_analysis
+                  - type: CheckBox
+                    name: texture_analysis
+                  - type: CheckBox
+                    name: lesion_characterization
+                  - type: CheckBox
+                    name: temporal_analysis
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: anatomical_correlation
+                  - type: CheckBox
+                    name: staging_correlation
+                  - type: CheckBox
+                    name: treatment_response
+                  - type: CheckBox
+                    name: ai_assisted
+      - type: CollapseBox
+        label: Visualization Options
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            style: inline
+            children:
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: correlation_plots
+                  - type: CheckBox
+                    name: concordance_plots
+                  - type: CheckBox
+                    name: heatmap_visualization
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: network_diagram
+                  - type: CheckBox
+                    name: roc_curves
+      - type: CollapseBox
+        label: Clinical Integration
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            style: inline
+            children:
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: clinical_guidelines
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: report_generation
+jus: '2.0'
