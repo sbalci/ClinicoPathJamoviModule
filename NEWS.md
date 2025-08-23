@@ -36,6 +36,71 @@
 *   **Visualization Suite:** Interactive treatment comparison plots, drug interaction networks, and dose-response relationship visualizations
 *   **Implementation Guidance:** Comprehensive clinical interpretation guides with practical implementation recommendations and quality metrics
 
+#### 🧠 **Differential Diagnosis Assistance (differentialdiagnosis) - Bayesian Diagnostic Reasoning System**
+
+##### **Advanced Bayesian Diagnostic Engine**
+*   **Multi-Method Probabilistic Analysis:** Comprehensive diagnostic reasoning with Naive Bayes, Bayesian Networks, Logistic Regression, and Random Forest methodologies for optimal diagnostic accuracy
+*   **Evidence-Based Prevalence Integration:** Population-based, clinical cohort, and literature-based disease prevalence estimates with demographic adjustment for personalized prior probabilities
+*   **Likelihood Ratio Optimization:** Systematic calculation of positive and negative likelihood ratios (LR+, LR-) for individual clinical findings with diagnostic utility assessment
+*   **Posterior Probability Ranking:** Automated differential diagnosis ranking based on Bayesian posterior probabilities with confidence interval quantification
+
+##### **Comprehensive Clinical Evidence Integration**
+*   **Multi-Modal Data Fusion:** Seamless integration of clinical findings, laboratory results, imaging findings, and patient demographics for holistic diagnostic assessment
+*   **Clinical Context Analysis:** Patient-specific factor evaluation including symptom duration, clinical setting, comorbidity profiles, and demographic risk stratification
+*   **Evidence Quality Assessment:** Systematic evaluation of diagnostic evidence quality with clinical relevance scoring and reliability assessment
+*   **Uncertainty Quantification:** Advanced diagnostic uncertainty analysis with source identification, impact assessment, and mitigation strategy recommendations
+
+##### **Advanced Diagnostic Validation & Performance**
+*   **Model Performance Assessment:** Comprehensive diagnostic model validation with sensitivity, specificity, PPV, NPV, accuracy, and AUC calculations with confidence intervals
+*   **Sensitivity Analysis Framework:** Parameter sensitivity evaluation for disease prevalence, test characteristics, and clinical likelihood ratios with impact range quantification
+*   **Calibration and Discrimination:** Model calibration assessment and discriminative ability evaluation for clinical decision-making validation
+*   **Clinical Guidelines Integration:** Evidence-based diagnostic guideline incorporation with NCCN, ASCO, and other major organization recommendations
+
+##### **Interactive Diagnostic Visualization Suite**
+*   **Diagnostic Probability Plots:** Dynamic probability visualization with confidence intervals, likelihood ratio displays, and evidence strength indicators
+*   **Diagnostic Network Diagrams:** Interactive relationship networks showing diagnostic dependencies, clinical finding correlations, and evidence pathways
+*   **Probability Heatmaps:** Comprehensive probability matrices across clinical findings with diagnostic significance visualization and pattern recognition
+*   **Bayesian Reasoning Visualization:** Step-by-step Bayesian calculation display with prior probability evolution and evidence integration tracking
+
+#### 🧪 **Laboratory Result Interpretation (labinterpret) - Comprehensive Clinical Laboratory Analysis**
+
+##### **Advanced Reference Range Analysis**
+*   **Demographic-Adjusted Reference Intervals:** Age, gender, and ethnicity-specific reference ranges with automatic demographic adjustment for personalized normal value interpretation
+*   **Multi-Source Reference Standards:** Integration of institutional, literature-based, demographic-adjusted, and custom reference ranges with confidence level configuration
+*   **Quality-Assured Interpretation:** Comprehensive reference interval quality assessment using CLSI guidelines with analytical performance validation
+*   **Dynamic Range Adjustment:** Real-time reference range modification based on patient demographics, clinical context, and population-specific factors
+
+##### **Clinical Decision Support Integration**
+*   **Critical Value Monitoring:** Automated detection and alerting for laboratory critical values with severity stratification (Critical, High, Moderate) and time-sensitive action requirements
+*   **Evidence-Based Guidelines Integration:** Seamless incorporation of clinical laboratory guidelines, best practices, and evidence-based diagnostic recommendations
+*   **Clinical Correlation Engine:** Systematic correlation of laboratory results with patient symptoms, medical history, and clinical presentation for comprehensive assessment
+*   **Medication Interaction Analysis:** Comprehensive evaluation of medication effects on laboratory values with clinical impact assessment and monitoring recommendations
+
+##### **Temporal Trend Analysis System**
+*   **Statistical Trend Detection:** Advanced time-series analysis with linear regression modeling, R² calculation, and statistical significance testing for laboratory value trends
+*   **Delta Check Analytics:** Sophisticated consecutive result comparison with configurable percentage thresholds (10-200%) and clinical relevance assessment
+*   **Longitudinal Pattern Recognition:** Multi-timepoint analysis with trend visualization, pattern detection, and clinical significance evaluation
+*   **Predictive Trend Modeling:** Forward-looking trend projection with confidence intervals and clinical outcome prediction
+
+##### **Advanced Correlation Analytics**
+*   **Multi-Variable Correlation Matrix:** Comprehensive pairwise correlation analysis of laboratory values with clinical relevance assessment and statistical validation
+*   **Clinically-Relevant Association Detection:** Automated identification of known clinically significant correlations (BUN-Creatinine, Glucose-HbA1c) with interpretation guidance
+*   **Pattern-Based Diagnostic Support:** Correlation pattern analysis for syndrome identification and differential diagnosis support
+*   **Network Correlation Visualization:** Interactive correlation networks showing laboratory value relationships and clinical significance
+
+##### **Quality Assessment Framework**
+*   **Analytical Performance Metrics:** Comprehensive quality indicators including coefficient of variation (CV%), analytical sensitivity, and measurement uncertainty quantification
+*   **Reference Interval Quality Scoring:** Systematic assessment of reference interval quality with demographic appropriateness and clinical validation
+*   **Uncertainty Propagation:** Advanced measurement uncertainty calculation with confidence interval reporting and clinical decision impact assessment
+*   **Quality Control Integration:** Built-in quality assurance protocols with performance monitoring and continuous improvement recommendations
+
+##### **Comprehensive Visualization Suite**
+*   **Laboratory Interpretation Plots:** Interactive visualizations showing laboratory values against reference ranges with status color-coding and confidence indicators
+*   **Temporal Trend Visualization:** Time-series plots with trend lines, confidence bands, and statistical significance indicators for longitudinal monitoring
+*   **Reference Range Visualization:** Comprehensive reference range displays with individual value overlay, demographic adjustments, and clinical context integration
+*   **Delta Check Visualization:** Interactive delta check plots showing consecutive changes with threshold indicators and clinical relevance assessment
+*   **Correlation Matrix Heatmaps:** Advanced correlation visualizations with hierarchical clustering and clinical significance annotation
+
 ## Version 0.0.31.36
 
 ### 🗓️ **August 22, 2025 - IHC Clustering Analysis Enhancement**
