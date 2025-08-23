@@ -1,0 +1,456 @@
+---
+name: hierarchicalbayes
+title: Hierarchical Bayesian Diagnostic Models
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: modelSpecification
+      title: 'Model Specification'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - model_type
+        - correlation_model
+        - prior_specification
+      columns:
+        - name: component
+          title: 'Component'
+          type: text
+        - name: specification
+          title: 'Specification'
+          type: text
+        - name: parameters
+          title: 'Parameters'
+          type: text
+        - name: description
+          title: 'Description'
+          type: text
+
+    - name: studySummary
+      title: 'Study-Level Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - tp
+        - fp
+        - fn
+        - tn
+        - study_id
+      columns:
+        - name: study
+          title: 'Study'
+          type: text
+        - name: n_diseased
+          title: 'Disease +'
+          type: integer
+        - name: n_non_diseased
+          title: 'Disease -'
+          type: integer
+        - name: sensitivity
+          title: 'Sensitivity'
+          type: number
+          format: zto:4
+        - name: specificity
+          title: 'Specificity'
+          type: number
+          format: zto:4
+        - name: dor
+          title: 'DOR'
+          type: number
+          format: zto:2
+        - name: prevalence
+          title: 'Prevalence'
+          type: number
+          format: zto:4
+
+    - name: pooledEstimates
+      title: 'Pooled Diagnostic Accuracy'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - model_type
+        - correlation_model
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: posterior_mean
+          title: 'Post. Mean'
+          type: number
+          format: zto:4
+        - name: posterior_sd
+          title: 'Post. SD'
+          type: number
+          format: zto:4
+        - name: credible_lower
+          title: 'Lower CrI'
+          type: number
+          format: zto:4
+        - name: credible_upper
+          title: 'Upper CrI'
+          type: number
+          format: zto:4
+        - name: prediction_lower
+          title: 'Pred Lower'
+          type: number
+          format: zto:4
+          visible: (prediction_interval)
+        - name: prediction_upper
+          title: 'Pred Upper'
+          type: number
+          format: zto:4
+          visible: (prediction_interval)
+
+    - name: hierarchicalParameters
+      title: 'Hierarchical Model Parameters'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - model_type
+        - correlation_model
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: posterior_mean
+          title: 'Post. Mean'
+          type: number
+          format: zto:4
+        - name: posterior_sd
+          title: 'Post. SD'
+          type: number
+          format: zto:4
+        - name: credible_lower
+          title: 'Lower CrI'
+          type: number
+          format: zto:4
+        - name: credible_upper
+          title: 'Upper CrI'
+          type: number
+          format: zto:4
+        - name: rhat
+          title: 'R̂'
+          type: number
+          format: zto:4
+        - name: ess_bulk
+          title: 'ESS Bulk'
+          type: integer
+
+    - name: heterogeneityAssessment
+      title: 'Between-Study Heterogeneity'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - model_type
+        - correlation_model
+      columns:
+        - name: component
+          title: 'Component'
+          type: text
+        - name: tau_squared
+          title: 'τ²'
+          type: number
+          format: zto:4
+        - name: tau_squared_lower
+          title: 'τ² Lower'
+          type: number
+          format: zto:4
+        - name: tau_squared_upper
+          title: 'τ² Upper'
+          type: number
+          format: zto:4
+        - name: i_squared
+          title: 'I²'
+          type: number
+          format: zto:1
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: correlationAnalysis
+      title: 'Sensitivity-Specificity Correlation'
+      type: Table
+      visible: (correlation_model:unstructured)
+      rows: 1
+      clearWith:
+        - correlation_model
+        - model_type
+      columns:
+        - name: correlation_type
+          title: 'Correlation'
+          type: text
+        - name: posterior_mean
+          title: 'Post. Mean'
+          type: number
+          format: zto:4
+        - name: posterior_sd
+          title: 'Post. SD'
+          type: number
+          format: zto:4
+        - name: credible_lower
+          title: 'Lower CrI'
+          type: number
+          format: zto:4
+        - name: credible_upper
+          title: 'Upper CrI'
+          type: number
+          format: zto:4
+        - name: prob_positive
+          title: 'P(ρ > 0)'
+          type: number
+          format: zto:4
+
+    - name: metaRegressionResults
+      title: 'Meta-Regression Results'
+      type: Table
+      visible: (meta_regression)
+      rows: 1
+      clearWith:
+        - study_covariates
+        - meta_regression
+      columns:
+        - name: covariate
+          title: 'Covariate'
+          type: text
+        - name: outcome
+          title: 'Outcome'
+          type: text
+        - name: coefficient
+          title: 'Coefficient'
+          type: number
+          format: zto:4
+        - name: coefficient_sd
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: credible_lower
+          title: 'Lower CrI'
+          type: number
+          format: zto:4
+        - name: credible_upper
+          title: 'Upper CrI'
+          type: number
+          format: zto:4
+        - name: prob_direction
+          title: 'P(Direction)'
+          type: number
+          format: zto:4
+
+    - name: outlierAnalysis
+      title: 'Outlier Analysis'
+      type: Table
+      visible: (outlier_detection)
+      rows: 1
+      clearWith:
+        - outlier_detection
+      columns:
+        - name: study
+          title: 'Study'
+          type: text
+        - name: mahalanobis_distance
+          title: 'Mahalanobis D'
+          type: number
+          format: zto:3
+        - name: leverage
+          title: 'Leverage'
+          type: number
+          format: zto:4
+        - name: influence_sensitivity
+          title: 'Influence (Sens)'
+          type: number
+          format: zto:4
+        - name: influence_specificity
+          title: 'Influence (Spec)'
+          type: number
+          format: zto:4
+        - name: outlier_probability
+          title: 'P(Outlier)'
+          type: number
+          format: zto:4
+        - name: outlier_flag
+          title: 'Outlier'
+          type: text
+
+    - name: convergenceDiagnostics
+      title: 'MCMC Convergence Diagnostics'
+      type: Table
+      visible: (convergence_diagnostics)
+      rows: 1
+      clearWith:
+        - mcmc_chains
+        - mcmc_iterations
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: rhat
+          title: 'R̂'
+          type: number
+          format: zto:4
+        - name: ess_bulk
+          title: 'ESS Bulk'
+          type: integer
+        - name: ess_tail
+          title: 'ESS Tail'
+          type: integer
+        - name: mcmc_se
+          title: 'MCMC SE'
+          type: number
+          format: zto:6
+        - name: convergence_status
+          title: 'Status'
+          type: text
+
+    - name: modelComparison
+      title: 'Model Comparison Metrics'
+      type: Table
+      visible: (model_comparison)
+      rows: 1
+      clearWith:
+        - model_type
+        - model_comparison
+      columns:
+        - name: metric
+          title: 'Metric'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+          format: zto:2
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:2
+        - name: description
+          title: 'Description'
+          type: text
+
+    - name: posteriorPredictive
+      title: 'Posterior Predictive Checks'
+      type: Table
+      visible: (posterior_predictive)
+      rows: 1
+      clearWith:
+        - posterior_predictive
+      columns:
+        - name: statistic
+          title: 'Test Statistic'
+          type: text
+        - name: observed
+          title: 'Observed'
+          type: number
+          format: zto:4
+        - name: predicted_mean
+          title: 'Pred. Mean'
+          type: number
+          format: zto:4
+        - name: predicted_sd
+          title: 'Pred. SD'
+          type: number
+          format: zto:4
+        - name: bayesian_p
+          title: 'Bayesian p'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: forestPlotSensitivity
+      title: 'Forest Plot - Sensitivity'
+      type: Image
+      visible: (forest_plots)
+      requiresData: true
+      width: 900
+      height: 700
+      renderFun: .plotForestSensitivity
+      clearWith:
+        - tp
+        - fn
+        - study_id
+
+    - name: forestPlotSpecificity
+      title: 'Forest Plot - Specificity'
+      type: Image
+      visible: (forest_plots)
+      requiresData: true
+      width: 900
+      height: 700
+      renderFun: .plotForestSpecificity
+      clearWith:
+        - fp
+        - tn
+        - study_id
+
+    - name: srocCurvePlot
+      title: 'Hierarchical SROC Curve'
+      type: Image
+      visible: (sroc_curves)
+      requiresData: true
+      width: 800
+      height: 800
+      renderFun: .plotSROCCurve
+      clearWith:
+        - model_type
+        - correlation_model
+
+    - name: tracePlots
+      title: 'MCMC Trace Plots'
+      type: Image
+      visible: (trace_plots)
+      requiresData: true
+      width: 1000
+      height: 800
+      renderFun: .plotTraces
+      clearWith:
+        - mcmc_chains
+        - mcmc_iterations
+
+    - name: densityPlots
+      title: 'Posterior Density Plots'
+      type: Image
+      visible: (density_plots)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotPosteriorDensities
+      clearWith:
+        - model_type
+        - density_plots
+
+    - name: pairsPlots
+      title: 'Parameter Correlation (Pairs) Plot'
+      type: Image
+      visible: (pairs_plots)
+      requiresData: true
+      width: 900
+      height: 900
+      renderFun: .plotPairs
+      clearWith:
+        - pairs_plots
+
+    - name: shrinkagePlots
+      title: 'Study Shrinkage Plot'
+      type: Image
+      visible: (shrinkage_plots)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotShrinkage
+      clearWith:
+        - shrinkage_plots
+
+    - name: methodExplanation
+      title: 'Method and Interpretation'
+      type: Html
+      visible: true
