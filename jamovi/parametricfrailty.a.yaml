@@ -1,7 +1,7 @@
 ---
 name: parametricfrailty
 title: Parametric Frailty Models
-menuGroup: Survival
+menuGroup: SurvivalT
 version: '0.0.31'
 jas: '1.2'
 

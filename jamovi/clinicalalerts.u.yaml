@@ -1,0 +1,134 @@
+---
+name: clinicalalerts
+title: Clinical Alert & Threshold Monitoring
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: clinicalVars
+            maxItemCount: 10
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 2
+    children:
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: TargetLayoutBox
+            children:
+              - type: VariablesListBox
+                name: patientId
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
+          - type: TargetLayoutBox  
+            children:
+              - type: VariablesListBox
+                name: timeVar
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
+
+      - type: CollapseBox
+        label: Output Options
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            style: inline
+            children:
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: alert_summary
+                  - type: CheckBox
+                    name: detailed_alerts
+                  - type: CheckBox
+                    name: clinical_recommendations
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: patient_analysis
+                    enable: (patientId)
+                  - type: CheckBox
+                    name: trend_analysis
+                    enable: (timeVar)
+
+      - type: CollapseBox
+        label: Threshold Configuration
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: use_clinical_defaults
+              - type: CheckBox
+                name: custom_thresholds
+                enable: '!use_clinical_defaults'
+
+      - type: CollapseBox
+        label: Alert Settings
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: include_medium_priority
+              - type: CheckBox
+                name: include_low_priority
+              - type: TextBox
+                name: confidence_level
+                format: number
+
+      - type: CollapseBox
+        label: Visualization Options
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            style: inline
+            children:
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: alert_dashboard
+                  - type: CheckBox
+                    name: threshold_plots
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: trend_plots
+                    enable: (timeVar)
+
+      - type: CollapseBox
+        label: Clinical Context
+        collapsed: true  
+        children:
+          - type: LayoutBox
+            margin: large
+            style: inline
+            children:
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: interpretation_guide
+                  - type: CheckBox
+                    name: evidence_references
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: quality_metrics
+

@@ -12,11 +12,11 @@
 new_version: "0.0.31.38"
 new_date: "2025-08-23"
 quick: false
-TEST: false
-meddecide: true
-jjstatsplot: true
-jsurvival: true
-ClinicoPathDescriptives: true
+TEST: true
+meddecide: false
+jjstatsplot: false
+jsurvival: false
+ClinicoPathDescriptives: false
 
 # ========================================
 # DETAILED CONFIGURATION BELOW

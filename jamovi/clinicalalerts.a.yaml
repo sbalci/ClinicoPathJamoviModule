@@ -1,0 +1,174 @@
+---
+name: clinicalalerts
+title: Clinical Alert & Threshold Monitoring
+menuGroup: ClinicoPathD
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Clinical Alert and Threshold Monitoring System provides real-time monitoring 
+        of clinical parameters with customizable alert thresholds and priority-based 
+        warnings for evidence-based clinical decision support.
+        
+    R:
+        dontrun: false
+        usage: |
+            data('histopathology', package='ClinicoPath')
+            
+            # Basic clinical alert monitoring
+            clinicalalerts(histopathology, 
+                         clinicalVars = 'Age', 
+                         alert_summary = TRUE,
+                         detailed_alerts = TRUE)
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+
+    - name: clinicalVars
+      title: Clinical Variables
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Clinical variables to monitor (laboratory values, vital signs, etc.)
+
+    - name: patientId
+      title: Patient ID
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: Patient identifier for patient-specific monitoring (optional)
+
+    - name: timeVar
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: Time variable for longitudinal monitoring (optional)
+
+    - name: alert_summary
+      title: Alert Summary Table
+      type: Bool
+      default: true
+      description:
+          R: Show summary of alerts by priority level
+
+    - name: detailed_alerts
+      title: Detailed Alerts Table
+      type: Bool
+      default: true
+      description:
+          R: Show detailed table of all threshold violations
+
+    - name: clinical_recommendations
+      title: Clinical Recommendations
+      type: Bool
+      default: true
+      description:
+          R: Show evidence-based clinical recommendations
+
+    - name: patient_analysis
+      title: Patient-Specific Analysis
+      type: Bool
+      default: false
+      description:
+          R: Show per-patient alert analysis (requires Patient ID)
+
+    - name: trend_analysis
+      title: Temporal Trend Analysis
+      type: Bool
+      default: false
+      description:
+          R: Show temporal patterns in alerts (requires Time Variable)
+
+    - name: use_clinical_defaults
+      title: Use Clinical Default Thresholds
+      type: Bool
+      default: true
+      description:
+          R: Use evidence-based clinical default thresholds
+          
+    - name: custom_thresholds
+      title: Custom Threshold Entry
+      type: Bool
+      default: false
+      description:
+          R: Enable custom threshold configuration
+
+    - name: include_medium_priority
+      title: Include Medium Priority Alerts
+      type: Bool
+      default: true
+      description:
+          R: Include medium priority threshold violations
+          
+    - name: include_low_priority
+      title: Include Low Priority Alerts
+      type: Bool
+      default: false
+      description:
+          R: Include low priority threshold violations
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description:
+          R: Confidence level for statistical calculations
+
+    - name: alert_dashboard
+      title: Alert Dashboard Plot
+      type: Bool
+      default: true
+      description:
+          R: Create visual dashboard of alert status
+          
+    - name: threshold_plots
+      title: Threshold Violation Plots
+      type: Bool
+      default: false
+      description:
+          R: Create plots showing threshold violations
+          
+    - name: trend_plots
+      title: Temporal Trend Plots  
+      type: Bool
+      default: false
+      description:
+          R: Create trend plots over time (requires Time Variable)
+
+    - name: interpretation_guide
+      title: Clinical Interpretation Guide
+      type: Bool
+      default: true
+      description:
+          R: Show clinical interpretation guidelines
+          
+    - name: evidence_references
+      title: Evidence References
+      type: Bool
+      default: false
+      description:
+          R: Show references for threshold recommendations
+          
+    - name: quality_metrics
+      title: Quality Assurance Metrics
+      type: Bool
+      default: false
+      description:
+          R: Show quality assurance and safety metrics
+

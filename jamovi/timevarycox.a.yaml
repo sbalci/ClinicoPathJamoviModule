@@ -1,7 +1,7 @@
 ---
 name: timevarycox
 title: Time-Varying Covariates Cox Regression
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cox regression with time-varying covariates'
 version: '0.0.31'
