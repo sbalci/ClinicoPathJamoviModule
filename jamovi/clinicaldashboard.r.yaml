@@ -1,0 +1,99 @@
+---
+name: clinicaldashboard
+title: Interactive Clinical Dashboard
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: summaryMetrics
+    title: Summary Metrics
+    type: Table
+    visible: (showSummaryStats)
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: current_value
+        title: Current Value
+        type: text
+      - name: trend
+        title: Trend
+        type: text
+      - name: status
+        title: Status
+        type: text
+
+  - name: clinicalAlerts
+    title: Clinical Alerts
+    type: Table
+    visible: (showAlerts)
+    columns:
+      - name: alert_type
+        title: Alert Type
+        type: text
+      - name: patient_id
+        title: Patient ID
+        type: text
+      - name: variable
+        title: Variable
+        type: text
+      - name: value
+        title: Value
+        type: text
+      - name: threshold
+        title: Threshold
+        type: text
+      - name: severity
+        title: Severity
+        type: text
+
+  - name: outcomeStats
+    title: Outcome Statistics
+    type: Table
+    visible: (outcomeVars && showSummaryStats)
+    columns:
+      - name: outcome
+        title: Outcome
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: mean
+        title: Mean
+        type: number
+      - name: sd
+        title: SD
+        type: number
+      - name: median
+        title: Median
+        type: number
+      - name: q25
+        title: Q1
+        type: number
+      - name: q75
+        title: Q3
+        type: number
+
+  - name: trendPlot
+    title: Trend Analysis
+    visible: (showTrends && timeVar)
+    type: Image
+    width: 700
+    height: 400
+    renderFun: .trendPlot
+
+  - name: distributionPlot
+    title: Outcome Distributions
+    visible: (showDistributions && outcomeVars)
+    type: Image
+    width: 600
+    height: 400
+    renderFun: .distributionPlot
+
+  - name: dashboardSummary
+    title: Dashboard Summary
+    type: Html
+    visible: true

@@ -1,0 +1,108 @@
+---
+name: clinicalvalidation
+title: Clinical Validation Framework
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: validationSummary
+    title: Validation Summary
+    type: Table
+    visible: true
+    columns:
+      - name: test_name
+        title: Validation Test
+        type: text
+      - name: result
+        title: Result
+        type: text
+      - name: p_value
+        title: p-value
+        type: number
+        format: zto,pvalue
+      - name: confidence_interval
+        title: 95% CI
+        type: text
+      - name: status
+        title: Status
+        type: text
+
+  - name: accuracyTests
+    title: Statistical Accuracy Tests
+    type: Table
+    visible: (validationType:accuracy)
+    columns:
+      - name: metric
+        title: Accuracy Metric
+        type: text
+      - name: test_value
+        title: Test Value
+        type: number
+      - name: reference_value
+        title: Reference Value
+        type: number
+      - name: difference
+        title: Difference
+        type: number
+      - name: relative_error
+        title: Relative Error (%)
+        type: number
+      - name: within_tolerance
+        title: Within Tolerance
+        type: text
+
+  - name: equivalenceTest
+    title: Equivalence Testing
+    type: Table
+    visible: (performEquivalence)
+    columns:
+      - name: test_type
+        title: Test Type
+        type: text
+      - name: equivalence_margin
+        title: Equivalence Margin
+        type: number
+      - name: test_statistic
+        title: Test Statistic
+        type: number
+      - name: p_value
+        title: p-value
+        type: number
+        format: zto,pvalue
+      - name: conclusion
+        title: Conclusion
+        type: text
+
+  - name: complianceChecklist
+    title: Compliance Checklist
+    type: Table
+    visible: (validationType:clinical_guidelines || validationType:regulatory)
+    columns:
+      - name: requirement
+        title: Requirement
+        type: text
+      - name: standard
+        title: Standard
+        type: text
+      - name: status
+        title: Status
+        type: text
+      - name: notes
+        title: Notes
+        type: text
+
+  - name: validationReport
+    title: Validation Report
+    type: Html
+    visible: (generateReport)
+
+  - name: agreementPlot
+    title: Method Agreement Plot
+    visible: (testVar && referenceVar)
+    type: Image
+    width: 600
+    height: 500
+    renderFun: .agreementPlot

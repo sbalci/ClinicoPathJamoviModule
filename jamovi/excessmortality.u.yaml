@@ -1,0 +1,89 @@
+name: excessmortality
+title: Excess Mortality Analysis
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: timeVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Status Variable
+        children:
+          - type: VariablesListBox
+            name: statusVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Age Variable
+        children:
+          - type: VariablesListBox
+            name: ageVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Sex Variable
+        children:
+          - type: VariablesListBox
+            name: sexVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+            itemDropBehaviour: emptyspace
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Model Configuration
+        children:
+          - type: ComboBox
+            name: expectedRate
+            label: Expected mortality rate source
+          - type: ComboBox
+            name: splineType
+            label: Spline basis type
+          - type: TextBox
+            name: nknots
+            label: Number of knots
+            format: number
+          - type: TextBox
+            name: degree
+            label: Spline degree
+            format: number
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: TextBox
+            name: confidenceLevel
+            label: Confidence level (%)
+            format: number
+          - type: TextBox
+            name: timePoints
+            label: Time points for prediction
+            format: string
+      - type: Label
+        label: Plots
+        children:
+          - type: CheckBox
+            name: plotHazard
+            label: Plot excess hazard
+          - type: CheckBox
+            name: plotSurvival
+            label: Plot excess survival
+          - type: CheckBox
+            name: plotCumHazard
+            label: Plot cumulative excess hazard
+jus: '2.0'

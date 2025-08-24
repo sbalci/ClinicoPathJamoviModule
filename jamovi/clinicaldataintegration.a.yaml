@@ -1,0 +1,109 @@
+---
+name: clinicaldataintegration
+title: Clinical Data Integration
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Clinical Data Integration
+menuSubtitle: EHR data import/export and quality assessment
+options:
+  - name: data
+    type: Data
+
+  - name: dataSource
+    title: Data source type
+    type: List
+    options:
+      - name: csv
+        title: CSV/Excel file
+      - name: fhir
+        title: FHIR R4 format
+      - name: hl7
+        title: HL7 format
+      - name: cdisc
+        title: CDISC/SDTM format
+    default: csv
+
+  - name: patientIdVar
+    title: Patient ID variable
+    type: Variable
+    suggested:
+      - id
+    permitted:
+      - factor
+      - id
+
+  - name: dateVars
+    title: Date variables
+    type: Variables
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: clinicalVars
+    title: Clinical variables
+    type: Variables
+    suggested:
+      - continuous
+      - ordinal
+      - nominal
+    permitted:
+      - numeric
+      - factor
+
+  - name: qualityCheck
+    title: Data quality assessment
+    type: Bool
+    default: true
+
+  - name: completenessThreshold
+    title: Completeness threshold
+    type: Number
+    min: 0
+    max: 100
+    default: 80
+
+  - name: consistencyCheck
+    title: Consistency checks
+    type: Bool
+    default: true
+
+  - name: outlierDetection
+    title: Outlier detection
+    type: Bool
+    default: true
+
+  - name: terminologyMapping
+    title: Clinical terminology mapping
+    type: List
+    options:
+      - name: icd10
+        title: ICD-10
+      - name: snomed
+        title: SNOMED-CT
+      - name: loinc
+        title: LOINC
+      - name: none
+        title: None
+    default: none
+
+  - name: exportFormat
+    title: Export format
+    type: List
+    options:
+      - name: csv
+        title: CSV
+      - name: json
+        title: JSON
+      - name: fhir
+        title: FHIR R4
+      - name: cdisc
+        title: CDISC
+    default: csv
+
+  - name: generateReport
+    title: Generate quality report
+    type: Bool
+    default: true

@@ -1,0 +1,73 @@
+name: clinicaldataintegration
+title: Clinical Data Integration
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Patient ID
+        children:
+          - type: VariablesListBox
+            name: patientIdVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Date Variables
+        children:
+          - type: VariablesListBox
+            name: dateVars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+      - type: TargetLayoutBox
+        label: Clinical Variables
+        children:
+          - type: VariablesListBox
+            name: clinicalVars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Data Source
+        children:
+          - type: ComboBox
+            name: dataSource
+            label: Data source type
+      - type: Label
+        label: Quality Assessment
+        children:
+          - type: CheckBox
+            name: qualityCheck
+            label: Perform data quality assessment
+          - type: TextBox
+            name: completenessThreshold
+            label: Completeness threshold (%)
+            format: number
+            enable: (qualityCheck)
+          - type: CheckBox
+            name: consistencyCheck
+            label: Consistency checks
+          - type: CheckBox
+            name: outlierDetection
+            label: Outlier detection
+      - type: Label
+        label: Clinical Standards
+        children:
+          - type: ComboBox
+            name: terminologyMapping
+            label: Terminology mapping
+      - type: Label
+        label: Export Options
+        children:
+          - type: ComboBox
+            name: exportFormat
+            label: Export format
+          - type: CheckBox
+            name: generateReport
+            label: Generate quality report
+jus: '2.0'

@@ -1,0 +1,111 @@
+---
+name: clinicaldashboard
+title: Interactive Clinical Dashboard
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Interactive Clinical Dashboard
+menuSubtitle: Real-time clinical analytics and visualization
+options:
+  - name: data
+    type: Data
+
+  - name: patientId
+    title: Patient ID variable
+    type: Variable
+    suggested:
+      - id
+    permitted:
+      - factor
+      - id
+
+  - name: timeVar
+    title: Time/Date variable
+    type: Variable
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: outcomeVars
+    title: Outcome variables
+    type: Variables
+    suggested:
+      - continuous
+      - ordinal
+    permitted:
+      - numeric
+      - factor
+
+  - name: groupVar
+    title: Grouping variable
+    type: Variable
+    suggested:
+      - nominal
+      - ordinal
+    permitted:
+      - factor
+
+  - name: dashboardType
+    title: Dashboard type
+    type: List
+    options:
+      - name: patient
+        title: Patient-level dashboard
+      - name: population
+        title: Population health dashboard
+      - name: quality
+        title: Quality metrics dashboard
+      - name: outcomes
+        title: Clinical outcomes dashboard
+    default: population
+
+  - name: timeWindow
+    title: Time window
+    type: List
+    options:
+      - name: last_30_days
+        title: Last 30 days
+      - name: last_90_days
+        title: Last 90 days
+      - name: last_year
+        title: Last year
+      - name: all_time
+        title: All time
+    default: last_90_days
+
+  - name: showTrends
+    title: Show trend analysis
+    type: Bool
+    default: true
+
+  - name: showAlerts
+    title: Show clinical alerts
+    type: Bool
+    default: true
+
+  - name: alertThresholds
+    title: Alert thresholds (comma-separated)
+    type: String
+    default: ""
+
+  - name: showSummaryStats
+    title: Show summary statistics
+    type: Bool
+    default: true
+
+  - name: showDistributions
+    title: Show outcome distributions
+    type: Bool
+    default: true
+
+  - name: realTimeUpdate
+    title: Real-time updates
+    type: Bool
+    default: false
+
+  - name: exportDashboard
+    title: Export dashboard
+    type: Bool
+    default: false

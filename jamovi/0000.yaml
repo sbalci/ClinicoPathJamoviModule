@@ -4135,6 +4135,46 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Polychoric Correlation Analysis
     menuSubtitle: Correlation for ordinal and binary variables
+  - title: Clinical Data Integration
+    name: clinicaldataintegration
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Clinical Data Integration
+    menuSubtitle: EHR data import/export and quality assessment
+  - title: Interactive Clinical Dashboard
+    name: clinicaldashboard
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Interactive Clinical Dashboard
+    menuSubtitle: Real-time clinical analytics and visualization
+  - title: Clinical Validation Framework
+    name: clinicalvalidation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Clinical Validation Framework
+    menuSubtitle: Statistical accuracy and regulatory compliance validation
+  - title: Excess Mortality Analysis
+    name: excessmortality
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Excess Mortality Analysis
+    menuSubtitle: Population-based excess mortality modeling with mexhaz
+  - title: Flexible Relative Survival Analysis
+    name: flexiblerelativesurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Flexible Relative Survival Analysis
+    menuSubtitle: Relative survival with spline smoothing (flexrsurv approach)
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

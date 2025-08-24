@@ -1,0 +1,106 @@
+name: flexiblerelativesurvival
+title: Flexible Relative Survival Analysis
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: timeVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Status Variable
+        children:
+          - type: VariablesListBox
+            name: statusVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Age Variable
+        children:
+          - type: VariablesListBox
+            name: ageVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Sex Variable
+        children:
+          - type: VariablesListBox
+            name: sexVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Calendar Year
+        children:
+          - type: VariablesListBox
+            name: yearVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
+            itemDropBehaviour: emptyspace
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Model Configuration
+        children:
+          - type: ComboBox
+            name: expectedType
+            label: Expected survival type
+          - type: ComboBox
+            name: smoothingMethod
+            label: Smoothing method
+      - type: Label
+        label: Smoothing Parameters
+        children:
+          - type: TextBox
+            name: knotsTime
+            label: Knots for time
+            format: number
+          - type: TextBox
+            name: knotsAge
+            label: Knots for age
+            format: number
+          - type: TextBox
+            name: smoothingParameter
+            label: Smoothing parameter
+            format: number
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: TextBox
+            name: confidenceLevel
+            label: Confidence level (%)
+            format: number
+          - type: CheckBox
+            name: standardizeAge
+            label: Age standardization
+          - type: TextBox
+            name: predictTimePoints
+            label: Prediction time points
+            format: string
+      - type: Label
+        label: Plots
+        children:
+          - type: CheckBox
+            name: plotRelativeSurvival
+            label: Plot relative survival
+          - type: CheckBox
+            name: plotExcessHazard
+            label: Plot excess hazard
+          - type: CheckBox
+            name: plotLifeExpectancy
+            label: Plot life expectancy loss
+jus: '2.0'

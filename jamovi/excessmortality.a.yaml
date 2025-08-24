@@ -1,0 +1,122 @@
+---
+name: excessmortality
+title: Excess Mortality Analysis
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Survival
+menuTitle: Excess Mortality Analysis
+menuSubtitle: Population-based excess mortality modeling with mexhaz
+options:
+  - name: data
+    type: Data
+
+  - name: timeVar
+    title: Time variable
+    type: Variable
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: statusVar
+    title: Status variable (0=alive, 1=dead)
+    type: Variable
+    suggested:
+      - ordinal
+      - nominal
+    permitted:
+      - factor
+      - numeric
+
+  - name: ageVar
+    title: Age variable
+    type: Variable
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: sexVar
+    title: Sex variable
+    type: Variable
+    suggested:
+      - nominal
+    permitted:
+      - factor
+
+  - name: covariates
+    title: Covariates
+    type: Variables
+    suggested:
+      - continuous
+      - ordinal
+      - nominal
+    permitted:
+      - numeric
+      - factor
+
+  - name: expectedRate
+    title: Expected mortality rate source
+    type: List
+    options:
+      - name: population
+        title: Population life tables
+      - name: custom
+        title: Custom expected rates
+      - name: internal
+        title: Internal estimation
+    default: population
+
+  - name: splineType
+    title: Spline basis type
+    type: List
+    options:
+      - name: bs
+        title: B-splines
+      - name: ns
+        title: Natural splines
+      - name: tprs
+        title: Thin plate regression splines
+    default: bs
+
+  - name: nknots
+    title: Number of knots
+    type: Number
+    min: 1
+    max: 10
+    default: 4
+
+  - name: degree
+    title: Spline degree
+    type: Number
+    min: 1
+    max: 5
+    default: 3
+
+  - name: confidenceLevel
+    title: Confidence level
+    type: Number
+    min: 90
+    max: 99.9
+    default: 95
+
+  - name: plotHazard
+    title: Plot excess hazard
+    type: Bool
+    default: true
+
+  - name: plotSurvival
+    title: Plot excess survival
+    type: Bool
+    default: true
+
+  - name: plotCumHazard
+    title: Plot cumulative excess hazard
+    type: Bool
+    default: false
+
+  - name: timePoints
+    title: Time points for prediction (comma-separated)
+    type: String
+    default: "1,2,3,5,10"
