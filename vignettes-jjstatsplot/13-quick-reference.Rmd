@@ -228,6 +228,6 @@ Example: "A Welch's ANOVA revealed a significant difference in fuel efficiency a
 ### Report Issues
 - Include data example, error message, and steps
 - GitHub: [sbalci/ClinicoPathJamoviModule/issues](https://github.com/sbalci/ClinicoPathJamoviModule/issues)
-- Email: drserdarbalci@gmail.com
+- Email: serdarbalci@serdarbalci.com
 
 This quick reference covers the essentials for efficient jjstatsplot usage. For detailed examples and advanced usage, consult the comprehensive vignettes listed above.

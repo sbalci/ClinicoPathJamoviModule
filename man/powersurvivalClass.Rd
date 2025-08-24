@@ -39,7 +39,7 @@ Rosner, B. (2006). Fundamentals of Biostatistics (6th edition).
 Thomson Brooks/Cole.
 }
 \author{
-Serdar Balci \email{drserdarbalci@gmail.com}
+Serdar Balci \email{serdarbalci@serdarbalci.com}
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::powersurvivalBase} -> \code{powersurvivalClass}

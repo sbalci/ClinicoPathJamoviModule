@@ -3,7 +3,7 @@ name: coxrobust
 title: Robust Cox Regression
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 menuTitle: Robust Cox Regression
 menuSubtitle: Outlier-resistant survival modeling

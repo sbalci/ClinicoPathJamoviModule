@@ -1,7 +1,7 @@
 ---
 name: metaanalysis
 title: Meta-Analysis & Evidence Synthesis
-menuGroup: OncoPathologyF
+menuGroup: OncoPathologyD
 version: '1.0.0'
 jas: '1.2'
 description:

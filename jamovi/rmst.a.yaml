@@ -1,7 +1,7 @@
 ---
 name:  rmst
 title: Restricted Mean Survival Time Tests
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 version: '1.0.0'
 jas: '1.2'

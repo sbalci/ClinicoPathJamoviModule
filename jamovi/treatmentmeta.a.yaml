@@ -1,7 +1,7 @@
 ---
 name: treatmentmeta
 title: Treatment Effect Meta-Analysis
-menuGroup: Frequencies
+menuGroup: FrequenciesD
 menuSubgroup: Meta-Analysis
 menuTitle: Treatment Effect Meta-Analysis
 menuSubtitle: Comprehensive meta-analysis for clinical interventions

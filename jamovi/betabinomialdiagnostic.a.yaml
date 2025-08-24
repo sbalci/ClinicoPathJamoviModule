@@ -1,6 +1,6 @@
 name: betabinomialdiagnostic
 title: Beta-Binomial Diagnostic Accuracy Models
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: meddecide
 version: '0.0.3'
 jas: '1.2'

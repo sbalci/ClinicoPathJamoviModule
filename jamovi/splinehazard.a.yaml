@@ -3,7 +3,7 @@ name: splinehazard
 title: Spline-based Hazard Functions
 jas: "1.2"
 version: "1.0.0"
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 menuTitle: Spline-based Hazard Functions
 menuSubtitle: Flexible parametric survival modeling with splines

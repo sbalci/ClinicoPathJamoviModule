@@ -124,7 +124,7 @@
 #' Serdar Balci MD, Pathologist
 #' 
 #' \itemize{
-#'   \item Email: \email{drserdarbalci@@gmail.com}
+#'   \item Email: \email{serdarbalci@serdarbalci.com}
 #'   \item ORCID: \href{https://orcid.org/0000-0002-7852-3851}{0000-0002-7852-3851}
 #'   \item Website: \url{https://www.serdarbalci.com/}
 #' }

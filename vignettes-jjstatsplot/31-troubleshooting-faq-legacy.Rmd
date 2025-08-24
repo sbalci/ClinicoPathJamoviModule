@@ -411,7 +411,7 @@ table(your_data$grouping_variable)
 
 ### jjstatsplot Specific
 - **GitHub Issues**: [github.com/sbalci/ClinicoPathJamoviModule/issues](https://github.com/sbalci/ClinicoPathJamoviModule/issues)
-- **Email Support**: drserdarbalci@gmail.com
+- **Email Support**: serdarbalci@serdarbalci.com
 - **Package Documentation**: Use `?function_name` in R
 
 ### When Reporting Issues

@@ -1,7 +1,7 @@
 ---
 name: jointfrailty
 title: Joint Frailty Models for Recurrent Events
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Joint Models for Recurrent and Terminal Events'
 version: '0.0.1'

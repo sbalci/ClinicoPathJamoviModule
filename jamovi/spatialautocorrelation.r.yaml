@@ -1,0 +1,322 @@
+---
+name: spatialautocorrelation
+title: Spatial Autocorrelation Analysis (Moran's I, Geary's C)
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: dataInfo
+      title: 'Spatial Data Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - measurement
+        - x_coordinate
+        - y_coordinate
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: globalAutocorrelation
+      title: 'Global Spatial Autocorrelation'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - measurement
+        - autocorr_method
+        - spatial_weights
+      columns:
+        - name: measure
+          title: 'Measure'
+          type: text
+        - name: observed
+          title: 'Observed'
+          type: number
+          format: zto:6
+        - name: expected
+          title: 'Expected'
+          type: number
+          format: zto:6
+        - name: variance
+          title: 'Variance'
+          type: number
+          format: zto:8
+        - name: z_score
+          title: 'Z-score'
+          type: number
+          format: zto:4
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:6
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: localIndicators
+      title: 'Local Indicators of Spatial Association (LISA)'
+      type: Table
+      visible: (local_analysis)
+      rows: 1
+      clearWith:
+        - local_analysis
+        - measurement
+        - spatial_weights
+      columns:
+        - name: location_id
+          title: 'Location ID'
+          type: integer
+        - name: local_moran
+          title: 'Local Moran'
+          type: number
+          format: zto:6
+        - name: local_pvalue
+          title: 'Local p-value'
+          type: number
+          format: zto:6
+        - name: cluster_type
+          title: 'Cluster Type'
+          type: text
+        - name: significance
+          title: 'Significance'
+          type: text
+        - name: quadrant
+          title: 'Quadrant'
+          type: text
+
+    - name: spatialClusters
+      title: 'Spatial Cluster Analysis'
+      type: Table
+      visible: (cluster_detection)
+      rows: 1
+      clearWith:
+        - cluster_detection
+        - measurement
+      columns:
+        - name: cluster_id
+          title: 'Cluster ID'
+          type: integer
+        - name: cluster_type
+          title: 'Cluster Type'
+          type: text
+        - name: size
+          title: 'Cluster Size'
+          type: integer
+        - name: mean_value
+          title: 'Mean Value'
+          type: number
+          format: zto:4
+        - name: local_moran
+          title: 'Local Moran'
+          type: number
+          format: zto:4
+        - name: significance_level
+          title: 'Significance Level'
+          type: text
+        - name: clinical_relevance
+          title: 'Clinical Relevance'
+          type: text
+
+    - name: hotspotAnalysis
+      title: 'Hot Spot Analysis Results'
+      type: Table
+      visible: (hotspot_analysis)
+      rows: 1
+      clearWith:
+        - hotspot_analysis
+        - measurement
+      columns:
+        - name: hotspot_id
+          title: 'Hot Spot ID'
+          type: integer
+        - name: hotspot_type
+          title: 'Type'
+          type: text
+        - name: intensity
+          title: 'Intensity Score'
+          type: number
+          format: zto:4
+        - name: confidence_level
+          title: 'Confidence Level'
+          type: text
+        - name: area_coverage
+          title: 'Area Coverage (%)'
+          type: number
+          format: zto:2
+        - name: statistical_significance
+          title: 'Statistical Significance'
+          type: text
+
+    - name: spatialRegimes
+      title: 'Spatial Regimes Identification'
+      type: Table
+      visible: (spatial_regimes)
+      rows: 1
+      clearWith:
+        - spatial_regimes
+        - measurement
+      columns:
+        - name: regime_id
+          title: 'Regime ID'
+          type: integer
+        - name: regime_type
+          title: 'Regime Type'
+          type: text
+        - name: mean_autocorr
+          title: 'Mean Autocorrelation'
+          type: number
+          format: zto:4
+        - name: regime_size
+          title: 'Size (locations)'
+          type: integer
+        - name: homogeneity_measure
+          title: 'Homogeneity Measure'
+          type: number
+          format: zto:4
+        - name: boundary_strength
+          title: 'Boundary Strength'
+          type: number
+          format: zto:4
+
+    - name: robustnessAnalysis
+      title: 'Robustness Analysis'
+      type: Table
+      visible: (robustness_check)
+      rows: 1
+      clearWith:
+        - robustness_check
+        - spatial_weights
+      columns:
+        - name: weight_specification
+          title: 'Weight Specification'
+          type: text
+        - name: morans_i
+          title: "Moran's I"
+          type: number
+          format: zto:6
+        - name: gearys_c
+          title: "Geary's C"
+          type: number
+          format: zto:6
+        - name: p_value_moran
+          title: 'p-value (Moran)'
+          type: number
+          format: zto:6
+        - name: p_value_geary
+          title: 'p-value (Geary)'
+          type: number
+          format: zto:6
+        - name: consistency_rating
+          title: 'Consistency Rating'
+          type: text
+
+    - name: temporalAnalysis
+      title: 'Temporal Spatial Analysis'
+      type: Table
+      visible: (temporal_analysis)
+      rows: 1
+      clearWith:
+        - temporal_analysis
+        - time_point
+      columns:
+        - name: time_point
+          title: 'Time Point'
+          type: text
+        - name: morans_i
+          title: "Moran's I"
+          type: number
+          format: zto:6
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:6
+        - name: change_from_baseline
+          title: 'Change from Baseline'
+          type: number
+          format: zto:6
+        - name: trend_direction
+          title: 'Trend Direction'
+          type: text
+        - name: temporal_significance
+          title: 'Temporal Significance'
+          type: text
+
+    - name: clinicalInterpretation
+      title: 'Clinical Interpretation Guide'
+      type: Table
+      visible: (clinical_interpretation)
+      rows: 1
+      clearWith:
+        - clinical_interpretation
+        - measurement
+      columns:
+        - name: spatial_pattern
+          title: 'Spatial Pattern'
+          type: text
+        - name: statistical_finding
+          title: 'Statistical Finding'
+          type: text
+        - name: biological_interpretation
+          title: 'Biological Interpretation'
+          type: text
+        - name: clinical_significance
+          title: 'Clinical Significance'
+          type: text
+        - name: follow_up_recommendation
+          title: 'Follow-up Recommendation'
+          type: text
+
+    - name: spatialMap
+      title: 'Spatial Pattern Map'
+      type: Image
+      visible: (spatial_plots)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotSpatialMap
+      clearWith:
+        - spatial_plots
+        - measurement
+        - x_coordinate
+        - y_coordinate
+
+    - name: autocorrPlot
+      title: 'Spatial Autocorrelation Functions'
+      type: Image
+      visible: (autocorr_plots)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotAutocorrFunction
+      clearWith:
+        - autocorr_plots
+        - measurement
+        - spatial_weights
+
+    - name: lisaMap
+      title: 'LISA Cluster and Significance Map'
+      type: Image
+      visible: (lisa_plots && local_analysis)
+      requiresData: true
+      width: 900
+      height: 600
+      renderFun: .plotLISAMap
+      clearWith:
+        - lisa_plots
+        - local_analysis
+        - measurement
+
+    - name: methodExplanation
+      title: 'Method and Clinical Context'
+      type: Html
+      visible: true

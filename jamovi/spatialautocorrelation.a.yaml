@@ -1,0 +1,291 @@
+---
+name: spatialautocorrelation
+title: Spatial Autocorrelation Analysis (Moran's I, Geary's C)
+menuGroup: ClinicoPathDescriptivesD
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Comprehensive spatial autocorrelation analysis for tissue pattern analysis and digital pathology.
+        Implements Moran's I, Geary's C, and local indicators of spatial association (LISA) for
+        detecting spatial clustering and patterns in histopathological data. Essential for analyzing
+        spatial dependencies in tissue architecture and cellular distributions.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            spatialautocorrelation(
+                measurement = "biomarker_intensity",
+                x_coordinate = "cell_x",
+                y_coordinate = "cell_y",
+                autocorr_method = "morans_i"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: measurement
+      title: Measurement Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Continuous measurement for spatial autocorrelation analysis
+
+    - name: x_coordinate
+      title: X Coordinate
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            X spatial coordinate for location data
+
+    - name: y_coordinate
+      title: Y Coordinate
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Y spatial coordinate for location data
+
+    - name: region_id
+      title: Region/Tissue ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Region or tissue identifier for stratified analysis
+
+    - name: time_point
+      title: Time Point (Optional)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Time point identifier for temporal spatial analysis
+
+    - name: autocorr_method
+      title: Autocorrelation Method
+      type: List
+      options:
+        - name: morans_i
+          title: Moran's I
+        - name: gearys_c
+          title: Geary's C
+        - name: both_global
+          title: Both Global Measures
+        - name: local_morans
+          title: Local Moran's I (LISA)
+        - name: local_gearys
+          title: Local Geary's C
+        - name: comprehensive
+          title: Comprehensive Analysis
+      default: morans_i
+      description:
+          R: >
+            Spatial autocorrelation method to compute
+
+    - name: spatial_weights
+      title: Spatial Weights Matrix
+      type: List
+      options:
+        - name: queen
+          title: Queen Contiguity
+        - name: rook
+          title: Rook Contiguity
+        - name: distance_band
+          title: Distance Band
+        - name: k_nearest
+          title: K-Nearest Neighbors
+        - name: inverse_distance
+          title: Inverse Distance
+        - name: gaussian
+          title: Gaussian Kernel
+      default: k_nearest
+      description:
+          R: >
+            Method for constructing spatial weights matrix
+
+    - name: distance_threshold
+      title: Distance Threshold
+      type: Number
+      min: 1
+      max: 1000
+      default: 50
+      description:
+          R: >
+            Distance threshold for spatial neighbor definition
+
+    - name: k_neighbors
+      title: Number of Nearest Neighbors
+      type: Integer
+      min: 1
+      max: 50
+      default: 8
+      description:
+          R: >
+            Number of nearest neighbors for spatial weights
+
+    - name: bandwidth
+      title: Kernel Bandwidth
+      type: Number
+      min: 1
+      max: 500
+      default: 25
+      description:
+          R: >
+            Bandwidth for Gaussian kernel weights
+
+    - name: significance_test
+      title: Significance Testing
+      type: List
+      options:
+        - name: normal_approximation
+          title: Normal Approximation
+        - name: permutation_test
+          title: Permutation Test
+        - name: bootstrap
+          title: Bootstrap Test
+        - name: both
+          title: Both Methods
+      default: permutation_test
+      description:
+          R: >
+            Method for statistical significance testing
+
+    - name: permutations
+      title: Number of Permutations
+      type: Integer
+      min: 99
+      max: 9999
+      default: 999
+      description:
+          R: >
+            Number of permutations for significance testing
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.90
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for statistical inference
+
+    - name: local_analysis
+      title: Local Indicators (LISA)
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compute local indicators of spatial association
+
+    - name: cluster_detection
+      title: Spatial Cluster Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Detect and characterize spatial clusters
+
+    - name: hotspot_analysis
+      title: Hot Spot Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Identify spatial hot spots and cold spots
+
+    - name: spatial_regimes
+      title: Spatial Regimes Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Identify spatially distinct regimes or patterns
+
+    - name: temporal_analysis
+      title: Temporal Spatial Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Analyze changes in spatial autocorrelation over time
+
+    - name: multivariate_analysis
+      title: Multivariate Spatial Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Analyze spatial relationships between multiple variables
+
+    - name: robustness_check
+      title: Robustness Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test robustness to different spatial weight specifications
+
+    - name: edge_effects
+      title: Edge Effects Correction
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply corrections for edge effects in spatial analysis
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide clinical interpretation of spatial patterns
+
+    - name: spatial_plots
+      title: Spatial Pattern Maps
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate spatial pattern visualization maps
+
+    - name: autocorr_plots
+      title: Autocorrelation Function Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create spatial autocorrelation function plots
+
+    - name: lisa_plots
+      title: LISA Cluster Maps
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate LISA cluster and significance maps

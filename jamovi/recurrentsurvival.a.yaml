@@ -1,6 +1,6 @@
 name: recurrentsurvival
 title: Recurrent Event Survival Analysis
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 version: '0.0.1'
 jas: '1.2'

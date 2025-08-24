@@ -3,7 +3,7 @@ name: pheval
 title: Proportional Hazards Testing
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 menuTitle: Proportional Hazards Testing
 menuSubtitle: Comprehensive PH assumption validation

@@ -1,7 +1,7 @@
 ---
 name:  mediansurvival
 title: Median Survival Comparisons
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 version: '1.0.0'
 jas: '1.2'

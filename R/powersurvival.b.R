@@ -35,7 +35,7 @@
 #' Rosner, B. (2006). Fundamentals of Biostatistics (6th edition). 
 #' Thomson Brooks/Cole.
 #' 
-#' @author Serdar Balci \email{drserdarbalci@@gmail.com}
+#' @author Serdar Balci \email{serdarbalci@serdarbalci.com}
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom powerSurvEpi powerCT.default
