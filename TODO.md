@@ -1,431 +1,95 @@
-# ClinicoPath Development Roadmap
+# ClinicoPath Development Roadmap - Remaining Features
 
+## Overview
 
-## Comprehensive Survival Analysis Roadmap (CRAN Task View Implementation)
+This document contains only the **REMAINING** features to be implemented in the ClinicoPath jamovi module. All completed features have been documented in `/vignettes/ClinicoPath-ImplementedFeatures-2025.qmd`.
 
-This roadmap outlines the systematic implementation of advanced survival analysis capabilities based on the comprehensive CRAN Task View on Survival Analysis. The focus is on robust, validated methods specifically applicable to tabular clinical research data.
+**Implementation Status Summary:**
+- ✅ **COMPLETED PHASES**: 1-8 (Core Survival Analysis, Advanced Methods, Clinical Decision Support)  
+- 🔄 **IN PROGRESS**: Phase 9 (Specialized Clinical Applications)  
+- 📅 **REMAINING**: Phase 4 gaps, Clinical Trial Applications, Advanced Analytics
 
-#### **Phase 1: Core Survival Distribution & Estimation** 🔄 IN PROGRESS
+## Remaining Survival Analysis Features
 
-- **Non-Parametric Estimation:**
-  - ✅ **Kaplan-Meier estimator with confidence intervals** (`survival`, `survminer`, `km.ci`) - **IMPLEMENTED**
-  - ✅ **Nelson-Aalen cumulative hazard estimator** (`survival`) - **IMPLEMENTED**  
-  - ✅ **Turnbull NPMLE for interval-censored data** (`Icens`, `MLEcens`, `interval`) - **IMPLEMENTED**
-  - ✅ **Product-limit estimator variants** (`prodlim`) - **IMPLEMENTED**
-  - ✅ **Smooth hazard estimation** (`muhaz`, `kerdiest`, `bshazard`) - **IMPLEMENTED** (`smoothhazard`)
-  - ✅ **Survey-weighted survival estimates** (`survey`) - **IMPLEMENTED** (`surveysurvival`)
+### High-Dimensional Methods (Phase 4 - Remaining Items)
+- **Penalized Cox regression** (`penalized`) - **REMAINING**  
+- **Smoothly clipped absolute deviation** (`ncvreg`) - **REMAINING**  
+- **Spatial Bayesian survival** (`spBayesSurv`) - **REMAINING**  
+- **Bayesian joint models** (`JMbayes`) - **REMAINING**  
+- **Principal component Cox models** (`superpc`) - **REMAINING**  
+- **Partial least squares Cox** (`plsRcox`) - **REMAINING**  
+- **Spike-and-slab priors** (`BoomSpikeSlab`) - **REMAINING**  
+- **Variable selection for Cox models** (`c060`) - **REMAINING**  
 
-- **Parametric Distribution Modeling:**
-  - ✅ **Weibull, Exponential, Log-normal, Log-logistic models** (`survival`, `flexsurv`) - **IMPLEMENTED**
-  - ✅ **Generalized Gamma and F-distributions** (`flexsurv`, `eha`) - **IMPLEMENTED** (`flexparametric`)
-  - ✅ **Spline-based hazard functions** (`flexsurv`, `splineSurv`) - **IMPLEMENTED** (`splinehazard`)
-  - ✅ **Distribution selection and goodness-of-fit** (`fitdistrplus`, `AdequacyModel`) - **IMPLEMENTED** (`distributionfit`)
-  - ✅ **Flexible baseline distributions** (`flexsurv`, `tram`) - **IMPLEMENTED** (`flexiblebaseline`)
-  - ✅ **Stratified parametric models** (`rstpm2`) - **IMPLEMENTED** (`stratifiedparametric`)
+### Model Validation Gaps (Phase 5 - Remaining Items)
+- **Optimism-corrected performance** (`rms`) - **REMAINING**  
+- **Shrinkage factor estimation** (`rms`) - **REMAINING**  
 
-- **Core Hypothesis Testing:**
-  - ✅ **Log-rank test and variants** (`survival`) - **IMPLEMENTED**
-  - ✅ **Fleming-Harrington G-rho family tests** (`survival`) - **IMPLEMENTED** (`flemingharrington`)
-  - ✅ **Weighted log-rank tests** (`survMisc`, `coin`) - **IMPLEMENTED** (`weightedlogrank`)
-  - ✅ **Restricted mean survival time tests** (`survRM2`, `SSRMST`) - **IMPLEMENTED** (`rmst`)
-  - ✅ **Permutation tests for survival** (`coin`) - **IMPLEMENTED** (`permutationsurvival`)
-  - ✅ **Median survival comparisons** (`survminer`) - **IMPLEMENTED** (`mediansurvival`)
+### Power Analysis & Sample Size (Phase 5 - Remaining Items)
+- **Log-rank test power** (`powerSurvEpi`) - **REMAINING**  
+- **Cox regression power** (`powerSurvEpi`) - **REMAINING**  
+- **Competing risks power** (`powerCompRisk`) - **REMAINING**  
+- **Non-inferiority trial design** (`nphRCT`) - **REMAINING**  
+- **Restricted mean survival time power** (`SSRMST`) - **REMAINING**  
+- **SNP-based survival studies** (`survSNP`) - **REMAINING**  
 
-#### **Phase 2: Cox Regression & Advanced Modeling** 🔄 IN PROGRESS
+### Specialized Survival Methods Gaps (Phase 6 - Remaining Items)
+- **Excess mortality modeling** (`mexhaz`) - **REMAINING**  
+- **Population-based survival** (`popEpi`) - **REMAINING**  
+- **Cancer registry analysis** (`relsurv`) - **REMAINING**  
+- **Flexible relative survival** (`flexrsurv`) - **REMAINING**  
+- **Shared parameter models** (`JMbayes`) - **REMAINING**  
+- **Dynamic predictions** (`JMbayes2`) - **REMAINING**  
+- **Landmark analysis** (`dynpred`) - **REMAINING**  
+- **Joint modeling with competing risks** (`joineR`) - **REMAINING**  
+- **Doubly censored data** (`dblcens`) - **REMAINING**  
+- **Partly interval-censored data** (`PWEALL`) - **REMAINING**  
+- **Current status data** (`Icens`) - **REMAINING**  
+- **Interval-censored cure models** (`ICGOR`) - **REMAINING**  
+- **Promotion time cure models** (`miCoPTCM`) - **REMAINING**  
+- **Generalized odds rate cure models** (`GORCure`) - **REMAINING**  
 
-- **Cox Proportional Hazards Models:**
-  - ✅ **Standard Cox PH with diagnostics** (`survival`, `survminer`, `rms`) - **IMPLEMENTED**
-  - ✅ **Stratified Cox models** (`survival`) - **IMPLEMENTED**
-  - ✅ **Penalized Cox regression** (`glmnet`, `penalized`) - **IMPLEMENTED** (`penalizedcox`)
-  - ✅ **High-dimensional data Cox models** (`glmnet`, `CoxBoost`) - **IMPLEMENTED** (`highdimcox`)
-  - ✅ **Robust Cox regression** (`coxrobust`) - **IMPLEMENTED** (`coxrobust`)
-  - ✅ **Weighted Cox regression** (`coxphw`) - **IMPLEMENTED** (`coxphw`)
-  - ✅ **Mixed-effects Cox models** (`coxme`) - **IMPLEMENTED** (`mixedcox`)
+### Clinical Translation Gaps (Phase 7 - Remaining Items)
+- **Dynamic prediction models** (`dynpred`) - **REMAINING**  
+- **Personalized treatment selection** (`ITRSelect`) - **REMAINING**  
+- **Time-dependent biomarkers** (`timeROC`) - **REMAINING**  
+- **Landmark analysis for biomarkers** (`dynpred`) - **REMAINING**  
+- **Threshold regression** (`threg`) - **REMAINING**  
+- **Biomarker evaluation** (`survcomp`) - **REMAINING**  
+- **Prognostic index calculation** (`survcomp`) - **REMAINING**  
+- **Treatment benefit calculators** (custom implementation) - **REMAINING**  
+- **Prognosis communication tools** (custom implementation) - **REMAINING**  
+- **Risk communication interfaces** (`DynNom`) - **REMAINING**  
+- **Clinical prediction models** (`rms`) - **REMAINING**  
 
-- **Time-Varying Effects & Non-Proportional Hazards:**
-  - ✅ **Time-varying covariates in Cox models** (`survival`) - **IMPLEMENTED** (`timevarycox`)
-  - ✅ **Aalen's additive hazard models** (`timereg`, `addhazard`) - **IMPLEMENTED** (`aalenhazard`)
-  - ✅ **Flexible parametric models** (`rstpm2`) - **IMPLEMENTED** (`flexrstpm2`)
-  - ✅ **Smoothly time-varying effects** (`smoothHR`, `timereg`) - **IMPLEMENTED** (`smoothtimevary`)
-  - ✅ **Dynamic coefficient models** (`dynsurv`) - **IMPLEMENTED** (`dynamiccoeff`)
-  - ✅ **Proportional hazards testing** (`PHeval`) - **IMPLEMENTED** (`pheval`)
+### Advanced Survival Methodology Gaps (Phase 8 - Remaining Items)
+- **Time-updated survival estimates** (`timereg`) - **REMAINING**  
+- **Flexible parametric survival models** (`flexsurv`) - **REMAINING**  
+- **Royston-Parmar models** (`rstpm2`) - **REMAINING**  
+- **Transformation models** (`tram`) - **REMAINING**  
+- **Link-based survival models** (`rstpm2`) - **REMAINING**
 
-- **Accelerated Failure Time Models:**
-  - ✅ **Parametric AFT models** (`survival`, `flexsurv`) - **IMPLEMENTED**
-  - ✅ **Rank-based AFT estimation** (`aftgee`) - **IMPLEMENTED** (`raftgee`)
-  - ✅ **Robust AFT models** (`RobustAFT`) - **IMPLEMENTED** (`robustaft`)
-  - ✅ **Transformation models** (`tram`) - **IMPLEMENTED** (`transformationmodels`)
-  - ✅ **GEE-based AFT models** (`aftgee`) - **IMPLEMENTED** (`raftgee`)
-
-- **Frailty Models:**
-  - ✅ **Shared frailty models** (`frailtypack`) - **IMPLEMENTED**
-  - ✅ **Mixed-effects survival models** (`coxme`) - **IMPLEMENTED**
-  - ✅ **EM-algorithm frailty models** (`frailtyEM`) - **IMPLEMENTED**
-  - ✅ **Parametric frailty models** (`frailtySurv`) - **IMPLEMENTED** (`parametricfrailty`)
-
-#### **Phase 3: Competing Risks & Multi-State Analysis** ✅ COMPLETED
-
-- **Competing Risks Analysis:**
-  - ✅ **Cumulative Incidence Functions** (`cmprsk`, `etm`) - **IMPLEMENTED**
-  - ✅ **Fine-Gray subdistribution hazards** (`cmprsk`) - **IMPLEMENTED**
-  - ✅ **Cause-specific hazards modeling** (`survival`) - **IMPLEMENTED** (`causespecifichazards`)
-  - ✅ **Direct binomial regression** (`timereg`) - **IMPLEMENTED** (`directbinomial`)
-  - ✅ **Competing risks power analysis** (`powerCompRisk`) - **IMPLEMENTED** (`powercomprisk`)
-  - ✅ **Flexible competing risks models** (`riskRegression`) - **IMPLEMENTED** (`flexcomprisk`)
-
-- **Multi-State Models:**
-  - ✅ **Markov multi-state models** (`mstate`, `msm`) - **IMPLEMENTED** (`markovmultistate`)
-  - ✅ **Semi-Markov models** (`SemiMarkov`) - **IMPLEMENTED** (`semimarkov`)
-  - ✅ **Hidden Markov models for survival** (`msm`) - **IMPLEMENTED** (`hiddenmarkov`)
-  - ✅ **Illness-death models** (`p3state.msm`) - **IMPLEMENTED** (`illnessdeath`)
-  - ✅ **Flexible multi-state models** (`flexmsm`) - **IMPLEMENTED** (`flexmultistate`)
-  - ✅ **Continuous-time Markov models** (`msm`) - **IMPLEMENTED** (`continuousmarkov`)
-
-- **Recurrent Event Analysis:** ✅ **6/6 IMPLEMENTED - PHASE COMPLETED**
-  - ✅ **Andersen-Gill and PWP models** (`survival`) - **IMPLEMENTED**
-  - ✅ **Frailty models for recurrent events** (`frailtypack`) - **IMPLEMENTED**
-  - ✅ **Marginal models for recurrent events** (`reReg`) - **IMPLEMENTED** (`marginalrecurrent`)
-  - ✅ **Joint frailty models** (`frailtypack`) - **IMPLEMENTED** (`jointfrailty`)
-  - ✅ **Conditional GEE for gap times** (`condGEE`) - **IMPLEMENTED** (`conditionalgee`)
-  - ✅ **Advanced recurrent event data analysis** (`reda`) - **IMPLEMENTED** (comprehensive coverage)
-
-#### **Phase 4: Machine Learning & Advanced Prediction** ✅ LARGELY COMPLETED
-
-- **Tree-Based Methods:**
-  - ✅ **Survival trees** (`rpart`, `party`) - **IMPLEMENTED**
-  - ✅ **Random survival forests** (`randomForestSRC`) - **IMPLEMENTED**
-  - ✅ **Conditional inference trees** (`party`, `partykit`) - **IMPLEMENTED** (`conditionalinference`)
-  - ✅ **Gradient boosting for survival** (`gbm`, `mboost`, `xgboost`) - **IMPLEMENTED** (`gradientboosting`)
-  - ✅ **Extremely randomized trees** (`ranger`) - **IMPLEMENTED** (`extratrees`)
-  - ✅ **Bayesian additive regression trees** (`BART`) - **IMPLEMENTED** (`survivalbart`)
-
-- **Regularized Survival Models:**
-  - ✅ **LASSO, Ridge, Elastic Net** (`glmnet`) - **IMPLEMENTED**
-  - ✅ **Adaptive LASSO for Cox models** (`glmnet`) - **IMPLEMENTED** (`adaptivelasso`)
-  - ✅ **Group LASSO for survival** (`grplasso`) - **IMPLEMENTED** (`grouplasso`)
-  - ✅ **Sparse group LASSO** (`SGL`) - **IMPLEMENTED** (`sparsegrouplasso`)
-  - **Penalized Cox regression** (`penalized`)
-  - **Smoothly clipped absolute deviation** (`ncvreg`)
-
-- **Bayesian Methods:**
-  - ✅ **Bayesian survival models** (`rstanarm`) - **IMPLEMENTED** (`bayesiansurvival`)
-  - ✅ **Bayesian model averaging** (`BMA`) - **IMPLEMENTED** (`bayesianma`)
-  - **Spatial Bayesian survival** (`spBayesSurv`)
-  - **Bayesian joint models** (`JMbayes`)
-
-- **High-Dimensional Methods:**
-  - **Principal component Cox models** (`superpc`)
-  - **Partial least squares Cox** (`plsRcox`)
-  - **Spike-and-slab priors** (`BoomSpikeSlab`)
-  - **Variable selection for Cox models** (`c060`)
-
-#### **Phase 5: Model Validation & Performance Assessment** ✅ COMPLETED
-
-- **Prediction Performance Metrics:**
-  - ✅ **Time-dependent ROC curves** (`timeROC`, `survivalROC`) - **IMPLEMENTED**
-  - ✅ **Prediction error curves** (`pec`) - **IMPLEMENTED**
-  - ✅ **Concordance index and C-statistics** (`survC1`, `compareC`) - **IMPLEMENTED**
-  - ✅ **Integrated prediction error** (`pec`, `riskRegression`) - **IMPLEMENTED**
-  - ✅ **Net reclassification improvement** (`nricens`) - **IMPLEMENTED** (`netreclassification`)
-  - ✅ **Integrated discrimination improvement** (`survIDI`) - **IMPLEMENTED** (`idi`)
-
-- **Model Calibration & Validation:**
-  - ✅ **Calibration plots for survival models** (`rms`, `pec`) - **IMPLEMENTED**
-  - ✅ **Bootstrap validation** (`rms`) - **IMPLEMENTED**
-  - ✅ **Cross-validation for survival** (`pec`) - **IMPLEMENTED**
-  - ✅ **External validation frameworks** (`riskRegression`) - **IMPLEMENTED**
-  - **Optimism-corrected performance** (`rms`)
-  - **Shrinkage factor estimation** (`rms`)
-
-- **Power Analysis & Sample Size:**
-  - **Log-rank test power** (`powerSurvEpi`)
-  - **Cox regression power** (`powerSurvEpi`)
-  - **Competing risks power** (`powerCompRisk`)
-  - **Non-inferiority trial design** (`nphRCT`)
-  - **Restricted mean survival time power** (`SSRMST`)
-  - **SNP-based survival studies** (`survSNP`)
-
-#### **Phase 6: Specialized Survival Methods** ✅ COMPLETED
-
-- **Relative & Excess Mortality:**
-  - ✅ **Relative survival analysis** (`relsurv`, `popEpi`) - **IMPLEMENTED**
-  - **Excess mortality modeling** (`mexhaz`)
-  - **Population-based survival** (`popEpi`)
-  - **Cancer registry analysis** (`relsurv`)
-  - **Flexible relative survival** (`flexrsurv`)
-
-- **Joint & Longitudinal-Survival Models:**
-  - ✅ **Joint longitudinal-survival modeling** (`JM`, `joineRML`) - **IMPLEMENTED**
-  - **Shared parameter models** (`JMbayes`)
-  - **Dynamic predictions** (`JMbayes2`)
-  - **Landmark analysis** (`dynpred`)
-  - **Joint modeling with competing risks** (`joineR`)
-
-- **Interval-Censored & Complex Censoring:**
-  - ✅ **Interval-censored survival** (`icenReg`, `Icens`) - **IMPLEMENTED**
-  - **Doubly censored data** (`dblcens`)
-  - **Partly interval-censored data** (`PWEALL`)
-  - **Current status data** (`Icens`)
-  - **Interval-censored cure models** (`ICGOR`)
-
-- **Cure Models & Long-Term Survival:**
-  - ✅ **Mixture cure models** (`smcure`) - **IMPLEMENTED** (`curemodels`)
-  - **Promotion time cure models** (`miCoPTCM`)
-  - ✅ **Flexible cure models** (`flexsurvcure`) - **IMPLEMENTED** (`curemodels`)
-  - **Generalized odds rate cure models** (`GORCure`)
-  - ✅ **Non-mixture cure models** (`NMCM`) - **IMPLEMENTED** (`curemodels`)
-
-#### **Phase 7: Clinical Translation & Implementation** ✅ COMPLETED
-
-- **Prognostic Model Development:**
-  - ✅ **Nomogram construction** (`rms`, `nomogramFormula`) - **IMPLEMENTED**
-  - ✅ **Risk score calculators** (`PredictABEL`) - **IMPLEMENTED**
-  - ✅ **Decision curve analysis** (`rmda`, `DecisionCurve`) - **IMPLEMENTED**
-  - ✅ **Net benefit analysis** (`stdca`) - **IMPLEMENTED**
-  - **Dynamic prediction models** (`dynpred`)
-  - **Personalized treatment selection** (`ITRSelect`)
-
-- **Biomarker & Threshold Analysis:**
-  - ✅ **Optimal cutpoint determination** (`survminer`, `maxstat`) - **IMPLEMENTED**
-  - **Time-dependent biomarkers** (`timeROC`)
-  - **Landmark analysis for biomarkers** (`dynpred`)
-  - **Threshold regression** (`threg`)
-  - **Biomarker evaluation** (`survcomp`)
-  - **Prognostic index calculation** (`survcomp`)
-
-- **Clinical Decision Support:**
-  - ✅ **Interactive survival calculators** (Shiny integration) - **IMPLEMENTED**
-  - ✅ **Patient-specific predictions** (`rms`) - **IMPLEMENTED**
-  - **Treatment benefit calculators** (custom implementation)
-  - **Prognosis communication tools** (custom implementation)
-  - **Risk communication interfaces** (`DynNom`)
-  - **Clinical prediction models** (`rms`)
-
-#### **Phase 8: Advanced Survival Methodology** ✅ **COMPLETED (January 2025)**
-
-- **Pseudo-Observations & Direct Regression:**
-  - ✅ **Pseudo-observations for survival** (`pseudo`) - **IMPLEMENTED**
-  - ✅ **Direct regression on survival function** (`pseudo`) - **IMPLEMENTED** (`directregression`)
-  - ✅ **Generalized pseudo-observations** (`geepack`) - **IMPLEMENTED** (`generalpseudo`)
-  - ✅ **Restricted mean survival time regression** (`survRM2`) - **IMPLEMENTED** (`rmstregression`)
-
-- **Conditional Survival & Temporal Methods:**
-  - ✅ **Conditional survival estimation** (`condSURV`) - **IMPLEMENTED** (`conditionalsurvival`)
-  - ✅ **Landmark analysis** (`landest`) - **IMPLEMENTED** (`landmarkanalysis`)
-  - ✅ **Dynamic survival prediction** (`dynpred`) - **IMPLEMENTED** (`dynamicprediction`)
-  - **Time-updated survival estimates** (`timereg`)
-
-- **High-Dimensional Methods:**
-  - ✅ **Principal component Cox models** - **IMPLEMENTED** (`principalcox`)
-  - ✅ **Partial least squares Cox** - **IMPLEMENTED** (`plscox`)
-
-- **Flexible Parametric & Transformation Models:**
-  - **Flexible parametric survival models** (`flexsurv`)
-  - **Royston-Parmar models** (`rstpm2`)
-  - **Transformation models** (`tram`)
-  - **Link-based survival models** (`rstpm2`)
-
-#### **Phase 9: Specialized Clinical Applications** 📅 PLANNED
+#### **Phase 9: Specialized Clinical Applications** 📅 IN PROGRESS
 
 - **Cancer-Specific Survival Analysis:**
-  - **Cure models for cancer data** (`smcure`, `flexsurvcure`)
-  - **Tumor growth models** (`grofit`)
-  - **Treatment switching analysis** (`rpsftm`)
-  - **Progression-free survival** (specialized implementation)
-  - **Cancer screening evaluation** (`HSROC`)
+  - ✅ **Cure models for cancer data** (`smcure`, `flexsurvcure`) - **IMPLEMENTED** (`curemodels`)
+  - ✅ **Tumor growth models** (`nlme`, `ggplot2`) - **IMPLEMENTED** (`tumorgrowth`)
+  - ✅ **Treatment switching analysis** (`survival`, `parallel`) - **IMPLEMENTED** (`treatmentswitching`)
+  - **Progression-free survival** (specialized implementation) - **REMAINING**
+  - ✅ **Cancer screening evaluation** (`stats`, `ggplot2`) - **IMPLEMENTED** (`screeningevaluation`)
 
 - **Epidemiological Survival Methods:**
-  - **Cohort survival analysis** (`Epi`)
-  - **Case-cohort designs** (`cchs`)
-  - **Survey-weighted survival** (`survey`)
-  - **Population attributable risk** (`Epi`)
+  - **Cohort survival analysis** (`Epi`) - **REMAINING**
+  - **Case-cohort designs** (`cchs`) - **REMAINING**  
+  - ✅ **Survey-weighted survival** (`survey`) - **IMPLEMENTED** (`surveysurvival`)
+  - **Population attributable risk** (`Epi`) - **REMAINING**
 
 - **Clinical Trial Applications:**
-  - **Non-inferiority designs** (`nphRCT`)
-  - **Adaptive trial methods** (`rpact`)
-  - **Group sequential designs** (`gsDesign`)
-  - **Futility analysis** (`interim`)
+  - **Non-inferiority designs** (`nphRCT`) - **REMAINING**
+  - **Adaptive trial methods** (`rpact`) - **REMAINING**
+  - **Group sequential designs** (`gsDesign`) - **REMAINING**
+  - **Futility analysis** (`interim`) - **REMAINING**
 
-#### **Recent Major Achievements (Phase 4 Implementation):**
-
-🎉 **Successfully Implemented 11 Advanced Survival Analysis Modules:**
-
-**Machine Learning & Regularization Methods:**
-- ✅ `adaptivelasso` - Adaptive LASSO for Cox models with optimal variable selection
-- ✅ `bayesianma` - Bayesian model averaging with uncertainty quantification  
-- ✅ `conditionalinference` - Conditional inference trees for non-parametric survival analysis
-- ✅ `extratrees` - Extremely randomized trees for robust survival prediction
-- ✅ `gradientboosting` - Gradient boosting machines for survival data
-- ✅ `grouplasso` - Group LASSO for structured variable selection
-- ✅ `survivalbart` - Bayesian Additive Regression Trees with uncertainty quantification
-- ✅ `sparsegrouplasso` - Sparse group LASSO for hierarchical variable selection
-
-**Model Validation & Performance Assessment:**
-- ✅ `idi` - Integrated Discrimination Improvement for model comparison
-- ✅ `netreclassification` - Net Reclassification Improvement for clinical utility
-
-**Advanced Multi-State Modeling:**
-- ✅ `illnessdeath` - Illness-death models for disease progression analysis
-
-**Technical Achievements:**
-- ✅ Complete YAML structure standardization across all modules
-- ✅ Automated UI generation with jamovi compiler integration
-- ✅ Proper type definitions and validation for all survival analysis parameters
-- ✅ Comprehensive error handling and user guidance systems
-
-#### **Latest Major Achievements (Advanced Survival Analysis - December 2024):**
-
-🚀 **Recently Implemented 6 Critical Advanced Survival Modules:**
-
-**Advanced Methodological Implementations:**
-- ✅ `curemodels` - Comprehensive cure models for long-term survivor analysis
-  - Mixture and non-mixture cure models using smcure and flexsurvcure
-  - Bootstrap confidence intervals and sensitivity analysis
-  - Multiple link functions (logit, probit, cloglog) and distributions
-  - Cure fraction visualization and clinical interpretation
-
-- ✅ `landmarkanalysis` - Landmark analysis for time-varying predictors
-  - Addresses immortal time bias in dynamic biomarker studies
-  - Multiple landmark time points with prediction windows
-  - Dynamic risk prediction and super model approaches
-  - Bootstrap validation with calibration and discrimination plots
-
-- ✅ `flexmultistate` - Flexible parametric multi-state survival models
-  - Illness-death, competing risks, and progressive disease models
-  - Royston-Parmar splines and flexible hazard distributions
-  - State transition and occupancy probability calculations
-  - Microsimulation capabilities for complex predictions
-
-- ✅ `continuousmarkov` - Continuous-time Markov models for longitudinal data
-  - Handles irregularly spaced observation times in clinical studies
-  - Estimates transition intensities between discrete health states
-  - Multiple model structures (full, progressive, reversible)
-  - Sojourn time calculations and prevalence estimation over time
-
-- ✅ `pcacox` - Principal Component Cox models for high-dimensional data
-  - PCA-based dimensionality reduction for survival analysis
-  - Supervised, standard, and sparse PCA methods with genomic applications
-  - Comprehensive validation with bootstrap and permutation testing
-  - Risk stratification with scree plots, biplots, and survival curves
-
-- ✅ `plscox` - Partial Least Squares Cox models for high-dimensional survival
-  - PLS-based supervised dimensionality reduction optimized for survival outcomes
-  - Cross-validation for optimal component selection with multiple algorithms
-  - Variable importance analysis and component loadings interpretation
-  - Advanced validation including bootstrap and permutation testing
-
-**Implementation Excellence:**
-- ✅ Each module follows complete jamovi architecture (4 YAML + 2 R + 1 JS files)
-- ✅ Comprehensive error handling and clinical guidance systems
-- ✅ Advanced visualization capabilities with state-of-the-art plots
-- ✅ Full integration with existing ClinicoPath survival analysis framework
-
-#### **Latest Major Achievements (Clinical Decision Support Systems - August 2025):**
-
-🚀 **Recently Implemented 6 Critical Clinical Decision Support Modules:**
-
-**Clinical Decision Support Infrastructure:**
-- ✅ `clinicalalerts` - Clinical Alert & Threshold Monitoring System
-  - Real-time clinical parameter monitoring with evidence-based thresholds
-  - Priority-based alert classification (Critical, High, Medium, Low) with response timeframes
-  - Comprehensive clinical knowledge base with laboratory reference ranges
-  - Patient-specific monitoring with temporal trend analysis and quality assurance metrics
-  - Clinical interpretation guides with evidence-based recommendations and implementation guidance
-
-- ✅ `treatmentoptim` - Treatment Optimization Framework
-  - **Personalized Treatment Selection:** Multi-model ML prediction (Logistic, Random Forest, Gradient Boosting, Ensemble) with individualized response modeling
-  - **Drug Interaction Screening:** Comprehensive safety analysis with Critical/Major/Moderate severity classification and alternative therapy recommendations
-  - **Dose Optimization:** Population PK/PD modeling with multi-factor adjustment (age, weight, organ function, genetics) and therapeutic drug monitoring
-  - **Clinical Guidelines Integration:** Evidence-based practice integration (NCCN, ASCO, FDA) with risk stratification and quality assurance systems
-  - **Advanced Analytics:** Treatment comparison engine, outcome prediction modeling, and comprehensive visualization suite
-
-- ✅ `differentialdiagnosis` - Differential Diagnosis Assistance System
-  - **Bayesian Diagnostic Reasoning:** Multi-method probabilistic analysis (Naive Bayes, Bayesian Networks, Logistic Regression, Random Forest) with evidence-based prevalence integration
-  - **Likelihood Ratio Analysis:** Systematic LR+/LR- calculation for individual clinical findings with diagnostic utility assessment and clinical significance evaluation
-  - **Multi-Modal Evidence Integration:** Clinical findings, laboratory results, imaging findings, and patient demographics fusion for holistic diagnostic assessment
-  - **Uncertainty Quantification:** Advanced diagnostic uncertainty analysis with source identification, impact assessment, and mitigation strategies
-  - **Clinical Validation:** Comprehensive model performance assessment (sensitivity, specificity, PPV, NPV, accuracy, AUC) with sensitivity analysis and calibration evaluation
-- ✅ `labinterpret` - Laboratory Result Interpretation System
-  - **Advanced Reference Range Analysis:** Demographic-adjusted reference intervals (age, gender, ethnicity) with multi-source standards and quality-assured interpretation using CLSI guidelines
-
-#### **Latest Major Achievements (Phase 8: Advanced Survival Methodology - January 2025):**
-
-🎯 **Successfully Implemented 7 Advanced Survival Analysis Modules:**
-
-**Pseudo-Observation Framework:**
-- ✅ `directregression` - Direct Regression on Survival Function
-  - Jackknife-based pseudo-observations for direct survival function modeling
-  - Multiple regression types (linear, logistic, complementary log-log) with automatic selection
-  - Bootstrap standard errors and comprehensive model validation
-  - Clinical interpretation of coefficients as changes in survival probability
-
-- ✅ `generalpseudo` - Generalized Pseudo-Observations Framework
-  - Unified framework for survival, cumulative incidence, RMST, and quantile functionals
-  - Complete competing risks integration with cause-specific modeling
-  - Multiple estimation methods (jackknife, bootstrap, analytical) with automatic selection
-  - Support for clustered data and various regression frameworks including beta regression
-
-- ✅ `rmstregression` - Restricted Mean Survival Time Regression
-  - Multiple RMST approaches (pseudo-observation, direct modeling, Wei-Lin-Ying)
-  - Adaptive and automatic tau selection with percentile-based methods
-  - Comprehensive group comparison framework with multiple testing adjustment
-  - Advanced visualization including RMST curves and difference plots over time
-
-**Dynamic and Longitudinal Methods:**
-- ✅ `dynamicprediction` - Dynamic Survival Prediction System
-  - Complete landmark analysis implementation with time-varying coefficients
-  - Joint modeling framework for longitudinal biomarker integration
-  - Multiple association structures (current value, slope, cumulative, shared random effects)
-  - Real-time risk assessment with dynamic updating as new measurements become available
-
-**High-Dimensional Survival Analysis:**
-- ✅ `principalcox` - Principal Component Cox Models
-  - Multiple PCA methods (standard, sparse, supervised, kernel) for dimension reduction
-  - Automatic component selection via cross-validation, variance threshold, or scree plot
-  - Comprehensive scaling options with outlier handling
-  - Variable importance tracking through component loadings and contributions
-
-- ✅ `plscox` - Partial Least Squares Cox Models (existing implementation enhanced)
-  - Supervised dimension reduction optimized for survival outcomes
-  - NIPALS, kernel, and wide kernel PLS algorithms
-  - Cross-validated component selection with bootstrap validation
-  - Variable importance assessment with comprehensive visualization
-
-- ✅ `conditionalsurvival` - Conditional Survival Estimation (existing implementation)
-  - Multiple estimation methods (Kaplan-Meier weights, landmark, IPW, presmoothed)
-  - Dynamic risk updating for long-term survivors
-  - Clinical interpretation tools for updated prognosis
-
-**Technical Excellence:**
-- ✅ All modules follow complete jamovi 4-file architecture (.a.yaml, .u.yaml, .r.yaml, .b.R)
-- ✅ Comprehensive error handling with clinical guidance and interpretation
-- ✅ Advanced visualization with ggplot2 integration for publication-ready figures
-- ✅ Full integration with existing ClinicoPath survival analysis ecosystem
-- ✅ Fixed compilation error in splinehazard.u.yaml preventing module compilation
-  - **Clinical Decision Support Integration:** Critical value monitoring with severity stratification and evidence-based guidelines integration for comprehensive clinical assessment
-  - **Temporal Trend Analysis:** Statistical trend detection with linear regression modeling, delta check analytics with configurable thresholds (10-200%), and longitudinal pattern recognition
-  - **Advanced Correlation Analytics:** Multi-variable correlation matrix with clinically-relevant association detection and pattern-based diagnostic support for syndrome identification
-  - **Quality Assessment Framework:** Analytical performance metrics including CV%, analytical sensitivity, and measurement uncertainty with reference interval quality scoring
-  - **Comprehensive Visualization:** Laboratory interpretation plots, temporal trend visualization, reference range displays, delta check plots, and correlation matrix heatmaps
-- ✅ `imagingcorrelation` - Imaging Findings Correlation System
-  - **Comprehensive Multi-Modal Integration:** Cross-modality correlation analysis between imaging findings, laboratory results, clinical presentations, and pathological data with multiple statistical methods
-  - **Diagnostic Concordance Assessment:** Inter-modality agreement evaluation using Cohen's kappa, diagnostic performance metrics (sensitivity, specificity, PPV, NPV, AUC), and discordance resolution
-  - **Advanced Imaging Analytics:** Lesion characterization, RECIST response assessment, radiomics feature extraction, and temporal change analysis for comprehensive diagnostic evaluation
-  - **Clinical Decision Support Integration:** Diagnostic confidence assessment, evidence-based recommendations using ACR guidelines, and integrated diagnostic report generation
-  - **Comprehensive Visualization Suite:** Multi-modal correlation plots, concordance assessment plots, correlation heatmaps, diagnostic network diagrams, and ROC curve analysis
-- ✅ `patientdashboard` - Patient Monitoring Dashboard System
-  - **Real-Time Patient Monitoring:** Multi-parameter vital signs tracking (heart rate, blood pressure, temperature, respiratory rate, oxygen saturation) with configurable alert thresholds and advanced temporal trend analysis
-  - **Laboratory Integration:** Real-time laboratory value monitoring with reference range comparison, critical value detection, and automated trend analysis across multiple configurable time windows
-  - **Intelligent Alert Management:** Priority-based alert system with Critical, High, Medium, and Low classifications including response time tracking and clinical escalation protocols
-  - **Clinical Decision Support:** Risk stratification engine with early warning system integration, evidence-based alert thresholds for multiple populations, and clinical pathway integration
-  - **Interactive Dashboard Visualization:** Real-time data streams with configurable monitoring frequencies, multi-modal display options optimized for clinical settings, and comprehensive alert management interface
-
-**Technical Achievements:**
-- ✅ Complete jamovi 4-file architecture implementation with upgraded UI framework (2.0 compatibility)
-- ✅ Advanced clinical workflow integration with evidence-based decision support algorithms
-- ✅ Comprehensive safety assessment frameworks with multi-organ risk evaluation
-- ✅ Real-time clinical parameter monitoring with configurable alert thresholds and priority systems
-- ✅ Integration with Clinical Decision Support menu structure for streamlined clinical workflows
 
 #### **Implementation Priority Matrix:**
 
