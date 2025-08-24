@@ -20,6 +20,20 @@
 * **Exact Confidence Intervals:** Clopper-Pearson exact intervals and Wilson score intervals for robust proportion estimation
 * **Small Sample Support:** Statistical methods specifically designed for studies with limited sample sizes and sparse data structures
 
+##### **Partial Correlation Analysis (partialcorrelation) - Advanced Correlation Methods**
+* **Partial Correlation:** Correlation analysis controlling for confounding variables using residual-based regression methods
+* **Multiple Methods:** Support for Pearson, Spearman, and Kendall's tau partial correlations with comprehensive statistical inference
+* **Zero-Order Comparison:** Side-by-side comparison of partial and zero-order correlations to assess confounding effects
+* **Statistical Inference:** Confidence intervals and significance testing for partial correlations with proper degrees of freedom adjustment
+* **Visualization:** Partial correlation matrix plots with clear indication of control variables and effect sizes
+
+##### **Polychoric Correlation Analysis (polychoriccorr) - Ordinal Data Correlation**
+* **Polychoric Correlation:** Correlation estimation for ordinal-ordinal variable relationships assuming underlying bivariate normality
+* **Tetrachoric Correlation:** Special case implementation for binary-binary variable correlations with enhanced precision
+* **Multiple Methods:** Maximum likelihood and two-step estimation approaches for robust correlation estimation
+* **Frequency Analysis:** Comprehensive frequency table analysis for categorical variable relationships and independence testing
+* **Statistical Testing:** Chi-square tests for independence with exact and approximate methods for ordinal data structures
+
 ## Version 0.0.31.43
 
 ### 🗓️ **August 24, 2025 - Diagnostic Performance Analysis Enhancements**

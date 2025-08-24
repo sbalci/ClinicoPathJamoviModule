@@ -1,0 +1,79 @@
+---
+name: polychoriccorr
+title: Polychoric Correlation Analysis
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Polychoric Correlation Analysis
+menuSubtitle: Correlation for ordinal and binary variables
+options:
+  - name: data
+    type: Data
+
+  - name: vars
+    title: Variables
+    type: Variables
+    suggested:
+      - ordinal
+      - nominal
+    permitted:
+      - factor
+
+  - name: corrType
+    title: Correlation type
+    type: List
+    options:
+      - name: polychoric
+        title: Polychoric (ordinal-ordinal)
+      - name: tetrachoric
+        title: Tetrachoric (binary-binary)
+      - name: polyserial
+        title: Polyserial (ordinal-continuous)
+      - name: biserial
+        title: Biserial (binary-continuous)
+    default: polychoric
+
+  - name: method
+    title: Estimation method
+    type: List
+    options:
+      - name: ml
+        title: Maximum likelihood
+      - name: two_step
+        title: Two-step estimation
+    default: ml
+
+  - name: ci
+    title: Show confidence intervals
+    type: Bool
+    default: true
+
+  - name: ciWidth
+    title: Confidence level
+    type: Number
+    min: 50
+    max: 99.9
+    default: 95
+
+  - name: sig
+    title: Test significance
+    type: Bool
+    default: true
+
+  - name: sigLevel
+    title: Significance level
+    type: Number
+    min: 0.001
+    max: 0.1
+    default: 0.05
+
+  - name: matrixPlot
+    title: Correlation matrix plot
+    type: Bool
+    default: false
+
+  - name: showFreq
+    title: Show frequency tables
+    type: Bool
+    default: true

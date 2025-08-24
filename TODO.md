@@ -26,12 +26,12 @@ Clinical data integration, advanced correlation methods, advanced Bayesian metho
 
 ### Enhanced Statistical Methods
 
-**Advanced Correlation Analysis (HIGH PRIORITY):**
+**Robust Statistical Methods (MEDIUM PRIORITY):**
 
-- **Partial correlation:** Correlation controlling for confounding variables
-- **Polychoric/tetrachoric correlation:** For ordinal and binary variables
 - **Robust correlation methods:** M-estimators and other outlier-resistant methods
 - **Correlation networks:** Network analysis of correlation structures
+- **Robust regression methods:** Resistant to outliers and influential observations
+- **Non-parametric alternatives:** Distribution-free statistical methods
 
 ### Advanced Survival Analysis Remaining Items
 
@@ -96,7 +96,7 @@ Clinical data integration, advanced correlation methods, advanced Bayesian metho
 
 1. ✅ Enhanced correlation analysis (Spearman, Kendall) - **COMPLETED**
 2. ✅ Exact tests for small samples (Fisher, binomial, McNemar) - **COMPLETED**
-3. Advanced correlation methods (partial, polychoric)
+3. ✅ Advanced correlation methods (partial, polychoric) - **COMPLETED**
 4. Clinical data integration (FHIR R4, EHR standards)
 5. Interactive clinical dashboards
 6. Clinical validation framework

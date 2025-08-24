@@ -1,0 +1,65 @@
+---
+name: polychoriccorr
+title: Polychoric Correlation Analysis
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: correlations
+    title: Polychoric Correlations
+    type: Table
+    visible: (vars)
+    columns:
+      - name: var1
+        title: Variable 1
+        type: text
+      - name: var2
+        title: Variable 2
+        type: text
+      - name: type
+        title: Type
+        type: text
+      - name: r
+        title: r
+        type: number
+        format: zto,pvalue
+      - name: rCI
+        title: 95% CI
+        type: text
+        visible: (ci)
+      - name: chisq
+        title: χ²
+        type: number
+        visible: (sig)
+      - name: p
+        title: p
+        type: number
+        format: zto,pvalue
+        visible: (sig)
+      - name: n
+        title: N
+        type: integer
+
+  - name: frequencies
+    title: Frequency Tables
+    type: Array
+    visible: (showFreq)
+    template:
+      title: $key
+      type: Table
+      columns:
+        - name: .name
+          title: ""
+          type: text
+          combineBelow: true
+
+  - name: plot
+    title: Correlation Matrix Plot
+    visible: (matrixPlot)
+    type: Image
+    width: 500
+    height: 400
+    renderFun: .plot

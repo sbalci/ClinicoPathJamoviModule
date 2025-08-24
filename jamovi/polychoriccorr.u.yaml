@@ -1,0 +1,59 @@
+name: polychoriccorr
+title: Polychoric Correlation Analysis
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Analysis Type
+        children:
+          - type: ComboBox
+            name: corrType
+            label: Correlation type
+          - type: ComboBox
+            name: method
+            label: Estimation method
+      - type: Label
+        label: Statistics
+        children:
+          - type: CheckBox
+            name: ci
+            label: Confidence intervals
+          - type: TextBox
+            name: ciWidth
+            label: Confidence level
+            suffix: '%'
+            format: number
+            enable: (ci)
+          - type: CheckBox
+            name: sig
+            label: Test significance
+          - type: TextBox
+            name: sigLevel
+            label: Significance level
+            format: number
+            enable: (sig)
+      - type: Label
+        label: Display Options
+        children:
+          - type: CheckBox
+            name: showFreq
+            label: Show frequency tables
+          - type: CheckBox
+            name: matrixPlot
+            label: Correlation matrix plot
+jus: '2.0'

@@ -1,0 +1,74 @@
+---
+name: partialcorrelation
+title: Partial Correlation Analysis
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Partial Correlation Analysis
+menuSubtitle: Correlation controlling for confounding variables
+options:
+  - name: data
+    type: Data
+
+  - name: vars
+    title: Variables
+    type: Variables
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: controls
+    title: Control variables
+    type: Variables
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: method
+    title: Correlation method
+    type: List
+    options:
+      - name: pearson
+        title: Pearson
+      - name: spearman
+        title: Spearman
+      - name: kendall
+        title: Kendall's tau
+    default: pearson
+
+  - name: ci
+    title: Show confidence intervals
+    type: Bool
+    default: true
+
+  - name: ciWidth
+    title: Confidence level
+    type: Number
+    min: 50
+    max: 99.9
+    default: 95
+
+  - name: sig
+    title: Flag significant correlations
+    type: Bool
+    default: true
+
+  - name: sigLevel
+    title: Significance level
+    type: Number
+    min: 0.001
+    max: 0.1
+    default: 0.05
+
+  - name: matrixPlot
+    title: Correlation matrix plot
+    type: Bool
+    default: false
+
+  - name: showZeroOrder
+    title: Show zero-order correlations
+    type: Bool
+    default: true

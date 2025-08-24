@@ -7,23 +7,14 @@ polychoriccorrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     public = list(
         initialize = function(
             vars = NULL,
-            method = "auto",
-            estimation_method = "ml",
-            confidence_level = 0.95,
-            show_frequencies = TRUE,
-            show_thresholds = TRUE,
-            show_standard_errors = TRUE,
-            significance_test = TRUE,
-            correction = "none",
-            matrix_plot = TRUE,
-            scatterplots = FALSE,
-            assumption_tests = TRUE,
-            bootstrap_ci = FALSE,
-            bootstrap_samples = 1000,
-            missing_data = "listwise",
-            show_pearson_comparison = TRUE,
-            factor_analysis_suitability = FALSE,
-            clinical_interpretation = TRUE, ...) {
+            corrType = "polychoric",
+            method = "ml",
+            ci = TRUE,
+            ciWidth = 95,
+            sig = TRUE,
+            sigLevel = 0.05,
+            matrixPlot = FALSE,
+            showFreq = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -35,332 +26,172 @@ polychoriccorrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "vars",
                 vars,
                 suggested=list(
-                    "nominal",
-                    "ordinal"),
+                    "ordinal",
+                    "nominal"),
                 permitted=list(
-                    "factor",
-                    "numeric"))
+                    "factor"))
+            private$..corrType <- jmvcore::OptionList$new(
+                "corrType",
+                corrType,
+                options=list(
+                    "polychoric",
+                    "tetrachoric",
+                    "polyserial",
+                    "biserial"),
+                default="polychoric")
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
                 options=list(
-                    "auto",
-                    "polychoric",
-                    "tetrachoric",
-                    "mixed"),
-                default="auto")
-            private$..estimation_method <- jmvcore::OptionList$new(
-                "estimation_method",
-                estimation_method,
-                options=list(
                     "ml",
-                    "wls",
-                    "uls"),
+                    "two_step"),
                 default="ml")
-            private$..confidence_level <- jmvcore::OptionNumber$new(
-                "confidence_level",
-                confidence_level,
-                min=0.8,
-                max=0.99,
-                default=0.95)
-            private$..show_frequencies <- jmvcore::OptionBool$new(
-                "show_frequencies",
-                show_frequencies,
+            private$..ci <- jmvcore::OptionBool$new(
+                "ci",
+                ci,
                 default=TRUE)
-            private$..show_thresholds <- jmvcore::OptionBool$new(
-                "show_thresholds",
-                show_thresholds,
+            private$..ciWidth <- jmvcore::OptionNumber$new(
+                "ciWidth",
+                ciWidth,
+                min=50,
+                max=99.9,
+                default=95)
+            private$..sig <- jmvcore::OptionBool$new(
+                "sig",
+                sig,
                 default=TRUE)
-            private$..show_standard_errors <- jmvcore::OptionBool$new(
-                "show_standard_errors",
-                show_standard_errors,
-                default=TRUE)
-            private$..significance_test <- jmvcore::OptionBool$new(
-                "significance_test",
-                significance_test,
-                default=TRUE)
-            private$..correction <- jmvcore::OptionList$new(
-                "correction",
-                correction,
-                options=list(
-                    "none",
-                    "bonferroni",
-                    "holm",
-                    "fdr"),
-                default="none")
-            private$..matrix_plot <- jmvcore::OptionBool$new(
-                "matrix_plot",
-                matrix_plot,
-                default=TRUE)
-            private$..scatterplots <- jmvcore::OptionBool$new(
-                "scatterplots",
-                scatterplots,
+            private$..sigLevel <- jmvcore::OptionNumber$new(
+                "sigLevel",
+                sigLevel,
+                min=0.001,
+                max=0.1,
+                default=0.05)
+            private$..matrixPlot <- jmvcore::OptionBool$new(
+                "matrixPlot",
+                matrixPlot,
                 default=FALSE)
-            private$..assumption_tests <- jmvcore::OptionBool$new(
-                "assumption_tests",
-                assumption_tests,
-                default=TRUE)
-            private$..bootstrap_ci <- jmvcore::OptionBool$new(
-                "bootstrap_ci",
-                bootstrap_ci,
-                default=FALSE)
-            private$..bootstrap_samples <- jmvcore::OptionNumber$new(
-                "bootstrap_samples",
-                bootstrap_samples,
-                min=100,
-                max=5000,
-                default=1000)
-            private$..missing_data <- jmvcore::OptionList$new(
-                "missing_data",
-                missing_data,
-                options=list(
-                    "listwise",
-                    "pairwise"),
-                default="listwise")
-            private$..show_pearson_comparison <- jmvcore::OptionBool$new(
-                "show_pearson_comparison",
-                show_pearson_comparison,
-                default=TRUE)
-            private$..factor_analysis_suitability <- jmvcore::OptionBool$new(
-                "factor_analysis_suitability",
-                factor_analysis_suitability,
-                default=FALSE)
-            private$..clinical_interpretation <- jmvcore::OptionBool$new(
-                "clinical_interpretation",
-                clinical_interpretation,
+            private$..showFreq <- jmvcore::OptionBool$new(
+                "showFreq",
+                showFreq,
                 default=TRUE)
 
             self$.addOption(private$..vars)
+            self$.addOption(private$..corrType)
             self$.addOption(private$..method)
-            self$.addOption(private$..estimation_method)
-            self$.addOption(private$..confidence_level)
-            self$.addOption(private$..show_frequencies)
-            self$.addOption(private$..show_thresholds)
-            self$.addOption(private$..show_standard_errors)
-            self$.addOption(private$..significance_test)
-            self$.addOption(private$..correction)
-            self$.addOption(private$..matrix_plot)
-            self$.addOption(private$..scatterplots)
-            self$.addOption(private$..assumption_tests)
-            self$.addOption(private$..bootstrap_ci)
-            self$.addOption(private$..bootstrap_samples)
-            self$.addOption(private$..missing_data)
-            self$.addOption(private$..show_pearson_comparison)
-            self$.addOption(private$..factor_analysis_suitability)
-            self$.addOption(private$..clinical_interpretation)
+            self$.addOption(private$..ci)
+            self$.addOption(private$..ciWidth)
+            self$.addOption(private$..sig)
+            self$.addOption(private$..sigLevel)
+            self$.addOption(private$..matrixPlot)
+            self$.addOption(private$..showFreq)
         }),
     active = list(
         vars = function() private$..vars$value,
+        corrType = function() private$..corrType$value,
         method = function() private$..method$value,
-        estimation_method = function() private$..estimation_method$value,
-        confidence_level = function() private$..confidence_level$value,
-        show_frequencies = function() private$..show_frequencies$value,
-        show_thresholds = function() private$..show_thresholds$value,
-        show_standard_errors = function() private$..show_standard_errors$value,
-        significance_test = function() private$..significance_test$value,
-        correction = function() private$..correction$value,
-        matrix_plot = function() private$..matrix_plot$value,
-        scatterplots = function() private$..scatterplots$value,
-        assumption_tests = function() private$..assumption_tests$value,
-        bootstrap_ci = function() private$..bootstrap_ci$value,
-        bootstrap_samples = function() private$..bootstrap_samples$value,
-        missing_data = function() private$..missing_data$value,
-        show_pearson_comparison = function() private$..show_pearson_comparison$value,
-        factor_analysis_suitability = function() private$..factor_analysis_suitability$value,
-        clinical_interpretation = function() private$..clinical_interpretation$value),
+        ci = function() private$..ci$value,
+        ciWidth = function() private$..ciWidth$value,
+        sig = function() private$..sig$value,
+        sigLevel = function() private$..sigLevel$value,
+        matrixPlot = function() private$..matrixPlot$value,
+        showFreq = function() private$..showFreq$value),
     private = list(
         ..vars = NA,
+        ..corrType = NA,
         ..method = NA,
-        ..estimation_method = NA,
-        ..confidence_level = NA,
-        ..show_frequencies = NA,
-        ..show_thresholds = NA,
-        ..show_standard_errors = NA,
-        ..significance_test = NA,
-        ..correction = NA,
-        ..matrix_plot = NA,
-        ..scatterplots = NA,
-        ..assumption_tests = NA,
-        ..bootstrap_ci = NA,
-        ..bootstrap_samples = NA,
-        ..missing_data = NA,
-        ..show_pearson_comparison = NA,
-        ..factor_analysis_suitability = NA,
-        ..clinical_interpretation = NA)
+        ..ci = NA,
+        ..ciWidth = NA,
+        ..sig = NA,
+        ..sigLevel = NA,
+        ..matrixPlot = NA,
+        ..showFreq = NA)
 )
 
 polychoriccorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "polychoriccorrResults",
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
+        instructions = function() private$.items[["instructions"]],
         correlations = function() private$.items[["correlations"]],
         frequencies = function() private$.items[["frequencies"]],
-        thresholds = function() private$.items[["thresholds"]],
-        assumptions = function() private$.items[["assumptions"]],
-        pearsonComparison = function() private$.items[["pearsonComparison"]],
-        factorAnalysis = function() private$.items[["factorAnalysis"]],
-        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
-        correlationMatrixPlot = function() private$.items[["correlationMatrixPlot"]],
-        scatterplotMatrix = function() private$.items[["scatterplotMatrix"]]),
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Polychoric & Tetrachoric Correlations")
+                title="Polychoric Correlation Analysis")
             self$add(jmvcore::Html$new(
                 options=options,
-                name="todo",
-                title="Analysis Complete",
-                visible=FALSE))
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="correlations",
-                title="Correlation Matrix",
-                columns=list()))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="frequencies",
-                title="Variable Frequencies",
-                visible="(show_frequencies)",
+                title="Polychoric Correlations",
+                visible="(vars)",
                 columns=list(
                     list(
-                        `name`="variable", 
-                        `title`="Variable", 
+                        `name`="var1", 
+                        `title`="Variable 1", 
                         `type`="text"),
                     list(
-                        `name`="category", 
-                        `title`="Category", 
+                        `name`="var2", 
+                        `title`="Variable 2", 
                         `type`="text"),
                     list(
-                        `name`="frequency", 
-                        `title`="Frequency", 
-                        `type`="integer"),
-                    list(
-                        `name`="percent", 
-                        `title`="Percent", 
-                        `type`="number", 
-                        `format`="dp:1"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="thresholds",
-                title="Threshold Parameters",
-                visible="(show_thresholds)",
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
+                        `name`="type", 
+                        `title`="Type", 
                         `type`="text"),
                     list(
-                        `name`="threshold", 
-                        `title`="Threshold", 
-                        `type`="text"),
-                    list(
-                        `name`="estimate", 
-                        `title`="Estimate", 
-                        `type`="number"),
-                    list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number"),
-                    list(
-                        `name`="z", 
-                        `title`="z", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="assumptions",
-                title="Assumption Tests",
-                visible="(assumption_tests)",
-                columns=list(
-                    list(
-                        `name`="test", 
-                        `title`="Test", 
-                        `type`="text"),
-                    list(
-                        `name`="statistic", 
-                        `title`="Statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p", 
+                        `name`="r", 
+                        `title`="r", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="pearsonComparison",
-                title="Comparison with Pearson Correlations",
-                visible="(show_pearson_comparison)",
-                columns=list(
+                        `name`="rCI", 
+                        `title`="95% CI", 
+                        `type`="text", 
+                        `visible`="(ci)"),
                     list(
-                        `name`="pair", 
-                        `title`="Variable Pair", 
-                        `type`="text"),
-                    list(
-                        `name`="polychoric", 
-                        `title`="Polychoric/Tetrachoric", 
+                        `name`="chisq", 
+                        `title`="\u03C7\u00B2", 
                         `type`="number", 
-                        `format`="zto"),
+                        `visible`="(sig)"),
                     list(
-                        `name`="pearson", 
-                        `title`="Pearson", 
+                        `name`="p", 
+                        `title`="p", 
                         `type`="number", 
-                        `format`="zto"),
+                        `format`="zto,pvalue", 
+                        `visible`="(sig)"),
                     list(
-                        `name`="difference", 
-                        `title`="Difference", 
-                        `type`="number", 
-                        `format`="zto"))))
-            self$add(jmvcore::Table$new(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
+            self$add(jmvcore::Array$new(
                 options=options,
-                name="factorAnalysis",
-                title="Factor Analysis Suitability",
-                visible="(factor_analysis_suitability)",
-                columns=list(
-                    list(
-                        `name`="measure", 
-                        `title`="Measure", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="clinicalInterpretation",
-                title="Clinical Interpretation",
-                visible="(clinical_interpretation)"))
+                name="frequencies",
+                title="Frequency Tables",
+                visible="(showFreq)",
+                template=jmvcore::Table$new(
+                    options=options,
+                    title="$key",
+                    columns=list(
+                        list(
+                            `name`=".name", 
+                            `title`="", 
+                            `type`="text", 
+                            `combineBelow`=TRUE)))))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="correlationMatrixPlot",
-                title="Correlation Matrix",
+                name="plot",
+                title="Correlation Matrix Plot",
+                visible="(matrixPlot)",
                 width=500,
                 height=400,
-                requiresData=TRUE,
-                visible="(matrix_plot)"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="scatterplotMatrix",
-                title="Scatterplot Matrix",
-                width=600,
-                height=500,
-                requiresData=TRUE,
-                visible="(scatterplots)"))}))
+                renderFun=".plot"))}))
 
 polychoriccorrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "polychoriccorrBase",
@@ -383,61 +214,25 @@ polychoriccorrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 weightsSupport = 'auto')
         }))
 
-#' Polychoric & Tetrachoric Correlations
+#' Polychoric Correlation Analysis
 #'
-#' Polychoric and tetrachoric correlations for analyzing relationships between 
-#' ordinal  and binary variables. These methods estimate the correlation that 
-#' would exist if  the underlying variables were continuous and normally 
-#' distributed, making them  particularly useful for pathology data with 
-#' ordered categorical outcomes.
 #' 
-#'
-#' @examples
-#' data \%>\%
-#' polychoriccorr(
-#'     vars = c("grade1", "grade2", "stage", "response"),
-#'     method = "polychoric"
-#' )
-#'
-#' @param data the data as a data frame
-#' @param vars Ordinal or binary variables for correlation analysis (minimum 2
-#'   required)
-#' @param method Type of correlation to compute based on variable types
-#' @param estimation_method Method for estimating correlations
-#' @param confidence_level Confidence level for confidence intervals
-#' @param show_frequencies Display frequency tables for each variable
-#' @param show_thresholds Show estimated threshold parameters for ordinal
-#'   variables
-#' @param show_standard_errors Include standard errors for correlation
-#'   estimates
-#' @param significance_test Perform significance tests for correlations
-#' @param correction Correction method for multiple comparisons
-#' @param matrix_plot Generate correlation matrix heatmap
-#' @param scatterplots Generate scatterplot matrix for variable relationships
-#' @param assumption_tests Test assumptions for polychoric/tetrachoric
-#'   correlations
-#' @param bootstrap_ci Use bootstrap method for confidence intervals
-#' @param bootstrap_samples Number of bootstrap samples for confidence
-#'   intervals
-#' @param missing_data Method for handling missing data
-#' @param show_pearson_comparison Show comparison with standard Pearson
-#'   correlations
-#' @param factor_analysis_suitability Assess suitability of correlation matrix
-#'   for factor analysis
-#' @param clinical_interpretation Provide clinical interpretation guidance for
-#'   results
+#' @param data .
+#' @param vars .
+#' @param corrType .
+#' @param method .
+#' @param ci .
+#' @param ciWidth .
+#' @param sig .
+#' @param sigLevel .
+#' @param matrixPlot .
+#' @param showFreq .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$correlations} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$frequencies} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$thresholds} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$assumptions} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$pearsonComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$factorAnalysis} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$correlationMatrixPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$scatterplotMatrix} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$frequencies} \tab \tab \tab \tab \tab an array of tables \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -450,23 +245,14 @@ polychoriccorrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 polychoriccorr <- function(
     data,
     vars,
-    method = "auto",
-    estimation_method = "ml",
-    confidence_level = 0.95,
-    show_frequencies = TRUE,
-    show_thresholds = TRUE,
-    show_standard_errors = TRUE,
-    significance_test = TRUE,
-    correction = "none",
-    matrix_plot = TRUE,
-    scatterplots = FALSE,
-    assumption_tests = TRUE,
-    bootstrap_ci = FALSE,
-    bootstrap_samples = 1000,
-    missing_data = "listwise",
-    show_pearson_comparison = TRUE,
-    factor_analysis_suitability = FALSE,
-    clinical_interpretation = TRUE) {
+    corrType = "polychoric",
+    method = "ml",
+    ci = TRUE,
+    ciWidth = 95,
+    sig = TRUE,
+    sigLevel = 0.05,
+    matrixPlot = FALSE,
+    showFreq = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("polychoriccorr requires jmvcore to be installed (restart may be required)")
@@ -477,26 +263,18 @@ polychoriccorr <- function(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL))
 
+    for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- polychoriccorrOptions$new(
         vars = vars,
+        corrType = corrType,
         method = method,
-        estimation_method = estimation_method,
-        confidence_level = confidence_level,
-        show_frequencies = show_frequencies,
-        show_thresholds = show_thresholds,
-        show_standard_errors = show_standard_errors,
-        significance_test = significance_test,
-        correction = correction,
-        matrix_plot = matrix_plot,
-        scatterplots = scatterplots,
-        assumption_tests = assumption_tests,
-        bootstrap_ci = bootstrap_ci,
-        bootstrap_samples = bootstrap_samples,
-        missing_data = missing_data,
-        show_pearson_comparison = show_pearson_comparison,
-        factor_analysis_suitability = factor_analysis_suitability,
-        clinical_interpretation = clinical_interpretation)
+        ci = ci,
+        ciWidth = ciWidth,
+        sig = sig,
+        sigLevel = sigLevel,
+        matrixPlot = matrixPlot,
+        showFreq = showFreq)
 
     analysis <- polychoriccorrClass$new(
         options = options,
