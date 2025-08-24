@@ -46,11 +46,11 @@ _tododata
 # ^docs$
 inst/doc
 **/.quarto/
-/.claude
+# /.claude
 .venv/
 backups/
 
 /doc/
 /Meta/
 /test_backups
-/.claude_prompts
+# /.claude_prompts
