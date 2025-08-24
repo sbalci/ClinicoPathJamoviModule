@@ -229,3 +229,4 @@ When updating documentation links in README.Rmd, ensure they point to these subm
 - in .u.yaml description is not allowed
 - in .a.yaml type: Level is not allowed to have default
 - official jamovi documentation is here './vignettes/dev.jamovi.org-master'
+- README.md is overwritten. make changes in README.Rmd
