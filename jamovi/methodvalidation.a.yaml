@@ -1,0 +1,316 @@
+---
+name: methodvalidation
+title: Laboratory Method Validation Protocols
+menuGroup: ClinicoPathDescriptives
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Comprehensive analytical method validation following CLSI EP15-A3, EP05-A3, and ISO 15189 guidelines.
+        Validates precision, accuracy, linearity, measuring interval, and analytical measurement range
+        for clinical laboratory methods. Supports regulatory submissions and laboratory accreditation.
+        Essential for establishing method performance characteristics.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            methodvalidation(
+                measurement = "glucose_result",
+                reference_value = "reference_glucose",
+                replicate = "replicate_number",
+                concentration_level = "control_level"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: measurement
+      title: Measurement Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Test method measurement values
+
+    - name: reference_value
+      title: Reference/Target Value
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Reference method or target concentration values
+
+    - name: replicate
+      title: Replicate Number
+      type: Variable
+      suggested:
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Replicate measurement identifier
+
+    - name: concentration_level
+      title: Concentration Level
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Concentration level identifier (e.g., Low, Medium, High)
+
+    - name: operator
+      title: Operator/Analyst (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Operator or analyst identifier for intermediate precision
+
+    - name: instrument
+      title: Instrument ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Instrument identifier for ruggedness testing
+
+    - name: validation_type
+      title: Validation Type
+      type: List
+      options:
+        - name: full_validation
+          title: Full Method Validation
+        - name: precision_only
+          title: Precision Study Only
+        - name: accuracy_only
+          title: Accuracy Study Only
+        - name: linearity_only
+          title: Linearity Study Only
+        - name: method_comparison
+          title: Method Comparison
+        - name: verification
+          title: Method Verification
+      default: full_validation
+      description:
+          R: >
+            Type of validation study to perform
+
+    - name: precision_design
+      title: Precision Study Design
+      type: List
+      options:
+        - name: ep15a3
+          title: CLSI EP15-A3 Design
+        - name: ep05a3
+          title: CLSI EP05-A3 Design
+        - name: nested_anova
+          title: Nested ANOVA Design
+        - name: custom
+          title: Custom Design
+      default: ep15a3
+      description:
+          R: >
+            Experimental design for precision evaluation
+
+    - name: replicates_per_run
+      title: Replicates per Run
+      type: Integer
+      min: 2
+      max: 10
+      default: 3
+      description:
+          R: >
+            Number of replicates per run for precision study
+
+    - name: number_of_runs
+      title: Number of Runs
+      type: Integer
+      min: 5
+      max: 30
+      default: 20
+      description:
+          R: >
+            Number of runs for precision study
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.90
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for statistical calculations
+
+    - name: acceptance_criteria
+      title: Acceptance Criteria Source
+      type: List
+      options:
+        - name: clia
+          title: CLIA Requirements
+        - name: biological_variation
+          title: Biological Variation
+        - name: state_of_art
+          title: State of the Art
+        - name: custom
+          title: Custom Criteria
+      default: biological_variation
+      description:
+          R: >
+            Source for method acceptance criteria
+
+    - name: custom_cv_limit
+      title: Custom CV Limit (%)
+      type: Number
+      min: 1
+      max: 50
+      default: 10
+      description:
+          R: >
+            Custom coefficient of variation acceptance limit
+
+    - name: custom_bias_limit
+      title: Custom Bias Limit (%)
+      type: Number
+      min: 1
+      max: 50
+      default: 5
+      description:
+          R: >
+            Custom bias acceptance limit
+
+    - name: linearity_points
+      title: Linearity Concentration Points
+      type: Integer
+      min: 5
+      max: 15
+      default: 7
+      description:
+          R: >
+            Number of concentration points for linearity study
+
+    - name: outlier_detection
+      title: Outlier Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply statistical outlier detection methods
+
+    - name: precision_analysis
+      title: Precision Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform comprehensive precision evaluation
+
+    - name: accuracy_analysis
+      title: Accuracy Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform bias and accuracy assessment
+
+    - name: linearity_analysis
+      title: Linearity Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform linearity and measuring interval evaluation
+
+    - name: limit_of_detection
+      title: Limit of Detection (LoD)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Estimate analytical limit of detection
+
+    - name: limit_of_quantitation
+      title: Limit of Quantitation (LoQ)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Estimate analytical limit of quantitation
+
+    - name: interference_testing
+      title: Interference Testing
+      type: Bool
+      default: false
+      description:
+          R: >
+            Evaluate potential analytical interferences
+
+    - name: carryover_assessment
+      title: Carryover Assessment
+      type: Bool
+      default: false
+      description:
+          R: >
+            Assess sample carryover effects
+
+    - name: reference_interval
+      title: Reference Interval Verification
+      type: Bool
+      default: false
+      description:
+          R: >
+            Verify established reference intervals
+
+    - name: uncertainty_budget
+      title: Measurement Uncertainty Budget
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate comprehensive uncertainty budget
+
+    - name: validation_plots
+      title: Validation Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate validation study visualizations
+
+    - name: method_comparison_plot
+      title: Method Comparison Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create method comparison visualizations
+
+    - name: export_report
+      title: Export Validation Report
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate comprehensive validation report

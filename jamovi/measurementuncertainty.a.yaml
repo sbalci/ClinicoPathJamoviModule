@@ -1,0 +1,324 @@
+---
+name: measurementuncertainty
+title: Measurement Uncertainty Estimation (ISO 15189)
+menuGroup: ClinicoPathDescriptives
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Comprehensive measurement uncertainty evaluation following ISO 15189, ISO/IEC Guide 98-3 (GUM),
+        and JCGM 100:2008 guidelines. Calculates Type A and Type B uncertainties, combined and expanded
+        uncertainty, and uncertainty budgets for clinical laboratory measurements.
+        Essential for laboratory accreditation and quality assurance.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            measurementuncertainty(
+                measurement = "glucose_result",
+                reference_value = "certified_value",
+                replicate_group = "measurement_run",
+                uncertainty_method = "gum_approach"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: measurement
+      title: Measurement Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Laboratory measurement values for uncertainty analysis
+
+    - name: reference_value
+      title: Reference/Certified Value
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Reference or certified values for bias estimation
+
+    - name: replicate_group
+      title: Replicate Group ID
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Identifier for measurement replicates or runs
+
+    - name: calibrator
+      title: Calibrator Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Calibrator or standard identifier
+
+    - name: operator
+      title: Operator Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Operator identifier for operator variability
+
+    - name: instrument
+      title: Instrument Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Instrument identifier for instrument variability
+
+    - name: uncertainty_method
+      title: Uncertainty Evaluation Method
+      type: List
+      options:
+        - name: gum_approach
+          title: GUM Approach (ISO Guide)
+        - name: monte_carlo
+          title: Monte Carlo Method
+        - name: top_down
+          title: Top-down Approach
+        - name: bottom_up
+          title: Bottom-up Approach
+        - name: combined_approach
+          title: Combined Approach
+      default: gum_approach
+      description:
+          R: >
+            Method for measurement uncertainty evaluation
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.90
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for expanded uncertainty
+
+    - name: coverage_factor
+      title: Coverage Factor (k)
+      type: Number
+      min: 1.5
+      max: 3.0
+      default: 2.0
+      description:
+          R: >
+            Coverage factor for expanded uncertainty calculation
+
+    - name: type_a_components
+      title: Type A Uncertainty Components
+      type: String
+      default: "repeatability,intermediate_precision,operator_variability"
+      description:
+          R: >
+            Comma-separated list of Type A uncertainty components
+
+    - name: type_b_components
+      title: Type B Uncertainty Components
+      type: String
+      default: "calibration_uncertainty,reference_material_uncertainty,temperature_effects"
+      description:
+          R: >
+            Comma-separated list of Type B uncertainty components
+
+    - name: calibration_uncertainty
+      title: Calibration Uncertainty (%)
+      type: Number
+      min: 0
+      max: 10
+      default: 1.0
+      description:
+          R: >
+            Relative uncertainty from calibration
+
+    - name: reference_material_uncertainty
+      title: Reference Material Uncertainty (%)
+      type: Number
+      min: 0
+      max: 5
+      default: 0.5
+      description:
+          R: >
+            Uncertainty of reference materials
+
+    - name: temperature_uncertainty
+      title: Temperature Effect Uncertainty (%)
+      type: Number
+      min: 0
+      max: 2
+      default: 0.1
+      description:
+          R: >
+            Uncertainty due to temperature variations
+
+    - name: pipetting_uncertainty
+      title: Pipetting Uncertainty (%)
+      type: Number
+      min: 0
+      max: 2
+      default: 0.2
+      description:
+          R: >
+            Uncertainty from pipetting operations
+
+    - name: sample_stability_uncertainty
+      title: Sample Stability Uncertainty (%)
+      type: Number
+      min: 0
+      max: 5
+      default: 0.3
+      description:
+          R: >
+            Uncertainty due to sample stability
+
+    - name: matrix_effects_uncertainty
+      title: Matrix Effects Uncertainty (%)
+      type: Number
+      min: 0
+      max: 3
+      default: 0.2
+      description:
+          R: >
+            Uncertainty from matrix effects
+
+    - name: monte_carlo_simulations
+      title: Monte Carlo Simulations
+      type: Integer
+      min: 10000
+      max: 1000000
+      default: 100000
+      description:
+          R: >
+            Number of Monte Carlo simulations
+
+    - name: distribution_types
+      title: Input Distribution Types
+      type: String
+      default: "normal,uniform,triangular"
+      description:
+          R: >
+            Distribution types for uncertainty components
+
+    - name: correlation_analysis
+      title: Correlation Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Analyze correlations between uncertainty components
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform sensitivity analysis of uncertainty components
+
+    - name: budget_optimization
+      title: Uncertainty Budget Optimization
+      type: Bool
+      default: true
+      description:
+          R: >
+            Optimize uncertainty budget for cost-effectiveness
+
+    - name: measurement_model
+      title: Measurement Model Definition
+      type: Bool
+      default: true
+      description:
+          R: >
+            Define and validate measurement model
+
+    - name: validation_experiments
+      title: Validation Experiments
+      type: Bool
+      default: false
+      description:
+          R: >
+            Design experiments to validate uncertainty estimates
+
+    - name: proficiency_testing_data
+      title: Include Proficiency Testing Data
+      type: Bool
+      default: false
+      description:
+          R: >
+            Incorporate proficiency testing results
+
+    - name: interlaboratory_comparison
+      title: Interlaboratory Comparison
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare uncertainty with other laboratories
+
+    - name: clinical_significance
+      title: Clinical Significance Assessment
+      type: Bool
+      default: true
+      description:
+          R: >
+            Evaluate clinical significance of uncertainty
+
+    - name: iso15189_compliance
+      title: ISO 15189 Compliance Check
+      type: Bool
+      default: true
+      description:
+          R: >
+            Verify compliance with ISO 15189 requirements
+
+    - name: uncertainty_plots
+      title: Uncertainty Visualization
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate uncertainty analysis plots
+
+    - name: budget_plots
+      title: Uncertainty Budget Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create uncertainty budget visualizations
+
+    - name: monte_carlo_plots
+      title: Monte Carlo Distribution Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate Monte Carlo simulation plots

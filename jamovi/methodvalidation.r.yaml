@@ -1,0 +1,400 @@
+---
+name: methodvalidation
+title: Laboratory Method Validation Protocols
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: studyDesign
+      title: 'Study Design Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - validation_type
+        - precision_design
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: precisionResults
+      title: 'Precision Evaluation Results'
+      type: Table
+      visible: (precision_analysis)
+      rows: 1
+      clearWith:
+        - precision_analysis
+        - measurement
+        - concentration_level
+      columns:
+        - name: concentration_level
+          title: 'Concentration Level'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: mean
+          title: 'Mean'
+          type: number
+          format: zto:4
+        - name: repeatability_sd
+          title: 'Repeatability SD'
+          type: number
+          format: zto:4
+        - name: repeatability_cv
+          title: 'Repeatability CV (%)'
+          type: number
+          format: zto:2
+        - name: intermediate_precision_sd
+          title: 'Intermediate Precision SD'
+          type: number
+          format: zto:4
+        - name: intermediate_precision_cv
+          title: 'Intermediate Precision CV (%)'
+          type: number
+          format: zto:2
+        - name: acceptance_status
+          title: 'Acceptance Status'
+          type: text
+
+    - name: accuracyResults
+      title: 'Accuracy and Bias Assessment'
+      type: Table
+      visible: (accuracy_analysis)
+      rows: 1
+      clearWith:
+        - accuracy_analysis
+        - measurement
+        - reference_value
+      columns:
+        - name: concentration_level
+          title: 'Concentration Level'
+          type: text
+        - name: target_value
+          title: 'Target Value'
+          type: number
+          format: zto:4
+        - name: observed_mean
+          title: 'Observed Mean'
+          type: number
+          format: zto:4
+        - name: bias
+          title: 'Bias'
+          type: number
+          format: zto:4
+        - name: bias_percent
+          title: 'Bias (%)'
+          type: number
+          format: zto:2
+        - name: bias_ci_lower
+          title: 'Bias CI Lower'
+          type: number
+          format: zto:4
+        - name: bias_ci_upper
+          title: 'Bias CI Upper'
+          type: number
+          format: zto:4
+        - name: recovery_percent
+          title: 'Recovery (%)'
+          type: number
+          format: zto:2
+        - name: acceptance_status
+          title: 'Acceptance Status'
+          type: text
+
+    - name: linearityResults
+      title: 'Linearity Analysis Results'
+      type: Table
+      visible: (linearity_analysis)
+      rows: 1
+      clearWith:
+        - linearity_analysis
+        - measurement
+        - reference_value
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:6
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: statistical_significance
+          title: 'Statistical Significance'
+          type: text
+        - name: clinical_significance
+          title: 'Clinical Significance'
+          type: text
+
+    - name: linearityData
+      title: 'Linearity Data Points'
+      type: Table
+      visible: (linearity_analysis)
+      rows: 1
+      clearWith:
+        - linearity_analysis
+        - measurement
+      columns:
+        - name: expected_value
+          title: 'Expected Value'
+          type: number
+          format: zto:4
+        - name: observed_mean
+          title: 'Observed Mean'
+          type: number
+          format: zto:4
+        - name: difference
+          title: 'Difference'
+          type: number
+          format: zto:4
+        - name: percent_difference
+          title: 'Difference (%)'
+          type: number
+          format: zto:2
+        - name: within_limits
+          title: 'Within Limits'
+          type: text
+
+    - name: detectionLimits
+      title: 'Detection and Quantitation Limits'
+      type: Table
+      visible: (limit_of_detection || limit_of_quantitation)
+      rows: 1
+      clearWith:
+        - limit_of_detection
+        - limit_of_quantitation
+      columns:
+        - name: limit_type
+          title: 'Limit Type'
+          type: text
+        - name: estimated_value
+          title: 'Estimated Value'
+          type: number
+          format: zto:6
+        - name: method_used
+          title: 'Method Used'
+          type: text
+        - name: confidence_interval
+          title: 'Confidence Interval'
+          type: text
+        - name: verification_status
+          title: 'Verification Status'
+          type: text
+
+    - name: uncertaintyBudget
+      title: 'Measurement Uncertainty Budget'
+      type: Table
+      visible: (uncertainty_budget)
+      rows: 1
+      clearWith:
+        - uncertainty_budget
+        - measurement
+      columns:
+        - name: uncertainty_component
+          title: 'Uncertainty Component'
+          type: text
+        - name: standard_uncertainty
+          title: 'Standard Uncertainty'
+          type: number
+          format: zto:4
+        - name: relative_uncertainty
+          title: 'Relative Uncertainty (%)'
+          type: number
+          format: zto:2
+        - name: degrees_of_freedom
+          title: 'Degrees of Freedom'
+          type: integer
+        - name: contribution_percent
+          title: 'Contribution (%)'
+          type: number
+          format: zto:1
+
+    - name: uncertaintySummary
+      title: 'Combined Uncertainty Summary'
+      type: Table
+      visible: (uncertainty_budget)
+      rows: 1
+      clearWith:
+        - uncertainty_budget
+      columns:
+        - name: uncertainty_type
+          title: 'Uncertainty Type'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: relative_value
+          title: 'Relative Value (%)'
+          type: number
+          format: zto:2
+        - name: coverage_factor
+          title: 'Coverage Factor'
+          type: number
+          format: zto:2
+        - name: expanded_uncertainty
+          title: 'Expanded Uncertainty'
+          type: number
+          format: zto:4
+
+    - name: validationSummary
+      title: 'Method Validation Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - validation_type
+        - measurement
+      columns:
+        - name: validation_parameter
+          title: 'Validation Parameter'
+          type: text
+        - name: acceptance_criterion
+          title: 'Acceptance Criterion'
+          type: text
+        - name: observed_result
+          title: 'Observed Result'
+          type: text
+        - name: status
+          title: 'Status'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: interferenceResults
+      title: 'Interference Testing Results'
+      type: Table
+      visible: (interference_testing)
+      rows: 1
+      clearWith:
+        - interference_testing
+      columns:
+        - name: interfering_substance
+          title: 'Interfering Substance'
+          type: text
+        - name: concentration_tested
+          title: 'Concentration Tested'
+          type: text
+        - name: baseline_result
+          title: 'Baseline Result'
+          type: number
+          format: zto:4
+        - name: interference_result
+          title: 'Interference Result'
+          type: number
+          format: zto:4
+        - name: percent_interference
+          title: 'Interference (%)'
+          type: number
+          format: zto:2
+        - name: clinical_significance
+          title: 'Clinical Significance'
+          type: text
+
+    - name: carryoverResults
+      title: 'Carryover Assessment Results'
+      type: Table
+      visible: (carryover_assessment)
+      rows: 1
+      clearWith:
+        - carryover_assessment
+      columns:
+        - name: test_sequence
+          title: 'Test Sequence'
+          type: text
+        - name: expected_result
+          title: 'Expected Result'
+          type: number
+          format: zto:4
+        - name: observed_result
+          title: 'Observed Result'
+          type: number
+          format: zto:4
+        - name: carryover_percent
+          title: 'Carryover (%)'
+          type: number
+          format: zto:2
+        - name: acceptance_status
+          title: 'Acceptance Status'
+          type: text
+
+    - name: precisionPlot
+      title: 'Precision Study Visualization'
+      type: Image
+      visible: (validation_plots && precision_analysis)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotPrecision
+      clearWith:
+        - validation_plots
+        - measurement
+        - concentration_level
+
+    - name: accuracyPlot
+      title: 'Accuracy and Bias Visualization'
+      type: Image
+      visible: (validation_plots && accuracy_analysis)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotAccuracy
+      clearWith:
+        - validation_plots
+        - measurement
+        - reference_value
+
+    - name: linearityPlot
+      title: 'Linearity Assessment Plot'
+      type: Image
+      visible: (validation_plots && linearity_analysis)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotLinearity
+      clearWith:
+        - validation_plots
+        - measurement
+        - reference_value
+
+    - name: methodComparisonPlot
+      title: 'Method Comparison Analysis'
+      type: Image
+      visible: (method_comparison_plot && validation_type == "method_comparison")
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotMethodComparison
+      clearWith:
+        - method_comparison_plot
+        - measurement
+        - reference_value
+
+    - name: uncertaintyPlot
+      title: 'Uncertainty Budget Visualization'
+      type: Image
+      visible: (validation_plots && uncertainty_budget)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotUncertaintyBudget
+      clearWith:
+        - validation_plots
+        - uncertainty_budget
+
+    - name: methodExplanation
+      title: 'Method and Regulatory Context'
+      type: Html
+      visible: true

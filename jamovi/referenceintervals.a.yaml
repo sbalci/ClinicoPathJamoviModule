@@ -1,0 +1,278 @@
+---
+name: referenceintervals
+title: Reference Interval Establishment
+menuGroup: ClinicoPathDescriptives
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Robust statistical methods for establishing clinical reference intervals following CLSI EP28-A3c guidelines.
+        Supports parametric and non-parametric approaches, robust methods for outlier handling,
+        and partitioning analysis for demographic factors. Essential for laboratory standardization
+        and clinical interpretation of test results.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            referenceintervals(
+                measurement = "laboratory_value",
+                age = "patient_age",
+                gender = "patient_gender",
+                method = "robust_nonparametric"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: measurement
+      title: Laboratory Measurement
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Laboratory test measurement values from reference population
+
+    - name: age
+      title: Age Variable (Optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Age of reference subjects for age-specific intervals
+
+    - name: gender
+      title: Gender Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Gender for sex-specific reference intervals
+
+    - name: ethnicity
+      title: Ethnicity Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Ethnicity for population-specific intervals
+
+    - name: additional_factors
+      title: Additional Partitioning Factors
+      type: Variables
+      suggested:
+        - nominal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Additional variables for partitioning analysis
+
+    - name: ri_method
+      title: Reference Interval Method
+      type: List
+      options:
+        - name: parametric
+          title: Parametric (Normal Distribution)
+        - name: nonparametric
+          title: Non-parametric (Percentile)
+        - name: robust_nonparametric
+          title: Robust Non-parametric
+        - name: bootstrap
+          title: Bootstrap Method
+        - name: box_cox
+          title: Box-Cox Transformation
+        - name: log_normal
+          title: Log-normal Distribution
+      default: robust_nonparametric
+      description:
+          R: >
+            Statistical method for calculating reference intervals
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      min: 0.90
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for reference interval limits
+
+    - name: reference_percentiles
+      title: Reference Percentiles
+      type: String
+      default: "2.5,97.5"
+      description:
+          R: >
+            Lower and upper percentiles for reference interval
+
+    - name: minimum_sample_size
+      title: Minimum Sample Size
+      type: Integer
+      min: 120
+      max: 1000
+      default: 120
+      description:
+          R: >
+            Minimum required sample size (CLSI recommends ≥120)
+
+    - name: outlier_detection
+      title: Outlier Detection Method
+      type: List
+      options:
+        - name: none
+          title: No Outlier Detection
+        - name: dixon
+          title: Dixon's Test
+        - name: grubbs
+          title: Grubbs' Test
+        - name: tukey
+          title: Tukey's Method
+        - name: horn
+          title: Horn's Method
+        - name: robust
+          title: Robust Z-score
+      default: horn
+      description:
+          R: >
+            Method for identifying and handling outliers
+
+    - name: transformation_test
+      title: Test for Normality/Transformation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test normality and suggest appropriate transformations
+
+    - name: partitioning_analysis
+      title: Partitioning Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Analyze need for demographic partitioning
+
+    - name: age_partitioning
+      title: Age-specific Partitioning
+      type: List
+      options:
+        - name: none
+          title: No Age Partitioning
+        - name: pediatric_adult
+          title: Pediatric vs Adult
+        - name: decades
+          title: Age Decades
+        - name: custom_groups
+          title: Custom Age Groups
+        - name: continuous_modeling
+          title: Continuous Age Modeling
+      default: none
+      description:
+          R: >
+            Method for age-related partitioning
+
+    - name: age_breakpoints
+      title: Custom Age Breakpoints
+      type: String
+      default: "18,65"
+      description:
+          R: >
+            Comma-separated age breakpoints for custom grouping
+
+    - name: harris_boyd_test
+      title: Harris-Boyd Partitioning Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            Apply Harris-Boyd test for need to partition
+
+    - name: verification_study
+      title: Reference Interval Verification
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform verification with independent samples
+
+    - name: transferability_assessment
+      title: Transferability Assessment
+      type: Bool
+      default: false
+      description:
+          R: >
+            Assess transferability to different populations
+
+    - name: uncertainty_estimation
+      title: Uncertainty Estimation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Estimate uncertainty of reference interval limits
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation Guidelines
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide clinical interpretation guidelines
+
+    - name: quality_assessment
+      title: Quality Assessment
+      type: Bool
+      default: true
+      description:
+          R: >
+            Assess quality of reference interval establishment
+
+    - name: literature_comparison
+      title: Literature Comparison
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare with published reference intervals
+
+    - name: distribution_plots
+      title: Distribution Analysis Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate distribution and normality plots
+
+    - name: partitioning_plots
+      title: Partitioning Analysis Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create partitioning visualization plots
+
+    - name: age_trend_plots
+      title: Age Trend Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate age-related trend visualizations
