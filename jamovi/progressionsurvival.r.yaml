@@ -1,0 +1,397 @@
+---
+name:  progressionsurvival
+title: Progression-Free Survival Analysis
+jrs:   '1.1'
+
+items:
+    - name:  instructions
+      title: Instructions
+      type:  Html
+      visible: true
+
+    - name: pfs_summary
+      title: 'PFS Analysis Summary'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: analysis_type
+            title: 'Analysis Type'
+            type: text
+          - name: n_patients
+            title: 'Patients (N)'
+            type: integer
+          - name: n_events
+            title: 'Events (N)'
+            type: integer
+          - name: median_followup
+            title: 'Median Follow-up'
+            type: number
+          - name: progression_definition
+            title: 'Progression Criteria'
+            type: text
+          - name: censoring_rate
+            title: 'Censoring Rate (%)'
+            type: number
+
+    - name: survival_estimates
+      title: 'Survival Estimates'
+      type: Table
+      rows: 0
+      visible: (kaplan_meier_curves)
+      columns:
+          - name: group
+            title: 'Group'
+            type: text
+          - name: n_risk
+            title: 'N at Risk'
+            type: integer
+          - name: events
+            title: 'Events'
+            type: integer
+          - name: median_pfs
+            title: 'Median PFS'
+            type: number
+          - name: median_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: median_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: pfs_6m
+            title: '6-month PFS (%)'
+            type: number
+          - name: pfs_12m
+            title: '12-month PFS (%)'
+            type: number
+          - name: pfs_24m
+            title: '24-month PFS (%)'
+            type: number
+
+    - name: treatment_effects
+      title: 'Treatment Effect Analysis'
+      type: Table
+      rows: 0
+      visible: (treatment_effect_estimation)
+      columns:
+          - name: comparison
+            title: 'Comparison'
+            type: text
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: hr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: test_statistic
+            title: 'Test Statistic'
+            type: number
+          - name: clinical_interpretation
+            title: 'Clinical Interpretation'
+            type: text
+
+    - name: competing_risks_analysis
+      title: 'Competing Risks Analysis'
+      type: Table
+      rows: 0
+      visible: (cumulative_incidence)
+      columns:
+          - name: endpoint
+            title: 'Endpoint'
+            type: text
+          - name: group
+            title: 'Group'
+            type: text
+          - name: cif_6m
+            title: '6-month CIF (%)'
+            type: number
+          - name: cif_12m
+            title: '12-month CIF (%)'
+            type: number
+          - name: cif_24m
+            title: '24-month CIF (%)'
+            type: number
+          - name: subdist_hr
+            title: 'Subdistribution HR'
+            type: number
+          - name: shr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: shr_ci_upper
+            title: '95% CI Upper'
+            type: number
+
+    - name: landmark_results
+      title: 'Landmark Analysis Results'
+      type: Table
+      rows: 0
+      visible: (landmark_analysis_plot)
+      columns:
+          - name: landmark_time
+            title: 'Landmark Time'
+            type: number
+          - name: group
+            title: 'Group'
+            type: text
+          - name: n_risk
+            title: 'N at Risk'
+            type: integer
+          - name: conditional_pfs
+            title: 'Conditional PFS (%)'
+            type: number
+          - name: cond_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: cond_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: updated_hr
+            title: 'Updated HR'
+            type: number
+          - name: updated_p
+            title: 'P-value'
+            type: number
+
+    - name: subgroup_analysis_table
+      title: 'Subgroup Analysis'
+      type: Table
+      rows: 0
+      visible: (subgroup_analysis)
+      columns:
+          - name: subgroup
+            title: 'Subgroup'
+            type: text
+          - name: n_patients
+            title: 'N Patients'
+            type: integer
+          - name: n_events
+            title: 'N Events'
+            type: integer
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: hr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: p_interaction
+            title: 'P-interaction'
+            type: number
+
+    - name: progression_patterns
+      title: 'Progression Patterns Analysis'
+      type: Table
+      rows: 0
+      visible: (progression_patterns)
+      columns:
+          - name: pattern_type
+            title: 'Pattern Type'
+            type: text
+          - name: frequency
+            title: 'Frequency (N)'
+            type: integer
+          - name: percentage
+            title: 'Percentage (%)'
+            type: number
+          - name: median_time
+            title: 'Median Time to Event'
+            type: number
+          - name: median_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: median_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: clinical_notes
+            title: 'Clinical Notes'
+            type: text
+
+    - name: sensitivity_analysis_table
+      title: 'Sensitivity Analysis'
+      type: Table
+      rows: 0
+      visible: (sensitivity_analysis)
+      columns:
+          - name: scenario
+            title: 'Scenario'
+            type: text
+          - name: assumption
+            title: 'Assumption'
+            type: text
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: hr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: impact_assessment
+            title: 'Impact Assessment'
+            type: text
+
+    - name: biomarker_interaction_table
+      title: 'Biomarker Interaction Analysis'
+      type: Table
+      rows: 0
+      visible: (biomarker_interaction)
+      columns:
+          - name: biomarker
+            title: 'Biomarker'
+            type: text
+          - name: subgroup
+            title: 'Subgroup'
+            type: text
+          - name: n_patients
+            title: 'N Patients'
+            type: integer
+          - name: treatment_hr
+            title: 'Treatment HR'
+            type: number
+          - name: hr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: hr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: interaction_p
+            title: 'P-interaction'
+            type: number
+          - name: predictive_value
+            title: 'Predictive Value'
+            type: text
+
+    - name: interim_monitoring_table
+      title: 'Interim Monitoring Analysis'
+      type: Table
+      rows: 0
+      visible: (interim_monitoring)
+      columns:
+          - name: analysis_time
+            title: 'Analysis Time'
+            type: text
+          - name: information_fraction
+            title: 'Information Fraction'
+            type: number
+          - name: observed_events
+            title: 'Observed Events'
+            type: integer
+          - name: boundary_efficacy
+            title: 'Efficacy Boundary'
+            type: number
+          - name: boundary_futility
+            title: 'Futility Boundary'
+            type: number
+          - name: test_statistic
+            title: 'Test Statistic'
+            type: number
+          - name: conditional_power
+            title: 'Conditional Power'
+            type: number
+          - name: recommendation
+            title: 'Recommendation'
+            type: text
+
+    - name: clinical_significance_table
+      title: 'Clinical Significance Assessment'
+      type: Table
+      rows: 0
+      visible: (clinical_significance)
+      columns:
+          - name: endpoint
+            title: 'Endpoint'
+            type: text
+          - name: observed_benefit
+            title: 'Observed Benefit'
+            type: text
+          - name: clinical_threshold
+            title: 'Clinical Threshold'
+            type: text
+          - name: meets_threshold
+            title: 'Meets Threshold'
+            type: text
+          - name: confidence
+            title: 'Confidence Level'
+            type: text
+          - name: clinical_interpretation
+            title: 'Clinical Interpretation'
+            type: text
+          - name: regulatory_perspective
+            title: 'Regulatory Perspective'
+            type: text
+
+    - name:  km_plot
+      title: Kaplan-Meier Survival Curves
+      type:  Image
+      width:  600
+      height: 450
+      visible: (kaplan_meier_curves)
+      renderFun: .plot_pfs_curves
+
+    - name:  cif_plot
+      title: Cumulative Incidence Functions
+      type:  Image
+      width:  600
+      height: 450
+      visible: (cumulative_incidence)
+      renderFun: .plot_cumulative_incidence
+
+    - name:  landmark_plot
+      title: Landmark Analysis Plot
+      type:  Image
+      width:  600
+      height: 450
+      visible: (landmark_analysis_plot)
+      renderFun: .plot_landmark_analysis
+
+    - name:  forest_plot
+      title: Subgroup Forest Plot
+      type:  Image
+      width:  600
+      height: 450
+      visible: (subgroup_analysis)
+      renderFun: .plot_subgroup_forest
+
+    - name:  progression_pattern_plot
+      title: Progression Pattern Visualization
+      type:  Image
+      width:  600
+      height: 450
+      visible: (progression_patterns)
+      renderFun: .plot_progression_patterns
+
+    - name:  consort_flow
+      title: CONSORT Flow Diagram
+      type:  Image
+      width:  600
+      height: 600
+      visible: (consort_diagram)
+      renderFun: .plot_consort_diagram
+
+    - name:  clinical_interpretation
+      title: Clinical Interpretation and Recommendations
+      type:  Html
+      visible: (clinical_significance)
+
+    - name:  regulatory_summary
+      title: Regulatory Summary
+      type:  Html
+      visible: (regulatory_endpoints)

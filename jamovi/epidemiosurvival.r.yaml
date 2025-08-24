@@ -1,0 +1,424 @@
+---
+name: epidemiosurvival
+title: Epidemiological Survival Analysis
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: cohort_summary
+      title: 'Cohort Study Summary'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: study_design
+            title: 'Study Design'
+            type: text
+          - name: total_participants
+            title: 'Total Participants (N)'
+            type: integer
+          - name: total_person_years
+            title: 'Total Person-Years'
+            type: number
+          - name: total_events
+            title: 'Total Events (N)'
+            type: integer
+          - name: incidence_rate
+            title: 'Incidence Rate (per 100,000)'
+            type: number
+          - name: median_followup
+            title: 'Median Follow-up (years)'
+            type: number
+          - name: study_period
+            title: 'Study Period'
+            type: text
+
+    - name: survival_estimates
+      title: 'Survival Estimates by Exposure'
+      type: Table
+      rows: 0
+      visible: (survival_curves)
+      columns:
+          - name: exposure_group
+            title: 'Exposure Group'
+            type: text
+          - name: n_participants
+            title: 'N Participants'
+            type: integer
+          - name: n_events
+            title: 'N Events'
+            type: integer
+          - name: person_years
+            title: 'Person-Years'
+            type: number
+          - name: incidence_rate
+            title: 'Rate (per 100,000)'
+            type: number
+          - name: rate_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: rate_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: survival_5yr
+            title: '5-year Survival (%)'
+            type: number
+          - name: survival_10yr
+            title: '10-year Survival (%)'
+            type: number
+
+    - name: hazard_ratios
+      title: 'Hazard Ratios and Risk Estimates'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: comparison
+            title: 'Comparison'
+            type: text
+          - name: hazard_ratio
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: hr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: rate_ratio
+            title: 'Rate Ratio'
+            type: number
+          - name: rr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: rr_ci_upper
+            title: '95% CI Upper'
+            type: number
+
+    - name: population_attributable_risk
+      title: 'Population Attributable Risk'
+      type: Table
+      rows: 0
+      visible: (population_impact_measures)
+      columns:
+          - name: exposure_factor
+            title: 'Exposure Factor'
+            type: text
+          - name: prevalence
+            title: 'Prevalence (%)'
+            type: number
+          - name: relative_risk
+            title: 'Relative Risk'
+            type: number
+          - name: par_percent
+            title: 'PAR (%)'
+            type: number
+          - name: par_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: par_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: paf_percent
+            title: 'PAF (%)'
+            type: number
+          - name: number_needed_treat
+            title: 'NNT'
+            type: number
+
+    - name: age_standardized_rates
+      title: 'Age-Standardized Rates'
+      type: Table
+      rows: 0
+      visible: (age_standardization:!none)
+      columns:
+          - name: group
+            title: 'Group'
+            type: text
+          - name: crude_rate
+            title: 'Crude Rate'
+            type: number
+          - name: asr
+            title: 'Age-Standardized Rate'
+            type: number
+          - name: asr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: asr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: standardization_method
+            title: 'Method'
+            type: text
+          - name: reference_population
+            title: 'Reference'
+            type: text
+
+    - name: life_table
+      title: 'Cohort Life Table'
+      type: Table
+      rows: 0
+      visible: (cohort_life_tables)
+      columns:
+          - name: age_interval
+            title: 'Age Interval'
+            type: text
+          - name: n_at_risk
+            title: 'N at Risk'
+            type: integer
+          - name: deaths
+            title: 'Deaths'
+            type: integer
+          - name: person_years
+            title: 'Person-Years'
+            type: number
+          - name: mortality_rate
+            title: 'Mortality Rate'
+            type: number
+          - name: survival_prob
+            title: 'Survival Probability'
+            type: number
+          - name: cumulative_survival
+            title: 'Cumulative Survival'
+            type: number
+
+    - name: case_cohort_results
+      title: 'Case-Cohort Analysis Results'
+      type: Table
+      rows: 0
+      visible: (analysis_type:case_cohort)
+      columns:
+          - name: subcohort_size
+            title: 'Subcohort Size'
+            type: integer
+          - name: cases_in_subcohort
+            title: 'Cases in Subcohort'
+            type: integer
+          - name: total_cases
+            title: 'Total Cases'
+            type: integer
+          - name: sampling_fraction
+            title: 'Sampling Fraction'
+            type: number
+          - name: weighted_hr
+            title: 'Weighted HR'
+            type: number
+          - name: whr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: whr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: efficiency
+            title: 'Relative Efficiency (%)'
+            type: number
+
+    - name: competing_mortality
+      title: 'Competing Mortality Analysis'
+      type: Table
+      rows: 0
+      visible: (competing_risks_analysis)
+      columns:
+          - name: cause
+            title: 'Cause of Death'
+            type: text
+          - name: events
+            title: 'Events'
+            type: integer
+          - name: crude_rate
+            title: 'Crude Rate'
+            type: number
+          - name: cause_specific_hr
+            title: 'Cause-Specific HR'
+            type: number
+          - name: cshr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: cshr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: subdistribution_hr
+            title: 'Subdistribution HR'
+            type: number
+          - name: shr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: shr_ci_upper
+            title: '95% CI Upper'
+            type: number
+
+    - name: apc_effects
+      title: 'Age-Period-Cohort Effects'
+      type: Table
+      rows: 0
+      visible: (age_period_cohort_effects)
+      columns:
+          - name: effect_type
+            title: 'Effect Type'
+            type: text
+          - name: category
+            title: 'Category'
+            type: text
+          - name: log_rate_ratio
+            title: 'Log Rate Ratio'
+            type: number
+          - name: rate_ratio
+            title: 'Rate Ratio'
+            type: number
+          - name: rr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: rr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: significance
+            title: 'Significance'
+            type: text
+
+    - name: survival_disparities_table
+      title: 'Survival Disparities Analysis'
+      type: Table
+      rows: 0
+      visible: (survival_disparities)
+      columns:
+          - name: demographic_factor
+            title: 'Demographic Factor'
+            type: text
+          - name: subgroup
+            title: 'Subgroup'
+            type: text
+          - name: hazard_ratio
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: hr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: absolute_difference
+            title: 'Absolute Difference (%)'
+            type: number
+          - name: relative_difference
+            title: 'Relative Difference (%)'
+            type: number
+          - name: disparity_index
+            title: 'Disparity Index'
+            type: number
+
+    - name: trend_analysis_table
+      title: 'Temporal Trend Analysis'
+      type: Table
+      rows: 0
+      visible: (trend_analysis)
+      columns:
+          - name: period
+            title: 'Calendar Period'
+            type: text
+          - name: incidence_rate
+            title: 'Incidence Rate'
+            type: number
+          - name: asr
+            title: 'Age-Standardized Rate'
+            type: number
+          - name: survival_rate
+            title: 'Survival Rate (%)'
+            type: number
+          - name: annual_change
+            title: 'Annual % Change'
+            type: number
+          - name: trend_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: trend_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: trend_p_value
+            title: 'P-trend'
+            type: number
+
+    - name: excess_mortality_table
+      title: 'Excess Mortality Analysis'
+      type: Table
+      rows: 0
+      visible: (excess_mortality)
+      columns:
+          - name: comparison
+            title: 'Comparison'
+            type: text
+          - name: observed_deaths
+            title: 'Observed Deaths'
+            type: integer
+          - name: expected_deaths
+            title: 'Expected Deaths'
+            type: number
+          - name: smr
+            title: 'SMR'
+            type: number
+          - name: smr_ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: smr_ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: excess_deaths
+            title: 'Excess Deaths'
+            type: number
+          - name: excess_rate
+            title: 'Excess Rate'
+            type: number
+
+    - name: survival_curves_plot
+      title: Survival Curves by Exposure
+      type: Image
+      width: 600
+      height: 450
+      visible: (survival_curves)
+      renderFun: .plot_survival_curves
+
+    - name: cumulative_incidence_plot
+      title: Cumulative Incidence Functions
+      type: Image
+      width: 600
+      height: 450
+      visible: (cumulative_incidence_plots)
+      renderFun: .plot_cumulative_incidence
+
+    - name: age_specific_rates_plot
+      title: Age-Specific Rates
+      type: Image
+      width: 600
+      height: 450
+      visible: (age_specific_rates)
+      renderFun: .plot_age_specific_rates
+
+    - name: trend_plot
+      title: Temporal Trends in Survival
+      type: Image
+      width: 600
+      height: 450
+      visible: (trend_plots)
+      renderFun: .plot_temporal_trends
+
+    - name: forest_plot
+      title: Forest Plot of Risk Estimates
+      type: Image
+      width: 600
+      height: 450
+      visible: (forest_plots)
+      renderFun: .plot_forest_estimates
+
+    - name: epidemiological_interpretation
+      title: Epidemiological Interpretation
+      type: Html
+      visible: true

@@ -1,0 +1,159 @@
+title: Progression-Free Survival Analysis
+name: progressionsurvival
+jus: '3.0'
+stage: 0
+compilerMode: aggressive
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time to Event
+        children:
+          - type: VariablesListBox
+            name: time_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Progression Indicator
+        children:
+          - type: VariablesListBox
+            name: progression_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Death Indicator
+        children:
+          - type: VariablesListBox
+            name: death_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Treatment Variable
+        children:
+          - type: VariablesListBox
+            name: treatment_var
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Stratification Variables
+        children:
+          - type: VariablesListBox
+            name: stratification_vars
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Patient ID
+        children:
+          - type: VariablesListBox
+            name: patient_id
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Baseline Covariates
+        children:
+          - type: VariablesListBox
+            name: baseline_vars
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: analysis_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: progression_definition
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: censoring_mechanism
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: survival_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: comparison_test
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: regression_model
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: landmark_times
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: rmst_tau
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: alpha_spending
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: kaplan_meier_curves
+      - type: CheckBox
+        name: cumulative_incidence
+      - type: CheckBox
+        name: landmark_analysis_plot
+      - type: CheckBox
+        name: progression_patterns
+      - type: CheckBox
+        name: treatment_effect_estimation
+      - type: CheckBox
+        name: subgroup_analysis
+      - type: CheckBox
+        name: biomarker_interaction
+      - type: CheckBox
+        name: sensitivity_analysis
+      - type: CheckBox
+        name: interim_monitoring
+      - type: CheckBox
+        name: progression_velocity
+      - type: CheckBox
+        name: clinical_significance
+      - type: CheckBox
+        name: regulatory_endpoints
+      - type: CheckBox
+        name: health_economic_outcomes
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: plot_theme
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: risk_tables
+      - type: CheckBox
+        name: median_survival_lines
+      - type: CheckBox
+        name: confidence_bands
+      - type: CheckBox
+        name: generate_report
+      - type: CheckBox
+        name: regulatory_tables
+      - type: CheckBox
+        name: consort_diagram

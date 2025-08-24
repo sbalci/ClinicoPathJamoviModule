@@ -1,0 +1,485 @@
+---
+name: advancedtrials
+title: Advanced Clinical Trial Methods
+menuGroup: SurvivalD
+menuSubgroup: Specialized Survival Methods
+menuTitle: Advanced Clinical Trials
+menuSubtitle: Group sequential designs, adaptive methods, and interim monitoring
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced clinical trial methodologies including group sequential designs, adaptive
+        trials, and interim monitoring. Provides sophisticated statistical methods for
+        non-inferiority trials, futility analysis, and early stopping rules. Implements
+        cutting-edge designs such as seamless Phase II/III, platform trials, and master
+        protocol studies. Designed for clinical trialists requiring state-of-the-art
+        methodology and regulatory compliance.
+    R:
+        dontrun: false
+        usage: |
+            data('clinical_trial')
+            
+            advancedtrials(
+                data = clinical_trial,
+                time_var = "survival_time",
+                event_var = "death",
+                treatment_var = "arm",
+                design_type = "group_sequential",
+                alpha_spending = "obrien_fleming",
+                number_of_looks = 3
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Core Variables
+    - name: time_var
+      title: Time to Event
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Time to primary endpoint (survival, progression, response)
+
+    - name: event_var
+      title: Event Indicator
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Event indicator (1=event, 0=censored)
+
+    - name: treatment_var
+      title: Treatment Assignment
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Treatment arm assignment (experimental vs control)
+
+    - name: biomarker_var
+      title: Biomarker Variable
+      type: Variable
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Biomarker for enrichment or stratification strategies
+
+    - name: interim_time_var
+      title: Interim Analysis Time
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Calendar time of interim analysis
+
+    - name: stratification_vars
+      title: Stratification Variables
+      type: Variables
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Variables for stratified randomization
+
+    # Advanced Trial Design
+    - name: design_type
+      title: Trial Design Type
+      type: List
+      options:
+          - name: "group_sequential"
+            title: "Group Sequential Design"
+          - name: "adaptive_design"
+            title: "Adaptive Design"
+          - name: "seamless_phase23"
+            title: "Seamless Phase II/III"
+          - name: "platform_trial"
+            title: "Platform Trial"
+          - name: "basket_trial"
+            title: "Basket Trial"
+          - name: "umbrella_trial"
+            title: "Umbrella Trial"
+          - name: "master_protocol"
+            title: "Master Protocol"
+          - name: "biomarker_driven"
+            title: "Biomarker-Driven Design"
+      default: "group_sequential"
+      description:
+          R: Advanced clinical trial design type
+
+    - name: primary_endpoint
+      title: Primary Endpoint
+      type: List
+      options:
+          - name: "overall_survival"
+            title: "Overall Survival (OS)"
+          - name: "progression_free_survival"
+            title: "Progression-Free Survival (PFS)"
+          - name: "disease_free_survival"
+            title: "Disease-Free Survival (DFS)"
+          - name: "objective_response_rate"
+            title: "Objective Response Rate (ORR)"
+          - name: "pathologic_complete_response"
+            title: "Pathologic Complete Response (pCR)"
+          - name: "event_free_survival"
+            title: "Event-Free Survival (EFS)"
+      default: "overall_survival"
+      description:
+          R: Primary efficacy endpoint
+
+    - name: statistical_test
+      title: Primary Statistical Test
+      type: List
+      options:
+          - name: "log_rank"
+            title: "Log-rank Test"
+          - name: "weighted_log_rank"
+            title: "Weighted Log-rank Test"
+          - name: "maxcombo"
+            title: "MaxCombo Test"
+          - name: "fleming_harrington"
+            title: "Fleming-Harrington Test"
+          - name: "cox_regression"
+            title: "Cox Regression"
+          - name: "rmst_test"
+            title: "RMST Comparison"
+      default: "log_rank"
+      description:
+          R: Statistical test for primary analysis
+
+    # Group Sequential Design
+    - name: alpha_spending
+      title: Alpha Spending Function
+      type: List
+      options:
+          - name: "obrien_fleming"
+            title: "O'Brien-Fleming"
+          - name: "pocock"
+            title: "Pocock"
+          - name: "lan_demets"
+            title: "Lan-DeMets"
+          - name: "hwang_shih_decani"
+            title: "Hwang-Shih-DeCani"
+          - name: "gamma_family"
+            title: "Gamma Family"
+      default: "obrien_fleming"
+      description:
+          R: Alpha spending function for efficacy boundaries
+
+    - name: beta_spending
+      title: Beta Spending Function
+      type: List
+      options:
+          - name: "obrien_fleming"
+            title: "O'Brien-Fleming"
+          - name: "pocock"
+            title: "Pocock"
+          - name: "symmetric"
+            title: "Symmetric with Alpha"
+          - name: "none"
+            title: "No Futility Boundary"
+      default: "obrien_fleming"
+      description:
+          R: Beta spending function for futility boundaries
+
+    - name: number_of_looks
+      title: Number of Interim Analyses
+      type: Number
+      default: 3
+      min: 1
+      max: 10
+      description:
+          R: Total number of planned interim looks
+
+    - name: information_fractions
+      title: Information Fractions
+      type: String
+      default: "0.5,0.75,1.0"
+      description:
+          R: Information fractions for each analysis (comma-separated)
+
+    - name: efficacy_boundaries
+      title: Efficacy Boundaries
+      type: String
+      default: "auto"
+      description:
+          R: Custom efficacy boundaries or 'auto' for spending function
+
+    # Adaptive Design Parameters
+    - name: adaptation_type
+      title: Type of Adaptation
+      type: List
+      options:
+          - name: "sample_size_reestimation"
+            title: "Sample Size Re-estimation"
+          - name: "population_enrichment"
+            title: "Population Enrichment"
+          - name: "treatment_selection"
+            title: "Treatment Selection"
+          - name: "dose_escalation"
+            title: "Dose Escalation"
+          - name: "endpoint_selection"
+            title: "Endpoint Selection"
+          - name: "biomarker_cutoff"
+            title: "Biomarker Cutoff Selection"
+      default: "sample_size_reestimation"
+      description:
+          R: Type of mid-trial adaptation
+
+    - name: adaptation_timing
+      title: Adaptation Timing (% events)
+      type: Number
+      default: 50
+      min: 10
+      max: 90
+      description:
+          R: Percentage of planned events for adaptation decision
+
+    - name: conditional_power_threshold
+      title: Conditional Power Threshold
+      type: Number
+      default: 0.3
+      min: 0.1
+      max: 0.8
+      description:
+          R: Threshold for sample size re-estimation
+
+    # Non-Inferiority Specific
+    - name: ni_margin
+      title: Non-Inferiority Margin
+      type: Number
+      default: 1.25
+      min: 1.0
+      max: 2.0
+      description:
+          R: Non-inferiority margin (hazard ratio scale)
+
+    - name: ni_margin_type
+      title: NI Margin Scale
+      type: List
+      options:
+          - name: "hazard_ratio"
+            title: "Hazard Ratio"
+          - name: "risk_difference"
+            title: "Risk Difference (%)"
+          - name: "survival_difference"
+            title: "Survival Difference (%)"
+      default: "hazard_ratio"
+      description:
+          R: Scale for non-inferiority margin
+
+    # Statistical Parameters
+    - name: overall_alpha
+      title: Overall Type I Error
+      type: Number
+      default: 0.025
+      min: 0.005
+      max: 0.05
+      description:
+          R: One-sided Type I error rate
+
+    - name: overall_power
+      title: Overall Power
+      type: Number
+      default: 0.80
+      min: 0.70
+      max: 0.95
+      description:
+          R: Overall study power
+
+    - name: expected_hr
+      title: Expected Hazard Ratio
+      type: Number
+      default: 0.75
+      min: 0.1
+      max: 2.0
+      description:
+          R: Expected treatment effect (hazard ratio)
+
+    - name: accrual_rate
+      title: Accrual Rate (pts/month)
+      type: Number
+      default: 25
+      min: 1
+      max: 1000
+      description:
+          R: Expected patient accrual rate
+
+    - name: dropout_rate
+      title: Annual Dropout Rate
+      type: Number
+      default: 0.05
+      min: 0.0
+      max: 0.5
+      description:
+          R: Annual patient dropout rate
+
+    # Platform/Master Protocol
+    - name: number_of_arms
+      title: Number of Treatment Arms
+      type: Number
+      default: 2
+      min: 2
+      max: 10
+      description:
+          R: Total number of treatment arms
+
+    - name: control_arm_sharing
+      title: Control Arm Sharing
+      type: Bool
+      default: true
+      description:
+          R: Share control arm across comparisons
+
+    - name: interim_arm_addition
+      title: Interim Arm Addition
+      type: Bool
+      default: false
+      description:
+          R: Allow adding arms during trial
+
+    - name: interim_arm_dropping
+      title: Interim Arm Dropping
+      type: Bool
+      default: false
+      description:
+          R: Allow dropping arms for futility
+
+    # Biomarker-Driven Design
+    - name: biomarker_strategy
+      title: Biomarker Strategy
+      type: List
+      options:
+          - name: "all_comers"
+            title: "All-Comers Design"
+          - name: "enrichment"
+            title: "Enrichment Design"
+          - name: "stratified"
+            title: "Stratified Design"
+          - name: "adaptive_enrichment"
+            title: "Adaptive Enrichment"
+      default: "all_comers"
+      description:
+          R: Biomarker-driven design strategy
+
+    - name: biomarker_prevalence
+      title: Biomarker Prevalence
+      type: Number
+      default: 0.3
+      min: 0.05
+      max: 0.95
+      description:
+          R: Prevalence of positive biomarker
+
+    # Futility and Monitoring
+    - name: futility_analysis
+      title: Futility Analysis
+      type: Bool
+      default: true
+      description:
+          R: Include formal futility testing
+
+    - name: stochastic_curtailment
+      title: Stochastic Curtailment
+      type: Bool
+      default: false
+      description:
+          R: Use stochastic curtailment approach
+
+    - name: predictive_power_threshold
+      title: Predictive Power Threshold
+      type: Number
+      default: 0.1
+      min: 0.05
+      max: 0.3
+      description:
+          R: Threshold for futility based on predictive power
+
+    # Analysis Options
+    - name: interim_monitoring_plan
+      title: Interim Monitoring Plan
+      type: Bool
+      default: true
+      description:
+          R: Generate detailed interim monitoring guidelines
+
+    - name: operating_characteristics
+      title: Operating Characteristics
+      type: Bool
+      default: true
+      description:
+          R: Calculate design operating characteristics via simulation
+
+    - name: boundary_plots
+      title: Boundary Plots
+      type: Bool
+      default: true
+      description:
+          R: Generate efficacy and futility boundary plots
+
+    - name: conditional_power_analysis
+      title: Conditional Power Analysis
+      type: Bool
+      default: false
+      description:
+          R: Calculate conditional power at interim analyses
+
+    - name: predictive_power_analysis
+      title: Predictive Power Analysis
+      type: Bool
+      default: false
+      description:
+          R: Calculate predictive power for study completion
+
+    - name: bias_adjustment
+      title: Bias Adjustment
+      type: Bool
+      default: false
+      description:
+          R: Apply bias adjustment methods for adaptive designs
+
+    - name: multiplicity_adjustment
+      title: Multiplicity Adjustment
+      type: Bool
+      default: false
+      description:
+          R: Apply multiplicity adjustment for multiple arms/endpoints
+
+    # Simulation Parameters
+    - name: simulation_runs
+      title: Simulation Runs
+      type: Number
+      default: 10000
+      min: 1000
+      max: 100000
+      description:
+          R: Number of simulations for operating characteristics
+
+    - name: seed_value
+      title: Random Seed
+      type: Number
+      default: 12345
+      min: 1
+      max: 999999
+      description:
+          R: Random seed for reproducible simulations

@@ -1,0 +1,413 @@
+---
+name: progressionsurvival
+title: Progression-Free Survival Analysis
+menuGroup: SurvivalD
+menuSubgroup: Specialized Survival Methods
+menuTitle: Progression-Free Survival
+menuSubtitle: Comprehensive PFS analysis for oncology research
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Specialized progression-free survival (PFS) analysis designed for oncology research.
+        Provides comprehensive analysis of time-to-progression endpoints with competing risks
+        considerations, landmark analysis, and treatment effect estimation. Includes analysis
+        of progression patterns, censoring mechanisms, and clinical interpretation specific
+        to cancer clinical trials and observational studies.
+    R:
+        dontrun: false
+        usage: |
+            data('cancer_trial')
+            
+            progressionsurvival(
+                data = cancer_trial,
+                time_var = "pfs_time",
+                progression_var = "progression",
+                death_var = "death",
+                treatment_var = "treatment",
+                stratification_vars = c("stage", "histology")
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Core Variables
+    - name: time_var
+      title: Time to Event
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Time to progression or censoring (PFS time)
+
+    - name: progression_var
+      title: Progression Indicator
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Progression indicator (1=progression, 0=censored)
+
+    - name: death_var
+      title: Death Indicator
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Death indicator (1=death, 0=alive) for competing risks analysis
+
+    - name: treatment_var
+      title: Treatment Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Treatment or intervention variable
+
+    - name: stratification_vars
+      title: Stratification Variables
+      type: Variables
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      description:
+          R: Variables for stratified analysis (e.g., stage, histology, biomarkers)
+
+    - name: patient_id
+      title: Patient ID
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - id
+      description:
+          R: Patient identifier for longitudinal data
+
+    - name: baseline_vars
+      title: Baseline Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: Baseline covariates for adjusted analysis
+
+    # Analysis Configuration
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+          - name: "standard_pfs"
+            title: "Standard PFS Analysis"
+          - name: "competing_risks"
+            title: "Competing Risks (Progression vs Death)"
+          - name: "landmark_analysis"
+            title: "Landmark Analysis"
+          - name: "treatment_switching"
+            title: "Treatment Switching Adjustment"
+          - name: "biomarker_subgroup"
+            title: "Biomarker Subgroup Analysis"
+      default: "standard_pfs"
+      description:
+          R: Type of progression-free survival analysis
+
+    - name: progression_definition
+      title: Progression Definition
+      type: List
+      options:
+          - name: "recist"
+            title: "RECIST Criteria"
+          - name: "irrecist"
+            title: "iRECIST (Immunotherapy)"
+          - name: "clinical"
+            title: "Clinical Progression"
+          - name: "biochemical"
+            title: "Biochemical Progression"
+          - name: "radiological"
+            title: "Radiological Progression"
+          - name: "composite"
+            title: "Composite Endpoint"
+      default: "recist"
+      description:
+          R: Definition of disease progression used
+
+    - name: censoring_mechanism
+      title: Censoring Mechanism
+      type: List
+      options:
+          - name: "administrative"
+            title: "Administrative Censoring"
+          - name: "lost_followup"
+            title: "Lost to Follow-up"
+          - name: "informative"
+            title: "Potentially Informative"
+          - name: "competing_event"
+            title: "Competing Event"
+      default: "administrative"
+      description:
+          R: Primary censoring mechanism in the data
+
+    # Statistical Methods
+    - name: survival_method
+      title: Survival Method
+      type: List
+      options:
+          - name: "kaplan_meier"
+            title: "Kaplan-Meier"
+          - name: "fleming_harrington"
+            title: "Fleming-Harrington"
+          - name: "nelson_aalen"
+            title: "Nelson-Aalen"
+          - name: "parametric"
+            title: "Parametric Models"
+      default: "kaplan_meier"
+      description:
+          R: Method for survival function estimation
+
+    - name: comparison_test
+      title: Comparison Test
+      type: List
+      options:
+          - name: "logrank"
+            title: "Log-rank Test"
+          - name: "weighted_logrank"
+            title: "Weighted Log-rank"
+          - name: "fleming_harrington_test"
+            title: "Fleming-Harrington Test"
+          - name: "maxcombo"
+            title: "MaxCombo Test"
+          - name: "rmst"
+            title: "Restricted Mean Survival Time"
+      default: "logrank"
+      description:
+          R: Statistical test for group comparisons
+
+    - name: regression_model
+      title: Regression Model
+      type: List
+      options:
+          - name: "cox_ph"
+            title: "Cox Proportional Hazards"
+          - name: "aft_weibull"
+            title: "AFT Weibull"
+          - name: "aft_lognormal"
+            title: "AFT Log-normal"
+          - name: "fine_gray"
+            title: "Fine-Gray (Competing Risks)"
+          - name: "cause_specific"
+            title: "Cause-Specific Hazards"
+      default: "cox_ph"
+      description:
+          R: Regression model for treatment effect estimation
+
+    # Advanced Options
+    - name: landmark_times
+      title: Landmark Time Points
+      type: String
+      default: "6,12,18,24"
+      description:
+          R: Landmark time points in months (comma-separated)
+
+    - name: rmst_tau
+      title: RMST Tau (Restriction Time)
+      type: Number
+      default: 24
+      min: 1
+      description:
+          R: Restriction time for RMST analysis (months)
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: Confidence level for intervals
+
+    - name: alpha_spending
+      title: Alpha Spending Function
+      type: List
+      options:
+          - name: "obrien_fleming"
+            title: "O'Brien-Fleming"
+          - name: "pocock"
+            title: "Pocock"
+          - name: "lan_demets"
+            title: "Lan-DeMets"
+          - name: "none"
+            title: "No Adjustment"
+      default: "obrien_fleming"
+      description:
+          R: Alpha spending function for interim analyses
+
+    # Analysis Options
+    - name: kaplan_meier_curves
+      title: Kaplan-Meier Curves
+      type: Bool
+      default: true
+      description:
+          R: Generate Kaplan-Meier survival curves
+
+    - name: cumulative_incidence
+      title: Cumulative Incidence Functions
+      type: Bool
+      default: false
+      description:
+          R: Calculate cumulative incidence functions (competing risks)
+
+    - name: landmark_analysis_plot
+      title: Landmark Analysis Plots
+      type: Bool
+      default: false
+      description:
+          R: Generate landmark analysis visualizations
+
+    - name: progression_patterns
+      title: Progression Pattern Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze patterns and timing of disease progression
+
+    - name: treatment_effect_estimation
+      title: Treatment Effect Estimation
+      type: Bool
+      default: true
+      description:
+          R: Estimate treatment effects with confidence intervals
+
+    - name: subgroup_analysis
+      title: Subgroup Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform pre-specified subgroup analyses
+
+    - name: biomarker_interaction
+      title: Biomarker Interaction Analysis
+      type: Bool
+      default: false
+      description:
+          R: Test for biomarker-treatment interactions
+
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform sensitivity analyses for assumptions
+
+    - name: interim_monitoring
+      title: Interim Monitoring Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analysis for interim monitoring and early stopping
+
+    - name: progression_velocity
+      title: Progression Velocity Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze velocity and acceleration of disease progression
+
+    # Clinical Interpretation
+    - name: clinical_significance
+      title: Clinical Significance Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess clinical significance of findings
+
+    - name: regulatory_endpoints
+      title: Regulatory Endpoint Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analysis aligned with regulatory requirements (FDA/EMA)
+
+    - name: health_economic_outcomes
+      title: Health Economic Outcomes
+      type: Bool
+      default: false
+      description:
+          R: Calculate health economic outcome measures
+
+    # Visualization Options
+    - name: plot_theme
+      title: Plot Theme
+      type: List
+      options:
+          - name: "publication"
+            title: "Publication Ready"
+          - name: "clinical"
+            title: "Clinical Report"
+          - name: "presentation"
+            title: "Presentation"
+      default: "publication"
+      description:
+          R: Visual theme for plots
+
+    - name: risk_tables
+      title: Risk Tables
+      type: Bool
+      default: true
+      description:
+          R: Include risk tables below survival curves
+
+    - name: median_survival_lines
+      title: Median Survival Lines
+      type: Bool
+      default: true
+      description:
+          R: Add median survival reference lines
+
+    - name: confidence_bands
+      title: Confidence Bands
+      type: Bool
+      default: true
+      description:
+          R: Show confidence bands on survival curves
+
+    # Export and Reporting
+    - name: generate_report
+      title: Generate Clinical Report
+      type: Bool
+      default: false
+      description:
+          R: Generate comprehensive clinical analysis report
+
+    - name: regulatory_tables
+      title: Regulatory Tables
+      type: Bool
+      default: false
+      description:
+          R: Generate regulatory submission-ready tables
+
+    - name: consort_diagram
+      title: CONSORT Flow Diagram
+      type: Bool
+      default: false
+      description:
+          R: Generate CONSORT-style patient flow diagram

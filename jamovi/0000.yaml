@@ -3948,6 +3948,76 @@ analyses:
     menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Tumor Growth Models
+  - title: Progression-Free Survival Analysis
+    name: progressionsurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Specialized Survival Methods
+    menuTitle: Progression-Free Survival
+    menuSubtitle: Comprehensive PFS analysis for oncology research
+    description: >
+      Specialized progression-free survival (PFS) analysis designed for oncology
+      research.
+
+      Provides comprehensive analysis of time-to-progression endpoints with
+      competing risks
+
+      considerations, landmark analysis, and treatment effect estimation.
+      Includes analysis
+
+      of progression patterns, censoring mechanisms, and clinical interpretation
+      specific
+
+      to cancer clinical trials and observational studies.
+  - title: Epidemiological Survival Analysis
+    name: epidemiosurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Specialized Survival Methods
+    menuTitle: Epidemiological Survival
+    menuSubtitle: Population-based survival analysis with epidemiological methods
+    description: >
+      Epidemiological survival analysis for population-based studies and
+      observational research.
+
+      Provides specialized methods for cohort survival analysis, case-cohort
+      designs, and 
+
+      population attributable risk calculation. Includes adjustment for sampling
+      schemes,
+
+      competing mortality, and population stratification. Designed for
+      epidemiological
+
+      research including cancer registry studies, cohort studies, and population
+      surveillance.
+  - title: Advanced Clinical Trial Methods
+    name: advancedtrials
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Specialized Survival Methods
+    menuTitle: Advanced Clinical Trials
+    menuSubtitle: Group sequential designs, adaptive methods, and interim monitoring
+    description: >
+      Advanced clinical trial methodologies including group sequential designs,
+      adaptive
+
+      trials, and interim monitoring. Provides sophisticated statistical methods
+      for
+
+      non-inferiority trials, futility analysis, and early stopping rules.
+      Implements
+
+      cutting-edge designs such as seamless Phase II/III, platform trials, and
+      master
+
+      protocol studies. Designed for clinical trialists requiring
+      state-of-the-art
+
+      methodology and regulatory compliance.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

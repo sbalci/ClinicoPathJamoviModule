@@ -1,0 +1,402 @@
+---
+name: epidemiosurvival
+title: Epidemiological Survival Analysis
+menuGroup: SurvivalD
+menuSubgroup: Specialized Survival Methods
+menuTitle: Epidemiological Survival
+menuSubtitle: Population-based survival analysis with epidemiological methods
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Epidemiological survival analysis for population-based studies and observational research.
+        Provides specialized methods for cohort survival analysis, case-cohort designs, and 
+        population attributable risk calculation. Includes adjustment for sampling schemes,
+        competing mortality, and population stratification. Designed for epidemiological
+        research including cancer registry studies, cohort studies, and population surveillance.
+    R:
+        dontrun: false
+        usage: |
+            data('population_cohort')
+            
+            epidemiosurvival(
+                data = population_cohort,
+                time_var = "followup_time",
+                event_var = "death",
+                exposure_var = "smoking_status",
+                age_var = "age_at_entry",
+                calendar_time = "entry_year",
+                population_weights = "sampling_weight"
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    # Core Variables
+    - name: time_var
+      title: Follow-up Time
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Follow-up time (years, months, or days)
+
+    - name: event_var
+      title: Event Indicator
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Event indicator (1=event, 0=censored)
+
+    - name: exposure_var
+      title: Primary Exposure
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Primary exposure of interest for epidemiological analysis
+
+    - name: age_var
+      title: Age at Entry
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Age at study entry or baseline (years)
+
+    - name: calendar_time
+      title: Calendar Time
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Calendar year or period of study entry
+
+    - name: population_weights
+      title: Population Weights
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: Sampling or population weights for complex survey designs
+
+    - name: subcohort_indicator
+      title: Subcohort Indicator
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Subcohort membership indicator for case-cohort designs
+
+    - name: stratification_vars
+      title: Stratification Variables
+      type: Variables
+      suggested:
+          - nominal
+          - continuous
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: Variables for stratified analysis (e.g., sex, region, socioeconomic status)
+
+    - name: competing_events
+      title: Competing Events
+      type: Variables
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: Competing event indicators for competing mortality analysis
+
+    # Analysis Configuration
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+          - name: "cohort_survival"
+            title: "Cohort Survival Analysis"
+          - name: "case_cohort"
+            title: "Case-Cohort Design"
+          - name: "population_attributable_risk"
+            title: "Population Attributable Risk"
+          - name: "competing_mortality"
+            title: "Competing Mortality Analysis"
+          - name: "age_period_cohort"
+            title: "Age-Period-Cohort Analysis"
+      default: "cohort_survival"
+      description:
+          R: Type of epidemiological survival analysis
+
+    - name: cohort_design
+      title: Cohort Study Design
+      type: List
+      options:
+          - name: "prospective"
+            title: "Prospective Cohort"
+          - name: "retrospective"
+            title: "Retrospective Cohort"
+          - name: "ambidirectional"
+            title: "Ambidirectional Cohort"
+          - name: "registry_based"
+            title: "Registry-Based Cohort"
+      default: "prospective"
+      description:
+          R: Type of cohort study design
+
+    - name: sampling_method
+      title: Sampling Method
+      type: List
+      options:
+          - name: "simple_random"
+            title: "Simple Random Sampling"
+          - name: "stratified"
+            title: "Stratified Sampling"
+          - name: "cluster"
+            title: "Cluster Sampling"
+          - name: "multistage"
+            title: "Multi-stage Sampling"
+          - name: "case_cohort"
+            title: "Case-Cohort Sampling"
+      default: "simple_random"
+      description:
+          R: Sampling method used in the study design
+
+    # Statistical Methods
+    - name: survival_method
+      title: Survival Estimation Method
+      type: List
+      options:
+          - name: "kaplan_meier"
+            title: "Kaplan-Meier"
+          - name: "life_table"
+            title: "Life Table Method"
+          - name: "weighted_survival"
+            title: "Weighted Survival (Complex Surveys)"
+          - name: "poisson_regression"
+            title: "Poisson Regression (Person-Years)"
+      default: "kaplan_meier"
+      description:
+          R: Method for survival function estimation
+
+    - name: regression_method
+      title: Regression Method
+      type: List
+      options:
+          - name: "cox_robust"
+            title: "Robust Cox Regression"
+          - name: "weighted_cox"
+            title: "Weighted Cox Regression"
+          - name: "poisson_glm"
+            title: "Poisson GLM"
+          - name: "case_cohort_cox"
+            title: "Case-Cohort Cox Regression"
+      default: "cox_robust"
+      description:
+          R: Regression method for hazard estimation
+
+    # Age and Time Adjustments
+    - name: age_standardization
+      title: Age Standardization
+      type: List
+      options:
+          - name: "none"
+            title: "None"
+          - name: "direct"
+            title: "Direct Standardization"
+          - name: "indirect"
+            title: "Indirect Standardization"
+          - name: "world_standard"
+            title: "World Standard Population"
+          - name: "segi_standard"
+            title: "Segi World Standard"
+      default: "none"
+      description:
+          R: Method for age standardization
+
+    - name: reference_population
+      title: Reference Population
+      type: String
+      default: "study_population"
+      description:
+          R: Reference population for standardization (study_population, external, or custom)
+
+    - name: age_groups
+      title: Age Groups
+      type: String
+      default: "0-49,50-59,60-69,70+"
+      description:
+          R: Age group categories for stratified analysis (comma-separated)
+
+    - name: calendar_periods
+      title: Calendar Periods
+      type: String
+      default: "1990-1999,2000-2009,2010-2019"
+      description:
+          R: Calendar period categories for period analysis
+
+    # Case-Cohort Options
+    - name: subcohort_size
+      title: Subcohort Size
+      type: Number
+      default: 1000
+      min: 50
+      description:
+          R: Size of subcohort for case-cohort analysis
+
+    - name: case_cohort_method
+      title: Case-Cohort Method
+      type: List
+      options:
+          - name: "prentice"
+            title: "Prentice Method"
+          - name: "self_prentice"
+            title: "Self & Prentice"
+          - name: "lin_ying"
+            title: "Lin & Ying"
+          - name: "barlow"
+            title: "Barlow Method"
+      default: "prentice"
+      description:
+          R: Estimation method for case-cohort designs
+
+    # Population Attributable Risk Options
+    - name: par_method
+      title: PAR Calculation Method
+      type: List
+      options:
+          - name: "levin"
+            title: "Levin's Formula"
+          - name: "adjusted"
+            title: "Adjusted PAR"
+          - name: "sequential"
+            title: "Sequential PAR"
+          - name: "miettinen"
+            title: "Miettinen's Method"
+      default: "levin"
+      description:
+          R: Method for population attributable risk calculation
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: Confidence level for intervals
+
+    # Analysis Options
+    - name: cohort_life_tables
+      title: Cohort Life Tables
+      type: Bool
+      default: true
+      description:
+          R: Generate cohort life tables
+
+    - name: competing_risks_analysis
+      title: Competing Risks Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze competing mortality risks
+
+    - name: age_period_cohort_effects
+      title: Age-Period-Cohort Effects
+      type: Bool
+      default: false
+      description:
+          R: Estimate age, period, and cohort effects
+
+    - name: population_impact_measures
+      title: Population Impact Measures
+      type: Bool
+      default: false
+      description:
+          R: Calculate population impact measures (PAR, PAF, NNT)
+
+    - name: survival_disparities
+      title: Survival Disparities Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze survival disparities by demographic factors
+
+    - name: trend_analysis
+      title: Temporal Trend Analysis
+      type: Bool
+      default: false
+      description:
+          R: Analyze temporal trends in survival
+
+    - name: excess_mortality
+      title: Excess Mortality Analysis
+      type: Bool
+      default: false
+      description:
+          R: Calculate excess mortality compared to general population
+
+    - name: standardized_mortality_ratio
+      title: Standardized Mortality Ratio
+      type: Bool
+      default: false
+      description:
+          R: Calculate SMR with confidence intervals
+
+    # Visualization Options
+    - name: survival_curves
+      title: Survival Curves
+      type: Bool
+      default: true
+      description:
+          R: Generate survival curves by exposure groups
+
+    - name: cumulative_incidence_plots
+      title: Cumulative Incidence Plots
+      type: Bool
+      default: false
+      description:
+          R: Plot cumulative incidence functions
+
+    - name: age_specific_rates
+      title: Age-Specific Rate Plots
+      type: Bool
+      default: false
+      description:
+          R: Plot age-specific mortality/incidence rates
+
+    - name: trend_plots
+      title: Temporal Trend Plots
+      type: Bool
+      default: false
+      description:
+          R: Plot survival trends over calendar time
+
+    - name: forest_plots
+      title: Forest Plots
+      type: Bool
+      default: false
+      description:
+          R: Generate forest plots for subgroup analyses
