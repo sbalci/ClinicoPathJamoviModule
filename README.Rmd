@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 **Methods:** The ClinicoPathJamoviModule integrates a robust and comprehensive suite of analytical tools designed to address the typical workflow of clinicopathological data analysis. The module is built upon the R statistical language and provides a graphical user interface within jamovi for a wide range of functions. Key features include:
 
 *   **Descriptive Statistics:** Generation of publication-ready summary tables (`Table 1`).
-*   **Survival Analysis:** Tools for Kaplan-Meier estimation, log-rank tests, and Cox proportional hazards models for single, comparison, and multiple variable analyses.
+*   **Survival Analysis:** Comprehensive survival analysis framework including Kaplan-Meier estimation, log-rank tests, Cox proportional hazards models, advanced pseudo-observation methods, restricted mean survival time (RMST) regression, dynamic survival prediction, conditional survival estimation, and high-dimensional survival analysis (PCA-Cox, PLS-Cox).
 *   **Diagnostic Accuracy:** Evaluation of diagnostic tests using Receiver Operating Characteristic (ROC) curve analysis, decision curve analysis (DCA), and screening test calculators.
 *   **Agreement and Reliability:** Assessment of inter-rater reliability using statistics such as Cohen's Kappa and the Intraclass Correlation Coefficient (ICC).
 *   **Laboratory Quality Control:** ISO 15189 compliant statistical process control with Shewhart, CUSUM, and EWMA control charts, Six Sigma metrics, method validation protocols, reference interval establishment, and measurement uncertainty estimation.

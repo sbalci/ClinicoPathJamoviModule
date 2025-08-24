@@ -1,0 +1,205 @@
+name: principalcox
+title: Principal Component Cox Models
+jrs: '1.1'
+items:
+    - name: todo
+      title: 'Analysis Complete'
+      type: Html
+      visible: false
+
+    - name: pcaSummary
+      title: Principal Component Analysis Summary
+      type: Table
+      visible: (show_pca_summary)
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: eigenvalue
+          title: Eigenvalue
+          type: number
+        - name: variance_explained
+          title: Variance Explained
+          type: number
+        - name: cumulative_variance
+          title: Cumulative Variance
+          type: number
+        - name: proportion
+          title: Proportion
+          type: number
+
+    - name: componentLoadings
+      title: Principal Component Loadings
+      type: Table
+      visible: (show_component_loadings)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: component
+          title: Component
+          type: text
+        - name: loading
+          title: Loading
+          type: number
+        - name: abs_loading
+          title: Loading
+          type: number
+        - name: contribution
+          title: Contribution
+          type: number
+
+    - name: coxResults
+      title: Cox Regression Results
+      type: Table
+      visible: (show_cox_results)
+      columns:
+        - name: term
+          title: Term
+          type: text
+        - name: coefficient
+          title: Coefficient
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: z_value
+          title: z
+          type: number
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: hazard_ratio
+          title: Hazard Ratio
+          type: number
+        - name: hr_lower
+          title: HR Lower
+          type: number
+        - name: hr_upper
+          title: HR Upper
+          type: number
+
+    - name: variableImportance
+      title: Variable Importance in Components
+      type: Table
+      visible: (show_variable_importance)
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: overall_contribution
+          title: Overall Contribution
+          type: number
+        - name: max_loading
+          title: Max |Loading|
+          type: number
+        - name: primary_component
+          title: Primary Component
+          type: text
+        - name: secondary_component
+          title: Secondary Component
+          type: text
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (show_model_comparison)
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: n_components
+          title: N Components
+          type: integer
+        - name: c_index
+          title: C-Index
+          type: number
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: log_likelihood
+          title: Log-Likelihood
+          type: number
+
+    - name: componentSelection
+      title: Component Selection Results
+      type: Table
+      columns:
+        - name: method
+          title: Selection Method
+          type: text
+        - name: selected_components
+          title: Selected Components
+          type: integer
+        - name: total_variance
+          title: Total Variance Explained
+          type: number
+        - name: selection_criterion
+          title: Selection Criterion
+          type: number
+
+    - name: scalingSummary
+      title: Scaling Summary
+      type: Table
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: original_mean
+          title: Original Mean
+          type: number
+        - name: original_sd
+          title: Original SD
+          type: number
+        - name: scaled_mean
+          title: Scaled Mean
+          type: number
+        - name: scaled_sd
+          title: Scaled SD
+          type: number
+
+    - name: methodologyExplanation
+      title: Methodology Explanation
+      type: Html
+      visible: (showExplanations)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: screePlot
+      title: Scree Plot
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (scree_plot)
+
+    - name: biplot
+      title: PCA Biplot
+      type: Image
+      width: 600
+      height: 500
+      requiresData: true
+      visible: (biplot)
+
+    - name: loadingPlot
+      title: Component Loadings
+      type: Image
+      width: 700
+      height: 400
+      requiresData: true
+      visible: (loading_plot)
+
+    - name: survivalPlot
+      title: Survival Curves by Component Scores
+      type: Image
+      width: 700
+      height: 500
+      requiresData: true
+      visible: (survival_plot)

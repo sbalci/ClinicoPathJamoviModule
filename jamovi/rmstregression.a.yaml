@@ -1,0 +1,261 @@
+---
+name: rmstregression
+title: Restricted Mean Survival Time Regression
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPathD
+menuSubgroup: Survival Analysis
+menuTitle: RMST Regression
+menuSubtitle: Regression modeling of restricted mean survival time
+
+description:
+    main: >
+        Restricted Mean Survival Time (RMST) regression analysis provides an alternative to hazard-based
+        models by directly modeling the mean survival time up to a specific time point (tau). This approach
+        offers clinically interpretable results and does not require proportional hazards assumptions.
+        RMST represents the area under the survival curve up to time tau and can be compared between
+        groups or modeled with covariates using regression techniques.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            rmstregression(
+                elapsedtime = "time_to_event",
+                outcome = "event_status",
+                explanatory = c("age", "treatment", "stage"),
+                tau = 60,
+                analysis_type = "comparison"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time to event or censoring
+
+    - name: outcome
+      title: Event Indicator
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Event indicator (1 = event, 0 = censored)
+
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Explanatory variables for RMST regression modeling
+
+    - name: group_var
+      title: Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Primary grouping variable for RMST comparison (optional)
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level indicating event occurrence
+
+    - name: tau
+      title: Restriction Time (τ)
+      type: Number
+      default: 60
+      min: 1
+      description:
+          R: >
+            Time point for restriction in RMST calculation
+
+    - name: tau_method
+      title: Tau Selection Method
+      type: List
+      options:
+        - fixed
+        - percentile
+        - adaptive
+      default: fixed
+      description:
+          R: >
+            Method for selecting restriction time tau
+
+    - name: tau_percentile
+      title: Tau Percentile
+      type: Number
+      default: 0.8
+      min: 0.1
+      max: 0.95
+      description:
+          R: >
+            Percentile of follow-up time for tau selection (when using percentile method)
+
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+        - regression
+        - comparison
+        - combined
+      default: regression
+      description:
+          R: >
+            Type of RMST analysis to perform
+
+    - name: regression_method
+      title: Regression Method
+      type: List
+      options:
+        - pseudo_observation
+        - direct_modeling
+        - wei_lin_ying
+      default: pseudo_observation
+      description:
+          R: >
+            Method for RMST regression analysis
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description:
+          R: >
+            Confidence level for confidence intervals
+
+    - name: bootstrap_se
+      title: Bootstrap Standard Errors
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use bootstrap method for standard error estimation
+
+    - name: bootstrap_reps
+      title: Bootstrap Replications
+      type: Number
+      default: 1000
+      min: 100
+      max: 5000
+      description:
+          R: >
+            Number of bootstrap replications for standard errors
+
+    - name: adjustment_method
+      title: Multiple Comparison Adjustment
+      type: List
+      options:
+        - none
+        - bonferroni
+        - holm
+        - benjamini_hochberg
+      default: none
+      description:
+          R: >
+            Method for multiple comparison adjustment
+
+    - name: show_rmst_table
+      title: Show RMST Summary Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display RMST summary statistics by group
+
+    - name: show_difference_table
+      title: Show RMST Differences
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display pairwise RMST differences between groups
+
+    - name: show_regression_table
+      title: Show Regression Results
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display regression coefficient estimates
+
+    - name: show_model_diagnostics
+      title: Show Model Diagnostics
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display model diagnostic information
+
+    - name: rmst_plot
+      title: RMST Curves Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display RMST curves with confidence intervals
+
+    - name: difference_plot
+      title: RMST Difference Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display plot of RMST differences over time
+
+    - name: residual_plot
+      title: Residual Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display residual diagnostic plots for regression models
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show comprehensive analysis summaries
+
+    - name: showExplanations
+      title: Methodology Explanations
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed methodology explanations

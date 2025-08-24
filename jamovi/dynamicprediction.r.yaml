@@ -1,0 +1,234 @@
+name: dynamicprediction
+title: Dynamic Survival Prediction
+jrs: '1.1'
+items:
+    - name: todo
+      title: 'Analysis Complete'
+      type: Html
+      visible: false
+
+    - name: predictionSummary
+      title: Dynamic Prediction Summary
+      type: Table
+      visible: (show_prediction_table)
+      columns:
+        - name: subject_id
+          title: Subject ID
+          type: text
+        - name: prediction_time
+          title: Prediction Time
+          type: number
+        - name: survival_prob
+          title: Survival Probability
+          type: number
+        - name: risk_score
+          title: Risk Score
+          type: number
+        - name: lower_ci
+          title: Lower CI
+          type: number
+        - name: upper_ci
+          title: Upper CI
+          type: number
+        - name: risk_category
+          title: Risk Category
+          type: text
+
+    - name: accuracyMetrics
+      title: Prediction Accuracy Assessment
+      type: Table
+      visible: (show_accuracy_metrics)
+      columns:
+        - name: prediction_window
+          title: Prediction Window
+          type: number
+        - name: c_index
+          title: C-Index
+          type: number
+        - name: auc
+          title: AUC
+          type: number
+        - name: brier_score
+          title: Brier Score
+          type: number
+        - name: calibration_slope
+          title: Calibration Slope
+          type: number
+        - name: calibration_intercept
+          title: Calibration Intercept
+          type: number
+        - name: n_predictions
+          title: N Predictions
+          type: integer
+
+    - name: biomarkerEffects
+      title: Biomarker Effects on Survival
+      type: Table
+      visible: (show_biomarker_effects)
+      columns:
+        - name: biomarker
+          title: Biomarker
+          type: text
+        - name: association_type
+          title: Association Type
+          type: text
+        - name: coefficient
+          title: Coefficient
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: z_value
+          title: z
+          type: number
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: hazard_ratio
+          title: Hazard Ratio
+          type: number
+        - name: hr_lower
+          title: HR Lower
+          type: number
+        - name: hr_upper
+          title: HR Upper
+          type: number
+
+    - name: modelComparison
+      title: Dynamic Prediction Model Comparison
+      type: Table
+      visible: (show_model_comparison)
+      columns:
+        - name: method
+          title: Method
+          type: text
+        - name: c_index_overall
+          title: Overall C-Index
+          type: number
+        - name: auc_mean
+          title: Mean AUC
+          type: number
+        - name: brier_mean
+          title: Mean Brier Score
+          type: number
+        - name: computation_time
+          title: Computation Time (s)
+          type: number
+        - name: complexity_score
+          title: Model Complexity
+          type: number
+
+    - name: landmarkAnalysis
+      title: Landmark Analysis Results
+      type: Table
+      visible: (prediction_method:landmark)
+      columns:
+        - name: landmark_time
+          title: Landmark Time
+          type: number
+        - name: n_at_risk
+          title: N at Risk
+          type: integer
+        - name: n_events
+          title: N Events
+          type: integer
+        - name: model_c_index
+          title: Model C-Index
+          type: number
+        - name: prediction_accuracy
+          title: Prediction Accuracy
+          type: number
+
+    - name: jointModelResults
+      title: Joint Model Parameter Estimates
+      type: Table
+      visible: (prediction_method:joint_modeling)
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: component
+          title: Component
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: t_value
+          title: t
+          type: number
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: trajectoryParameters
+      title: Biomarker Trajectory Parameters
+      type: Table
+      columns:
+        - name: biomarker
+          title: Biomarker
+          type: text
+        - name: intercept
+          title: Intercept
+          type: number
+        - name: slope
+          title: Slope
+          type: number
+        - name: quadratic
+          title: Quadratic
+          type: number
+        - name: random_intercept_var
+          title: Rand. Intercept Var
+          type: number
+        - name: random_slope_var
+          title: Rand. Slope Var
+          type: number
+        - name: residual_var
+          title: Residual Var
+          type: number
+
+    - name: methodologyExplanation
+      title: Methodology Explanation
+      type: Html
+      visible: (showExplanations)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: predictionCurves
+      title: Dynamic Prediction Curves
+      type: Image
+      width: 700
+      height: 500
+      requiresData: true
+      visible: (prediction_curves)
+
+    - name: biomarkerTrajectory
+      title: Biomarker Trajectories
+      type: Image
+      width: 700
+      height: 400
+      requiresData: true
+      visible: (biomarker_trajectory)
+
+    - name: accuracyPlot
+      title: Prediction Accuracy Over Time
+      type: Image
+      width: 700
+      height: 400
+      requiresData: true
+      visible: (accuracy_plot)
+
+    - name: riskStratification
+      title: Risk Stratification
+      type: Image
+      width: 700
+      height: 400
+      requiresData: true
+      visible: (risk_stratification)

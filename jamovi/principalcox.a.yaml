@@ -1,0 +1,269 @@
+---
+name: principalcox
+title: Principal Component Cox Models
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPathD
+menuSubgroup: Survival Analysis
+menuTitle: Principal Component Cox
+menuSubtitle: Principal component analysis for Cox regression with high-dimensional data
+
+description:
+    main: >
+        Principal Component Cox models address the challenges of high-dimensional survival data
+        by using principal component analysis (PCA) to reduce dimensionality before fitting Cox
+        regression models. This approach is particularly useful when the number of covariates
+        is large relative to sample size, helping to avoid overfitting while retaining important
+        patterns in the data. The method supports various PCA approaches including standard PCA,
+        sparse PCA, and supervised PCA for survival data.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            principalcox(
+                elapsedtime = "time_to_event",
+                outcome = "event_status",
+                highdim_vars = c("gene1", "gene2", "gene3"),
+                n_components = 5,
+                pca_method = "standard"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time to event or censoring
+
+    - name: outcome
+      title: Event Indicator
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Event indicator (1 = event, 0 = censored)
+
+    - name: highdim_vars
+      title: High-Dimensional Variables
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            High-dimensional variables for principal component analysis
+
+    - name: clinical_vars
+      title: Clinical Variables
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Clinical variables to include alongside principal components
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level indicating event occurrence
+
+    - name: pca_method
+      title: PCA Method
+      type: List
+      options:
+        - standard
+        - sparse
+        - supervised
+        - kernel
+      default: standard
+      description:
+          R: >
+            Method for principal component analysis
+
+    - name: n_components
+      title: Number of Components
+      type: Number
+      default: 5
+      min: 1
+      max: 50
+      description:
+          R: >
+            Number of principal components to retain
+
+    - name: variance_threshold
+      title: Variance Threshold
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.99
+      description:
+          R: >
+            Cumulative variance threshold for automatic component selection
+
+    - name: component_selection
+      title: Component Selection Method
+      type: List
+      options:
+        - fixed_number
+        - variance_threshold
+        - cross_validation
+        - scree_plot
+      default: fixed_number
+      description:
+          R: >
+            Method for selecting the number of components
+
+    - name: scaling_method
+      title: Scaling Method
+      type: List
+      options:
+        - standardize
+        - normalize
+        - robust
+        - none
+      default: standardize
+      description:
+          R: >
+            Method for scaling variables before PCA
+
+    - name: sparse_parameter
+      title: Sparsity Parameter
+      type: Number
+      default: 0.1
+      min: 0.01
+      max: 1.0
+      description:
+          R: >
+            Sparsity parameter for sparse PCA (proportion of non-zero loadings)
+
+    - name: cross_validation
+      title: Cross-Validation Folds
+      type: Number
+      default: 5
+      min: 3
+      max: 10
+      description:
+          R: >
+            Number of folds for cross-validation component selection
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description:
+          R: >
+            Confidence level for confidence intervals
+
+    - name: show_pca_summary
+      title: Show PCA Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display PCA summary statistics
+
+    - name: show_component_loadings
+      title: Show Component Loadings
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display principal component loadings
+
+    - name: show_cox_results
+      title: Show Cox Model Results
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display Cox regression results for principal components
+
+    - name: show_variable_importance
+      title: Show Variable Importance
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display importance of original variables in components
+
+    - name: show_model_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare different PCA approaches and component numbers
+
+    - name: scree_plot
+      title: Scree Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display scree plot for component selection
+
+    - name: biplot
+      title: Biplot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display PCA biplot
+
+    - name: loading_plot
+      title: Loading Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display component loading plots
+
+    - name: survival_plot
+      title: Survival Plot by Components
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display survival curves stratified by principal component scores
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show comprehensive analysis summaries
+
+    - name: showExplanations
+      title: Methodology Explanations
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed methodology explanations

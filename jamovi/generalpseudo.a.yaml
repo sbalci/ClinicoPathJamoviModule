@@ -1,0 +1,253 @@
+---
+name: generalpseudo
+title: Generalized Pseudo-Observations
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPathD
+menuSubgroup: Survival Analysis
+menuTitle: Generalized Pseudo-Observations
+menuSubtitle: Generalized pseudo-observations for survival and competing risks analysis
+
+description:
+    main: >
+        Generalized pseudo-observations approach for survival analysis, competing risks, and other
+        censored data problems. This method provides a flexible framework for analyzing survival
+        outcomes using standard statistical methods by transforming survival data into pseudo-observations
+        that can be analyzed with conventional regression techniques. Supports various functionals
+        including survival probabilities, cumulative incidence functions, and restricted mean survival times.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            generalpseudo(
+                elapsedtime = "time_to_event",
+                outcome = "event_status",
+                explanatory = c("age", "treatment", "stage"),
+                functional_type = "survival",
+                time_points = c(12, 24, 60),
+                cause_specific = 1
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time to event or censoring
+
+    - name: outcome
+      title: Event Indicator
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Event indicator (for survival: 1 = event, 0 = censored; for competing risks: 0 = censored, 1,2,... = specific causes)
+
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Explanatory variables for pseudo-observation regression modeling
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level indicating event occurrence (for survival analysis)
+
+    - name: functional_type
+      title: Functional Type
+      type: List
+      options:
+        - survival
+        - cumulative_incidence
+        - restricted_mean
+        - quantile
+      default: survival
+      description:
+          R: >
+            Type of functional for pseudo-observation calculation
+
+    - name: cause_specific
+      title: Cause of Interest
+      type: Number
+      default: 1
+      min: 1
+      max: 10
+      description:
+          R: >
+            Cause of interest for competing risks analysis (competing events coded as different integers)
+
+    - name: time_points
+      title: Time Points for Analysis
+      type: String
+      default: '12,24,60'
+      description:
+          R: >
+            Comma-separated list of time points at which to calculate pseudo-observations
+
+    - name: quantile_prob
+      title: Quantile Probability
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 0.99
+      description:
+          R: >
+            Probability for quantile pseudo-observations (e.g., 0.5 for median survival)
+
+    - name: rmst_tau
+      title: RMST Restriction Time
+      type: Number
+      default: 60
+      min: 1
+      description:
+          R: >
+            Restriction time tau for restricted mean survival time calculations
+
+    - name: pseudo_method
+      title: Pseudo-observation Method
+      type: List
+      options:
+        - jackknife
+        - bootstrap
+        - analytical
+      default: jackknife
+      description:
+          R: >
+            Method for calculating pseudo-observations
+
+    - name: regression_type
+      title: Regression Model Type
+      type: List
+      options:
+        - linear
+        - logistic
+        - complementary_log_log
+        - beta_regression
+      default: linear
+      description:
+          R: >
+            Type of regression model for pseudo-observations
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description:
+          R: >
+            Confidence level for confidence intervals
+
+    - name: bootstrap_reps
+      title: Bootstrap Replications
+      type: Number
+      default: 500
+      min: 100
+      max: 2000
+      description:
+          R: >
+            Number of bootstrap replications for pseudo-observation calculation
+
+    - name: clustering_var
+      title: Clustering Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Variable for clustered data analysis (optional)
+
+    - name: show_pseudo_values
+      title: Show Pseudo-values
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display calculated pseudo-observation values
+
+    - name: show_model_diagnostics
+      title: Show Model Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display comprehensive model diagnostic information
+
+    - name: show_comparison
+      title: Show Method Comparison
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare pseudo-observation results with traditional methods
+
+    - name: functional_plot
+      title: Functional Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display plots of the estimated functionals
+
+    - name: residual_plot
+      title: Residual Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display residual diagnostic plots
+
+    - name: pseudo_plot
+      title: Pseudo-observation Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display pseudo-observation distribution plots
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show comprehensive analysis summaries
+
+    - name: showExplanations
+      title: Methodology Explanations
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed methodology explanations
