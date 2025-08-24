@@ -29,6 +29,8 @@ knitr::opts_chunk$set(
 *   **Survival Analysis:** Tools for Kaplan-Meier estimation, log-rank tests, and Cox proportional hazards models for single, comparison, and multiple variable analyses.
 *   **Diagnostic Accuracy:** Evaluation of diagnostic tests using Receiver Operating Characteristic (ROC) curve analysis, decision curve analysis (DCA), and screening test calculators.
 *   **Agreement and Reliability:** Assessment of inter-rater reliability using statistics such as Cohen's Kappa and the Intraclass Correlation Coefficient (ICC).
+*   **Laboratory Quality Control:** ISO 15189 compliant statistical process control with Shewhart, CUSUM, and EWMA control charts, Six Sigma metrics, method validation protocols, reference interval establishment, and measurement uncertainty estimation.
+*   **Spatial Statistics & Digital Pathology:** Comprehensive spatial analysis tools including Ripley's K-function, spatial autocorrelation (Moran's I, Geary's C), LISA analysis, and Haralick texture analysis for digital pathology applications.
 *   **Data Visualization:** A collection of advanced plotting tools, including waterfall plots, swimmer plots, raincloud plots, and advanced bar plots for intuitive data exploration and presentation.
 *   **Data Preprocessing:** Utilities for data quality checking, management of missing data, and date corrections.
 

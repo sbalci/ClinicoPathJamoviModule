@@ -9,8 +9,8 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE
 # ========================================
 
-new_version: "0.0.31.40"
-new_date: "2025-08-23"
+new_version: "0.0.31.41"
+new_date: "2025-08-24"
 quick: false
 TEST: true
 meddecide: false
