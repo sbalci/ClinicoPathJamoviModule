@@ -1,0 +1,425 @@
+---
+name: poweranalysis
+title: Power Analysis & Sample Size Calculation
+menuGroup: SurvivalD
+menuSubgroup: Specialized Survival Methods
+menuTitle: Power Analysis
+menuSubtitle: Comprehensive power and sample size calculations for survival studies
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive power analysis and sample size calculation for survival studies and clinical trials.
+        Supports log-rank tests, Cox regression, competing risks, non-inferiority trials, and RMST-based 
+        analyses. Includes specialized methods for SNP-based survival studies and complex trial designs.
+        Essential for study planning, grant applications, and regulatory submissions requiring rigorous
+        sample size justification.
+    R:
+        dontrun: false
+        usage: |
+            poweranalysis(
+                test_type = "log_rank",
+                effect_size = 0.75,
+                alpha = 0.05,
+                power = 0.80,
+                allocation_ratio = 1,
+                accrual_period = 24,
+                follow_up_period = 36
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame (optional for power calculations)
+
+    # Analysis Type
+    - name: analysis_type
+      title: Analysis Type
+      type: List
+      options:
+          - name: "sample_size"
+            title: "Calculate Sample Size"
+          - name: "power"
+            title: "Calculate Power"
+          - name: "effect_size"
+            title: "Calculate Detectable Effect Size"
+          - name: "duration"
+            title: "Calculate Study Duration"
+      default: "sample_size"
+      description:
+          R: Type of power analysis to perform
+
+    - name: test_type
+      title: Statistical Test
+      type: List
+      options:
+          - name: "log_rank"
+            title: "Log-rank Test"
+          - name: "cox_regression"
+            title: "Cox Regression"
+          - name: "competing_risks"
+            title: "Competing Risks"
+          - name: "rmst_test"
+            title: "RMST Comparison"
+          - name: "non_inferiority"
+            title: "Non-inferiority Trial"
+          - name: "snp_survival"
+            title: "SNP-based Survival"
+          - name: "weighted_log_rank"
+            title: "Weighted Log-rank"
+      default: "log_rank"
+      description:
+          R: Type of statistical test for power calculation
+
+    # Study Design Parameters
+    - name: study_design
+      title: Study Design
+      type: List
+      options:
+          - name: "two_arm_parallel"
+            title: "Two-arm Parallel"
+          - name: "multi_arm"
+            title: "Multi-arm Trial"
+          - name: "crossover"
+            title: "Crossover Design"
+          - name: "cluster_randomized"
+            title: "Cluster Randomized"
+          - name: "stratified"
+            title: "Stratified Design"
+      default: "two_arm_parallel"
+      description:
+          R: Overall study design type
+
+    - name: primary_endpoint
+      title: Primary Endpoint
+      type: List
+      options:
+          - name: "overall_survival"
+            title: "Overall Survival"
+          - name: "disease_free_survival"
+            title: "Disease-Free Survival"
+          - name: "progression_free_survival"
+            title: "Progression-Free Survival"
+          - name: "time_to_event"
+            title: "General Time-to-Event"
+          - name: "composite_endpoint"
+            title: "Composite Endpoint"
+      default: "overall_survival"
+      description:
+          R: Primary survival endpoint
+
+    # Statistical Parameters
+    - name: effect_size_type
+      title: Effect Size Type
+      type: List
+      options:
+          - name: "hazard_ratio"
+            title: "Hazard Ratio"
+          - name: "median_ratio"
+            title: "Median Survival Ratio"
+          - name: "rmst_difference"
+            title: "RMST Difference (months)"
+          - name: "survival_difference"
+            title: "Survival Probability Difference"
+      default: "hazard_ratio"
+      description:
+          R: Type of effect size specification
+
+    - name: effect_size
+      title: Effect Size
+      type: Number
+      default: 0.75
+      min: 0.1
+      max: 5.0
+      description:
+          R: Expected effect size (HR, median ratio, or difference)
+
+    - name: alpha_level
+      title: Type I Error Rate (Alpha)
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.10
+      description:
+          R: Significance level (two-sided)
+
+    - name: power_level
+      title: Power (1-Beta)
+      type: Number
+      default: 0.80
+      min: 0.50
+      max: 0.99
+      description:
+          R: Desired statistical power
+
+    - name: allocation_ratio
+      title: Allocation Ratio (Control:Experimental)
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+      description:
+          R: Ratio of control to experimental group sizes
+
+    # Survival Distribution Parameters
+    - name: control_median_survival
+      title: Control Group Median Survival (months)
+      type: Number
+      default: 12.0
+      min: 1.0
+      max: 240.0
+      description:
+          R: Expected median survival in control group
+
+    - name: survival_distribution
+      title: Survival Distribution
+      type: List
+      options:
+          - name: "exponential"
+            title: "Exponential"
+          - name: "weibull"
+            title: "Weibull"
+          - name: "log_normal"
+            title: "Log-normal"
+          - name: "piecewise_exponential"
+            title: "Piecewise Exponential"
+      default: "exponential"
+      description:
+          R: Assumed survival distribution
+
+    - name: weibull_shape
+      title: Weibull Shape Parameter
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 5.0
+      description:
+          R: Shape parameter for Weibull distribution
+
+    # Study Timeline Parameters
+    - name: accrual_period
+      title: Accrual Period (months)
+      type: Number
+      default: 24.0
+      min: 1.0
+      max: 120.0
+      description:
+          R: Patient recruitment period
+
+    - name: follow_up_period
+      title: Additional Follow-up (months)
+      type: Number
+      default: 12.0
+      min: 0.0
+      max: 120.0
+      description:
+          R: Additional follow-up after recruitment ends
+
+    - name: accrual_pattern
+      title: Accrual Pattern
+      type: List
+      options:
+          - name: "uniform"
+            title: "Uniform Accrual"
+          - name: "linear_increasing"
+            title: "Linear Increasing"
+          - name: "exponential"
+            title: "Exponential Ramp-up"
+          - name: "custom"
+            title: "Custom Pattern"
+      default: "uniform"
+      description:
+          R: Pattern of patient accrual over time
+
+    - name: dropout_rate
+      title: Annual Dropout Rate
+      type: Number
+      default: 0.05
+      min: 0.0
+      max: 0.5
+      description:
+          R: Annual rate of loss to follow-up
+
+    # Non-inferiority Specific
+    - name: ni_margin
+      title: Non-inferiority Margin
+      type: Number
+      default: 1.25
+      min: 1.0
+      max: 2.0
+      description:
+          R: Non-inferiority margin (hazard ratio scale)
+
+    - name: ni_type
+      title: Non-inferiority Type
+      type: List
+      options:
+          - name: "absolute_margin"
+            title: "Absolute Margin"
+          - name: "relative_margin"
+            title: "Relative Margin"
+          - name: "retention_fraction"
+            title: "Retention of Effect Fraction"
+      default: "relative_margin"
+      description:
+          R: Type of non-inferiority margin
+
+    # Competing Risks Parameters
+    - name: competing_risk_rate
+      title: Competing Risk Event Rate
+      type: Number
+      default: 0.1
+      min: 0.0
+      max: 0.9
+      description:
+          R: Annual rate of competing risk events
+
+    - name: competing_risk_hr
+      title: Competing Risk Hazard Ratio
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 5.0
+      description:
+          R: Treatment effect on competing risks
+
+    # RMST Parameters
+    - name: rmst_tau
+      title: RMST Restriction Time (months)
+      type: Number
+      default: 36.0
+      min: 6.0
+      max: 120.0
+      description:
+          R: Restriction time for RMST analysis
+
+    - name: rmst_difference
+      title: Expected RMST Difference (months)
+      type: Number
+      default: 3.0
+      min: 0.1
+      max: 60.0
+      description:
+          R: Expected difference in restricted mean survival time
+
+    # SNP-based Parameters
+    - name: snp_maf
+      title: Minor Allele Frequency
+      type: Number
+      default: 0.3
+      min: 0.01
+      max: 0.5
+      description:
+          R: Minor allele frequency for SNP analysis
+
+    - name: genetic_model
+      title: Genetic Model
+      type: List
+      options:
+          - name: "additive"
+            title: "Additive Model"
+          - name: "dominant"
+            title: "Dominant Model"
+          - name: "recessive"
+            title: "Recessive Model"
+      default: "additive"
+      description:
+          R: Genetic inheritance model
+
+    # Multi-arm Parameters
+    - name: number_of_arms
+      title: Number of Treatment Arms
+      type: Number
+      default: 3
+      min: 2
+      max: 10
+      description:
+          R: Total number of treatment arms (including control)
+
+    - name: multiple_comparisons
+      title: Multiple Comparisons Adjustment
+      type: List
+      options:
+          - name: "none"
+            title: "No Adjustment"
+          - name: "bonferroni"
+            title: "Bonferroni"
+          - name: "holm"
+            title: "Holm"
+          - name: "dunnett"
+            title: "Dunnett"
+      default: "dunnett"
+      description:
+          R: Method for multiple comparisons adjustment
+
+    # Advanced Options
+    - name: interim_analyses
+      title: Number of Interim Analyses
+      type: Number
+      default: 0
+      min: 0
+      max: 5
+      description:
+          R: Number of planned interim analyses
+
+    - name: alpha_spending
+      title: Alpha Spending Function
+      type: List
+      options:
+          - name: "none"
+            title: "No Spending Function"
+          - name: "obrien_fleming"
+            title: "O'Brien-Fleming"
+          - name: "pocock"
+            title: "Pocock"
+      default: "none"
+      description:
+          R: Alpha spending function for interim analyses
+
+    - name: stratification_factors
+      title: Number of Stratification Factors
+      type: Number
+      default: 0
+      min: 0
+      max: 5
+      description:
+          R: Number of stratification factors
+
+    - name: cluster_size
+      title: Average Cluster Size
+      type: Number
+      default: 50
+      min: 5
+      max: 1000
+      description:
+          R: Average cluster size for cluster randomized trials
+
+    - name: icc
+      title: Intracluster Correlation Coefficient
+      type: Number
+      default: 0.05
+      min: 0.0
+      max: 0.5
+      description:
+          R: ICC for cluster randomized trials
+
+    # Sensitivity Analysis
+    - name: sensitivity_analysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: Perform sensitivity analysis across parameter ranges
+
+    - name: simulation_runs
+      title: Simulation Runs
+      type: Number
+      default: 10000
+      min: 1000
+      max: 100000
+      description:
+          R: Number of simulation runs for complex calculations

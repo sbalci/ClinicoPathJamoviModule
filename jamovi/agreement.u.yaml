@@ -75,3 +75,13 @@ children:
                 name: interval
               - title: Ratio
                 name: ratio
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: multiraterMethod
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: fleissCI

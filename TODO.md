@@ -5,18 +5,31 @@
 This document contains only the **REMAINING** features to be implemented in the ClinicoPath jamovi module. All completed features have been documented in `/vignettes/ClinicoPath-ImplementedFeatures-2025.qmd`.
 
 **Implementation Status Summary:**
-- ✅ **COMPLETED PHASES**: 1-8 (Core Survival Analysis, Advanced Methods, Clinical Decision Support)  
-- 🔄 **IN PROGRESS**: Phase 9 (Specialized Clinical Applications)  
-- 📅 **REMAINING**: Phase 4 gaps, Clinical Trial Applications, Advanced Analytics
+- ✅ **COMPLETED PHASES**: 1-9 (Core Survival Analysis, Advanced Methods, Clinical Decision Support, Specialized Clinical Applications)  
+- 🆕 **RECENTLY COMPLETED**: Enhanced diagnostic performance analysis (timeroc v1.1.0, agreement enhancements)
+- 📅 **REMAINING**: Phase 4 gaps, Power Analysis & Sample Size, Advanced Methodology gaps
+
+## Recently Implemented Features (August 2024)
+
+### Enhanced Diagnostic Performance Analysis
+- ✅ **Enhanced timeroc Function (v1.1.0)** - Binary ROC analysis and DeLong test comparison
+  - General binary ROC analysis for non-time-dependent outcomes
+  - DeLong test for statistical comparison of multiple ROC curves  
+  - Youden index calculation for optimal cutpoint determination
+  - Comprehensive diagnostic performance metrics with clinical interpretation
+- ✅ **Enhanced agreement Function** - Explicit Fleiss' kappa support
+  - Multi-rater agreement analysis for >2 raters
+  - Fleiss' kappa with confidence intervals and significance testing
+  - Comprehensive inter-rater reliability assessment for diagnostic agreement
 
 ## Remaining Survival Analysis Features
 
 ### High-Dimensional Methods (Phase 4 - Remaining Items)
 - **Penalized Cox regression** (`penalized`) - **REMAINING**  
-- **Smoothly clipped absolute deviation** (`ncvreg`) - **REMAINING**  
+- ✅ **Smoothly clipped absolute deviation** (`ncvreg`) - **COMPLETED** (`ncvregcox`)
 - **Spatial Bayesian survival** (`spBayesSurv`) - **REMAINING**  
 - **Bayesian joint models** (`JMbayes`) - **REMAINING**  
-- **Principal component Cox models** (`superpc`) - **REMAINING**  
+- ✅ **Principal component Cox models** (`superpc`) - **COMPLETED** (`superpc`)
 - **Partial least squares Cox** (`plsRcox`) - **REMAINING**  
 - **Spike-and-slab priors** (`BoomSpikeSlab`) - **REMAINING**  
 - **Variable selection for Cox models** (`c060`) - **REMAINING**  
@@ -26,12 +39,14 @@ This document contains only the **REMAINING** features to be implemented in the 
 - **Shrinkage factor estimation** (`rms`) - **REMAINING**  
 
 ### Power Analysis & Sample Size (Phase 5 - Remaining Items)
-- **Log-rank test power** (`powerSurvEpi`) - **REMAINING**  
-- **Cox regression power** (`powerSurvEpi`) - **REMAINING**  
-- **Competing risks power** (`powerCompRisk`) - **REMAINING**  
-- **Non-inferiority trial design** (`nphRCT`) - **REMAINING**  
-- **Restricted mean survival time power** (`SSRMST`) - **REMAINING**  
-- **SNP-based survival studies** (`survSNP`) - **REMAINING**  
+✅ **Power Analysis Comprehensive Suite** - **COMPLETED** (`poweranalysis`)
+- Log-rank test power calculations with effect size estimation
+- Cox regression power analysis with hazard ratio scenarios  
+- Competing risks power assessment and sample size determination
+- Non-inferiority trial design with margin specifications
+- Restricted mean survival time (RMST) power analysis
+- Multi-arm and cluster randomized trial calculations
+- Interim analysis planning with alpha spending functions
 
 ### Specialized Survival Methods Gaps (Phase 6 - Remaining Items)
 - **Excess mortality modeling** (`mexhaz`) - **REMAINING**  
@@ -69,26 +84,26 @@ This document contains only the **REMAINING** features to be implemented in the 
 - **Transformation models** (`tram`) - **REMAINING**  
 - **Link-based survival models** (`rstpm2`) - **REMAINING**
 
-#### **Phase 9: Specialized Clinical Applications** 📅 IN PROGRESS
+#### **Phase 9: Specialized Clinical Applications** ✅ COMPLETED
 
 - **Cancer-Specific Survival Analysis:**
-  - ✅ **Cure models for cancer data** (`smcure`, `flexsurvcure`) - **IMPLEMENTED** (`curemodels`)
-  - ✅ **Tumor growth models** (`nlme`, `ggplot2`) - **IMPLEMENTED** (`tumorgrowth`)
-  - ✅ **Treatment switching analysis** (`survival`, `parallel`) - **IMPLEMENTED** (`treatmentswitching`)
-  - **Progression-free survival** (specialized implementation) - **REMAINING**
-  - ✅ **Cancer screening evaluation** (`stats`, `ggplot2`) - **IMPLEMENTED** (`screeningevaluation`)
+  - ✅ **Cure models for cancer data** (`smcure`, `flexsurvcure`) - **COMPLETED** (`curemodels`)
+  - ✅ **Tumor growth models** (`nlme`, `ggplot2`) - **COMPLETED** (`tumorgrowth`)
+  - ✅ **Treatment switching analysis** (`survival`, `parallel`) - **COMPLETED** (`treatmentswitching`)
+  - ✅ **Progression-free survival** (specialized implementation) - **COMPLETED** (`progressionsurvival`)
+  - ✅ **Cancer screening evaluation** (`stats`, `ggplot2`) - **COMPLETED** (`screeningevaluation`)
 
 - **Epidemiological Survival Methods:**
-  - **Cohort survival analysis** (`Epi`) - **REMAINING**
-  - **Case-cohort designs** (`cchs`) - **REMAINING**  
-  - ✅ **Survey-weighted survival** (`survey`) - **IMPLEMENTED** (`surveysurvival`)
-  - **Population attributable risk** (`Epi`) - **REMAINING**
+  - ✅ **Cohort survival analysis** (`Epi`) - **COMPLETED** (`epidemiosurvival`)
+  - ✅ **Case-cohort designs** (`cchs`) - **COMPLETED** (`epidemiosurvival`)
+  - ✅ **Survey-weighted survival** (`survey`) - **COMPLETED** (`surveysurvival`)
+  - ✅ **Population attributable risk** (`Epi`) - **COMPLETED** (`epidemiosurvival`)
 
 - **Clinical Trial Applications:**
-  - **Non-inferiority designs** (`nphRCT`) - **REMAINING**
-  - **Adaptive trial methods** (`rpact`) - **REMAINING**
-  - **Group sequential designs** (`gsDesign`) - **REMAINING**
-  - **Futility analysis** (`interim`) - **REMAINING**
+  - ✅ **Non-inferiority designs** (`gsDesign`) - **COMPLETED** (`advancedtrials`)
+  - ✅ **Adaptive trial methods** (`gsDesign`) - **COMPLETED** (`advancedtrials`)
+  - ✅ **Group sequential designs** (`gsDesign`) - **COMPLETED** (`advancedtrials`)
+  - ✅ **Futility analysis** (`gsDesign`) - **COMPLETED** (`advancedtrials`)
 
 
 #### **Implementation Priority Matrix:**

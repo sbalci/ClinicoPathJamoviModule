@@ -1,0 +1,149 @@
+---
+name: ncvregcox
+title: Smoothly Clipped Absolute Deviation Cox Regression
+menuGroup: Survival
+menuSubgroup: High-Dimensional Methods
+menuTitle: SCAD Cox Regression
+menuSubtitle: Variable selection with smoothly clipped absolute deviation penalty
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Smoothly Clipped Absolute Deviation (SCAD) Cox regression for high-dimensional survival data. 
+        SCAD provides automatic variable selection with oracle properties, avoiding over-penalization
+        of large coefficients while maintaining sparsity for small coefficients. Particularly useful
+        for genomics and high-dimensional clinical data where interpretable variable selection is crucial.
+    R:
+        dontrun: false
+        usage: |
+            ncvregcox(
+                data = data,
+                time = "time",
+                event = "event", 
+                covariates = c("x1", "x2", "x3"),
+                penalty = "SCAD",
+                cv_folds = 10,
+                lambda_type = "min"
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: survival time variable
+
+    - name: event
+      title: Event Variable  
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: event indicator (1=event, 0=censored)
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+      permitted:
+          - numeric
+          - factor
+      description:
+          R: predictor variables for high-dimensional analysis
+
+    - name: penalty
+      title: Penalty Function
+      type: List
+      options:
+          - name: "SCAD"
+            title: "SCAD (Smoothly Clipped Absolute Deviation)"
+          - name: "MCP" 
+            title: "MCP (Minimax Concave Penalty)"
+          - name: "lasso"
+            title: "Lasso (L1 penalty)"
+      default: "SCAD"
+      description:
+          R: Type of penalty function for variable selection
+
+    - name: cv_folds
+      title: Cross-Validation Folds
+      type: Number
+      default: 10
+      min: 3
+      max: 20
+      description:
+          R: Number of folds for cross-validation
+
+    - name: lambda_type
+      title: Lambda Selection
+      type: List
+      options:
+          - name: "min"
+            title: "Minimum CV Error"
+          - name: "1se"
+            title: "One Standard Error Rule"
+      default: "min"
+      description:
+          R: Lambda selection criterion
+
+    - name: alpha
+      title: Elastic Net Mixing Parameter
+      type: Number
+      default: 1.0
+      min: 0.0
+      max: 1.0
+      description:
+          R: Mixing parameter for elastic net (1=lasso, 0=ridge)
+
+    - name: gamma
+      title: SCAD/MCP Parameter
+      type: Number
+      default: 3.7
+      min: 1.1
+      max: 10.0
+      description:
+          R: SCAD gamma parameter or MCP gamma parameter
+
+    - name: standardize
+      title: Standardize Variables
+      type: Bool
+      default: true
+      description:
+          R: Standardize covariates before fitting
+
+    - name: plot_path
+      title: Show Regularization Path
+      type: Bool
+      default: true
+      description:
+          R: Display coefficient paths plot
+
+    - name: plot_cv
+      title: Show Cross-Validation Plot
+      type: Bool
+      default: true
+      description:
+          R: Display cross-validation error plot
+
+    - name: variable_importance
+      title: Variable Importance Analysis
+      type: Bool
+      default: true
+      description:
+          R: Calculate and display variable importance metrics

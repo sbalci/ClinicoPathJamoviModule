@@ -1,0 +1,620 @@
+#' @title Comprehensive Diagnostic Performance Analysis
+#' 
+#' @description 
+#' Advanced diagnostic performance evaluation with ROC analysis, cross-validation,
+#' and statistical comparison of diagnostic tests. Designed for clinical research
+#' applications requiring robust validation of biomarkers and diagnostic tools.
+#' 
+#' @details
+#' This analysis provides comprehensive diagnostic performance evaluation including:
+#' \itemize{
+#'   \item ROC curve analysis with multiple comparison methods
+#'   \item Cross-validation and bootstrap validation
+#'   \item Optimal cutoff selection using various criteria
+#'   \item Comprehensive performance metrics (AUC, sensitivity, specificity, PPV, NPV, LR+, LR-)
+#'   \item Statistical comparison of multiple biomarkers using DeLong test
+#'   \item Calibration assessment for prediction models
+#'   \item Stratified analysis capabilities
+#'   \item Clinical interpretation and recommendations
+#' }
+#' 
+#' @importFrom R6 R6Class
+#' @import jmvcore
+#' @importFrom pROC roc auc ci.auc roc.test coords
+#' @importFrom caret createFolds trainControl train
+#' @importFrom boot boot
+#' @import ggplot2
+#' @import dplyr
+#' @import glue
+
+diagnosticperformanceClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+    "diagnosticperformanceClass",
+    inherit = diagnosticperformanceBase,
+    private = list(
+        .data = NULL,
+        .roc_objects = NULL,
+        .validation_results = NULL,
+        
+        .init = function() {
+            # Show welcome message if variables not selected
+            if (is.null(self$options$outcome) || 
+                is.null(self$options$predictors) || 
+                length(self$options$predictors) == 0) {
+
+                welcome <- glue::glue("
+                    <h3>Diagnostic Performance Analysis</h3>
+                    <p>Comprehensive evaluation of diagnostic tests and biomarkers with robust validation methods.</p>
+                    
+                    <h4>Required Variables:</h4>
+                    <ul>
+                        <li><b>Outcome Variable:</b> Binary outcome (0/1, Yes/No, or factor)</li>
+                        <li><b>Predictor Variables:</b> Continuous biomarkers or risk scores to evaluate</li>
+                    </ul>
+                    
+                    <h4>Analysis Features:</h4>
+                    <ul>
+                        <li><b>ROC Analysis:</b> Area under curve with confidence intervals</li>
+                        <li><b>Statistical Comparison:</b> DeLong test for comparing ROC curves</li>
+                        <li><b>Validation Methods:</b> Cross-validation and bootstrap for overfitting assessment</li>
+                        <li><b>Optimal Cutoffs:</b> Youden index, cost-weighted, and other methods</li>
+                        <li><b>Performance Metrics:</b> Sensitivity, specificity, PPV, NPV, likelihood ratios</li>
+                        <li><b>Calibration Assessment:</b> Evaluate prediction calibration</li>
+                    </ul>
+                    
+                    <h4>Validation Methods:</h4>
+                    <ul>
+                        <li><b>Cross-Validation:</b> K-fold CV to assess model stability</li>
+                        <li><b>Bootstrap:</b> Bootstrap validation for optimism correction</li>
+                        <li><b>Holdout:</b> Train/test split validation</li>
+                    </ul>
+                ")
+
+                self$results$text$setContent(welcome)
+                return()
+            }
+
+            # Initialize analysis if all variables selected
+            private$.cleanData()
+        },
+
+        .cleanData = function() {
+            # Get data
+            data <- self$data
+            
+            # Handle empty data
+            if (nrow(data) == 0) {
+                stop('Data contains no rows')
+            }
+
+            # Get variable names
+            outcome_var <- self$options$outcome
+            predictors <- self$options$predictors
+            outcome_level <- self$options$outcomeLevel
+
+            # Input validation
+            if (!all(sapply(predictors, function(p) is.numeric(data[[p]])))) {
+                stop("All predictor variables must be numeric")
+            }
+
+            # Convert outcome to 0/1
+            if (is.factor(data[[outcome_var]])) {
+                if (is.null(outcome_level)) {
+                    stop("Please specify the event level for the outcome variable")
+                }
+                data$outcome <- ifelse(data[[outcome_var]] == outcome_level, 1, 0)
+            } else {
+                if (!all(data[[outcome_var]] %in% c(0,1,NA))) {
+                    stop("Numeric outcome must contain only 0s and 1s")
+                }
+                data$outcome <- data[[outcome_var]]
+            }
+
+            # Clean predictors
+            for (pred in predictors) {
+                data[[pred]] <- jmvcore::toNumeric(data[[pred]])
+            }
+
+            # Add stratification if specified
+            if (!is.null(self$options$stratifyBy)) {
+                data$stratum <- data[[self$options$stratifyBy]]
+            }
+
+            # Remove missing values
+            analysis_vars <- c("outcome", predictors)
+            if (!is.null(self$options$stratifyBy)) {
+                analysis_vars <- c(analysis_vars, "stratum")
+            }
+            
+            complete_cases <- complete.cases(data[analysis_vars])
+            data <- data[complete_cases, ]
+
+            # Validate final dataset
+            if (nrow(data) == 0) {
+                stop("No complete cases remaining after removing missing values")
+            }
+            
+            if (sum(data$outcome) == 0) {
+                stop("No positive cases found in the outcome variable")
+            }
+            
+            if (sum(data$outcome) == nrow(data)) {
+                stop("No negative cases found in the outcome variable")
+            }
+
+            # Check for sufficient sample size
+            if (nrow(data) < 20) {
+                warning("Sample size is very small (n < 20). Results may be unreliable.")
+            }
+
+            # Store cleaned data
+            private$.data <- data[c("outcome", predictors, if (!is.null(self$options$stratifyBy)) "stratum")]
+        },
+
+        .run = function() {
+            if (is.null(private$.data))
+                return()
+
+            predictors <- self$options$predictors
+            
+            # Calculate ROC curves for all predictors
+            private$.calculateROCCurves()
+            
+            # Perform validation if requested
+            if (self$options$validationMethod != "none") {
+                private$.performValidation()
+            }
+            
+            # Compare ROC curves if multiple predictors
+            if (length(predictors) > 1) {
+                private$.compareROCCurves()
+            }
+            
+            # Calculate performance metrics and cutoffs
+            private$.calculatePerformanceMetrics()
+            
+            # Stratified analysis if requested
+            if (!is.null(self$options$stratifyBy)) {
+                private$.performStratifiedAnalysis()
+            }
+            
+            # Generate interpretation
+            private$.generateInterpretation()
+        },
+
+        .calculateROCCurves = function() {
+            data <- private$.data
+            predictors <- self$options$predictors
+            roc_objects <- list()
+            
+            performance_table <- self$results$performanceTable
+            
+            for (pred in predictors) {
+                tryCatch({
+                    # Calculate ROC curve
+                    roc_obj <- pROC::roc(
+                        response = data$outcome,
+                        predictor = data[[pred]],
+                        ci = TRUE,
+                        levels = c(0, 1),
+                        direction = "<"
+                    )
+                    
+                    # Store ROC object
+                    roc_objects[[pred]] <- roc_obj
+                    
+                    # Calculate additional metrics
+                    coords_result <- pROC::coords(roc_obj, "best", 
+                                                ret = c("threshold", "sensitivity", "specificity", "ppv", "npv"))
+                    
+                    # Calculate accuracy and F1 score at optimal threshold
+                    threshold <- coords_result$threshold
+                    predictions <- ifelse(data[[pred]] > threshold, 1, 0)
+                    accuracy <- mean(predictions == data$outcome, na.rm = TRUE)
+                    
+                    # F1 score
+                    tp <- sum(predictions == 1 & data$outcome == 1, na.rm = TRUE)
+                    fp <- sum(predictions == 1 & data$outcome == 0, na.rm = TRUE)
+                    fn <- sum(predictions == 0 & data$outcome == 1, na.rm = TRUE)
+                    
+                    precision <- if ((tp + fp) > 0) tp / (tp + fp) else 0
+                    recall <- if ((tp + fn) > 0) tp / (tp + fn) else 0
+                    f1_score <- if ((precision + recall) > 0) 2 * (precision * recall) / (precision + recall) else 0
+                    
+                    # Add to performance table
+                    performance_table$addRow(rowKey = pred, values = list(
+                        predictor = pred,
+                        auc = round(as.numeric(roc_obj$auc), 3),
+                        auc_ci_lower = round(roc_obj$ci[1], 3),
+                        auc_ci_upper = round(roc_obj$ci[3], 3),
+                        sensitivity = round(coords_result$sensitivity, 3),
+                        specificity = round(coords_result$specificity, 3),
+                        ppv = round(coords_result$ppv, 3),
+                        npv = round(coords_result$npv, 3),
+                        accuracy = round(accuracy, 3),
+                        f1_score = round(f1_score, 3)
+                    ))
+                    
+                }, error = function(e) {
+                    warning(paste("ROC calculation failed for", pred, ":", e$message))
+                })
+            }
+            
+            # Store ROC objects for later use
+            private$.roc_objects <- roc_objects
+        },
+
+        .compareROCCurves = function() {
+            roc_objects <- private$.roc_objects
+            if (length(roc_objects) < 2) return()
+            
+            comparison_table <- self$results$comparisonTable
+            predictors <- names(roc_objects)
+            
+            # Pairwise comparisons
+            for (i in 1:(length(predictors) - 1)) {
+                for (j in (i + 1):length(predictors)) {
+                    pred1 <- predictors[i]
+                    pred2 <- predictors[j]
+                    
+                    tryCatch({
+                        # Perform comparison test
+                        test_result <- switch(self$options$comparisonMethod,
+                            "delong" = pROC::roc.test(roc_objects[[pred1]], roc_objects[[pred2]], method = "delong"),
+                            "bootstrap" = pROC::roc.test(roc_objects[[pred1]], roc_objects[[pred2]], 
+                                                       method = "bootstrap", boot.n = self$options$bootstrapN),
+                            "venkatraman" = pROC::roc.test(roc_objects[[pred1]], roc_objects[[pred2]], method = "venkatraman")
+                        )
+                        
+                        # Calculate AUC difference
+                        auc_diff <- as.numeric(roc_objects[[pred1]]$auc) - as.numeric(roc_objects[[pred2]]$auc)
+                        
+                        # Interpret significance
+                        significance <- if (test_result$p.value < 0.001) {
+                            "p < 0.001"
+                        } else if (test_result$p.value < 0.05) {
+                            "p < 0.05"
+                        } else {
+                            "Not significant"
+                        }
+                        
+                        # Add to comparison table
+                        comparison_name <- paste(pred1, "vs", pred2)
+                        comparison_table$addRow(rowKey = comparison_name, values = list(
+                            comparison = comparison_name,
+                            method = switch(self$options$comparisonMethod,
+                                "delong" = "DeLong",
+                                "bootstrap" = "Bootstrap",
+                                "venkatraman" = "Venkatraman"
+                            ),
+                            test_statistic = round(as.numeric(test_result$statistic), 4),
+                            p_value = round(test_result$p.value, 4),
+                            significance = significance,
+                            auc_diff = round(auc_diff, 3)
+                        ))
+                        
+                    }, error = function(e) {
+                        warning(paste("ROC comparison failed for", pred1, "vs", pred2, ":", e$message))
+                    })
+                }
+            }
+        },
+
+        .calculatePerformanceMetrics = function() {
+            # Calculate optimal cutoff analysis for each predictor
+            if (!self$options$showCutoffAnalysis) return()
+            
+            data <- private$.data
+            roc_objects <- private$.roc_objects
+            cutoff_table <- self$results$cutoffTable
+            
+            for (pred in names(roc_objects)) {
+                roc_obj <- roc_objects[[pred]]
+                
+                # Calculate optimal cutoff based on selected method
+                optimal_coords <- switch(self$options$optimalCutoff,
+                    "youden" = pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity")),
+                    "closest_topleft" = pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"), 
+                                                   best.method = "closest.topleft"),
+                    "equal_sens_spec" = {
+                        # Find point where sensitivity equals specificity
+                        coords_all <- pROC::coords(roc_obj, "all", ret = c("threshold", "sensitivity", "specificity"))
+                        diff_sens_spec <- abs(coords_all$sensitivity - coords_all$specificity)
+                        min_idx <- which.min(diff_sens_spec)
+                        list(threshold = coords_all$threshold[min_idx],
+                             sensitivity = coords_all$sensitivity[min_idx],
+                             specificity = coords_all$specificity[min_idx])
+                    },
+                    "cost_weighted" = {
+                        # Cost-weighted optimal cutoff
+                        cost_ratio <- self$options$costRatio
+                        prevalence <- mean(data$outcome)
+                        
+                        # Calculate cost for each threshold
+                        coords_all <- pROC::coords(roc_obj, "all", ret = c("threshold", "sensitivity", "specificity"))
+                        costs <- (1 - coords_all$specificity) * (1 - prevalence) + 
+                               cost_ratio * (1 - coords_all$sensitivity) * prevalence
+                        min_cost_idx <- which.min(costs)
+                        
+                        list(threshold = coords_all$threshold[min_cost_idx],
+                             sensitivity = coords_all$sensitivity[min_cost_idx],
+                             specificity = coords_all$specificity[min_cost_idx])
+                    }
+                )
+                
+                # Calculate Youden index and likelihood ratios
+                youden_index <- optimal_coords$sensitivity + optimal_coords$specificity - 1
+                lr_positive <- optimal_coords$sensitivity / (1 - optimal_coords$specificity)
+                lr_negative <- (1 - optimal_coords$sensitivity) / optimal_coords$specificity
+                
+                # Add to cutoff table
+                cutoff_table$addRow(rowKey = pred, values = list(
+                    predictor = pred,
+                    method = switch(self$options$optimalCutoff,
+                        "youden" = "Youden Index",
+                        "closest_topleft" = "Closest to (0,1)",
+                        "equal_sens_spec" = "Sens = Spec",
+                        "cost_weighted" = "Cost-Weighted"
+                    ),
+                    cutoff = round(optimal_coords$threshold, 3),
+                    sensitivity = round(optimal_coords$sensitivity, 3),
+                    specificity = round(optimal_coords$specificity, 3),
+                    youden_index = round(youden_index, 3),
+                    lr_positive = round(lr_positive, 2),
+                    lr_negative = round(lr_negative, 2)
+                ))
+            }
+        },
+
+        .performValidation = function() {
+            # Implement cross-validation or bootstrap validation
+            data <- private$.data
+            predictors <- self$options$predictors
+            validation_table <- self$results$validationTable
+            
+            for (pred in predictors) {
+                tryCatch({
+                    if (self$options$validationMethod == "crossval") {
+                        # K-fold cross-validation
+                        aucs <- private$.performCrossValidation(pred)
+                        
+                        validation_table$addRow(rowKey = pred, values = list(
+                            predictor = pred,
+                            method = paste(self$options$cvFolds, "Fold CV"),
+                            mean_auc = round(mean(aucs), 3),
+                            sd_auc = round(sd(aucs), 3),
+                            ci_lower = round(quantile(aucs, (1 - self$options$confidenceLevel) / 2), 3),
+                            ci_upper = round(quantile(aucs, 1 - (1 - self$options$confidenceLevel) / 2), 3),
+                            optimism = round(as.numeric(private$.roc_objects[[pred]]$auc) - mean(aucs), 3)
+                        ))
+                        
+                    } else if (self$options$validationMethod == "bootstrap") {
+                        # Bootstrap validation
+                        bootstrap_aucs <- private$.performBootstrapValidation(pred)
+                        
+                        validation_table$addRow(rowKey = pred, values = list(
+                            predictor = pred,
+                            method = "Bootstrap",
+                            mean_auc = round(mean(bootstrap_aucs), 3),
+                            sd_auc = round(sd(bootstrap_aucs), 3),
+                            ci_lower = round(quantile(bootstrap_aucs, (1 - self$options$confidenceLevel) / 2), 3),
+                            ci_upper = round(quantile(bootstrap_aucs, 1 - (1 - self$options$confidenceLevel) / 2), 3),
+                            optimism = round(as.numeric(private$.roc_objects[[pred]]$auc) - mean(bootstrap_aucs), 3)
+                        ))
+                    }
+                    
+                }, error = function(e) {
+                    warning(paste("Validation failed for", pred, ":", e$message))
+                })
+            }
+        },
+
+        .performCrossValidation = function(predictor) {
+            data <- private$.data
+            n_folds <- self$options$cvFolds
+            n_repeats <- self$options$cvRepeats
+            
+            all_aucs <- c()
+            
+            for (rep in 1:n_repeats) {
+                folds <- caret::createFolds(data$outcome, k = n_folds, list = TRUE)
+                aucs <- c()
+                
+                for (fold in folds) {
+                    # Training and test sets
+                    train_data <- data[-fold, ]
+                    test_data <- data[fold, ]
+                    
+                    # Skip if insufficient events in test set
+                    if (sum(test_data$outcome) < 2 || sum(1 - test_data$outcome) < 2) {
+                        next
+                    }
+                    
+                    # Calculate AUC on test set
+                    test_roc <- pROC::roc(test_data$outcome, test_data[[predictor]], 
+                                         levels = c(0, 1), direction = "<", quiet = TRUE)
+                    aucs <- c(aucs, as.numeric(test_roc$auc))
+                }
+                
+                all_aucs <- c(all_aucs, aucs)
+            }
+            
+            return(all_aucs)
+        },
+
+        .performBootstrapValidation = function(predictor) {
+            data <- private$.data
+            n_bootstrap <- self$options$bootstrapN
+            
+            aucs <- c()
+            
+            for (i in 1:n_bootstrap) {
+                # Bootstrap sample
+                boot_indices <- sample(nrow(data), replace = TRUE)
+                boot_data <- data[boot_indices, ]
+                
+                # Calculate AUC on bootstrap sample
+                tryCatch({
+                    boot_roc <- pROC::roc(boot_data$outcome, boot_data[[predictor]], 
+                                        levels = c(0, 1), direction = "<", quiet = TRUE)
+                    aucs <- c(aucs, as.numeric(boot_roc$auc))
+                }, error = function(e) {
+                    # Skip this bootstrap sample if ROC calculation fails
+                })
+            }
+            
+            return(aucs)
+        },
+
+        .performStratifiedAnalysis = function() {
+            # Perform stratified ROC analysis
+            data <- private$.data
+            predictors <- self$options$predictors
+            stratified_table <- self$results$stratifiedResults
+            
+            strata <- unique(data$stratum)
+            
+            for (stratum in strata) {
+                stratum_data <- data[data$stratum == stratum, ]
+                
+                if (nrow(stratum_data) < 10 || 
+                    sum(stratum_data$outcome) < 2 || 
+                    sum(1 - stratum_data$outcome) < 2) {
+                    warning(paste("Insufficient data for stratum:", stratum))
+                    next
+                }
+                
+                for (pred in predictors) {
+                    tryCatch({
+                        stratum_roc <- pROC::roc(stratum_data$outcome, stratum_data[[pred]], 
+                                               levels = c(0, 1), direction = "<", ci = TRUE, quiet = TRUE)
+                        
+                        stratified_table$addRow(rowKey = paste(stratum, pred), values = list(
+                            stratum = paste(stratum, "-", pred),
+                            n = nrow(stratum_data),
+                            events = sum(stratum_data$outcome),
+                            auc = round(as.numeric(stratum_roc$auc), 3),
+                            ci_lower = round(stratum_roc$ci[1], 3),
+                            ci_upper = round(stratum_roc$ci[3], 3)
+                        ))
+                        
+                    }, error = function(e) {
+                        warning(paste("Stratified analysis failed for", stratum, pred, ":", e$message))
+                    })
+                }
+            }
+        },
+
+        .generateInterpretation = function() {
+            # Generate clinical interpretation and recommendations
+            roc_objects <- private$.roc_objects
+            predictors <- names(roc_objects)
+            
+            if (length(predictors) == 0) return()
+            
+            # Find best performing predictor
+            aucs <- sapply(roc_objects, function(x) as.numeric(x$auc))
+            best_pred <- names(aucs)[which.max(aucs)]
+            best_auc <- max(aucs)
+            
+            # AUC interpretation
+            auc_interpretation <- if (best_auc >= 0.9) {
+                "Excellent discrimination ability"
+            } else if (best_auc >= 0.8) {
+                "Good discrimination ability"
+            } else if (best_auc >= 0.7) {
+                "Fair discrimination ability" 
+            } else if (best_auc >= 0.6) {
+                "Poor discrimination ability"
+            } else {
+                "No discriminatory ability (random performance)"
+            }
+            
+            interpretation_html <- glue::glue("
+                <h4>Clinical Interpretation</h4>
+                <p><strong>Best Performing Predictor:</strong> {best_pred} (AUC = {round(best_auc, 3)})</p>
+                <p><strong>Performance Assessment:</strong> {auc_interpretation}</p>
+                
+                <h4>Key Findings:</h4>
+                <ul>
+                    <li>The analysis included {nrow(private$.data)} subjects with {sum(private$.data$outcome)} positive cases ({round(100 * mean(private$.data$outcome), 1)}% event rate)</li>
+                    <li>AUC values range from {round(min(aucs), 3)} to {round(max(aucs), 3)}</li>
+                    {if (length(predictors) > 1) paste('<li>Statistical comparison shows', 
+                      if (any(sapply(1:(length(predictors)-1), function(i) 
+                        sapply((i+1):length(predictors), function(j) 
+                          tryCatch(pROC::roc.test(roc_objects[[predictors[i]]], roc_objects[[predictors[j]]])$p.value < 0.05, 
+                                 error = function(e) FALSE))), na.rm = TRUE)) 
+                        'significant differences between predictors' else 'no significant differences between predictors', '</li>') else ''}
+                </ul>
+            ")
+            
+            self$results$interpretation$setContent(interpretation_html)
+            
+            # Generate recommendations
+            recommendations_html <- glue::glue("
+                <h4>Clinical Recommendations</h4>
+                <ul>
+                    {if (best_auc >= 0.8) '<li><strong>Clinical Implementation:</strong> This biomarker shows strong diagnostic potential and may be suitable for clinical use.</li>' else ''}
+                    {if (best_auc < 0.7) '<li><strong>Further Development:</strong> Performance is suboptimal. Consider combining with other predictors or clinical variables.</li>' else ''}
+                    <li><strong>Validation:</strong> {if (self$options$validationMethod == 'none') 'External validation is strongly recommended before clinical implementation.' else 'Internal validation performed. External validation in independent cohorts is still recommended.'}</li>
+                    <li><strong>Sample Size:</strong> {if (nrow(private$.data) < 100) 'Consider larger validation studies for more robust estimates.' else 'Sample size appears adequate for reliable estimates.'}</li>
+                    <li><strong>Clinical Context:</strong> Consider clinical feasibility, cost-effectiveness, and patient impact when implementing diagnostic tests.</li>
+                </ul>
+            ")
+            
+            self$results$recommendations$setContent(recommendations_html)
+        },
+
+        .plotROC = function(image, ggtheme, theme, ...) {
+            # Generate ROC curve plot
+            if (is.null(private$.roc_objects) || length(private$.roc_objects) == 0)
+                return()
+
+            # Prepare data for plotting
+            plot_data <- data.frame()
+            
+            for (pred_name in names(private$.roc_objects)) {
+                roc_obj <- private$.roc_objects[[pred_name]]
+                
+                roc_data <- data.frame(
+                    fpr = 1 - roc_obj$specificities,
+                    tpr = roc_obj$sensitivities,
+                    predictor = pred_name,
+                    auc = round(as.numeric(roc_obj$auc), 3)
+                )
+                
+                plot_data <- rbind(plot_data, roc_data)
+            }
+            
+            # Create plot
+            p <- ggplot(plot_data, aes(x = fpr, y = tpr, color = predictor)) +
+                geom_line(size = 1.2) +
+                geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+                labs(
+                    title = "ROC Curves",
+                    x = "False Positive Rate (1 - Specificity)",
+                    y = "True Positive Rate (Sensitivity)",
+                    color = "Predictor"
+                ) +
+                xlim(0, 1) + ylim(0, 1) +
+                theme_minimal() +
+                theme(
+                    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                    legend.position = "bottom"
+                )
+            
+            # Add AUC values to legend
+            if (length(private$.roc_objects) > 1) {
+                auc_labels <- sapply(names(private$.roc_objects), function(pred) {
+                    auc_val <- round(as.numeric(private$.roc_objects[[pred]]$auc), 3)
+                    paste0(pred, " (AUC = ", auc_val, ")")
+                })
+                p <- p + scale_color_discrete(labels = auc_labels)
+            } else {
+                auc_val <- round(as.numeric(private$.roc_objects[[1]]$auc), 3)
+                p <- p + labs(subtitle = paste("AUC =", auc_val))
+            }
+            
+            print(p)
+        }
+    )
+)

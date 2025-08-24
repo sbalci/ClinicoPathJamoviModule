@@ -12,6 +12,8 @@ agreement(
   heatmapDetails = FALSE,
   wght = "unweighted",
   exct = FALSE,
+  multiraterMethod = "auto",
+  fleissCI = TRUE,
   kripp = FALSE,
   krippMethod = "nominal"
 )
@@ -39,6 +41,12 @@ disagreement.}
 
 \item{exct}{Use exact method for Fleiss' kappa calculation with 3 or more
 raters. More accurate but computationally intensive.}
+
+\item{multiraterMethod}{Choose specific method for multi-rater agreement
+analysis or use automatic selection.}
+
+\item{fleissCI}{Calculate 95\\% confidence intervals for Fleiss' kappa using
+asymptotic standard errors.}
 
 \item{kripp}{Calculate Krippendorff's alpha, a generalized measure of
 reliability for any number of observers and data types.}

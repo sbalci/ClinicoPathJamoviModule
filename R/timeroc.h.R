@@ -20,7 +20,12 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showOptimalCutoff = TRUE,
             showMarkerStats = TRUE,
             compareBaseline = FALSE,
-            smoothAUC = FALSE, ...) {
+            smoothAUC = FALSE,
+            analysisType = "timedep",
+            compareROCs = FALSE,
+            markers = NULL,
+            rocComparison = "delong",
+            youdenIndex = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -111,6 +116,36 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "smoothAUC",
                 smoothAUC,
                 default=FALSE)
+            private$..analysisType <- jmvcore::OptionList$new(
+                "analysisType",
+                analysisType,
+                options=list(
+                    "timedep",
+                    "binary"),
+                default="timedep")
+            private$..compareROCs <- jmvcore::OptionBool$new(
+                "compareROCs",
+                compareROCs,
+                default=FALSE)
+            private$..markers <- jmvcore::OptionVariables$new(
+                "markers",
+                markers,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..rocComparison <- jmvcore::OptionList$new(
+                "rocComparison",
+                rocComparison,
+                options=list(
+                    "delong",
+                    "bootstrap",
+                    "venkatraman"),
+                default="delong")
+            private$..youdenIndex <- jmvcore::OptionBool$new(
+                "youdenIndex",
+                youdenIndex,
+                default=TRUE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..outcome)
@@ -127,6 +162,11 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showMarkerStats)
             self$.addOption(private$..compareBaseline)
             self$.addOption(private$..smoothAUC)
+            self$.addOption(private$..analysisType)
+            self$.addOption(private$..compareROCs)
+            self$.addOption(private$..markers)
+            self$.addOption(private$..rocComparison)
+            self$.addOption(private$..youdenIndex)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -143,7 +183,12 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showOptimalCutoff = function() private$..showOptimalCutoff$value,
         showMarkerStats = function() private$..showMarkerStats$value,
         compareBaseline = function() private$..compareBaseline$value,
-        smoothAUC = function() private$..smoothAUC$value),
+        smoothAUC = function() private$..smoothAUC$value,
+        analysisType = function() private$..analysisType$value,
+        compareROCs = function() private$..compareROCs$value,
+        markers = function() private$..markers$value,
+        rocComparison = function() private$..rocComparison$value,
+        youdenIndex = function() private$..youdenIndex$value),
     private = list(
         ..elapsedtime = NA,
         ..outcome = NA,
@@ -159,7 +204,12 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showOptimalCutoff = NA,
         ..showMarkerStats = NA,
         ..compareBaseline = NA,
-        ..smoothAUC = NA)
+        ..smoothAUC = NA,
+        ..analysisType = NA,
+        ..compareROCs = NA,
+        ..markers = NA,
+        ..rocComparison = NA,
+        ..youdenIndex = NA)
 )
 
 timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -173,7 +223,11 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         markerStats = function() private$.items[["markerStats"]],
         cutoffTable = function() private$.items[["cutoffTable"]],
         modelComparison = function() private$.items[["modelComparison"]],
-        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]]),
+        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
+        binaryROCTable = function() private$.items[["binaryROCTable"]],
+        rocComparison = function() private$.items[["rocComparison"]],
+        binaryROCPlot = function() private$.items[["binaryROCPlot"]],
+        diagnosticPerformance = function() private$.items[["diagnosticPerformance"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -277,7 +331,86 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalInterpretation",
-                title="Clinical Interpretation"))}))
+                title="Clinical Interpretation"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="binaryROCTable",
+                title="Binary ROC Analysis Results",
+                visible="(analysisType:binary)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="marker", 
+                        `title`="Marker", 
+                        `type`="text"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number"),
+                    list(
+                        `name`="optimal_cutoff", 
+                        `title`="Optimal Cutoff", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="rocComparison",
+                title="ROC Curve Comparison",
+                visible="(compareROCs)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="test_statistic", 
+                        `title`="Test Statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="binaryROCPlot",
+                title="Binary ROC Curves",
+                width=600,
+                height=450,
+                renderFun=".plotBinaryROC",
+                visible="(analysisType:binary && plotROC)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="diagnosticPerformance",
+                title="Diagnostic Performance Summary",
+                visible="(analysisType:binary)"))}))
 
 timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "timerocBase",
@@ -287,7 +420,7 @@ timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "timeroc",
-                version = c(1,0,0),
+                version = c(1,1,0),
                 options = options,
                 results = timerocResults$new(options=options),
                 data = data,
@@ -300,7 +433,7 @@ timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Time-Dependent ROC Analysis
+#' Enhanced ROC Analysis
 #'
 #' 
 #' @param data .
@@ -323,6 +456,16 @@ timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   = 0.5).
 #' @param smoothAUC Apply smoothing to the AUC over time plot for better
 #'   visualization.
+#' @param analysisType Choose between time-dependent ROC analysis or general
+#'   binary classification ROC.
+#' @param compareROCs Compare multiple ROC curves using statistical tests
+#'   (DeLong test for binary ROC).
+#' @param markers Additional marker variables to compare against the primary
+#'   marker.
+#' @param rocComparison Statistical method for comparing ROC curves (binary
+#'   analysis only).
+#' @param youdenIndex Calculate Youden index (sensitivity + specificity - 1)
+#'   for optimal threshold selection.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
@@ -333,6 +476,10 @@ timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$cutoffTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$modelComparison} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$binaryROCTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rocComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$binaryROCPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagnosticPerformance} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -358,7 +505,12 @@ timeroc <- function(
     showOptimalCutoff = TRUE,
     showMarkerStats = TRUE,
     compareBaseline = FALSE,
-    smoothAUC = FALSE) {
+    smoothAUC = FALSE,
+    analysisType = "timedep",
+    compareROCs = FALSE,
+    markers,
+    rocComparison = "delong",
+    youdenIndex = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("timeroc requires jmvcore to be installed (restart may be required)")
@@ -366,12 +518,14 @@ timeroc <- function(
     if ( ! missing(elapsedtime)) elapsedtime <- jmvcore::resolveQuo(jmvcore::enquo(elapsedtime))
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(marker)) marker <- jmvcore::resolveQuo(jmvcore::enquo(marker))
+    if ( ! missing(markers)) markers <- jmvcore::resolveQuo(jmvcore::enquo(markers))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(elapsedtime), elapsedtime, NULL),
             `if`( ! missing(outcome), outcome, NULL),
-            `if`( ! missing(marker), marker, NULL))
+            `if`( ! missing(marker), marker, NULL),
+            `if`( ! missing(markers), markers, NULL))
 
 
     options <- timerocOptions$new(
@@ -389,7 +543,12 @@ timeroc <- function(
         showOptimalCutoff = showOptimalCutoff,
         showMarkerStats = showMarkerStats,
         compareBaseline = compareBaseline,
-        smoothAUC = smoothAUC)
+        smoothAUC = smoothAUC,
+        analysisType = analysisType,
+        compareROCs = compareROCs,
+        markers = markers,
+        rocComparison = rocComparison,
+        youdenIndex = youdenIndex)
 
     analysis <- timerocClass$new(
         options = options,

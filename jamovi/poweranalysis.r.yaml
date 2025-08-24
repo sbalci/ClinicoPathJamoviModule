@@ -1,0 +1,339 @@
+---
+name: poweranalysis
+title: Power Analysis & Sample Size Calculation
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: power_summary
+      title: 'Power Analysis Summary'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: analysis_type
+            title: 'Analysis Type'
+            type: text
+          - name: test_type
+            title: 'Statistical Test'
+            type: text
+          - name: study_design
+            title: 'Study Design'
+            type: text
+          - name: primary_endpoint
+            title: 'Primary Endpoint'
+            type: text
+          - name: effect_size_type
+            title: 'Effect Size Type'
+            type: text
+          - name: calculated_value
+            title: 'Calculated Value'
+            type: text
+          - name: confidence_level
+            title: 'Confidence Level'
+            type: text
+
+    - name: sample_size_results
+      title: 'Sample Size Calculations'
+      type: Table
+      rows: 0
+      visible: (analysis_type:sample_size)
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: value
+            title: 'Value'
+            type: text
+          - name: description
+            title: 'Description'
+            type: text
+
+    - name: power_results
+      title: 'Power Analysis Results'
+      type: Table
+      rows: 0
+      visible: (analysis_type:power)
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: value
+            title: 'Value'
+            type: text
+          - name: description
+            title: 'Description'
+            type: text
+
+    - name: effect_size_results
+      title: 'Detectable Effect Size'
+      type: Table
+      rows: 0
+      visible: (analysis_type:effect_size)
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: value
+            title: 'Value'
+            type: text
+          - name: description
+            title: 'Description'
+            type: text
+
+    - name: study_duration_results
+      title: 'Study Duration Analysis'
+      type: Table
+      rows: 0
+      visible: (analysis_type:duration)
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: value
+            title: 'Value'
+            type: text
+          - name: description
+            title: 'Description'
+            type: text
+
+    - name: assumptions_table
+      title: 'Statistical Assumptions'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: assumption
+            title: 'Assumption'
+            type: text
+          - name: specification
+            title: 'Specification'
+            type: text
+          - name: impact
+            title: 'Impact on Results'
+            type: text
+          - name: recommendation
+            title: 'Recommendation'
+            type: text
+
+    - name: competing_risks_table
+      title: 'Competing Risks Analysis'
+      type: Table
+      rows: 0
+      visible: (test_type:competing_risks)
+      columns:
+          - name: risk_type
+            title: 'Risk Type'
+            type: text
+          - name: event_rate
+            title: 'Event Rate'
+            type: number
+          - name: hazard_ratio
+            title: 'Hazard Ratio'
+            type: number
+          - name: cumulative_incidence
+            title: 'Cumulative Incidence (%)'
+            type: number
+          - name: required_events
+            title: 'Required Events'
+            type: integer
+          - name: sample_size_impact
+            title: 'Sample Size Impact'
+            type: text
+
+    - name: non_inferiority_table
+      title: 'Non-inferiority Analysis'
+      type: Table
+      rows: 0
+      visible: (test_type:non_inferiority)
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: value
+            title: 'Value'
+            type: text
+          - name: margin_type
+            title: 'Margin Type'
+            type: text
+          - name: clinical_interpretation
+            title: 'Clinical Interpretation'
+            type: text
+
+    - name: rmst_analysis_table
+      title: 'RMST Analysis Parameters'
+      type: Table
+      rows: 0
+      visible: (test_type:rmst_test)
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: control_group
+            title: 'Control Group'
+            type: number
+          - name: treatment_group
+            title: 'Treatment Group'  
+            type: number
+          - name: difference
+            title: 'Difference'
+            type: number
+          - name: confidence_interval
+            title: '95% CI'
+            type: text
+
+    - name: snp_analysis_table
+      title: 'SNP-based Survival Analysis'
+      type: Table
+      rows: 0
+      visible: (test_type:snp_survival)
+      columns:
+          - name: genetic_model
+            title: 'Genetic Model'
+            type: text
+          - name: maf
+            title: 'Minor Allele Frequency'
+            type: number
+          - name: genotype_frequencies
+            title: 'Genotype Frequencies'
+            type: text
+          - name: required_sample_size
+            title: 'Required Sample Size'
+            type: integer
+          - name: power_by_genotype
+            title: 'Power by Genotype'
+            type: text
+
+    - name: multi_arm_table
+      title: 'Multi-arm Trial Analysis'
+      type: Table
+      rows: 0
+      visible: (study_design:multi_arm)
+      columns:
+          - name: comparison
+            title: 'Comparison'
+            type: text
+          - name: sample_size_per_arm
+            title: 'Sample Size per Arm'
+            type: integer
+          - name: adjusted_alpha
+            title: 'Adjusted Alpha'
+            type: number
+          - name: power
+            title: 'Power (%)'
+            type: number
+          - name: total_study_power
+            title: 'Overall Study Power (%)'
+            type: number
+
+    - name: interim_analysis_table
+      title: 'Interim Analysis Plan'
+      type: Table
+      rows: 0
+      visible: (interim_analyses:>0)
+      columns:
+          - name: analysis_number
+            title: 'Analysis'
+            type: integer
+          - name: timing
+            title: 'Timing (% of events)'
+            type: number
+          - name: alpha_spent
+            title: 'Alpha Spent'
+            type: number
+          - name: boundary_value
+            title: 'Boundary Value'
+            type: number
+          - name: conditional_power
+            title: 'Conditional Power (%)'
+            type: number
+
+    - name: sensitivity_analysis_table
+      title: 'Sensitivity Analysis'
+      type: Table
+      rows: 0
+      visible: (sensitivity_analysis)
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: base_case
+            title: 'Base Case'
+            type: text
+          - name: scenario_1
+            title: 'Optimistic'
+            type: text
+          - name: scenario_2
+            title: 'Conservative'
+            type: text
+          - name: impact_assessment
+            title: 'Impact Assessment'
+            type: text
+
+    - name: regulatory_table
+      title: 'Regulatory Considerations'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: regulatory_aspect
+            title: 'Regulatory Aspect'
+            type: text
+          - name: requirement
+            title: 'Requirement'
+            type: text
+          - name: compliance_status
+            title: 'Compliance Status'
+            type: text
+          - name: recommendation
+            title: 'Recommendation'
+            type: text
+
+    - name: power_curve_plot
+      title: Power Curves
+      type: Image
+      width: 600
+      height: 450
+      visible: true
+      renderFun: .plot_power_curves
+
+    - name: sample_size_plot
+      title: Sample Size by Effect Size
+      type: Image
+      width: 600
+      height: 450
+      visible: (analysis_type:sample_size)
+      renderFun: .plot_sample_size_curves
+
+    - name: survival_curves_plot
+      title: Expected Survival Curves
+      type: Image
+      width: 600
+      height: 450
+      visible: true
+      renderFun: .plot_expected_survival
+
+    - name: accrual_timeline_plot
+      title: Accrual and Event Timeline
+      type: Image
+      width: 600
+      height: 450
+      visible: true
+      renderFun: .plot_study_timeline
+
+    - name: sensitivity_plot
+      title: Sensitivity Analysis
+      type: Image
+      width: 600
+      height: 450
+      visible: (sensitivity_analysis)
+      renderFun: .plot_sensitivity_analysis
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation and Recommendations
+      type: Html
+      visible: true
