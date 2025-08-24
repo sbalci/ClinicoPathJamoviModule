@@ -1,0 +1,360 @@
+---
+name: sigmametrics
+title: Six Sigma Metrics for Laboratory Performance
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: dataInfo
+      title: 'Data Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - bias
+        - cv
+        - tea
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: sigmaResults
+      title: 'Sigma Metrics Results'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - bias
+        - cv
+        - tea
+        - sigma_calculation
+      columns:
+        - name: analyte
+          title: 'Analyte/Test'
+          type: text
+        - name: sigma_value
+          title: 'Sigma Value'
+          type: number
+          format: zto:2
+        - name: sigma_level
+          title: 'Sigma Level'
+          type: text
+        - name: quality_rating
+          title: 'Quality Rating'
+          type: text
+        - name: defect_rate_ppm
+          title: 'Defect Rate (ppm)'
+          type: number
+          format: zto:0
+        - name: yield_percentage
+          title: 'Process Yield (%)'
+          type: number
+          format: zto:2
+
+    - name: processCapability
+      title: 'Process Capability Analysis'
+      type: Table
+      visible: (process_capability)
+      rows: 1
+      clearWith:
+        - process_capability
+        - bias
+        - cv
+      columns:
+        - name: analyte
+          title: 'Analyte/Test'
+          type: text
+        - name: cp
+          title: 'Cp'
+          type: number
+          format: zto:3
+        - name: cpk
+          title: 'Cpk'
+          type: number
+          format: zto:3
+        - name: cpp
+          title: 'Cpp'
+          type: number
+          format: zto:3
+        - name: capability_status
+          title: 'Capability Status'
+          type: text
+        - name: process_shift
+          title: 'Process Shift'
+          type: number
+          format: zto:3
+
+    - name: qualityGoalIndex
+      title: 'Quality Goal Index (QGI) Analysis'
+      type: Table
+      visible: (quality_goal_index)
+      rows: 1
+      clearWith:
+        - quality_goal_index
+        - bias
+        - cv
+        - tea
+      columns:
+        - name: analyte
+          title: 'Analyte/Test'
+          type: text
+        - name: bias_qgi
+          title: 'Bias QGI'
+          type: number
+          format: zto:2
+        - name: precision_qgi
+          title: 'Precision QGI'
+          type: number
+          format: zto:2
+        - name: total_qgi
+          title: 'Total QGI'
+          type: number
+          format: zto:2
+        - name: qgi_interpretation
+          title: 'QGI Interpretation'
+          type: text
+
+    - name: benchmarkComparison
+      title: 'Benchmark Comparison'
+      type: Table
+      visible: (benchmark_comparison)
+      rows: 1
+      clearWith:
+        - benchmark_comparison
+        - sigma_calculation
+      columns:
+        - name: sigma_level
+          title: 'Sigma Level'
+          type: text
+        - name: defect_rate
+          title: 'Defect Rate (ppm)'
+          type: number
+          format: zto:0
+        - name: process_yield
+          title: 'Process Yield (%)'
+          type: number
+          format: zto:2
+        - name: performance_class
+          title: 'Performance Class'
+          type: text
+        - name: your_performance
+          title: 'Your Performance'
+          type: text
+
+    - name: methodValidation
+      title: 'Method Validation Assessment'
+      type: Table
+      visible: (method_validation)
+      rows: 1
+      clearWith:
+        - method_validation
+        - bias
+        - cv
+      columns:
+        - name: validation_criterion
+          title: 'Validation Criterion'
+          type: text
+        - name: observed_value
+          title: 'Observed Value'
+          type: number
+          format: zto:3
+        - name: acceptance_limit
+          title: 'Acceptance Limit'
+          type: number
+          format: zto:3
+        - name: status
+          title: 'Status'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: regulatoryCompliance
+      title: 'Regulatory Compliance Assessment'
+      type: Table
+      visible: (regulatory_compliance)
+      rows: 1
+      clearWith:
+        - regulatory_compliance
+        - quality_goals
+      columns:
+        - name: regulatory_body
+          title: 'Regulatory Body'
+          type: text
+        - name: requirement
+          title: 'Requirement'
+          type: text
+        - name: your_result
+          title: 'Your Result'
+          type: text
+        - name: compliance_status
+          title: 'Compliance Status'
+          type: text
+        - name: action_needed
+          title: 'Action Needed'
+          type: text
+
+    - name: improvementRecommendations
+      title: 'Quality Improvement Recommendations'
+      type: Table
+      visible: (improvement_recommendations)
+      rows: 1
+      clearWith:
+        - improvement_recommendations
+        - sigma_calculation
+      columns:
+        - name: issue_area
+          title: 'Issue Area'
+          type: text
+        - name: current_performance
+          title: 'Current Performance'
+          type: text
+        - name: target_performance
+          title: 'Target Performance'
+          type: text
+        - name: recommended_action
+          title: 'Recommended Action'
+          type: text
+        - name: expected_improvement
+          title: 'Expected Improvement'
+          type: text
+        - name: priority
+          title: 'Priority'
+          type: text
+
+    - name: defectRateAnalysis
+      title: 'Defect Rate Analysis'
+      type: Table
+      visible: (defect_rates)
+      rows: 1
+      clearWith:
+        - defect_rates
+        - sigma_calculation
+      columns:
+        - name: error_type
+          title: 'Error Type'
+          type: text
+        - name: current_rate_ppm
+          title: 'Current Rate (ppm)'
+          type: number
+          format: zto:0
+        - name: target_rate_ppm
+          title: 'Target Rate (ppm)'
+          type: number
+          format: zto:0
+        - name: monthly_volume
+          title: 'Expected Monthly Errors'
+          type: integer
+        - name: annual_errors
+          title: 'Expected Annual Errors'
+          type: integer
+        - name: clinical_impact
+          title: 'Clinical Impact'
+          type: text
+
+    - name: costOfQuality
+      title: 'Cost of Quality Analysis'
+      type: Table
+      visible: (cost_of_quality)
+      rows: 1
+      clearWith:
+        - cost_of_quality
+        - sigma_calculation
+      columns:
+        - name: cost_category
+          title: 'Cost Category'
+          type: text
+        - name: current_sigma_cost
+          title: 'Current Sigma Cost ($)'
+          type: number
+          format: zto:0
+        - name: six_sigma_cost
+          title: '6 Sigma Cost ($)'
+          type: number
+          format: zto:0
+        - name: cost_savings
+          title: 'Potential Savings ($)'
+          type: number
+          format: zto:0
+        - name: roi_months
+          title: 'ROI Timeframe (months)'
+          type: integer
+
+    - name: controlPlanning
+      title: 'Statistical Control Planning'
+      type: Table
+      visible: (control_planning)
+      rows: 1
+      clearWith:
+        - control_planning
+        - sigma_calculation
+      columns:
+        - name: control_strategy
+          title: 'Control Strategy'
+          type: text
+        - name: recommended_rules
+          title: 'Recommended QC Rules'
+          type: text
+        - name: control_frequency
+          title: 'Control Frequency'
+          type: text
+        - name: control_levels
+          title: 'Control Levels'
+          type: text
+        - name: acceptance_criteria
+          title: 'Acceptance Criteria'
+          type: text
+
+    - name: sigmaPlot
+      title: 'Sigma Metrics Visualization'
+      type: Image
+      visible: (sigma_plots)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotSigma
+      clearWith:
+        - sigma_plots
+        - bias
+        - cv
+        - tea
+
+    - name: normalizedChart
+      title: 'Normalized Operating Specifications Chart'
+      type: Image
+      visible: (normalized_plots)
+      requiresData: true
+      width: 700
+      height: 600
+      renderFun: .plotNormalizedOPSpecs
+      clearWith:
+        - normalized_plots
+        - bias
+        - cv
+
+    - name: qualityScorecard
+      title: 'Quality Performance Scorecard'
+      type: Image
+      visible: (quality_scorecard)
+      requiresData: true
+      width: 900
+      height: 700
+      renderFun: .plotQualityScorecard
+      clearWith:
+        - quality_scorecard
+        - bias
+        - cv
+        - tea
+
+    - name: methodExplanation
+      title: 'Method and Clinical Context'
+      type: Html
+      visible: true

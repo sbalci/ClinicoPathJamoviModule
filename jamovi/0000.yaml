@@ -3771,6 +3771,30 @@ analyses:
       intervals using Beta-posterior distributions, Monte Carlo sampling, and
       various prior specifications for continuous and binary outcome data.
       Essential for Bayesian statistical inference in clinical research.
+  - title: Laboratory Control Charts (Shewhart, CUSUM, EWMA)
+    name: labcontrolcharts
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuTitle: Laboratory Control Charts (Shewhart, CUSUM, EWMA)
+    description: >
+      Statistical process control charts for laboratory quality monitoring.
+      Implements Shewhart charts, CUSUM (Cumulative Sum), and EWMA
+      (Exponentially Weighted Moving Average) charts for detecting systematic
+      errors, shifts, and trends in laboratory measurements. Essential for ISO
+      15189 compliance and quality assurance programs.
+  - title: Six Sigma Metrics for Laboratory Performance
+    name: sigmametrics
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuTitle: Six Sigma Metrics for Laboratory Performance
+    description: >
+      Six Sigma methodology for laboratory performance evaluation and quality
+      assessment. Calculates sigma metrics, process capability indices, and
+      quality goal index (QGI) for analytical methods. Supports ISO 15189
+      compliance and quality improvement initiatives. Essential for laboratory
+      method validation and performance monitoring.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
