@@ -1,0 +1,176 @@
+---
+name: ncvregcox
+title: SCAD Cox Regression Results
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: model_summary
+      title: 'Model Summary'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: penalty
+            title: 'Penalty Function'
+            type: text
+          - name: lambda_selected
+            title: 'Selected Lambda'
+            type: number
+          - name: cv_error
+            title: 'CV Error'
+            type: number
+          - name: n_selected
+            title: 'Variables Selected'
+            type: integer
+          - name: deviance_explained
+            title: 'Deviance Explained (%)'
+            type: number
+
+    - name: selected_variables
+      title: 'Selected Variables'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: variable
+            title: 'Variable'
+            type: text
+          - name: coefficient
+            title: 'Coefficient'
+            type: number
+          - name: hazard_ratio
+            title: 'Hazard Ratio'
+            type: number
+          - name: standard_error
+            title: 'Standard Error'
+            type: number
+          - name: z_value
+            title: 'Z-value'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+
+    - name: variable_importance
+      title: 'Variable Importance'
+      type: Table
+      rows: 0
+      visible: (variable_importance)
+      columns:
+          - name: variable
+            title: 'Variable'
+            type: text
+          - name: importance
+            title: 'Importance Score'
+            type: number
+          - name: rank
+            title: 'Rank'
+            type: integer
+          - name: relative_importance
+            title: 'Relative Importance (%)'
+            type: number
+
+    - name: cross_validation_results
+      title: 'Cross-Validation Results'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: lambda
+            title: 'Lambda'
+            type: number
+          - name: cv_error
+            title: 'CV Error'
+            type: number
+          - name: cv_se
+            title: 'CV Standard Error'
+            type: number
+          - name: n_vars
+            title: 'Number of Variables'
+            type: integer
+
+    - name: model_comparison
+      title: 'Model Comparison'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: model
+            title: 'Model'
+            type: text
+          - name: lambda
+            title: 'Lambda'
+            type: number
+          - name: cv_error
+            title: 'CV Error'
+            type: number
+          - name: n_vars
+            title: 'Variables'
+            type: integer
+          - name: c_index
+            title: 'C-index'
+            type: number
+          - name: aic
+            title: 'AIC'
+            type: number
+
+    - name: convergence_info
+      title: 'Convergence Information'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: converged
+            title: 'Converged'
+            type: text
+          - name: iterations
+            title: 'Iterations'
+            type: integer
+          - name: tolerance
+            title: 'Tolerance'
+            type: number
+          - name: algorithm
+            title: 'Algorithm'
+            type: text
+
+    - name: regularization_path
+      title: Regularization Path
+      type: Image
+      width: 600
+      height: 450
+      visible: (plot_path)
+      renderFun: .plot_regularization_path
+
+    - name: cv_error_plot
+      title: Cross-Validation Error
+      type: Image
+      width: 600
+      height: 450
+      visible: (plot_cv)
+      renderFun: .plot_cv_error
+
+    - name: variable_selection_plot
+      title: Variable Selection Stability
+      type: Image
+      width: 600
+      height: 450
+      visible: (variable_importance)
+      renderFun: .plot_variable_selection
+
+    - name: coefficient_comparison
+      title: Coefficient Comparison
+      type: Image
+      width: 600
+      height: 450
+      visible: true
+      renderFun: .plot_coefficient_comparison
+
+    - name: model_interpretation
+      title: Model Interpretation and Clinical Insights
+      type: Html
+      visible: true

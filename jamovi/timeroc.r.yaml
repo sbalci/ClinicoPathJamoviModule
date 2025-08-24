@@ -89,4 +89,70 @@ items:
       title: Clinical Interpretation
       type: Html
 
+    - name: binaryROCTable
+      title: Binary ROC Analysis Results
+      type: Table
+      visible: (analysisType:binary)
+      rows: 0
+      columns:
+        - name: marker
+          title: "Marker"
+          type: text
+        - name: auc
+          title: "AUC"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+        - name: specificity
+          title: "Specificity"
+          type: number
+        - name: optimal_cutoff
+          title: "Optimal Cutoff"
+          type: number
+
+    - name: rocComparison
+      title: ROC Curve Comparison
+      type: Table
+      visible: (compareROCs)
+      rows: 0
+      columns:
+        - name: comparison
+          title: "Comparison"
+          type: text
+        - name: method
+          title: "Method"
+          type: text
+        - name: test_statistic
+          title: "Test Statistic"
+          type: number
+        - name: p_value
+          title: "p-value"
+          type: number
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: binaryROCPlot
+      title: Binary ROC Curves
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotBinaryROC
+      visible: (analysisType:binary && plotROC)
+
+    - name: diagnosticPerformance
+      title: Diagnostic Performance Summary
+      type: Html
+      visible: (analysisType:binary)
+
 ...

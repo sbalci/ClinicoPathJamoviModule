@@ -1,10 +1,10 @@
 ---
 name: timeroc
-title: Time-Dependent ROC Analysis
+title: Enhanced ROC Analysis
 menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
-menuSubtitle: 'Predictive Performance Over Time'
-version: '1.0.0'
+menuSubtitle: 'Time-Dependent & Binary ROC'
+version: '1.1.0'
 jas: '1.2'
 
 options:
@@ -121,5 +121,58 @@ options:
       description:
         R: >
           Apply smoothing to the AUC over time plot for better visualization.
+
+    - name: analysisType
+      title: Analysis Type
+      type: List
+      options:
+        - title: Time-Dependent ROC
+          name: timedep
+        - title: General Binary ROC
+          name: binary
+      default: timedep
+      description:
+        R: >
+          Choose between time-dependent ROC analysis or general binary classification ROC.
+
+    - name: compareROCs
+      title: Compare ROC Curves
+      type: Bool
+      default: false
+      description:
+        R: >
+          Compare multiple ROC curves using statistical tests (DeLong test for binary ROC).
+
+    - name: markers
+      title: 'Multiple Markers (for comparison)'
+      type: Variables
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      description:
+        R: >
+          Additional marker variables to compare against the primary marker.
+
+    - name: rocComparison
+      title: ROC Comparison Method
+      type: List
+      options:
+        - title: DeLong Test
+          name: delong
+        - title: Bootstrap Test  
+          name: bootstrap
+        - title: Venkatraman Test
+          name: venkatraman
+      default: delong
+      description:
+        R: >
+          Statistical method for comparing ROC curves (binary analysis only).
+
+    - name: youdenIndex
+      title: Calculate Youden Index
+      type: Bool
+      default: true
+      description:
+        R: >
+          Calculate Youden index (sensitivity + specificity - 1) for optimal threshold selection.
 
 ...

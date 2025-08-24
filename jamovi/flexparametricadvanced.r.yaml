@@ -1,0 +1,323 @@
+---
+name: flexparametricadvanced
+title: Advanced Flexible Parametric Survival Results
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: model_summary
+      title: 'Model Summary'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: distribution
+            title: 'Distribution'
+            type: text
+          - name: n_observations
+            title: 'N Observations'
+            type: integer
+          - name: n_events
+            title: 'N Events'
+            type: integer
+          - name: log_likelihood
+            title: 'Log-Likelihood'
+            type: number
+          - name: aic
+            title: 'AIC'
+            type: number
+          - name: bic
+            title: 'BIC'
+            type: number
+
+    - name: distribution_parameters
+      title: 'Distribution Parameters'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: estimate
+            title: 'Estimate'
+            type: number
+          - name: se
+            title: 'Standard Error'
+            type: number
+          - name: lower_ci
+            title: 'Lower 95% CI'
+            type: number
+          - name: upper_ci
+            title: 'Upper 95% CI'
+            type: number
+
+    - name: covariate_effects
+      title: 'Covariate Effects'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: covariate
+            title: 'Covariate'
+            type: text
+          - name: coefficient
+            title: 'Coefficient'
+            type: number
+          - name: hazard_ratio
+            title: 'Hazard Ratio'
+            type: number
+          - name: se
+            title: 'Standard Error'
+            type: number
+          - name: z_value
+            title: 'Z-value'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: lower_ci
+            title: 'HR Lower 95% CI'
+            type: number
+          - name: upper_ci
+            title: 'HR Upper 95% CI'
+            type: number
+
+    - name: time_varying_effects
+      title: 'Time-Varying Effects'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: covariate
+            title: 'Covariate'
+            type: text
+          - name: time_interaction
+            title: 'Time Interaction'
+            type: number
+          - name: se
+            title: 'Standard Error'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: interpretation
+            title: 'Effect Pattern'
+            type: text
+
+    - name: survival_predictions
+      title: 'Survival Predictions at Key Time Points'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: time_point
+            title: 'Time Point'
+            type: number
+          - name: survival_prob
+            title: 'Survival Probability'
+            type: number
+          - name: hazard_rate
+            title: 'Hazard Rate'
+            type: number
+          - name: survival_lower
+            title: 'Survival Lower CI'
+            type: number
+          - name: survival_upper
+            title: 'Survival Upper CI'
+            type: number
+          - name: median_survival
+            title: 'Median Survival'
+            type: number
+
+    - name: model_comparison_table
+      title: 'Model Comparison'
+      type: Table
+      rows: 0
+      visible: (model_comparison)
+      columns:
+          - name: distribution
+            title: 'Distribution'
+            type: text
+          - name: log_likelihood
+            title: 'Log-Likelihood'
+            type: number
+          - name: aic
+            title: 'AIC'
+            type: number
+          - name: bic
+            title: 'BIC'
+            type: number
+          - name: aic_rank
+            title: 'AIC Rank'
+            type: integer
+          - name: convergence
+            title: 'Converged'
+            type: text
+
+    - name: goodness_of_fit_tests
+      title: 'Goodness of Fit Tests'
+      type: Table
+      rows: 0
+      visible: (goodness_of_fit)
+      columns:
+          - name: test
+            title: 'Test'
+            type: text
+          - name: statistic
+            title: 'Test Statistic'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name: cure_model_results
+      title: 'Cure Model Parameters'
+      type: Table
+      rows: 0
+      visible: (cure_model)
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: estimate
+            title: 'Estimate'
+            type: number
+          - name: se
+            title: 'Standard Error'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: clinical_meaning
+            title: 'Clinical Meaning'
+            type: text
+
+    - name: stratified_results
+      title: 'Stratified Analysis Results'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: stratum
+            title: 'Stratum'
+            type: text
+          - name: n_obs
+            title: 'N Obs'
+            type: integer
+          - name: n_events
+            title: 'N Events'
+            type: integer
+          - name: median_survival
+            title: 'Median Survival'
+            type: number
+          - name: shape_parameter
+            title: 'Shape Parameter'
+            type: number
+          - name: scale_parameter
+            title: 'Scale Parameter'
+            type: number
+
+    - name: residual_analysis
+      title: 'Residual Analysis'
+      type: Table
+      rows: 0
+      visible: (goodness_of_fit)
+      columns:
+          - name: residual_type
+            title: 'Residual Type'
+            type: text
+          - name: mean
+            title: 'Mean'
+            type: number
+          - name: variance
+            title: 'Variance'
+            type: number
+          - name: skewness
+            title: 'Skewness'
+            type: number
+          - name: normality_test_p
+            title: 'Normality Test P-value'
+            type: number
+
+    - name: extrapolation_results
+      title: 'Long-term Extrapolation'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: time_horizon
+            title: 'Time Horizon'
+            type: number
+          - name: extrapolated_survival
+            title: 'Extrapolated Survival'
+            type: number
+          - name: uncertainty_lower
+            title: 'Uncertainty Lower'
+            type: number
+          - name: uncertainty_upper
+            title: 'Uncertainty Upper'
+            type: number
+          - name: reliability_score
+            title: 'Reliability Score'
+            type: text
+
+    - name: survival_curves_plot
+      title: Parametric Survival Curves
+      type: Image
+      width: 600
+      height: 450
+      visible: (plot_survival)
+      renderFun: .plot_parametric_survival
+
+    - name: hazard_functions_plot
+      title: Parametric Hazard Functions
+      type: Image
+      width: 600
+      height: 450
+      visible: (plot_hazard)
+      renderFun: .plot_parametric_hazard
+
+    - name: model_diagnostics_plot
+      title: Model Diagnostic Plots
+      type: Image
+      width: 800
+      height: 600
+      visible: (plot_diagnostics)
+      renderFun: .plot_model_diagnostics
+
+    - name: qq_plot
+      title: Q-Q Plot for Model Fit
+      type: Image
+      width: 600
+      height: 450
+      visible: (goodness_of_fit)
+      renderFun: .plot_qq_diagnostics
+
+    - name: time_varying_plot
+      title: Time-Varying Effects Plot
+      type: Image
+      width: 600
+      height: 450
+      visible: true
+      renderFun: .plot_time_varying_effects
+
+    - name: model_comparison_plot
+      title: Model Comparison Plot
+      type: Image
+      width: 600
+      height: 450
+      visible: (model_comparison)
+      renderFun: .plot_model_comparison
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation and Health Economic Implications
+      type: Html
+      visible: true

@@ -1156,13 +1156,13 @@ analyses:
       analysis.
     ribbon: analyses
     category: analyses
-  - title: Time-Dependent ROC Analysis
+  - title: Enhanced ROC Analysis
     name: timeroc
     ns: ClinicoPath
     menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
-    menuTitle: Time-Dependent ROC Analysis
-    menuSubtitle: Predictive Performance Over Time
+    menuTitle: Enhanced ROC Analysis
+    menuSubtitle: Time-Dependent & Binary ROC
     ribbon: analyses
     category: analyses
   - title: Treatment Pathway Alluvial Plot
@@ -4018,6 +4018,91 @@ analyses:
       state-of-the-art
 
       methodology and regulatory compliance.
+  - title: Power Analysis & Sample Size Calculation
+    name: poweranalysis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Specialized Survival Methods
+    menuTitle: Power Analysis
+    menuSubtitle: Comprehensive power and sample size calculations for survival studies
+    description: >
+      Comprehensive power analysis and sample size calculation for survival
+      studies and clinical trials.
+
+      Supports log-rank tests, Cox regression, competing risks, non-inferiority
+      trials, and RMST-based 
+
+      analyses. Includes specialized methods for SNP-based survival studies and
+      complex trial designs.
+
+      Essential for study planning, grant applications, and regulatory
+      submissions requiring rigorous
+
+      sample size justification.
+  - title: Smoothly Clipped Absolute Deviation Cox Regression
+    name: ncvregcox
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuSubgroup: High-Dimensional Methods
+    menuTitle: SCAD Cox Regression
+    menuSubtitle: Variable selection with smoothly clipped absolute deviation penalty
+    description: >
+      Smoothly Clipped Absolute Deviation (SCAD) Cox regression for
+      high-dimensional survival data. 
+
+      SCAD provides automatic variable selection with oracle properties,
+      avoiding over-penalization
+
+      of large coefficients while maintaining sparsity for small coefficients.
+      Particularly useful
+
+      for genomics and high-dimensional clinical data where interpretable
+      variable selection is crucial.
+  - title: Supervised Principal Components Cox Regression
+    name: superpc
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuSubgroup: High-Dimensional Methods
+    menuTitle: Supervised PCA Cox
+    menuSubtitle: Principal components analysis for survival prediction
+    description: >
+      Supervised Principal Components (SuperPC) for Cox regression with
+      high-dimensional data.
+
+      This method first screens features using univariate Cox regression, then
+      applies PCA
+
+      to selected features, and finally fits a Cox model using the principal
+      components.
+
+      Particularly effective for genomics data where many features are
+      correlated.
+  - title: Advanced Flexible Parametric Survival Models
+    name: flexparametricadvanced
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: Survival
+    menuSubgroup: Advanced Methods
+    menuTitle: Flexible Parametric Models
+    menuSubtitle: Advanced parametric survival modeling with flexible baseline hazards
+    description: >
+      Advanced flexible parametric survival models with customizable baseline
+      hazard distributions.
+
+      Supports multiple parametric distributions (Weibull, log-normal,
+      log-logistic, gamma, 
+
+      Gompertz), spline-based flexible baseline hazards, time-varying effects,
+      and cure models.
+
+      Provides superior modeling flexibility compared to Cox regression when
+      parametric
+
+      assumptions are met, with improved extrapolation capabilities for health
+      economic modeling.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

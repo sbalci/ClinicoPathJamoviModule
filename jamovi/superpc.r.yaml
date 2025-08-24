@@ -1,0 +1,212 @@
+---
+name: superpc
+title: Supervised Principal Components Results
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: analysis_summary
+      title: 'Analysis Summary'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: total_features
+            title: 'Total Features'
+            type: integer
+          - name: selected_features
+            title: 'Selected Features'
+            type: integer
+          - name: n_components
+            title: 'Components Used'
+            type: integer
+          - name: variance_explained
+            title: 'Variance Explained (%)'
+            type: number
+          - name: c_index
+            title: 'C-index'
+            type: number
+
+    - name: feature_screening
+      title: 'Feature Screening Results'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: feature
+            title: 'Feature'
+            type: text
+          - name: univariate_hr
+            title: 'Univariate HR'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+          - name: selected
+            title: 'Selected'
+            type: text
+          - name: rank
+            title: 'Rank'
+            type: integer
+
+    - name: principal_components
+      title: 'Principal Components'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: component
+            title: 'Component'
+            type: text
+          - name: variance_explained
+            title: 'Variance Explained (%)'
+            type: number
+          - name: cumulative_variance
+            title: 'Cumulative Variance (%)'
+            type: number
+          - name: cox_coefficient
+            title: 'Cox Coefficient'
+            type: number
+          - name: hazard_ratio
+            title: 'Hazard Ratio'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+
+    - name: component_loadings
+      title: 'Component Loadings'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: feature
+            title: 'Feature'
+            type: text
+          - name: pc1_loading
+            title: 'PC1 Loading'
+            type: number
+          - name: pc2_loading
+            title: 'PC2 Loading'
+            type: number
+          - name: pc3_loading
+            title: 'PC3 Loading'
+            type: number
+          - name: max_loading
+            title: 'Max |Loading|'
+            type: number
+          - name: dominant_pc
+            title: 'Dominant PC'
+            type: text
+
+    - name: model_performance
+      title: 'Model Performance'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: training
+            title: 'Training'
+            type: number
+          - name: validation
+            title: 'Cross-Validation'
+            type: number
+          - name: confidence_interval
+            title: '95% CI'
+            type: text
+
+    - name: risk_groups
+      title: 'Risk Group Analysis'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: risk_group
+            title: 'Risk Group'
+            type: text
+          - name: n_patients
+            title: 'N Patients'
+            type: integer
+          - name: events
+            title: 'Events'
+            type: integer
+          - name: median_survival
+            title: 'Median Survival'
+            type: number
+          - name: hazard_ratio
+            title: 'Hazard Ratio'
+            type: number
+          - name: p_value
+            title: 'P-value'
+            type: number
+
+    - name: cross_validation_results
+      title: 'Cross-Validation Results'
+      type: Table
+      rows: 0
+      visible: (validation_method:cv)
+      columns:
+          - name: fold
+            title: 'Fold'
+            type: integer
+          - name: c_index
+            title: 'C-index'
+            type: number
+          - name: selected_features
+            title: 'Selected Features'
+            type: integer
+          - name: components_used
+            title: 'Components Used'
+            type: integer
+
+    - name: feature_screening_plot
+      title: Feature Screening Results
+      type: Image
+      width: 600
+      height: 450
+      visible: (plot_screening)
+      renderFun: .plot_feature_screening
+
+    - name: pca_biplot
+      title: PCA Biplot
+      type: Image
+      width: 600
+      height: 450
+      visible: (plot_pca)
+      renderFun: .plot_pca_biplot
+
+    - name: variance_explained_plot
+      title: Variance Explained
+      type: Image
+      width: 600
+      height: 450
+      visible: (plot_pca)
+      renderFun: .plot_variance_explained
+
+    - name: survival_curves_plot
+      title: Survival Curves by Risk Groups
+      type: Image
+      width: 600
+      height: 450
+      visible: (plot_survival)
+      renderFun: .plot_survival_curves
+
+    - name: component_heatmap
+      title: Component Loadings Heatmap
+      type: Image
+      width: 600
+      height: 450
+      visible: (plot_pca)
+      renderFun: .plot_component_heatmap
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation and Biological Insights
+      type: Html
+      visible: true

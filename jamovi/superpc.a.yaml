@@ -1,0 +1,169 @@
+---
+name: superpc
+title: Supervised Principal Components Cox Regression
+menuGroup: Survival
+menuSubgroup: High-Dimensional Methods
+menuTitle: Supervised PCA Cox
+menuSubtitle: Principal components analysis for survival prediction
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Supervised Principal Components (SuperPC) for Cox regression with high-dimensional data.
+        This method first screens features using univariate Cox regression, then applies PCA
+        to selected features, and finally fits a Cox model using the principal components.
+        Particularly effective for genomics data where many features are correlated.
+    R:
+        dontrun: false
+        usage: |
+            superpc(
+                data = data,
+                time = "time",
+                event = "event",
+                features = c("gene1", "gene2", "gene3"),
+                threshold = 0.1,
+                n_components = 5
+            )
+
+completeWhenFilled: false
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: survival time variable
+
+    - name: event
+      title: Event Variable
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+      description:
+          R: event indicator (1=event, 0=censored)
+
+    - name: features
+      title: Features
+      type: Variables
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: high-dimensional feature variables (e.g., gene expression)
+
+    - name: threshold
+      title: Feature Selection Threshold
+      type: Number
+      default: 0.1
+      min: 0.01
+      max: 0.5
+      description:
+          R: p-value threshold for initial feature screening
+
+    - name: n_components
+      title: Number of Components
+      type: Number
+      default: 5
+      min: 1
+      max: 50
+      description:
+          R: number of principal components to extract
+
+    - name: cv_folds
+      title: Cross-Validation Folds
+      type: Number
+      default: 10
+      min: 3
+      max: 20
+      description:
+          R: number of folds for cross-validation
+
+    - name: standardize
+      title: Standardize Features
+      type: Bool
+      default: true
+      description:
+          R: standardize features before analysis
+
+    - name: screening_method
+      title: Feature Screening Method
+      type: List
+      options:
+          - name: "univariate_cox"
+            title: "Univariate Cox Regression"
+          - name: "correlation"
+            title: "Correlation with Survival"
+          - name: "t_test"
+            title: "T-test (Log-rank)"
+      default: "univariate_cox"
+      description:
+          R: method for initial feature screening
+
+    - name: pca_method
+      title: PCA Method
+      type: List
+      options:
+          - name: "standard"
+            title: "Standard PCA"
+          - name: "sparse"
+            title: "Sparse PCA"
+          - name: "robust"
+            title: "Robust PCA"
+      default: "standard"
+      description:
+          R: principal component analysis method
+
+    - name: validation_method
+      title: Validation Method
+      type: List
+      options:
+          - name: "cv"
+            title: "Cross-Validation"
+          - name: "bootstrap"
+            title: "Bootstrap"
+          - name: "split_sample"
+            title: "Split-Sample"
+      default: "cv"
+      description:
+          R: model validation approach
+
+    - name: plot_screening
+      title: Show Feature Screening Plot
+      type: Bool
+      default: true
+      description:
+          R: display feature screening results
+
+    - name: plot_pca
+      title: Show PCA Plots
+      type: Bool
+      default: true
+      description:
+          R: display principal component analysis plots
+
+    - name: plot_survival
+      title: Show Survival Curves
+      type: Bool
+      default: true
+      description:
+          R: display survival curves by risk groups
+
+    - name: export_components
+      title: Export Components
+      type: Bool
+      default: false
+      description:
+          R: export principal component scores to data

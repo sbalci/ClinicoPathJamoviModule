@@ -26,13 +26,27 @@ knitr::opts_chunk$set(
 **Methods:** The ClinicoPathJamoviModule integrates a robust and comprehensive suite of analytical tools designed to address the typical workflow of clinicopathological data analysis. The module is built upon the R statistical language and provides a graphical user interface within jamovi for a wide range of functions. Key features include:
 
 *   **Descriptive Statistics:** Generation of publication-ready summary tables (`Table 1`).
-*   **Survival Analysis:** Comprehensive survival analysis framework including Kaplan-Meier estimation, log-rank tests, Cox proportional hazards models, advanced pseudo-observation methods, restricted mean survival time (RMST) regression, dynamic survival prediction, conditional survival estimation, and high-dimensional survival analysis (PCA-Cox, PLS-Cox).
-*   **Diagnostic Accuracy:** Evaluation of diagnostic tests using Receiver Operating Characteristic (ROC) curve analysis, decision curve analysis (DCA), and screening test calculators.
-*   **Agreement and Reliability:** Assessment of inter-rater reliability using statistics such as Cohen's Kappa and the Intraclass Correlation Coefficient (ICC).
-*   **Laboratory Quality Control:** ISO 15189 compliant statistical process control with Shewhart, CUSUM, and EWMA control charts, Six Sigma metrics, method validation protocols, reference interval establishment, and measurement uncertainty estimation.
-*   **Spatial Statistics & Digital Pathology:** Comprehensive spatial analysis tools including Ripley's K-function, spatial autocorrelation (Moran's I, Geary's C), LISA analysis, and Haralick texture analysis for digital pathology applications.
-*   **Data Visualization:** A collection of advanced plotting tools, including waterfall plots, swimmer plots, raincloud plots, and advanced bar plots for intuitive data exploration and presentation.
-*   **Data Preprocessing:** Utilities for data quality checking, management of missing data, and date corrections.
+*   **Survival Analysis:** A comprehensive framework including:
+    *   **Core Methods:** Kaplan-Meier, Nelson-Aalen, and Turnbull NPMLE for interval-censored data.
+    *   **Advanced Modeling:** Cox PH, time-varying effects, AFT models, and frailty models.
+    *   **Specialized Applications:** Competing risks, multi-state models, recurrent event analysis, and cure models.
+    *   **Machine Learning Integration:** Survival trees, random forests, gradient boosting, and regularized regression (LASSO, Ridge).
+    *   **Oncological Analysis:** Specialized methods for Progression-Free Survival (PFS), treatment switching (IPCW), and tumor growth kinetics.
+*   **Clinical Trial Design & Evaluation:**
+    *   **Modern Designs:** Group sequential, adaptive, platform, and master (umbrella, basket) protocols.
+    *   **Epidemiological Tools:** Population-based survival analysis, case-cohort designs, and attributable risk calculation.
+*   **Diagnostic & Prognostic Accuracy:**
+    *   **Test Evaluation:** ROC analysis, decision curve analysis (DCA), and screening test calculators.
+    *   **Model Validation:** Time-dependent ROC, prediction error curves, C-statistics, and calibration plots.
+*   **Agreement and Reliability:** Inter-rater reliability statistics (Cohen's Kappa, ICC) and method comparison (Bland-Altman, Deming Regression).
+*   **Evidence-Based Decision Support:** A suite of tools for:
+    *   **Clinical Monitoring:** Alert systems and patient monitoring dashboards.
+    *   **Treatment Planning:** Optimization frameworks and differential diagnosis assistance.
+    *   **Results Interpretation:** Laboratory and imaging findings correlation.
+*   **Laboratory Quality Control:** ISO 15189 compliant statistical process control, including Shewhart/CUSUM charts, Six Sigma metrics, and measurement uncertainty.
+*   **Spatial Statistics & Digital Pathology:** Tools for spatial point pattern analysis (Ripley's K-function), spatial autocorrelation (Moran's I), and Haralick texture analysis.
+*   **Data Visualization:** Advanced plotting tools such as waterfall plots, swimmer plots, and raincloud plots.
+*   **Data Preprocessing:** Utilities for data quality checking, missing data management, and date corrections.
 
 **Conclusion:** The ClinicoPathJamoviModule provides a powerful, accessible, and free-to-use toolkit that empowers medical researchers to conduct sophisticated statistical analyses without requiring extensive programming knowledge. By integrating these essential functions into the intuitive jamovi framework, the module aims to lower the barrier to high-quality data analysis, enhance research reproducibility, and accelerate the translation of clinical data into meaningful insights.
 

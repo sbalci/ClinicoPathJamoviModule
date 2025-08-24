@@ -89,6 +89,31 @@ options:
           R: >
             Use exact method for Fleiss' kappa calculation with 3 or more raters. More accurate but computationally intensive.
 
+    - name: multiraterMethod
+      title: Multi-rater Agreement Method
+      type: List
+      options:
+        - title: Automatic (based on number of raters)
+          name: auto
+        - title: Pairwise Cohen's Kappa (2 raters)
+          name: cohen
+        - title: Fleiss' Kappa (3+ raters)
+          name: fleiss
+        - title: Krippendorff's Alpha (any number)
+          name: krippendorff
+      default: auto
+      description:
+          R: >
+            Choose specific method for multi-rater agreement analysis or use automatic selection.
+
+    - name: fleissCI
+      title: Fleiss Kappa Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate 95% confidence intervals for Fleiss' kappa using asymptotic standard errors.
+
     - name: kripp
       title: "Krippendorff's Alpha"
       type: Bool

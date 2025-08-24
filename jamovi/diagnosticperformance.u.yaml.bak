@@ -1,0 +1,100 @@
+title: Diagnostic Performance Analysis
+name: diagnosticperformance
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    suggested:
+      - continuous
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        label: Predictor Variables
+        children:
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Stratification Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: stratifyBy
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Analysis Options
+        children:
+          - type: ComboBox
+            name: validationMethod
+          
+          - type: SpinBox
+            name: cvFolds
+            enable: (validationMethod:crossval)
+          
+          - type: SpinBox
+            name: cvRepeats  
+            enable: (validationMethod:crossval)
+          
+          - type: SpinBox
+            name: bootstrapN
+            enable: (validationMethod:bootstrap)
+          
+          - type: TextBox
+            name: holdoutProp
+            format: number
+            enable: (validationMethod:holdout)
+
+      - type: Label
+        label: Cutoff & Comparison
+        children:
+          - type: ComboBox
+            name: optimalCutoff
+          
+          - type: TextBox
+            name: costRatio
+            format: number
+            enable: (optimalCutoff:cost_weighted)
+          
+          - type: ComboBox
+            name: comparisonMethod
+          
+          - type: TextBox
+            name: confidenceLevel
+            format: number
+
+      - type: Label
+        label: Display Options
+        children:
+          - type: CheckBox
+            name: plotROC
+
+          - type: CheckBox
+            name: plotPR
+
+          - type: CheckBox
+            name: plotCalibration
+
+          - type: CheckBox
+            name: showMetrics
+
+          - type: CheckBox
+            name: showCutoffAnalysis
+
+...

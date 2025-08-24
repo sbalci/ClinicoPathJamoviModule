@@ -12,6 +12,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             heatmapDetails = FALSE,
             wght = "unweighted",
             exct = FALSE,
+            multiraterMethod = "auto",
+            fleissCI = TRUE,
             kripp = FALSE,
             krippMethod = "nominal", ...) {
 
@@ -53,6 +55,19 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "exct",
                 exct,
                 default=FALSE)
+            private$..multiraterMethod <- jmvcore::OptionList$new(
+                "multiraterMethod",
+                multiraterMethod,
+                options=list(
+                    "auto",
+                    "cohen",
+                    "fleiss",
+                    "krippendorff"),
+                default="auto")
+            private$..fleissCI <- jmvcore::OptionBool$new(
+                "fleissCI",
+                fleissCI,
+                default=TRUE)
             private$..kripp <- jmvcore::OptionBool$new(
                 "kripp",
                 kripp,
@@ -73,6 +88,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..heatmapDetails)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
+            self$.addOption(private$..multiraterMethod)
+            self$.addOption(private$..fleissCI)
             self$.addOption(private$..kripp)
             self$.addOption(private$..krippMethod)
         }),
@@ -83,6 +100,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         heatmapDetails = function() private$..heatmapDetails$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
+        multiraterMethod = function() private$..multiraterMethod$value,
+        fleissCI = function() private$..fleissCI$value,
         kripp = function() private$..kripp$value,
         krippMethod = function() private$..krippMethod$value),
     private = list(
@@ -92,6 +111,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..heatmapDetails = NA,
         ..wght = NA,
         ..exct = NA,
+        ..multiraterMethod = NA,
+        ..fleissCI = NA,
         ..kripp = NA,
         ..krippMethod = NA)
 )
@@ -281,6 +302,10 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   disagreement.
 #' @param exct Use exact method for Fleiss' kappa calculation with 3 or more
 #'   raters. More accurate but computationally intensive.
+#' @param multiraterMethod Choose specific method for multi-rater agreement
+#'   analysis or use automatic selection.
+#' @param fleissCI Calculate 95\% confidence intervals for Fleiss' kappa using
+#'   asymptotic standard errors.
 #' @param kripp Calculate Krippendorff's alpha, a generalized measure of
 #'   reliability for any number of observers and data types.
 #' @param krippMethod Measurement level for Krippendorff's alpha calculation.
@@ -310,6 +335,8 @@ agreement <- function(
     heatmapDetails = FALSE,
     wght = "unweighted",
     exct = FALSE,
+    multiraterMethod = "auto",
+    fleissCI = TRUE,
     kripp = FALSE,
     krippMethod = "nominal") {
 
@@ -331,6 +358,8 @@ agreement <- function(
         heatmapDetails = heatmapDetails,
         wght = wght,
         exct = exct,
+        multiraterMethod = multiraterMethod,
+        fleissCI = fleissCI,
         kripp = kripp,
         krippMethod = krippMethod)
 

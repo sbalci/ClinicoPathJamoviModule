@@ -5,9 +5,12 @@
 
 # run  /Applications/jamovi.app/Contents/MacOS/jamovi
 
-# ========================================
-# MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE
-# ========================================
+# update TODO.md and remove implemented features from it to the /vignettes/ClinicoPath-ImplementedFeatures-2025.qmd. update NEWS.md. Then continue implementing the remaining features from TODO.md. 
+
+
+# ==============================================
+# MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
+# ==============================================
 
 new_version: "0.0.31.43"
 new_date: "2025-08-24"

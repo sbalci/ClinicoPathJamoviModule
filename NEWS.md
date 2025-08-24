@@ -1,5 +1,104 @@
 # ClinicoPath News
 
+## Version 0.0.31.43
+
+### 🗓️ **August 24, 2025 - Diagnostic Performance Analysis Enhancements**
+
+#### 🎯 **Enhanced Diagnostic Accuracy Methods - ROC Analysis & Agreement**
+
+##### **Enhanced timeroc Function (v1.1.0) - Binary ROC Analysis & Comparison**
+* **Binary ROC Analysis:** Complete implementation of general binary ROC curve analysis for non-time-dependent diagnostic outcomes with comprehensive performance metrics
+* **DeLong Test Integration:** Statistical comparison of multiple ROC curves using DeLong method for pairwise AUC comparisons with confidence intervals
+* **Youden Index Calculation:** Optimal cutpoint determination using Youden J statistic with sensitivity/specificity optimization and clinical decision support
+* **Comprehensive Diagnostics:** AUC with confidence intervals, sensitivity/specificity analysis, positive/negative likelihood ratios, and diagnostic odds ratios
+* **Enhanced Visualization:** ROC curves with optimal cutpoints, confidence bands, and comparison plots for multiple diagnostic markers
+
+##### **Enhanced agreement Function - Multi-Rater Reliability**
+* **Explicit Fleiss' Kappa:** Enhanced multi-rater agreement analysis with explicit method selection for >2 raters with comprehensive reliability assessment
+* **Confidence Intervals:** Bootstrap and asymptotic confidence intervals for Fleiss' kappa with significance testing and clinical interpretation
+* **Diagnostic Agreement:** Specialized support for inter-observer reliability in diagnostic pathology with categorical outcome analysis
+* **Method Validation:** Robust validation for multi-rater categorical data with missing data handling and clinical context awareness
+
+#### 🎯 **High-Dimensional Survival Analysis - Advanced Methods**
+
+##### **SCAD Cox Regression Analysis (ncvregcox) - Variable Selection**
+* **Oracle Properties:** Smoothly Clipped Absolute Deviation (SCAD) penalty with superior variable selection compared to LASSO methods
+* **Cross-Validation:** Optimal penalty parameter selection with k-fold cross-validation and comprehensive model performance assessment
+* **Variable Importance:** Stability analysis with bootstrap methods and feature selection consistency evaluation
+* **High-Dimensional Support:** Efficient handling of genomics data with thousands of predictors and advanced regularization techniques
+
+##### **Supervised Principal Components Cox Analysis (superpc) - Dimensionality Reduction**
+* **Feature Screening:** Survival association-based feature selection with configurable p-value thresholds and multiple testing corrections
+* **Dimensionality Reduction:** Principal component analysis of selected features optimized for Cox regression applications
+* **Model Validation:** Comprehensive performance assessment with cross-validation and genomics-specific evaluation metrics
+* **Clinical Applications:** Particularly effective for biomarker discovery and high-dimensional molecular data analysis
+
+#### 🎯 **Comprehensive Power Analysis & Sample Size Calculations**
+
+##### **Power Analysis Suite (poweranalysis) - Clinical Trial Design**
+* **Log-Rank Power:** Effect size estimation and sample size determination with comprehensive sensitivity analysis across parameter ranges
+* **Cox Regression Power:** Hazard ratio scenarios with covariate adjustments and multi-variable model power calculations
+* **Competing Risks:** Cause-specific hazard modeling with power assessment for complex survival endpoints
+* **Non-Inferiority Designs:** Margin specifications with regulatory compliance (FDA/EMA) and adaptive trial methodology
+* **RMST Analysis:** Restricted mean survival time power analysis for alternative endpoint evaluation
+* **Advanced Designs:** Multi-arm trials, cluster randomization, interim analysis planning with alpha spending functions
+
+### 🗓️ **August 24, 2025 - Phase 9: Specialized Clinical Applications - Complete Implementation**
+
+#### 🎯 **Cancer-Specific Survival Analysis - Advanced Implementations**
+
+##### **Progression-Free Survival Analysis (progressionsurvival) - Oncology Research Framework**
+* **Specialized PFS Analysis:** Complete implementation of progression-free survival analysis with competing risks methodology, landmark analysis, and biomarker interactions
+* **Clinical Trial Integration:** Support for regulatory endpoints (FDA/EMA), treatment effect estimation with clinical significance assessment, and comprehensive interim monitoring
+* **Advanced Methods:** Non-inferiority analysis, maxcombo testing, RMST-based comparisons, and adaptive enrichment designs for biomarker-driven studies
+* **Visualization Suite:** Kaplan-Meier curves with risk tables, cumulative incidence functions, landmark analysis plots, forest plots, and CONSORT flow diagrams
+
+##### **Enhanced Treatment Switching Analysis (treatmentswitching) - IPCW Methods**
+* **Stabilized IPCW Weights:** Implementation of stabilized inverse probability of censoring weighting using marginal probabilities for reduced variance
+* **Bootstrap Confidence Intervals:** Parallel processing bootstrap with comprehensive sensitivity analysis across multiple adjustment methods
+* **Enhanced Validation:** Robust data validation with informative missingness detection and treatment switching pattern analysis
+* **Clinical Interpretation:** Comprehensive effect size interpretation with regulatory compliance considerations
+
+##### **Advanced Tumor Growth Modeling (tumorgrowth) - Kinetics Analysis**
+* **Six Growth Models:** Complete implementation of Exponential, Gompertz, Logistic, von Bertalanffy, Linear, and Power Law models with automatic model selection
+* **Treatment Effects Analysis:** Comprehensive treatment effect estimation with confidence intervals and model-specific parameter interpretation
+* **Enhanced Validation:** Robust error handling, outlier detection, and biological constraint validation for tumor growth data
+* **Clinical Applications:** Growth rate estimation, doubling time calculation, and treatment response assessment tools
+
+##### **Enhanced Cancer Screening Evaluation (screeningevaluation) - Epidemiological Methods**
+* **Interval Cancer Analysis:** Advanced analysis of cancers missed between screening rounds with sensitivity reduction estimation
+* **Lead Time Analysis:** Sojourn time estimation and lead time bias assessment using prevalence-incidence methods
+* **Length Bias Assessment:** Screen-detected vs symptomatic cancer comparison with bias potential evaluation
+* **Overdiagnosis Analysis:** Age-adjusted excess detection assessment with clinical significance thresholds and recommendation systems
+
+#### 🎯 **Epidemiological Survival Methods - Population-Based Analysis**
+
+##### **Epidemiological Survival Analysis (epidemiosurvival) - Population Studies Framework**
+* **Cohort Survival Analysis:** Complete implementation using robust statistical methods with age standardization (direct/indirect) and population weighting
+* **Case-Cohort Designs:** Prentice, Self & Prentice, Lin & Ying, and Barlow methods with proper weighting schemes and efficiency calculations
+* **Population Attributable Risk:** Levin's formula, adjusted PAR, sequential PAR with bootstrap confidence intervals and clinical interpretation
+* **Complex Survey Integration:** Weighted survival analysis with survey design considerations, stratified sampling, and multi-stage design support
+
+#### 🎯 **Advanced Clinical Trial Applications - State-of-the-Art Methodology**
+
+##### **Advanced Clinical Trial Methods (advancedtrials) - Group Sequential & Adaptive Designs**
+* **Group Sequential Designs:** O'Brien-Fleming, Pocock, Lan-DeMets, and Hwang-Shih-DeCani spending functions with comprehensive boundary calculations
+* **Adaptive Designs:** Sample size re-estimation, population enrichment, treatment selection with conditional power assessment and bias adjustment methods  
+* **Platform Trials:** Multiple treatment evaluations with shared controls, adaptive arm addition/dropping, and graduation/futility boundaries
+* **Master Protocols:** Umbrella and basket trial designs with biomarker-driven enrichment strategies and interaction testing frameworks
+* **Operating Characteristics:** Simulation-based evaluation with regulatory compliance (FDA/EMA) and comprehensive interim monitoring guidelines
+
+#### 🔧 **Technical Achievements & Bug Fixes**
+* **Schema Compliance:** All modules compile successfully with proper YAML structure and UI integration
+* **Syntax Resolution:** Fixed Python-style conditional expressions in R code (screeningevaluation.b.R) and resolved R6 class duplicate method issues
+* **Error Handling:** Enhanced data validation, robust error handling, and comprehensive clinical interpretation across all modules
+* **Documentation:** Complete implementation documented in `/vignettes/ClinicoPath-ImplementedFeatures-2025.qmd` with package dependencies and clinical applications
+
+#### 📈 **Implementation Milestone**
+* **Phase 9 Complete:** All specialized clinical applications successfully implemented with cutting-edge statistical methodology
+* **Total Functions:** 150+ specialized survival analysis and clinical research functions
+* **Regulatory Focus:** FDA/EMA compliance considerations throughout with comprehensive documentation and validation
+
 ## Version 0.0.31.42
 
 ### 🗓️ **January 24, 2025 - Phase 8: Advanced Survival Methodology Implementation**

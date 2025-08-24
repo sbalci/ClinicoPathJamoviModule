@@ -2,7 +2,7 @@
 % Please edit documentation in R/timeroc.h.R
 \name{timeroc}
 \alias{timeroc}
-\title{Time-Dependent ROC Analysis}
+\title{Enhanced ROC Analysis}
 \usage{
 timeroc(
   data,
@@ -20,7 +20,12 @@ timeroc(
   showOptimalCutoff = TRUE,
   showMarkerStats = TRUE,
   compareBaseline = FALSE,
-  smoothAUC = FALSE
+  smoothAUC = FALSE,
+  analysisType = "timedep",
+  compareROCs = FALSE,
+  markers,
+  rocComparison = "delong",
+  youdenIndex = TRUE
 )
 }
 \arguments{
@@ -59,6 +64,21 @@ variable.}
 
 \item{smoothAUC}{Apply smoothing to the AUC over time plot for better
 visualization.}
+
+\item{analysisType}{Choose between time-dependent ROC analysis or general
+binary classification ROC.}
+
+\item{compareROCs}{Compare multiple ROC curves using statistical tests
+(DeLong test for binary ROC).}
+
+\item{markers}{Additional marker variables to compare against the primary
+marker.}
+
+\item{rocComparison}{Statistical method for comparing ROC curves (binary
+analysis only).}
+
+\item{youdenIndex}{Calculate Youden index (sensitivity + specificity - 1)
+for optimal threshold selection.}
 }
 \value{
 A results object containing:
@@ -71,6 +91,10 @@ A results object containing:
 \code{results$cutoffTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelComparison} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$binaryROCTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$rocComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$binaryROCPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticPerformance} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -80,5 +104,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$aucTable)}
 }
 \description{
-Time-Dependent ROC Analysis
+Enhanced ROC Analysis
 }

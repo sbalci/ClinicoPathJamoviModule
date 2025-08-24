@@ -1,19 +1,22 @@
-#' @title Enhanced Time-Dependent ROC Analysis for Clinical Research
+#' @title Enhanced ROC Analysis for Clinical Research
 #' 
 #' @description 
-#' Comprehensive evaluation of biomarker predictive performance over time using 
-#' time-dependent ROC analysis. Supports multiple ROC estimation methods and 
-#' provides clinical interpretation of results.
+#' Comprehensive evaluation of biomarker predictive performance using both 
+#' time-dependent and general binary ROC analysis. Supports multiple ROC estimation 
+#' methods, statistical comparisons, and provides clinical interpretation of results.
 #' 
 #' @details
-#' This analysis provides time-dependent ROC curve analysis with:
+#' This analysis provides both time-dependent and binary ROC curve analysis with:
 #' \itemize{
-#'   \item Multiple estimation methods (incident, cumulative, static)
+#'   \item Time-dependent ROC: Multiple estimation methods (incident, cumulative, static)
+#'   \item Binary ROC: General diagnostic performance evaluation
+#'   \item DeLong test for comparing multiple ROC curves (binary mode)
+#'   \item Bootstrap and Venkatraman tests for ROC comparison
 #'   \item Bootstrap confidence intervals for robust inference
 #'   \item Optimal cutoff calculation using Youden index
 #'   \item Comprehensive visualization (ROC curves and AUC over time)
 #'   \item Clinical interpretation and performance assessment
-#'   \item Model comparison capabilities
+#'   \item Model comparison capabilities with statistical testing
 #' }
 #' 
 #' @importFrom R6 R6Class
@@ -22,6 +25,7 @@
 #' @import ggplot2
 #' @import glue
 #' @import dplyr
+#' @importFrom pROC roc auc ci.auc roc.test
 
 timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "timerocClass",
@@ -254,10 +258,172 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(private$.data))
                 return()
 
-            # Parse timepoints
+            # Choose analysis type
+            if (self$options$analysisType == "binary") {
+                private$.runBinaryROC()
+            } else {
+                private$.runTimeROC()
+            }
+        },
+
+        .runBinaryROC = function() {
+            # Binary ROC analysis using pROC package
+            tryCatch({
+                data <- private$.data
+                
+                # Calculate primary marker ROC
+                primary_roc <- pROC::roc(
+                    response = data$status,
+                    predictor = data$marker,
+                    ci = TRUE,
+                    levels = c(0, 1),
+                    direction = "<"
+                )
+                
+                # Calculate optimal cutoff using Youden index
+                if (self$options$youdenIndex) {
+                    youden_index <- primary_roc$sensitivities + primary_roc$specificities - 1
+                    optimal_idx <- which.max(youden_index)
+                    optimal_cutoff <- primary_roc$thresholds[optimal_idx]
+                    optimal_sens <- primary_roc$sensitivities[optimal_idx]
+                    optimal_spec <- primary_roc$specificities[optimal_idx]
+                } else {
+                    optimal_cutoff <- NA
+                    optimal_sens <- NA
+                    optimal_spec <- NA
+                }
+                
+                # Populate binary ROC table
+                table <- self$results$binaryROCTable
+                table$addRow(rowKey = "primary", values = list(
+                    marker = self$options$marker,
+                    auc = round(as.numeric(primary_roc$auc), 3),
+                    se = round(sqrt(pROC::var(primary_roc)), 3),
+                    ci_lower = round(primary_roc$ci[1], 3),
+                    ci_upper = round(primary_roc$ci[3], 3),
+                    sensitivity = round(optimal_sens, 3),
+                    specificity = round(optimal_spec, 3),
+                    optimal_cutoff = round(optimal_cutoff, 3)
+                ))
+                
+                # Store primary ROC for comparison and plotting
+                private$.primary_roc <- primary_roc
+                
+                # Handle multiple markers and comparison if requested
+                if (self$options$compareROCs && !is.null(self$options$markers)) {
+                    private$.runROCComparison()
+                }
+                
+                # Generate diagnostic performance summary
+                private$.generateDiagnosticSummary()
+                
+            }, error = function(e) {
+                stop(paste("Binary ROC analysis failed:", e$message))
+            })
+        },
+
+        .runROCComparison = function() {
+            # Compare multiple ROC curves using statistical tests
+            data <- private$.data
+            primary_roc <- private$.primary_roc
+            markers <- self$options$markers
+            
+            if (is.null(markers) || length(markers) == 0) return()
+            
+            comparison_table <- self$results$rocComparison
+            
+            for (marker in markers) {
+                if (marker == self$options$marker) next  # Skip primary marker
+                
+                tryCatch({
+                    # Calculate ROC for comparison marker
+                    marker_data <- jmvcore::toNumeric(self$data[[marker]])
+                    complete_idx <- complete.cases(data$status, marker_data)
+                    
+                    if (sum(complete_idx) < 10) {
+                        warning(paste("Insufficient data for marker:", marker))
+                        next
+                    }
+                    
+                    comparison_roc <- pROC::roc(
+                        response = data$status[complete_idx],
+                        predictor = marker_data[complete_idx],
+                        levels = c(0, 1),
+                        direction = "<"
+                    )
+                    
+                    # Perform statistical comparison
+                    test_result <- switch(self$options$rocComparison,
+                        "delong" = pROC::roc.test(primary_roc, comparison_roc, method = "delong"),
+                        "bootstrap" = pROC::roc.test(primary_roc, comparison_roc, method = "bootstrap", boot.n = 1000),
+                        "venkatraman" = pROC::roc.test(primary_roc, comparison_roc, method = "venkatraman")
+                    )
+                    
+                    # Interpret results
+                    interpretation <- if (test_result$p.value < 0.05) {
+                        "Significantly different"
+                    } else {
+                        "Not significantly different"
+                    }
+                    
+                    # Add to comparison table
+                    comparison_name <- paste(self$options$marker, "vs", marker)
+                    comparison_table$addRow(rowKey = marker, values = list(
+                        comparison = comparison_name,
+                        method = switch(self$options$rocComparison,
+                            "delong" = "DeLong",
+                            "bootstrap" = "Bootstrap",
+                            "venkatraman" = "Venkatraman"
+                        ),
+                        test_statistic = round(as.numeric(test_result$statistic), 4),
+                        p_value = round(test_result$p.value, 4),
+                        interpretation = interpretation
+                    ))
+                    
+                }, error = function(e) {
+                    warning(paste("ROC comparison failed for marker", marker, ":", e$message))
+                })
+            }
+        },
+
+        .generateDiagnosticSummary = function() {
+            # Generate diagnostic performance summary HTML
+            primary_roc <- private$.primary_roc
+            
+            auc_value <- as.numeric(primary_roc$auc)
+            
+            # AUC interpretation
+            auc_interpretation <- if (auc_value >= 0.9) {
+                "Excellent discrimination"
+            } else if (auc_value >= 0.8) {
+                "Good discrimination"
+            } else if (auc_value >= 0.7) {
+                "Fair discrimination"
+            } else if (auc_value >= 0.6) {
+                "Poor discrimination"
+            } else {
+                "No discrimination (equivalent to random chance)"
+            }
+            
+            summary_html <- glue::glue("
+                <h4>Diagnostic Performance Summary</h4>
+                <p><strong>AUC:</strong> {round(auc_value, 3)} ({auc_interpretation})</p>
+                <p><strong>95% CI:</strong> [{round(primary_roc$ci[1], 3)}, {round(primary_roc$ci[3], 3)}]</p>
+                
+                <h4>Clinical Interpretation:</h4>
+                <ul>
+                    <li>An AUC of {round(auc_value, 3)} indicates that the marker correctly discriminates between cases and controls in {round(auc_value * 100, 1)}% of randomly selected pairs.</li>
+                    <li>The 95% confidence interval suggests the true AUC lies between {round(primary_roc$ci[1], 3)} and {round(primary_roc$ci[3], 3)}.</li>
+                </ul>
+            ")
+            
+            self$results$diagnosticPerformance$setContent(summary_html)
+        },
+
+        .runTimeROC = function() {
+            # Original time-dependent ROC analysis
             timepoints <- private$.parseTimepoints()
 
-            # Additional validation before running timeROC
             tryCatch({
                 # Validate data for timeROC requirements
                 if (length(unique(private$.data$status)) < 2) {

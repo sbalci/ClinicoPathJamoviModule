@@ -2,21 +2,24 @@
 % Please edit documentation in R/timeroc.b.R
 \name{timerocClass}
 \alias{timerocClass}
-\title{Enhanced Time-Dependent ROC Analysis for Clinical Research}
+\title{Enhanced ROC Analysis for Clinical Research}
 \description{
-Comprehensive evaluation of biomarker predictive performance over time using
-time-dependent ROC analysis. Supports multiple ROC estimation methods and
-provides clinical interpretation of results.
+Comprehensive evaluation of biomarker predictive performance using both
+time-dependent and general binary ROC analysis. Supports multiple ROC estimation
+methods, statistical comparisons, and provides clinical interpretation of results.
 }
 \details{
-This analysis provides time-dependent ROC curve analysis with:
+This analysis provides both time-dependent and binary ROC curve analysis with:
 \itemize{
-\item Multiple estimation methods (incident, cumulative, static)
+\item Time-dependent ROC: Multiple estimation methods (incident, cumulative, static)
+\item Binary ROC: General diagnostic performance evaluation
+\item DeLong test for comparing multiple ROC curves (binary mode)
+\item Bootstrap and Venkatraman tests for ROC comparison
 \item Bootstrap confidence intervals for robust inference
 \item Optimal cutoff calculation using Youden index
 \item Comprehensive visualization (ROC curves and AUC over time)
 \item Clinical interpretation and performance assessment
-\item Model comparison capabilities
+\item Model comparison capabilities with statistical testing
 }
 }
 \section{Super classes}{
