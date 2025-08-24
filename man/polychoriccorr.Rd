@@ -2,90 +2,49 @@
 % Please edit documentation in R/polychoriccorr.h.R
 \name{polychoriccorr}
 \alias{polychoriccorr}
-\title{Polychoric & Tetrachoric Correlations}
+\title{Polychoric Correlation Analysis}
 \usage{
 polychoriccorr(
   data,
   vars,
-  method = "auto",
-  estimation_method = "ml",
-  confidence_level = 0.95,
-  show_frequencies = TRUE,
-  show_thresholds = TRUE,
-  show_standard_errors = TRUE,
-  significance_test = TRUE,
-  correction = "none",
-  matrix_plot = TRUE,
-  scatterplots = FALSE,
-  assumption_tests = TRUE,
-  bootstrap_ci = FALSE,
-  bootstrap_samples = 1000,
-  missing_data = "listwise",
-  show_pearson_comparison = TRUE,
-  factor_analysis_suitability = FALSE,
-  clinical_interpretation = TRUE
+  corrType = "polychoric",
+  method = "ml",
+  ci = TRUE,
+  ciWidth = 95,
+  sig = TRUE,
+  sigLevel = 0.05,
+  matrixPlot = FALSE,
+  showFreq = TRUE
 )
 }
 \arguments{
-\item{data}{the data as a data frame}
+\item{data}{.}
 
-\item{vars}{Ordinal or binary variables for correlation analysis (minimum 2
-required)}
+\item{vars}{.}
 
-\item{method}{Type of correlation to compute based on variable types}
+\item{corrType}{.}
 
-\item{estimation_method}{Method for estimating correlations}
+\item{method}{.}
 
-\item{confidence_level}{Confidence level for confidence intervals}
+\item{ci}{.}
 
-\item{show_frequencies}{Display frequency tables for each variable}
+\item{ciWidth}{.}
 
-\item{show_thresholds}{Show estimated threshold parameters for ordinal
-variables}
+\item{sig}{.}
 
-\item{show_standard_errors}{Include standard errors for correlation
-estimates}
+\item{sigLevel}{.}
 
-\item{significance_test}{Perform significance tests for correlations}
+\item{matrixPlot}{.}
 
-\item{correction}{Correction method for multiple comparisons}
-
-\item{matrix_plot}{Generate correlation matrix heatmap}
-
-\item{scatterplots}{Generate scatterplot matrix for variable relationships}
-
-\item{assumption_tests}{Test assumptions for polychoric/tetrachoric
-correlations}
-
-\item{bootstrap_ci}{Use bootstrap method for confidence intervals}
-
-\item{bootstrap_samples}{Number of bootstrap samples for confidence
-intervals}
-
-\item{missing_data}{Method for handling missing data}
-
-\item{show_pearson_comparison}{Show comparison with standard Pearson
-correlations}
-
-\item{factor_analysis_suitability}{Assess suitability of correlation matrix
-for factor analysis}
-
-\item{clinical_interpretation}{Provide clinical interpretation guidance for
-results}
+\item{showFreq}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$correlations} \tab \tab \tab \tab \tab a table \cr
-\code{results$frequencies} \tab \tab \tab \tab \tab a table \cr
-\code{results$thresholds} \tab \tab \tab \tab \tab a table \cr
-\code{results$assumptions} \tab \tab \tab \tab \tab a table \cr
-\code{results$pearsonComparison} \tab \tab \tab \tab \tab a table \cr
-\code{results$factorAnalysis} \tab \tab \tab \tab \tab a table \cr
-\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
-\code{results$correlationMatrixPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$scatterplotMatrix} \tab \tab \tab \tab \tab an image \cr
+\code{results$frequencies} \tab \tab \tab \tab \tab an array of tables \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -95,17 +54,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$correlations)}
 }
 \description{
-Polychoric and tetrachoric correlations for analyzing relationships between
-ordinal  and binary variables. These methods estimate the correlation that
-would exist if  the underlying variables were continuous and normally
-distributed, making them  particularly useful for pathology data with
-ordered categorical outcomes.
-}
-\examples{
-data \\%>\\%
-polychoriccorr(
-    vars = c("grade1", "grade2", "stage", "response"),
-    method = "polychoric"
-)
-
+Polychoric Correlation Analysis
 }

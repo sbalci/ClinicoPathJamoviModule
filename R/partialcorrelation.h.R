@@ -6,25 +6,15 @@ partialcorrelationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            x = NULL,
-            y = NULL,
+            vars = NULL,
             controls = NULL,
             method = "pearson",
-            confidence_level = 0.95,
-            alternative = "two.sided",
-            show_zero_order = TRUE,
-            show_semi_partial = TRUE,
-            show_diagnostics = TRUE,
-            correlation_matrix = TRUE,
-            scatterplots = TRUE,
-            residual_plots = FALSE,
-            significance_test = TRUE,
-            effect_size_interpretation = TRUE,
-            multiple_controls_method = "simultaneous",
-            missing_data = "listwise",
-            bootstrap_ci = FALSE,
-            bootstrap_samples = 1000,
-            clinical_interpretation = TRUE, ...) {
+            ci = TRUE,
+            ciWidth = 95,
+            sig = TRUE,
+            sigLevel = 0.05,
+            matrixPlot = FALSE,
+            showZeroOrder = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -32,16 +22,9 @@ partialcorrelationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 requiresData=TRUE,
                 ...)
 
-            private$..x <- jmvcore::OptionVariable$new(
-                "x",
-                x,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"))
-            private$..y <- jmvcore::OptionVariable$new(
-                "y",
-                y,
+            private$..vars <- jmvcore::OptionVariables$new(
+                "vars",
+                vars,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -52,8 +35,7 @@ partialcorrelationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric",
-                    "factor"))
+                    "numeric"))
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
@@ -62,157 +44,75 @@ partialcorrelationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "spearman",
                     "kendall"),
                 default="pearson")
-            private$..confidence_level <- jmvcore::OptionNumber$new(
-                "confidence_level",
-                confidence_level,
-                min=0.8,
-                max=0.99,
-                default=0.95)
-            private$..alternative <- jmvcore::OptionList$new(
-                "alternative",
-                alternative,
-                options=list(
-                    "two.sided",
-                    "greater",
-                    "less"),
-                default="two.sided")
-            private$..show_zero_order <- jmvcore::OptionBool$new(
-                "show_zero_order",
-                show_zero_order,
+            private$..ci <- jmvcore::OptionBool$new(
+                "ci",
+                ci,
                 default=TRUE)
-            private$..show_semi_partial <- jmvcore::OptionBool$new(
-                "show_semi_partial",
-                show_semi_partial,
+            private$..ciWidth <- jmvcore::OptionNumber$new(
+                "ciWidth",
+                ciWidth,
+                min=50,
+                max=99.9,
+                default=95)
+            private$..sig <- jmvcore::OptionBool$new(
+                "sig",
+                sig,
                 default=TRUE)
-            private$..show_diagnostics <- jmvcore::OptionBool$new(
-                "show_diagnostics",
-                show_diagnostics,
-                default=TRUE)
-            private$..correlation_matrix <- jmvcore::OptionBool$new(
-                "correlation_matrix",
-                correlation_matrix,
-                default=TRUE)
-            private$..scatterplots <- jmvcore::OptionBool$new(
-                "scatterplots",
-                scatterplots,
-                default=TRUE)
-            private$..residual_plots <- jmvcore::OptionBool$new(
-                "residual_plots",
-                residual_plots,
+            private$..sigLevel <- jmvcore::OptionNumber$new(
+                "sigLevel",
+                sigLevel,
+                min=0.001,
+                max=0.1,
+                default=0.05)
+            private$..matrixPlot <- jmvcore::OptionBool$new(
+                "matrixPlot",
+                matrixPlot,
                 default=FALSE)
-            private$..significance_test <- jmvcore::OptionBool$new(
-                "significance_test",
-                significance_test,
-                default=TRUE)
-            private$..effect_size_interpretation <- jmvcore::OptionBool$new(
-                "effect_size_interpretation",
-                effect_size_interpretation,
-                default=TRUE)
-            private$..multiple_controls_method <- jmvcore::OptionList$new(
-                "multiple_controls_method",
-                multiple_controls_method,
-                options=list(
-                    "simultaneous",
-                    "hierarchical",
-                    "stepwise"),
-                default="simultaneous")
-            private$..missing_data <- jmvcore::OptionList$new(
-                "missing_data",
-                missing_data,
-                options=list(
-                    "listwise",
-                    "pairwise"),
-                default="listwise")
-            private$..bootstrap_ci <- jmvcore::OptionBool$new(
-                "bootstrap_ci",
-                bootstrap_ci,
-                default=FALSE)
-            private$..bootstrap_samples <- jmvcore::OptionNumber$new(
-                "bootstrap_samples",
-                bootstrap_samples,
-                min=100,
-                max=10000,
-                default=1000)
-            private$..clinical_interpretation <- jmvcore::OptionBool$new(
-                "clinical_interpretation",
-                clinical_interpretation,
+            private$..showZeroOrder <- jmvcore::OptionBool$new(
+                "showZeroOrder",
+                showZeroOrder,
                 default=TRUE)
 
-            self$.addOption(private$..x)
-            self$.addOption(private$..y)
+            self$.addOption(private$..vars)
             self$.addOption(private$..controls)
             self$.addOption(private$..method)
-            self$.addOption(private$..confidence_level)
-            self$.addOption(private$..alternative)
-            self$.addOption(private$..show_zero_order)
-            self$.addOption(private$..show_semi_partial)
-            self$.addOption(private$..show_diagnostics)
-            self$.addOption(private$..correlation_matrix)
-            self$.addOption(private$..scatterplots)
-            self$.addOption(private$..residual_plots)
-            self$.addOption(private$..significance_test)
-            self$.addOption(private$..effect_size_interpretation)
-            self$.addOption(private$..multiple_controls_method)
-            self$.addOption(private$..missing_data)
-            self$.addOption(private$..bootstrap_ci)
-            self$.addOption(private$..bootstrap_samples)
-            self$.addOption(private$..clinical_interpretation)
+            self$.addOption(private$..ci)
+            self$.addOption(private$..ciWidth)
+            self$.addOption(private$..sig)
+            self$.addOption(private$..sigLevel)
+            self$.addOption(private$..matrixPlot)
+            self$.addOption(private$..showZeroOrder)
         }),
     active = list(
-        x = function() private$..x$value,
-        y = function() private$..y$value,
+        vars = function() private$..vars$value,
         controls = function() private$..controls$value,
         method = function() private$..method$value,
-        confidence_level = function() private$..confidence_level$value,
-        alternative = function() private$..alternative$value,
-        show_zero_order = function() private$..show_zero_order$value,
-        show_semi_partial = function() private$..show_semi_partial$value,
-        show_diagnostics = function() private$..show_diagnostics$value,
-        correlation_matrix = function() private$..correlation_matrix$value,
-        scatterplots = function() private$..scatterplots$value,
-        residual_plots = function() private$..residual_plots$value,
-        significance_test = function() private$..significance_test$value,
-        effect_size_interpretation = function() private$..effect_size_interpretation$value,
-        multiple_controls_method = function() private$..multiple_controls_method$value,
-        missing_data = function() private$..missing_data$value,
-        bootstrap_ci = function() private$..bootstrap_ci$value,
-        bootstrap_samples = function() private$..bootstrap_samples$value,
-        clinical_interpretation = function() private$..clinical_interpretation$value),
+        ci = function() private$..ci$value,
+        ciWidth = function() private$..ciWidth$value,
+        sig = function() private$..sig$value,
+        sigLevel = function() private$..sigLevel$value,
+        matrixPlot = function() private$..matrixPlot$value,
+        showZeroOrder = function() private$..showZeroOrder$value),
     private = list(
-        ..x = NA,
-        ..y = NA,
+        ..vars = NA,
         ..controls = NA,
         ..method = NA,
-        ..confidence_level = NA,
-        ..alternative = NA,
-        ..show_zero_order = NA,
-        ..show_semi_partial = NA,
-        ..show_diagnostics = NA,
-        ..correlation_matrix = NA,
-        ..scatterplots = NA,
-        ..residual_plots = NA,
-        ..significance_test = NA,
-        ..effect_size_interpretation = NA,
-        ..multiple_controls_method = NA,
-        ..missing_data = NA,
-        ..bootstrap_ci = NA,
-        ..bootstrap_samples = NA,
-        ..clinical_interpretation = NA)
+        ..ci = NA,
+        ..ciWidth = NA,
+        ..sig = NA,
+        ..sigLevel = NA,
+        ..matrixPlot = NA,
+        ..showZeroOrder = NA)
 )
 
 partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "partialcorrelationResults",
     inherit = jmvcore::Group,
     active = list(
-        todo = function() private$.items[["todo"]],
-        partialCorrelations = function() private$.items[["partialCorrelations"]],
-        correlationMatrix = function() private$.items[["correlationMatrix"]],
-        diagnostics = function() private$.items[["diagnostics"]],
-        effectSizeInterpretation = function() private$.items[["effectSizeInterpretation"]],
-        clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
-        scatterplotMatrix = function() private$.items[["scatterplotMatrix"]],
-        residualPlots = function() private$.items[["residualPlots"]],
-        correlationMatrixPlot = function() private$.items[["correlationMatrixPlot"]]),
+        instructions = function() private$.items[["instructions"]],
+        partialCorr = function() private$.items[["partialCorr"]],
+        zeroOrder = function() private$.items[["zeroOrder"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -222,110 +122,86 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 title="Partial Correlation Analysis")
             self$add(jmvcore::Html$new(
                 options=options,
-                name="todo",
-                title="Analysis Complete",
-                visible=FALSE))
+                name="instructions",
+                title="Instructions",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="partialCorrelations",
+                name="partialCorr",
                 title="Partial Correlations",
+                visible="(vars && controls)",
                 columns=list(
                     list(
-                        `name`="variables", 
-                        `title`="Variables", 
+                        `name`="var1", 
+                        `title`="Variable 1", 
                         `type`="text"),
                     list(
-                        `name`="partial_r", 
+                        `name`="var2", 
+                        `title`="Variable 2", 
+                        `type`="text"),
+                    list(
+                        `name`="controls", 
+                        `title`="Controlling for", 
+                        `type`="text"),
+                    list(
+                        `name`="r", 
                         `title`="Partial r", 
                         `type`="number", 
-                        `format`="zto"),
+                        `format`="zto,pvalue"),
                     list(
-                        `name`="zero_order_r", 
-                        `title`="Zero-order r", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="semi_partial_r", 
-                        `title`="Semi-partial r", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="t", 
-                        `title`="t", 
-                        `type`="number"),
+                        `name`="rCI", 
+                        `title`="95% CI", 
+                        `type`="text", 
+                        `visible`="(ci)"),
                     list(
                         `name`="p", 
                         `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
-                        `name`="ci_lower", 
-                        `title`="Lower CI", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
                     list(
-                        `name`="ci_upper", 
-                        `title`="Upper CI", 
-                        `type`="number", 
-                        `format`="zto"))))
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="correlationMatrix",
-                title="Full Correlation Matrix",
-                columns=list(),
-                visible="(correlation_matrix)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="diagnostics",
-                title="Diagnostic Information",
-                visible="(show_diagnostics)",
+                name="zeroOrder",
+                title="Zero-Order Correlations",
+                visible="(vars && showZeroOrder)",
                 columns=list(
                     list(
-                        `name`="statistic", 
-                        `title`="Statistic", 
+                        `name`="var1", 
+                        `title`="Variable 1", 
                         `type`="text"),
                     list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="text"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="effectSizeInterpretation",
-                title="Effect Size Interpretation",
-                visible="(effect_size_interpretation)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="clinicalInterpretation",
-                title="Clinical Interpretation",
-                visible="(clinical_interpretation)"))
+                        `name`="var2", 
+                        `title`="Variable 2", 
+                        `type`="text"),
+                    list(
+                        `name`="r", 
+                        `title`="r", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="scatterplotMatrix",
-                title="Scatterplot Matrix",
-                width=600,
-                height=500,
-                requiresData=TRUE,
-                visible="(scatterplots)"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="residualPlots",
-                title="Residual Plots",
-                width=600,
-                height=400,
-                requiresData=TRUE,
-                visible="(residual_plots)"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="correlationMatrixPlot",
+                name="plot",
                 title="Correlation Matrix Plot",
+                visible="(matrixPlot)",
                 width=500,
                 height=400,
-                requiresData=TRUE,
-                visible="(correlation_matrix)"))}))
+                renderFun=".plot"))}))
 
 partialcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "partialcorrelationBase",
@@ -350,133 +226,66 @@ partialcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 
 #' Partial Correlation Analysis
 #'
-#' Partial correlation analysis for examining the relationship between two 
-#' variables while controlling for one or more other variables. This method 
-#' removes the influence of control variables to reveal the direct association 
-#' between primary variables, commonly used in pathology research to control 
-#' for confounding factors.
 #' 
-#'
-#' @examples
-#' data \%>\%
-#' partialcorrelation(
-#'     x = "variable1",
-#'     y = "variable2",
-#'     controls = c("age", "sex", "stage"),
-#'     method = "pearson"
-#' )
-#'
-#' @param data the data as a data frame
-#' @param x First variable for partial correlation analysis
-#' @param y Second variable for partial correlation analysis
-#' @param controls Variables to control for in the partial correlation
-#'   analysis (minimum 1 required)
-#' @param method Method for calculating partial correlations
-#' @param confidence_level Confidence level for confidence intervals
-#' @param alternative Direction of alternative hypothesis for significance
-#'   testing
-#' @param show_zero_order Show original (zero-order) correlations between all
-#'   variables
-#' @param show_semi_partial Show semi-partial (part) correlations alongside
-#'   partial correlations
-#' @param show_diagnostics Show diagnostic information including degrees of
-#'   freedom and sample sizes
-#' @param correlation_matrix Display complete correlation matrix including all
-#'   variables
-#' @param scatterplots Generate scatterplot matrix showing relationships
-#'   between variables
-#' @param residual_plots Show residual plots after removing effects of control
-#'   variables
-#' @param significance_test Perform significance tests for partial
-#'   correlations
-#' @param effect_size_interpretation Provide interpretation guidelines for
-#'   correlation effect sizes
-#' @param multiple_controls_method Method for handling multiple control
-#'   variables
-#' @param missing_data Method for handling missing data in correlation
-#'   analysis
-#' @param bootstrap_ci Use bootstrap method for confidence intervals (robust
-#'   for non-normal data)
-#' @param bootstrap_samples Number of bootstrap samples for confidence
-#'   intervals
-#' @param clinical_interpretation Provide clinical interpretation guidance for
-#'   partial correlation results
+#' @param data .
+#' @param vars .
+#' @param controls .
+#' @param method .
+#' @param ci .
+#' @param ciWidth .
+#' @param sig .
+#' @param sigLevel .
+#' @param matrixPlot .
+#' @param showZeroOrder .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$partialCorrelations} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$correlationMatrix} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$diagnostics} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$effectSizeInterpretation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$scatterplotMatrix} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$residualPlots} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$correlationMatrixPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$partialCorr} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$zeroOrder} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$partialCorrelations$asDF}
+#' \code{results$partialCorr$asDF}
 #'
-#' \code{as.data.frame(results$partialCorrelations)}
+#' \code{as.data.frame(results$partialCorr)}
 #'
 #' @export
 partialcorrelation <- function(
     data,
-    x,
-    y,
+    vars,
     controls,
     method = "pearson",
-    confidence_level = 0.95,
-    alternative = "two.sided",
-    show_zero_order = TRUE,
-    show_semi_partial = TRUE,
-    show_diagnostics = TRUE,
-    correlation_matrix = TRUE,
-    scatterplots = TRUE,
-    residual_plots = FALSE,
-    significance_test = TRUE,
-    effect_size_interpretation = TRUE,
-    multiple_controls_method = "simultaneous",
-    missing_data = "listwise",
-    bootstrap_ci = FALSE,
-    bootstrap_samples = 1000,
-    clinical_interpretation = TRUE) {
+    ci = TRUE,
+    ciWidth = 95,
+    sig = TRUE,
+    sigLevel = 0.05,
+    matrixPlot = FALSE,
+    showZeroOrder = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("partialcorrelation requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(x)) x <- jmvcore::resolveQuo(jmvcore::enquo(x))
-    if ( ! missing(y)) y <- jmvcore::resolveQuo(jmvcore::enquo(y))
+    if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if ( ! missing(controls)) controls <- jmvcore::resolveQuo(jmvcore::enquo(controls))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(x), x, NULL),
-            `if`( ! missing(y), y, NULL),
+            `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(controls), controls, NULL))
 
 
     options <- partialcorrelationOptions$new(
-        x = x,
-        y = y,
+        vars = vars,
         controls = controls,
         method = method,
-        confidence_level = confidence_level,
-        alternative = alternative,
-        show_zero_order = show_zero_order,
-        show_semi_partial = show_semi_partial,
-        show_diagnostics = show_diagnostics,
-        correlation_matrix = correlation_matrix,
-        scatterplots = scatterplots,
-        residual_plots = residual_plots,
-        significance_test = significance_test,
-        effect_size_interpretation = effect_size_interpretation,
-        multiple_controls_method = multiple_controls_method,
-        missing_data = missing_data,
-        bootstrap_ci = bootstrap_ci,
-        bootstrap_samples = bootstrap_samples,
-        clinical_interpretation = clinical_interpretation)
+        ci = ci,
+        ciWidth = ciWidth,
+        sig = sig,
+        sigLevel = sigLevel,
+        matrixPlot = matrixPlot,
+        showZeroOrder = showZeroOrder)
 
     analysis <- partialcorrelationClass$new(
         options = options,

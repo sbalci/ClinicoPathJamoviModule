@@ -4119,6 +4119,22 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Exact Tests for Small Samples
     menuSubtitle: Precise inference for small sample sizes
+  - title: Partial Correlation Analysis
+    name: partialcorrelation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Partial Correlation Analysis
+    menuSubtitle: Correlation controlling for confounding variables
+  - title: Polychoric Correlation Analysis
+    name: polychoriccorr
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Polychoric Correlation Analysis
+    menuSubtitle: Correlation for ordinal and binary variables
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

@@ -6,117 +6,53 @@
 \usage{
 partialcorrelation(
   data,
-  x,
-  y,
+  vars,
   controls,
   method = "pearson",
-  confidence_level = 0.95,
-  alternative = "two.sided",
-  show_zero_order = TRUE,
-  show_semi_partial = TRUE,
-  show_diagnostics = TRUE,
-  correlation_matrix = TRUE,
-  scatterplots = TRUE,
-  residual_plots = FALSE,
-  significance_test = TRUE,
-  effect_size_interpretation = TRUE,
-  multiple_controls_method = "simultaneous",
-  missing_data = "listwise",
-  bootstrap_ci = FALSE,
-  bootstrap_samples = 1000,
-  clinical_interpretation = TRUE
+  ci = TRUE,
+  ciWidth = 95,
+  sig = TRUE,
+  sigLevel = 0.05,
+  matrixPlot = FALSE,
+  showZeroOrder = TRUE
 )
 }
 \arguments{
-\item{data}{the data as a data frame}
+\item{data}{.}
 
-\item{x}{First variable for partial correlation analysis}
+\item{vars}{.}
 
-\item{y}{Second variable for partial correlation analysis}
+\item{controls}{.}
 
-\item{controls}{Variables to control for in the partial correlation
-analysis (minimum 1 required)}
+\item{method}{.}
 
-\item{method}{Method for calculating partial correlations}
+\item{ci}{.}
 
-\item{confidence_level}{Confidence level for confidence intervals}
+\item{ciWidth}{.}
 
-\item{alternative}{Direction of alternative hypothesis for significance
-testing}
+\item{sig}{.}
 
-\item{show_zero_order}{Show original (zero-order) correlations between all
-variables}
+\item{sigLevel}{.}
 
-\item{show_semi_partial}{Show semi-partial (part) correlations alongside
-partial correlations}
+\item{matrixPlot}{.}
 
-\item{show_diagnostics}{Show diagnostic information including degrees of
-freedom and sample sizes}
-
-\item{correlation_matrix}{Display complete correlation matrix including all
-variables}
-
-\item{scatterplots}{Generate scatterplot matrix showing relationships
-between variables}
-
-\item{residual_plots}{Show residual plots after removing effects of control
-variables}
-
-\item{significance_test}{Perform significance tests for partial
-correlations}
-
-\item{effect_size_interpretation}{Provide interpretation guidelines for
-correlation effect sizes}
-
-\item{multiple_controls_method}{Method for handling multiple control
-variables}
-
-\item{missing_data}{Method for handling missing data in correlation
-analysis}
-
-\item{bootstrap_ci}{Use bootstrap method for confidence intervals (robust
-for non-normal data)}
-
-\item{bootstrap_samples}{Number of bootstrap samples for confidence
-intervals}
-
-\item{clinical_interpretation}{Provide clinical interpretation guidance for
-partial correlation results}
+\item{showZeroOrder}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$partialCorrelations} \tab \tab \tab \tab \tab a table \cr
-\code{results$correlationMatrix} \tab \tab \tab \tab \tab a table \cr
-\code{results$diagnostics} \tab \tab \tab \tab \tab a table \cr
-\code{results$effectSizeInterpretation} \tab \tab \tab \tab \tab a html \cr
-\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
-\code{results$scatterplotMatrix} \tab \tab \tab \tab \tab an image \cr
-\code{results$residualPlots} \tab \tab \tab \tab \tab an image \cr
-\code{results$correlationMatrixPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$partialCorr} \tab \tab \tab \tab \tab a table \cr
+\code{results$zeroOrder} \tab \tab \tab \tab \tab a table \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$partialCorrelations$asDF}
+\code{results$partialCorr$asDF}
 
-\code{as.data.frame(results$partialCorrelations)}
+\code{as.data.frame(results$partialCorr)}
 }
 \description{
-Partial correlation analysis for examining the relationship between two
-variables while controlling for one or more other variables. This method
-removes the influence of control variables to reveal the direct association
-between primary variables, commonly used in pathology research to control
-for confounding factors.
-}
-\examples{
-data \\%>\\%
-partialcorrelation(
-    x = "variable1",
-    y = "variable2",
-    controls = c("age", "sex", "stage"),
-    method = "pearson"
-)
-
+Partial Correlation Analysis
 }

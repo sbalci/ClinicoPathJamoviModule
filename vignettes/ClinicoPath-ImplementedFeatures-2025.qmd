@@ -42,6 +42,30 @@ This document provides a comprehensive overview of all implemented features in t
 - Wilson score confidence intervals as robust alternative
 - Statistical support for studies with small sample sizes where asymptotic methods fail
 
+**Feature:** Partial Correlation Analysis (partialcorrelation)  
+**Packages Used:** `stats`, `ggplot2`, `jmvcore`  
+**Functions Applied:** `partialcorrelation`  
+
+**Key Features:**
+- Partial correlation analysis controlling for confounding variables
+- Support for Pearson, Spearman, and Kendall's tau methods
+- Zero-order correlation comparison with controlled correlations
+- Residual-based partial correlation calculation using regression methods
+- Comprehensive statistical inference with confidence intervals and significance testing
+- Visualization of partial correlation matrices with control variable identification
+
+**Feature:** Polychoric Correlation Analysis (polychoriccorr)  
+**Packages Used:** `stats`, `ggplot2`, `jmvcore`  
+**Functions Applied:** `polychoriccorr`  
+
+**Key Features:**
+- Polychoric correlation for ordinal-ordinal variable relationships
+- Tetrachoric correlation for binary-binary variable analysis
+- Maximum likelihood and two-step estimation methods
+- Frequency table analysis for categorical data relationships
+- Chi-square tests for independence with exact and approximate methods
+- Correlation matrix visualization for ordinal data structures
+
 ### Enhanced Diagnostic Performance Analysis (August 2024)
 **Feature:** Enhanced timeroc Function (v1.1.0) with Binary ROC Analysis and DeLong Test  
 **Packages Used:** `pROC`, `survival`, `ggplot2`, `dplyr`  
