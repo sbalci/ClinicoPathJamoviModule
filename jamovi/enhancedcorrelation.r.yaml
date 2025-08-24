@@ -1,0 +1,44 @@
+---
+name: enhancedcorrelation
+title: Enhanced Correlation Analysis
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: text
+    title: Correlation Results
+    type: Table
+    visible: (vars)
+    columns:
+      - name: var1
+        title: Variable 1
+        type: text
+      - name: var2
+        title: Variable 2  
+        type: text
+      - name: r
+        title: r
+        type: number
+        format: zto,pvalue
+      - name: rCI
+        title: 95% CI for r
+        type: text
+        visible: (ci)
+      - name: p
+        title: p
+        type: number
+        format: zto,pvalue
+      - name: n
+        title: N
+        type: integer
+
+  - name: plot
+    title: Correlation Plot
+    visible: (plotMatrix || plotScatter)
+    type: Image
+    width: 450
+    height: 400
+    renderFun: .plot

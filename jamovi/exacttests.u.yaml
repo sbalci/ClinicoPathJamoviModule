@@ -1,0 +1,66 @@
+name: exacttests
+title: Exact Tests for Small Samples
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Rows
+        children:
+          - type: VariablesListBox
+            name: rows
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Columns
+        children:
+          - type: VariablesListBox
+            name: cols
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Counts (optional)
+        children:
+          - type: VariablesListBox
+            name: counts
+            isTarget: true
+            maxItemCount: 1
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Test Options
+        children:
+          - type: ComboBox
+            name: testType
+            label: Test type
+          - type: ComboBox
+            name: alternative
+            label: Alternative hypothesis
+      - type: Label
+        label: Confidence Intervals
+        children:
+          - type: CheckBox
+            name: showCI
+            label: Show confidence intervals
+          - type: ComboBox
+            name: ciMethod
+            label: CI method
+            enable: (showCI)
+          - type: TextBox
+            name: ciWidth
+            label: Confidence level
+            suffix: '%'
+            format: number
+            enable: (showCI)
+      - type: Label
+        label: Options
+        children:
+          - type: CheckBox
+            name: correction
+            label: Continuity correction
+jus: '2.0'

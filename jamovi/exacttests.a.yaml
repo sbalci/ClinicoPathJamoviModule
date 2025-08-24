@@ -1,0 +1,93 @@
+---
+name: exacttests
+title: Exact Tests for Small Samples
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Exact Tests for Small Samples
+menuSubtitle: Precise inference for small sample sizes
+options:
+  - name: data
+    type: Data
+
+  - name: rows
+    title: Rows
+    type: Variable
+    suggested:
+      - nominal
+      - ordinal
+    permitted:
+      - factor
+
+  - name: cols
+    title: Columns  
+    type: Variable
+    suggested:
+      - nominal
+      - ordinal
+    permitted:
+      - factor
+
+  - name: counts
+    title: Counts
+    type: Variable
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: testType
+    title: Test type
+    type: List
+    options:
+      - name: fisher
+        title: Fisher's exact test
+      - name: binomial
+        title: Exact binomial test
+      - name: mcnemar
+        title: Exact McNemar test
+      - name: barnard
+        title: Barnard's exact test
+    default: fisher
+
+  - name: alternative
+    title: Alternative hypothesis
+    type: List
+    options:
+      - name: two.sided
+        title: Two-sided
+      - name: greater
+        title: Greater than
+      - name: less
+        title: Less than
+    default: two.sided
+
+  - name: ciMethod
+    title: Confidence interval method
+    type: List
+    options:
+      - name: clopper_pearson
+        title: Clopper-Pearson (exact)
+      - name: wilson
+        title: Wilson score
+      - name: agresti_coull
+        title: Agresti-Coull
+    default: clopper_pearson
+
+  - name: ciWidth
+    title: Confidence level
+    type: Number
+    min: 50
+    max: 99.9
+    default: 95
+
+  - name: showCI
+    title: Show confidence intervals
+    type: Bool
+    default: true
+
+  - name: correction
+    title: Continuity correction
+    type: Bool
+    default: false

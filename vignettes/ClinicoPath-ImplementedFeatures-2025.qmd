@@ -16,6 +16,32 @@ This document provides a comprehensive overview of all implemented features in t
 
 ## Recent Major Achievements
 
+### Enhanced Statistical Methods for Small Samples (December 2024)
+
+**Feature:** Enhanced Correlation Analysis (enhancedcorrelation)  
+**Packages Used:** `stats`, `ggplot2`, `jmvcore`  
+**Functions Applied:** `enhancedcorrelation`  
+
+**Key Features:**
+- Enhanced Spearman rank correlation with robust confidence intervals
+- Kendall's tau correlation with comprehensive statistical inference
+- Pearson correlation with improved small-sample performance
+- Correlation matrix visualization with statistical significance testing
+- Multiple correlation methods in single analysis framework
+- Clinical interpretation support for correlation strength and direction
+
+**Feature:** Exact Tests for Small Samples (exacttests)  
+**Packages Used:** `stats`, `jmvcore`  
+**Functions Applied:** `exacttests`  
+
+**Key Features:**
+- Fisher's exact test with enhanced functionality for sparse contingency tables
+- Exact binomial test for precise proportion inference with small samples
+- Exact McNemar test for paired binary data analysis
+- Clopper-Pearson exact confidence intervals for proportions
+- Wilson score confidence intervals as robust alternative
+- Statistical support for studies with small sample sizes where asymptotic methods fail
+
 ### Enhanced Diagnostic Performance Analysis (August 2024)
 **Feature:** Enhanced timeroc Function (v1.1.0) with Binary ROC Analysis and DeLong Test  
 **Packages Used:** `pROC`, `survival`, `ggplot2`, `dplyr`  
@@ -61,6 +87,111 @@ This document provides a comprehensive overview of all implemented features in t
 - Principal component analysis of selected features for Cox regression
 - Model validation and performance assessment with cross-validation
 - Particularly effective for genomics and high-dimensional biomarker data
+
+### Advanced Non-Parametric Methods Suite (August 2024)
+**Feature:** Cochran's Q Test for Repeated Binary Measures (cochranq)  
+**Packages Used:** `RVAideMemoire`, `stats`, `ggplot2`  
+**Functions Applied:** `cochranq`  
+
+**Key Features:**
+- Extension of McNemar's test for more than 2 paired groups or time points
+- Analysis of repeated binary measurements across multiple conditions
+- Post-hoc pairwise comparisons with multiple testing corrections
+- Effect size measures and power analysis for study design
+- Clinical applications for treatment response over time and diagnostic concordance
+
+**Feature:** Friedman Test for Non-Parametric Repeated Measures (friedmantest)  
+**Packages Used:** `stats`, `PMCMRplus`, `coin`, `ggplot2`  
+**Functions Applied:** `friedmantest`  
+
+**Key Features:**
+- Non-parametric alternative to repeated measures ANOVA for ordinal or non-normal data
+- Robust analysis for within-subjects designs with multiple time points
+- Post-hoc pairwise comparisons using Nemenyi, Wilcoxon, or Conover methods
+- Effect size calculations (Kendall's W) and clinical interpretation
+- Visualization of rank changes across conditions with comprehensive reporting
+
+**Feature:** Page's Trend Test for Ordered Alternatives (pagetrendtest)  
+**Packages Used:** `PMCMRplus`, `stats`, `ggplot2`  
+**Functions Applied:** `pagetrendtest`  
+
+**Key Features:**
+- Specialized test for detecting ordered trends in repeated measures designs
+- Superior power compared to Friedman test when a priori ordering exists
+- Page's L statistic with exact and asymptotic p-values
+- Trend analysis for dose-response studies and progressive interventions
+- Clinical applications for treatment escalation and biomarker progression
+
+### Advanced Flexible Parametric Survival Models (August 2024)
+**Feature:** Flexible Parametric Survival Models with Royston-Parmar Splines (flexparametricadvanced)  
+**Packages Used:** `flexsurv`, `rstpm2`, `survival`, `ggplot2`  
+**Functions Applied:** `flexparametricadvanced`  
+
+**Key Features:**
+- Multiple parametric distributions: Weibull, log-normal, log-logistic, gamma, Gompertz, generalized gamma
+- Royston-Parmar spline models with flexible baseline hazards using restricted cubic splines
+- Superior extrapolation capabilities for health economic modeling and long-term predictions
+- Time-varying effects modeling for covariates that change impact over time
+- Cure model specifications for populations with a cured fraction
+- Smooth hazard and survival functions with clinical interpretation
+- Model comparison using AIC/BIC for distribution selection
+
+### Advanced Survival Methodology Suite (August 2024)
+**Feature:** Time-Updated Survival Estimates (timeupdatedsurvival, timeupdatesurvival)  
+**Packages Used:** `timereg`, `survival`, `ggplot2`, `dplyr`  
+**Functions Applied:** `timeupdatedsurvival`, `timeupdatesurvival`  
+
+**Key Features:**
+- Time-updated survival probability estimates with landmark analysis
+- Dynamic survival prediction incorporating new information over time
+- Non-parametric and semi-parametric approaches for survival updating
+- Additive hazards regression models for time-varying effects
+- Clinical applications for real-time prognosis updating and patient counseling
+
+**Feature:** Transformation Models for Survival Analysis (transformationmodels)  
+**Packages Used:** `tram`, `survival`, `mlt`, `ggplot2`  
+**Functions Applied:** `transformationmodels`  
+
+**Key Features:**
+- Flexible transformation models for survival outcomes with distributional flexibility
+- Box-Cox, log-rank, and normal score transformations for survival data
+- Simultaneous estimation of transformation parameters and regression coefficients
+- Model comparison and selection using information criteria and validation
+- Enhanced modeling of complex survival distributions beyond proportional hazards
+
+### Clinical Translation Suite (August 2024)
+**Feature:** Dynamic Prediction Models (dynamicprediction)  
+**Packages Used:** `dynpred`, `survival`, `JMbayes`, `ggplot2`  
+**Functions Applied:** `dynamicprediction`  
+
+**Key Features:**
+- Dynamic risk prediction incorporating longitudinal biomarker data
+- Landmark analysis for time-updated prognosis calculation
+- Joint modeling of longitudinal and survival processes
+- Personalized prediction intervals with clinical interpretation
+- Real-time prognostic updating for clinical decision support
+
+**Feature:** Clinical Prediction Models (clinicalprediction)  
+**Packages Used:** `rms`, `survival`, `Hmisc`, `ggplot2`  
+**Functions Applied:** `clinicalprediction`  
+
+**Key Features:**
+- Comprehensive clinical prediction model development and validation
+- Risk score calculation with confidence intervals and calibration assessment
+- Nomogram generation for clinical use and patient counseling
+- Model performance assessment with discrimination and calibration metrics
+- Clinical utility analysis with decision curve analysis integration
+
+**Feature:** Treatment Effects Analysis (treatmenteffects, treatmentoptim)  
+**Packages Used:** `survival`, `ggplot2`, `dplyr`, `boot`  
+**Functions Applied:** `treatmenteffects`, `treatmentoptim`  
+
+**Key Features:**
+- Treatment benefit quantification with individual patient-level effects
+- Optimization of treatment selection based on patient characteristics
+- Subgroup analysis for differential treatment effects identification
+- Cost-effectiveness integration with clinical outcomes assessment
+- Personalized treatment recommendation with uncertainty quantification
 
 ### Comprehensive Power Analysis Suite (August 2024)
 **Feature:** Power Analysis & Sample Size Calculations (poweranalysis)  
