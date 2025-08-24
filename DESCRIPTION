@@ -233,7 +233,9 @@ Imports:
     vcd,
     interval,
     Icens,
-    regplot
+    regplot,
+    smcure,
+    flexsurvcure
 VignetteBuilder: 
     knitr, 
     tiff, 

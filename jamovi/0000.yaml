@@ -2163,8 +2163,8 @@ analyses:
     name: curemodels
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
-    menuSubgroup: Advanced Survival
+    menuGroup: ClinicoPathD
+    menuSubgroup: Survival Analysis
     menuTitle: Cure Models for Long-term Survivors
     menuSubtitle: Mixture and Non-mixture Cure Models
     description: >
@@ -3921,6 +3921,33 @@ analyses:
       assumptions. RMST represents the area under the survival curve up to time
       tau and can be compared between groups or modeled with covariates using
       regression techniques.
+  - title: AI Model Validation with Cross-Validation
+    name: aivalidation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideD
+    menuSubgroup: AI & Machine Learning
+    menuTitle: AI Model Validation with Cross-Validation
+    menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
+    description: >
+      Comprehensive validation of AI models and diagnostic tests using
+      cross-validation, model selection, and advanced performance metrics.
+      Designed for AI diagnostic research including comparison of AI vs human
+      performance with statistical significance testing.
+  - title: Treatment Switching Analysis
+    name: treatmentswitching
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Survival Analysis
+    menuTitle: Treatment Switching Analysis
+  - title: Tumor Growth Models
+    name: tumorgrowth
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Survival Analysis
+    menuTitle: Tumor Growth Models
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

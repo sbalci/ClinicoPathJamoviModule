@@ -1,0 +1,336 @@
+---
+name: aivalidation
+title: AI Model Validation with Cross-Validation
+menuGroup: meddecideD
+menuSubgroup: AI & Machine Learning
+menuSubtitle: AI Model Validation, Cross-Validation, DeLong Test
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Comprehensive validation of AI models and diagnostic tests using cross-validation,
+        model selection, and advanced performance metrics. Designed for AI diagnostic research
+        including comparison of AI vs human performance with statistical significance testing.
+        
+    R:
+        dontrun: false
+        usage: |
+            data('medical_ai_data', package='ClinicoPath')
+            
+            aivalidation(data = medical_ai_data, 
+                        predictorVars = c('AI_score', 'human_score', 'biomarker1'),
+                        outcomeVar = 'diagnosis',
+                        positiveLevel = 'positive',
+                        crossValidation = '10-fold',
+                        modelSelection = 'AIC',
+                        compareModels = TRUE,
+                        delongTest = TRUE)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: predictorVars
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            a vector of strings naming the predictor variables (AI scores, human scores, 
+            biomarkers, etc.) from `data`
+
+    - name: outcomeVar
+      title: Outcome Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description:
+          R: >
+            a string naming the binary outcome variable (gold standard) from `data`
+
+    - name: positiveLevel
+      title: Positive Level
+      type: Level
+      variable: (outcomeVar)
+      description:
+          R: >
+            the level of the outcome variable which represents the positive case
+
+    - name: referencePredictor
+      title: Reference Predictor
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            reference predictor for model comparisons (typically AI model or main biomarker)
+
+    # Cross-Validation Options
+    - name: crossValidation
+      title: Cross-Validation Method
+      type: List
+      options:
+        - name: '5-fold'
+          title: 5-fold Cross-Validation
+        - name: '10-fold'
+          title: 10-fold Cross-Validation
+        - name: 'LOO'
+          title: Leave-One-Out
+        - name: 'repeated'
+          title: Repeated Cross-Validation
+        - name: 'none'
+          title: No Cross-Validation
+      default: '10-fold'
+      description:
+          R: >
+            cross-validation method for model validation
+
+    - name: nRepeats
+      title: Number of Repeats
+      type: Integer
+      min: 1
+      max: 1000
+      default: 10
+      description:
+          R: >
+            number of repetitions for repeated cross-validation
+
+    - name: stratified
+      title: Stratified Cross-Validation
+      type: Bool
+      default: true
+      description:
+          R: >
+            maintain outcome variable proportions across folds
+
+    - name: randomSeed
+      title: Random Seed
+      type: Integer
+      min: 1
+      default: 42
+      description:
+          R: >
+            random seed for reproducible results
+
+    # Model Selection Options
+    - name: modelSelection
+      title: Model Selection Method
+      type: List
+      options:
+        - name: 'none'
+          title: No Model Selection
+        - name: 'AIC'
+          title: AIC Stepwise Selection
+        - name: 'BIC'
+          title: BIC Stepwise Selection
+        - name: 'forward'
+          title: Forward Selection
+        - name: 'backward'
+          title: Backward Selection
+        - name: 'lasso'
+          title: LASSO Regularization
+        - name: 'ridge'
+          title: Ridge Regression
+        - name: 'elastic'
+          title: Elastic Net
+      default: 'AIC'
+      description:
+          R: >
+            method for automatic model selection and variable importance
+
+    - name: selectionDirection
+      title: Selection Direction
+      type: List
+      options:
+        - name: 'both'
+          title: Bidirectional
+        - name: 'forward'
+          title: Forward
+        - name: 'backward'
+          title: Backward
+      default: 'both'
+      description:
+          R: >
+            direction for stepwise model selection
+
+    # Statistical Tests
+    - name: compareModels
+      title: Compare Models
+      type: Bool
+      default: true
+      description:
+          R: >
+            perform statistical comparison between models
+
+    - name: delongTest
+      title: DeLong Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            perform DeLong test for comparing AUC values
+
+    - name: mcnemarTest
+      title: McNemar's Test
+      type: Bool
+      default: false
+      description:
+          R: >
+            perform McNemar's test for paired binary predictions
+
+    - name: calibrationTest
+      title: Calibration Test
+      type: Bool
+      default: true
+      description:
+          R: >
+            perform Hosmer-Lemeshow calibration test
+
+    # Advanced Metrics
+    - name: calculateNRI
+      title: Net Reclassification Index
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate Net Reclassification Index with confidence intervals
+
+    - name: calculateIDI
+      title: Integrated Discrimination Index
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate Integrated Discrimination Index with confidence intervals
+
+    - name: youdensJ
+      title: Youden's J Statistic
+      type: Bool
+      default: true
+      description:
+          R: >
+            calculate Youden's J statistic for optimal cutoff determination
+
+    - name: bootstrapCI
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            use bootstrap methods for confidence interval estimation
+
+    - name: nBootstrap
+      title: Bootstrap Iterations
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: >
+            number of bootstrap iterations for confidence intervals
+
+    # Output Options
+    - name: showModelSelection
+      title: Show Model Selection Results
+      type: Bool
+      default: true
+      description:
+          R: >
+            display model selection process and variable importance
+
+    - name: showCalibration
+      title: Show Calibration Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            display calibration plots and statistics
+
+    - name: showCrossValidation
+      title: Show Cross-Validation Details
+      type: Bool
+      default: true
+      description:
+          R: >
+            display detailed cross-validation results
+
+    - name: showComparison
+      title: Show Model Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            display statistical comparison between models
+
+    # Plot Options
+    - name: rocPlot
+      title: ROC Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            generate ROC curves with cross-validation confidence bands
+
+    - name: calibrationPlot
+      title: Calibration Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            generate calibration plots showing observed vs predicted probabilities
+
+    - name: comparisonPlot
+      title: Model Comparison Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            generate forest plot comparing model performance
+
+    - name: cvPerformancePlot
+      title: Cross-Validation Performance
+      type: Bool
+      default: true
+      description:
+          R: >
+            generate plots showing cross-validation performance across folds
+
+    - name: variableImportancePlot
+      title: Variable Importance Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            generate variable importance plot from model selection
+
+    # Report Options
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: true
+      description:
+          R: >
+            show explanations for methods and interpretations
+
+    - name: showSummaries
+      title: Show Summaries
+      type: Bool
+      default: true
+      description:
+          R: >
+            show summary interpretations of results
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.999
+      default: 0.95
+      description:
+          R: >
+            confidence level for confidence intervals
+...

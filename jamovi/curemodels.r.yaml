@@ -13,6 +13,11 @@ items:
           - status
           - predictors
 
+    - name:  warnings
+      title: Warnings
+      type:  Html
+      visible: true
+
     - name:  summary
       title: Analysis Summary
       type:  Html

@@ -1,0 +1,253 @@
+---
+name: treatmentswitching
+title: Treatment Switching Analysis
+menuGroup: ClinicoPathD
+menuSubgroup: Survival Analysis
+menuTitle: Treatment Switching Analysis
+
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Time to event or censoring
+
+    - name: event
+      title: Event Indicator
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Event status (0 = censored, 1 = event)
+
+    - name: treatment
+      title: Initial Treatment Assignment
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      description:
+          R: >
+            Original randomized treatment assignment
+
+    - name: switchingTime
+      title: Switching Time
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Time when treatment switching occurred (NA if no switching)
+
+    - name: actualTreatment
+      title: Actual Treatment Received
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      description:
+          R: >
+            Actual treatment received after any switching
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      default: []
+      description:
+          R: >
+            Baseline covariates for adjustment
+
+    - name: switchingMethod
+      title: Switching Analysis Method
+      type: List
+      options:
+          - name: itt
+            title: Intention-to-Treat (ITT)
+          - name: pp
+            title: Per-Protocol (PP)
+          - name: ipcw
+            title: Inverse Probability of Censoring Weighting (IPCW)
+          - name: rpsft
+            title: Rank Preserving Structural Failure Time (RPSFT)
+          - name: tvc
+            title: Time-Varying Covariate
+          - name: tte
+            title: Two-Stage Estimation
+      default: ipcw
+      description:
+          R: >
+            Method for handling treatment switching
+
+    - name: switchingDirection
+      title: Switching Direction
+      type: List
+      options:
+          - name: control_to_treatment
+            title: Control to Treatment
+          - name: treatment_to_control
+            title: Treatment to Control
+          - name: bidirectional
+            title: Bidirectional Switching
+      default: control_to_treatment
+      description:
+          R: >
+            Direction of treatment switching allowed
+
+    - name: censoringAssumption
+      title: Censoring Assumption
+      type: List
+      options:
+          - name: common_treatment
+            title: Common Treatment Effect
+          - name: no_unmeasured_confounding
+            title: No Unmeasured Confounding
+          - name: non_informative_censoring
+            title: Non-informative Censoring
+      default: common_treatment
+      description:
+          R: >
+            Assumptions for handling censoring in switching analysis
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: Number
+      min: 50
+      max: 99.9
+      default: 95
+      description:
+          R: >
+            Confidence level for interval estimation
+
+    # Results options
+    - name: treatmentEffect
+      title: Treatment Effect Estimates
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display treatment effect estimates for different methods
+
+    - name: switchingPatterns
+      title: Switching Patterns Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Summarize patterns of treatment switching
+
+    - name: survivalCurves
+      title: Survival Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display survival curves with switching adjustments
+
+    - name: sensitivityAnalysis
+      title: Sensitivity Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform sensitivity analysis for switching assumptions
+
+    - name: causalEstimate
+      title: Causal Effect Estimation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Estimate causal treatment effects adjusting for switching
+
+    - name: methodComparison
+      title: Method Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare results across different switching methods
+
+    # Advanced options
+    - name: bootstrapSamples
+      title: Bootstrap Samples
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: >
+            Number of bootstrap samples for uncertainty estimation
+
+    - name: psModel
+      title: Propensity Score Model
+      type: String
+      description:
+          R: >
+            Formula for propensity score model (for IPCW method)
+
+    - name: accelerationFactor
+      title: Acceleration Factor (RPSFT)
+      type: Number
+      description:
+          R: >
+            Acceleration factor for RPSFT method (estimated if not specified)
+
+    - name: treatmentLag
+      title: Treatment Lag Time
+      type: Number
+      min: 0
+      default: 0
+      description:
+          R: >
+            Lag time before treatment effect begins
+
+    - name: plotWidth
+      title: Plot Width
+      type: Integer
+      default: 700
+      min: 300
+      max: 2000
+      description:
+          R: >
+            Width of survival plots in pixels
+
+    - name: plotHeight
+      title: Plot Height
+      type: Integer
+      default: 500
+      min: 200
+      max: 2000
+      description:
+          R: >
+            Height of survival plots in pixels

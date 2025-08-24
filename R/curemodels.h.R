@@ -158,6 +158,7 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        warnings = function() private$.items[["warnings"]],
         summary = function() private$.items[["summary"]],
         modelTable = function() private$.items[["modelTable"]],
         cureTable = function() private$.items[["cureTable"]],
@@ -182,6 +183,11 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "time",
                     "status",
                     "predictors")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -349,7 +355,7 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "curemodels",
-                version = c(0,0,3),
+                version = c(1,0,0),
                 options = options,
                 results = curemodelsResults$new(options=options),
                 data = data,
@@ -398,6 +404,7 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cureTable} \tab \tab \tab \tab \tab a table \cr
