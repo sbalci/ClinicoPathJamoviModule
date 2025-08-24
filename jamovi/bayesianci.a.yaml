@@ -1,0 +1,317 @@
+---
+name: bayesianci
+title: Bayesian Confidence Intervals (Credible Intervals)
+menuGroup: ClinicoPathDescriptivesD
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Bayesian confidence intervals (credible intervals) as alternative to frequentist confidence intervals.
+        This analysis provides credible intervals using Beta-posterior distributions, Monte Carlo sampling,
+        and various prior specifications for continuous and binary outcome data.
+        Essential for Bayesian statistical inference in clinical research.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            bayesianci(
+                outcome = "response",
+                credible_level = 0.95,
+                prior_type = "uniform",
+                mcmc_method = "gibbs"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Outcome variable for credible interval estimation
+
+    - name: group_var
+      title: Grouping Variable (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Grouping variable for stratified analysis
+
+    - name: covariates
+      title: Covariates (Optional)
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Covariate variables for adjusted analysis
+
+    - name: outcome_type
+      title: Outcome Type
+      type: List
+      options:
+        - name: continuous
+          title: Continuous
+        - name: binary
+          title: Binary/Proportion
+        - name: count
+          title: Count/Poisson
+        - name: ordinal
+          title: Ordinal
+      default: continuous
+      description:
+          R: >
+            Type of outcome variable for appropriate modeling
+
+    - name: credible_level
+      title: Credible Level
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Level for Bayesian credible intervals
+
+    - name: additional_levels
+      title: Additional Credible Levels
+      type: String
+      default: "0.50,0.80,0.90"
+      description:
+          R: >
+            Comma-separated additional credible levels to compute
+
+    - name: prior_type
+      title: Prior Distribution
+      type: List
+      options:
+        - name: uniform
+          title: Uniform (Non-informative)
+        - name: jeffreys
+          title: Jeffreys Prior
+        - name: beta
+          title: Beta Prior
+        - name: normal
+          title: Normal Prior
+        - name: gamma
+          title: Gamma Prior
+        - name: informative
+          title: Informative Expert Prior
+      default: uniform
+      description:
+          R: >
+            Prior distribution specification for Bayesian analysis
+
+    - name: beta_alpha
+      title: Beta Prior Alpha
+      type: Number
+      min: 0.1
+      max: 100
+      default: 1.0
+      description:
+          R: >
+            Alpha parameter for Beta prior distribution
+
+    - name: beta_beta
+      title: Beta Prior Beta
+      type: Number
+      min: 0.1
+      max: 100
+      default: 1.0
+      description:
+          R: >
+            Beta parameter for Beta prior distribution
+
+    - name: normal_mean
+      title: Normal Prior Mean
+      type: Number
+      default: 0.0
+      description:
+          R: >
+            Mean parameter for Normal prior distribution
+
+    - name: normal_sd
+      title: Normal Prior Standard Deviation
+      type: Number
+      min: 0.1
+      max: 100
+      default: 1.0
+      description:
+          R: >
+            Standard deviation for Normal prior distribution
+
+    - name: gamma_shape
+      title: Gamma Prior Shape
+      type: Number
+      min: 0.1
+      max: 100
+      default: 1.0
+      description:
+          R: >
+            Shape parameter for Gamma prior distribution
+
+    - name: gamma_rate
+      title: Gamma Prior Rate
+      type: Number
+      min: 0.1
+      max: 100
+      default: 1.0
+      description:
+          R: >
+            Rate parameter for Gamma prior distribution
+
+    - name: mcmc_method
+      title: MCMC Method
+      type: List
+      options:
+        - name: analytical
+          title: Analytical (Conjugate)
+        - name: gibbs
+          title: Gibbs Sampling
+        - name: metropolis
+          title: Metropolis-Hastings
+        - name: stan
+          title: Stan (HMC)
+        - name: jags
+          title: JAGS
+      default: analytical
+      description:
+          R: >
+            Method for posterior sampling and credible interval computation
+
+    - name: mcmc_samples
+      title: MCMC Samples
+      type: Integer
+      min: 1000
+      max: 50000
+      default: 10000
+      description:
+          R: >
+            Number of MCMC samples for posterior estimation
+
+    - name: burnin_samples
+      title: Burn-in Samples
+      type: Integer
+      min: 100
+      max: 10000
+      default: 2000
+      description:
+          R: >
+            Number of burn-in samples to discard
+
+    - name: thinning
+      title: Thinning Interval
+      type: Integer
+      min: 1
+      max: 100
+      default: 1
+      description:
+          R: >
+            Thinning interval for MCMC chains
+
+    - name: chains
+      title: Number of Chains
+      type: Integer
+      min: 1
+      max: 8
+      default: 3
+      description:
+          R: >
+            Number of parallel MCMC chains
+
+    - name: posterior_summary
+      title: Posterior Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compute posterior mean, median, mode, and credible intervals
+
+    - name: convergence_diagnostics
+      title: Convergence Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Assess MCMC convergence using R-hat and effective sample size
+
+    - name: prior_posterior_comparison
+      title: Prior-Posterior Comparison
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare prior and posterior distributions
+
+    - name: credible_vs_confidence
+      title: Credible vs Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compare Bayesian credible intervals with frequentist confidence intervals
+
+    - name: hpd_intervals
+      title: Highest Posterior Density Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Compute highest posterior density (HPD) credible intervals
+
+    - name: sensitivity_analysis
+      title: Prior Sensitivity Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Assess sensitivity to prior specification
+
+    - name: robustness_check
+      title: Robustness Checks
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform robustness checks with different prior specifications
+
+    - name: clinical_interpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide clinical interpretation of credible intervals
+
+    - name: posterior_plots
+      title: Posterior Distribution Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create posterior distribution and credible interval visualizations
+
+    - name: trace_plots
+      title: MCMC Trace Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate MCMC trace plots for convergence assessment

@@ -1,0 +1,386 @@
+---
+name: bayesianci
+title: Bayesian Confidence Intervals (Credible Intervals)
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: dataInfo
+      title: 'Data Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - outcome
+        - group_var
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: priorSpecification
+      title: 'Prior Specification Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - prior_type
+        - beta_alpha
+        - beta_beta
+        - normal_mean
+        - normal_sd
+        - gamma_shape
+        - gamma_rate
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: distribution
+          title: 'Prior Distribution'
+          type: text
+        - name: parameters
+          title: 'Prior Parameters'
+          type: text
+        - name: mean
+          title: 'Prior Mean'
+          type: number
+          format: zto:4
+        - name: variance
+          title: 'Prior Variance'
+          type: number
+          format: zto:4
+
+    - name: posteriorSummary
+      title: 'Posterior Summary Statistics'
+      type: Table
+      visible: (posterior_summary)
+      rows: 1
+      clearWith:
+        - posterior_summary
+        - outcome
+        - group_var
+        - mcmc_method
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: mean
+          title: 'Posterior Mean'
+          type: number
+          format: zto:4
+        - name: median
+          title: 'Posterior Median'
+          type: number
+          format: zto:4
+        - name: mode
+          title: 'Posterior Mode'
+          type: number
+          format: zto:4
+        - name: sd
+          title: 'Posterior SD'
+          type: number
+          format: zto:4
+        - name: se_mean
+          title: 'SE of Mean'
+          type: number
+          format: zto:4
+
+    - name: credibleIntervals
+      title: 'Bayesian Credible Intervals'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - outcome
+        - credible_level
+        - additional_levels
+        - mcmc_method
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: level
+          title: 'Credible Level'
+          type: text
+        - name: lower_bound
+          title: 'Lower Bound'
+          type: number
+          format: zto:4
+        - name: upper_bound
+          title: 'Upper Bound'
+          type: number
+          format: zto:4
+        - name: width
+          title: 'Interval Width'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: hpdIntervals
+      title: 'Highest Posterior Density Intervals'
+      type: Table
+      visible: (hpd_intervals)
+      rows: 1
+      clearWith:
+        - hpd_intervals
+        - outcome
+        - credible_level
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: level
+          title: 'HPD Level'
+          type: text
+        - name: lower_hpd
+          title: 'HPD Lower'
+          type: number
+          format: zto:4
+        - name: upper_hpd
+          title: 'HPD Upper'
+          type: number
+          format: zto:4
+        - name: hpd_width
+          title: 'HPD Width'
+          type: number
+          format: zto:4
+        - name: coverage_prob
+          title: 'Coverage Probability'
+          type: number
+          format: zto:4
+
+    - name: comparisonTable
+      title: 'Credible vs Confidence Intervals Comparison'
+      type: Table
+      visible: (credible_vs_confidence)
+      rows: 1
+      clearWith:
+        - credible_vs_confidence
+        - outcome
+        - credible_level
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: bayesian_lower
+          title: 'Bayesian Lower'
+          type: number
+          format: zto:4
+        - name: bayesian_upper
+          title: 'Bayesian Upper'
+          type: number
+          format: zto:4
+        - name: frequentist_lower
+          title: 'Frequentist Lower'
+          type: number
+          format: zto:4
+        - name: frequentist_upper
+          title: 'Frequentist Upper'
+          type: number
+          format: zto:4
+        - name: width_difference
+          title: 'Width Difference'
+          type: number
+          format: zto:4
+        - name: interpretation_difference
+          title: 'Interpretation Difference'
+          type: text
+
+    - name: convergenceDiagnostics
+      title: 'MCMC Convergence Diagnostics'
+      type: Table
+      visible: (convergence_diagnostics)
+      rows: 1
+      clearWith:
+        - convergence_diagnostics
+        - mcmc_samples
+        - chains
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: rhat
+          title: 'R-hat'
+          type: number
+          format: zto:4
+        - name: eff_sample_size
+          title: 'Effective Sample Size'
+          type: integer
+        - name: ess_bulk
+          title: 'ESS Bulk'
+          type: integer
+        - name: ess_tail
+          title: 'ESS Tail'
+          type: integer
+        - name: convergence_status
+          title: 'Convergence Status'
+          type: text
+        - name: recommendation
+          title: 'Recommendation'
+          type: text
+
+    - name: sensitivityAnalysis
+      title: 'Prior Sensitivity Analysis'
+      type: Table
+      visible: (sensitivity_analysis)
+      rows: 1
+      clearWith:
+        - sensitivity_analysis
+        - prior_type
+        - outcome
+      columns:
+        - name: prior_specification
+          title: 'Prior Specification'
+          type: text
+        - name: posterior_mean
+          title: 'Posterior Mean'
+          type: number
+          format: zto:4
+        - name: credible_lower
+          title: 'Credible Lower'
+          type: number
+          format: zto:4
+        - name: credible_upper
+          title: 'Credible Upper'
+          type: number
+          format: zto:4
+        - name: sensitivity_measure
+          title: 'Sensitivity Measure'
+          type: number
+          format: zto:4
+        - name: robustness_assessment
+          title: 'Robustness Assessment'
+          type: text
+
+    - name: robustnessCheck
+      title: 'Robustness Check Results'
+      type: Table
+      visible: (robustness_check)
+      rows: 1
+      clearWith:
+        - robustness_check
+        - outcome
+        - prior_type
+      columns:
+        - name: test_scenario
+          title: 'Test Scenario'
+          type: text
+        - name: prior_description
+          title: 'Prior Description'
+          type: text
+        - name: posterior_change
+          title: 'Posterior Change (%)'
+          type: number
+          format: zto:2
+        - name: interval_change
+          title: 'Interval Width Change (%)'
+          type: number
+          format: zto:2
+        - name: robustness_rating
+          title: 'Robustness Rating'
+          type: text
+
+    - name: clinicalInterpretation
+      title: 'Clinical Interpretation Guide'
+      type: Table
+      visible: (clinical_interpretation)
+      rows: 1
+      clearWith:
+        - clinical_interpretation
+        - outcome
+        - credible_level
+      columns:
+        - name: clinical_aspect
+          title: 'Clinical Aspect'
+          type: text
+        - name: bayesian_finding
+          title: 'Bayesian Finding'
+          type: text
+        - name: clinical_interpretation
+          title: 'Clinical Interpretation'
+          type: text
+        - name: decision_guidance
+          title: 'Decision Guidance'
+          type: text
+        - name: uncertainty_assessment
+          title: 'Uncertainty Assessment'
+          type: text
+
+    - name: posteriorPlot
+      title: 'Posterior Distribution and Credible Intervals'
+      type: Image
+      visible: (posterior_plots)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotPosterior
+      clearWith:
+        - posterior_plots
+        - outcome
+        - credible_level
+
+    - name: priorPosteriorPlot
+      title: 'Prior vs Posterior Comparison'
+      type: Image
+      visible: (prior_posterior_comparison)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotPriorPosterior
+      clearWith:
+        - prior_posterior_comparison
+        - outcome
+        - prior_type
+
+    - name: tracePlots
+      title: 'MCMC Trace Plots'
+      type: Image
+      visible: (trace_plots)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotTraces
+      clearWith:
+        - trace_plots
+        - mcmc_samples
+        - chains
+
+    - name: credibleComparisonPlot
+      title: 'Credible vs Confidence Intervals Comparison'
+      type: Image
+      visible: (credible_vs_confidence)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotCredibleComparison
+      clearWith:
+        - credible_vs_confidence
+        - outcome
+        - credible_level
+
+    - name: sensitivityPlot
+      title: 'Prior Sensitivity Visualization'
+      type: Image
+      visible: (sensitivity_analysis)
+      requiresData: true
+      width: 800
+      height: 600
+      renderFun: .plotSensitivity
+      clearWith:
+        - sensitivity_analysis
+        - prior_type
+        - outcome
+
+    - name: methodExplanation
+      title: 'Method and Clinical Context'
+      type: Html
+      visible: true

@@ -3759,6 +3759,18 @@ analyses:
       treatment  effects or time points, making it more powerful than the
       general Friedman test when the alternative hypothesis specifies a trend or
       ordered pattern.
+  - title: Bayesian Confidence Intervals (Credible Intervals)
+    name: bayesianci
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptivesD
+    menuTitle: Bayesian Confidence Intervals (Credible Intervals)
+    description: >
+      Bayesian confidence intervals (credible intervals) as alternative to
+      frequentist confidence intervals. This analysis provides credible
+      intervals using Beta-posterior distributions, Monte Carlo sampling, and
+      various prior specifications for continuous and binary outcome data.
+      Essential for Bayesian statistical inference in clinical research.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
