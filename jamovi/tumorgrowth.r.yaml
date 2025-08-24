@@ -1,0 +1,180 @@
+---
+name:  tumorgrowth
+title: Tumor Growth Models
+jrs:   '1.1'
+
+items:
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - time
+          - tumorSize
+          - patientId
+
+    - name:  summary
+      title: Analysis Summary
+      type:  Html
+      visible: true
+
+    - name:  modelTable
+      title: Growth Model Parameters
+      type:  Table
+      visible: (modelSummary)
+      rows: 1
+      columns:
+          - name: parameter
+            title: 'Parameter'
+            type: text
+          - name: estimate
+            title: 'Estimate'
+            type: number
+          - name: std_error
+            title: 'Std. Error'
+            type: number
+          - name: t_value
+            title: 't value'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: interpretation
+            title: 'Biological Meaning'
+            type: text
+
+    - name:  growthParametersTable
+      title: Growth Characteristics
+      type:  Table
+      visible: (growthParameters)
+      rows: 1
+      columns:
+          - name: characteristic
+            title: 'Characteristic'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+          - name: unit
+            title: 'Unit'
+            type: text
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  doublingTimeTable
+      title: Tumor Doubling Time
+      type:  Table
+      visible: (doubleTime)
+      rows: 1
+      columns:
+          - name: group
+            title: 'Group'
+            type: text
+          - name: doubling_time
+            title: 'Doubling Time'
+            type: number
+          - name: unit
+            title: 'Unit'
+            type: text
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+
+    - name:  treatmentEffectTable
+      title: Treatment Effects on Growth
+      type:  Table
+      visible: (treatmentAnalysis)
+      rows: 1
+      columns:
+          - name: parameter
+            title: 'Growth Parameter'
+            type: text
+          - name: treatment_effect
+            title: 'Treatment Effect'
+            type: number
+          - name: percent_change
+            title: '% Change'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: clinical_significance
+            title: 'Clinical Significance'
+            type: text
+
+    - name:  growthCurvesPlot
+      title: Tumor Growth Curves
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .plotGrowthCurves
+      visible: (growthCurves)
+      clearWith:
+          - time
+          - tumorSize
+          - patientId
+          - growthModel
+          - treatmentEffect
+
+    - name:  residualPlot
+      title: Residual Analysis
+      type:  Image
+      width:  700
+      height: 400
+      renderFun: .plotResiduals
+      visible: (residualAnalysis)
+      clearWith:
+          - time
+          - tumorSize
+          - growthModel
+          - modelApproach
+
+    - name:  predictionPlot
+      title: Growth Predictions
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotPredictions
+      visible: (predictions)
+      clearWith:
+          - time
+          - tumorSize
+          - predictionTime
+          - growthModel
+
+    - name:  fitStatistics
+      title: Model Fit Statistics
+      type:  Table
+      visible: (modelSummary)
+      rows: 1
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  clinicalInterpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: true
+
+...

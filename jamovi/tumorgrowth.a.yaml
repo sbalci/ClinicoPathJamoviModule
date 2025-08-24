@@ -1,0 +1,248 @@
+---
+
+name: tumorgrowth
+title: Tumor Growth Models
+
+menuGroup: ClinicoPathD
+menuSubgroup: Survival Analysis
+menuTitle: Tumor Growth Models
+
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Time variable (days, weeks, months) from baseline
+
+    - name: tumorSize
+      title: Tumor Size
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Tumor size measurement (volume, diameter, etc.)
+
+    - name: patientId
+      title: Patient ID
+      type: Variable
+      suggested:
+          - nominal
+      permitted:
+          - factor
+          - numeric
+      description:
+          R: >
+            Patient identifier for longitudinal data
+
+    - name: covariates
+      title: Covariates
+      type: Variables
+      suggested:
+          - continuous
+          - nominal
+          - ordinal
+      permitted:
+          - numeric
+          - factor
+      default: []
+      description:
+          R: >
+            Covariates affecting tumor growth
+
+    - name: growthModel
+      title: Growth Model Type
+      type: List
+      options:
+          - name: exponential
+            title: Exponential Growth
+          - name: gompertz
+            title: Gompertz Model
+          - name: logistic
+            title: Logistic Growth
+          - name: bertalanffy
+            title: von Bertalanffy
+          - name: linear
+            title: Linear Growth
+          - name: power
+            title: Power Law
+      default: gompertz
+      description:
+          R: >
+            Mathematical model for tumor growth kinetics
+
+    - name: treatmentEffect
+      title: Treatment Effect Variable
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+      description:
+          R: >
+            Variable indicating treatment status or type
+
+    - name: treatmentTime
+      title: Treatment Start Time
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description:
+          R: >
+            Time when treatment was initiated
+
+    - name: modelApproach
+      title: Modeling Approach
+      type: List
+      options:
+          - name: nlme
+            title: Nonlinear Mixed Effects
+          - name: nls
+            title: Nonlinear Least Squares
+          - name: bayesian
+            title: Bayesian Estimation
+      default: nlme
+      description:
+          R: >
+            Statistical approach for parameter estimation
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: Number
+      min: 50
+      max: 99.9
+      default: 95
+      description:
+          R: >
+            Confidence level for parameter intervals
+
+    # Results options
+    - name: modelSummary
+      title: Model Summary
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display model parameter estimates and fit statistics
+
+    - name: growthParameters
+      title: Growth Parameters
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show biological interpretation of growth parameters
+
+    - name: growthCurves
+      title: Growth Curves Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display individual and population growth curves
+
+    - name: residualAnalysis
+      title: Residual Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform residual diagnostics
+
+    - name: treatmentAnalysis
+      title: Treatment Effect Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Analyze treatment effects on growth parameters
+
+    - name: predictions
+      title: Growth Predictions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate future growth predictions
+
+    - name: doubleTime
+      title: Calculate Doubling Time
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate tumor doubling time
+
+    # Advanced options
+    - name: initialSize
+      title: Initial Tumor Size
+      type: Number
+      min: 0
+      description:
+          R: >
+            Initial tumor size (if not measured)
+
+    - name: maxSize
+      title: Maximum Tumor Size
+      type: Number
+      min: 0
+      description:
+          R: >
+            Theoretical maximum size for logistic models
+
+    - name: predictionTime
+      title: Prediction Time Horizon
+      type: Number
+      min: 1
+      default: 30
+      description:
+          R: >
+            Time units ahead for growth predictions
+
+    - name: mcmcSamples
+      title: MCMC Samples
+      type: Integer
+      min: 1000
+      max: 50000
+      default: 5000
+      description:
+          R: >
+            Number of MCMC samples for Bayesian estimation
+
+    - name: plotWidth
+      title: Plot Width
+      type: Integer
+      default: 600
+      min: 300
+      max: 2000
+      description:
+          R: >
+            Width of the growth plots in pixels
+
+    - name: plotHeight
+      title: Plot Height
+      type: Integer
+      default: 450
+      min: 200
+      max: 2000
+      description:
+          R: >
+            Height of the growth plots in pixels

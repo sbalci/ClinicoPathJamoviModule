@@ -54,6 +54,7 @@ curemodels(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$cureTable} \tab \tab \tab \tab \tab a table \cr

@@ -1,0 +1,218 @@
+---
+name:  treatmentswitching
+title: Treatment Switching Analysis
+jrs:   '1.1'
+
+items:
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - time
+          - event
+          - treatment
+          - switchingTime
+
+    - name:  summary
+      title: Analysis Summary
+      type:  Html
+      visible: true
+
+    - name:  switchingPatternsTable
+      title: Treatment Switching Patterns
+      type:  Table
+      visible: (switchingPatterns)
+      rows: 1
+      columns:
+          - name: pattern
+            title: 'Switching Pattern'
+            type: text
+          - name: n_patients
+            title: 'N Patients'
+            type: integer
+          - name: percentage
+            title: 'Percentage'
+            type: number
+          - name: median_switch_time
+            title: 'Median Switch Time'
+            type: number
+          - name: switch_time_iqr
+            title: 'IQR Switch Time'
+            type: text
+
+    - name:  treatmentEffectTable
+      title: Treatment Effect Estimates
+      type:  Table
+      visible: (treatmentEffect)
+      rows: 1
+      columns:
+          - name: method
+            title: 'Method'
+            type: text
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_ci_lower
+            title: 'HR CI Lower'
+            type: number
+          - name: hr_ci_upper
+            title: 'HR CI Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  causalEffectTable
+      title: Causal Treatment Effects
+      type:  Table
+      visible: (causalEstimate)
+      rows: 1
+      columns:
+          - name: estimand
+            title: 'Estimand'
+            type: text
+          - name: estimate
+            title: 'Estimate'
+            type: number
+          - name: std_error
+            title: 'Std. Error'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: assumption
+            title: 'Key Assumption'
+            type: text
+
+    - name:  methodComparisonTable
+      title: Method Comparison
+      type:  Table
+      visible: (methodComparison)
+      rows: 1
+      columns:
+          - name: method
+            title: 'Method'
+            type: text
+          - name: bias_direction
+            title: 'Likely Bias Direction'
+            type: text
+          - name: assumptions
+            title: 'Key Assumptions'
+            type: text
+          - name: hr_estimate
+            title: 'HR Estimate'
+            type: number
+          - name: recommendation
+            title: 'Recommendation'
+            type: text
+
+    - name:  survivalCurvesPlot
+      title: Survival Curves by Switching Method
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .plotSurvivalCurves
+      visible: (survivalCurves)
+      clearWith:
+          - time
+          - event
+          - treatment
+          - switchingMethod
+
+    - name:  switchingPatternsPlot
+      title: Treatment Switching Timeline
+      type:  Image
+      width:  700
+      height: 400
+      renderFun: .plotSwitchingPatterns
+      visible: (switchingPatterns)
+      clearWith:
+          - switchingTime
+          - treatment
+          - actualTreatment
+
+    - name:  sensitivityPlot
+      title: Sensitivity Analysis
+      type:  Image
+      width:  600
+      height: 400
+      renderFun: .plotSensitivity
+      visible: (sensitivityAnalysis)
+      clearWith:
+          - switchingMethod
+          - accelerationFactor
+          - treatmentLag
+
+    - name:  diagnosticsTable
+      title: Model Diagnostics
+      type:  Table
+      visible: (causalEstimate)
+      rows: 1
+      columns:
+          - name: diagnostic
+            title: 'Diagnostic'
+            type: text
+          - name: value
+            title: 'Value'
+            type: number
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  sensitivityTable
+      title: Sensitivity Analysis Results
+      type:  Table
+      visible: (sensitivityAnalysis)
+      rows: 1
+      columns:
+          - name: analysis_type
+            title: 'Analysis Type'
+            type: text
+          - name: parameter
+            title: 'Parameter/Model'
+            type: text
+          - name: hr
+            title: 'Hazard Ratio'
+            type: number
+          - name: hr_ci
+            title: '95% CI'
+            type: text
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name:  bootstrapTable
+      title: Bootstrap Confidence Intervals
+      type:  Table
+      visible: (bootstrapSamples:>0)
+      rows: 1
+      columns:
+          - name: method
+            title: 'Method'
+            type: text
+          - name: n_bootstrap
+            title: 'Bootstrap Samples'
+            type: integer
+          - name: boot_ci_lower
+            title: 'Bootstrap CI Lower'
+            type: number
+          - name: boot_ci_upper
+            title: 'Bootstrap CI Upper'
+            type: number
+          - name: boot_se
+            title: 'Bootstrap SE'
+            type: number
+
+    - name:  clinicalInterpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: true
+
+...

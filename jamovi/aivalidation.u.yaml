@@ -1,0 +1,166 @@
+title: AI Model Validation with Cross-Validation
+name: aivalidation
+jus: '3.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Predictor Variables
+        children:
+          - type: VariablesListBox
+            name: predictorVars
+            isTarget: true
+            
+      - type: TargetLayoutBox
+        label: Outcome Variable (Gold Standard)
+        children:
+          - type: VariablesListBox
+            name: outcomeVar
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: positiveLevel
+            label: Positive Level
+            enable: (outcomeVar)
+            
+      - type: TargetLayoutBox
+        label: Reference Predictor
+        children:
+          - type: VariablesListBox
+            name: referencePredictor
+            maxItemCount: 1
+            isTarget: true
+    
+  - type: CollapseBox
+    name: crossValidationOptions
+    label: Cross-Validation Options
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: crossValidation
+        
+      - type: TextBox
+        name: nRepeats
+        format: number
+        enable: (crossValidation == 'repeated')
+        
+      - type: CheckBox
+        name: stratified
+        
+      - type: TextBox
+        name: randomSeed
+        format: number
+
+  - type: CollapseBox
+    name: modelSelectionOptions
+    label: Model Selection Options
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: modelSelection
+        
+      - type: ComboBox
+        name: selectionDirection
+        enable: (modelSelection == 'AIC' || modelSelection == 'BIC')
+
+  - type: CollapseBox
+    name: statisticalTests
+    label: Statistical Tests
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: compareModels
+        
+      - type: CheckBox
+        name: delongTest
+        enable: (compareModels)
+        
+      - type: CheckBox
+        name: mcnemarTest
+        enable: (compareModels)
+        
+      - type: CheckBox
+        name: calibrationTest
+
+  - type: CollapseBox
+    name: advancedMetrics
+    label: Advanced Metrics
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: calculateNRI
+        
+      - type: CheckBox
+        name: calculateIDI
+        
+      - type: CheckBox
+        name: youdensJ
+        
+      - type: CheckBox
+        name: bootstrapCI
+        
+      - type: TextBox
+        name: nBootstrap
+        format: number
+        enable: (bootstrapCI)
+
+  - type: CollapseBox
+    name: outputOptions
+    label: Output Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showModelSelection
+        enable: (modelSelection != 'none')
+        
+      - type: CheckBox
+        name: showCalibration
+        
+      - type: CheckBox
+        name: showCrossValidation
+        
+      - type: CheckBox
+        name: showComparison
+        enable: (compareModels)
+
+  - type: CollapseBox
+    name: plotOptions
+    label: Plot Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: rocPlot
+        
+      - type: CheckBox
+        name: calibrationPlot
+        
+      - type: CheckBox
+        name: comparisonPlot
+        enable: (compareModels)
+        
+      - type: CheckBox
+        name: cvPerformancePlot
+        
+      - type: CheckBox
+        name: variableImportancePlot
+        enable: (modelSelection != 'none')
+
+  - type: CollapseBox
+    name: reportOptions
+    label: Report Options
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showExplanations
+        
+      - type: CheckBox
+        name: showSummaries
+        
+      - type: TextBox
+        name: confidenceLevel
+        format: number

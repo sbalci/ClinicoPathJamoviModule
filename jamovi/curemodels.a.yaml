@@ -1,10 +1,10 @@
 ---
 name: curemodels
 title: Cure Models for Long-term Survivors
-menuGroup: SurvivalD
-menuSubgroup: Advanced Survival
+menuGroup: ClinicoPathD
+menuSubgroup: Survival Analysis
 menuSubtitle: 'Mixture and Non-mixture Cure Models'
-version: '0.0.3'
+version: '1.0.0'
 jas: '1.2'
 
 description:
