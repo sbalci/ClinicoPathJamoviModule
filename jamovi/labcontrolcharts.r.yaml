@@ -1,0 +1,339 @@
+---
+name: labcontrolcharts
+title: Laboratory Control Charts (Shewhart, CUSUM, EWMA)
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: dataInfo
+      title: 'Data Summary'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - measurement
+        - run_number
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: controlLimits
+      title: 'Control Limits and Parameters'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - measurement
+        - chart_type
+        - control_limits
+      columns:
+        - name: chart_type
+          title: 'Chart Type'
+          type: text
+        - name: center_line
+          title: 'Center Line (CL)'
+          type: number
+          format: zto:4
+        - name: upper_control_limit
+          title: 'Upper Control Limit (UCL)'
+          type: number
+          format: zto:4
+        - name: lower_control_limit
+          title: 'Lower Control Limit (LCL)'
+          type: number
+          format: zto:4
+        - name: upper_warning_limit
+          title: 'Upper Warning Limit (UWL)'
+          type: number
+          format: zto:4
+        - name: lower_warning_limit
+          title: 'Lower Warning Limit (LWL)'
+          type: number
+          format: zto:4
+
+    - name: violationSummary
+      title: 'Control Rule Violations Summary'
+      type: Table
+      visible: (violation_detection)
+      rows: 1
+      clearWith:
+        - violation_detection
+        - measurement
+        - chart_type
+      columns:
+        - name: rule
+          title: 'Control Rule'
+          type: text
+        - name: violations
+          title: 'Number of Violations'
+          type: integer
+        - name: violation_rate
+          title: 'Violation Rate (%)'
+          type: number
+          format: zto:2
+        - name: first_violation
+          title: 'First Violation (Run)'
+          type: integer
+        - name: last_violation
+          title: 'Last Violation (Run)'
+          type: integer
+        - name: severity
+          title: 'Severity'
+          type: text
+
+    - name: violationDetails
+      title: 'Detailed Violation List'
+      type: Table
+      visible: (export_violations)
+      rows: 1
+      clearWith:
+        - export_violations
+        - measurement
+      columns:
+        - name: run_number
+          title: 'Run Number'
+          type: integer
+        - name: measurement_value
+          title: 'Measurement Value'
+          type: number
+          format: zto:4
+        - name: violation_type
+          title: 'Violation Type'
+          type: text
+        - name: rule_violated
+          title: 'Rule Violated'
+          type: text
+        - name: action_required
+          title: 'Action Required'
+          type: text
+
+    - name: trendAnalysis
+      title: 'Trend Analysis Results'
+      type: Table
+      visible: (trend_analysis)
+      rows: 1
+      clearWith:
+        - trend_analysis
+        - measurement
+      columns:
+        - name: trend_type
+          title: 'Trend Type'
+          type: text
+        - name: detected
+          title: 'Detected'
+          type: text
+        - name: start_run
+          title: 'Start Run'
+          type: integer
+        - name: end_run
+          title: 'End Run'
+          type: integer
+        - name: slope
+          title: 'Slope'
+          type: number
+          format: zto:6
+        - name: significance
+          title: 'Statistical Significance'
+          type: text
+
+    - name: shiftDetection
+      title: 'Shift Detection Analysis'
+      type: Table
+      visible: (shift_detection)
+      rows: 1
+      clearWith:
+        - shift_detection
+        - measurement
+      columns:
+        - name: shift_point
+          title: 'Shift Point (Run)'
+          type: integer
+        - name: shift_magnitude
+          title: 'Shift Magnitude'
+          type: number
+          format: zto:4
+        - name: shift_direction
+          title: 'Direction'
+          type: text
+        - name: before_mean
+          title: 'Mean Before'
+          type: number
+          format: zto:4
+        - name: after_mean
+          title: 'Mean After'
+          type: number
+          format: zto:4
+        - name: statistical_test
+          title: 'Statistical Test'
+          type: text
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:4
+
+    - name: performanceMetrics
+      title: 'Control Chart Performance Metrics'
+      type: Table
+      visible: (performance_metrics)
+      rows: 1
+      clearWith:
+        - performance_metrics
+        - chart_type
+      columns:
+        - name: metric
+          title: 'Performance Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:2
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+        - name: acceptable_range
+          title: 'Acceptable Range'
+          type: text
+
+    - name: qcStatistics
+      title: 'Quality Control Statistics'
+      type: Table
+      visible: (qc_summary)
+      rows: 1
+      clearWith:
+        - qc_summary
+        - measurement
+      columns:
+        - name: statistic
+          title: 'QC Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:4
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: correctiveActions
+      title: 'Corrective Action Recommendations'
+      type: Table
+      visible: (corrective_actions)
+      rows: 1
+      clearWith:
+        - corrective_actions
+        - violation_detection
+      columns:
+        - name: issue_identified
+          title: 'Issue Identified'
+          type: text
+        - name: priority
+          title: 'Priority'
+          type: text
+        - name: recommended_action
+          title: 'Recommended Action'
+          type: text
+        - name: timeframe
+          title: 'Timeframe'
+          type: text
+        - name: responsible_party
+          title: 'Responsible Party'
+          type: text
+
+    - name: westgardInterpretation
+      title: 'Westgard Rules Interpretation'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - westgard_rules
+        - control_limits
+      columns:
+        - name: rule
+          title: 'Westgard Rule'
+          type: text
+        - name: description
+          title: 'Description'
+          type: text
+        - name: error_detected
+          title: 'Error Type Detected'
+          type: text
+        - name: clinical_significance
+          title: 'Clinical Significance'
+          type: text
+
+    - name: shewhartChart
+      title: 'Shewhart Control Chart'
+      type: Image
+      visible: (control_plots)
+      requiresData: true
+      width: 900
+      height: 600
+      renderFun: .plotShewhart
+      clearWith:
+        - control_plots
+        - measurement
+        - chart_type
+
+    - name: cusumChart
+      title: 'CUSUM Control Chart'
+      type: Image
+      visible: (control_plots && chart_type == "cusum" || chart_type == "combined")
+      requiresData: true
+      width: 900
+      height: 600
+      renderFun: .plotCUSUM
+      clearWith:
+        - control_plots
+        - measurement
+        - chart_type
+
+    - name: ewmaChart
+      title: 'EWMA Control Chart'
+      type: Image
+      visible: (control_plots && chart_type == "ewma" || chart_type == "combined")
+      requiresData: true
+      width: 900
+      height: 600
+      renderFun: .plotEWMA
+      clearWith:
+        - control_plots
+        - measurement
+        - chart_type
+
+    - name: distributionPlot
+      title: 'Measurement Distribution'
+      type: Image
+      visible: (histogram_plot)
+      requiresData: true
+      width: 700
+      height: 500
+      renderFun: .plotDistribution
+      clearWith:
+        - histogram_plot
+        - measurement
+
+    - name: trendPlot
+      title: 'Trend Analysis Visualization'
+      type: Image
+      visible: (trend_plot && trend_analysis)
+      requiresData: true
+      width: 800
+      height: 500
+      renderFun: .plotTrend
+      clearWith:
+        - trend_plot
+        - measurement
+        - trend_analysis
+
+    - name: methodExplanation
+      title: 'Method and Clinical Context'
+      type: Html
+      visible: true

@@ -1,0 +1,254 @@
+---
+name: labcontrolcharts
+title: Laboratory Control Charts (Shewhart, CUSUM, EWMA)
+menuGroup: ClinicoPathDescriptives
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Statistical process control charts for laboratory quality monitoring.
+        Implements Shewhart charts, CUSUM (Cumulative Sum), and EWMA (Exponentially Weighted Moving Average)
+        charts for detecting systematic errors, shifts, and trends in laboratory measurements.
+        Essential for ISO 15189 compliance and quality assurance programs.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            labcontrolcharts(
+                measurement = "glucose_value",
+                run_number = "run_id",
+                chart_type = "shewhart",
+                control_limits = "3sigma"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: measurement
+      title: Measurement Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Laboratory measurement values to monitor
+
+    - name: run_number
+      title: Run/Time Variable
+      type: Variable
+      suggested:
+        - continuous
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Sequential run number or time point identifier
+
+    - name: batch_id
+      title: Batch/Lot ID (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Batch or lot identifier for stratified analysis
+
+    - name: control_level
+      title: Control Level (Optional)
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Control material level (e.g., Level 1, Level 2, Level 3)
+
+    - name: chart_type
+      title: Control Chart Type
+      type: List
+      options:
+        - name: shewhart
+          title: Shewhart Chart
+        - name: cusum
+          title: CUSUM Chart
+        - name: ewma
+          title: EWMA Chart
+        - name: combined
+          title: Combined Charts
+        - name: multi_rule
+          title: Multi-rule Westgard
+      default: shewhart
+      description:
+          R: >
+            Type of control chart to generate
+
+    - name: control_limits
+      title: Control Limit Method
+      type: List
+      options:
+        - name: 3sigma
+          title: 3 Sigma (99.7%)
+        - name: 2sigma
+          title: 2 Sigma (95%)
+        - name: custom
+          title: Custom Limits
+        - name: westgard
+          title: Westgard Rules
+      default: 3sigma
+      description:
+          R: >
+            Method for calculating control limits
+
+    - name: target_mean
+      title: Target Mean Value
+      type: Number
+      default: 0
+      description:
+          R: >
+            Target or expected mean value (0 = calculate from data)
+
+    - name: target_sd
+      title: Target Standard Deviation
+      type: Number
+      default: 0
+      description:
+          R: >
+            Target or expected standard deviation (0 = calculate from data)
+
+    - name: cusum_k
+      title: CUSUM Reference Value (k)
+      type: Number
+      min: 0.1
+      max: 2.0
+      default: 0.5
+      description:
+          R: >
+            CUSUM reference value (typically 0.5σ)
+
+    - name: cusum_h
+      title: CUSUM Decision Interval (h)
+      type: Number
+      min: 1
+      max: 10
+      default: 4
+      description:
+          R: >
+            CUSUM decision interval (typically 4-5σ)
+
+    - name: ewma_lambda
+      title: EWMA Smoothing Parameter (λ)
+      type: Number
+      min: 0.05
+      max: 1.0
+      default: 0.2
+      description:
+          R: >
+            EWMA smoothing parameter (0.05-0.25 typical)
+
+    - name: westgard_rules
+      title: Westgard Rules to Apply
+      type: String
+      default: "13s,22s,R4s"
+      description:
+          R: >
+            Comma-separated Westgard rules (e.g., "13s,22s,R4s,41s,10x")
+
+    - name: baseline_runs
+      title: Baseline Period (runs)
+      type: Integer
+      min: 10
+      max: 100
+      default: 20
+      description:
+          R: >
+            Number of initial runs to establish baseline
+
+    - name: violation_detection
+      title: Violation Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Identify and mark control rule violations
+
+    - name: trend_analysis
+      title: Trend Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform trend detection and analysis
+
+    - name: shift_detection
+      title: Shift Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Detect systematic shifts in measurements
+
+    - name: performance_metrics
+      title: Performance Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate ARL, power, and false alarm rates
+
+    - name: corrective_actions
+      title: Corrective Action Suggestions
+      type: Bool
+      default: true
+      description:
+          R: >
+            Provide corrective action recommendations
+
+    - name: qc_summary
+      title: QC Summary Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate comprehensive QC statistics
+
+    - name: export_violations
+      title: Export Violations List
+      type: Bool
+      default: false
+      description:
+          R: >
+            Export detailed list of violations
+
+    - name: control_plots
+      title: Control Chart Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate control chart visualizations
+
+    - name: histogram_plot
+      title: Distribution Histogram
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create measurement distribution histogram
+
+    - name: trend_plot
+      title: Trend Analysis Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate trend analysis visualization
