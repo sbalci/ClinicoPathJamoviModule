@@ -1,7 +1,7 @@
 ---
 name: optimalcutpoint
 title: Optimal Cutpoint Determination
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Inferential
 menuTitle: Optimal Cutpoint Determination
 menuSubtitle: Find optimal thresholds for continuous biomarkers

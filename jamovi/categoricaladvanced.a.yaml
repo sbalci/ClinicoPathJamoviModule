@@ -1,7 +1,7 @@
 ---
 name: categoricaladvanced
 title: Enhanced Chi-Square and Fisher's Tests
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 version: '1.0.0'
 jas: '1.2'
 

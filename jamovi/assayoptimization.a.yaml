@@ -1,6 +1,6 @@
 name: assayoptimization
 title: Assay Optimization & Experimental Design
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Experimental Design
 version: '0.0.3'
 jas: '1.2'

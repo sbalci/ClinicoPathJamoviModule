@@ -1,7 +1,7 @@
 ---
 name: marginalrecurrent
 title: Marginal Models for Recurrent Events
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Marginal Rate Models, Accelerated Models for Recurrent Events'
 version: '0.0.1'

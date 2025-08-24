@@ -3,7 +3,7 @@ name: smoothtimevary
 title: Smoothly Time-Varying Effects
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 menuTitle: Smoothly Time-Varying Effects
 menuSubtitle: Smooth estimation of time-varying covariate effects using splines

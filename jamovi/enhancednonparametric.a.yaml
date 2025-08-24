@@ -1,7 +1,7 @@
 ---
 name: enhancednonparametric
 title: Enhanced Non-Parametric Tests
-menuGroup: ClinicoPath Descriptives
+menuGroup: ClinicoPathD Descriptives
 menuSubgroup: Advanced Statistical Tests
 menuSubtitle: 'Enhanced Non-Parametric Tests with Effect Sizes and Post Hoc Analysis'
 version: '0.0.1'

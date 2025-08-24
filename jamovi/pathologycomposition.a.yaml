@@ -1,7 +1,7 @@
 ---
 name: pathologycomposition
 title: Pathology Composition Analysis
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 version: '1.0.0'
 jas: '1.2'
 

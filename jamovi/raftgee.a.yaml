@@ -3,7 +3,7 @@ name: raftgee
 title: Rank-based AFT Estimation
 jas: '1.2'
 version: '1.0.0'
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 menuTitle: Rank-based AFT Estimation
 menuSubtitle: GEE-based accelerated failure time models

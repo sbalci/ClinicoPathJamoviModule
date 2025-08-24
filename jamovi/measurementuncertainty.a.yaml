@@ -1,7 +1,7 @@
 ---
 name: measurementuncertainty
 title: Measurement Uncertainty Estimation (ISO 15189)
-menuGroup: ClinicoPathDescriptives
+menuGroup: ClinicoPathDescriptivesD
 version: '1.0.0'
 jas: '1.2'
 description:

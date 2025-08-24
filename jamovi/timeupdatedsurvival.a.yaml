@@ -1,7 +1,7 @@
 ---
 name: timeupdatedsurvival
 title: Time-Updated Survival Estimates
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Dynamic Models, Time-Varying Effects, Temporal Analysis'
 version: '0.0.1'

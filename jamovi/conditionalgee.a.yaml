@@ -1,7 +1,7 @@
 ---
 name: conditionalgee
 title: Conditional GEE for Recurrent Events Gap Times
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'GEE Models for Gap Times, Recurrent Events'
 version: '0.0.1'

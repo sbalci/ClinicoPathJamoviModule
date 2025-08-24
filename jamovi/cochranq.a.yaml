@@ -1,7 +1,7 @@
 ---
 name: cochranq
 title: Cochran's Q Test for Paired Categorical Data
-menuGroup: ClinicoPathDescriptives
+menuGroup: ClinicoPathDescriptivesD
 version: '1.0.0'
 jas: '1.2'
 description:

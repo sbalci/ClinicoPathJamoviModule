@@ -1,6 +1,6 @@
 name: frailtysurvival
 title: Frailty & Random Effects Survival Models
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 version: '0.0.3'
 jas: '1.2'

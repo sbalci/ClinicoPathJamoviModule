@@ -1,7 +1,7 @@
 ---
 name: sparsegrouplasso
 title: Sparse Group LASSO
-menuGroup: ClinicoPath
+menuGroup: ClinicoPathD
 version: '1.0.0'
 jas: '1.2'
 

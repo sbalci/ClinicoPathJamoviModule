@@ -5,7 +5,7 @@ version: 0.0.31.39
 jms: '1.0'
 authors:
   - Serdar Balci
-maintainer: Serdar Balci <drserdarbalci@gmail.com>
+maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 date: '2025-08-23'
 type: R
 description: >-
