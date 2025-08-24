@@ -71,6 +71,15 @@ screeningevaluationClass <- R6::R6Class(
                 private$.costEffectivenessAnalysis()
             }
             
+            # Advanced cancer screening analyses
+            if (self$options$target_disease == "cancer") {
+                private$.intervalCancerAnalysis()
+                private$.leadTimeAnalysis()
+                private$.lengthBiasAnalysis()
+                private$.overdiagnosisAnalysis()
+                private$.cancerScreeningQualityMetrics()
+            }
+            
             # Update tables with results
             private$.populateTables()
         },
@@ -709,6 +718,304 @@ screeningevaluationClass <- R6::R6Class(
             
             print(p)
             TRUE
+        },
+        
+        .intervalCancerAnalysis = function() {
+            # Advanced interval cancer analysis for cancer screening
+            if (!self$options$interval_cancer_analysis) return()
+            
+            data <- private$.screening_data
+            if (is.null(data)) return()
+            
+            tryCatch({
+                # Interval cancers: Cancers diagnosed after negative screen and before next screen
+                if (!is.null(self$options$screening_round) && self$options$screening_round %in% names(data)) {
+                    
+                    # Calculate interval cancer rates by screening round
+                    round_var <- data[[self$options$screening_round]]
+                    interval_results <- list()
+                    
+                    for (round_num in unique(round_var)) {
+                        round_data <- data[round_var == round_num, ]
+                        
+                        # Screen-negative cases
+                        screen_negative <- sum(!round_data$screening_positive, na.rm = TRUE)
+                        # Interval cancers (disease present in screen-negative cases)
+                        interval_cancers <- sum(!round_data$screening_positive & round_data$disease_present, na.rm = TRUE)
+                        
+                        interval_rate <- (interval_cancers / screen_negative) * 1000 if screen_negative > 0 else 0
+                        
+                        interval_results[[paste0("round_", round_num)]] <- list(
+                            round = round_num,
+                            screen_negative = screen_negative,
+                            interval_cancers = interval_cancers,
+                            interval_rate = interval_rate,
+                            sensitivity_reduction = interval_rate / (private$.getExpectedIncidenceRate() || 5) * 100
+                        )
+                    }
+                    
+                    private$interval_cancer_results <- interval_results
+                }
+                
+            }, error = function(e) {
+                message("Interval cancer analysis failed: ", e$message)
+            })
+        },
+        
+        .leadTimeAnalysis = function() {
+            # Lead time and sojourn time estimation
+            if (!self$options$lead_time_analysis) return()
+            
+            tryCatch({
+                data <- private$.screening_data
+                if (is.null(data)) return()
+                
+                # Simplified lead time estimation using prevalence method
+                prevalence <- sum(data$disease_present, na.rm = TRUE) / nrow(data)
+                incidence <- private$.getExpectedIncidenceRate() / 100000 || 0.005 # Convert to proportion
+                
+                # Estimate mean sojourn time (preclinical phase)
+                if (incidence > 0) {
+                    mean_sojourn_time <- prevalence / incidence
+                    
+                    # Lead time distribution (exponential assumption)
+                    screening_interval <- 1 # Assume annual screening
+                    mean_lead_time <- mean_sojourn_time * (1 - exp(-screening_interval / mean_sojourn_time))
+                    
+                    private$lead_time_results <- list(
+                        mean_sojourn_time = mean_sojourn_time,
+                        mean_lead_time = mean_lead_time,
+                        lead_time_bias_potential = ifelse(mean_lead_time > 2, "High", 
+                                                        ifelse(mean_lead_time > 1, "Moderate", "Low")),
+                        screening_interval = screening_interval
+                    )
+                }
+                
+            }, error = function(e) {
+                message("Lead time analysis failed: ", e$message)
+            })
+        },
+        
+        .lengthBiasAnalysis = function() {
+            # Length bias assessment for cancer screening
+            if (!self$options$length_bias_analysis) return()
+            
+            tryCatch({
+                data <- private$.screening_data
+                if (is.null(data)) return()
+                
+                # Screen-detected vs. symptomatic cancer analysis
+                screen_detected <- sum(data$screening_positive & data$disease_present, na.rm = TRUE)
+                total_detected <- sum(data$disease_present, na.rm = TRUE)
+                
+                screen_detection_proportion <- screen_detected / total_detected if total_detected > 0 else 0
+                
+                # Length bias indicators
+                length_bias_potential <- if (screen_detection_proportion > 0.8) {
+                    "High potential for length bias"
+                } else if (screen_detection_proportion > 0.6) {
+                    "Moderate potential for length bias"
+                } else {
+                    "Lower potential for length bias"
+                }
+                
+                length_bias_assessment <- list(
+                    screen_detected_proportion = screen_detection_proportion,
+                    length_bias_potential = length_bias_potential,
+                    recommendation = ifelse(screen_detection_proportion > 0.7,
+                        "Consider survival analysis comparing screen-detected vs. symptomatic cases",
+                        "Length bias less concerning with current detection pattern")
+                )
+                
+                private$length_bias_results <- length_bias_assessment
+                
+            }, error = function(e) {
+                message("Length bias analysis failed: ", e$message)
+            })
+        },
+        
+        .overdiagnosisAnalysis = function() {
+            # Overdiagnosis assessment for cancer screening
+            if (!self$options$overdiagnosis_analysis) return()
+            
+            tryCatch({
+                data <- private$.screening_data
+                if (is.null(data)) return()
+                
+                # Calculate observed vs. expected detection rates
+                observed_rate <- sum(data$screening_positive & data$disease_present, na.rm = TRUE) / 
+                               sum(!is.na(data$screening_positive)) * 1000
+                               
+                expected_background_rate <- private$.getExpectedIncidenceRate() || 5
+                
+                # Excess detection suggesting potential overdiagnosis
+                excess_detection <- max(0, observed_rate - expected_background_rate)
+                overdiagnosis_ratio <- excess_detection / observed_rate if observed_rate > 0 else 0
+                
+                # Age-specific overdiagnosis risk (higher in older adults)
+                age_risk_factor <- 1
+                if (!is.null(self$options$age_var) && self$options$age_var %in% names(data)) {
+                    mean_age <- mean(data[[self$options$age_var]], na.rm = TRUE)
+                    age_risk_factor <- if (mean_age > 75) {
+                        1.5
+                    } else if (mean_age > 65) {
+                        1.2
+                    } else {
+                        1.0
+                    }
+                }
+                
+                overdiagnosis_assessment <- list(
+                    observed_detection_rate = observed_rate,
+                    expected_background_rate = expected_background_rate,
+                    excess_detection = excess_detection,
+                    overdiagnosis_ratio = overdiagnosis_ratio * age_risk_factor,
+                    risk_level = if (overdiagnosis_ratio * age_risk_factor > 0.3) {
+                        "High risk of overdiagnosis"
+                    } else if (overdiagnosis_ratio * age_risk_factor > 0.15) {
+                        "Moderate risk of overdiagnosis"
+                    } else {
+                        "Lower risk of overdiagnosis"
+                    },
+                    recommendation = private$.getOverdiagnosisRecommendation(overdiagnosis_ratio * age_risk_factor)
+                )
+                
+                private$overdiagnosis_results <- overdiagnosis_assessment
+                
+            }, error = function(e) {
+                message("Overdiagnosis analysis failed: ", e$message)
+            })
+        },
+        
+        .cancerScreeningQualityMetrics = function() {
+            # Cancer-specific screening quality metrics
+            data <- private$.screening_data
+            if (is.null(data)) return()
+            
+            tryCatch({
+                
+                target_disease <- self$options$target_disease
+                
+                # Disease-specific quality targets
+                quality_targets <- list(
+                    "cancer" = list(
+                        sensitivity_target = 0.85,
+                        specificity_target = 0.95,
+                        ppv_target = 0.10,
+                        recall_rate_max = 0.10,
+                        detection_rate_min = 5
+                    ),
+                    "cardiovascular" = list(
+                        sensitivity_target = 0.80,
+                        specificity_target = 0.90,
+                        ppv_target = 0.20
+                    ),
+                    "diabetes" = list(
+                        sensitivity_target = 0.90,
+                        specificity_target = 0.95,
+                        ppv_target = 0.25
+                    )
+                )
+                
+                targets <- quality_targets[[target_disease]] %||% quality_targets[["cancer"]]
+                
+                # Calculate current performance
+                accuracy <- private$.diagnostic_accuracy
+                recall_rate <- sum(data$screening_positive, na.rm = TRUE) / nrow(data)
+                detection_rate <- sum(data$screening_positive & data$disease_present, na.rm = TRUE) / nrow(data) * 1000
+                
+                # Quality assessment
+                cancer_quality_metrics <- list(
+                    sensitivity_performance = private$.assessPerformance(accuracy$sensitivity$value, targets$sensitivity_target),
+                    specificity_performance = private$.assessPerformance(accuracy$specificity$value, targets$specificity_target),
+                    ppv_performance = private$.assessPerformance(accuracy$ppv$value, targets$ppv_target),
+                    recall_rate_performance = private$.assessRecallRate(recall_rate, targets$recall_rate_max %||% 0.10),
+                    detection_rate_performance = private$.assessDetectionRate(detection_rate, targets$detection_rate_min %||% 5),
+                    overall_quality_score = private$.calculateOverallQualityScore(accuracy, recall_rate, detection_rate, targets)
+                )
+                
+                private$cancer_quality_metrics <- cancer_quality_metrics
+                
+            }, error = function(e) {
+                message("Cancer screening quality metrics failed: ", e$message)
+            })
+        },
+        
+        .getExpectedIncidenceRate = function() {
+            # Disease-specific expected incidence rates per 100,000
+            target_disease <- self$options$target_disease %||% "cancer"
+            
+            incidence_rates <- list(
+                "cancer" = 450,      # General cancer incidence
+                "breast_cancer" = 125,
+                "cervical_cancer" = 7,
+                "colorectal_cancer" = 40,
+                "lung_cancer" = 60,
+                "prostate_cancer" = 110,
+                "cardiovascular" = 200,
+                "diabetes" = 850
+            )
+            
+            return(incidence_rates[[target_disease]] %||% incidence_rates[["cancer"]])
+        },
+        
+        .getOverdiagnosisRecommendation = function(ratio) {
+            if (ratio > 0.3) {
+                return("Consider reducing screening frequency or raising diagnostic thresholds. Review individual cases for clinical significance.")
+            } else if (ratio > 0.15) {
+                return("Monitor overdiagnosis rates closely. Consider patient risk stratification.")
+            } else {
+                return("Overdiagnosis risk appears acceptable. Continue current screening protocol.")
+            }
+        },
+        
+        .assessPerformance = function(observed, target) {
+            if (is.null(observed) || is.null(target)) return("Unable to assess")
+            
+            if (observed >= target) {
+                return("Meets target")
+            } else if (observed >= target * 0.9) {
+                return("Close to target")
+            } else {
+                return("Below target")
+            }
+        },
+        
+        .assessRecallRate = function(rate, max_target) {
+            if (rate <= max_target) {
+                return("Acceptable")
+            } else if (rate <= max_target * 1.2) {
+                return("Slightly elevated")
+            } else {
+                return("Elevated - needs improvement")
+            }
+        },
+        
+        .assessDetectionRate = function(rate, min_target) {
+            if (rate >= min_target) {
+                return("Adequate")
+            } else if (rate >= min_target * 0.8) {
+                return("Marginal")
+            } else {
+                return("Low - needs improvement")
+            }
+        },
+        
+        .calculateOverallQualityScore = function(accuracy, recall_rate, detection_rate, targets) {
+            # Weighted quality score (0-100)
+            weights <- c(sensitivity = 0.25, specificity = 0.25, ppv = 0.20, 
+                        recall = 0.15, detection = 0.15)
+            
+            scores <- c(
+                sensitivity = min(100, (accuracy$sensitivity$value / targets$sensitivity_target) * 100),
+                specificity = min(100, (accuracy$specificity$value / targets$specificity_target) * 100),
+                ppv = min(100, (accuracy$ppv$value / targets$ppv_target) * 100),
+                recall = min(100, ((targets$recall_rate_max %||% 0.1) / max(recall_rate, 0.01)) * 100),
+                detection = min(100, (detection_rate / (targets$detection_rate_min %||% 5)) * 100)
+            )
+            
+            overall_score <- sum(scores * weights, na.rm = TRUE)
+            return(round(overall_score, 1))
         }
     )
 )
