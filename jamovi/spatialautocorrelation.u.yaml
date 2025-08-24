@@ -2,7 +2,7 @@ title: Spatial Autocorrelation Analysis (Moran's I, Geary's C)
 name: spatialautocorrelation
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -16,107 +16,102 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Spatial Coordinates
+        label: X Coordinate
         children:
           - type: VariablesListBox
             name: x_coordinate
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Y Coordinate
+        children:
           - type: VariablesListBox
             name: y_coordinate
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Optional Variables
+        label: Region/Tissue ID (Optional)
         children:
           - type: VariablesListBox
             name: region_id
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Time Point (Optional)
+        children:
           - type: VariablesListBox
             name: time_point
             maxItemCount: 1
             isTarget: true
-
-  - type: CollapseBox
-    label: Analysis Options
-    collapsed: true
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: ComboBox
-            name: autocorr_method
-          - type: ComboBox
-            name: spatial_weights
-          - type: ComboBox
-            name: significance_test
-
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: distance_threshold
-            format: number
-          - type: SpinBox
-            name: k_neighbors
-          - type: TextBox
-            name: bandwidth
-            format: number
-
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: SpinBox
-            name: permutations
-          - type: TextBox
-            name: confidence_level
-            format: number
-
-  - type: CollapseBox
-    label: Analysis Components
-    collapsed: true
+      - type: ComboBox
+        name: autocorr_method
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: local_analysis
-          - type: CheckBox
-            name: cluster_detection
-          - type: CheckBox
-            name: hotspot_analysis
-          - type: CheckBox
-            name: spatial_regimes
-          - type: CheckBox
-            name: temporal_analysis
-          - type: CheckBox
-            name: multivariate_analysis
-
-  - type: CollapseBox
-    label: Quality Control
-    collapsed: true
+      - type: ComboBox
+        name: spatial_weights
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: robustness_check
-          - type: CheckBox
-            name: edge_effects
-
-  - type: CollapseBox
-    label: Visualization
-    collapsed: true
+      - type: TextBox
+        name: distance_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: clinical_interpretation
-          - type: CheckBox
-            name: spatial_plots
-          - type: CheckBox
-            name: autocorr_plots
-          - type: CheckBox
-            name: lisa_plots
+      - type: TextBox
+        name: k_neighbors
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bandwidth
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: significance_test
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: permutations
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: confidence_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: local_analysis
+      - type: CheckBox
+        name: cluster_detection
+      - type: CheckBox
+        name: hotspot_analysis
+      - type: CheckBox
+        name: spatial_regimes
+      - type: CheckBox
+        name: temporal_analysis
+      - type: CheckBox
+        name: multivariate_analysis
+      - type: CheckBox
+        name: robustness_check
+      - type: CheckBox
+        name: edge_effects
+      - type: CheckBox
+        name: clinical_interpretation
+      - type: CheckBox
+        name: spatial_plots
+      - type: CheckBox
+        name: autocorr_plots
+      - type: CheckBox
+        name: lisa_plots
