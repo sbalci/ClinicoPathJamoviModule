@@ -3844,6 +3844,83 @@ analyses:
       indicators of spatial association (LISA) for detecting spatial clustering
       and patterns in histopathological data. Essential for analyzing spatial
       dependencies in tissue architecture and cellular distributions.
+  - title: Direct Regression on Survival Function
+    name: directregression
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Survival Analysis
+    menuTitle: Direct Regression
+    menuSubtitle: Direct regression on survival function using pseudo-observations
+    description: >
+      Direct regression on the survival function using pseudo-observations. This
+      method allows for direct modeling of survival probabilities at specific
+      time points using standard regression techniques, providing an alternative
+      to hazard-based models. Particularly useful when interest lies in survival
+      probabilities rather than hazard ratios.
+  - title: Dynamic Survival Prediction
+    name: dynamicprediction
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Survival Analysis
+    menuTitle: Dynamic Prediction
+    menuSubtitle: Dynamic prediction models for longitudinal biomarker data
+    description: >
+      Dynamic prediction models provide updated survival predictions as new
+      longitudinal data becomes available. This approach is particularly
+      valuable when biomarker values change over time and influence prognosis.
+      The analysis implements various dynamic prediction methods including
+      landmark approaches, joint modeling, and dynamic Cox models, allowing for
+      real-time risk assessment and personalized medicine applications.
+  - title: Generalized Pseudo-Observations
+    name: generalpseudo
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Survival Analysis
+    menuTitle: Generalized Pseudo-Observations
+    menuSubtitle: Generalized pseudo-observations for survival and competing risks analysis
+    description: >
+      Generalized pseudo-observations approach for survival analysis, competing
+      risks, and other censored data problems. This method provides a flexible
+      framework for analyzing survival outcomes using standard statistical
+      methods by transforming survival data into pseudo-observations that can be
+      analyzed with conventional regression techniques. Supports various
+      functionals including survival probabilities, cumulative incidence
+      functions, and restricted mean survival times.
+  - title: Principal Component Cox Models
+    name: principalcox
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Survival Analysis
+    menuTitle: Principal Component Cox
+    menuSubtitle: Principal component analysis for Cox regression with high-dimensional data
+    description: >
+      Principal Component Cox models address the challenges of high-dimensional
+      survival data by using principal component analysis (PCA) to reduce
+      dimensionality before fitting Cox regression models. This approach is
+      particularly useful when the number of covariates is large relative to
+      sample size, helping to avoid overfitting while retaining important
+      patterns in the data. The method supports various PCA approaches including
+      standard PCA, sparse PCA, and supervised PCA for survival data.
+  - title: Restricted Mean Survival Time Regression
+    name: rmstregression
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathD
+    menuSubgroup: Survival Analysis
+    menuTitle: RMST Regression
+    menuSubtitle: Regression modeling of restricted mean survival time
+    description: >
+      Restricted Mean Survival Time (RMST) regression analysis provides an
+      alternative to hazard-based models by directly modeling the mean survival
+      time up to a specific time point (tau). This approach offers clinically
+      interpretable results and does not require proportional hazards
+      assumptions. RMST represents the area under the survival curve up to time
+      tau and can be compared between groups or modeled with covariates using
+      regression techniques.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

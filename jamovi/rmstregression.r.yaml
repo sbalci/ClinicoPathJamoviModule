@@ -1,0 +1,191 @@
+name: rmstregression
+title: Restricted Mean Survival Time Regression
+jrs: '1.1'
+items:
+    - name: todo
+      title: 'Analysis Complete'
+      type: Html
+      visible: false
+
+    - name: rmstSummary
+      title: RMST Summary by Group
+      type: Table
+      visible: (show_rmst_table)
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: events
+          title: Events
+          type: integer
+        - name: rmst
+          title: RMST
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+        - name: tau_reached
+          title: τ Reached
+          type: text
+
+    - name: rmstDifferences
+      title: RMST Differences Between Groups
+      type: Table
+      visible: (show_difference_table)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: difference
+          title: Difference
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: statistic
+          title: z
+          type: number
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+        - name: adj_p
+          title: Adj. p
+          type: number
+          format: zto,pvalue
+
+    - name: regressionResults
+      title: RMST Regression Results
+      type: Table
+      visible: (show_regression_table)
+      columns:
+        - name: term
+          title: Term
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: statistic
+          title: t/z
+          type: number
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+
+    - name: modelDiagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (show_model_diagnostics)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: tauSelection
+      title: Tau Selection Information
+      type: Table
+      columns:
+        - name: method
+          title: Method
+          type: text
+        - name: tau_selected
+          title: Selected τ
+          type: number
+        - name: rationale
+          title: Rationale
+          type: text
+        - name: followup_pct
+          title: Follow-up %
+          type: number
+        - name: events_by_tau
+          title: Events by τ
+          type: integer
+
+    - name: bootstrapResults
+      title: Bootstrap Results
+      type: Table
+      visible: (bootstrap_se)
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: original
+          title: Original
+          type: number
+        - name: bootstrap_mean
+          title: Bootstrap Mean
+          type: number
+        - name: bootstrap_se
+          title: Bootstrap SE
+          type: number
+        - name: bias
+          title: Bias
+          type: number
+        - name: ci_type
+          title: CI Type
+          type: text
+
+    - name: methodologyExplanation
+      title: Methodology Explanation
+      type: Html
+      visible: (showExplanations)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: rmstPlot
+      title: RMST Curves
+      type: Image
+      width: 700
+      height: 500
+      requiresData: true
+      visible: (rmst_plot)
+
+    - name: differencePlot
+      title: RMST Difference Over Time
+      type: Image
+      width: 700
+      height: 400
+      requiresData: true
+      visible: (difference_plot)
+
+    - name: residualPlot
+      title: Residual Diagnostic Plots
+      type: Image
+      width: 700
+      height: 400
+      requiresData: true
+      visible: (residual_plot)

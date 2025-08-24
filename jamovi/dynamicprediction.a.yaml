@@ -1,0 +1,294 @@
+---
+name: dynamicprediction
+title: Dynamic Survival Prediction
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPathD
+menuSubgroup: Survival Analysis
+menuTitle: Dynamic Prediction
+menuSubtitle: Dynamic prediction models for longitudinal biomarker data
+
+description:
+    main: >
+        Dynamic prediction models provide updated survival predictions as new longitudinal data
+        becomes available. This approach is particularly valuable when biomarker values change
+        over time and influence prognosis. The analysis implements various dynamic prediction
+        methods including landmark approaches, joint modeling, and dynamic Cox models, allowing
+        for real-time risk assessment and personalized medicine applications.
+    R:
+        dontrun: false
+        usage: |
+            data %>%
+            dynamicprediction(
+                elapsedtime = "time_to_event",
+                outcome = "event_status",
+                baseline = c("age", "stage"),
+                longitudinal = c("biomarker", "treatment_response"),
+                time_var = "measurement_time",
+                prediction_horizon = 24
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: elapsedtime
+      title: Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time to event or censoring
+
+    - name: outcome
+      title: Event Indicator
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Event indicator (1 = event, 0 = censored)
+
+    - name: baseline
+      title: Baseline Variables
+      type: Variables
+      suggested:
+        - continuous
+        - nominal
+        - ordinal
+      permitted:
+        - numeric
+        - factor
+      description:
+          R: >
+            Baseline covariates that don't change over time
+
+    - name: longitudinal
+      title: Longitudinal Variables
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time-varying covariates (longitudinal biomarkers)
+
+    - name: time_var
+      title: Measurement Time Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            Time of longitudinal measurements
+
+    - name: subject_id
+      title: Subject ID
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Subject identifier for longitudinal data
+
+    - name: outcomeLevel
+      title: Event Level
+      type: String
+      default: '1'
+      description:
+          R: >
+            Level indicating event occurrence
+
+    - name: prediction_horizon
+      title: Prediction Horizon
+      type: Number
+      default: 24
+      min: 1
+      description:
+          R: >
+            Time horizon for dynamic predictions (in time units)
+
+    - name: prediction_method
+      title: Prediction Method
+      type: List
+      options:
+        - landmark
+        - joint_modeling
+        - dynamic_cox
+        - super_learning
+      default: landmark
+      description:
+          R: >
+            Method for dynamic prediction
+
+    - name: landmark_times
+      title: Landmark Times
+      type: String
+      default: '6,12,18'
+      description:
+          R: >
+            Comma-separated list of landmark time points for dynamic updating
+
+    - name: joint_model_type
+      title: Joint Model Type
+      type: List
+      options:
+        - linear_mixed
+        - spline_mixed
+        - latent_class
+        - shared_parameter
+      default: linear_mixed
+      description:
+          R: >
+            Type of joint model for longitudinal and survival data
+
+    - name: biomarker_model
+      title: Biomarker Model
+      type: List
+      options:
+        - linear
+        - quadratic
+        - spline
+        - random_effects
+      default: linear
+      description:
+          R: >
+            Model for longitudinal biomarker trajectory
+
+    - name: association_structure
+      title: Association Structure
+      type: List
+      options:
+        - current_value
+        - slope
+        - cumulative
+        - shared_random_effects
+      default: current_value
+      description:
+          R: >
+            How longitudinal process associates with survival
+
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description:
+          R: >
+            Confidence level for prediction intervals
+
+    - name: mc_samples
+      title: Monte Carlo Samples
+      type: Number
+      default: 500
+      min: 100
+      max: 2000
+      description:
+          R: >
+            Number of Monte Carlo samples for prediction uncertainty
+
+    - name: window_width
+      title: Prediction Window Width
+      type: Number
+      default: 6
+      min: 1
+      description:
+          R: >
+            Width of prediction window for dynamic updating
+
+    - name: show_prediction_table
+      title: Show Prediction Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display table of dynamic predictions
+
+    - name: show_accuracy_metrics
+      title: Show Accuracy Metrics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display prediction accuracy assessment
+
+    - name: show_biomarker_effects
+      title: Show Biomarker Effects
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display estimated effects of longitudinal biomarkers
+
+    - name: show_model_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compare different prediction methods
+
+    - name: prediction_curves
+      title: Prediction Curves
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display dynamic prediction curves over time
+
+    - name: biomarker_trajectory
+      title: Biomarker Trajectories
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display individual biomarker trajectories
+
+    - name: accuracy_plot
+      title: Accuracy Assessment Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display prediction accuracy over time
+
+    - name: risk_stratification
+      title: Risk Stratification Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display risk stratification based on dynamic predictions
+
+    - name: showSummaries
+      title: Analysis Summaries
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show comprehensive analysis summaries
+
+    - name: showExplanations
+      title: Methodology Explanations
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show detailed methodology explanations

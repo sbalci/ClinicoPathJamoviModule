@@ -1,0 +1,249 @@
+name: generalpseudo
+title: Generalized Pseudo-Observations
+jrs: '1.1'
+items:
+    - name: todo
+      title: 'Analysis Complete'
+      type: Html
+      visible: false
+
+    - name: functionalSummary
+      title: Functional Summary
+      type: Table
+      columns:
+        - name: functional_type
+          title: Functional Type
+          type: text
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: n_observations
+          title: N Obs
+          type: integer
+        - name: n_events
+          title: N Events
+          type: integer
+        - name: kaplan_meier
+          title: Kaplan-Meier
+          type: number
+        - name: pseudo_mean
+          title: Pseudo Mean
+          type: number
+        - name: pseudo_se
+          title: Pseudo SE
+          type: number
+
+    - name: regressionResults
+      title: Pseudo-Observation Regression Results
+      type: Table
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: term
+          title: Term
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: statistic
+          title: t/z
+          type: number
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+
+    - name: pseudoValues
+      title: Pseudo-Observation Values
+      type: Table
+      visible: (show_pseudo_values)
+      columns:
+        - name: observation
+          title: Observation
+          type: integer
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: functional_type
+          title: Functional
+          type: text
+        - name: pseudo_value
+          title: Pseudo-Value
+          type: number
+        - name: original_functional
+          title: Original Functional
+          type: number
+        - name: jackknife_functional
+          title: Jackknife Functional
+          type: number
+
+    - name: modelDiagnostics
+      title: Model Diagnostics
+      type: Table
+      visible: (show_model_diagnostics)
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: r_squared
+          title: R²
+          type: number
+        - name: adj_r_squared
+          title: Adj. R²
+          type: number
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: rmse
+          title: RMSE
+          type: number
+        - name: residual_normality_p
+          title: Normality p
+          type: number
+          format: zto,pvalue
+
+    - name: methodComparison
+      title: Method Comparison
+      type: Table
+      visible: (show_comparison)
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: method
+          title: Method
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+        - name: bias
+          title: Bias
+          type: number
+        - name: mse
+          title: MSE
+          type: number
+
+    - name: competingRisks
+      title: Competing Risks Analysis
+      type: Table
+      visible: (functional_type:cumulative_incidence)
+      columns:
+        - name: cause
+          title: Cause
+          type: integer
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: cumulative_incidence
+          title: Cum. Incidence
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+
+    - name: restrictedMean
+      title: Restricted Mean Survival Time
+      type: Table
+      visible: (functional_type:restricted_mean)
+      columns:
+        - name: tau
+          title: Tau
+          type: number
+        - name: rmst
+          title: RMST
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+        - name: n_events_by_tau
+          title: Events by Tau
+          type: integer
+
+    - name: quantileResults
+      title: Quantile Pseudo-Observations
+      type: Table
+      visible: (functional_type:quantile)
+      columns:
+        - name: probability
+          title: Probability
+          type: number
+        - name: quantile_estimate
+          title: Quantile
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+
+    - name: methodologyExplanation
+      title: Methodology Explanation
+      type: Html
+      visible: (showExplanations)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: functionalPlot
+      title: Functional Estimates
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (functional_plot)
+
+    - name: residualPlot
+      title: Residual Diagnostic Plots
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (residual_plot)
+
+    - name: pseudoPlot
+      title: Pseudo-Observation Distributions
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (pseudo_plot)

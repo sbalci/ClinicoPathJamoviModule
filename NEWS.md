@@ -1,5 +1,50 @@
 # ClinicoPath News
 
+## Version 0.0.31.42
+
+### 🗓️ **January 24, 2025 - Phase 8: Advanced Survival Methodology Implementation**
+
+#### 🎯 **Advanced Survival Analysis Methods - Complete Implementation**
+
+##### **Direct Regression on Survival Function (directregression) - Pseudo-Observation Framework**
+* **Comprehensive Pseudo-Observation Methods:** Implementation of jackknife-based pseudo-observations for direct survival function regression with support for multiple time points and confidence interval estimation
+* **Multiple Regression Types:** Support for linear, logistic, and complementary log-log regression models with automatic model selection and diagnostic tools
+* **Clinical Interpretation Tools:** Direct interpretation of regression coefficients as changes in survival probability with clinical significance assessment and visualization
+* **Advanced Modeling Options:** Bootstrap standard errors, model comparison across time points, and residual analysis for model validation
+
+##### **Generalized Pseudo-Observations (generalpseudo) - Unified Framework**
+* **Multiple Functional Types:** Support for survival probabilities, cumulative incidence functions, restricted mean survival times, and quantile pseudo-observations
+* **Competing Risks Integration:** Complete framework for competing risks analysis using pseudo-observations with cause-specific modeling
+* **Advanced Estimation Methods:** Jackknife, bootstrap, and analytical pseudo-observation calculation with automatic method selection
+* **Comprehensive Regression Framework:** Support for various regression types including beta regression for bounded outcomes with clustered data handling
+
+##### **Restricted Mean Survival Time Regression (rmstregression) - Clinical Outcome Modeling**
+* **Multiple RMST Approaches:** Implementation of pseudo-observation, direct modeling, and Wei-Lin-Ying methods for RMST regression
+* **Adaptive Tau Selection:** Automatic and manual restriction time selection with percentile-based and adaptive methods
+* **Group Comparison Framework:** Pairwise RMST differences with multiple comparison adjustment and clinical significance testing
+* **Advanced Visualization:** RMST curves, difference plots over time, and cumulative RMST visualization with confidence bands
+
+##### **Dynamic Survival Prediction (dynamicprediction) - Longitudinal Integration**
+* **Landmark Analysis Implementation:** Complete landmark approach with dynamic risk prediction and time-varying coefficient estimation
+* **Joint Modeling Framework:** Integration of longitudinal biomarker trajectories with survival outcomes for personalized prediction
+* **Multiple Association Structures:** Support for current value, slope, cumulative, and shared random effects associations
+* **Real-Time Risk Assessment:** Dynamic updating of survival predictions as new biomarker measurements become available
+
+##### **Principal Component Cox Models (principalcox) - High-Dimensional Analysis**
+* **Multiple PCA Methods:** Standard, sparse, supervised, and kernel PCA implementations for dimension reduction
+* **Automatic Component Selection:** Cross-validation, variance threshold, and scree plot methods for optimal component determination
+* **Comprehensive Scaling Options:** Standardization, normalization, and robust scaling methods with outlier handling
+* **Variable Importance Analysis:** Component loadings, contribution analysis, and original variable importance tracking
+
+##### **Partial Least Squares Cox (plscox) - Supervised Dimension Reduction**
+* **Note:** Module was already comprehensively implemented with NIPALS, kernel, and wide kernel PLS algorithms
+* **Existing Features:** Cross-validated component selection, bootstrap validation, and variable importance assessment
+
+#### 🔧 **Bug Fixes and Improvements**
+* **Fixed:** Compilation error in splinehazard.u.yaml file that was preventing module compilation
+* **Enhanced:** Error handling and validation across all new survival modules
+* **Improved:** Clinical interpretation and methodology explanations for advanced methods
+
 ## Version 0.0.31.39
 
 ### 🗓️ **August 24, 2025 - Advanced Laboratory Quality Control and Spatial Analysis Implementation**

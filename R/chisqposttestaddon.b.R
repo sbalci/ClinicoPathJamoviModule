@@ -15,7 +15,7 @@
 #' @import jmvcore
 #' @importFrom stats chisq.test fisher.test p.adjust qnorm pnorm
 #' @importFrom htmltools HTML div h3 h4 p strong br
-#'
+#' @noRd
 
 chisqposttestaddonClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "chisqposttestaddonClass",

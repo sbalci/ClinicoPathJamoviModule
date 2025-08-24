@@ -1,0 +1,136 @@
+name: directregression
+title: Direct Regression on Survival Function
+jrs: '1.1'
+items:
+    - name: todo
+      title: 'Analysis Complete'
+      type: Html
+      visible: false
+
+    - name: modelSummary
+      title: Direct Regression Model Summary
+      type: Table
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: term
+          title: Term
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: statistic
+          title: t/z
+          type: number
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+
+    - name: pseudoValues
+      title: Pseudo-Observation Values
+      type: Table
+      visible: (show_pseudo_values)
+      columns:
+        - name: observation
+          title: Observation
+          type: integer
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: pseudo_value
+          title: Pseudo-Value
+          type: number
+        - name: survival_prob
+          title: Survival Probability
+          type: number
+
+    - name: modelComparison
+      title: Model Comparison Across Time Points
+      type: Table
+      visible: (model_comparison)
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: r_squared
+          title: R²
+          type: number
+        - name: adj_r_squared
+          title: Adj. R²
+          type: number
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: rmse
+          title: RMSE
+          type: number
+
+    - name: residualAnalysis
+      title: Residual Analysis
+      type: Table
+      visible: (show_residuals)
+      columns:
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: residual_type
+          title: Residual Type
+          type: text
+        - name: mean_residual
+          title: Mean Residual
+          type: number
+        - name: sd_residual
+          title: SD Residual
+          type: number
+        - name: normality_p
+          title: Normality Test p
+          type: number
+          format: zto,pvalue
+
+    - name: methodologyExplanation
+      title: Methodology Explanation
+      type: Html
+      visible: (showExplanations)
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+
+    - name: survivalPlot
+      title: Survival Function with Regression Predictions
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (survival_plot)
+
+    - name: residualPlot
+      title: Residual Diagnostic Plots
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (residual_plot)
+
+    - name: predictionPlot
+      title: Model Predictions at Time Points
+      type: Image
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (prediction_plot)
