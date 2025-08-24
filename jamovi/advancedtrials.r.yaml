@@ -1,0 +1,360 @@
+---
+name: advancedtrials
+title: Advanced Clinical Trial Methods
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: trial_design_summary
+      title: 'Trial Design Summary'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: design_type
+            title: 'Design Type'
+            type: text
+          - name: primary_endpoint
+            title: 'Primary Endpoint'
+            type: text
+          - name: statistical_test
+            title: 'Statistical Test'
+            type: text
+          - name: number_looks
+            title: 'Interim Looks'
+            type: integer
+          - name: overall_alpha
+            title: 'Overall Alpha'
+            type: number
+          - name: overall_power
+            title: 'Overall Power'
+            type: number
+          - name: expected_effect
+            title: 'Expected Effect (HR)'
+            type: number
+
+    - name: group_sequential_boundaries
+      title: 'Group Sequential Boundaries'
+      type: Table
+      rows: 0
+      visible: (design_type:group_sequential)
+      columns:
+          - name: analysis_number
+            title: 'Analysis'
+            type: integer
+          - name: information_fraction
+            title: 'Information Fraction'
+            type: number
+          - name: calendar_time
+            title: 'Calendar Time (months)'
+            type: number
+          - name: cumulative_events
+            title: 'Cumulative Events'
+            type: integer
+          - name: efficacy_boundary
+            title: 'Efficacy Boundary (Z)'
+            type: number
+          - name: futility_boundary
+            title: 'Futility Boundary (Z)'
+            type: number
+          - name: efficacy_p_value
+            title: 'Efficacy P-value'
+            type: number
+          - name: conditional_power
+            title: 'Conditional Power'
+            type: number
+
+    - name: adaptive_design_parameters
+      title: 'Adaptive Design Parameters'
+      type: Table
+      rows: 0
+      visible: (design_type:adaptive_design)
+      columns:
+          - name: adaptation_type
+            title: 'Adaptation Type'
+            type: text
+          - name: adaptation_timing
+            title: 'Adaptation Timing'
+            type: text
+          - name: decision_criterion
+            title: 'Decision Criterion'
+            type: text
+          - name: pre_adaptation_sample_size
+            title: 'Pre-Adaptation N'
+            type: integer
+          - name: post_adaptation_sample_size
+            title: 'Post-Adaptation N'
+            type: integer
+          - name: alpha_adjustment
+            title: 'Alpha Adjustment'
+            type: number
+          - name: power_adjustment
+            title: 'Power Adjustment'
+            type: number
+
+    - name: platform_trial_design
+      title: 'Platform Trial Design'
+      type: Table
+      rows: 0
+      visible: (design_type:platform_trial)
+      columns:
+          - name: treatment_arm
+            title: 'Treatment Arm'
+            type: text
+          - name: arm_status
+            title: 'Arm Status'
+            type: text
+          - name: allocation_ratio
+            title: 'Allocation Ratio'
+            type: number
+          - name: planned_sample_size
+            title: 'Planned N'
+            type: integer
+          - name: interim_decision_rule
+            title: 'Interim Decision Rule'
+            type: text
+          - name: graduation_threshold
+            title: 'Graduation Threshold'
+            type: number
+          - name: futility_threshold
+            title: 'Futility Threshold'
+            type: number
+
+    - name: biomarker_strategy_results
+      title: 'Biomarker Strategy Results'
+      type: Table
+      rows: 0
+      visible: (biomarker_strategy:!all_comers)
+      columns:
+          - name: population
+            title: 'Population'
+            type: text
+          - name: biomarker_prevalence
+            title: 'Biomarker Prevalence (%)'
+            type: number
+          - name: expected_hr
+            title: 'Expected HR'
+            type: number
+          - name: sample_size
+            title: 'Sample Size'
+            type: integer
+          - name: power
+            title: 'Power (%)'
+            type: number
+          - name: analysis_strategy
+            title: 'Analysis Strategy'
+            type: text
+          - name: decision_criterion
+            title: 'Decision Criterion'
+            type: text
+
+    - name: operating_characteristics
+      title: 'Operating Characteristics'
+      type: Table
+      rows: 0
+      visible: (operating_characteristics)
+      columns:
+          - name: scenario
+            title: 'Scenario'
+            type: text
+          - name: true_effect_size
+            title: 'True Effect (HR)'
+            type: number
+          - name: power
+            title: 'Power (%)'
+            type: number
+          - name: type1_error
+            title: 'Type I Error (%)'
+            type: number
+          - name: expected_sample_size
+            title: 'Expected N'
+            type: number
+          - name: expected_duration
+            title: 'Expected Duration (months)'
+            type: number
+          - name: probability_early_stop
+            title: 'P(Early Stop) (%)'
+            type: number
+          - name: probability_futility
+            title: 'P(Futility) (%)'
+            type: number
+
+    - name: interim_monitoring_guidelines
+      title: 'Interim Monitoring Guidelines'
+      type: Table
+      rows: 0
+      visible: (interim_monitoring_plan)
+      columns:
+          - name: analysis_time
+            title: 'Analysis Time'
+            type: text
+          - name: data_cutoff_rule
+            title: 'Data Cutoff Rule'
+            type: text
+          - name: analysis_population
+            title: 'Analysis Population'
+            type: text
+          - name: statistical_methods
+            title: 'Statistical Methods'
+            type: text
+          - name: decision_framework
+            title: 'Decision Framework'
+            type: text
+          - name: communication_plan
+            title: 'Communication Plan'
+            type: text
+          - name: regulatory_considerations
+            title: 'Regulatory Considerations'
+            type: text
+
+    - name: sample_size_calculations
+      title: 'Sample Size Calculations'
+      type: Table
+      rows: 0
+      visible: true
+      columns:
+          - name: analysis_type
+            title: 'Analysis Type'
+            type: text
+          - name: events_required
+            title: 'Events Required'
+            type: integer
+          - name: total_sample_size
+            title: 'Total Sample Size'
+            type: integer
+          - name: per_arm_sample_size
+            title: 'Per Arm Sample Size'
+            type: integer
+          - name: study_duration
+            title: 'Study Duration (months)'
+            type: number
+          - name: accrual_period
+            title: 'Accrual Period (months)'
+            type: number
+          - name: follow_up_period
+            title: 'Follow-up Period (months)'
+            type: number
+
+    - name: futility_analysis_results
+      title: 'Futility Analysis Results'
+      type: Table
+      rows: 0
+      visible: (futility_analysis)
+      columns:
+          - name: interim_analysis
+            title: 'Interim Analysis'
+            type: integer
+          - name: conditional_power
+            title: 'Conditional Power'
+            type: number
+          - name: predictive_power
+            title: 'Predictive Power'
+            type: number
+          - name: futility_boundary
+            title: 'Futility Boundary'
+            type: number
+          - name: recommendation
+            title: 'Recommendation'
+            type: text
+          - name: rationale
+            title: 'Rationale'
+            type: text
+          - name: continue_probability
+            title: 'P(Continue)'
+            type: number
+
+    - name: multiplicity_adjustment
+      title: 'Multiplicity Adjustment'
+      type: Table
+      rows: 0
+      visible: (multiplicity_adjustment)
+      columns:
+          - name: comparison
+            title: 'Comparison'
+            type: text
+          - name: unadjusted_alpha
+            title: 'Unadjusted Alpha'
+            type: number
+          - name: adjusted_alpha
+            title: 'Adjusted Alpha'
+            type: number
+          - name: adjustment_method
+            title: 'Adjustment Method'
+            type: text
+          - name: family_wise_error_rate
+            title: 'FWER'
+            type: number
+          - name: power_impact
+            title: 'Power Impact (%)'
+            type: number
+
+    - name: regulatory_compliance
+      title: 'Regulatory Compliance Summary'
+      type: Table
+      rows: 1
+      visible: true
+      columns:
+          - name: regulatory_framework
+            title: 'Regulatory Framework'
+            type: text
+          - name: design_qualification
+            title: 'Design Qualification'
+            type: text
+          - name: statistical_considerations
+            title: 'Statistical Considerations'
+            type: text
+          - name: documentation_requirements
+            title: 'Documentation Requirements'
+            type: text
+          - name: submission_pathway
+            title: 'Submission Pathway'
+            type: text
+
+    - name: boundary_plot
+      title: Group Sequential Boundaries
+      type: Image
+      width: 600
+      height: 450
+      visible: (boundary_plots)
+      renderFun: .plot_sequential_boundaries
+
+    - name: operating_characteristics_plot
+      title: Operating Characteristics
+      type: Image
+      width: 600
+      height: 450
+      visible: (operating_characteristics)
+      renderFun: .plot_operating_characteristics
+
+    - name: conditional_power_plot
+      title: Conditional Power Analysis
+      type: Image
+      width: 600
+      height: 450
+      visible: (conditional_power_analysis)
+      renderFun: .plot_conditional_power
+
+    - name: sample_size_sensitivity_plot
+      title: Sample Size Sensitivity Analysis
+      type: Image
+      width: 600
+      height: 450
+      visible: (operating_characteristics)
+      renderFun: .plot_sample_size_sensitivity
+
+    - name: platform_trial_flowchart
+      title: Platform Trial Flow Diagram
+      type: Image
+      width: 700
+      height: 500
+      visible: (design_type:platform_trial)
+      renderFun: .plot_platform_trial_flow
+
+    - name: design_recommendations
+      title: Design Recommendations and Interpretation
+      type: Html
+      visible: true
