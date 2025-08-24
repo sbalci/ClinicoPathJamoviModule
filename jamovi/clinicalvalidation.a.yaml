@@ -1,0 +1,108 @@
+---
+name: clinicalvalidation
+title: Clinical Validation Framework
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Clinical Validation Framework
+menuSubtitle: Statistical accuracy and regulatory compliance validation
+options:
+  - name: data
+    type: Data
+
+  - name: testVar
+    title: Test variable
+    type: Variable
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: referenceVar
+    title: Reference standard
+    type: Variable
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: validationType
+    title: Validation type
+    type: List
+    options:
+      - name: accuracy
+        title: Statistical accuracy validation
+      - name: clinical_guidelines
+        title: Clinical guidelines compliance
+      - name: regulatory
+        title: Regulatory compliance
+      - name: cross_platform
+        title: Cross-platform validation
+    default: accuracy
+
+  - name: referenceMethod
+    title: Reference method
+    type: List
+    options:
+      - name: r_stats
+        title: R base statistics
+      - name: sas
+        title: SAS reference
+      - name: spss
+        title: SPSS reference
+      - name: stata
+        title: Stata reference
+      - name: published
+        title: Published literature
+    default: r_stats
+
+  - name: toleranceLevel
+    title: Tolerance level
+    type: Number
+    min: 0.001
+    max: 0.1
+    default: 0.01
+
+  - name: confidenceLevel
+    title: Confidence level
+    type: Number
+    min: 90
+    max: 99.9
+    default: 95
+
+  - name: performEquivalence
+    title: Perform equivalence test
+    type: Bool
+    default: true
+
+  - name: generateReport
+    title: Generate validation report
+    type: Bool
+    default: true
+
+  - name: regulatoryStandard
+    title: Regulatory standard
+    type: List
+    options:
+      - name: fda
+        title: FDA guidelines
+      - name: ema
+        title: EMA guidelines
+      - name: ich
+        title: ICH guidelines
+      - name: gcp
+        title: GCP standards
+    default: fda
+
+  - name: documentationLevel
+    title: Documentation level
+    type: List
+    options:
+      - name: basic
+        title: Basic validation
+      - name: comprehensive
+        title: Comprehensive validation
+      - name: submission_ready
+        title: Submission-ready documentation
+    default: comprehensive

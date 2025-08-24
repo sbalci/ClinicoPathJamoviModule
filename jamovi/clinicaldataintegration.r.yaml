@@ -1,0 +1,98 @@
+---
+name: clinicaldataintegration
+title: Clinical Data Integration
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: overview
+    title: Data Overview
+    type: Table
+    visible: true
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: value
+        title: Value
+        type: text
+      - name: status
+        title: Status
+        type: text
+
+  - name: qualityAssessment
+    title: Data Quality Assessment
+    type: Table
+    visible: (qualityCheck)
+    columns:
+      - name: variable
+        title: Variable
+        type: text
+      - name: completeness
+        title: Completeness (%)
+        type: number
+      - name: missing
+        title: Missing Values
+        type: integer
+      - name: unique
+        title: Unique Values
+        type: integer
+      - name: outliers
+        title: Outliers
+        type: integer
+        visible: (outlierDetection)
+      - name: quality_score
+        title: Quality Score
+        type: text
+
+  - name: consistencyChecks
+    title: Consistency Checks
+    type: Table
+    visible: (consistencyCheck)
+    columns:
+      - name: check_type
+        title: Check Type
+        type: text
+      - name: variable
+        title: Variable(s)
+        type: text
+      - name: result
+        title: Result
+        type: text
+      - name: issues
+        title: Issues Found
+        type: integer
+
+  - name: terminologyMapping
+    title: Terminology Mapping
+    type: Table
+    visible: (terminologyMapping:icd10 || terminologyMapping:snomed || terminologyMapping:loinc)
+    columns:
+      - name: original_code
+        title: Original Code
+        type: text
+      - name: mapped_code
+        title: Mapped Code
+        type: text
+      - name: description
+        title: Description
+        type: text
+      - name: mapping_confidence
+        title: Confidence
+        type: text
+
+  - name: exportSummary
+    title: Export Summary
+    type: Html
+    visible: (generateReport)
+
+  - name: qualityPlot
+    title: Data Quality Visualization
+    visible: (qualityCheck)
+    type: Image
+    width: 600
+    height: 400
+    renderFun: .qualityPlot

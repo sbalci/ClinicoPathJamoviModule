@@ -1,0 +1,130 @@
+---
+name: flexiblerelativesurvival
+title: Flexible Relative Survival Analysis
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: modelSummary
+    title: Model Summary
+    type: Table
+    visible: true
+    columns:
+      - name: parameter
+        title: Parameter
+        type: text
+      - name: value
+        title: Value
+        type: text
+
+  - name: coefficients
+    title: Model Coefficients
+    type: Table
+    visible: (covariates)
+    columns:
+      - name: term
+        title: Term
+        type: text
+      - name: estimate
+        title: Estimate
+        type: number
+      - name: se
+        title: Std. Error
+        type: number
+      - name: z_value
+        title: z value
+        type: number
+      - name: p_value
+        title: p-value
+        type: number
+        format: zto,pvalue
+      - name: hr
+        title: Hazard Ratio
+        type: number
+      - name: ci_lower
+        title: HR CI Lower
+        type: number
+      - name: ci_upper
+        title: HR CI Upper
+        type: number
+
+  - name: relativeSurvival
+    title: Relative Survival Estimates
+    type: Table
+    visible: true
+    columns:
+      - name: time
+        title: Time
+        type: number
+      - name: rel_survival
+        title: Relative Survival
+        type: number
+      - name: ci_lower
+        title: CI Lower
+        type: number
+      - name: ci_upper
+        title: CI Upper
+        type: number
+      - name: excess_hazard
+        title: Excess Hazard
+        type: number
+      - name: life_lost
+        title: Life Years Lost
+        type: number
+
+  - name: smoothingInfo
+    title: Smoothing Information
+    type: Table
+    visible: true
+    columns:
+      - name: dimension
+        title: Dimension
+        type: text
+      - name: knots
+        title: Knots
+        type: integer
+      - name: smoothing_param
+        title: Smoothing Parameter
+        type: number
+      - name: edf
+        title: Effective df
+        type: number
+
+  - name: goodnessOfFit
+    title: Model Fit Statistics
+    type: Table
+    visible: true
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: value
+        title: Value
+        type: number
+
+  - name: relativeSurvivalPlot
+    title: Relative Survival Curve
+    visible: (plotRelativeSurvival)
+    type: Image
+    width: 650
+    height: 450
+    renderFun: .relativeSurvivalPlot
+
+  - name: excessHazardPlot
+    title: Excess Hazard Function
+    visible: (plotExcessHazard)
+    type: Image
+    width: 650
+    height: 450
+    renderFun: .excessHazardPlot
+
+  - name: lifeExpectancyPlot
+    title: Life Expectancy Loss
+    visible: (plotLifeExpectancy)
+    type: Image
+    width: 650
+    height: 450
+    renderFun: .lifeExpectancyPlot

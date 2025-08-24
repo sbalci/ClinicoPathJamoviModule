@@ -1,0 +1,144 @@
+---
+name: flexiblerelativesurvival
+title: Flexible Relative Survival Analysis
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Survival
+menuTitle: Flexible Relative Survival Analysis
+menuSubtitle: Relative survival with spline smoothing (flexrsurv approach)
+options:
+  - name: data
+    type: Data
+
+  - name: timeVar
+    title: Time variable
+    type: Variable
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: statusVar
+    title: Status variable (0=alive, 1=dead)
+    type: Variable
+    suggested:
+      - ordinal
+      - nominal
+    permitted:
+      - factor
+      - numeric
+
+  - name: ageVar
+    title: Age variable
+    type: Variable
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: sexVar
+    title: Sex variable
+    type: Variable
+    suggested:
+      - nominal
+    permitted:
+      - factor
+
+  - name: yearVar
+    title: Calendar year variable
+    type: Variable
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: covariates
+    title: Covariates
+    type: Variables
+    suggested:
+      - continuous
+      - ordinal
+      - nominal
+    permitted:
+      - numeric
+      - factor
+
+  - name: expectedType
+    title: Expected survival type
+    type: List
+    options:
+      - name: lifetable
+        title: Life table approach
+      - name: hazard
+        title: Expected hazard approach
+      - name: custom
+        title: Custom expected rates
+    default: lifetable
+
+  - name: smoothingMethod
+    title: Smoothing method
+    type: List
+    options:
+      - name: splines
+        title: Penalized splines
+      - name: pspline
+        title: P-splines
+      - name: bspline
+        title: B-splines
+      - name: ns
+        title: Natural splines
+    default: splines
+
+  - name: knotsTime
+    title: Knots for time dimension
+    type: Number
+    min: 2
+    max: 10
+    default: 5
+
+  - name: knotsAge
+    title: Knots for age dimension
+    type: Number
+    min: 2
+    max: 8
+    default: 3
+
+  - name: smoothingParameter
+    title: Smoothing parameter
+    type: Number
+    min: 0.001
+    max: 100
+    default: 1.0
+
+  - name: confidenceLevel
+    title: Confidence level
+    type: Number
+    min: 90
+    max: 99.9
+    default: 95
+
+  - name: plotRelativeSurvival
+    title: Plot relative survival
+    type: Bool
+    default: true
+
+  - name: plotExcessHazard
+    title: Plot excess hazard
+    type: Bool
+    default: true
+
+  - name: plotLifeExpectancy
+    title: Plot life expectancy loss
+    type: Bool
+    default: false
+
+  - name: predictTimePoints
+    title: Prediction time points (comma-separated)
+    type: String
+    default: "1,2,3,5,10"
+
+  - name: standardizeAge
+    title: Age standardization
+    type: Bool
+    default: true

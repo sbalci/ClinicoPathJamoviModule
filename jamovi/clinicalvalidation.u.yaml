@@ -1,0 +1,66 @@
+name: clinicalvalidation
+title: Clinical Validation Framework
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Test Variable
+        children:
+          - type: VariablesListBox
+            name: testVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Reference Standard
+        children:
+          - type: VariablesListBox
+            name: referenceVar
+            isTarget: true
+            maxItemCount: 1
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Validation Configuration
+        children:
+          - type: ComboBox
+            name: validationType
+            label: Validation type
+          - type: ComboBox
+            name: referenceMethod
+            label: Reference method
+      - type: Label
+        label: Statistical Parameters
+        children:
+          - type: TextBox
+            name: toleranceLevel
+            label: Tolerance level
+            format: number
+          - type: TextBox
+            name: confidenceLevel
+            label: Confidence level (%)
+            format: number
+          - type: CheckBox
+            name: performEquivalence
+            label: Perform equivalence test
+      - type: Label
+        label: Regulatory Compliance
+        children:
+          - type: ComboBox
+            name: regulatoryStandard
+            label: Regulatory standard
+          - type: ComboBox
+            name: documentationLevel
+            label: Documentation level
+      - type: Label
+        label: Output Options
+        children:
+          - type: CheckBox
+            name: generateReport
+            label: Generate validation report
+jus: '2.0'

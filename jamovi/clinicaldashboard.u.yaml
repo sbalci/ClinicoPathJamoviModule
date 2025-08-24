@@ -1,0 +1,83 @@
+name: clinicaldashboard
+title: Interactive Clinical Dashboard
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Patient ID
+        children:
+          - type: VariablesListBox
+            name: patientId
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Time/Date Variable
+        children:
+          - type: VariablesListBox
+            name: timeVar
+            isTarget: true
+            maxItemCount: 1
+      - type: TargetLayoutBox
+        label: Outcome Variables
+        children:
+          - type: VariablesListBox
+            name: outcomeVars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: groupVar
+            isTarget: true
+            maxItemCount: 1
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: Label
+        label: Dashboard Configuration
+        children:
+          - type: ComboBox
+            name: dashboardType
+            label: Dashboard type
+          - type: ComboBox
+            name: timeWindow
+            label: Time window
+      - type: Label
+        label: Display Options
+        children:
+          - type: CheckBox
+            name: showSummaryStats
+            label: Show summary statistics
+          - type: CheckBox
+            name: showTrends
+            label: Show trend analysis
+          - type: CheckBox
+            name: showDistributions
+            label: Show outcome distributions
+      - type: Label
+        label: Clinical Alerts
+        children:
+          - type: CheckBox
+            name: showAlerts
+            label: Show clinical alerts
+          - type: TextBox
+            name: alertThresholds
+            label: Alert thresholds
+            format: string
+            enable: (showAlerts)
+      - type: Label
+        label: Advanced Options
+        children:
+          - type: CheckBox
+            name: realTimeUpdate
+            label: Real-time updates
+          - type: CheckBox
+            name: exportDashboard
+            label: Export dashboard
+jus: '2.0'

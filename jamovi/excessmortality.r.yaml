@@ -1,0 +1,112 @@
+---
+name: excessmortality
+title: Excess Mortality Analysis
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: modelSummary
+    title: Model Summary
+    type: Table
+    visible: true
+    columns:
+      - name: parameter
+        title: Parameter
+        type: text
+      - name: value
+        title: Value
+        type: text
+
+  - name: coefficients
+    title: Model Coefficients
+    type: Table
+    visible: (covariates)
+    columns:
+      - name: term
+        title: Term
+        type: text
+      - name: estimate
+        title: Estimate
+        type: number
+      - name: se
+        title: Std. Error
+        type: number
+      - name: z_value
+        title: z value
+        type: number
+      - name: p_value
+        title: p-value
+        type: number
+        format: zto,pvalue
+      - name: ci_lower
+        title: CI Lower
+        type: number
+      - name: ci_upper
+        title: CI Upper
+        type: number
+
+  - name: predictions
+    title: Excess Mortality Predictions
+    type: Table
+    visible: true
+    columns:
+      - name: time
+        title: Time
+        type: number
+      - name: excess_hazard
+        title: Excess Hazard
+        type: number
+      - name: excess_survival
+        title: Excess Survival
+        type: number
+      - name: ci_hazard_lower
+        title: Hazard CI Lower
+        type: number
+      - name: ci_hazard_upper
+        title: Hazard CI Upper
+        type: number
+      - name: ci_survival_lower
+        title: Survival CI Lower
+        type: number
+      - name: ci_survival_upper
+        title: Survival CI Upper
+        type: number
+
+  - name: goodnessOfFit
+    title: Goodness of Fit
+    type: Table
+    visible: true
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: value
+        title: Value
+        type: number
+
+  - name: hazardPlot
+    title: Excess Hazard Function
+    visible: (plotHazard)
+    type: Image
+    width: 600
+    height: 400
+    renderFun: .hazardPlot
+
+  - name: survivalPlot
+    title: Excess Survival Function
+    visible: (plotSurvival)
+    type: Image
+    width: 600
+    height: 400
+    renderFun: .survivalPlot
+
+  - name: cumHazardPlot
+    title: Cumulative Excess Hazard
+    visible: (plotCumHazard)
+    type: Image
+    width: 600
+    height: 400
+    renderFun: .cumHazardPlot
