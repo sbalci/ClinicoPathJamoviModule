@@ -3795,6 +3795,43 @@ analyses:
       quality goal index (QGI) for analytical methods. Supports ISO 15189
       compliance and quality improvement initiatives. Essential for laboratory
       method validation and performance monitoring.
+  - title: Laboratory Method Validation Protocols
+    name: methodvalidation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuTitle: Laboratory Method Validation Protocols
+    description: >
+      Comprehensive analytical method validation following CLSI EP15-A3,
+      EP05-A3, and ISO 15189 guidelines. Validates precision, accuracy,
+      linearity, measuring interval, and analytical measurement range for
+      clinical laboratory methods. Supports regulatory submissions and
+      laboratory accreditation. Essential for establishing method performance
+      characteristics.
+  - title: Reference Interval Establishment
+    name: referenceintervals
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuTitle: Reference Interval Establishment
+    description: >
+      Robust statistical methods for establishing clinical reference intervals
+      following CLSI EP28-A3c guidelines. Supports parametric and non-parametric
+      approaches, robust methods for outlier handling, and partitioning analysis
+      for demographic factors. Essential for laboratory standardization and
+      clinical interpretation of test results.
+  - title: Measurement Uncertainty Estimation (ISO 15189)
+    name: measurementuncertainty
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuTitle: Measurement Uncertainty Estimation (ISO 15189)
+    description: >
+      Comprehensive measurement uncertainty evaluation following ISO 15189,
+      ISO/IEC Guide 98-3 (GUM), and JCGM 100:2008 guidelines. Calculates Type A
+      and Type B uncertainties, combined and expanded uncertainty, and
+      uncertainty budgets for clinical laboratory measurements. Essential for
+      laboratory accreditation and quality assurance.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
