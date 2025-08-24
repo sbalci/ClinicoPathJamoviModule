@@ -1,0 +1,66 @@
+---
+name: enhancedcorrelation
+title: Enhanced Correlation Analysis  
+jas: '1.2'
+version: '1.0.0'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Enhanced Correlation Analysis
+menuSubtitle: Advanced correlation with confidence intervals
+options:
+  - name: data
+    type: Data
+
+  - name: vars
+    title: Variables
+    type: Variables
+    suggested:
+      - continuous
+    permitted:
+      - numeric
+
+  - name: method
+    title: Correlation method
+    type: List
+    options:
+      - name: pearson
+        title: Pearson
+      - name: spearman  
+        title: Spearman
+      - name: kendall
+        title: Kendall's tau
+    default: spearman
+
+  - name: ci
+    title: Confidence intervals
+    type: Bool
+    default: true
+
+  - name: ciWidth
+    title: Confidence level
+    type: Number
+    min: 50
+    max: 99.9
+    default: 95
+
+  - name: sig
+    title: Flag significant correlations
+    type: Bool
+    default: true
+
+  - name: sigLevel
+    title: Significance level
+    type: Number
+    min: 0.001
+    max: 0.1
+    default: 0.05
+
+  - name: plotMatrix
+    title: Correlation plot matrix
+    type: Bool
+    default: false
+
+  - name: plotScatter
+    title: Scatterplot matrix
+    type: Bool
+    default: false

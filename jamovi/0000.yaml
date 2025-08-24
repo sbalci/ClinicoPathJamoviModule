@@ -4103,6 +4103,22 @@ analyses:
 
       assumptions are met, with improved extrapolation capabilities for health
       economic modeling.
+  - title: Enhanced Correlation Analysis
+    name: enhancedcorrelation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Enhanced Correlation Analysis
+    menuSubtitle: Advanced correlation with confidence intervals
+  - title: Exact Tests for Small Samples
+    name: exacttests
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Exact Tests for Small Samples
+    menuSubtitle: Precise inference for small sample sizes
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

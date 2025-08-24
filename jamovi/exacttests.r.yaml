@@ -1,0 +1,48 @@
+---
+name: exacttests
+title: Exact Tests for Small Samples
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  - name: contingency
+    title: Contingency Table
+    type: Table
+    visible: (rows && cols)
+    columns:
+      - name: .name
+        title: ""
+        type: text
+        combineBelow: true
+
+  - name: tests
+    title: Statistical Tests
+    type: Table
+    visible: true
+    columns:
+      - name: test
+        title: Test
+        type: text
+      - name: value
+        title: Value
+        type: number
+      - name: df
+        title: df
+        type: integer
+        visible: (testType:fisher)
+      - name: p
+        title: p
+        type: number
+        format: zto,pvalue
+      - name: ci
+        title: 95% CI
+        type: text
+        visible: (showCI)
+
+  - name: note
+    title: Note
+    type: Html
+    visible: true

@@ -1,5 +1,25 @@
 # ClinicoPath News
 
+## Version 0.0.31.44
+
+### 🗓️ **August 24, 2025 - Enhanced Statistical Methods for Small Samples**
+
+#### 🎯 **New Statistical Analysis Modules - Robust Methods for Limited Data**
+
+##### **Enhanced Correlation Analysis (enhancedcorrelation) - Advanced Correlation Methods**
+* **Spearman Rank Correlation:** Non-parametric correlation analysis with robust confidence intervals, resistant to outliers and non-linear relationships
+* **Kendall's Tau Correlation:** Alternative non-parametric correlation with comprehensive statistical inference and concordance-based analysis
+* **Pearson Correlation:** Traditional linear correlation with improved small-sample performance and enhanced confidence interval estimation
+* **Multiple Methods Framework:** Single analysis supporting all three correlation types with unified statistical reporting and clinical interpretation
+* **Visualization Support:** Correlation matrix plots and scatterplot matrices with statistical significance indicators and effect size interpretation
+
+##### **Exact Tests for Small Samples (exacttests) - Precise Statistical Inference**
+* **Fisher's Exact Test:** Enhanced implementation for sparse contingency tables with comprehensive exact p-values and confidence intervals
+* **Exact Binomial Test:** Precise proportion inference for small samples where normal approximations fail, with multiple confidence interval methods
+* **Exact McNemar Test:** Paired binary data analysis with exact statistical inference for marginal homogeneity testing
+* **Exact Confidence Intervals:** Clopper-Pearson exact intervals and Wilson score intervals for robust proportion estimation
+* **Small Sample Support:** Statistical methods specifically designed for studies with limited sample sizes and sparse data structures
+
 ## Version 0.0.31.43
 
 ### 🗓️ **August 24, 2025 - Diagnostic Performance Analysis Enhancements**
@@ -32,6 +52,70 @@
 * **Dimensionality Reduction:** Principal component analysis of selected features optimized for Cox regression applications
 * **Model Validation:** Comprehensive performance assessment with cross-validation and genomics-specific evaluation metrics
 * **Clinical Applications:** Particularly effective for biomarker discovery and high-dimensional molecular data analysis
+
+#### 🎯 **Advanced Non-Parametric Methods - Statistical Test Suite**
+
+##### **Cochran's Q Test (cochranq) - Repeated Binary Measures**
+* **Extended McNemar Analysis:** Statistical analysis for more than 2 paired groups or time points with comprehensive effect size measures
+* **Clinical Applications:** Treatment response tracking over time, diagnostic concordance across multiple raters, and longitudinal binary outcomes
+* **Post-Hoc Comparisons:** Multiple comparison procedures with Bonferroni, Holm, and FDR corrections for pairwise testing
+* **Power Analysis:** Sample size calculation and power assessment for repeated binary measure study designs
+
+##### **Friedman Test Enhancement (friedmantest) - Non-Parametric Repeated Measures**
+* **Robust Alternative:** Non-parametric repeated measures ANOVA for ordinal or non-normal data with comprehensive post-hoc testing
+* **Multiple Comparison Methods:** Nemenyi, Wilcoxon signed-rank, and Conover post-hoc procedures with effect size calculations
+* **Clinical Integration:** Within-subjects analysis for treatment protocols, biomarker progression, and patient monitoring over time
+* **Effect Size Measures:** Kendall's W coefficient with clinical interpretation and confidence intervals
+
+##### **Page's Trend Test (pagetrendtest) - Ordered Alternatives**
+* **Trend Detection:** Specialized analysis for detecting ordered patterns in repeated measures with superior statistical power
+* **Clinical Applications:** Dose-response studies, treatment escalation protocols, and progressive intervention assessments
+* **Statistical Rigor:** Page's L statistic with exact and asymptotic p-values plus trend effect size quantification
+* **Research Applications:** Biomarker progression analysis and ordered categorical outcome evaluation
+
+#### 🎯 **Clinical Translation Suite - Dynamic Prediction & Treatment Optimization**
+
+##### **Dynamic Prediction Models (dynamicprediction) - Real-Time Prognosis**
+* **Longitudinal Integration:** Dynamic risk prediction incorporating time-varying biomarker data with joint modeling frameworks
+* **Landmark Analysis:** Time-updated prognosis calculation with flexible landmark time selection and survival updating
+* **Clinical Applications:** Real-time prognostic updating for clinical decision support and personalized patient counseling
+* **Prediction Intervals:** Personalized prediction intervals with uncertainty quantification and clinical interpretation guidelines
+
+##### **Clinical Prediction Models (clinicalprediction) - Model Development & Validation**
+* **Comprehensive Validation:** Clinical prediction model development with internal and external validation frameworks
+* **Nomogram Generation:** Interactive nomogram creation for clinical use with risk score calculation and calibration assessment
+* **Performance Metrics:** Discrimination (C-index, AUC) and calibration assessment with decision curve analysis integration
+* **Clinical Utility:** Treatment benefit quantification with cost-effectiveness analysis and personalized recommendations
+
+##### **Treatment Effects Analysis (treatmenteffects, treatmentoptim) - Personalized Medicine**
+* **Individual Effects:** Treatment benefit quantification at patient level with subgroup analysis for differential effects
+* **Optimization Framework:** Treatment selection optimization based on patient characteristics and biomarker profiles
+* **Uncertainty Quantification:** Bootstrap confidence intervals and sensitivity analysis for treatment recommendations
+* **Cost-Effectiveness:** Integration of clinical outcomes with economic evaluation for healthcare decision making
+
+#### 🎯 **Advanced Survival Methodology - Time-Updated & Transformation Models**
+
+##### **Time-Updated Survival Estimates (timeupdatedsurvival, timeupdatesurvival) - Dynamic Survival**
+* **Real-Time Updates:** Time-updated survival probability estimates incorporating new patient information over follow-up
+* **Additive Hazards:** Non-parametric and semi-parametric approaches using timereg methodology for time-varying effects
+* **Landmark Analysis:** Dynamic survival prediction with landmark methodology for clinical prognosis updating
+* **Clinical Integration:** Real-time prognostic counseling tools with updated survival curves and patient communication aids
+
+##### **Transformation Models (transformationmodels) - Distributional Flexibility**
+* **Flexible Transformations:** Box-Cox, log-rank, and normal score transformations for survival data beyond proportional hazards
+* **Joint Estimation:** Simultaneous estimation of transformation parameters and regression coefficients with model selection
+* **Model Comparison:** Information criteria (AIC/BIC) based selection with cross-validation for optimal transformation choice
+* **Clinical Applications:** Enhanced modeling of complex survival distributions with improved prognostic accuracy
+
+#### 🎯 **Advanced Survival Methodology - Flexible Parametric Models**
+
+##### **Flexible Parametric Survival Models (flexparametricadvanced) - Royston-Parmar Methods**
+* **Multiple Distributions:** Comprehensive support for Weibull, log-normal, log-logistic, gamma, Gompertz, and generalized gamma distributions
+* **Royston-Parmar Splines:** Flexible baseline hazards using restricted cubic splines with customizable degrees of freedom
+* **Superior Extrapolation:** Enhanced prediction capabilities for health economic modeling and long-term survival projections
+* **Time-Varying Effects:** Model covariate effects that change over time with smooth hazard transitions
+* **Cure Models:** Support for mixture and non-mixture cure model specifications for populations with cured fractions
+* **Clinical Applications:** Smooth hazard and survival functions with comprehensive model diagnostics and selection criteria
 
 #### 🎯 **Comprehensive Power Analysis & Sample Size Calculations**
 
