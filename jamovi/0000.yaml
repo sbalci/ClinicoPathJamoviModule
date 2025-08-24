@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.39
+version: 0.0.31.41
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-08-23'
+date: '2025-08-24'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -2298,7 +2298,7 @@ analyses:
     name: enhancednonparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath Descriptives
+    menuGroup: ClinicoPathD Descriptives
     menuTitle: Enhanced Non-Parametric Tests
     description: >-
       Performs enhanced non-parametric statistical tests specifically designed
@@ -2315,7 +2315,7 @@ analyses:
     name: advancedanova
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Inferential
     menuTitle: Advanced ANOVA Suite
     menuSubtitle: Comprehensive ANOVA with enhanced post hoc testing
@@ -2327,7 +2327,7 @@ analyses:
     name: hierarchicalpathology
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Inferential
     menuTitle: Hierarchical Mixed-Effects Models
     menuSubtitle: Multi-level analysis for nested pathology data
@@ -2340,7 +2340,7 @@ analyses:
     name: optimalcutpoint
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Inferential
     menuTitle: Optimal Cutpoint Determination
     menuSubtitle: Find optimal thresholds for continuous biomarkers
@@ -2353,7 +2353,7 @@ analyses:
     name: categoricaladvanced
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuTitle: Enhanced Chi-Square and Fisher's Tests
     description: >
       Enhanced categorical analysis with chi-square tests, Fisher's exact
@@ -2367,7 +2367,7 @@ analyses:
     name: treatmentmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: Frequencies
+    menuGroup: FrequenciesD
     menuSubgroup: Meta-Analysis
     menuTitle: Treatment Effect Meta-Analysis
     menuSubtitle: Comprehensive meta-analysis for clinical interventions
@@ -2408,7 +2408,7 @@ analyses:
     name: mlpathology
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuTitle: Classification Performance Metrics for Digital Pathology
     description: >
       Comprehensive evaluation of machine learning models and algorithms for 
@@ -2423,7 +2423,7 @@ analyses:
     name: pathologycomposition
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuTitle: Pathology Composition Analysis
     description: >
       Semi-quantitative analysis of histologic components and their association
@@ -2485,7 +2485,7 @@ analyses:
     name: assayoptimization
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Experimental Design
     menuTitle: Assay Optimization & Experimental Design
     description: >
@@ -2500,7 +2500,7 @@ analyses:
     name: frailtysurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Frailty & Random Effects Survival Models
     description: |
@@ -2511,7 +2511,7 @@ analyses:
     name: pseudosurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Pseudo-Observations Survival Methods
     description: |
@@ -2523,7 +2523,7 @@ analyses:
     name: intervalsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Interval-Censored Survival Analysis
     description: |
@@ -2534,7 +2534,7 @@ analyses:
     name: recurrentsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Recurrent Event Survival Analysis
     description: >
@@ -2552,13 +2552,13 @@ analyses:
     name: clinicalcalculators
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuTitle: Clinical Risk Calculators & Nomograms
   - title: Enhanced Survival Model Validation
     name: survivalmodelvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath Survival
+    menuGroup: ClinicoPathD Survival
     menuSubgroup: Advanced Validation
     menuTitle: Enhanced Survival Model Validation
     menuSubtitle: Comprehensive Model Performance Assessment
@@ -2574,7 +2574,7 @@ analyses:
     name: clinicalnomograms
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath Survival
+    menuGroup: ClinicoPathD Survival
     menuSubgroup: Clinical Translation
     menuTitle: Clinical Nomograms & Risk Calculators
     menuSubtitle: Prognostic Tools for Clinical Practice
@@ -2590,7 +2590,7 @@ analyses:
     name: smoothhazard
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath Survival
+    menuGroup: ClinicoPathD Survival
     menuTitle: Smooth Hazard Estimation & Analysis
   - title: Survey-Weighted Survival Analysis
     name: surveysurvival
@@ -2669,7 +2669,7 @@ analyses:
     name: rmst
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Restricted Mean Survival Time Tests
     description: >
@@ -2682,7 +2682,7 @@ analyses:
     name: permutationsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Permutation Tests for Survival
     description: >-
@@ -2696,7 +2696,7 @@ analyses:
     name: mediansurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Median Survival Comparisons
     description: >-
@@ -2707,7 +2707,7 @@ analyses:
     name: flexparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Flexible Parametric Survival Models
     description: >-
@@ -2720,7 +2720,7 @@ analyses:
     name: splinehazard
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Spline-based Hazard Functions
     menuSubtitle: Flexible parametric survival modeling with splines
@@ -2728,7 +2728,7 @@ analyses:
     name: distributionfit
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Distribution Selection and Goodness-of-Fit
     menuSubtitle: Automated parametric distribution selection with model adequacy testing
@@ -2736,14 +2736,14 @@ analyses:
     name: flexiblebaseline
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Flexible Baseline Distributions
   - title: Stratified Parametric Models
     name: stratifiedparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Stratified Parametric Models
   - title: High-Dimensional Cox Regression
@@ -2796,7 +2796,7 @@ analyses:
     name: smoothtimevary
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Smoothly Time-Varying Effects
     menuSubtitle: Smooth estimation of time-varying covariate effects using splines
@@ -2810,7 +2810,7 @@ analyses:
     name: dynamiccoeff
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Dynamic Coefficient Models
     menuSubtitle: Time-varying coefficients with dynamic updating
@@ -2825,7 +2825,7 @@ analyses:
     name: pheval
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Proportional Hazards Testing
     menuSubtitle: Comprehensive PH assumption validation
@@ -2840,7 +2840,7 @@ analyses:
     name: coxphw
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Weighted Cox Regression
     menuSubtitle: Cox models for rare events and imbalanced data
@@ -2854,7 +2854,7 @@ analyses:
     name: coxrobust
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Robust Cox Regression
     menuSubtitle: Outlier-resistant survival modeling
@@ -2868,7 +2868,7 @@ analyses:
     name: raftgee
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Rank-based AFT Estimation
     menuSubtitle: GEE-based accelerated failure time models
@@ -2883,7 +2883,7 @@ analyses:
     name: robustaft
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Robust AFT Models
     menuSubtitle: Accelerated failure time models with robust estimation
@@ -2897,7 +2897,7 @@ analyses:
     name: transformationmodels
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Transformation Models
     menuSubtitle: Unified framework for survival models through transformations
@@ -2911,7 +2911,7 @@ analyses:
     name: mixedeffectscox
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath Survival
+    menuGroup: ClinicoPathD Survival
     menuTitle: Mixed-Effects Cox Models
     description: >
       Implements mixed-effects Cox proportional hazards models for hierarchical 
@@ -2922,7 +2922,7 @@ analyses:
     name: emfrailty
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath Survival
+    menuGroup: ClinicoPathD Survival
     menuTitle: EM-Algorithm Frailty Models
     description: >
       Implements expectation-maximization (EM) algorithm based frailty models
@@ -3285,7 +3285,7 @@ analyses:
     name: bayesianma
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuTitle: Bayesian Model Averaging
     description: Bayesian Model Averaging for survival analysis
   - title: Group LASSO for Survival Analysis
@@ -3379,7 +3379,7 @@ analyses:
     name: sparsegrouplasso
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuTitle: Sparse Group LASSO
     description: Sparse Group LASSO regularization for survival analysis
   - title: Bayesian Additive Regression Trees (BART) for Survival
@@ -3524,7 +3524,7 @@ analyses:
     name: chisqposttestaddon
     ns: ClinicoPath
     category: analyses
-    menuGroup: conttablesplus
+    menuGroup: conttablesplusD
     menuTitle: Chi-Square Post-Hoc Analysis
     addonFor: jmv::conttables
   - title: Patient Monitoring Dashboard
@@ -3562,7 +3562,7 @@ analyses:
     name: conditionalgee
     ns: ClinicoPath
     category: analyses
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Conditional GEE for Recurrent Events Gap Times
     menuSubtitle: GEE Models for Gap Times, Recurrent Events
@@ -3576,7 +3576,7 @@ analyses:
     name: jointfrailty
     ns: ClinicoPath
     category: analyses
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Joint Frailty Models for Recurrent Events
     menuSubtitle: Joint Models for Recurrent and Terminal Events
@@ -3590,7 +3590,7 @@ analyses:
     name: marginalrecurrent
     ns: ClinicoPath
     category: analyses
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Marginal Models for Recurrent Events
     menuSubtitle: Marginal Rate Models, Accelerated Models for Recurrent Events
@@ -3620,7 +3620,7 @@ analyses:
     name: timeupdatedsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: Survival
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Time-Updated Survival Estimates
     menuSubtitle: Dynamic Models, Time-Varying Effects, Temporal Analysis
@@ -3635,7 +3635,7 @@ analyses:
     name: bayesiandiagnostic
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: meddecide
     menuTitle: Bayesian Diagnostic Probability Updates
     description: >
@@ -3649,7 +3649,7 @@ analyses:
     name: betabinomialdiagnostic
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: meddecide
     menuTitle: Beta-Binomial Diagnostic Accuracy Models
     description: >
@@ -3663,7 +3663,7 @@ analyses:
     name: hierarchicalbayes
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
+    menuGroup: ClinicoPathD
     menuSubgroup: meddecide
     menuTitle: Hierarchical Bayesian Diagnostic Models
     description: |
@@ -3674,7 +3674,7 @@ analyses:
     name: qualitycontrol
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyE
+    menuGroup: OncoPathologyD
     menuTitle: Laboratory Quality Control Statistics
     description: >
       Comprehensive laboratory quality control statistics including control
@@ -3685,7 +3685,7 @@ analyses:
     name: metaanalysis
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyF
+    menuGroup: OncoPathologyD
     menuTitle: Meta-Analysis & Evidence Synthesis
     description: >
       Comprehensive meta-analysis and evidence synthesis including forest plots,
@@ -3695,7 +3695,7 @@ analyses:
     name: condsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyAdvanced
+    menuGroup: OncoPathologyD
     menuTitle: Conditional Survival Analysis
     description: >
       Conditional survival analysis for calculating the probability of surviving
@@ -3706,7 +3706,7 @@ analyses:
     name: timeupdatesurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyAdvanced
+    menuGroup: OncoPathologyD
     menuTitle: Time-Updated Survival Estimates
     description: >
       Time-updated survival estimates using time-varying regression coefficients
@@ -3716,7 +3716,7 @@ analyses:
     name: flexparametricadv
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathologyAdvanced
+    menuGroup: OncoPathologyD
     menuTitle: Advanced Flexible Parametric Survival Models
     description: >
       Advanced flexible parametric survival models using Royston-Parmar
@@ -3727,7 +3727,7 @@ analyses:
     name: cochranq
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDescriptives
+    menuGroup: ClinicoPathDescriptivesD
     menuTitle: Cochran's Q Test for Paired Categorical Data
     description: >
       Cochran's Q test for analyzing paired categorical (binary) data with more
@@ -3739,7 +3739,7 @@ analyses:
     name: friedmantest
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDescriptives
+    menuGroup: ClinicoPathDescriptivesD
     menuTitle: Friedman Test for Non-Parametric Repeated Measures
     description: >
       Friedman test for non-parametric analysis of repeated measures data with
@@ -3751,7 +3751,7 @@ analyses:
     name: pagetrendtest
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDescriptives
+    menuGroup: ClinicoPathDescriptivesD
     menuTitle: Page's Trend Test for Ordered Alternatives
     description: >
       Page's trend test for detecting ordered alternatives in repeated measures
@@ -3775,7 +3775,7 @@ analyses:
     name: labcontrolcharts
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDescriptives
+    menuGroup: ClinicoPathDescriptivesD
     menuTitle: Laboratory Control Charts (Shewhart, CUSUM, EWMA)
     description: >
       Statistical process control charts for laboratory quality monitoring.
@@ -3787,7 +3787,7 @@ analyses:
     name: sigmametrics
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDescriptives
+    menuGroup: ClinicoPathDescriptivesD
     menuTitle: Six Sigma Metrics for Laboratory Performance
     description: >
       Six Sigma methodology for laboratory performance evaluation and quality
@@ -3799,7 +3799,7 @@ analyses:
     name: methodvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDescriptives
+    menuGroup: ClinicoPathDescriptivesD
     menuTitle: Laboratory Method Validation Protocols
     description: >
       Comprehensive analytical method validation following CLSI EP15-A3,
@@ -3812,7 +3812,7 @@ analyses:
     name: referenceintervals
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDescriptives
+    menuGroup: ClinicoPathDescriptivesD
     menuTitle: Reference Interval Establishment
     description: >
       Robust statistical methods for establishing clinical reference intervals
@@ -3824,7 +3824,7 @@ analyses:
     name: measurementuncertainty
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDescriptives
+    menuGroup: ClinicoPathDescriptivesD
     menuTitle: Measurement Uncertainty Estimation (ISO 15189)
     description: >
       Comprehensive measurement uncertainty evaluation following ISO 15189,
@@ -3832,6 +3832,18 @@ analyses:
       and Type B uncertainties, combined and expanded uncertainty, and
       uncertainty budgets for clinical laboratory measurements. Essential for
       laboratory accreditation and quality assurance.
+  - title: Spatial Autocorrelation Analysis (Moran's I, Geary's C)
+    name: spatialautocorrelation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptivesD
+    menuTitle: Spatial Autocorrelation Analysis (Moran's I, Geary's C)
+    description: >
+      Comprehensive spatial autocorrelation analysis for tissue pattern analysis
+      and digital pathology. Implements Moran's I, Geary's C, and local
+      indicators of spatial association (LISA) for detecting spatial clustering
+      and patterns in histopathological data. Essential for analyzing spatial
+      dependencies in tissue architecture and cellular distributions.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv
