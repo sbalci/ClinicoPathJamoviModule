@@ -629,7 +629,7 @@ flexparametricadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             super$initialize(
                 package = "ClinicoPath",
                 name = "flexparametricadvanced",
-                version = c(1,0,0),
+                version = c(0,0,31),
                 options = options,
                 results = flexparametricadvancedResults$new(options=options),
                 data = data,

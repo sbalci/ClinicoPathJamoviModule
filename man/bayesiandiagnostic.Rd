@@ -2,121 +2,246 @@
 % Please edit documentation in R/bayesiandiagnostic.h.R
 \name{bayesiandiagnostic}
 \alias{bayesiandiagnostic}
-\title{Bayesian Diagnostic Probability Updates}
+\title{Bayesian Diagnostic Test Evaluation}
 \usage{
 bayesiandiagnostic(
-  test_result,
-  disease_status,
-  covariates = NULL,
+  data,
+  test_results,
+  gold_standard,
+  test_positive_level,
+  disease_positive_level,
+  study_id = NULL,
+  patient_id = NULL,
+  covariates,
   analysis_type = "single_test",
-  prior_type = "fixed_prior",
-  prior_prob = 0.1,
-  alpha_prior = 1,
-  beta_prior = 1,
-  test_sequence = "test1,test2,test3",
-  credible_level = 0.95,
-  mcmc_samples = 5000,
-  burnin_samples = 1000,
-  likelihood_method = "exact",
-  posterior_summary = TRUE,
-  diagnostic_plots = TRUE,
-  sensitivity_analysis = FALSE,
-  model_comparison = FALSE,
-  predictive_checking = FALSE,
-  multilevel_structure = FALSE,
-  overdispersion_model = FALSE,
-  conditional_independence = TRUE,
-  network_analysis = FALSE
+  comparison_test = NULL,
+  comparison_positive_level,
+  prior_type = "informative",
+  prior_sensitivity_mean = 0.8,
+  prior_sensitivity_precision = 10,
+  prior_specificity_mean = 0.9,
+  prior_specificity_precision = 10,
+  correlation_prior = 0,
+  bivariate_model = TRUE,
+  hierarchical_model = FALSE,
+  covariate_effects = FALSE,
+  heterogeneity_model = "random",
+  mcmc_samples = 10000,
+  mcmc_burnin = 5000,
+  mcmc_thin = 1,
+  mcmc_chains = 3,
+  mcmc_adapt = TRUE,
+  convergence_criterion = 1.1,
+  compute_sensitivity = TRUE,
+  compute_specificity = TRUE,
+  compute_ppv = TRUE,
+  compute_npv = TRUE,
+  compute_likelihood_ratios = TRUE,
+  compute_diagnostic_odds_ratio = TRUE,
+  compute_accuracy = TRUE,
+  compute_auc = FALSE,
+  prevalence_prior = 0.5,
+  decision_analysis = FALSE,
+  cost_fn = 1,
+  cost_fp = 1,
+  utility_tp = 1,
+  utility_tn = 1,
+  threshold_analysis = FALSE,
+  threshold_metric = "youden",
+  show_summary_statistics = TRUE,
+  show_posterior_distributions = TRUE,
+  show_credible_intervals = TRUE,
+  show_convergence_diagnostics = TRUE,
+  show_model_comparison = FALSE,
+  show_predictive_checks = FALSE,
+  show_clinical_interpretation = TRUE,
+  credible_interval = 0.95,
+  hpdi = TRUE,
+  set_seed = TRUE,
+  seed_value = 42,
+  parallel_chains = TRUE,
+  n_cores = 2,
+  robust_estimation = FALSE,
+  outlier_detection = FALSE,
+  publication_bias = FALSE,
+  sensitivity_analysis = FALSE
 )
 }
 \arguments{
-\item{test_result}{Test result variable for diagnostic analysis}
+\item{data}{The data as a data frame for Bayesian diagnostic test
+evaluation.}
 
-\item{disease_status}{Gold standard disease status variable}
+\item{test_results}{.}
 
-\item{covariates}{Covariates for risk-stratified diagnostic analysis}
+\item{gold_standard}{.}
 
-\item{analysis_type}{Statistical approach for diagnostic probability
-updates}
+\item{test_positive_level}{.}
 
-\item{prior_type}{Prior probability specification approach}
+\item{disease_positive_level}{.}
 
-\item{prior_prob}{Prior probability of disease in the population}
+\item{study_id}{.}
 
-\item{alpha_prior}{Alpha parameter for informative beta prior}
+\item{patient_id}{.}
 
-\item{beta_prior}{Beta parameter for informative beta prior}
+\item{covariates}{.}
 
-\item{test_sequence}{Sequential test names for chain analysis}
+\item{analysis_type}{.}
 
-\item{credible_level}{Level for Bayesian credible intervals}
+\item{comparison_test}{.}
 
-\item{mcmc_samples}{MCMC iterations for posterior sampling}
+\item{comparison_positive_level}{.}
 
-\item{burnin_samples}{MCMC burn-in iterations}
+\item{prior_type}{.}
 
-\item{likelihood_method}{Approach for computing diagnostic likelihood}
+\item{prior_sensitivity_mean}{.}
 
-\item{posterior_summary}{Whether to compute posterior summary statistics}
+\item{prior_sensitivity_precision}{.}
 
-\item{diagnostic_plots}{Whether to create diagnostic probability plots}
+\item{prior_specificity_mean}{.}
 
-\item{sensitivity_analysis}{Whether to perform prior sensitivity analysis}
+\item{prior_specificity_precision}{.}
 
-\item{model_comparison}{Whether to perform Bayesian model comparison}
+\item{correlation_prior}{.}
 
-\item{predictive_checking}{Whether to perform posterior predictive checks}
+\item{bivariate_model}{.}
 
-\item{multilevel_structure}{Whether to use hierarchical Bayesian modeling}
+\item{hierarchical_model}{.}
 
-\item{overdispersion_model}{Whether to model overdispersion in diagnostic
-accuracy}
+\item{covariate_effects}{.}
 
-\item{conditional_independence}{Whether tests are conditionally independent
-given disease status}
+\item{heterogeneity_model}{.}
 
-\item{network_analysis}{Whether to use Bayesian network modeling}
+\item{mcmc_samples}{.}
+
+\item{mcmc_burnin}{.}
+
+\item{mcmc_thin}{.}
+
+\item{mcmc_chains}{.}
+
+\item{mcmc_adapt}{.}
+
+\item{convergence_criterion}{.}
+
+\item{compute_sensitivity}{.}
+
+\item{compute_specificity}{.}
+
+\item{compute_ppv}{.}
+
+\item{compute_npv}{.}
+
+\item{compute_likelihood_ratios}{.}
+
+\item{compute_diagnostic_odds_ratio}{.}
+
+\item{compute_accuracy}{.}
+
+\item{compute_auc}{.}
+
+\item{prevalence_prior}{.}
+
+\item{decision_analysis}{.}
+
+\item{cost_fn}{.}
+
+\item{cost_fp}{.}
+
+\item{utility_tp}{.}
+
+\item{utility_tn}{.}
+
+\item{threshold_analysis}{.}
+
+\item{threshold_metric}{.}
+
+\item{show_summary_statistics}{.}
+
+\item{show_posterior_distributions}{.}
+
+\item{show_credible_intervals}{.}
+
+\item{show_convergence_diagnostics}{.}
+
+\item{show_model_comparison}{.}
+
+\item{show_predictive_checks}{.}
+
+\item{show_clinical_interpretation}{.}
+
+\item{credible_interval}{.}
+
+\item{hpdi}{.}
+
+\item{set_seed}{.}
+
+\item{seed_value}{.}
+
+\item{parallel_chains}{.}
+
+\item{n_cores}{.}
+
+\item{robust_estimation}{.}
+
+\item{outlier_detection}{.}
+
+\item{publication_bias}{.}
+
+\item{sensitivity_analysis}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-\code{results$priorSummary} \tab \tab \tab \tab \tab a table \cr
-\code{results$likelihoodTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$summaryStatistics} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnosticPerformance} \tab \tab \tab \tab \tab a table \cr
+\code{results$sensitivitySpecificity} \tab \tab \tab \tab \tab a table \cr
+\code{results$predictiveValues} \tab \tab \tab \tab \tab a table \cr
+\code{results$likelihoodRatios} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnosticOddsRatio} \tab \tab \tab \tab \tab a table \cr
+\code{results$convergenceDiagnostics} \tab \tab \tab \tab \tab a table \cr
 \code{results$posteriorSummary} \tab \tab \tab \tab \tab a table \cr
-\code{results$bayesianUpdates} \tab \tab \tab \tab \tab a table \cr
-\code{results$hierarchicalResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$metaAnalysisResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$heterogeneityAssessment} \tab \tab \tab \tab \tab a table \cr
+\code{results$covariateEffects} \tab \tab \tab \tab \tab a table \cr
+\code{results$thresholdAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$decisionAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$posteriorPredictiveChecks} \tab \tab \tab \tab \tab a table \cr
 \code{results$sensitivityAnalysis} \tab \tab \tab \tab \tab a table \cr
-\code{results$predictiveChecks} \tab \tab \tab \tab \tab a table \cr
-\code{results$priorPosteriorPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$likelihoodPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$posteriorPredictivePlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$sensitivityPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$networkDiagram} \tab \tab \tab \tab \tab an image \cr
-\code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$rocCurve} \tab \tab \tab \tab \tab an image \cr
+\code{results$posteriorDistributionsPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$sensitivitySpecificityPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$predictiveValuesPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$likelihoodRatioPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$convergencePlots} \tab \tab \tab \tab \tab an image \cr
+\code{results$forestPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$heterogeneityPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$thresholdOptimizationPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$decisionCurvePlot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$priorSummary$asDF}
+\code{results$summaryStatistics$asDF}
 
-\code{as.data.frame(results$priorSummary)}
+\code{as.data.frame(results$summaryStatistics)}
 }
 \description{
-Bayesian diagnostic probability calculations with prior probability
-updates.
-Implements likelihood ratios, posterior probability calculations, and
-diagnostic test chain analysis with sequential updating.
+Comprehensive Bayesian evaluation of diagnostic test performance including
+sensitivity, specificity, predictive values, likelihood ratios, and
+diagnostic odds ratios with full uncertainty quantification. Supports
+meta-analysis, hierarchical modeling, and comparative test evaluation.
 }
 \examples{
-# Example: Bayesian diagnostic update
+# Bayesian diagnostic test evaluation
 bayesiandiagnostic(
     data = diagnostic_data,
-    test_result = test_outcome,
-    disease_status = actual_disease,
-    prior_prob = 0.15,
-    analysis_type = "single_test"
+    test_results = "test_outcome",
+    gold_standard = "true_diagnosis",
+    prior_sensitivity_mean = 0.8,
+    prior_specificity_mean = 0.9
 )
 
 }

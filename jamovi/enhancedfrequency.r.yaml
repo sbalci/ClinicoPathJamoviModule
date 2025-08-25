@@ -1,0 +1,233 @@
+---
+name: enhancedfrequency
+title: Enhanced Frequency Analysis Results
+jrs: '1.1'
+
+items:
+    - title: Analysis Results
+      name: results
+      type: Group
+      items:
+          - name: instructions
+            title: Instructions
+            type: Html
+            visible: true
+
+          # Dataset Overview
+          - name: datasetOverview
+            title: Dataset Overview
+            type: Table
+            description: Summary of dataset characteristics
+            visible: (showDatasetOverview)
+            
+            columns:
+                - name: characteristic
+                  title: 'Characteristic'
+                  type: text
+                - name: value
+                  title: 'Value'
+                  type: text
+                - name: description
+                  title: 'Description'
+                  type: text
+
+          # Variable Summary
+          - name: variableSummary
+            title: Variables Summary
+            type: Table
+            description: Summary statistics for all selected variables
+            visible: (showVariableSummary)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: type
+                  title: 'Type'
+                  type: text
+                - name: categories
+                  title: 'Categories'
+                  type: integer
+                - name: valid_n
+                  title: 'Valid N'
+                  type: integer
+                - name: missing_n
+                  title: 'Missing N'
+                  type: integer
+                - name: missing_pct
+                  title: 'Missing %'
+                  type: number
+                  format: zto
+                - name: most_common
+                  title: 'Most Common'
+                  type: text
+                - name: most_common_freq
+                  title: 'Most Common Freq'
+                  type: integer
+                - name: least_common
+                  title: 'Least Common'
+                  type: text
+                - name: least_common_freq
+                  title: 'Least Common Freq'
+                  type: integer
+
+          # Combined Summary Table
+          - name: combinedSummary
+            title: Combined Frequency Summary
+            type: Table
+            description: All variables combined in a single summary table
+            visible: (showCombinedSummary)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: category
+                  title: 'Category'
+                  type: text
+                - name: frequency
+                  title: 'Frequency'
+                  type: integer
+                - name: percentage
+                  title: 'Percentage'
+                  type: number
+                  format: zto
+                - name: valid_percentage
+                  title: 'Valid %'
+                  type: number
+                  format: zto
+                - name: cumulative_percentage
+                  title: 'Cumulative %'
+                  type: number
+                  format: zto
+                - name: valid_cumulative_percentage
+                  title: 'Valid Cumulative %'
+                  type: number
+                  format: zto
+
+          # Data Quality Assessment
+          - name: dataQualityReport
+            title: Data Quality Assessment
+            type: Table
+            description: Data quality metrics and recommendations
+            visible: (dataQualityAssessment)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: quality_score
+                  title: 'Quality Score'
+                  type: number
+                  format: zto
+                - name: completeness
+                  title: 'Completeness'
+                  type: number
+                  format: zto
+                - name: uniqueness
+                  title: 'Uniqueness'
+                  type: number
+                  format: zto
+                - name: balance
+                  title: 'Category Balance'
+                  type: text
+                - name: recommendations
+                  title: 'Recommendations'
+                  type: text
+
+          # Categorical Diagnostics
+          - name: categoricalDiagnostics
+            title: Categorical Variable Diagnostics
+            type: Table
+            description: Advanced diagnostics for categorical variables
+            visible: (categoricalDiagnostics)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: entropy
+                  title: 'Entropy'
+                  type: number
+                  format: zto
+                - name: gini_impurity
+                  title: 'Gini Impurity'
+                  type: number
+                  format: zto
+                - name: concentration_ratio
+                  title: 'Concentration Ratio'
+                  type: number
+                  format: zto
+                - name: dominant_category_pct
+                  title: 'Dominant Category %'
+                  type: number
+                  format: zto
+                - name: rare_categories_count
+                  title: 'Rare Categories'
+                  type: integer
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          # Comprehensive Analysis Summary
+          - name: comprehensiveAnalysisSummary
+            title: Comprehensive Frequency Analysis Summary
+            type: Table
+            description: Enhanced statistical summary with BlueSky integration
+            visible: (bluesky_integration && comprehensive_output)
+            
+            columns:
+                - name: measure
+                  title: 'Measure'
+                  type: text
+                - name: value
+                  title: 'Value'
+                  type: text
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+                - name: clinical_significance
+                  title: 'Clinical Significance'
+                  type: text
+
+          # Clinical Interpretation
+          - name: clinicalInterpretationGuide
+            title: Clinical Application Guidance
+            type: Html
+            visible: (clinical_interpretation)
+
+          # Statistical Methods
+          - name: methodsExplanation
+            title: Statistical Methods and References
+            type: Html
+            visible: (comprehensive_output)
+
+          # Frequency Distribution Plot
+          - name: frequencyDistributionPlot
+            title: Frequency Distribution Overview
+            type: Image
+            description: Overview of frequency distributions for all variables
+            visible: (showFrequencyTables)
+            renderFun: .plotFrequencyDistribution
+            width: 800
+            height: 600
+
+          # Quality Assessment Plot
+          - name: dataQualityPlot
+            title: Data Quality Assessment Plot
+            type: Image
+            description: Visual assessment of data quality metrics
+            visible: (dataQualityAssessment)
+            renderFun: .plotDataQuality
+            width: 700
+            height: 500
+
+          # Category Balance Plot
+          - name: categoryBalancePlot
+            title: Category Balance Analysis
+            type: Image
+            description: Analysis of category distribution balance
+            visible: (categoricalDiagnostics)
+            renderFun: .plotCategoryBalance
+            width: 800
+            height: 600

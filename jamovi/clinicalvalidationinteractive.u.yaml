@@ -2,7 +2,7 @@ title: Interactive Clinical Model Validation
 name: clinicalvalidationinteractive
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -42,28 +42,38 @@ children:
     children:
       - type: ComboBox
         name: clinical_preset
+        events:
+          change: ./clinicalvalidationinteractive.events::onChange_clinicalPreset
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: model_type
+        events:
+          change: ./clinicalvalidationinteractive.events::onChange_modelType
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: validation_method
+        events:
+          change: ./clinicalvalidationinteractive.events::onChange_validationMethod
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: bootstrap_samples
         format: number
+        events:
+          change: ./clinicalvalidationinteractive.events::onChange_bootstrapSamples
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
         name: cv_folds
         format: number
+        events:
+          change: ./clinicalvalidationinteractive.events::onChange_cvFolds
   - type: LayoutBox
     margin: large
     children:
@@ -97,11 +107,15 @@ children:
       - type: TextBox
         name: population_prevalence
         format: number
+        events:
+          change: ./clinicalvalidationinteractive.events::onChange_prevalence
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: cost_matrix
+        events:
+          change: ./clinicalvalidationinteractive.events::onChange_costMatrix
   - type: LayoutBox
     margin: large
     children:

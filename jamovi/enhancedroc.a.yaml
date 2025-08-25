@@ -1,0 +1,290 @@
+---
+name: enhancedroc
+title: Enhanced ROC Analysis with Youden Index Optimization
+menuGroup: meddecide
+menuSubgroup: Diagnostic Performance
+menuSubtitle: "ROC analysis with BlueSky integration"
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Enhanced ROC analysis toolkit with BlueSky integration for comprehensive
+        diagnostic performance evaluation. Includes ROC curve analysis, Youden Index
+        optimization, sensitivity/specificity analysis, optimal cutoff determination,
+        and comparative ROC analysis. Essential for biomarker validation, diagnostic
+        test evaluation, and clinical decision support in medical research.
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: outcome
+      title: 'Outcome Variable'
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description: 'Binary outcome variable (disease status)'
+
+    - name: predictors
+      title: 'Predictor Variables'
+      type: Variables
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description: 'Numeric predictor variables for ROC analysis'
+
+    - name: analysisType
+      title: 'Analysis Type'
+      type: List
+      options:
+          - title: 'Single ROC Analysis'
+            name: single
+          - title: 'Comparative ROC Analysis'
+            name: comparative
+          - title: 'Comprehensive Diagnostic Performance'
+            name: comprehensive
+      default: single
+      description: 'Type of ROC analysis to perform'
+
+    - name: direction
+      title: 'Direction'
+      type: List
+      options:
+          - title: 'Auto (determine automatically)'
+            name: auto
+          - title: 'Higher values indicate positive outcome'
+            name: higher
+          - title: 'Lower values indicate positive outcome'
+            name: lower
+      default: auto
+      description: 'Direction of the predictor-outcome relationship'
+
+    # Youden Index Options
+    - name: youdenOptimization
+      title: 'Youden Index Optimization'
+      type: Bool
+      default: true
+      description: 'Find optimal cutoff using Youden Index (Sensitivity + Specificity - 1)'
+
+    - name: customCutoffs
+      title: 'Custom Cutoffs'
+      type: String
+      description: 'Comma-separated list of custom cutoffs to evaluate (e.g., 0.1, 0.5, 0.9)'
+
+    - name: sensitivityThreshold
+      title: 'Sensitivity Threshold'
+      type: Number
+      default: 0.8
+      min: 0.1
+      max: 1.0
+      description: 'Minimum required sensitivity for screening applications'
+
+    - name: specificityThreshold
+      title: 'Specificity Threshold' 
+      type: Number
+      default: 0.8
+      min: 0.1
+      max: 1.0
+      description: 'Minimum required specificity for confirmatory testing'
+
+    # Statistical Options
+    - name: confidenceLevel
+      title: 'Confidence Level'
+      type: Number
+      default: 95
+      min: 50
+      max: 99.9
+      description: 'Confidence level for AUC confidence intervals'
+
+    - name: bootstrapSamples
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description: 'Number of bootstrap samples for confidence intervals'
+
+    - name: useBootstrap
+      title: 'Use Bootstrap'
+      type: Bool
+      default: true
+      description: 'Use bootstrap methods for confidence intervals'
+
+    # Comparison Options  
+    - name: pairwiseComparisons
+      title: 'Pairwise Comparisons'
+      type: Bool
+      default: true
+      description: 'Perform pairwise comparisons between ROC curves'
+
+    - name: comparisonMethod
+      title: 'Comparison Method'
+      type: List
+      options:
+          - title: 'DeLong et al. (1988)'
+            name: delong
+          - title: 'Bootstrap'
+            name: bootstrap
+          - title: 'Venkatraman (2000)'
+            name: venkatraman
+      default: delong
+      description: 'Method for comparing ROC curves'
+
+    # Output Options
+    - name: rocCurve
+      title: 'ROC Curve Plot'
+      type: Bool
+      default: true
+      description: 'Display ROC curve plot'
+
+    - name: aucTable
+      title: 'AUC Summary Table'
+      type: Bool
+      default: true
+      description: 'Display AUC summary table'
+
+    - name: cutoffTable
+      title: 'Cutoff Analysis Table'
+      type: Bool
+      default: true
+      description: 'Display detailed cutoff analysis'
+
+    - name: optimalCutoffs
+      title: 'Optimal Cutoffs Summary'
+      type: Bool
+      default: true
+      description: 'Display optimal cutoff summary'
+
+    - name: diagnosticMetrics
+      title: 'Diagnostic Metrics'
+      type: Bool
+      default: true
+      description: 'Display comprehensive diagnostic metrics'
+
+    - name: clinicalMetrics
+      title: 'Clinical Metrics'
+      type: Bool
+      default: true
+      description: 'Display clinical application metrics (PPV, NPV, LR+, LR-)'
+
+    # Advanced Options
+    - name: smoothMethod
+      title: 'ROC Curve Smoothing'
+      type: List
+      options:
+          - title: 'None'
+            name: none
+          - title: 'Binormal'
+            name: binormal
+          - title: 'Kernel'
+            name: kernel
+      default: none
+      description: 'Method for smoothing ROC curves'
+
+    - name: partialAuc
+      title: 'Partial AUC Analysis'
+      type: Bool
+      default: false
+      description: 'Calculate partial AUC for specific sensitivity/specificity ranges'
+
+    - name: partialRange
+      title: 'Partial AUC Range'
+      type: String
+      default: '0.8,1.0'
+      description: 'Range for partial AUC (specificity_min,specificity_max)'
+
+    # Clinical Context
+    - name: prevalence
+      title: 'Disease Prevalence'
+      type: Number
+      default: 0.1
+      min: 0.001
+      max: 0.999
+      description: 'Disease prevalence for calculating predictive values'
+
+    - name: clinicalContext
+      title: 'Clinical Context'
+      type: List
+      options:
+          - title: 'Screening'
+            name: screening
+          - title: 'Diagnosis'
+            name: diagnosis
+          - title: 'Prognosis'
+            name: prognosis
+          - title: 'Monitoring'
+            name: monitoring
+          - title: 'General'
+            name: general
+      default: general
+      description: 'Clinical application context for interpretation'
+
+    # BlueSky Integration
+    - name: bluesky_integration
+      title: 'Enhanced BlueSky Integration'
+      type: Bool
+      default: true
+      description: 'Use BlueSky R statistical environment features'
+
+    - name: comprehensive_output
+      title: 'Comprehensive Statistical Output'
+      type: Bool
+      default: false
+      description: 'Include comprehensive statistical details'
+
+    - name: clinical_interpretation
+      title: 'Clinical Interpretation'
+      type: Bool
+      default: true
+      description: 'Provide clinical context for ROC analysis results'
+
+    # Plotting Options
+    - name: plotTheme
+      title: 'Plot Theme'
+      type: List
+      options:
+          - title: 'Classic'
+            name: classic
+          - title: 'Modern'
+            name: modern
+          - title: 'Clinical'
+            name: clinical
+      default: clinical
+      description: 'Visual theme for ROC plots'
+
+    - name: plotWidth
+      title: 'Plot Width'
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+      description: 'Width of ROC plots'
+
+    - name: plotHeight
+      title: 'Plot Height'
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+      description: 'Height of ROC plots'
+
+    - name: showCutoffPoints
+      title: 'Show Cutoff Points'
+      type: Bool
+      default: true
+      description: 'Highlight optimal cutoff points on ROC curve'
+
+    - name: showConfidenceBands
+      title: 'Show Confidence Bands'
+      type: Bool
+      default: false
+      description: 'Display confidence bands around ROC curve'

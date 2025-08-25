@@ -1,0 +1,161 @@
+---
+name: modalitycomparison
+title: Modality Comparison Analysis
+menuGroup: meddecide
+menuSubgroup: Agreement
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Modality Comparison Analysis for digital pathology validation studies.
+        Compare agreement between different diagnostic modalities (e.g., glass slides vs digital images)
+        with specialized metrics for pathology applications including discordance pattern analysis
+        and HER2 scoring validation.
+    R:
+        dontrun: false
+        usage: |
+            # Basic modality comparison
+            result1 <- modalitycomparison(
+              data = data,
+              modality1_var = "glass_slides",
+              modality2_var = "digital_images",
+              case_id = "case_number"
+            )
+            
+            # HER2 scoring comparison with 5-category analysis
+            result2 <- modalitycomparison(
+              data = her2_data,
+              modality1_var = "glass_score",
+              modality2_var = "digital_score", 
+              case_id = "case_id",
+              score_categories = "her2_5cat",
+              show_discordance_analysis = TRUE
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame with paired observations from two modalities.
+
+    - name: modality1_var
+      title: Modality 1 Scores
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable containing scores/ratings from the first modality (e.g., glass slides).
+
+    - name: modality2_var
+      title: Modality 2 Scores  
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Variable containing scores/ratings from the second modality (e.g., digital images).
+
+    - name: case_id
+      title: Case Identifier
+      type: Variable
+      suggested: [nominal, id]
+      permitted: [factor, id]
+      default: NULL
+      description:
+          R: >
+            Optional case identifier variable for tracking individual cases.
+
+    - name: modality1_name
+      title: Modality 1 Name
+      type: String
+      default: "Modality 1"
+      description:
+          R: >
+            Descriptive name for the first modality (e.g., "Glass Slides").
+
+    - name: modality2_name
+      title: Modality 2 Name
+      type: String
+      default: "Modality 2"
+      description:
+          R: >
+            Descriptive name for the second modality (e.g., "Digital Images").
+
+    - name: show_discordance_analysis
+      title: Discordance Pattern Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Perform detailed analysis of discordance patterns between modalities.
+
+    - name: score_categories
+      title: Score Categories
+      type: List
+      options:
+        - title: HER2 5-Category (Null, Ultralow, 1+, 2+, 3+)
+          name: her2_5cat
+        - title: HER2 Standard (0, 1+, 2+, 3+)
+          name: her2_4cat
+        - title: Custom Categories
+          name: custom
+        - title: Auto-detect from data
+          name: auto
+      default: auto
+      description:
+          R: >
+            Category system for score interpretation and analysis.
+
+    - name: show_contingency_table
+      title: Show Contingency Table
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display detailed cross-tabulation of scores between modalities.
+
+    - name: calculate_weighted_kappa
+      title: Calculate Weighted Kappa
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate weighted kappa for ordinal scores (requires ordered categories).
+
+    - name: confidence_intervals
+      title: Show 95% Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate and display 95% confidence intervals for agreement statistics.
+
+    - name: directional_analysis
+      title: Directional Bias Analysis
+      type: Bool
+      default: true
+      description:
+          R: >
+            Analyze systematic bias in one direction (e.g., higher scores on digital vs glass).
+
+    - name: low_end_focus
+      title: Focus on Low-End Categories
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform specialized analysis focusing on agreement at low expression levels
+            (relevant for HER2-low/null distinction).
+
+    - name: show_plots
+      title: Show Agreement Plots
+      type: Bool
+      default: true
+      description:
+          R: >
+            Generate scatter plots and agreement visualization.
+
+...

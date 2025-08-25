@@ -1,116 +1,285 @@
-title: Bayesian Diagnostic Probability Updates
+title: Bayesian Diagnostic Test Evaluation
 name: bayesiandiagnostic
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Test Result Variable
+        label: Test Results Variable
         children:
           - type: VariablesListBox
-            name: test_result
+            name: test_results
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Disease Status Variable
+        label: Gold Standard/Reference Variable
         children:
           - type: VariablesListBox
-            name: disease_status
+            name: gold_standard
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: test_positive_level
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: disease_positive_level
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Study ID Variable (Meta-analysis)
+        children:
+          - type: VariablesListBox
+            name: study_id
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Patient Characteristics (optional)
+        label: Patient ID Variable
+        children:
+          - type: VariablesListBox
+            name: patient_id
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Covariate Variables
         children:
           - type: VariablesListBox
             name: covariates
             isTarget: true
   - type: LayoutBox
     margin: large
+    children:
+      - type: ComboBox
+        name: analysis_type
+  - type: VariableSupplier
+    persistentItems: false
     stretchFactor: 1
     children:
-      - type: CollapseBox
-        label: Analysis Options
-        collapsed: false
-        stretchFactor: 1
+      - type: TargetLayoutBox
+        label: Comparison Test Variable
         children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: analysis_type
-              - type: ComboBox
-                name: prior_type
-              - type: TextBox
-                name: prior_prob
-                format: number
-              - type: TextBox
-                name: alpha_prior
-                format: number
-                enable: (prior_type:informative_prior)
-              - type: TextBox
-                name: beta_prior
-                format: number
-                enable: (prior_type:informative_prior)
-              - type: TextBox
-                name: test_sequence
-                format: string
-                enable: (analysis_type:test_chain)
-              - type: TextBox
-                name: credible_level
-                format: number
-      - type: CollapseBox
-        label: Computational Options
-        collapsed: true
-        stretchFactor: 1
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: likelihood_method
-              - type: TextBox
-                name: mcmc_samples
-                format: number
-                enable: (analysis_type:hierarchical_bayes)
-              - type: TextBox
-                name: burnin_samples
-                format: number
-                enable: (analysis_type:hierarchical_bayes)
-              - type: CheckBox
-                name: conditional_independence
-      - type: CollapseBox
-        label: Model Extensions
-        collapsed: true
-        stretchFactor: 1
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: multilevel_structure
-              - type: CheckBox
-                name: overdispersion_model
-              - type: CheckBox
-                name: network_analysis
-      - type: CollapseBox
-        label: Output Options
-        collapsed: true
-        stretchFactor: 1
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: posterior_summary
-              - type: CheckBox
-                name: diagnostic_plots
-              - type: CheckBox
-                name: sensitivity_analysis
-              - type: CheckBox
-                name: model_comparison
-              - type: CheckBox
-                name: predictive_checking
+          - type: VariablesListBox
+            name: comparison_test
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: comparison_positive_level
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: prior_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: prior_sensitivity_mean
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: prior_sensitivity_precision
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: prior_specificity_mean
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: prior_specificity_precision
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: correlation_prior
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: bivariate_model
+      - type: CheckBox
+        name: hierarchical_model
+      - type: CheckBox
+        name: covariate_effects
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: heterogeneity_model
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: mcmc_samples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: mcmc_burnin
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: mcmc_thin
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: mcmc_chains
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: mcmc_adapt
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: convergence_criterion
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: compute_sensitivity
+      - type: CheckBox
+        name: compute_specificity
+      - type: CheckBox
+        name: compute_ppv
+      - type: CheckBox
+        name: compute_npv
+      - type: CheckBox
+        name: compute_likelihood_ratios
+      - type: CheckBox
+        name: compute_diagnostic_odds_ratio
+      - type: CheckBox
+        name: compute_accuracy
+      - type: CheckBox
+        name: compute_auc
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: prevalence_prior
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: decision_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cost_fn
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cost_fp
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: utility_tp
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: utility_tn
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: threshold_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: threshold_metric
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_summary_statistics
+      - type: CheckBox
+        name: show_posterior_distributions
+      - type: CheckBox
+        name: show_credible_intervals
+      - type: CheckBox
+        name: show_convergence_diagnostics
+      - type: CheckBox
+        name: show_model_comparison
+      - type: CheckBox
+        name: show_predictive_checks
+      - type: CheckBox
+        name: show_clinical_interpretation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: credible_interval
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: hpdi
+      - type: CheckBox
+        name: set_seed
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: seed_value
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: parallel_chains
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: n_cores
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: robust_estimation
+      - type: CheckBox
+        name: outlier_detection
+      - type: CheckBox
+        name: publication_bias
+      - type: CheckBox
+        name: sensitivity_analysis

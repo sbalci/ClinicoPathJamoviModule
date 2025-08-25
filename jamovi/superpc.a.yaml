@@ -5,7 +5,7 @@ menuGroup: Survival
 menuSubgroup: High-Dimensional Methods
 menuTitle: Supervised PCA Cox
 menuSubtitle: Principal components analysis for survival prediction
-version: '1.0.0'
+version: '0.0.31'
 jas: '1.2'
 
 description:

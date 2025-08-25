@@ -139,6 +139,52 @@ options:
           R: >
             Measurement level for Krippendorff's alpha calculation. Choose based on your data type.
 
+    - name: consensus
+      title: Consensus Analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform consensus scoring analysis to determine agreed-upon ratings from multiple raters.
+
+    - name: consensus_method
+      title: Consensus Method
+      type: List
+      options:
+        - title: Majority Rule (≥50%)
+          name: majority
+        - title: Super Majority (≥2/3)
+          name: super_majority
+        - title: Unanimous Only
+          name: unanimous
+      default: majority
+      description:
+          R: >
+            Method for determining consensus scores from multiple raters.
+
+    - name: tie_breaking
+      title: Tie Breaking Method
+      type: List
+      options:
+        - title: Exclude ties from analysis
+          name: exclude
+        - title: Flag for expert arbitration
+          name: arbitration
+        - title: Use most frequent category overall
+          name: global_mode
+      default: exclude
+      description:
+          R: >
+            How to handle cases where no consensus can be reached using the selected method.
+
+    - name: show_consensus_table
+      title: Show Consensus Results
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display detailed consensus scoring results including individual rater scores and consensus outcomes.
+
     # - name: bootstrap
     #   title: "Bootstrap Confidence Intervals"
     #   type: Bool

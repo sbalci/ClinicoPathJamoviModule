@@ -1,0 +1,430 @@
+---
+name: spikeslabpriors
+title: Spike-and-Slab Variable Selection
+menuGroup: meddecideD
+menuSubgroup: Advanced Bayesian Methods
+menuSubtitle: Bayesian variable selection for high-dimensional data
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced Bayesian variable selection using spike-and-slab priors for
+        high-dimensional data analysis. Supports regression, classification, and
+        survival analysis with automatic variable selection, model averaging, and
+        uncertainty quantification for clinical biomarker discovery.
+    R:
+        dontrun: false
+        usage: |
+            # Spike-and-slab variable selection
+            spikeslabpriors(
+                data = biomarker_data,
+                outcome = "clinical_response",
+                predictors = c("gene1", "gene2", "gene3", ..., "gene1000"),
+                model_type = "regression",
+                prior_inclusion_prob = 0.1
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for spike-and-slab variable selection.
+
+    # Core variables
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal]
+      permitted: [numeric, factor]
+
+    - name: outcomeLevel
+      title: Success/Event Level
+      type: Level
+      variable: (outcome)
+
+    - name: time_variable
+      title: Time to Event Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description: "For survival analysis"
+
+    - name: status_variable
+      title: Event Status Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: null
+      description: "For survival analysis"
+
+    # Model specification
+    - name: model_type
+      title: Model Type
+      type: List
+      options:
+        - title: "Linear Regression"
+          name: regression
+        - title: "Logistic Regression"
+          name: logistic
+        - title: "Poisson Regression"
+          name: poisson
+        - title: "Cox Proportional Hazards"
+          name: cox
+        - title: "Probit Regression"
+          name: probit
+        - title: "Quantile Regression"
+          name: quantile
+      default: regression
+
+    - name: spike_slab_type
+      title: Spike-and-Slab Prior Type
+      type: List
+      options:
+        - title: "Binary Spike-and-Slab"
+          name: binary
+        - title: "Continuous Spike-and-Slab"
+          name: continuous
+        - title: "George-McCulloch"
+          name: george_mcculloch
+        - title: "Ishwaran-Rao"
+          name: ishwaran_rao
+        - title: "Stochastic Search Variable Selection"
+          name: ssvs
+      default: binary
+
+    # Prior specifications
+    - name: prior_inclusion_prob
+      title: Prior Inclusion Probability
+      type: Number
+      default: 0.5
+      min: 0.001
+      max: 0.999
+      description: "Prior probability that each variable is included"
+
+    - name: expected_model_size
+      title: Expected Model Size
+      type: Integer
+      default: 5
+      min: 1
+      max: 100
+      description: "Expected number of active predictors"
+
+    - name: spike_variance
+      title: Spike Variance
+      type: Number
+      default: 0.001
+      min: 0.0001
+      max: 0.1
+      description: "Variance for spike component (near-zero effects)"
+
+    - name: slab_variance
+      title: Slab Variance
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 100.0
+      description: "Variance for slab component (non-zero effects)"
+
+    - name: hyperprior_type
+      title: Hyperprior Specification
+      type: List
+      options:
+        - title: "Empirical Bayes"
+          name: empirical_bayes
+        - title: "Full Bayes"
+          name: full_bayes
+        - title: "Fixed Hyperparameters"
+          name: fixed
+        - title: "Beta-Binomial"
+          name: beta_binomial
+      default: empirical_bayes
+
+    - name: hyperprior_alpha
+      title: Hyperprior Alpha Parameter
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+
+    - name: hyperprior_beta
+      title: Hyperprior Beta Parameter
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+
+    # Variable selection criteria
+    - name: selection_criterion
+      title: Variable Selection Criterion
+      type: List
+      options:
+        - title: "Median Probability Model"
+          name: median_probability
+        - title: "Highest Posterior Density"
+          name: hpd
+        - title: "Bayes Factor Threshold"
+          name: bayes_factor
+        - title: "Posterior Inclusion Probability"
+          name: pip
+        - title: "Marginal Inclusion Probability"
+          name: mip
+      default: median_probability
+
+    - name: inclusion_threshold
+      title: Inclusion Probability Threshold
+      type: Number
+      default: 0.5
+      min: 0.1
+      max: 0.99
+
+    - name: bayes_factor_threshold
+      title: Bayes Factor Threshold
+      type: Number
+      default: 3.0
+      min: 1.0
+      max: 100.0
+
+    # MCMC sampling
+    - name: mcmc_samples
+      title: MCMC Samples
+      type: Integer
+      default: 10000
+      min: 2000
+      max: 100000
+
+    - name: mcmc_burnin
+      title: MCMC Burn-in
+      type: Integer
+      default: 5000
+      min: 1000
+      max: 50000
+
+    - name: mcmc_thin
+      title: Thinning Interval
+      type: Integer
+      default: 1
+      min: 1
+      max: 50
+
+    - name: mcmc_chains
+      title: Number of MCMC Chains
+      type: Integer
+      default: 3
+      min: 1
+      max: 8
+
+    # Model averaging and prediction
+    - name: model_averaging
+      title: Bayesian Model Averaging
+      type: Bool
+      default: true
+
+    - name: prediction_method
+      title: Prediction Method
+      type: List
+      options:
+        - title: "BMA (Model Averaging)"
+          name: bma
+        - title: "Best Model"
+          name: best_model
+        - title: "Median Probability Model"
+          name: median_model
+        - title: "Full Posterior"
+          name: full_posterior
+      default: bma
+
+    - name: cross_validation
+      title: Cross-Validation
+      type: Bool
+      default: false
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+
+    # Dimensionality and scaling
+    - name: standardize_predictors
+      title: Standardize Predictors
+      type: Bool
+      default: true
+
+    - name: center_predictors
+      title: Center Predictors
+      type: Bool
+      default: true
+
+    - name: max_model_size
+      title: Maximum Model Size
+      type: Integer
+      default: 50
+      min: 1
+      max: 500
+      description: "Maximum number of variables to include"
+
+    - name: dimension_reduction
+      title: Pre-screening Method
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "Sure Independence Screening"
+          name: sis
+        - title: "Marginal Correlation"
+          name: marginal_correlation
+        - title: "LASSO Pre-screening"
+          name: lasso_prescreening
+      default: none
+
+    - name: prescreening_threshold
+      title: Pre-screening Threshold
+      type: Number
+      default: 0.1
+      min: 0.01
+      max: 0.5
+
+    # Output options
+    - name: show_variable_selection
+      title: Show Variable Selection Results
+      type: Bool
+      default: true
+
+    - name: show_inclusion_probabilities
+      title: Show Inclusion Probabilities
+      type: Bool
+      default: true
+
+    - name: show_model_probabilities
+      title: Show Model Probabilities
+      type: Bool
+      default: true
+
+    - name: show_coefficient_estimates
+      title: Show Coefficient Estimates
+      type: Bool
+      default: true
+
+    - name: show_prediction_performance
+      title: Show Prediction Performance
+      type: Bool
+      default: true
+
+    - name: show_convergence_diagnostics
+      title: Show MCMC Diagnostics
+      type: Bool
+      default: true
+
+    - name: show_variable_importance
+      title: Show Variable Importance
+      type: Bool
+      default: true
+
+    - name: show_model_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: false
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+
+    # Advanced options
+    - name: interaction_terms
+      title: Include Interaction Terms
+      type: Bool
+      default: false
+
+    - name: max_interactions
+      title: Maximum Interaction Order
+      type: Integer
+      default: 2
+      min: 2
+      max: 3
+
+    - name: heredity_constraint
+      title: Heredity Constraint
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "Weak Heredity"
+          name: weak
+        - title: "Strong Heredity"
+          name: strong
+      default: weak
+
+    - name: group_variables
+      title: Group Variable Selection
+      type: Bool
+      default: false
+
+    - name: group_structure
+      title: Group Structure Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: null
+
+    # Clinical context
+    - name: clinical_context
+      title: Clinical Application Context
+      type: List
+      options:
+        - title: "Biomarker Discovery"
+          name: biomarker_discovery
+        - title: "Genomic Analysis"
+          name: genomic
+        - title: "Radiomics"
+          name: radiomics
+        - title: "Clinical Risk Factors"
+          name: clinical_risk
+        - title: "Multi-omics Integration"
+          name: multi_omics
+        - title: "General High-Dimensional"
+          name: general
+      default: biomarker_discovery
+
+    - name: confidence_level
+      title: Credible Interval Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+
+    # Computational options
+    - name: parallel_processing
+      title: Use Parallel Processing
+      type: Bool
+      default: true
+
+    - name: n_cores
+      title: Number of CPU Cores
+      type: Integer
+      default: 2
+      min: 1
+      max: 8

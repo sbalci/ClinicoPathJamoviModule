@@ -1,0 +1,208 @@
+title: Enhanced Factor Variable Analysis
+name: enhancedfactorvariable
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Factor Variables
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Analysis Options
+            children:
+              - type: CheckBox
+                name: showOnlyTopFactors
+              - type: TextBox
+                name: maxTopFactors
+                format: number
+                enable: (showOnlyTopFactors)
+              - type: ComboBox
+                name: sortingMethod
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Output Tables
+            children:
+              - type: CheckBox
+                name: showDatasetOverview
+              - type: CheckBox
+                name: showNominalSummary
+              - type: CheckBox
+                name: showDetailedLevels
+              - type: CheckBox
+                name: showCombinedAnalysis
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Statistical Options
+            children:
+              - type: CheckBox
+                name: includePercentages
+              - type: CheckBox
+                name: includeValidPercentages
+              - type: CheckBox
+                name: includeCumulativeStats
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Missing Values
+            children:
+              - type: CheckBox
+                name: includeMissing
+              - type: TextBox
+                name: missingLabel
+                format: string
+                enable: (includeMissing)
+  - type: CollapseBox
+    label: Filtering Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Count Filters
+                children:
+                  - type: TextBox
+                    name: minimumCount
+                    format: number
+                  - type: TextBox
+                    name: minimumPercentage
+                    suffix: '%'
+                    format: number
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Rare Factor Handling
+                children:
+                  - type: CheckBox
+                    name: excludeRareFactors
+                  - type: TextBox
+                    name: rareFactorThreshold
+                    suffix: '%'
+                    format: number
+                    enable: (excludeRareFactors)
+                  - type: TextBox
+                    name: rareFactorLabel
+                    format: string
+                    enable: (excludeRareFactors)
+  - type: CollapseBox
+    label: Advanced Analysis
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Complexity Analysis
+                children:
+                  - type: CheckBox
+                    name: factorComplexityAnalysis
+                  - type: CheckBox
+                    name: levelBalanceAnalysis
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Output Format
+                children:
+                  - type: ComboBox
+                    name: outputFormat
+                  - type: CheckBox
+                    name: includeMethodology
+  - type: CollapseBox
+    label: Visualization
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Plot Options
+                children:
+                  - type: CheckBox
+                    name: createVisualizations
+                  - type: CheckBox
+                    name: plotTopFactorsOnly
+                    enable: (createVisualizations)
+                  - type: ComboBox
+                    name: plotOrientation
+                    enable: (createVisualizations)
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Plot Theme
+                children:
+                  - type: ComboBox
+                    name: plotTheme
+                    enable: (createVisualizations)
+  - type: CollapseBox
+    label: BlueSky Integration
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bluesky_integration
+          - type: CheckBox
+            name: comprehensive_output
+          - type: CheckBox
+            name: clinical_interpretation

@@ -1,6 +1,6 @@
 ---
 name: effectsize
-title: Effect Size Analysis Results
+title: Comprehensive Effect Size Analysis Results
 jrs: '1.1'
 
 items:
@@ -130,12 +130,331 @@ items:
                   title: 'Result'
                   type: text
 
+          # Enhanced Effect Size Tables (BlueSky Integration)
+          - name: comprehensiveEffectSizes
+            title: Comprehensive Effect Size Analysis
+            type: Table
+            description: All requested effect size measures with interpretations
+            visible: (bluesky_integration)
+            clearWith:
+                - dep
+                - group
+                - analysisType
+                - effect_size_family
+
+            columns:
+                - name: family
+                  title: 'Effect Size Family'
+                  type: text
+                - name: measure
+                  title: 'Measure'
+                  type: text
+                - name: symbol
+                  title: 'Symbol'
+                  type: text
+                - name: estimate
+                  title: 'Estimate'
+                  type: number
+                  format: zto
+                - name: lower_ci
+                  title: 'Lower CI'
+                  type: number
+                  format: zto
+                - name: upper_ci
+                  title: 'Upper CI'
+                  type: number
+                  format: zto
+                - name: magnitude
+                  title: 'Magnitude'
+                  type: text
+                - name: clinical_significance
+                  title: 'Clinical Significance'
+                  type: text
+
+          - name: varianceExplained
+            title: Variance Explained Measures
+            type: Table
+            description: Eta-squared, omega-squared, and related measures
+            visible: (measures_eta_squared || measures_partial_eta_squared || measures_omega_squared)
+
+            columns:
+                - name: measure
+                  title: 'Measure'
+                  type: text
+                - name: estimate
+                  title: 'Estimate'
+                  type: number
+                  format: zto
+                - name: ci_lower
+                  title: '95% CI Lower'
+                  type: number
+                  format: zto
+                - name: ci_upper
+                  title: '95% CI Upper'
+                  type: number
+                  format: zto
+                - name: variance_percent
+                  title: 'Variance %'
+                  type: number
+                  format: zto
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          - name: associationMeasures
+            title: Association Effect Sizes
+            type: Table
+            description: Cramér's V, phi coefficient, and association measures
+            visible: (measures_cramers_v || measures_phi_coefficient || measures_cohens_w)
+
+            columns:
+                - name: measure
+                  title: 'Association Measure'
+                  type: text
+                - name: estimate
+                  title: 'Estimate'
+                  type: number
+                  format: zto
+                - name: ci_lower
+                  title: '95% CI Lower'
+                  type: number
+                  format: zto
+                - name: ci_upper
+                  title: '95% CI Upper'
+                  type: number
+                  format: zto
+                - name: strength
+                  title: 'Association Strength'
+                  type: text
+                - name: sample_size
+                  title: 'Effective N'
+                  type: integer
+
+          - name: rankBasedEffects
+            title: Rank-based Effect Sizes
+            type: Table
+            description: Non-parametric effect size measures
+            visible: (measures_rank_biserial || measures_cliff_delta || measures_vargha_delaney_a)
+
+            columns:
+                - name: measure
+                  title: 'Rank-based Measure'
+                  type: text
+                - name: estimate
+                  title: 'Estimate'
+                  type: number
+                  format: zto
+                - name: ci_lower
+                  title: '95% CI Lower'
+                  type: number
+                  format: zto
+                - name: ci_upper
+                  title: '95% CI Upper'
+                  type: number
+                  format: zto
+                - name: probability_superiority
+                  title: 'P(Superiority)'
+                  type: number
+                  format: zto
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          - name: commonLanguageEffects
+            title: Common Language Effect Sizes
+            type: Table
+            description: Intuitive probability-based effect sizes
+            visible: (measures_common_language || measures_cohens_u3 || measures_probability_superiority)
+
+            columns:
+                - name: measure
+                  title: 'Measure'
+                  type: text
+                - name: probability
+                  title: 'Probability'
+                  type: number
+                  format: zto
+                - name: percentage
+                  title: 'Percentage'
+                  type: number
+                - name: ci_lower
+                  title: '95% CI Lower'
+                  type: number
+                  format: zto
+                - name: ci_upper
+                  title: '95% CI Upper'
+                  type: number
+                  format: zto
+                - name: plain_language
+                  title: 'Plain Language Interpretation'
+                  type: text
+
+          - name: powerAnalysisResults
+            title: Post-hoc Power Analysis
+            type: Table
+            description: Statistical power calculations for observed effects
+            visible: (power_analysis)
+
+            columns:
+                - name: effect_size_used
+                  title: 'Effect Size Used'
+                  type: text
+                - name: effect_magnitude
+                  title: 'Effect Magnitude'
+                  type: number
+                  format: zto
+                - name: sample_size
+                  title: 'Sample Size'
+                  type: integer
+                - name: alpha_level
+                  title: 'Alpha Level'
+                  type: number
+                  format: zto
+                - name: observed_power
+                  title: 'Observed Power'
+                  type: number
+                  format: zto
+                - name: power_interpretation
+                  title: 'Power Interpretation'
+                  type: text
+                - name: required_n
+                  title: 'N for Desired Power'
+                  type: integer
+
+          - name: metaAnalysisFormat
+            title: Meta-analysis Ready Output
+            type: Table
+            description: Formatted output for meta-analysis software
+            visible: (meta_analysis_format)
+
+            columns:
+                - name: study_name
+                  title: 'Study/Group'
+                  type: text
+                - name: effect_size
+                  title: 'Effect Size'
+                  type: number
+                  format: zto
+                - name: standard_error
+                  title: 'Standard Error'
+                  type: number
+                  format: zto
+                - name: sample_size_1
+                  title: 'N₁'
+                  type: integer
+                - name: sample_size_2
+                  title: 'N₂'
+                  type: integer
+                - name: weight
+                  title: 'Weight'
+                  type: number
+                  format: zto
+                - name: mean_1
+                  title: 'Mean₁'
+                  type: number
+                - name: mean_2
+                  title: 'Mean₂'
+                  type: number
+                - name: sd_pooled
+                  title: 'SD Pooled'
+                  type: number
+
+          - name: clinicalSignificance
+            title: Clinical Significance Assessment
+            type: Table
+            description: Clinical significance evaluation using thresholds
+            visible: (clinical_thresholds)
+
+            columns:
+                - name: effect_size
+                  title: 'Effect Size'
+                  type: text
+                - name: observed_value
+                  title: 'Observed Value'
+                  type: number
+                  format: zto
+                - name: small_threshold
+                  title: 'Small Effect Threshold'
+                  type: number
+                  format: zto
+                - name: medium_threshold
+                  title: 'Medium Effect Threshold'
+                  type: number
+                  format: zto
+                - name: large_threshold
+                  title: 'Large Effect Threshold'
+                  type: number
+                  format: zto
+                - name: clinical_magnitude
+                  title: 'Clinical Magnitude'
+                  type: text
+                - name: clinical_interpretation
+                  title: 'Clinical Interpretation'
+                  type: text
+
+          - name: bootstrapResults
+            title: Bootstrap Confidence Intervals
+            type: Table
+            description: Bootstrap-based confidence intervals for effect sizes
+            visible: (bootstrap_ci)
+
+            columns:
+                - name: measure
+                  title: 'Effect Size'
+                  type: text
+                - name: bootstrap_estimate
+                  title: 'Bootstrap Estimate'
+                  type: number
+                  format: zto
+                - name: bootstrap_se
+                  title: 'Bootstrap SE'
+                  type: number
+                  format: zto
+                - name: percentile_lower
+                  title: 'Percentile CI Lower'
+                  type: number
+                  format: zto
+                - name: percentile_upper
+                  title: 'Percentile CI Upper'
+                  type: number
+                  format: zto
+                - name: bca_lower
+                  title: 'BCa CI Lower'
+                  type: number
+                  format: zto
+                - name: bca_upper
+                  title: 'BCa CI Upper'
+                  type: number
+                  format: zto
+                - name: bootstrap_samples
+                  title: 'Bootstrap N'
+                  type: integer
+
+          # HTML Interpretations and Guidance
+          - name: effectSizeGuide
+            title: Effect Size Interpretation Guide
+            type: Html
+            visible: (interpretation)
+
+          - name: clinicalGuidance
+            title: Clinical Application Guidance
+            type: Html
+            visible: (clinical_thresholds)
+
+          - name: methodsExplanation
+            title: Statistical Methods and References
+            type: Html
+            visible: (comprehensive_output)
+
+          # Enhanced Visualizations
           - name: effectPlot
             title: Effect Size Visualization
             type: Image
             description: Plot showing effect sizes with confidence intervals
             visible: (plotEffects)
             renderFun: .plotEffects
+            width: 600
+            height: 400
             clearWith:
                 - dep
                 - group
@@ -148,3 +467,39 @@ items:
                 - plotType
                 - plotWidth
                 - plotHeight
+
+          - name: advancedForestPlot
+            title: Advanced Forest Plot
+            type: Image
+            description: Publication-ready forest plot of effect sizes
+            visible: (forest_plot_advanced)
+            renderFun: .plotAdvancedForest
+            width: 800
+            height: 600
+
+          - name: effectDistributionPlot
+            title: Effect Size Distribution
+            type: Image
+            description: Sampling distribution of effect sizes
+            visible: (effect_size_distribution)
+            renderFun: .plotEffectDistribution
+            width: 600
+            height: 400
+
+          - name: comparisonPlot
+            title: Effect Size Comparison
+            type: Image
+            description: Comparison of multiple effect size measures
+            visible: (comparison_plot)
+            renderFun: .plotEffectComparison
+            width: 700
+            height: 500
+
+          - name: powerCurvePlot
+            title: Power Analysis Curves
+            type: Image
+            description: Power curves for different effect sizes and sample sizes
+            visible: (power_analysis)
+            renderFun: .plotPowerCurves
+            width: 600
+            height: 450

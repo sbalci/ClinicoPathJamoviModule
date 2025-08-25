@@ -1,0 +1,171 @@
+title: Enhanced Frequency Analysis
+name: enhancedfrequency
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Ordering Options
+            children:
+              - type: ComboBox
+                name: orderBy
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Output Tables
+            children:
+              - type: CheckBox
+                name: showDatasetOverview
+              - type: CheckBox
+                name: showVariableSummary
+              - type: CheckBox
+                name: showFrequencyTables
+              - type: CheckBox
+                name: showCombinedSummary
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Percentage Options
+            children:
+              - type: CheckBox
+                name: showPercentages
+              - type: CheckBox
+                name: showValidPercentages
+              - type: CheckBox
+                name: showCumulative
+              - type: CheckBox
+                name: showValidCumulative
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Missing Values
+            children:
+              - type: CheckBox
+                name: includeMissing
+              - type: TextBox
+                name: missingLabel
+                format: string
+                enable: (includeMissing)
+  - type: CollapseBox
+    label: Formatting Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Decimal Places
+                children:
+                  - type: TextBox
+                    name: percentageDecimals
+                    suffix: 'decimals'
+                    format: number
+                  - type: TextBox
+                    name: frequencyDecimals
+                    suffix: 'decimals'
+                    format: number
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Category Filtering
+                children:
+                  - type: TextBox
+                    name: minFrequency
+                    format: number
+                  - type: TextBox
+                    name: maxCategories
+                    format: number
+                  - type: CheckBox
+                    name: combineRareCategories
+                  - type: TextBox
+                    name: rareCategoryLabel
+                    format: string
+                    enable: (combineRareCategories)
+  - type: CollapseBox
+    label: Advanced Analysis
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Quality Assessment
+                children:
+                  - type: CheckBox
+                    name: dataQualityAssessment
+                  - type: CheckBox
+                    name: categoricalDiagnostics
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Output Format
+                children:
+                  - type: ComboBox
+                    name: exportFormat
+                  - type: CheckBox
+                    name: includeMethodology
+  - type: CollapseBox
+    label: BlueSky Integration
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bluesky_integration
+          - type: CheckBox
+            name: comprehensive_output
+          - type: CheckBox
+            name: clinical_interpretation

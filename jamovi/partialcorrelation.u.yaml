@@ -1,4 +1,3 @@
----
 name: partialcorrelation
 title: Partial Correlation Analysis
 stage: 0
@@ -15,7 +14,6 @@ children:
             name: vars
             isTarget: true
             itemDropBehaviour: emptyspace
-
       - type: TargetLayoutBox
         label: Control Variables
         children:
@@ -23,7 +21,6 @@ children:
             name: controls
             isTarget: true
             itemDropBehaviour: emptyspace
-
   - type: LayoutBox
     margin: large
     stretchFactor: 1
@@ -46,7 +43,6 @@ children:
             optionName: method
             optionPart: kendall
             label: Kendall's tau
-
       - type: Label
         label: Statistics
         children:
@@ -67,7 +63,6 @@ children:
             label: Significance level
             format: number
             enable: (sig)
-
       - type: Label
         label: Options
         children:
@@ -77,3 +72,46 @@ children:
           - type: CheckBox
             name: matrixPlot
             label: Correlation matrix plot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: correlationType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: multipleComparison
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: robustErrorHandling
+      - type: CheckBox
+        name: showDiagnostics
+      - type: CheckBox
+        name: detailedOutput
+      - type: CheckBox
+        name: bootstrapCI
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrapSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: showEffectSizes
+      - type: CheckBox
+        name: assumptionChecks
+      - type: CheckBox
+        name: clinicalInterpretation
+      - type: CheckBox
+        name: showRecommendations
+      - type: CheckBox
+        name: bluesky_integration
+      - type: CheckBox
+        name: comprehensive_output
+jus: '2.0'

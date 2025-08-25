@@ -15,7 +15,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             multiraterMethod = "auto",
             fleissCI = TRUE,
             kripp = FALSE,
-            krippMethod = "nominal", ...) {
+            krippMethod = "nominal",
+            consensus = FALSE,
+            consensus_method = "majority",
+            tie_breaking = "exclude",
+            show_consensus_table = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -81,6 +85,30 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "interval",
                     "ratio"),
                 default="nominal")
+            private$..consensus <- jmvcore::OptionBool$new(
+                "consensus",
+                consensus,
+                default=FALSE)
+            private$..consensus_method <- jmvcore::OptionList$new(
+                "consensus_method",
+                consensus_method,
+                options=list(
+                    "majority",
+                    "super_majority",
+                    "unanimous"),
+                default="majority")
+            private$..tie_breaking <- jmvcore::OptionList$new(
+                "tie_breaking",
+                tie_breaking,
+                options=list(
+                    "exclude",
+                    "arbitration",
+                    "global_mode"),
+                default="exclude")
+            private$..show_consensus_table <- jmvcore::OptionBool$new(
+                "show_consensus_table",
+                show_consensus_table,
+                default=TRUE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
@@ -92,6 +120,10 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..fleissCI)
             self$.addOption(private$..kripp)
             self$.addOption(private$..krippMethod)
+            self$.addOption(private$..consensus)
+            self$.addOption(private$..consensus_method)
+            self$.addOption(private$..tie_breaking)
+            self$.addOption(private$..show_consensus_table)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -103,7 +135,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         multiraterMethod = function() private$..multiraterMethod$value,
         fleissCI = function() private$..fleissCI$value,
         kripp = function() private$..kripp$value,
-        krippMethod = function() private$..krippMethod$value),
+        krippMethod = function() private$..krippMethod$value,
+        consensus = function() private$..consensus$value,
+        consensus_method = function() private$..consensus_method$value,
+        tie_breaking = function() private$..tie_breaking$value,
+        show_consensus_table = function() private$..show_consensus_table$value),
     private = list(
         ..vars = NA,
         ..sft = NA,
@@ -114,7 +150,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..multiraterMethod = NA,
         ..fleissCI = NA,
         ..kripp = NA,
-        ..krippMethod = NA)
+        ..krippMethod = NA,
+        ..consensus = NA,
+        ..consensus_method = NA,
+        ..tie_breaking = NA,
+        ..show_consensus_table = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -125,6 +165,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         overviewTable = function() private$.items[["overviewTable"]],
         kappaTable = function() private$.items[["kappaTable"]],
         krippTable = function() private$.items[["krippTable"]],
+        consensusTable = function() private$.items[["consensusTable"]],
+        consensusSummary = function() private$.items[["consensusSummary"]],
         heatmapPlot = function() private$.items[["heatmapPlot"]],
         frequencyTables = function() private$.items[["frequencyTables"]]),
     private = list(),
@@ -243,6 +285,51 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="interpretation", 
                         `title`="Interpretation", 
                         `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="consensusTable",
+                title="Consensus Scoring Results",
+                visible="(consensus && show_consensus_table)",
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Case ID", 
+                        `type`="text"),
+                    list(
+                        `name`="consensus_score", 
+                        `title`="Consensus Score", 
+                        `type`="text"),
+                    list(
+                        `name`="agreement_level", 
+                        `title`="Agreement Level", 
+                        `type`="text"),
+                    list(
+                        `name`="n_agreeing", 
+                        `title`="Raters Agreeing", 
+                        `type`="integer"),
+                    list(
+                        `name`="rater_scores", 
+                        `title`="Individual Scores", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="consensusSummary",
+                title="Consensus Summary Statistics",
+                visible="(consensus)",
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="zto"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="heatmapPlot",
@@ -310,12 +397,22 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reliability for any number of observers and data types.
 #' @param krippMethod Measurement level for Krippendorff's alpha calculation.
 #'   Choose based on your data type.
+#' @param consensus Perform consensus scoring analysis to determine
+#'   agreed-upon ratings from multiple raters.
+#' @param consensus_method Method for determining consensus scores from
+#'   multiple raters.
+#' @param tie_breaking How to handle cases where no consensus can be reached
+#'   using the selected method.
+#' @param show_consensus_table Display detailed consensus scoring results
+#'   including individual rater scores and consensus outcomes.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$overviewTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$kappaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$consensusSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$heatmapPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$frequencyTables} \tab \tab \tab \tab \tab a html \cr
 #' }
@@ -338,7 +435,11 @@ agreement <- function(
     multiraterMethod = "auto",
     fleissCI = TRUE,
     kripp = FALSE,
-    krippMethod = "nominal") {
+    krippMethod = "nominal",
+    consensus = FALSE,
+    consensus_method = "majority",
+    tie_breaking = "exclude",
+    show_consensus_table = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
@@ -361,7 +462,11 @@ agreement <- function(
         multiraterMethod = multiraterMethod,
         fleissCI = fleissCI,
         kripp = kripp,
-        krippMethod = krippMethod)
+        krippMethod = krippMethod,
+        consensus = consensus,
+        consensus_method = consensus_method,
+        tie_breaking = tie_breaking,
+        show_consensus_table = show_consensus_table)
 
     analysis <- agreementClass$new(
         options = options,

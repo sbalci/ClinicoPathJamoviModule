@@ -1,268 +1,424 @@
+---
 name: bayesiandiagnostic
-title: Bayesian Diagnostic Probability Updates
-menuGroup: ClinicoPathD
-menuSubgroup: meddecide
-version: '0.0.3'
+title: Bayesian Diagnostic Test Evaluation
+menuGroup: meddecideD
+menuSubgroup: Diagnostic Test Evaluation
+menuSubtitle: Bayesian analysis of diagnostic test performance with uncertainty
+version: '0.0.31'
 jas: '1.2'
+
 description:
     main: |
-        Bayesian diagnostic probability calculations with prior probability updates.
-        Implements likelihood ratios, posterior probability calculations, and
-        diagnostic test chain analysis with sequential updating.
+        Comprehensive Bayesian evaluation of diagnostic test performance including
+        sensitivity, specificity, predictive values, likelihood ratios, and
+        diagnostic odds ratios with full uncertainty quantification. Supports
+        meta-analysis, hierarchical modeling, and comparative test evaluation.
     R:
         dontrun: false
         usage: |
-            # Example: Bayesian diagnostic update
+            # Bayesian diagnostic test evaluation
             bayesiandiagnostic(
                 data = diagnostic_data,
-                test_result = test_outcome,
-                disease_status = actual_disease,
-                prior_prob = 0.15,
-                analysis_type = "single_test"
+                test_results = "test_outcome",
+                gold_standard = "true_diagnosis",
+                prior_sensitivity_mean = 0.8,
+                prior_specificity_mean = 0.9
             )
 
 options:
-    - name: test_result
-      title: Test Result Variable
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for Bayesian diagnostic test evaluation.
+
+    # Core variables
+    - name: test_results
+      title: Test Results Variable
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor, numeric]
-      description:
-          ui: Test result (positive/negative or ordinal)
-          R: |
-              Test result variable for diagnostic analysis
 
-    - name: disease_status
-      title: Disease Status Variable
+    - name: gold_standard
+      title: Gold Standard/Reference Variable
       type: Variable
-      suggested: [nominal]
+      suggested: [nominal, ordinal]  
       permitted: [factor, numeric]
-      description:
-          ui: True disease status (gold standard)
-          R: |
-              Gold standard disease status variable
+
+    - name: test_positive_level
+      title: Test Positive Level
+      type: Level
+      variable: (test_results)
+
+    - name: disease_positive_level
+      title: Disease Positive Level
+      type: Level
+      variable: (gold_standard)
+
+    - name: study_id
+      title: Study ID Variable (Meta-analysis)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: null
+
+    - name: patient_id
+      title: Patient ID Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: null
 
     - name: covariates
-      title: Patient Characteristics
+      title: Covariate Variables
       type: Variables
-      suggested: [continuous, nominal]
+      suggested: [continuous, nominal, ordinal]
       permitted: [numeric, factor]
-      default: null
-      description:
-          ui: Variables for stratified analysis
-          R: |
-              Covariates for risk-stratified diagnostic analysis
 
+    # Analysis type
     - name: analysis_type
       title: Analysis Type
       type: List
       options:
-          - name: single_test
-            title: Single Test Analysis
-          - name: test_chain
-            title: Sequential Test Chain
-          - name: parallel_tests
-            title: Parallel Test Combination
-          - name: hierarchical_bayes
-            title: Hierarchical Bayesian Model
-          - name: beta_binomial
-            title: Beta-Binomial Model
+        - title: "Single Test Evaluation"
+          name: single_test
+        - title: "Comparative Test Evaluation"
+          name: comparative_test
+        - title: "Meta-analysis"
+          name: meta_analysis
+        - title: "Individual Patient Data"
+          name: individual_patient
+        - title: "Hierarchical Modeling"
+          name: hierarchical
       default: single_test
-      description:
-          ui: Type of Bayesian diagnostic analysis
-          R: |
-              Statistical approach for diagnostic probability updates
 
+    - name: comparison_test
+      title: Comparison Test Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: null
+
+    - name: comparison_positive_level
+      title: Comparison Test Positive Level
+      type: Level
+      variable: (comparison_test)
+
+    # Prior specifications
     - name: prior_type
-      title: Prior Specification
+      title: Prior Specification Type
       type: List
       options:
-          - name: fixed_prior
-            title: Fixed Prior Probability
-          - name: empirical_prior
-            title: Empirical Bayes Prior
-          - name: reference_prior
-            title: Reference/Uniform Prior
-          - name: informative_prior
-            title: Informative Beta Prior
-          - name: hierarchical_prior
-            title: Hierarchical Prior
-      default: fixed_prior
-      description:
-          ui: Method for specifying prior probabilities
-          R: |
-              Prior probability specification approach
+        - title: "Informative Priors"
+          name: informative
+        - title: "Non-informative Priors"
+          name: noninformative
+        - title: "Skeptical Priors"
+          name: skeptical
+        - title: "Enthusiastic Priors"
+          name: enthusiastic
+        - title: "Custom Priors"
+          name: custom
+      default: informative
 
-    - name: prior_prob
-      title: Prior Disease Probability
+    - name: prior_sensitivity_mean
+      title: Prior Sensitivity Mean
       type: Number
-      default: 0.1
-      min: 0.001
-      max: 0.999
-      description:
-          ui: Prior probability of disease (prevalence)
-          R: |
-              Prior probability of disease in the population
-
-    - name: alpha_prior
-      title: Beta Prior Alpha
-      type: Number
-      default: 1
-      min: 0.1
-      max: 100
-      description:
-          ui: Beta distribution alpha parameter for prior
-          R: |
-              Alpha parameter for informative beta prior
-
-    - name: beta_prior
-      title: Beta Prior Beta
-      type: Number
-      default: 1
-      min: 0.1
-      max: 100
-      description:
-          ui: Beta distribution beta parameter for prior
-          R: |
-              Beta parameter for informative beta prior
-
-    - name: test_sequence
-      title: Test Sequence (comma-separated)
-      type: String
-      default: "test1,test2,test3"
-      description:
-          ui: Names of tests in sequential order
-          R: |
-              Sequential test names for chain analysis
-
-    - name: credible_level
-      title: Credible Interval Level
-      type: Number
-      default: 0.95
-      min: 0.8
+      default: 0.8
+      min: 0.01
       max: 0.99
-      description:
-          ui: Credible interval coverage probability
-          R: |
-              Level for Bayesian credible intervals
 
+    - name: prior_sensitivity_precision
+      title: Prior Sensitivity Precision
+      type: Number
+      default: 10
+      min: 0.1
+      max: 1000
+
+    - name: prior_specificity_mean
+      title: Prior Specificity Mean
+      type: Number
+      default: 0.9
+      min: 0.01
+      max: 0.99
+
+    - name: prior_specificity_precision
+      title: Prior Specificity Precision
+      type: Number
+      default: 10
+      min: 0.1
+      max: 1000
+
+    - name: correlation_prior
+      title: Prior Correlation (Sensitivity-Specificity)
+      type: Number
+      default: 0.0
+      min: -0.99
+      max: 0.99
+
+    # Modeling options
+    - name: bivariate_model
+      title: Bivariate Model (Sens & Spec)
+      type: Bool
+      default: true
+
+    - name: hierarchical_model
+      title: Hierarchical Random Effects
+      type: Bool
+      default: false
+
+    - name: covariate_effects
+      title: Include Covariate Effects
+      type: Bool
+      default: false
+
+    - name: heterogeneity_model
+      title: Between-Study Heterogeneity
+      type: List
+      options:
+        - title: "Fixed Effects"
+          name: fixed
+        - title: "Random Effects"
+          name: random
+        - title: "Mixed Effects"
+          name: mixed
+      default: random
+
+    # MCMC settings
     - name: mcmc_samples
       title: MCMC Samples
       type: Integer
+      default: 10000
+      min: 2000
+      max: 100000
+
+    - name: mcmc_burnin
+      title: MCMC Burn-in
+      type: Integer
       default: 5000
       min: 1000
-      max: 20000
-      description:
-          ui: Number of MCMC samples for hierarchical models
-          R: |
-              MCMC iterations for posterior sampling
+      max: 50000
 
-    - name: burnin_samples
-      title: Burn-in Samples
+    - name: mcmc_thin
+      title: Thinning Interval
       type: Integer
-      default: 1000
-      min: 100
-      max: 5000
-      description:
-          ui: Number of burn-in samples to discard
-          R: |
-              MCMC burn-in iterations
+      default: 1
+      min: 1
+      max: 50
 
-    - name: likelihood_method
-      title: Likelihood Calculation
+    - name: mcmc_chains
+      title: Number of MCMC Chains
+      type: Integer
+      default: 3
+      min: 1
+      max: 8
+
+    - name: mcmc_adapt
+      title: Adaptive MCMC
+      type: Bool
+      default: true
+
+    - name: convergence_criterion
+      title: Convergence Criterion (R-hat)
+      type: Number
+      default: 1.1
+      min: 1.01
+      max: 1.2
+
+    # Output metrics
+    - name: compute_sensitivity
+      title: Compute Sensitivity
+      type: Bool
+      default: true
+
+    - name: compute_specificity
+      title: Compute Specificity
+      type: Bool
+      default: true
+
+    - name: compute_ppv
+      title: Compute Positive Predictive Value
+      type: Bool
+      default: true
+
+    - name: compute_npv
+      title: Compute Negative Predictive Value
+      type: Bool
+      default: true
+
+    - name: compute_likelihood_ratios
+      title: Compute Likelihood Ratios
+      type: Bool
+      default: true
+
+    - name: compute_diagnostic_odds_ratio
+      title: Compute Diagnostic Odds Ratio
+      type: Bool
+      default: true
+
+    - name: compute_accuracy
+      title: Compute Overall Accuracy
+      type: Bool
+      default: true
+
+    - name: compute_auc
+      title: Compute Area Under Curve
+      type: Bool
+      default: false
+
+    - name: prevalence_prior
+      title: Prior Disease Prevalence
+      type: Number
+      default: 0.5
+      min: 0.001
+      max: 0.999
+
+    # Clinical decision making
+    - name: decision_analysis
+      title: Clinical Decision Analysis
+      type: Bool
+      default: false
+
+    - name: cost_fn
+      title: False Negative Cost
+      type: Number
+      default: 1.0
+      min: 0.0
+      max: 1000.0
+
+    - name: cost_fp
+      title: False Positive Cost
+      type: Number
+      default: 1.0
+      min: 0.0
+      max: 1000.0
+
+    - name: utility_tp
+      title: True Positive Utility
+      type: Number
+      default: 1.0
+      min: 0.0
+      max: 1000.0
+
+    - name: utility_tn
+      title: True Negative Utility
+      type: Number
+      default: 1.0
+      min: 0.0
+      max: 1000.0
+
+    # Threshold analysis
+    - name: threshold_analysis
+      title: Optimal Threshold Analysis
+      type: Bool
+      default: false
+
+    - name: threshold_metric
+      title: Threshold Optimization Metric
       type: List
       options:
-          - name: exact
-            title: Exact Likelihood
-          - name: asymptotic
-            title: Asymptotic Approximation
-          - name: bootstrap
-            title: Bootstrap Likelihood
-          - name: bayesian_bootstrap
-            title: Bayesian Bootstrap
-      default: exact
-      description:
-          ui: Method for likelihood calculation
-          R: |
-              Approach for computing diagnostic likelihood
+        - title: "Youden Index"
+          name: youden
+        - title: "Expected Utility"
+          name: utility
+        - title: "Minimize Misclassification"
+          name: misclassification
+        - title: "Maximize Accuracy"
+          name: accuracy
+      default: youden
 
-    - name: posterior_summary
-      title: Posterior Summary Statistics
+    # Output options
+    - name: show_summary_statistics
+      title: Show Summary Statistics
       type: Bool
       default: true
-      description:
-          ui: Calculate posterior means, medians, and intervals
-          R: |
-              Whether to compute posterior summary statistics
 
-    - name: diagnostic_plots
-      title: Diagnostic Plots
+    - name: show_posterior_distributions
+      title: Show Posterior Distributions
       type: Bool
       default: true
-      description:
-          ui: Generate prior/posterior distribution plots
-          R: |
-              Whether to create diagnostic probability plots
+
+    - name: show_credible_intervals
+      title: Show Credible Intervals
+      type: Bool
+      default: true
+
+    - name: show_convergence_diagnostics
+      title: Show MCMC Diagnostics
+      type: Bool
+      default: true
+
+    - name: show_model_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: false
+
+    - name: show_predictive_checks
+      title: Show Posterior Predictive Checks
+      type: Bool
+      default: false
+
+    - name: show_clinical_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+
+    # Confidence/credible intervals
+    - name: credible_interval
+      title: Credible Interval Level
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+
+    - name: hpdi
+      title: Use Highest Posterior Density Intervals
+      type: Bool
+      default: true
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+
+    # Computational options
+    - name: parallel_chains
+      title: Run Chains in Parallel
+      type: Bool
+      default: true
+
+    - name: n_cores
+      title: Number of CPU Cores
+      type: Integer
+      default: 2
+      min: 1
+      max: 8
+
+    # Advanced options
+    - name: robust_estimation
+      title: Robust Estimation
+      type: Bool
+      default: false
+
+    - name: outlier_detection
+      title: Outlier Study Detection
+      type: Bool
+      default: false
+
+    - name: publication_bias
+      title: Publication Bias Assessment
+      type: Bool
+      default: false
 
     - name: sensitivity_analysis
       title: Prior Sensitivity Analysis
       type: Bool
       default: false
-      description:
-          ui: Assess robustness to prior specification
-          R: |
-              Whether to perform prior sensitivity analysis
-
-    - name: model_comparison
-      title: Bayesian Model Comparison
-      type: Bool
-      default: false
-      description:
-          ui: Compare different diagnostic models using DIC/WAIC
-          R: |
-              Whether to perform Bayesian model comparison
-
-    - name: predictive_checking
-      title: Posterior Predictive Checking
-      type: Bool
-      default: false
-      description:
-          ui: Validate model fit using posterior predictive distributions
-          R: |
-              Whether to perform posterior predictive checks
-
-    - name: multilevel_structure
-      title: Multilevel Structure
-      type: Bool
-      default: false
-      description:
-          ui: Account for hierarchical data structure (centers, studies)
-          R: |
-              Whether to use hierarchical Bayesian modeling
-
-    - name: overdispersion_model
-      title: Overdispersion Modeling
-      type: Bool
-      default: false
-      description:
-          ui: Use beta-binomial for overdispersed diagnostic data
-          R: |
-              Whether to model overdispersion in diagnostic accuracy
-
-    - name: conditional_independence
-      title: Test Conditional Independence
-      type: Bool
-      default: true
-      description:
-          ui: Assume conditional independence of test results
-          R: |
-              Whether tests are conditionally independent given disease status
-
-    - name: network_analysis
-      title: Diagnostic Network Analysis
-      type: Bool
-      default: false
-      description:
-          ui: Model complex diagnostic pathways as Bayesian networks
-          R: |
-              Whether to use Bayesian network modeling

@@ -1,0 +1,324 @@
+---
+title: Analysis Results
+name: bayesiannetworkma
+jrs: '1.1'
+items:
+    - name: networkSummary
+      title: Network Meta-Analysis Summary
+      type: Table
+      columns:
+        - name: parameter
+          title: Network Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: description
+          title: Description
+          type: text
+
+    - name: networkCharacteristics
+      title: Network Characteristics
+      type: Table
+      columns:
+        - name: treatment
+          title: Treatment
+          type: text
+        - name: n_studies
+          title: Number of Studies
+          type: integer
+        - name: n_participants
+          title: Total Participants
+          type: integer
+        - name: direct_comparisons
+          title: Direct Comparisons
+          type: integer
+        - name: indirect_evidence
+          title: Indirect Evidence
+          type: text
+
+    - name: treatmentEffects
+      title: Network Treatment Effects
+      type: Table
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: posterior_mean
+          title: Posterior Mean
+          type: number
+        - name: posterior_sd
+          title: Posterior SD
+          type: number
+        - name: credible_interval_lower
+          title: CrI Lower
+          type: number
+        - name: credible_interval_upper
+          title: CrI Upper
+          type: number
+        - name: prob_superiority
+          title: P(Superiority)
+          type: number
+        - name: evidence_type
+          title: Evidence Type
+          type: text
+
+    - name: heterogeneityAnalysis
+      title: Between-Study Heterogeneity Assessment
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: posterior_mean
+          title: Posterior Mean
+          type: number
+        - name: posterior_sd
+          title: Posterior SD
+          type: number
+        - name: credible_interval_lower
+          title: CrI Lower
+          type: number
+        - name: credible_interval_upper
+          title: CrI Upper
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: coherenceAssessment
+      title: Network Coherence Assessment
+      type: Table
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: direct_effect
+          title: Direct Effect
+          type: number
+        - name: indirect_effect
+          title: Indirect Effect
+          type: number
+        - name: inconsistency
+          title: Inconsistency
+          type: number
+        - name: p_value
+          title: P-value
+          type: number
+          format: zto,pvalue
+        - name: coherence_status
+          title: Coherence Status
+          type: text
+
+    - name: treatmentRankings
+      title: Treatment Rankings
+      type: Table
+      columns:
+        - name: treatment
+          title: Treatment
+          type: text
+        - name: mean_rank
+          title: Mean Rank
+          type: number
+        - name: sucra
+          title: SUCRA
+          type: number
+        - name: prob_best
+          title: P(Best)
+          type: number
+        - name: prob_worst
+          title: P(Worst)
+          type: number
+        - name: rank_95_credible
+          title: 95% CrI Rank
+          type: text
+
+    - name: pairwiseComparisons
+      title: All Pairwise Comparisons
+      type: Table
+      columns:
+        - name: treatment_a
+          title: Treatment A
+          type: text
+        - name: treatment_b
+          title: Treatment B
+          type: text
+        - name: effect_estimate
+          title: Effect Estimate
+          type: number
+        - name: credible_interval_lower
+          title: CrI Lower
+          type: number
+        - name: credible_interval_upper
+          title: CrI Upper
+          type: number
+        - name: prob_a_better
+          title: P(A > B)
+          type: number
+
+    - name: leagueTable
+      title: League Table Matrix
+      type: Table
+      columns:
+        - name: comparison_matrix
+          title: Treatment Comparison Matrix
+          type: text
+        - name: lower_triangle
+          title: Effect Estimates (Lower)
+          type: text
+        - name: upper_triangle
+          title: Probabilities (Upper)
+          type: text
+
+    - name: modelComparison
+      title: Model Selection and Comparison
+      type: Table
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: dic
+          title: DIC
+          type: number
+        - name: pd
+          title: pD
+          type: number
+        - name: waic
+          title: WAIC
+          type: number
+        - name: loo
+          title: LOO
+          type: number
+        - name: model_weight
+          title: Model Weight
+          type: number
+        - name: preferred
+          title: Preferred Model
+          type: text
+
+    - name: convergenceDiagnostics
+      title: MCMC Convergence Diagnostics
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: rhat
+          title: R̂
+          type: number
+        - name: ess_bulk
+          title: Bulk ESS
+          type: integer
+        - name: ess_tail
+          title: Tail ESS
+          type: integer
+        - name: mcse
+          title: Monte Carlo SE
+          type: number
+        - name: convergence_status
+          title: Convergence Status
+          type: text
+
+    - name: metaRegressionResults
+      title: Meta-Regression Results
+      type: Table
+      columns:
+        - name: covariate
+          title: Covariate
+          type: text
+        - name: coefficient
+          title: Coefficient
+          type: number
+        - name: posterior_sd
+          title: Posterior SD
+          type: number
+        - name: credible_interval_lower
+          title: CrI Lower
+          type: number
+        - name: credible_interval_upper
+          title: CrI Upper
+          type: number
+        - name: prob_positive_effect
+          title: P(β > 0)
+          type: number
+
+    - name: sensitivityAnalysis
+      title: Sensitivity Analysis Results
+      type: Table
+      columns:
+        - name: scenario
+          title: Scenario
+          type: text
+        - name: treatment_effect
+          title: Treatment Effect
+          type: number
+        - name: ranking_change
+          title: Ranking Change
+          type: text
+        - name: robustness_assessment
+          title: Robustness Assessment
+          type: text
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation and Recommendations
+      type: Html
+
+    - name: methodsExplanation
+      title: Network Meta-Analysis Methods and Theory
+      type: Html
+
+    - name: networkPlot
+      title: Network Plot Visualization
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotNetwork
+
+    - name: forestPlots
+      title: Network Forest Plots
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plotForestPlots
+
+    - name: rankingPlots
+      title: Treatment Ranking Visualization
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotRankings
+
+    - name: heterogeneityPlots
+      title: Heterogeneity Assessment Plots
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotHeterogeneity
+
+    - name: coherencePlots
+      title: Network Coherence Visualization
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotCoherence
+
+    - name: posteriorDistributionPlots
+      title: Posterior Distribution Plots
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotPosteriorDistributions
+
+    - name: convergencePlots
+      title: MCMC Convergence Plots
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotConvergence
+
+    - name: comparisonMatrix
+      title: Treatment Comparison Heatmap
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotComparisonMatrix

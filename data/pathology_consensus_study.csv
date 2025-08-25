@@ -1,0 +1,51 @@
+case_id,pathologist_1,pathologist_2,pathologist_3,pathologist_4,diagnosis_type,specimen_type
+PATH_001,Benign,Benign,Benign,Benign,Breast lesion,Core biopsy
+PATH_002,Benign,Benign,Benign,Atypical,Breast lesion,Core biopsy
+PATH_003,Atypical,Atypical,Atypical,Atypical,Breast lesion,Core biopsy
+PATH_004,Atypical,Malignant,Atypical,Atypical,Breast lesion,Excisional
+PATH_005,Malignant,Malignant,Malignant,Malignant,Breast lesion,Excisional
+PATH_006,Benign,Benign,Atypical,Benign,Breast lesion,Core biopsy
+PATH_007,Benign,Atypical,Atypical,Atypical,Breast lesion,Core biopsy
+PATH_008,Atypical,Atypical,Malignant,Atypical,Breast lesion,Excisional
+PATH_009,Atypical,Malignant,Malignant,Malignant,Breast lesion,Excisional
+PATH_010,Malignant,Malignant,Malignant,Malignant,Breast lesion,Excisional
+PATH_011,Benign,Benign,Benign,Benign,Prostate lesion,Core biopsy
+PATH_012,Benign,Benign,PIN,Benign,Prostate lesion,Core biopsy
+PATH_013,PIN,PIN,PIN,PIN,Prostate lesion,Core biopsy
+PATH_014,PIN,Adenocarcinoma,PIN,PIN,Prostate lesion,Core biopsy
+PATH_015,Adenocarcinoma,Adenocarcinoma,Adenocarcinoma,Adenocarcinoma,Prostate lesion,Core biopsy
+PATH_016,Benign,Benign,Benign,PIN,Prostate lesion,Core biopsy
+PATH_017,Benign,PIN,PIN,PIN,Prostate lesion,Core biopsy
+PATH_018,PIN,PIN,Adenocarcinoma,PIN,Prostate lesion,Core biopsy
+PATH_019,PIN,Adenocarcinoma,Adenocarcinoma,Adenocarcinoma,Prostate lesion,Core biopsy
+PATH_020,Adenocarcinoma,Adenocarcinoma,Adenocarcinoma,Adenocarcinoma,Prostate lesion,Core biopsy
+PATH_021,Normal,Normal,Normal,Normal,Skin lesion,Excisional
+PATH_022,Normal,Normal,Dysplasia,Normal,Skin lesion,Excisional
+PATH_023,Dysplasia,Dysplasia,Dysplasia,Dysplasia,Skin lesion,Excisional
+PATH_024,Dysplasia,Melanoma,Dysplasia,Dysplasia,Skin lesion,Excisional
+PATH_025,Melanoma,Melanoma,Melanoma,Melanoma,Skin lesion,Excisional
+PATH_026,Normal,Normal,Normal,Dysplasia,Skin lesion,Excisional
+PATH_027,Normal,Dysplasia,Dysplasia,Dysplasia,Skin lesion,Excisional
+PATH_028,Dysplasia,Dysplasia,Melanoma,Dysplasia,Skin lesion,Excisional
+PATH_029,Dysplasia,Melanoma,Melanoma,Melanoma,Skin lesion,Excisional
+PATH_030,Melanoma,Melanoma,Melanoma,Melanoma,Skin lesion,Excisional
+PATH_031,Negative,Negative,Negative,Negative,Lymph node,Excisional
+PATH_032,Negative,Negative,Metastatic,Negative,Lymph node,Excisional
+PATH_033,Metastatic,Metastatic,Metastatic,Metastatic,Lymph node,Excisional
+PATH_034,Negative,Metastatic,Metastatic,Metastatic,Lymph node,Excisional
+PATH_035,Metastatic,Metastatic,Metastatic,Metastatic,Lymph node,Excisional
+PATH_036,Negative,Negative,Negative,Metastatic,Lymph node,Excisional
+PATH_037,Negative,Negative,Metastatic,Negative,Lymph node,Excisional
+PATH_038,Negative,Metastatic,Metastatic,Metastatic,Lymph node,Excisional
+PATH_039,Metastatic,Metastatic,Metastatic,Metastatic,Lymph node,Excisional
+PATH_040,Metastatic,Metastatic,Metastatic,Metastatic,Lymph node,Excisional
+PATH_041,Grade_1,Grade_1,Grade_1,Grade_1,Tumor grading,Core biopsy
+PATH_042,Grade_1,Grade_1,Grade_2,Grade_1,Tumor grading,Core biopsy
+PATH_043,Grade_2,Grade_2,Grade_2,Grade_2,Tumor grading,Core biopsy
+PATH_044,Grade_2,Grade_3,Grade_2,Grade_2,Tumor grading,Core biopsy
+PATH_045,Grade_3,Grade_3,Grade_3,Grade_3,Tumor grading,Core biopsy
+PATH_046,Grade_1,Grade_1,Grade_1,Grade_2,Tumor grading,Core biopsy
+PATH_047,Grade_1,Grade_2,Grade_2,Grade_2,Tumor grading,Core biopsy
+PATH_048,Grade_2,Grade_2,Grade_3,Grade_2,Tumor grading,Core biopsy
+PATH_049,Grade_2,Grade_3,Grade_3,Grade_3,Tumor grading,Core biopsy
+PATH_050,Grade_3,Grade_3,Grade_3,Grade_3,Tumor grading,Core biopsy

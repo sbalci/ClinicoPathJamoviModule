@@ -623,6 +623,88 @@ copy_module_files_enhanced <- function(module_names, source_dir, dest_dir, file_
   return(list(copied = copied_count, skipped = skipped_count, failed = failed_count))
 }
 
+# Copy JavaScript and HTML files from jamovi/js and jamovi/html directories
+copy_jamovi_assets <- function(module_names, source_base_dir, dest_base_dir, module_type = "unknown") {
+  cat("\n🎯 Copying", module_type, "JavaScript and HTML assets...\n")
+  
+  if (length(module_names) == 0) {
+    cat("  ⏭️ No", module_type, "modules to process\n")
+    return(list(copied = 0, skipped = 0, failed = 0))
+  }
+  
+  copied_count <- 0
+  skipped_count <- 0
+  failed_count <- 0
+  
+  # JavaScript files from jamovi/js/
+  js_source_dir <- file.path(source_base_dir, "jamovi", "js")
+  js_dest_dir <- file.path(dest_base_dir, "jamovi", "js")
+  
+  if (dir.exists(js_source_dir)) {
+    if (!dir.exists(js_dest_dir)) {
+      dir.create(js_dest_dir, recursive = TRUE)
+    }
+    
+    # Find JavaScript files related to our modules
+    for (module_name in module_names) {
+      js_files <- list.files(js_source_dir, pattern = paste0("^", module_name, ".*\\.js$"), full.names = TRUE)
+      
+      for (js_file in js_files) {
+        dest_file <- file.path(js_dest_dir, basename(js_file))
+        
+        copy_result <- tryCatch({
+          file.copy(js_file, dest_file, overwrite = TRUE)
+          cat("  ✅ Copied JS:", basename(js_file), "\n")
+          copied_count <- copied_count + 1
+          TRUE
+        }, error = function(e) {
+          warning("⚠️ Failed to copy JS file ", basename(js_file), ": ", e$message)
+          failed_count <- failed_count + 1
+          FALSE
+        })
+      }
+    }
+  }
+  
+  # HTML files from jamovi/html/ (less common but included for completeness)
+  html_source_dir <- file.path(source_base_dir, "jamovi", "html")
+  html_dest_dir <- file.path(dest_base_dir, "jamovi", "html")
+  
+  if (dir.exists(html_source_dir)) {
+    if (!dir.exists(html_dest_dir)) {
+      dir.create(html_dest_dir, recursive = TRUE)
+    }
+    
+    # Find HTML files related to our modules
+    for (module_name in module_names) {
+      html_files <- list.files(html_source_dir, pattern = paste0("^", module_name, ".*\\.html$"), full.names = TRUE)
+      
+      for (html_file in html_files) {
+        dest_file <- file.path(html_dest_dir, basename(html_file))
+        
+        copy_result <- tryCatch({
+          file.copy(html_file, dest_file, overwrite = TRUE)
+          cat("  ✅ Copied HTML:", basename(html_file), "\n")
+          copied_count <- copied_count + 1
+          TRUE
+        }, error = function(e) {
+          warning("⚠️ Failed to copy HTML file ", basename(html_file), ": ", e$message)
+          failed_count <- failed_count + 1
+          FALSE
+        })
+      }
+    }
+  }
+  
+  if (copied_count > 0) {
+    cat("  ✅", copied_count, "asset files copied successfully\n")
+  } else if (failed_count == 0) {
+    cat("  ℹ️ No JavaScript/HTML assets found for", module_type, "modules\n")
+  }
+  
+  return(list(copied = copied_count, skipped = skipped_count, failed = failed_count))
+}
+
 # Enhanced Git commit function with comprehensive validation
 commit_repo_enhanced <- function(repo_dir, commit_message, validate_repo = TRUE, dry_run = FALSE) {
   if (!dir.exists(repo_dir)) {
@@ -1215,6 +1297,14 @@ if (!TEST) {
     dest_dir = jamovi_dir,
     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
   )
+  
+  # Copy JavaScript and HTML assets
+  copy_jamovi_assets(
+    jjstatsplot_modules,
+    source_base_dir = main_repo_dir,
+    dest_base_dir = jjstatsplot_dir,
+    module_type = "jjstatsplot"
+  )
 } else {
   cat("\n⏭️ Skipping jjstatsplot modules (disabled or no modules found)\n")
 }
@@ -1244,6 +1334,14 @@ if (meddecide_module && length(meddecide_modules) > 0) {
     source_dir = file.path(main_repo_dir, "jamovi"),
     dest_dir = jamovi_dir,
     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+  )
+  
+  # Copy JavaScript and HTML assets
+  copy_jamovi_assets(
+    meddecide_modules,
+    source_base_dir = main_repo_dir,
+    dest_base_dir = meddecide_dir,
+    module_type = "meddecide"
   )
 } else {
   cat("\n⏭️ Skipping meddecide modules (disabled or no modules found)\n")
@@ -1276,6 +1374,14 @@ if (jsurvival_module && length(jsurvival_modules) > 0) {
     dest_dir = jamovi_dir,
     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
   )
+  
+  # Copy JavaScript and HTML assets
+  copy_jamovi_assets(
+    jsurvival_modules,
+    source_base_dir = main_repo_dir,
+    dest_base_dir = jsurvival_dir,
+    module_type = "jsurvival"
+  )
 } else {
   cat("\n⏭️ Skipping jsurvival modules (disabled or no modules found)\n")
 }
@@ -1306,6 +1412,14 @@ if (ClinicoPathDescriptives_module && length(ClinicoPathDescriptives_modules) > 
     source_dir = file.path(main_repo_dir, "jamovi"),
     dest_dir = jamovi_dir,
     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+  )
+  
+  # Copy JavaScript and HTML assets
+  copy_jamovi_assets(
+    ClinicoPathDescriptives_modules,
+    source_base_dir = main_repo_dir,
+    dest_base_dir = ClinicoPathDescriptives_dir,
+    module_type = "ClinicoPathDescriptives"
   )
 } else {
   cat("\n⏭️ Skipping ClinicoPathDescriptives modules (disabled or no modules found)\n")
@@ -1343,6 +1457,14 @@ if (TEST && modules_config$JamoviTest$enabled && length(JamoviTest_modules) > 0)
     source_dir = file.path(main_repo_dir, "jamovi"),
     dest_dir = jamovi_dir,
     file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+  )
+  
+  # Copy JavaScript and HTML assets
+  copy_jamovi_assets(
+    JamoviTest_modules,
+    source_base_dir = main_repo_dir,
+    dest_base_dir = test_dir,
+    module_type = "JamoviTest"
   )
   
   # Copy utils.R and other R helper files if specified in config

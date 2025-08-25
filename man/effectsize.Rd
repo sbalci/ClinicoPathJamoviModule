@@ -2,7 +2,7 @@
 % Please edit documentation in R/effectsize.h.R
 \name{effectsize}
 \alias{effectsize}
-\title{Effect Size Analysis}
+\title{Comprehensive Effect Size Analysis}
 \usage{
 effectsize(
   data,
@@ -23,7 +23,44 @@ effectsize(
   plotEffects = TRUE,
   plotType = "forest",
   plotWidth = 600,
-  plotHeight = 400
+  plotHeight = 400,
+  measures_eta_squared = FALSE,
+  measures_partial_eta_squared = FALSE,
+  measures_omega_squared = FALSE,
+  measures_epsilon_squared = FALSE,
+  measures_cramers_v = FALSE,
+  measures_phi_coefficient = FALSE,
+  measures_cohens_w = FALSE,
+  measures_rank_biserial = FALSE,
+  measures_cliff_delta = FALSE,
+  measures_vargha_delaney_a = FALSE,
+  measures_common_language = FALSE,
+  measures_cohens_u3 = FALSE,
+  measures_probability_superiority = FALSE,
+  analysis_context = "ttest",
+  correction_method = "none",
+  bootstrap_ci = FALSE,
+  bootstrap_samples = 1000,
+  pooled_sd = TRUE,
+  welch_correction = FALSE,
+  paired_analysis = FALSE,
+  pairing_variable,
+  clinical_thresholds = FALSE,
+  small_effect_threshold = 0.2,
+  medium_effect_threshold = 0.5,
+  large_effect_threshold = 0.8,
+  power_analysis = FALSE,
+  alpha_level = 0.05,
+  desired_power = 0.8,
+  meta_analysis_format = FALSE,
+  study_weights,
+  bluesky_integration = TRUE,
+  comprehensive_output = FALSE,
+  effect_size_family = "smd",
+  forest_plot_advanced = FALSE,
+  effect_size_distribution = FALSE,
+  comparison_plot = FALSE,
+  export_format = "standard"
 )
 }
 \arguments{
@@ -66,6 +103,86 @@ intervals}
 \item{plotWidth}{Width of effect size plot}
 
 \item{plotHeight}{Height of effect size plot}
+
+\item{measures_eta_squared}{Calculate eta-squared effect size (ANOVA)}
+
+\item{measures_partial_eta_squared}{Calculate partial eta-squared effect
+size}
+
+\item{measures_omega_squared}{Calculate omega-squared effect size
+(unbiased)}
+
+\item{measures_epsilon_squared}{Calculate epsilon-squared effect size}
+
+\item{measures_cramers_v}{Calculate Cramér's V for categorical associations}
+
+\item{measures_phi_coefficient}{Calculate phi coefficient for 2x2
+contingency tables}
+
+\item{measures_cohens_w}{Calculate Cohen's w for chi-square goodness of fit}
+
+\item{measures_rank_biserial}{Calculate rank-biserial correlation for
+Mann-Whitney U}
+
+\item{measures_cliff_delta}{Calculate Cliff's delta for ordinal data}
+
+\item{measures_vargha_delaney_a}{Calculate Vargha-Delaney A measure}
+
+\item{measures_common_language}{Calculate common language effect size
+(CLES)}
+
+\item{measures_cohens_u3}{Calculate Cohen's U3 statistic}
+
+\item{measures_probability_superiority}{Calculate probability of
+superiority}
+
+\item{analysis_context}{Statistical context for effect size calculation}
+
+\item{correction_method}{Correction method for multiple effect sizes}
+
+\item{bootstrap_ci}{Use bootstrap methods for confidence intervals}
+
+\item{bootstrap_samples}{Number of bootstrap samples}
+
+\item{pooled_sd}{Use pooled standard deviation for effect size calculations}
+
+\item{welch_correction}{Apply Welch correction for unequal variances}
+
+\item{paired_analysis}{Analyze paired/matched data}
+
+\item{pairing_variable}{Variable indicating pairs/matches}
+
+\item{clinical_thresholds}{Apply clinical significance thresholds}
+
+\item{small_effect_threshold}{Threshold for small effect size}
+
+\item{medium_effect_threshold}{Threshold for medium effect size}
+
+\item{large_effect_threshold}{Threshold for large effect size}
+
+\item{power_analysis}{Include post-hoc power analysis}
+
+\item{alpha_level}{Significance level for power calculations}
+
+\item{desired_power}{Desired statistical power}
+
+\item{meta_analysis_format}{Format output for meta-analysis software}
+
+\item{study_weights}{Variable containing study weights for meta-analysis}
+
+\item{bluesky_integration}{Use BlueSky R statistical environment features}
+
+\item{comprehensive_output}{Include comprehensive statistical details}
+
+\item{effect_size_family}{Focus on specific family of effect sizes}
+
+\item{forest_plot_advanced}{Create publication-ready forest plot}
+
+\item{effect_size_distribution}{Show sampling distribution of effect sizes}
+
+\item{comparison_plot}{Compare multiple effect size measures}
+
+\item{export_format}{Output formatting style}
 }
 \value{
 A results object containing:
@@ -75,13 +192,30 @@ A results object containing:
 \code{results$results$descriptives} \tab \tab \tab \tab \tab Group descriptive statistics \cr
 \code{results$results$testDetails} \tab \tab \tab \tab \tab t-test statistics and significance \cr
 \code{results$results$assumptions} \tab \tab \tab \tab \tab Tests of normality and variance homogeneity \cr
+\code{results$results$comprehensiveEffectSizes} \tab \tab \tab \tab \tab All requested effect size measures with interpretations \cr
+\code{results$results$varianceExplained} \tab \tab \tab \tab \tab Eta-squared, omega-squared, and related measures \cr
+\code{results$results$associationMeasures} \tab \tab \tab \tab \tab Cramér's V, phi coefficient, and association measures \cr
+\code{results$results$rankBasedEffects} \tab \tab \tab \tab \tab Non-parametric effect size measures \cr
+\code{results$results$commonLanguageEffects} \tab \tab \tab \tab \tab Intuitive probability-based effect sizes \cr
+\code{results$results$powerAnalysisResults} \tab \tab \tab \tab \tab Statistical power calculations for observed effects \cr
+\code{results$results$metaAnalysisFormat} \tab \tab \tab \tab \tab Formatted output for meta-analysis software \cr
+\code{results$results$clinicalSignificance} \tab \tab \tab \tab \tab Clinical significance evaluation using thresholds \cr
+\code{results$results$bootstrapResults} \tab \tab \tab \tab \tab Bootstrap-based confidence intervals for effect sizes \cr
+\code{results$results$effectSizeGuide} \tab \tab \tab \tab \tab a html \cr
+\code{results$results$clinicalGuidance} \tab \tab \tab \tab \tab a html \cr
+\code{results$results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$results$effectPlot} \tab \tab \tab \tab \tab Plot showing effect sizes with confidence intervals \cr
+\code{results$results$advancedForestPlot} \tab \tab \tab \tab \tab Publication-ready forest plot of effect sizes \cr
+\code{results$results$effectDistributionPlot} \tab \tab \tab \tab \tab Sampling distribution of effect sizes \cr
+\code{results$results$comparisonPlot} \tab \tab \tab \tab \tab Comparison of multiple effect size measures \cr
+\code{results$results$powerCurvePlot} \tab \tab \tab \tab \tab Power curves for different effect sizes and sample sizes \cr
 }
 }
 \description{
-Comprehensive effect size analysis including Cohen's d, Hedges' g, and
-Glass' delta.
-Essential for clinical significance assessment, meta-analyses, and power
-analyses
-in medical and pathological research.
+Comprehensive effect size analysis toolkit with BlueSky R integration.
+Includes
+Cohen's d, Hedges' g, Glass' delta, eta-squared, omega-squared, Cramér's V,
+phi coefficient, rank-based effect sizes, and more. Essential for clinical
+significance assessment, meta-analyses, power analyses, and reproducible
+research in medical and pathological studies.
 }

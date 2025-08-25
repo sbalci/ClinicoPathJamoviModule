@@ -1,0 +1,283 @@
+---
+name: factoranalysis
+title: Comprehensive Factor Analysis Results
+jrs: '1.1'
+
+items:
+    - title: Analysis Results
+      name: results
+      type: Group
+      items:
+          - name: instructions
+            title: Instructions
+            type: Html
+            visible: true
+
+          # Sampling Adequacy Tests
+          - name: adequacyTable
+            title: Sampling Adequacy Tests
+            type: Table
+            description: Tests for appropriateness of factor analysis
+            visible: (adequacyTests)
+            
+            columns:
+                - name: test
+                  title: 'Test'
+                  type: text
+                - name: statistic
+                  title: 'Statistic'
+                  type: number
+                  format: zto
+                - name: pValue
+                  title: 'p'
+                  type: number
+                  format: zto;pvalue
+                - name: result
+                  title: 'Result'
+                  type: text
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          # Eigenvalues and Variance Explained
+          - name: eigenvaluesTable
+            title: Total Variance Explained
+            type: Table
+            description: Eigenvalues and percentage of variance explained
+            visible: (eigenvalues)
+            
+            columns:
+                - name: factor
+                  title: 'Factor'
+                  type: integer
+                - name: eigenvalue
+                  title: 'Eigenvalue'
+                  type: number
+                  format: zto
+                - name: variance_percent
+                  title: '% Variance'
+                  type: number
+                  format: zto
+                - name: cumulative_percent
+                  title: '% Cumulative'
+                  type: number
+                  format: zto
+                - name: eigenvalue_rotated
+                  title: 'Rotated Eigenvalue'
+                  type: number
+                  format: zto
+                  visible: (rotation:!none)
+                - name: variance_percent_rotated
+                  title: 'Rotated % Variance'
+                  type: number
+                  format: zto
+                  visible: (rotation:!none)
+
+          # Parallel Analysis Results
+          - name: parallelAnalysis
+            title: Parallel Analysis Results
+            type: Table
+            description: Comparison of eigenvalues with random data
+            visible: (nFactorsMethod:parallel)
+            
+            columns:
+                - name: factor
+                  title: 'Factor'
+                  type: integer
+                - name: actual_eigenvalue
+                  title: 'Actual Eigenvalue'
+                  type: number
+                  format: zto
+                - name: random_eigenvalue
+                  title: 'Random Eigenvalue'
+                  type: number
+                  format: zto
+                - name: retain_factor
+                  title: 'Retain?'
+                  type: text
+
+          # Communalities
+          - name: communalitiesTable
+            title: Communalities
+            type: Table
+            description: Initial and extracted communalities
+            visible: (communalities)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: initial
+                  title: 'Initial'
+                  type: number
+                  format: zto
+                - name: extracted
+                  title: 'Extracted'
+                  type: number
+                  format: zto
+
+          # Unrotated Factor Loadings
+          - name: unrotatedLoadings
+            title: Unrotated Factor Loadings
+            type: Table
+            description: Factor loadings before rotation
+            visible: (showUnrotated)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+
+          # Rotated Factor Loadings
+          - name: rotatedLoadings
+            title: Rotated Factor Loadings
+            type: Table
+            description: Factor loadings after rotation
+            visible: (showRotated && rotation:!none)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+
+          # Factor Loadings (when no rotation)
+          - name: factorLoadings
+            title: Factor Loadings
+            type: Table
+            description: Factor loadings matrix
+            visible: (showRotated && rotation:none)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+
+          # Factor Correlations (Oblique Rotation)
+          - name: factorCorrelationsTable
+            title: Factor Correlations
+            type: Table
+            description: Correlations between factors (oblique rotation only)
+            visible: (factorCorrelations && (rotation:oblimin || rotation:promax))
+            
+            columns:
+                - name: factor
+                  title: 'Factor'
+                  type: text
+
+          # Factor Scores Statistics
+          - name: factorScoresStats
+            title: Factor Scores Statistics
+            type: Table
+            description: Descriptive statistics for factor scores
+            visible: (scores:!none)
+            
+            columns:
+                - name: factor
+                  title: 'Factor'
+                  type: text
+                - name: mean
+                  title: 'Mean'
+                  type: number
+                  format: zto
+                - name: sd
+                  title: 'SD'
+                  type: number
+                  format: zto
+                - name: min
+                  title: 'Minimum'
+                  type: number
+                  format: zto
+                - name: max
+                  title: 'Maximum'
+                  type: number
+                  format: zto
+
+          # Goodness of Fit
+          - name: goodnessOfFit
+            title: Goodness of Fit Test
+            type: Table
+            description: Chi-square test of model fit
+            visible: (method:ml)
+            
+            columns:
+                - name: statistic
+                  title: 'Chi-square'
+                  type: number
+                  format: zto
+                - name: df
+                  title: 'df'
+                  type: integer
+                - name: pValue
+                  title: 'p'
+                  type: number
+                  format: zto;pvalue
+                - name: result
+                  title: 'Result'
+                  type: text
+
+          # BlueSky Enhanced Output
+          - name: comprehensiveResults
+            title: Comprehensive Factor Analysis Summary
+            type: Table
+            description: Enhanced statistical output with BlueSky integration
+            visible: (bluesky_integration && comprehensive_output)
+            
+            columns:
+                - name: measure
+                  title: 'Measure'
+                  type: text
+                - name: value
+                  title: 'Value'
+                  type: text
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          # Clinical Interpretation
+          - name: clinicalInterpretation
+            title: Clinical Application Guidance
+            type: Html
+            visible: (clinical_interpretation)
+
+          # Method Details
+          - name: methodDetails
+            title: Analysis Method Details
+            type: Html
+            visible: (comprehensive_output)
+
+          # Plots
+          - name: screePlotImage
+            title: Scree Plot
+            type: Image
+            description: Plot of eigenvalues
+            visible: (screePlot)
+            renderFun: .plotScree
+            width: 600
+            height: 400
+
+          - name: loadingsPlotImage
+            title: Factor Loadings Plot
+            type: Image
+            description: Visualization of factor loadings
+            visible: (loadingsPlot)
+            renderFun: .plotLoadings
+            width: 600
+            height: 400
+
+          - name: biplotImage
+            title: Factor Biplot
+            type: Image
+            description: Biplot of first two factors
+            visible: (biplot)
+            renderFun: .plotBiplot
+            width: 600
+            height: 600
+
+          - name: parallelPlot
+            title: Parallel Analysis Plot
+            type: Image
+            description: Comparison of actual vs random eigenvalues
+            visible: (nFactorsMethod:parallel)
+            renderFun: .plotParallel
+            width: 600
+            height: 400

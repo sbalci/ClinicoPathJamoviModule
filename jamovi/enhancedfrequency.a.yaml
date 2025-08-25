@@ -1,0 +1,212 @@
+---
+name: enhancedfrequency
+title: Enhanced Frequency Analysis with BlueSky Integration
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuSubtitle: "Advanced frequency tables with BlueSky features"
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Enhanced frequency analysis toolkit with BlueSky integration for comprehensive
+        categorical data exploration. Includes flexible ordering options (by frequency, 
+        variable value, or natural order), comprehensive percentage calculations (valid, 
+        cumulative, missing), and enhanced missing value handling. Perfect for exploratory 
+        data analysis, categorical variable profiling, and data quality assessment.
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: 'Variables'
+      type: Variables
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description: 'Variables for frequency analysis (will be converted to factors if needed)'
+
+    - name: orderBy
+      title: 'Order By'
+      type: List
+      options:
+          - title: 'Frequency (Most Common First)'
+            name: freq_desc
+          - title: 'Frequency (Least Common First)'
+            name: freq_asc
+          - title: 'Variable Value (Ascending)'
+            name: var_asc
+          - title: 'Variable Value (Descending)'
+            name: var_desc
+          - title: 'Natural Order (As Entered)'
+            name: none
+      default: freq_desc
+      description: 'Ordering method for frequency table categories'
+
+    # Output Options
+    - name: showDatasetOverview
+      title: 'Dataset Overview'
+      type: Bool
+      default: true
+      description: 'Display dataset summary with variable counts and observations'
+
+    - name: showVariableSummary
+      title: 'Variable Summary'
+      type: Bool
+      default: true
+      description: 'Display summary statistics by variable'
+
+    - name: showFrequencyTables
+      title: 'Individual Frequency Tables'
+      type: Bool
+      default: true
+      description: 'Display detailed frequency tables for each variable'
+
+    - name: showCombinedSummary
+      title: 'Combined Summary Table'
+      type: Bool
+      default: false
+      description: 'Display all variables in a single summary table'
+
+    # Percentage Options
+    - name: showPercentages
+      title: 'Show Percentages'
+      type: Bool
+      default: true
+      description: 'Include percentage columns in frequency tables'
+
+    - name: showValidPercentages
+      title: 'Show Valid Percentages'
+      type: Bool
+      default: true
+      description: 'Include valid percentages (excluding missing values)'
+
+    - name: showCumulative
+      title: 'Show Cumulative Statistics'
+      type: Bool
+      default: true
+      description: 'Include cumulative frequencies and percentages'
+
+    - name: showValidCumulative
+      title: 'Show Valid Cumulative Statistics'
+      type: Bool
+      default: true
+      description: 'Include valid cumulative percentages (excluding missing values)'
+
+    # Missing Value Handling
+    - name: includeMissing
+      title: 'Include Missing Values'
+      type: Bool
+      default: true
+      description: 'Include missing values (NA) in frequency tables'
+
+    - name: missingLabel
+      title: 'Missing Value Label'
+      type: String
+      default: '<Missing>'
+      description: 'Label to use for missing values in output tables'
+
+    # Formatting Options
+    - name: percentageDecimals
+      title: 'Percentage Decimals'
+      type: Integer
+      default: 1
+      min: 0
+      max: 5
+      description: 'Number of decimal places for percentages'
+
+    - name: frequencyDecimals
+      title: 'Frequency Decimals'
+      type: Integer
+      default: 0
+      min: 0
+      max: 3
+      description: 'Number of decimal places for frequencies'
+
+    # Advanced Options
+    - name: minFrequency
+      title: 'Minimum Frequency Threshold'
+      type: Integer
+      default: 0
+      min: 0
+      max: 1000
+      description: 'Hide categories with frequency below this threshold (0 = show all)'
+
+    - name: maxCategories
+      title: 'Maximum Categories to Display'
+      type: Integer
+      default: 50
+      min: 5
+      max: 500
+      description: 'Maximum number of categories to display per variable'
+
+    - name: combineRareCategories
+      title: 'Combine Rare Categories'
+      type: Bool
+      default: false
+      description: 'Combine categories below minimum frequency threshold into "Other"'
+
+    - name: rareCategoryLabel
+      title: 'Rare Category Label'
+      type: String
+      default: 'Other'
+      description: 'Label for combined rare categories'
+
+    # BlueSky Integration
+    - name: bluesky_integration
+      title: 'Enhanced BlueSky Integration'
+      type: Bool
+      default: true
+      description: 'Use BlueSky R statistical environment features'
+
+    - name: comprehensive_output
+      title: 'Comprehensive Statistical Output'
+      type: Bool
+      default: false
+      description: 'Include comprehensive statistical details and diagnostics'
+
+    - name: clinical_interpretation
+      title: 'Clinical Context'
+      type: Bool
+      default: true
+      description: 'Provide clinical context for frequency analysis results'
+
+    # Quality Assessment
+    - name: dataQualityAssessment
+      title: 'Data Quality Assessment'
+      type: Bool
+      default: true
+      description: 'Include data quality metrics and recommendations'
+
+    - name: categoricalDiagnostics
+      title: 'Categorical Diagnostics'
+      type: Bool
+      default: false
+      description: 'Include advanced categorical variable diagnostics'
+
+    # Export Options
+    - name: exportFormat
+      title: 'Export Format'
+      type: List
+      options:
+          - title: 'Standard (jamovi)'
+            name: standard
+          - title: 'Publication Ready'
+            name: publication
+          - title: 'Clinical Report'
+            name: clinical
+      default: standard
+      description: 'Output format for frequency tables'
+
+    - name: includeMethodology
+      title: 'Include Methodology'
+      type: Bool
+      default: false
+      description: 'Include detailed methodology and references in output'

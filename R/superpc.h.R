@@ -435,7 +435,7 @@ superpcBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "superpc",
-                version = c(1,0,0),
+                version = c(0,0,31),
                 options = options,
                 results = superpcResults$new(options=options),
                 data = data,

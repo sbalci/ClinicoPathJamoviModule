@@ -1,0 +1,132 @@
+---
+name: enhancedtwowayfrequency
+title: Enhanced Two-Way Frequency Analysis
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Row Variable
+        children:
+          - type: VariablesListBox
+            name: rowVar
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Column Variable
+        children:
+          - type: VariablesListBox
+            name: colVar
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: BlueSky Two-Way Frequency Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: cellPercent
+              - type: CheckBox
+                name: rowPercent
+              - type: CheckBox
+                name: colPercent
+              - type: CheckBox
+                name: showCounts
+              - type: CheckBox
+                name: showTotals
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Statistical Tests
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: chiSquareTest
+              - type: CheckBox
+                name: fisherTest
+              - type: CheckBox
+                name: continuityCorrection
+              - type: CheckBox
+                name: associationMeasures
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Advanced Analysis
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: expectedFrequencies
+              - type: CheckBox
+                name: residualAnalysis
+              - type: TextBox
+                name: minimumExpected
+                format: number
+                suffix: (minimum expected frequency)
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Output Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showDiagnostics
+              - type: CheckBox
+                name: detailedOutput
+              - type: CheckBox
+                name: clinicalInterpretation
+              - type: CheckBox
+                name: showRecommendations
+              - type: ComboBox
+                name: percentageDisplay
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Visualization
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: heatmapPlot
+              - type: CheckBox
+                name: mosaicPlot
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: BlueSky Integration
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: bluesky_integration
+              - type: CheckBox
+                name: comprehensive_output
+              - type: CheckBox
+                name: robustErrorHandling

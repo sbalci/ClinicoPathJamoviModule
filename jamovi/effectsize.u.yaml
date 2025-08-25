@@ -3,7 +3,6 @@ name: effectsize
 jus: '3.0'
 stage: 0
 compilerMode: tame
-
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -17,7 +16,6 @@ children:
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
       - type: TargetLayoutBox
         label: Grouping Variable
         children:
@@ -26,7 +24,6 @@ children:
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-
   - type: LayoutBox
     margin: large
     stretchFactor: 1
@@ -50,7 +47,6 @@ children:
                 name: testDetails
               - type: CheckBox
                 name: assumptionChecks
-
       - type: LayoutBox
         cell:
           column: 1
@@ -66,7 +62,6 @@ children:
                 name: measures_hedges_g
               - type: CheckBox
                 name: measures_glass_delta
-
       - type: LayoutBox
         cell:
           column: 0
@@ -92,7 +87,6 @@ children:
                 name: ciWidth
                 suffix: '%'
                 format: number
-
       - type: LayoutBox
         cell:
           column: 1
@@ -115,3 +109,155 @@ children:
                 name: plotHeight
                 format: number
                 enable: (plotEffects)
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: measures_eta_squared
+              - type: CheckBox
+                name: measures_partial_eta_squared
+              - type: CheckBox
+                name: measures_omega_squared
+              - type: CheckBox
+                name: measures_epsilon_squared
+              - type: CheckBox
+                name: measures_cramers_v
+              - type: CheckBox
+                name: measures_phi_coefficient
+              - type: CheckBox
+                name: measures_cohens_w
+              - type: CheckBox
+                name: measures_rank_biserial
+              - type: CheckBox
+                name: measures_cliff_delta
+              - type: CheckBox
+                name: measures_vargha_delaney_a
+              - type: CheckBox
+                name: measures_common_language
+              - type: CheckBox
+                name: measures_cohens_u3
+              - type: CheckBox
+                name: measures_probability_superiority
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: analysis_context
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: correction_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: bootstrap_ci
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bootstrap_samples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: pooled_sd
+      - type: CheckBox
+        name: welch_correction
+      - type: CheckBox
+        name: paired_analysis
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Pairing Variable
+        children:
+          - type: VariablesListBox
+            name: pairing_variable
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: clinical_thresholds
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: small_effect_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: medium_effect_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: large_effect_threshold
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: power_analysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: alpha_level
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: desired_power
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: meta_analysis_format
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Study Weights Variable
+        children:
+          - type: VariablesListBox
+            name: study_weights
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: bluesky_integration
+      - type: CheckBox
+        name: comprehensive_output
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: effect_size_family
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: forest_plot_advanced
+      - type: CheckBox
+        name: effect_size_distribution
+      - type: CheckBox
+        name: comparison_plot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: export_format

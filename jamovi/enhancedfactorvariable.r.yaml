@@ -1,0 +1,281 @@
+---
+name: enhancedfactorvariable
+title: Enhanced Factor Variable Analysis Results
+jrs: '1.1'
+
+items:
+    - title: Analysis Results
+      name: results
+      type: Group
+      items:
+          - name: instructions
+            title: Instructions
+            type: Html
+            visible: true
+
+          # Dataset Overview
+          - name: datasetOverview
+            title: Dataset Overview
+            type: Table
+            description: Summary of dataset characteristics for factor analysis
+            visible: (showDatasetOverview)
+            
+            columns:
+                - name: characteristic
+                  title: 'Characteristic'
+                  type: text
+                - name: value
+                  title: 'Value'
+                  type: text
+                - name: description
+                  title: 'Description'
+                  type: text
+
+          # Nominal Variable Summary
+          - name: nominalSummary
+            title: Nominal Variable Summary
+            type: Table
+            description: Summary statistics for all factor variables
+            visible: (showNominalSummary)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: observations
+                  title: 'Observations'
+                  type: integer
+                - name: non_nas
+                  title: 'Non-NAs'
+                  type: integer
+                - name: nas
+                  title: 'NAs'
+                  type: integer
+                - name: missing_percent
+                  title: 'Missing %'
+                  type: number
+                  format: zto
+                - name: factor_levels
+                  title: 'Factor Levels'
+                  type: integer
+                - name: most_frequent
+                  title: 'Most Frequent'
+                  type: text
+                - name: most_frequent_count
+                  title: 'Most Frequent Count'
+                  type: integer
+                - name: least_frequent
+                  title: 'Least Frequent'
+                  type: text
+                - name: least_frequent_count
+                  title: 'Least Frequent Count'
+                  type: integer
+
+          # Detailed Factor Levels Analysis
+          - name: detailedLevelsAnalysis
+            title: Detailed Factor Levels Analysis
+            type: Table
+            description: Detailed counts and percentages for each factor level
+            visible: (showDetailedLevels)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: factor_level
+                  title: 'Factor Level'
+                  type: text
+                - name: count
+                  title: 'Count'
+                  type: integer
+                - name: percentage
+                  title: 'Percentage'
+                  type: number
+                  format: zto
+                - name: valid_percentage
+                  title: 'Valid %'
+                  type: number
+                  format: zto
+                - name: cumulative_count
+                  title: 'Cumulative Count'
+                  type: integer
+                - name: cumulative_percentage
+                  title: 'Cumulative %'
+                  type: number
+                  format: zto
+                - name: rank
+                  title: 'Rank'
+                  type: integer
+
+          # Combined Factor Analysis
+          - name: combinedFactorAnalysis
+            title: Combined Factor Analysis
+            type: Table
+            description: All factor variables combined in a single analysis table
+            visible: (showCombinedAnalysis)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: level
+                  title: 'Level'
+                  type: text
+                - name: count
+                  title: 'Count'
+                  type: integer
+                - name: percentage
+                  title: 'Percentage'
+                  type: number
+                  format: zto
+                - name: category_rank
+                  title: 'Rank Within Variable'
+                  type: integer
+                - name: global_rank
+                  title: 'Global Rank'
+                  type: integer
+
+          # Factor Complexity Analysis
+          - name: complexityAnalysis
+            title: Factor Complexity Analysis
+            type: Table
+            description: Complexity metrics for factor variables including entropy and diversity
+            visible: (factorComplexityAnalysis)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: shannon_entropy
+                  title: 'Shannon Entropy'
+                  type: number
+                  format: zto
+                - name: simpson_diversity
+                  title: 'Simpson Diversity'
+                  type: number
+                  format: zto
+                - name: berger_parker_dominance
+                  title: 'Berger-Parker Dominance'
+                  type: number
+                  format: zto
+                - name: effective_categories
+                  title: 'Effective Categories'
+                  type: number
+                  format: zto
+                - name: complexity_score
+                  title: 'Complexity Score'
+                  type: number
+                  format: zto
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          # Level Balance Analysis
+          - name: levelBalanceAnalysis
+            title: Level Balance Analysis
+            type: Table
+            description: Balance metrics for factor level distributions
+            visible: (levelBalanceAnalysis)
+            
+            columns:
+                - name: variable
+                  title: 'Variable'
+                  type: text
+                - name: gini_coefficient
+                  title: 'Gini Coefficient'
+                  type: number
+                  format: zto
+                - name: coefficient_variation
+                  title: 'Coefficient of Variation'
+                  type: number
+                  format: zto
+                - name: balance_ratio
+                  title: 'Balance Ratio'
+                  type: number
+                  format: zto
+                - name: dominant_level_pct
+                  title: 'Dominant Level %'
+                  type: number
+                  format: zto
+                - name: rare_levels_count
+                  title: 'Rare Levels Count'
+                  type: integer
+                - name: balance_category
+                  title: 'Balance Category'
+                  type: text
+                - name: recommendation
+                  title: 'Recommendation'
+                  type: text
+
+          # Comprehensive Analysis Summary
+          - name: comprehensiveAnalysisSummary
+            title: Comprehensive Factor Analysis Summary
+            type: Table
+            description: Enhanced statistical summary with BlueSky integration
+            visible: (bluesky_integration && comprehensive_output)
+            
+            columns:
+                - name: measure
+                  title: 'Measure'
+                  type: text
+                - name: value
+                  title: 'Value'
+                  type: text
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+                - name: clinical_significance
+                  title: 'Clinical Significance'
+                  type: text
+
+          # Clinical Interpretation
+          - name: clinicalInterpretationGuide
+            title: Clinical Application Guidance
+            type: Html
+            visible: (clinical_interpretation)
+
+          # Statistical Methods
+          - name: methodsExplanation
+            title: Statistical Methods and References
+            type: Html
+            visible: (comprehensive_output)
+
+          # Factor Distribution Overview Plot
+          - name: factorDistributionPlot
+            title: Factor Distribution Overview
+            type: Image
+            description: Overview of factor level distributions across all variables
+            visible: (createVisualizations)
+            renderFun: .plotFactorDistribution
+            width: 800
+            height: 600
+
+          # Top Factors Bar Plot
+          - name: topFactorsPlot
+            title: Top Factor Levels Analysis
+            type: Image
+            description: Bar plot showing most frequent factor levels
+            visible: (createVisualizations && showOnlyTopFactors)
+            renderFun: .plotTopFactors
+            width: 700
+            height: 500
+
+          # Factor Complexity Plot
+          - name: complexityPlot
+            title: Factor Complexity Analysis Plot
+            type: Image
+            description: Visualization of factor complexity metrics
+            visible: (factorComplexityAnalysis)
+            renderFun: .plotComplexity
+            width: 600
+            height: 400
+
+          # Balance Analysis Plot
+          - name: balanceAnalysisPlot
+            title: Level Balance Analysis Plot
+            type: Image
+            description: Visualization of factor level balance across variables
+            visible: (levelBalanceAnalysis)
+            renderFun: .plotBalanceAnalysis
+            width: 700
+            height: 500
