@@ -80,6 +80,71 @@ items:
                   title: 'Clinical Significance'
                   type: text
 
+          # Enhanced Model Comparison Metrics
+          - name: detailedComparison
+            title: Detailed Model Comparison
+            type: Table
+            description: Comprehensive comparison of diagnostic metrics between models
+            visible: (showMetricsDiff && analysisType:comparative)
+            
+            columns:
+                - name: metric
+                  title: 'Metric'
+                  type: text
+                - name: model1_value
+                  title: 'Model 1 Value'
+                  type: number
+                  format: zto
+                - name: model2_value
+                  title: 'Model 2 Value'
+                  type: number
+                  format: zto
+                - name: difference
+                  title: 'Difference'
+                  type: number
+                  format: zto
+                - name: percent_change
+                  title: '% Change'
+                  type: number
+                  format: pc
+                - name: p_value
+                  title: 'p-value'
+                  type: number
+                  format: zto;pvalue
+                - name: effect_size
+                  title: 'Effect Size'
+                  type: number
+                  format: zto
+                - name: interpretation
+                  title: 'Clinical Interpretation'
+                  type: text
+
+          # Statistical Comparison Summary
+          - name: statisticalSummary
+            title: Statistical Comparison Summary
+            type: Table
+            description: Summary of statistical tests for model comparison
+            visible: (statisticalComparison && analysisType:comparative)
+            
+            columns:
+                - name: test_name
+                  title: 'Statistical Test'
+                  type: text
+                - name: test_statistic
+                  title: 'Test Statistic'
+                  type: number
+                  format: zto
+                - name: p_value
+                  title: 'p-value'
+                  type: number
+                  format: zto;pvalue
+                - name: conclusion
+                  title: 'Statistical Conclusion'
+                  type: text
+                - name: effect_magnitude
+                  title: 'Effect Magnitude'
+                  type: text
+
           # Optimal Cutoff Summary
           - name: optimalCutoffSummary
             title: Optimal Cutoff Analysis

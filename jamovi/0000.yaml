@@ -64,7 +64,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: ExplorationD
+    menuGroup: ExplorationT
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -915,7 +915,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1290,7 +1290,7 @@ analyses:
   - title: ROC Analysis
     name: psychopdaroc
     ns: ClinicoPath
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuTitle: ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: ROC Analysis, AUC, Cutpoints
@@ -1543,7 +1543,7 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotD
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
@@ -4043,7 +4043,7 @@ analyses:
     name: ncvregcox
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: High-Dimensional Methods
     menuTitle: SCAD Cox Regression
     menuSubtitle: Variable selection with smoothly clipped absolute deviation penalty
@@ -4063,7 +4063,7 @@ analyses:
     name: superpc
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: High-Dimensional Methods
     menuTitle: Supervised PCA Cox
     menuSubtitle: Principal components analysis for survival prediction
@@ -4083,7 +4083,7 @@ analyses:
     name: flexparametricadvanced
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalD
     menuSubgroup: Advanced Methods
     menuTitle: Flexible Parametric Models
     menuSubtitle: Advanced parametric survival modeling with flexible baseline hazards
@@ -4484,6 +4484,17 @@ analyses:
       percentages, statistical tests for association, robust error handling,
       and clinical interpretation guidance. Perfect for exploring relationships 
       between categorical variables in clinicopathological research.
+  - title: Multi-class Diagnostic Performance Evaluation
+    name: multiclassdiagnostics
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Diagnostic Performance
+    menuTitle: Multi-class Diagnostics
+    description: >
+      Comprehensive evaluation of multi-class classification performance
+      including per-class and overall metrics, ROC curves, confusion matrices,
+      and model comparison capabilities.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

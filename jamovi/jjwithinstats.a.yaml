@@ -4,7 +4,7 @@ title: Box-Violin Plots to Compare Within Groups
 menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: Repeated Continuous Measurements
-version: '0.0.3'
+version: '0.0.31'
 jas: '1.2'
 
 

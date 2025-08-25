@@ -1,0 +1,113 @@
+title: Multi-class Diagnostic Performance Evaluation
+name: multiclassdiagnostics
+jus: '2.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Predicted Classes
+        children:
+          - type: VariablesListBox
+            name: predicted
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Actual Classes
+        children:
+          - type: VariablesListBox
+            name: actual
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Predicted Classes (Model 2)
+        children:
+          - type: VariablesListBox
+            name: predicted2
+            maxItemCount: 1
+            isTarget: true
+
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LayoutBox
+        margin: large
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Basic Options
+            children:
+              - type: ComboBox
+                name: positiveClass
+                label: Positive Class (Binary)
+                enable: (actual)
+              - type: TextBox
+                name: confidenceLevel
+                label: Confidence Level
+                format: number
+                suffix: '%'
+                enable: (predicted)
+              - type: CheckBox
+                name: showConfusion
+                label: Show Confusion Matrix
+              - type: CheckBox
+                name: showPerClass
+                label: Show Per-Class Metrics
+              - type: CheckBox
+                name: showOverall
+                label: Show Overall Metrics
+              - type: CheckBox
+                name: showROC
+                label: Show ROC Curves
+
+      - type: LayoutBox
+        margin: large
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Model Comparison
+            children:
+              - type: CheckBox
+                name: compareModels
+                label: Compare Models
+                children:
+                  - type: TextBox
+                    name: modelNames
+                    label: Model Names
+                    format: string
+                    enable: (compareModels)
+                  - type: CheckBox
+                    name: deLongTest
+                    label: DeLong Test (Binary)
+                    enable: (compareModels)
+                  - type: CheckBox
+                    name: mcnemarTest
+                    label: McNemar Test
+                    enable: (compareModels)
+
+      - type: LayoutBox
+        margin: large
+        cell:
+          column: 0
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Visualization Options
+            children:
+              - type: ComboBox
+                name: plotTheme
+                label: Plot Theme
+              - type: CheckBox
+                name: saveResults
+                label: Save Detailed Results

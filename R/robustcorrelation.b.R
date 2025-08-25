@@ -5,6 +5,8 @@
 #' @import jmvcore
 #' @import glue
 #' @export
+#' @noRd
+
 
 robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "robustcorrelationClass",
@@ -458,7 +460,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             boot_data <- data[indices, ]
             cors <- numeric()
             n_vars <- length(vars)
-            
+
             for (i in 1:(n_vars-1)) {
                 for (j in (i+1):n_vars) {
                     x <- boot_data[[vars[i]]]

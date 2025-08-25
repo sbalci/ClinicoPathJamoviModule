@@ -288,3 +288,28 @@ options:
       type: Bool
       default: false
       description: 'Display confidence bands around ROC curve'
+
+    # Model Comparison Enhancements
+    - name: showMetricsDiff
+      title: 'Show Metrics Differences'
+      type: Bool
+      default: true
+      description: 'Display detailed differences between model metrics'
+
+    - name: statisticalComparison
+      title: 'Statistical Model Comparison'
+      type: Bool
+      default: true
+      description: 'Perform comprehensive statistical comparison between models'
+
+    - name: effectSizeAnalysis
+      title: 'Effect Size Analysis'
+      type: Bool
+      default: false
+      description: 'Calculate effect sizes for model differences'
+
+    - name: powerAnalysis
+      title: 'Power Analysis'
+      type: Bool
+      default: false
+      description: 'Estimate statistical power for detecting differences'

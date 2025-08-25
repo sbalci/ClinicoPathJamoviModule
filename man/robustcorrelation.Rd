@@ -88,10 +88,10 @@ coefficients.}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$package_status} \tab \tab \tab \tab \tab a html \cr
 \code{results$correlation_table} \tab \tab \tab \tab \tab Correlation coefficients and significance tests \cr
 \code{results$bootstrap_table} \tab \tab \tab \tab \tab Bootstrap confidence intervals for correlations \cr
 \code{results$outlier_table} \tab \tab \tab \tab \tab Identified outliers and their statistics \cr
-\code{results$method_comparison_table} \tab \tab \tab \tab \tab Comparison of different correlation methods \cr
 \code{results$correlation_heatmap} \tab \tab \tab \tab \tab an image \cr
 \code{results$outlier_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$diagnostic_plots} \tab \tab \tab \tab \tab an image \cr
