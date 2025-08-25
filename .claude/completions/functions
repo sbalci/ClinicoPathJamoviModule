@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Claude CLI autocomplete provider for jamovi functions.
+# Delegates to functions_list.sh to get clean names.
+# chmod +x ./.claude/completions/functions
+
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+"$script_dir/functions_list.sh" "$PWD"

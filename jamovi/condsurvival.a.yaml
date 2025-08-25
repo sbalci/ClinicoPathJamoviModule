@@ -1,7 +1,7 @@
 ---
 name: condsurvival
 title: Conditional Survival Analysis
-menuGroup: OncoPathologyD
+menuGroup: OncoPathologyT
 version: '1.0.0'
 jas: '1.2'
 description:

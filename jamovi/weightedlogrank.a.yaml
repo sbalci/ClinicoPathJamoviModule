@@ -1,7 +1,7 @@
 ---
 name: weightedlogrank
 title: Weighted Log-Rank Tests
-menuGroup: SurvivalT
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Advanced weighted survival comparison tests'
 version: '0.0.31'

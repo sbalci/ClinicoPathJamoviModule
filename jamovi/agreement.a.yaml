@@ -1,7 +1,7 @@
 ---
 name:  agreement
 title: Interrater Reliability
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Agreement
 version: '0.0.31'
 jas: '1.2'

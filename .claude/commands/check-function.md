@@ -18,12 +18,16 @@ You are an expert jamovi module developer performing a comprehensive quality ass
 
 Function: **`$ARGUMENTS`**
 
+### Argument normalization (safety)
+
+Before proceeding, sanitize `$ARGUMENTS` to a base function name (call it **SANITIZED_FN**): drop any leading paths, then strip any of these suffixes: .a.yaml, .b.R, .r.yaml, .u.yaml. Use **SANITIZED_FN** consistently for all file paths and references below.
+
 Please analyze these files:
 
-- `jamovi/$ARGUMENTS.a.yaml` - Analysis definition (options/arguments)
-- `R/$ARGUMENTS.b.R` - Backend implementation
-- `jamovi/$ARGUMENTS.r.yaml` - Results definition (outputs)
-- `jamovi/$ARGUMENTS.u.yaml` - User interface definition
+- `jamovi/SANITIZED_FN.a.yaml` - Analysis definition (options/arguments)
+- `R/SANITIZED_FN.b.R` - Backend implementation
+- `jamovi/SANITIZED_FN.r.yaml` - Results definition (outputs)
+- `jamovi/SANITIZED_FN.u.yaml` - User interface definition
 
 ## Systematic Evaluation Framework
 

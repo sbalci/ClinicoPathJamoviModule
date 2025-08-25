@@ -1,7 +1,7 @@
 ---
 name: digitalvalidation
 title: Digital Pathology Validation
-menuGroup: OncoPathologyD
+menuGroup: OncoPathologyT
 version: '1.0.0'
 jas: '1.2'
 

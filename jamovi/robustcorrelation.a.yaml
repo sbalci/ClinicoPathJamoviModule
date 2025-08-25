@@ -1,7 +1,7 @@
 ---
 name:  robustcorrelation
 title: Robust Correlation Methods
-menuGroup: ClinicoPath Descriptives
+menuGroup: ClinicoPathD
 menuSubgroup: Continuous vs Continuous
 version: '0.0.1'
 jas: '1.2'

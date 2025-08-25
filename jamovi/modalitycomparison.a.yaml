@@ -1,9 +1,9 @@
 ---
 name: modalitycomparison
 title: Modality Comparison Analysis
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Agreement
-version: '1.0.0'
+version: '0.0.31'
 jas: '1.2'
 
 description:
