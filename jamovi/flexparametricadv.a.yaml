@@ -1,7 +1,7 @@
 ---
 name: flexparametricadv
 title: Advanced Flexible Parametric Survival Models
-menuGroup: OncoPathologyD
+menuGroup: OncoPathologyT
 version: '1.0.0'
 jas: '1.2'
 description:

@@ -1,7 +1,7 @@
 ---
 name: ncvregcox
 title: Smoothly Clipped Absolute Deviation Cox Regression
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: High-Dimensional Methods
 menuTitle: SCAD Cox Regression
 menuSubtitle: Variable selection with smoothly clipped absolute deviation penalty

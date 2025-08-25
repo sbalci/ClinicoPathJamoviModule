@@ -1,7 +1,7 @@
 ---
 name: mlpathology
 title: Classification Performance Metrics for Digital Pathology
-menuGroup: ClinicoPathD
+menuGroup: OncoPathologyT
 version: '1.0.0'
 jas: '1.2'
 

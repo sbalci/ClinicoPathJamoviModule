@@ -1,7 +1,7 @@
 ---
 name: psychopdaroc
 title: ROC Analysis
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: ROC Analysis, AUC, Cutpoints
 version: '0.0.31'

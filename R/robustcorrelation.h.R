@@ -239,10 +239,10 @@ robustcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        package_status = function() private$.items[["package_status"]],
         correlation_table = function() private$.items[["correlation_table"]],
         bootstrap_table = function() private$.items[["bootstrap_table"]],
         outlier_table = function() private$.items[["outlier_table"]],
-        method_comparison_table = function() private$.items[["method_comparison_table"]],
         correlation_heatmap = function() private$.items[["correlation_heatmap"]],
         outlier_plot = function() private$.items[["outlier_plot"]],
         diagnostic_plots = function() private$.items[["diagnostic_plots"]],
@@ -290,6 +290,11 @@ robustcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="instructions",
                 title="Instructions"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="package_status",
+                title="Package Availability Status",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="correlation_table",
@@ -406,46 +411,9 @@ robustcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `title`="Outlier", 
                         `type`="text"),
                     list(
-                        `name`="extreme_variable", 
-                        `title`="Extreme Variable", 
+                        `name`="variables", 
+                        `title`="Extreme Variables", 
                         `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="method_comparison_table",
-                title="Method Comparison",
-                visible=FALSE,
-                clearWith=list(
-                    "dep",
-                    "method"),
-                columns=list(
-                    list(
-                        `name`="var1", 
-                        `title`="Variable 1", 
-                        `type`="text"),
-                    list(
-                        `name`="var2", 
-                        `title`="Variable 2", 
-                        `type`="text"),
-                    list(
-                        `name`="pearson", 
-                        `title`="Pearson", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="spearman", 
-                        `title`="Spearman", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="kendall", 
-                        `title`="Kendall", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="robust", 
-                        `title`="Robust", 
-                        `type`="number", 
-                        `format`="zto"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="correlation_heatmap",
@@ -504,7 +472,7 @@ robustcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 height=800,
                 renderFun=".plot_scatter_matrix",
                 requiresData=TRUE,
-                visible=FALSE,
+                visible=TRUE,
                 clearWith=list(
                     "dep",
                     "method",
@@ -610,10 +578,10 @@ robustcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$package_status} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$correlation_table} \tab \tab \tab \tab \tab Correlation coefficients and significance tests \cr
 #'   \code{results$bootstrap_table} \tab \tab \tab \tab \tab Bootstrap confidence intervals for correlations \cr
 #'   \code{results$outlier_table} \tab \tab \tab \tab \tab Identified outliers and their statistics \cr
-#'   \code{results$method_comparison_table} \tab \tab \tab \tab \tab Comparison of different correlation methods \cr
 #'   \code{results$correlation_heatmap} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$outlier_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$diagnostic_plots} \tab \tab \tab \tab \tab an image \cr

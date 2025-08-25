@@ -1,7 +1,7 @@
 ---
 name: biomarkerresponse
 title: Biomarker Response Association
-menuGroup: OncoPathologyD
+menuGroup: OncoPathologyT
 menuSubgroup: ClinicoPath Biomarker Analysis
 version: '0.0.3'
 jas: '1.2'

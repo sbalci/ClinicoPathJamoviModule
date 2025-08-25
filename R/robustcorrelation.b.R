@@ -1,8 +1,10 @@
 #' @title Robust Correlation Methods
+#' @description Comprehensive robust correlation analysis with multiple correlation methods,
+#' outlier detection, diagnostic plots, and bootstrap confidence intervals.
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import glue
-#'
+#' @export
 
 robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "robustcorrelationClass",
@@ -14,6 +16,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .correlationResults = NULL,
         .outlierResults = NULL,
         .bootstrapResults = NULL,
+        .packageWarningsShown = FALSE,
 
         # Initialize the analysis
         .init = function() {
@@ -263,6 +266,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         result$pvalue <- pb_result$p.value
                     } else {
                         # Fallback to Spearman if WRS2 not available
+                        private$.showPackageWarning("WRS2", "Percentage Bend", "Spearman")
                         test_result <- cor.test(x, y, method = "spearman")
                         result$estimate <- test_result$estimate
                         result$pvalue <- test_result$p.value
@@ -278,6 +282,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         result$pvalue <- 2 * (1 - pnorm(abs(z) / se))
                     } else {
                         # Fallback to Spearman
+                        private$.showPackageWarning("WGCNA", "Biweight Midcorrelation", "Spearman")
                         test_result <- cor.test(x, y, method = "spearman")
                         result$estimate <- test_result$estimate
                         result$pvalue <- test_result$p.value
@@ -299,6 +304,8 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         result$pvalue <- 2 * (1 - pnorm(abs(z) / se))
                     } else {
                         # Fallback to Spearman
+                        method_name <- if (method == "mve") "Minimum Volume Ellipsoid" else "Minimum Covariance Determinant"
+                        private$.showPackageWarning("robustbase", method_name, "Spearman")
                         test_result <- cor.test(x, y, method = "spearman")
                         result$estimate <- test_result$estimate
                         result$pvalue <- test_result$p.value
@@ -430,6 +437,47 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(outliers)
         },
 
+        # Show package availability warning
+        .showPackageWarning = function(pkg_name, method_name, fallback_name) {
+            if (!private$.packageWarningsShown) {
+                warning_msg <- glue::glue(
+                    "<br><div style='background-color: #fff3cd; padding: 8px; border: 1px solid #ffeaa7; border-radius: 4px; margin: 5px 0;'>
+                    <strong>⚠️ Package Availability Notice:</strong><br>
+                    The {pkg_name} package is not available. Using {fallback_name} correlation instead of {method_name}.
+                    <br>Install {pkg_name} with: <code>install.packages('{pkg_name}')</code>
+                    </div>"
+                )
+                current_content <- self$results$package_status$content
+                self$results$package_status$setContent(paste0(current_content, warning_msg))
+                private$.packageWarningsShown <- TRUE
+            }
+        },
+
+        # Extract bootstrap sampling into helper function
+        .performBootstrapSampling = function(data, indices, vars, method) {
+            boot_data <- data[indices, ]
+            cors <- numeric()
+            n_vars <- length(vars)
+            
+            for (i in 1:(n_vars-1)) {
+                for (j in (i+1):n_vars) {
+                    x <- boot_data[[vars[i]]]
+                    y <- boot_data[[vars[j]]]
+
+                    complete_cases <- complete.cases(x, y)
+                    if (sum(complete_cases) >= 3) {
+                        cor_result <- private$.computePairwiseCorrelation(
+                            x[complete_cases], y[complete_cases], method
+                        )
+                        cors <- c(cors, cor_result$estimate)
+                    } else {
+                        cors <- c(cors, NA)
+                    }
+                }
+            }
+            return(cors)
+        },
+
         # Bootstrap confidence intervals
         .computeBootstrapCI = function(data) {
             if (!is.null(private$.bootstrapResults) || !self$options$bootstrap_ci) {
@@ -449,27 +497,9 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             bootstrap_results$bias <- list()
             bootstrap_results$se <- list()
 
-            # Bootstrap function
+            # Bootstrap function using helper
             boot_cor <- function(data, indices) {
-                boot_data <- data[indices, ]
-                cors <- c()
-                for (i in 1:(n_vars-1)) {
-                    for (j in (i+1):n_vars) {
-                        x <- boot_data[[vars[i]]]
-                        y <- boot_data[[vars[j]]]
-
-                        complete_cases <- complete.cases(x, y)
-                        if (sum(complete_cases) >= 3) {
-                            cor_result <- private$.computePairwiseCorrelation(
-                                x[complete_cases], y[complete_cases], method
-                            )
-                            cors <- c(cors, cor_result$estimate)
-                        } else {
-                            cors <- c(cors, NA)
-                        }
-                    }
-                }
-                return(cors)
+                return(private$.performBootstrapSampling(data, indices, vars, method))
             }
 
             # Perform bootstrap

@@ -31,6 +31,11 @@ items:
       title: Instructions
       type:  Html
 
+    - name: package_status
+      title: Package Availability Status
+      type: Html
+      visible: true
+
     - name: correlation_table
       title: Correlation Matrix
       type: Table
@@ -131,41 +136,10 @@ items:
         - name: outlier
           title: Outlier
           type: text
-        - name: extreme_variable
-          title: Extreme Variable
+        - name: variables
+          title: Extreme Variables
           type: text
 
-    - name: method_comparison_table
-      title: Method Comparison
-      type: Table
-      description: Comparison of different correlation methods
-      visible: false
-      clearWith:
-        - dep
-        - method
-      columns:
-        - name: var1
-          title: Variable 1
-          type: text
-        - name: var2
-          title: Variable 2
-          type: text
-        - name: pearson
-          title: Pearson
-          type: number
-          format: zto
-        - name: spearman
-          title: Spearman
-          type: number
-          format: zto
-        - name: kendall
-          title: Kendall
-          type: number
-          format: zto
-        - name: robust
-          title: Robust
-          type: number
-          format: zto
 
     - name: correlation_heatmap
       title: Correlation Heatmap
@@ -224,7 +198,7 @@ items:
       height: 800
       renderFun: .plot_scatter_matrix
       requiresData: true
-      visible: false
+      visible: true
       clearWith:
         - dep
         - method

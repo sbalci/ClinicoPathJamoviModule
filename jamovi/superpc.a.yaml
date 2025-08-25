@@ -1,7 +1,7 @@
 ---
 name: superpc
 title: Supervised Principal Components Cox Regression
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: High-Dimensional Methods
 menuTitle: Supervised PCA Cox
 menuSubtitle: Principal components analysis for survival prediction

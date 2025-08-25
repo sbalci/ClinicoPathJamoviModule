@@ -1,7 +1,7 @@
 ---
 name: treatmentoptim
 title: Treatment Optimization Framework
-menuGroup: ClinicoPathT
+menuGroup: ClinicoPathD
 version: '1.0.0'
 jas: '1.2'
 

@@ -1,7 +1,7 @@
 ---
 name: flexparametricadvanced
 title: Advanced Flexible Parametric Survival Models
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: Advanced Methods
 menuTitle: Flexible Parametric Models
 menuSubtitle: Advanced parametric survival modeling with flexible baseline hazards

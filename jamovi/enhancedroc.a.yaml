@@ -1,7 +1,7 @@
 ---
 name: enhancedroc
 title: Enhanced ROC Analysis with Youden Index Optimization
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Diagnostic Performance
 menuSubtitle: "ROC analysis with BlueSky integration"
 version: '0.0.31'
