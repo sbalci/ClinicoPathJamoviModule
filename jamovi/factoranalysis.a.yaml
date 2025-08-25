@@ -1,0 +1,279 @@
+---
+name: factoranalysis
+title: Comprehensive Factor Analysis
+menuGroup: ClinicoPathDescriptives
+menuSubgroup: Multivariate Analysis
+menuSubtitle: "Factor analysis with BlueSky integration"
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive factor analysis toolkit with BlueSky R integration. Includes
+        maximum likelihood factor analysis, principal axis factoring, scree plots,
+        multiple rotation methods, and factor score extraction. Essential for
+        dimensionality reduction, scale development, and multivariate analysis
+        in clinical and pathological research.
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: 'Variables'
+      type: Variables
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description: 'Numeric variables for factor analysis'
+
+    - name: method
+      title: 'Extraction Method'
+      type: List
+      options:
+          - title: 'Maximum Likelihood'
+            name: ml
+          - title: 'Principal Axis Factoring'
+            name: paf
+          - title: 'Principal Components'
+            name: pc
+      default: ml
+      description: 'Method for factor extraction'
+
+    - name: nFactorsMethod
+      title: 'Number of Factors Method'
+      type: List
+      options:
+          - title: 'Eigenvalues > 1 (Kaiser)'
+            name: kaiser
+          - title: 'Specify Number'
+            name: manual
+          - title: 'Parallel Analysis'
+            name: parallel
+          - title: 'Scree Plot Inspection'
+            name: scree
+      default: kaiser
+      description: 'Method for determining number of factors'
+
+    - name: nFactors
+      title: 'Number of Factors'
+      type: Integer
+      default: 1
+      min: 1
+      max: 20
+      description: 'Number of factors to extract (when method = manual)'
+
+    - name: rotation
+      title: 'Rotation Method'
+      type: List
+      options:
+          - title: 'None'
+            name: none
+          - title: 'Varimax (Orthogonal)'
+            name: varimax
+          - title: 'Quartimax (Orthogonal)'
+            name: quartimax
+          - title: 'Oblimin (Oblique)'
+            name: oblimin
+          - title: 'Promax (Oblique)'
+            name: promax
+      default: varimax
+      description: 'Factor rotation method'
+
+    - name: scores
+      title: 'Factor Scores'
+      type: List
+      options:
+          - title: 'None'
+            name: none
+          - title: 'Regression'
+            name: regression
+          - title: 'Bartlett'
+            name: bartlett
+          - title: 'Anderson-Rubin'
+            name: anderson
+      default: none
+      description: 'Method for computing factor scores'
+
+    - name: saveScores
+      title: 'Save Factor Scores'
+      type: Bool
+      default: false
+      description: 'Save factor scores to dataset'
+
+    - name: scoresPrefix
+      title: 'Factor Scores Prefix'
+      type: String
+      default: 'Factor'
+      description: 'Prefix for saved factor score variables'
+
+    # Display Options
+    - name: showUnrotated
+      title: 'Show Unrotated Solution'
+      type: Bool
+      default: false
+      description: 'Display unrotated factor loadings'
+
+    - name: showRotated
+      title: 'Show Rotated Solution'
+      type: Bool
+      default: true
+      description: 'Display rotated factor loadings'
+
+    - name: hideSmallLoadings
+      title: 'Hide Small Loadings'
+      type: Bool
+      default: false
+      description: 'Hide loadings below cutoff'
+
+    - name: loadingsCutoff
+      title: 'Loadings Cutoff'
+      type: Number
+      default: 0.3
+      min: 0.0
+      max: 1.0
+      description: 'Cutoff for hiding small loadings'
+
+    # Plots
+    - name: screePlot
+      title: 'Scree Plot'
+      type: Bool
+      default: true
+      description: 'Display scree plot of eigenvalues'
+
+    - name: loadingsPlot
+      title: 'Loadings Plot'
+      type: Bool
+      default: false
+      description: 'Display factor loadings plot'
+
+    - name: biplot
+      title: 'Biplot'
+      type: Bool
+      default: false
+      description: 'Display factor biplot (first 2 factors)'
+
+    # Advanced Options
+    - name: priorCommunalities
+      title: 'Prior Communalities'
+      type: List
+      options:
+          - title: 'SMC (Squared Multiple Correlations)'
+            name: smc
+          - title: 'Maximum Correlations'
+            name: maxr
+          - title: 'Unity'
+            name: unity
+      default: smc
+      description: 'Method for prior communality estimates'
+
+    - name: maxIterations
+      title: 'Maximum Iterations'
+      type: Integer
+      default: 25
+      min: 10
+      max: 1000
+      description: 'Maximum iterations for factor extraction'
+
+    - name: convergence
+      title: 'Convergence Criterion'
+      type: Number
+      default: 0.001
+      min: 1e-6
+      max: 0.1
+      description: 'Convergence criterion for factor extraction'
+
+    # Adequacy Tests
+    - name: adequacyTests
+      title: 'Sampling Adequacy Tests'
+      type: Bool
+      default: true
+      description: 'Perform sampling adequacy tests'
+
+    - name: bartlettTest
+      title: 'Bartlett Test of Sphericity'
+      type: Bool
+      default: true
+      description: 'Test if correlation matrix is identity matrix'
+
+    - name: kmoTest
+      title: 'Kaiser-Meyer-Olkin Test'
+      type: Bool
+      default: true
+      description: 'Measure of sampling adequacy'
+
+    # Factor Interpretation
+    - name: factorCorrelations
+      title: 'Factor Correlations'
+      type: Bool
+      default: true
+      description: 'Show correlations between factors (oblique rotation)'
+
+    - name: communalities
+      title: 'Communalities'
+      type: Bool
+      default: true
+      description: 'Show initial and extracted communalities'
+
+    - name: eigenvalues
+      title: 'Eigenvalues Table'
+      type: Bool
+      default: true
+      description: 'Show eigenvalues and variance explained'
+
+    # BlueSky Integration Options
+    - name: bluesky_integration
+      title: 'Enhanced BlueSky Integration'
+      type: Bool
+      default: true
+      description: 'Use BlueSky R statistical environment features'
+
+    - name: comprehensive_output
+      title: 'Comprehensive Statistical Output'
+      type: Bool
+      default: false
+      description: 'Include comprehensive statistical details'
+
+    - name: clinical_interpretation
+      title: 'Clinical Interpretation'
+      type: Bool
+      default: true
+      description: 'Provide clinical context for factor analysis results'
+
+    # Parallel Analysis Options
+    - name: parallel_iterations
+      title: 'Parallel Analysis Iterations'
+      type: Integer
+      default: 100
+      min: 50
+      max: 1000
+      description: 'Number of iterations for parallel analysis'
+
+    - name: parallel_percentile
+      title: 'Parallel Analysis Percentile'
+      type: Number
+      default: 95
+      min: 50
+      max: 99
+      description: 'Percentile for parallel analysis threshold'
+
+    # Advanced Plotting
+    - name: plotWidth
+      title: 'Plot Width'
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+      description: 'Width of plots'
+
+    - name: plotHeight
+      title: 'Plot Height'
+      type: Integer
+      default: 400
+      min: 200
+      max: 800
+      description: 'Height of plots'

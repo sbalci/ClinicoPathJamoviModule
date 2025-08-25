@@ -1,0 +1,501 @@
+---
+name: bayesiannetworkma
+title: Bayesian Network Meta-Analysis
+menuGroup: meddecideD
+menuSubgroup: Advanced Bayesian Methods
+menuSubtitle: Multiple treatment comparison with network geometry
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced Bayesian network meta-analysis for multiple treatment comparisons
+        using network geometry. Supports direct and indirect comparisons, network
+        coherence assessment, and ranking of multiple interventions with uncertainty
+        quantification for clinical decision making.
+    R:
+        dontrun: false
+        usage: |
+            # Bayesian network meta-analysis
+            bayesiannetworkma(
+                data = network_data,
+                study_id = "study",
+                treatment = "treatment",
+                outcome = "response",
+                sample_size = "n",
+                network_type = "mixed_evidence"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for Bayesian network meta-analysis.
+
+    # Core network variables
+    - name: study_id
+      title: Study Identifier
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+
+    - name: treatment
+      title: Treatment Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+
+    - name: sample_size
+      title: Sample Size Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+
+    - name: outcomeLevel
+      title: Event/Success Level
+      type: Level
+      variable: (outcome)
+
+    - name: standard_error
+      title: Standard Error Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description: "For continuous outcomes"
+
+    - name: control_rate
+      title: Control Rate Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description: "Baseline event rate for binary outcomes"
+
+    # Network specification
+    - name: network_type
+      title: Network Evidence Type
+      type: List
+      options:
+        - title: "Mixed Evidence (Direct + Indirect)"
+          name: mixed_evidence
+        - title: "Direct Evidence Only"
+          name: direct_only
+        - title: "Indirect Evidence Only"
+          name: indirect_only
+        - title: "Contrast-Based"
+          name: contrast_based
+        - title: "Arm-Based"
+          name: arm_based
+      default: mixed_evidence
+
+    - name: outcome_type
+      title: Outcome Type
+      type: List
+      options:
+        - title: "Binary (Risk Ratio)"
+          name: binary_rr
+        - title: "Binary (Odds Ratio)"
+          name: binary_or
+        - title: "Binary (Risk Difference)"
+          name: binary_rd
+        - title: "Continuous (Mean Difference)"
+          name: continuous_md
+        - title: "Continuous (Standardized Mean Difference)"
+          name: continuous_smd
+        - title: "Rate (Rate Ratio)"
+          name: rate_ratio
+        - title: "Time-to-Event (Hazard Ratio)"
+          name: hazard_ratio
+      default: binary_or
+
+    - name: reference_treatment
+      title: Reference Treatment
+      type: Level
+      variable: (treatment)
+      description: "Reference treatment for network comparisons"
+
+    - name: baseline_model
+      title: Baseline Risk Model
+      type: List
+      options:
+        - title: "Exchangeable"
+          name: exchangeable
+        - title: "Independent"
+          name: independent
+        - title: "Regression on Covariates"
+          name: regression
+        - title: "Meta-Regression"
+          name: meta_regression
+      default: exchangeable
+
+    # Statistical model specification
+    - name: random_effects_model
+      title: Random Effects Model
+      type: List
+      options:
+        - title: "No Random Effects (Fixed)"
+          name: fixed
+        - title: "Random Effects (Univariate)"
+          name: random_univariate
+        - title: "Random Effects (Multivariate)"
+          name: random_multivariate
+        - title: "Hierarchical Random Effects"
+          name: hierarchical
+      default: random_univariate
+
+    - name: heterogeneity_model
+      title: Between-Study Heterogeneity
+      type: List
+      options:
+        - title: "Common Heterogeneity"
+          name: common
+        - title: "Comparison-Specific"
+          name: comparison_specific
+        - title: "Treatment-Specific"
+          name: treatment_specific
+        - title: "Class-Specific"
+          name: class_specific
+      default: common
+
+    - name: correlation_structure
+      title: Correlation Structure
+      type: List
+      options:
+        - title: "Unstructured"
+          name: unstructured
+        - title: "Exchangeable"
+          name: exchangeable
+        - title: "Compound Symmetry"
+          name: compound_symmetry
+        - title: "AR(1)"
+          name: ar1
+      default: unstructured
+
+    # Prior specifications
+    - name: treatment_effect_prior
+      title: Treatment Effect Prior
+      type: List
+      options:
+        - title: "Vague Normal"
+          name: vague_normal
+        - title: "Informative Normal"
+          name: informative_normal
+        - title: "Hierarchical"
+          name: hierarchical
+        - title: "Skeptical"
+          name: skeptical
+      default: vague_normal
+
+    - name: heterogeneity_prior
+      title: Heterogeneity Prior
+      type: List
+      options:
+        - title: "Vague Uniform"
+          name: vague_uniform
+        - title: "Half-Normal"
+          name: half_normal
+        - title: "Inverse-Gamma"
+          name: inverse_gamma
+        - title: "Log-Normal"
+          name: log_normal
+        - title: "Turner et al. (2012) Predictive"
+          name: turner_predictive
+      default: half_normal
+
+    - name: prior_mean_effect
+      title: Prior Mean Treatment Effect
+      type: Number
+      default: 0.0
+      min: -10.0
+      max: 10.0
+
+    - name: prior_sd_effect
+      title: Prior SD Treatment Effect
+      type: Number
+      default: 10.0
+      min: 0.1
+      max: 100.0
+
+    - name: prior_heterogeneity_sd
+      title: Prior Heterogeneity SD
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+
+    # Network coherence and consistency
+    - name: assess_coherence
+      title: Assess Network Coherence
+      type: Bool
+      default: true
+
+    - name: coherence_method
+      title: Coherence Assessment Method
+      type: List
+      options:
+        - title: "Node-Splitting"
+          name: node_splitting
+        - title: "Side-Splitting"
+          name: side_splitting
+        - title: "Unrelated Mean Effects"
+          name: unrelated_mean_effects
+        - title: "Inconsistency Model"
+          name: inconsistency_model
+      default: node_splitting
+
+    - name: inconsistency_threshold
+      title: Inconsistency P-value Threshold
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.20
+
+    # MCMC sampling
+    - name: mcmc_samples
+      title: MCMC Samples
+      type: Integer
+      default: 10000
+      min: 2000
+      max: 100000
+
+    - name: mcmc_burnin
+      title: MCMC Burn-in
+      type: Integer
+      default: 5000
+      min: 1000
+      max: 50000
+
+    - name: mcmc_thin
+      title: Thinning Interval
+      type: Integer
+      default: 2
+      min: 1
+      max: 50
+
+    - name: mcmc_chains
+      title: Number of MCMC Chains
+      type: Integer
+      default: 3
+      min: 1
+      max: 8
+
+    # Treatment ranking and probability analysis
+    - name: ranking_analysis
+      title: Treatment Ranking Analysis
+      type: Bool
+      default: true
+
+    - name: ranking_measure
+      title: Ranking Measure
+      type: List
+      options:
+        - title: "Probability Best (SUCRA)"
+          name: sucra
+        - title: "Probability Ranking"
+          name: prob_ranking
+        - title: "Mean Rank"
+          name: mean_rank
+        - title: "P-Score"
+          name: p_score
+      default: sucra
+
+    - name: pairwise_probabilities
+      title: Pairwise Comparison Probabilities
+      type: Bool
+      default: true
+
+    - name: superiority_threshold
+      title: Superiority Threshold
+      type: Number
+      default: 0.0
+      min: -10.0
+      max: 10.0
+      description: "Threshold for clinically meaningful superiority"
+
+    # Model selection and comparison
+    - name: model_selection
+      title: Model Selection
+      type: Bool
+      default: true
+
+    - name: model_comparison_criteria
+      title: Model Comparison Criteria
+      type: List
+      options:
+        - title: "DIC (Deviance Information Criterion)"
+          name: dic
+        - title: "WAIC (Widely Applicable Information Criterion)"
+          name: waic
+        - title: "LOO-CV"
+          name: loo
+        - title: "Leverage"
+          name: leverage
+      default: dic
+
+    # Network visualization and analysis
+    - name: network_plot
+      title: Generate Network Plot
+      type: Bool
+      default: true
+
+    - name: network_layout
+      title: Network Layout Algorithm
+      type: List
+      options:
+        - title: "Circular"
+          name: circular
+        - title: "Spring"
+          name: spring
+        - title: "Hierarchical"
+          name: hierarchical
+        - title: "Force-Directed"
+          name: force_directed
+      default: spring
+
+    - name: edge_weights
+      title: Edge Weight Representation
+      type: List
+      options:
+        - title: "Number of Studies"
+          name: n_studies
+        - title: "Total Sample Size"
+          name: sample_size
+        - title: "Precision"
+          name: precision
+        - title: "Equal Weights"
+          name: equal
+      default: n_studies
+
+    # Output options
+    - name: show_network_summary
+      title: Show Network Summary
+      type: Bool
+      default: true
+
+    - name: show_treatment_effects
+      title: Show Treatment Effects
+      type: Bool
+      default: true
+
+    - name: show_heterogeneity_analysis
+      title: Show Heterogeneity Analysis
+      type: Bool
+      default: true
+
+    - name: show_coherence_results
+      title: Show Coherence Assessment
+      type: Bool
+      default: true
+
+    - name: show_ranking_results
+      title: Show Treatment Rankings
+      type: Bool
+      default: true
+
+    - name: show_forest_plots
+      title: Show Forest Plots
+      type: Bool
+      default: true
+
+    - name: show_league_table
+      title: Show League Table
+      type: Bool
+      default: true
+
+    - name: show_convergence_diagnostics
+      title: Show MCMC Diagnostics
+      type: Bool
+      default: true
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+
+    # Advanced options
+    - name: meta_regression_covariates
+      title: Meta-Regression Covariates
+      type: Variables
+      suggested: [continuous, ordinal]
+      permitted: [numeric, factor]
+      default: null
+
+    - name: treatment_classes
+      title: Treatment Class Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: null
+      description: "For class-effect models"
+
+    - name: multi_arm_correction
+      title: Multi-Arm Trial Correction
+      type: Bool
+      default: true
+
+    - name: zero_events_correction
+      title: Zero Events Correction
+      type: Number
+      default: 0.5
+      min: 0.1
+      max: 1.0
+
+    # Clinical context
+    - name: clinical_context
+      title: Clinical Context
+      type: List
+      options:
+        - title: "Therapeutic Comparison"
+          name: therapeutic
+        - title: "Prevention Interventions"
+          name: prevention
+        - title: "Diagnostic Tests"
+          name: diagnostic
+        - title: "Surgical Procedures"
+          name: surgical
+        - title: "Drug Development"
+          name: drug_development
+        - title: "Health Technology Assessment"
+          name: hta
+      default: therapeutic
+
+    - name: confidence_level
+      title: Credible Interval Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+
+    # Computational options
+    - name: parallel_processing
+      title: Use Parallel Processing
+      type: Bool
+      default: true
+
+    - name: n_cores
+      title: Number of CPU Cores
+      type: Integer
+      default: 2
+      min: 1
+      max: 8

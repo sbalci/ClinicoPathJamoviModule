@@ -1,6 +1,6 @@
 ---
 name: partialcorrelation
-title: Partial Correlation Analysis
+title: Enhanced Partial Correlation Analysis Results
 jrs: '1.1'
 items:
   - name: instructions
@@ -11,7 +11,7 @@ items:
   - name: partialCorr
     title: Partial Correlations
     type: Table
-    visible: (vars && controls)
+    visible: (vars && controls && (correlationType:partial || correlationType:both))
     columns:
       - name: var1
         title: Variable 1
@@ -29,17 +29,30 @@ items:
       - name: rCI
         title: 95% CI
         type: text
-        visible: (ci)
+        visible: (ci || bootstrapCI)
       - name: p
         title: p
         type: number
         format: zto,pvalue
+      - name: p_adjusted
+        title: p (adjusted)
+        type: number
+        format: zto,pvalue
+        visible: (multipleComparison:!none)
       - name: df
         title: df
         type: integer
       - name: n
         title: N
         type: integer
+      - name: effect_size
+        title: Effect Size
+        type: text
+        visible: (showEffectSizes)
+      - name: computation_notes
+        title: Notes
+        type: text
+        visible: (robustErrorHandling)
 
   - name: zeroOrder
     title: Zero-Order Correlations
@@ -64,6 +77,143 @@ items:
         title: N
         type: integer
 
+  # Semi-partial Correlations (BlueSky Feature)
+  - name: semipartialCorr
+    title: Semi-partial Correlations
+    type: Table
+    visible: (vars && controls && (correlationType:semipartial || correlationType:both))
+    columns:
+      - name: var1
+        title: Variable 1
+        type: text
+      - name: var2
+        title: Variable 2
+        type: text
+      - name: controls
+        title: Controlling for
+        type: text
+      - name: sr
+        title: Semi-partial r
+        type: number
+        format: zto,pvalue
+      - name: srCI
+        title: 95% CI
+        type: text
+        visible: (ci || bootstrapCI)
+      - name: p
+        title: p
+        type: number
+        format: zto,pvalue
+      - name: p_adjusted
+        title: p (adjusted)
+        type: number
+        format: zto,pvalue
+        visible: (multipleComparison:!none)
+      - name: df
+        title: df
+        type: integer
+      - name: n
+        title: N
+        type: integer
+      - name: effect_size
+        title: Effect Size
+        type: text
+        visible: (showEffectSizes)
+
+  # Diagnostic Information
+  - name: diagnostics
+    title: Diagnostic Information
+    type: Table
+    description: Computational diagnostics and assumption checks
+    visible: (showDiagnostics)
+    columns:
+      - name: variable_pair
+        title: Variable Pair
+        type: text
+      - name: control_variables
+        title: Control Variables
+        type: text
+      - name: sample_size
+        title: Sample Size
+        type: integer
+      - name: complete_cases
+        title: Complete Cases
+        type: integer
+      - name: missing_pattern
+        title: Missing Pattern
+        type: text
+      - name: computation_status
+        title: Status
+        type: text
+      - name: warnings
+        title: Warnings
+        type: text
+
+  # Assumption Checks
+  - name: assumptionResults
+    title: Assumption Check Results
+    type: Table
+    description: Results of statistical assumption testing
+    visible: (assumptionChecks)
+    columns:
+      - name: variable_pair
+        title: Variable Pair
+        type: text
+      - name: normality_test
+        title: Normality Test
+        type: text
+      - name: normality_p
+        title: Normality p
+        type: number
+        format: zto,pvalue
+      - name: linearity_check
+        title: Linearity
+        type: text
+      - name: homoscedasticity
+        title: Homoscedasticity
+        type: text
+      - name: overall_assumptions
+        title: Overall Assessment
+        type: text
+
+  # Comprehensive Analysis Summary
+  - name: comprehensiveAnalysisSummary
+    title: Comprehensive Partial Correlation Summary
+    type: Table
+    description: Enhanced statistical summary with BlueSky integration
+    visible: (bluesky_integration && comprehensive_output)
+    columns:
+      - name: measure
+        title: Measure
+        type: text
+      - name: value
+        title: Value
+        type: text
+      - name: interpretation
+        title: Interpretation
+        type: text
+      - name: clinical_significance
+        title: Clinical Significance
+        type: text
+
+  # Statistical Recommendations
+  - name: recommendations
+    title: Statistical Recommendations
+    type: Html
+    visible: (showRecommendations)
+
+  # Clinical Interpretation
+  - name: clinicalInterpretationGuide
+    title: Clinical Application Guidance
+    type: Html
+    visible: (clinicalInterpretation)
+
+  # Methods Explanation
+  - name: methodsExplanation
+    title: Statistical Methods and References
+    type: Html
+    visible: (detailedOutput)
+
   - name: plot
     title: Correlation Matrix Plot
     visible: (matrixPlot)
@@ -71,3 +221,20 @@ items:
     width: 500
     height: 400
     renderFun: .plot
+
+  # Enhanced Correlation Plots
+  - name: partialCorrelationNetwork
+    title: Partial Correlation Network
+    visible: (matrixPlot && correlationType:!semipartial)
+    type: Image
+    width: 600
+    height: 500
+    renderFun: .plotNetwork
+
+  - name: effectSizePlot
+    title: Effect Size Distribution
+    visible: (showEffectSizes && detailedOutput)
+    type: Image
+    width: 500
+    height: 400
+    renderFun: .plotEffectSizes

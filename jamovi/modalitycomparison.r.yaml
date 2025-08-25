@@ -1,0 +1,202 @@
+---
+name: modalitycomparison
+title: Modality Comparison Analysis
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: Getting Started
+      type: Html
+
+    - name: overviewTable
+      title: Modality Comparison Summary
+      type: Table
+      rows: 1
+      columns:
+        - name: cases
+          title: 'Cases'
+          type: integer
+        - name: modality1_name
+          title: 'Modality 1'
+          type: text
+        - name: modality2_name
+          title: 'Modality 2'
+          type: text
+        - name: categories
+          title: 'Categories'
+          type: integer
+        - name: concordance_percent
+          title: 'Overall Concordance %'
+          type: number
+          format: zto
+        - name: discordance_count
+          title: 'Discordant Cases'
+          type: integer
+
+    - name: agreementTable
+      title: 'Agreement Statistics'
+      type: Table
+      columns:
+        - name: statistic
+          title: 'Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 'CI Lower'
+          type: number
+          format: zto
+          visible: (confidence_intervals)
+        - name: ci_upper
+          title: 'CI Upper'
+          type: number
+          format: zto
+          visible: (confidence_intervals)
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: contingencyTable
+      title: 'Cross-Tabulation of Scores'
+      type: Table
+      visible: (show_contingency_table)
+      columns:
+        - name: modality1_score
+          title: 'Modality 1 Score'
+          type: text
+        - name: modality2_null
+          title: 'Null'
+          type: integer
+          visible: (score_categories:her2_5cat)
+        - name: modality2_ultralow
+          title: 'Ultralow'
+          type: integer
+          visible: (score_categories:her2_5cat)
+        - name: modality2_1plus
+          title: '1+'
+          type: integer
+          visible: (score_categories:her2_5cat || score_categories:her2_4cat)
+        - name: modality2_2plus
+          title: '2+'
+          type: integer
+          visible: (score_categories:her2_5cat || score_categories:her2_4cat)
+        - name: modality2_3plus
+          title: '3+'
+          type: integer
+          visible: (score_categories:her2_5cat || score_categories:her2_4cat)
+        - name: modality2_0
+          title: '0'
+          type: integer
+          visible: (score_categories:her2_4cat)
+        - name: total
+          title: 'Total'
+          type: integer
+
+    - name: discordanceTable
+      title: 'Discordance Pattern Analysis'
+      type: Table
+      visible: (show_discordance_analysis)
+      columns:
+        - name: pattern
+          title: 'Discordance Pattern'
+          type: text
+        - name: count
+          title: 'Count'
+          type: integer
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: zto
+        - name: direction
+          title: 'Direction'
+          type: text
+        - name: clinical_significance
+          title: 'Clinical Impact'
+          type: text
+
+    - name: directionalBiasTable
+      title: 'Directional Bias Analysis'
+      type: Table
+      visible: (directional_analysis)
+      columns:
+        - name: bias_type
+          title: 'Bias Type'
+          type: text
+        - name: count
+          title: 'Count'
+          type: integer
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: zto
+        - name: significance
+          title: 'Significance'
+          type: text
+
+    - name: lowEndAnalysisTable
+      title: 'Low-End Category Analysis'
+      type: Table
+      visible: (low_end_focus)
+      columns:
+        - name: category_comparison
+          title: 'Category Comparison'
+          type: text
+        - name: concordance
+          title: 'Concordance'
+          type: integer
+        - name: discordance
+          title: 'Discordance'
+          type: integer
+        - name: kappa
+          title: 'Kappa'
+          type: number
+          format: zto
+        - name: clinical_relevance
+          title: 'Clinical Relevance'
+          type: text
+
+    - name: caseDetailTable
+      title: 'Discordant Cases Detail'
+      type: Table
+      visible: (show_discordance_analysis)
+      columns:
+        - name: case_id
+          title: 'Case ID'
+          type: text
+        - name: modality1_score
+          title: 'Modality 1 Score'
+          type: text
+        - name: modality2_score
+          title: 'Modality 2 Score'
+          type: text
+        - name: discordance_type
+          title: 'Discordance Type'
+          type: text
+        - name: clinical_impact
+          title: 'Clinical Impact'
+          type: text
+
+    - name: agreementPlot
+      title: 'Agreement Visualization'
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .agreementPlot
+      visible: (show_plots)
+
+    - name: discordancePlot
+      title: 'Discordance Pattern Plot'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .discordancePlot
+      visible: (show_discordance_analysis && show_plots)
+
+refs:
+    - irr
+    - ggplot2
+    - ClinicoPathJamoviModule
+
+...

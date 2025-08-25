@@ -23,14 +23,18 @@ partialcorrelationClass <- R6::R6Class(
                 </head>
                 <body>
                 <div class="instructions">
-                <h3>Partial Correlation Analysis</h3>
-                <p>Partial correlation measures the linear relationship between two variables while controlling for one or more other variables.</p>
+                <h3>Enhanced Partial Correlation Analysis with BlueSky Integration</h3>
+                <p>This module provides comprehensive partial and semi-partial correlation analysis with BlueSky-inspired features:</p>
                 <ul>
-                <li><b>Partial correlation:</b> Correlation between X and Y, controlling for Z</li>
+                <li><b>Partial correlation:</b> Correlation between X and Y, controlling for Z (BlueSky pcor.test)</li>
+                <li><b>Semi-partial correlation:</b> Correlation between X and Y, with Z partialled from X only (BlueSky spcor.test)</li>
                 <li><b>Zero-order correlation:</b> Simple correlation without controls</li>
-                <li><b>Control variables:</b> Variables whose effects are removed from the correlation</li>
+                <li><b>Robust error handling:</b> BlueSky-style graceful degradation with informative messages</li>
+                <li><b>Multiple comparison correction:</b> Bonferroni, Holm, FDR, and BY methods</li>
+                <li><b>Effect size interpretation:</b> Cohen\'s guidelines for correlation magnitudes</li>
+                <li><b>Bootstrap confidence intervals:</b> Robust CI estimation methods</li>
                 </ul>
-                <p><b>Interpretation:</b> Partial correlation shows the "pure" relationship after removing confounding effects.</p>
+                <p><b>Clinical Applications:</b> Essential for controlling confounding variables in clinicopathological research.</p>
                 </div>
                 </body>
                 </html>'
@@ -68,23 +72,77 @@ partialcorrelationClass <- R6::R6Class(
                 data[[var]] <- jmvcore::toNumeric(data[[var]])
             }
             
+            # Store original sample size for diagnostics
+            original_n <- nrow(data)
+            
             # Remove incomplete cases
             data <- data[complete.cases(data[all_vars]), all_vars, drop = FALSE]
+            final_n <- nrow(data)
             
-            if (nrow(data) < (length(controls) + 3)) {
-                self$results$instructions$setContent(
-                    paste("Insufficient data for partial correlation analysis. Need at least", 
-                          length(controls) + 3, "complete cases.")
-                )
+            if (final_n < (length(controls) + 3)) {
+                if (self$options$robustErrorHandling) {
+                    self$results$instructions$setContent(
+                        paste0("<div style='color: orange;'><strong>Warning:</strong> Insufficient data for reliable partial correlation analysis.<br>",
+                               "Need at least ", length(controls) + 3, " complete cases, but only ", final_n, " available.<br>",
+                               "Consider reducing control variables or collecting more data.</div>")
+                    )
+                } else {
+                    self$results$instructions$setContent(
+                        paste("Insufficient data for partial correlation analysis. Need at least", 
+                              length(controls) + 3, "complete cases.")
+                    )
+                }
                 return()
             }
             
-            # Calculate partial correlations
-            self$.calculatePartialCorrelations(data, vars, controls, method, ci_level)
+            # BlueSky-style error handling with message tracking
+            private$.error_messages <- character(0)
+            private$.warning_messages <- character(0)
+            
+            # Calculate correlations based on type
+            correlation_type <- self$options$correlationType
+            
+            if (correlation_type %in% c("partial", "both")) {
+                private$.calculatePartialCorrelations(data, vars, controls, method, ci_level)
+            }
+            
+            if (correlation_type %in% c("semipartial", "both")) {
+                private$.calculateSemiPartialCorrelations(data, vars, controls, method, ci_level)
+            }
             
             # Calculate zero-order correlations if requested
             if (self$options$showZeroOrder) {
-                self$.calculateZeroOrderCorrelations(data, vars, method)
+                private$.calculateZeroOrderCorrelations(data, vars, method)
+            }
+            
+            # Generate diagnostic information
+            if (self$options$showDiagnostics) {
+                private$.generateDiagnostics(original_n, final_n, vars, controls)
+            }
+            
+            # Perform assumption checks
+            if (self$options$assumptionChecks) {
+                private$.performAssumptionChecks(data, vars, controls)
+            }
+            
+            # Generate comprehensive summary
+            if (self$options$bluesky_integration && self$options$comprehensive_output) {
+                private$.generateComprehensiveSummary(data, vars, controls)
+            }
+            
+            # Generate recommendations
+            if (self$options$showRecommendations) {
+                private$.generateRecommendations()
+            }
+            
+            # Generate clinical interpretation
+            if (self$options$clinicalInterpretation) {
+                private$.generateClinicalInterpretation()
+            }
+            
+            # Generate methods explanation
+            if (self$options$detailedOutput) {
+                private$.generateMethodsExplanation()
             }
         },
         

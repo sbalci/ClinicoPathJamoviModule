@@ -1,17 +1,19 @@
 ---
 name: effectsize
-title: Effect Size Analysis
+title: Comprehensive Effect Size Analysis
 menuGroup: ClinicoPathDescriptives
 menuSubgroup: Statistical Tests
-menuSubtitle: "Cohen's d, Hedges' g, Glass' Δ"
-version: '0.0.1'
+menuSubtitle: "Complete effect size toolkit with BlueSky integration"
+version: '0.0.31'
 jas: '1.2'
 
 description:
     main: |
-        Comprehensive effect size analysis including Cohen's d, Hedges' g, and Glass' delta.
-        Essential for clinical significance assessment, meta-analyses, and power analyses
-        in medical and pathological research.
+        Comprehensive effect size analysis toolkit with BlueSky R integration. Includes
+        Cohen's d, Hedges' g, Glass' delta, eta-squared, omega-squared, Cramér's V,
+        phi coefficient, rank-based effect sizes, and more. Essential for clinical
+        significance assessment, meta-analyses, power analyses, and reproducible
+        research in medical and pathological studies.
 
 options:
     - name: data
@@ -151,3 +153,296 @@ options:
       min: 200
       max: 800
       description: 'Height of effect size plot'
+
+    # Additional Effect Size Measures (BlueSky Integration)
+    - name: measures_eta_squared
+      title: "Eta-squared (η²)"
+      type: Bool
+      default: false
+      description: "Calculate eta-squared effect size (ANOVA)"
+
+    - name: measures_partial_eta_squared
+      title: "Partial Eta-squared (ηₚ²)"
+      type: Bool
+      default: false
+      description: "Calculate partial eta-squared effect size"
+
+    - name: measures_omega_squared
+      title: "Omega-squared (ω²)"
+      type: Bool
+      default: false
+      description: "Calculate omega-squared effect size (unbiased)"
+
+    - name: measures_epsilon_squared
+      title: "Epsilon-squared (ε²)"
+      type: Bool
+      default: false
+      description: "Calculate epsilon-squared effect size"
+
+    - name: measures_cramers_v
+      title: "Cramér's V"
+      type: Bool
+      default: false
+      description: "Calculate Cramér's V for categorical associations"
+
+    - name: measures_phi_coefficient
+      title: "Phi coefficient (φ)"
+      type: Bool
+      default: false
+      description: "Calculate phi coefficient for 2x2 contingency tables"
+
+    - name: measures_cohens_w
+      title: "Cohen's w"
+      type: Bool
+      default: false
+      description: "Calculate Cohen's w for chi-square goodness of fit"
+
+    - name: measures_rank_biserial
+      title: "Rank-biserial correlation"
+      type: Bool
+      default: false
+      description: "Calculate rank-biserial correlation for Mann-Whitney U"
+
+    - name: measures_cliff_delta
+      title: "Cliff's delta (δ)"
+      type: Bool
+      default: false
+      description: "Calculate Cliff's delta for ordinal data"
+
+    - name: measures_vargha_delaney_a
+      title: "Vargha-Delaney A"
+      type: Bool
+      default: false
+      description: "Calculate Vargha-Delaney A measure"
+
+    - name: measures_common_language
+      title: "Common Language Effect Size"
+      type: Bool
+      default: false
+      description: "Calculate common language effect size (CLES)"
+
+    - name: measures_cohens_u3
+      title: "Cohen's U₃"
+      type: Bool
+      default: false
+      description: "Calculate Cohen's U3 statistic"
+
+    - name: measures_probability_superiority
+      title: "Probability of Superiority"
+      type: Bool
+      default: false
+      description: "Calculate probability of superiority"
+
+    # Analysis Context
+    - name: analysis_context
+      title: 'Analysis Context'
+      type: List
+      options:
+          - title: 'T-test / Mean Comparison'
+            name: ttest
+          - title: 'ANOVA / F-test'
+            name: anova
+          - title: 'Correlation Analysis'
+            name: correlation
+          - title: 'Chi-square / Contingency Table'
+            name: chisquare
+          - title: 'Non-parametric Tests'
+            name: nonparametric
+          - title: 'Regression Analysis'
+            name: regression
+      default: ttest
+      description: 'Statistical context for effect size calculation'
+
+    # Advanced Options
+    - name: correction_method
+      title: 'Multiple Comparison Correction'
+      type: List
+      options:
+          - title: 'None'
+            name: none
+          - title: 'Bonferroni'
+            name: bonferroni
+          - title: 'Holm'
+            name: holm
+          - title: 'Benjamini-Hochberg (FDR)'
+            name: fdr
+      default: none
+      description: 'Correction method for multiple effect sizes'
+
+    - name: bootstrap_ci
+      title: 'Bootstrap Confidence Intervals'
+      type: Bool
+      default: false
+      description: 'Use bootstrap methods for confidence intervals'
+
+    - name: bootstrap_samples
+      title: 'Bootstrap Samples'
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description: 'Number of bootstrap samples'
+
+    - name: pooled_sd
+      title: 'Pooled Standard Deviation'
+      type: Bool
+      default: true
+      description: 'Use pooled standard deviation for effect size calculations'
+
+    - name: welch_correction
+      title: "Welch's Correction"
+      type: Bool
+      default: false
+      description: 'Apply Welch correction for unequal variances'
+
+    - name: paired_analysis
+      title: 'Paired Analysis'
+      type: Bool
+      default: false
+      description: 'Analyze paired/matched data'
+
+    - name: pairing_variable
+      title: 'Pairing Variable'
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description: 'Variable indicating pairs/matches'
+
+    # Clinical Significance
+    - name: clinical_thresholds
+      title: 'Clinical Significance Thresholds'
+      type: Bool
+      default: false
+      description: 'Apply clinical significance thresholds'
+
+    - name: small_effect_threshold
+      title: 'Small Effect Threshold'
+      type: Number
+      default: 0.2
+      min: 0.01
+      max: 1.0
+      description: 'Threshold for small effect size'
+
+    - name: medium_effect_threshold
+      title: 'Medium Effect Threshold'
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 2.0
+      description: 'Threshold for medium effect size'
+
+    - name: large_effect_threshold
+      title: 'Large Effect Threshold'
+      type: Number
+      default: 0.8
+      min: 0.01
+      max: 3.0
+      description: 'Threshold for large effect size'
+
+    # Power Analysis Integration
+    - name: power_analysis
+      title: 'Power Analysis'
+      type: Bool
+      default: false
+      description: 'Include post-hoc power analysis'
+
+    - name: alpha_level
+      title: 'Alpha Level'
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.2
+      description: 'Significance level for power calculations'
+
+    - name: desired_power
+      title: 'Desired Power'
+      type: Number
+      default: 0.8
+      min: 0.5
+      max: 0.99
+      description: 'Desired statistical power'
+
+    # Meta-analysis Preparation
+    - name: meta_analysis_format
+      title: 'Meta-analysis Format Output'
+      type: Bool
+      default: false
+      description: 'Format output for meta-analysis software'
+
+    - name: study_weights
+      title: 'Study Weights Variable'
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description: 'Variable containing study weights for meta-analysis'
+
+    # BlueSky R Integration Options
+    - name: bluesky_integration
+      title: 'Enhanced BlueSky Integration'
+      type: Bool
+      default: true
+      description: 'Use BlueSky R statistical environment features'
+
+    - name: comprehensive_output
+      title: 'Comprehensive Statistical Output'
+      type: Bool
+      default: false
+      description: 'Include comprehensive statistical details'
+
+    - name: effect_size_family
+      title: 'Effect Size Family'
+      type: List
+      options:
+          - title: 'Standardized Mean Differences'
+            name: smd
+          - title: 'Variance Explained'
+            name: variance
+          - title: 'Association Measures'
+            name: association
+          - title: 'Rank-based Measures'
+            name: rank
+          - title: 'All Families'
+            name: all
+      default: smd
+      description: 'Focus on specific family of effect sizes'
+
+    # Advanced Visualization
+    - name: forest_plot_advanced
+      title: 'Advanced Forest Plot'
+      type: Bool
+      default: false
+      description: 'Create publication-ready forest plot'
+
+    - name: effect_size_distribution
+      title: 'Effect Size Distribution Plot'
+      type: Bool
+      default: false
+      description: 'Show sampling distribution of effect sizes'
+
+    - name: comparison_plot
+      title: 'Effect Size Comparison Plot'
+      type: Bool
+      default: false
+      description: 'Compare multiple effect size measures'
+
+    # Export Options
+    - name: export_format
+      title: 'Export Format'
+      type: List
+      options:
+          - title: 'Standard Output'
+            name: standard
+          - title: 'APA Style'
+            name: apa
+          - title: 'Meta-analysis Ready'
+            name: meta
+          - title: 'Comprehensive Report'
+            name: comprehensive
+      default: standard
+      description: 'Output formatting style'

@@ -38,13 +38,21 @@ knitr::opts_chunk$set(
 *   **Diagnostic & Prognostic Accuracy:**
     *   **Test Evaluation:** ROC analysis, decision curve analysis (DCA), and screening test calculators.
     *   **Model Validation:** Time-dependent ROC, prediction error curves, C-statistics, and calibration plots.
-*   **Agreement and Reliability:** Inter-rater reliability statistics (Cohen's Kappa, ICC) and method comparison (Bland-Altman, Deming Regression).
+*   **Agreement and Reliability:** 
+    *   **Inter-rater Statistics:** Cohen's Kappa, Fleiss' Kappa, Krippendorff's Alpha, and ICC
+    *   **Consensus Scoring:** Automated consensus determination with majority rule, super-majority, and unanimous methods
+    *   **Digital Pathology Validation:** Modality comparison for glass slides vs digital images with HER2-specific analysis
+    *   **Method Comparison:** Bland-Altman plots and Deming Regression
 *   **Evidence-Based Decision Support:** A suite of tools for:
     *   **Clinical Monitoring:** Alert systems and patient monitoring dashboards.
     *   **Treatment Planning:** Optimization frameworks and differential diagnosis assistance.
     *   **Results Interpretation:** Laboratory and imaging findings correlation.
 *   **Laboratory Quality Control:** ISO 15189 compliant statistical process control, including Shewhart/CUSUM charts, Six Sigma metrics, and measurement uncertainty.
-*   **Spatial Statistics & Digital Pathology:** Tools for spatial point pattern analysis (Ripley's K-function), spatial autocorrelation (Moran's I), and Haralick texture analysis.
+*   **Spatial Statistics & Digital Pathology:** 
+    *   **Spatial Analysis:** Spatial point pattern analysis (Ripley's K-function), spatial autocorrelation (Moran's I)
+    *   **Texture Analysis:** Haralick texture features for quantitative pathology
+    *   **Validation Studies:** Glass slide vs digital image comparison with discordance pattern analysis
+    *   **HER2 Scoring:** Specialized tools for HER2-low/null distinction and ADC therapy eligibility
 *   **Data Visualization:** Advanced plotting tools such as waterfall plots, swimmer plots, and raincloud plots.
 *   **Data Preprocessing:** Utilities for data quality checking, missing data management, and date corrections.
 

@@ -99,11 +99,17 @@
       "WebFetch(domain:www.rdocumentation.org)",
       "Read(//Users/serdarbalci/Downloads/**)",
       "Read(//Users/serdarbalci/Documents/GitHub/BlueSky/R/**)",
-      "Read(//Users/serdarbalci/Documents/GitHub/BrawStats-for-Jamovi-Full/**)"
+      "Read(//Users/serdarbalci/Documents/GitHub/BrawStats-for-Jamovi-Full/**)",
+      "Read(//Users/serdarbalci/Documents/GitHub/JamoviTest/jamovi/js/**)",
+      "Read(//Users/serdarbalci/Documents/GitHub/JamoviTest/jamovi/js/**)",
+      "Read(//Users/serdarbalci/Documents/GitHub/JamoviTest/**)",
+      "Read(//Users/serdarbalci/Documents/GitHub/BlueSky/R/**)",
+      "Read(//Users/serdarbalci/Documents/GitHub/BlueSky/**)"
     ],
     "deny": [],
     "additionalDirectories": [
-      "/Users/serdarbalci/Documents/GitHub/conttablesplus"
+      "/Users/serdarbalci/Documents/GitHub/conttablesplus",
+      "/Users/serdarbalci/Documents/GitHub/JamoviTest"
     ]
   }
 }

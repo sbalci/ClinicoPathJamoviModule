@@ -212,7 +212,7 @@ items:
     title: Validation Learning Curves
     type: Image
     description: Learning curves showing model performance vs sample size
-    visible: (show_validation_curves)
+    visible: false
     requiresData: true
     clearWith:
       - validation_method

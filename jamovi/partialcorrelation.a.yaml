@@ -1,12 +1,20 @@
 ---
 name: partialcorrelation
-title: Partial Correlation Analysis
+title: Enhanced Partial Correlation Analysis with BlueSky Integration
 jas: '1.2'
-version: '1.0.0'
+version: '0.0.31'
 menuGroup: ClinicoPath
 menuSubgroup: ClinicoPath Descriptives
-menuTitle: Partial Correlation Analysis
-menuSubtitle: Correlation controlling for confounding variables
+menuTitle: Enhanced Partial Correlation Analysis
+menuSubtitle: Correlation analysis with BlueSky integration and advanced features
+
+description:
+    main: |
+        Enhanced partial correlation analysis toolkit with BlueSky integration for
+        comprehensive correlation analysis while controlling for confounding variables.
+        Includes partial and semi-partial correlations, robust error handling,
+        multiple variable support, and advanced statistical inference. Perfect for
+        clinicopathological research where controlling for covariates is essential.
 options:
   - name: data
     type: Data
@@ -72,3 +80,105 @@ options:
     title: Show zero-order correlations
     type: Bool
     default: true
+
+  # BlueSky Integration Features
+  - name: correlationType
+    title: Correlation Type
+    type: List
+    options:
+      - title: Partial Correlations
+        name: partial
+      - title: Semi-partial Correlations
+        name: semipartial
+      - title: Both Types
+        name: both
+    default: partial
+    description: Type of correlation analysis (BlueSky BSkyPartialSemiCorrelations feature)
+
+  - name: multipleComparison
+    title: Multiple Comparison Correction
+    type: List
+    options:
+      - title: None
+        name: none
+      - title: Bonferroni
+        name: bonferroni
+      - title: Holm
+        name: holm
+      - title: FDR (Benjamini-Hochberg)
+        name: fdr
+      - title: Benjamini-Yekutieli
+        name: by
+    default: none
+    description: Method for correcting p-values for multiple comparisons
+
+  - name: robustErrorHandling
+    title: Robust Error Handling
+    type: Bool
+    default: true
+    description: Use BlueSky-style error handling with graceful degradation
+
+  - name: showDiagnostics
+    title: Show Diagnostic Information
+    type: Bool
+    default: false
+    description: Display diagnostic information about computations and assumptions
+
+  - name: detailedOutput
+    title: Detailed Statistical Output
+    type: Bool
+    default: false
+    description: Include comprehensive statistical details and interpretations
+
+  # Advanced Options
+  - name: bootstrapCI
+    title: Bootstrap Confidence Intervals
+    type: Bool
+    default: false
+    description: Calculate bootstrap confidence intervals for correlations
+
+  - name: bootstrapSamples
+    title: Bootstrap Samples
+    type: Integer
+    default: 1000
+    min: 100
+    max: 10000
+    description: Number of bootstrap samples for confidence intervals
+
+  - name: showEffectSizes
+    title: Show Effect Size Interpretations
+    type: Bool
+    default: true
+    description: Include Cohen's interpretation of correlation effect sizes
+
+  - name: assumptionChecks
+    title: Check Assumptions
+    type: Bool
+    default: false
+    description: Perform and report assumption checks for correlation analysis
+
+  # Clinical Context
+  - name: clinicalInterpretation
+    title: Clinical Interpretation
+    type: Bool
+    default: true
+    description: Provide clinical context and interpretation guidance
+
+  - name: showRecommendations
+    title: Statistical Recommendations
+    type: Bool
+    default: false
+    description: Provide recommendations based on analysis results
+
+  # BlueSky Integration
+  - name: bluesky_integration
+    title: Enhanced BlueSky Integration
+    type: Bool
+    default: true
+    description: Use BlueSky R statistical environment features
+
+  - name: comprehensive_output
+    title: Comprehensive Statistical Output
+    type: Bool
+    default: false
+    description: Include comprehensive statistical details and diagnostics

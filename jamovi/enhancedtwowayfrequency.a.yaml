@@ -1,0 +1,188 @@
+---
+name: enhancedtwowayfrequency
+title: Enhanced Two-Way Frequency Analysis with BlueSky Integration
+jas: '1.2'
+version: '0.0.31'
+menuGroup: ClinicoPath
+menuSubgroup: ClinicoPath Descriptives
+menuTitle: Enhanced Two-Way Frequency Analysis
+menuSubtitle: Cross-tabulation analysis with BlueSky integration and advanced features
+
+description:
+    main: |
+        Enhanced two-way frequency analysis toolkit with BlueSky integration for
+        comprehensive cross-tabulation analysis. Includes cell, row, and column 
+        percentages, statistical tests for association, robust error handling,
+        and clinical interpretation guidance. Perfect for exploring relationships 
+        between categorical variables in clinicopathological research.
+
+options:
+  - name: data
+    type: Data
+
+  - name: rowVar
+    title: Row Variable
+    type: Variable
+    suggested:
+      - nominal
+      - ordinal
+    permitted:
+      - factor
+      - numeric
+
+  - name: colVar
+    title: Column Variable
+    type: Variable
+    suggested:
+      - nominal
+      - ordinal
+    permitted:
+      - factor
+      - numeric
+
+  # BlueSky Integration Features
+  - name: cellPercent
+    title: Show Cell Percentages
+    type: Bool
+    default: true
+    description: Display percentages of total sample (BlueSky BSkyTwoWayFrequency feature)
+
+  - name: rowPercent
+    title: Show Row Percentages
+    type: Bool
+    default: false
+    description: Display row-wise percentages (sum to 100% across rows)
+
+  - name: colPercent
+    title: Show Column Percentages
+    type: Bool
+    default: false
+    description: Display column-wise percentages (sum to 100% across columns)
+
+  - name: showCounts
+    title: Show Observed Frequencies
+    type: Bool
+    default: true
+    description: Display raw frequency counts in cross-tabulation
+
+  - name: showTotals
+    title: Show Marginal Totals
+    type: Bool
+    default: true
+    description: Include row and column totals in tables
+
+  # Statistical Tests
+  - name: chiSquareTest
+    title: Chi-Square Test of Independence
+    type: Bool
+    default: true
+    description: Perform Pearson's chi-square test for association
+
+  - name: fisherTest
+    title: Fisher's Exact Test
+    type: Bool
+    default: false
+    description: Perform Fisher's exact test (recommended for small samples)
+
+  - name: continuityCorrection
+    title: Yates' Continuity Correction
+    type: Bool
+    default: true
+    description: Apply continuity correction for 2x2 tables
+
+  # Effect Size and Association Measures
+  - name: associationMeasures
+    title: Association Measures
+    type: Bool
+    default: true
+    description: Calculate Cramér's V, Phi coefficient, and other association measures
+
+  - name: residualAnalysis
+    title: Standardized Residuals
+    type: Bool
+    default: false
+    description: Calculate and display standardized residuals for detecting patterns
+
+  # Advanced Options
+  - name: expectedFrequencies
+    title: Show Expected Frequencies
+    type: Bool
+    default: false
+    description: Display expected frequencies under independence assumption
+
+  - name: minimumExpected
+    title: Minimum Expected Frequency Warning
+    type: Number
+    min: 1
+    max: 10
+    default: 5
+    description: Threshold for warning about low expected frequencies
+
+  # Error Handling and Output
+  - name: robustErrorHandling
+    title: Robust Error Handling
+    type: Bool
+    default: true
+    description: Use BlueSky-style error handling with graceful degradation
+
+  - name: showDiagnostics
+    title: Show Diagnostic Information
+    type: Bool
+    default: false
+    description: Display diagnostic information about computations and assumptions
+
+  - name: detailedOutput
+    title: Detailed Statistical Output
+    type: Bool
+    default: false
+    description: Include comprehensive statistical details and interpretations
+
+  # Clinical Context
+  - name: clinicalInterpretation
+    title: Clinical Interpretation
+    type: Bool
+    default: true
+    description: Provide clinical context and interpretation guidance
+
+  - name: showRecommendations
+    title: Statistical Recommendations
+    type: Bool
+    default: false
+    description: Provide recommendations based on analysis results
+
+  # BlueSky Integration
+  - name: bluesky_integration
+    title: Enhanced BlueSky Integration
+    type: Bool
+    default: true
+    description: Use BlueSky R statistical environment features
+
+  - name: comprehensive_output
+    title: Comprehensive Statistical Output
+    type: Bool
+    default: false
+    description: Include comprehensive statistical details and diagnostics
+
+  # Visualization
+  - name: heatmapPlot
+    title: Frequency Heatmap
+    type: Bool
+    default: false
+    description: Create heatmap visualization of frequency table
+
+  - name: mosaicPlot
+    title: Mosaic Plot
+    type: Bool
+    default: false
+    description: Create mosaic plot showing proportional relationships
+
+  - name: percentageDisplay
+    title: Percentage Display Format
+    type: List
+    options:
+      - title: Decimal (0.25)
+        name: decimal
+      - title: Percentage (25%)
+        name: percentage
+    default: percentage
+    description: Format for displaying percentage values

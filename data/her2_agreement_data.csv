@@ -1,0 +1,101 @@
+case_id,pathologist_a,pathologist_b,pathologist_c,glass_slides,digital_images,specimen_type,clinical_score
+Case_001,Null,Null,Null,Null,Null,Core biopsy,0
+Case_002,Null,Ultralow,Null,Null,Ultralow,Core biopsy,0
+Case_003,Ultralow,Ultralow,Ultralow,Ultralow,Ultralow,Excisional,0
+Case_004,Ultralow,1+,Ultralow,Ultralow,1+,Core biopsy,0
+Case_005,1+,1+,1+,1+,1+,Excisional,1+
+Case_006,1+,2+,1+,1+,1+,Core biopsy,1+
+Case_007,2+,2+,2+,2+,2+,Excisional,2+
+Case_008,2+,3+,2+,2+,2+,Core biopsy,2+
+Case_009,3+,3+,3+,3+,3+,Excisional,3+
+Case_010,Null,Null,Ultralow,Null,Null,Core biopsy,0
+Case_011,Ultralow,Null,Ultralow,Null,Ultralow,Core biopsy,0
+Case_012,Ultralow,Ultralow,1+,Ultralow,1+,Excisional,0
+Case_013,1+,1+,2+,1+,1+,Core biopsy,1+
+Case_014,2+,2+,2+,2+,3+,Excisional,2+
+Case_015,3+,3+,2+,3+,3+,Core biopsy,3+
+Case_016,Null,Null,Null,Null,Null,Core biopsy,0
+Case_017,Null,Ultralow,Null,Null,Null,Core biopsy,0
+Case_018,Ultralow,Ultralow,Ultralow,Ultralow,Ultralow,Excisional,0
+Case_019,Ultralow,1+,1+,Ultralow,1+,Core biopsy,0
+Case_020,1+,1+,1+,1+,1+,Excisional,1+
+Case_021,1+,1+,2+,1+,2+,Core biopsy,1+
+Case_022,2+,2+,2+,2+,2+,Excisional,2+
+Case_023,2+,3+,3+,2+,3+,Core biopsy,2+
+Case_024,3+,3+,3+,3+,3+,Excisional,3+
+Case_025,Null,Null,Null,Null,Ultralow,Core biopsy,0
+Case_026,Null,Ultralow,Ultralow,Null,Ultralow,Core biopsy,0
+Case_027,Ultralow,Ultralow,Ultralow,Ultralow,1+,Excisional,0
+Case_028,Ultralow,1+,1+,1+,1+,Core biopsy,0
+Case_029,1+,1+,1+,1+,2+,Excisional,1+
+Case_030,1+,2+,2+,1+,2+,Core biopsy,1+
+Case_031,2+,2+,2+,2+,2+,Excisional,2+
+Case_032,2+,2+,3+,2+,3+,Core biopsy,2+
+Case_033,3+,3+,3+,3+,3+,Excisional,3+
+Case_034,Null,Null,Null,Null,Null,Core biopsy,0
+Case_035,Null,Null,Ultralow,Null,Ultralow,Core biopsy,0
+Case_036,Ultralow,Ultralow,Ultralow,Ultralow,Ultralow,Excisional,0
+Case_037,Ultralow,Ultralow,1+,Ultralow,1+,Core biopsy,0
+Case_038,1+,1+,1+,1+,1+,Excisional,1+
+Case_039,1+,1+,1+,1+,1+,Core biopsy,1+
+Case_040,2+,2+,2+,2+,2+,Excisional,2+
+Case_041,2+,2+,2+,2+,2+,Core biopsy,2+
+Case_042,3+,3+,3+,3+,3+,Excisional,3+
+Case_043,Null,Ultralow,Null,Null,Ultralow,Core biopsy,0
+Case_044,Null,Null,Null,Null,Null,Core biopsy,0
+Case_045,Ultralow,Ultralow,Ultralow,Ultralow,1+,Excisional,0
+Case_046,Ultralow,1+,Ultralow,Ultralow,1+,Core biopsy,0
+Case_047,1+,1+,1+,1+,1+,Excisional,1+
+Case_048,1+,2+,1+,1+,1+,Core biopsy,1+
+Case_049,2+,2+,2+,2+,2+,Excisional,2+
+Case_050,2+,3+,2+,2+,3+,Core biopsy,2+
+Case_051,3+,3+,3+,3+,3+,Excisional,3+
+Case_052,Null,Null,Null,Null,Null,Core biopsy,0
+Case_053,Null,Null,Ultralow,Null,Null,Core biopsy,0
+Case_054,Ultralow,Ultralow,Ultralow,Ultralow,Ultralow,Excisional,0
+Case_055,Ultralow,1+,1+,Ultralow,1+,Core biopsy,0
+Case_056,1+,1+,1+,1+,2+,Excisional,1+
+Case_057,1+,1+,2+,1+,2+,Core biopsy,1+
+Case_058,2+,2+,2+,2+,2+,Excisional,2+
+Case_059,2+,2+,3+,2+,3+,Core biopsy,2+
+Case_060,3+,3+,3+,3+,3+,Excisional,3+
+Case_061,Null,Null,Null,Null,Ultralow,Core biopsy,0
+Case_062,Null,Ultralow,Null,Null,Ultralow,Core biopsy,0
+Case_063,Ultralow,Ultralow,1+,Ultralow,1+,Excisional,0
+Case_064,Ultralow,1+,1+,1+,1+,Core biopsy,0
+Case_065,1+,1+,1+,1+,1+,Excisional,1+
+Case_066,1+,1+,1+,1+,2+,Core biopsy,1+
+Case_067,2+,2+,2+,2+,2+,Excisional,2+
+Case_068,2+,3+,2+,2+,2+,Core biopsy,2+
+Case_069,3+,3+,3+,3+,3+,Excisional,3+
+Case_070,Null,Null,Null,Null,Null,Core biopsy,0
+Case_071,Null,Null,Null,Null,Null,Core biopsy,0
+Case_072,Ultralow,Ultralow,Ultralow,Ultralow,Ultralow,Excisional,0
+Case_073,Ultralow,Ultralow,Ultralow,Ultralow,1+,Core biopsy,0
+Case_074,1+,1+,1+,1+,1+,Excisional,1+
+Case_075,1+,1+,2+,1+,1+,Core biopsy,1+
+Case_076,2+,2+,2+,2+,2+,Excisional,2+
+Case_077,2+,2+,2+,2+,3+,Core biopsy,2+
+Case_078,3+,3+,3+,3+,3+,Excisional,3+
+Case_079,Null,Ultralow,Null,Null,Ultralow,Core biopsy,0
+Case_080,Null,Null,Ultralow,Null,Null,Core biopsy,0
+Case_081,Ultralow,Ultralow,Ultralow,Ultralow,1+,Excisional,0
+Case_082,Ultralow,1+,1+,Ultralow,1+,Core biopsy,0
+Case_083,1+,1+,1+,1+,1+,Excisional,1+
+Case_084,1+,2+,1+,1+,2+,Core biopsy,1+
+Case_085,2+,2+,2+,2+,2+,Excisional,2+
+Case_086,2+,3+,3+,2+,3+,Core biopsy,2+
+Case_087,3+,3+,3+,3+,3+,Excisional,3+
+Case_088,Null,Null,Null,Null,Null,Core biopsy,0
+Case_089,Null,Null,Null,Null,Ultralow,Core biopsy,0
+Case_090,Ultralow,Ultralow,Ultralow,Ultralow,Ultralow,Excisional,0
+Case_091,Ultralow,Ultralow,1+,Ultralow,1+,Core biopsy,0
+Case_092,1+,1+,1+,1+,1+,Excisional,1+
+Case_093,1+,1+,1+,1+,1+,Core biopsy,1+
+Case_094,2+,2+,2+,2+,2+,Excisional,2+
+Case_095,2+,2+,3+,2+,3+,Core biopsy,2+
+Case_096,3+,3+,3+,3+,3+,Excisional,3+
+Case_097,Null,Null,Ultralow,Null,Null,Core biopsy,0
+Case_098,Null,Ultralow,Ultralow,Null,Ultralow,Core biopsy,0
+Case_099,Ultralow,Ultralow,1+,Ultralow,1+,Excisional,0
+Case_100,Ultralow,1+,1+,1+,1+,Core biopsy,0

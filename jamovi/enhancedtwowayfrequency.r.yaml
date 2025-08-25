@@ -1,0 +1,248 @@
+---
+name: enhancedtwowayfrequency
+title: Enhanced Two-Way Frequency Analysis Results
+jrs: '1.1'
+items:
+  - name: instructions
+    title: Instructions
+    type: Html
+    visible: true
+
+  # Main Cross-Tabulation Tables
+  - name: observedFrequencies
+    title: Observed Frequencies
+    type: Table
+    visible: (rowVar && colVar && showCounts)
+    columns:
+      - name: rowVar_level
+        title: Row Variable
+        type: text
+      - name: colVar_level
+        title: Column Variable
+        type: text
+      - name: count
+        title: Count
+        type: integer
+      - name: cell_percent
+        title: Cell %
+        type: number
+        format: pc
+        visible: (cellPercent)
+      - name: row_percent
+        title: Row %
+        type: number
+        format: pc
+        visible: (rowPercent)
+      - name: col_percent
+        title: Col %
+        type: number
+        format: pc
+        visible: (colPercent)
+      - name: expected
+        title: Expected
+        type: number
+        format: zto
+        visible: (expectedFrequencies)
+      - name: std_residual
+        title: Std. Residual
+        type: number
+        format: zto
+        visible: (residualAnalysis)
+
+  # Summary Cross-Tabulation Matrix
+  - name: crossTabMatrix
+    title: Cross-Tabulation Matrix
+    type: Table
+    visible: (rowVar && colVar)
+    columns:
+      - name: row_category
+        title: ''
+        type: text
+      # Dynamic columns will be added based on column variable levels
+
+  # Cell Percentage Matrix
+  - name: cellPercentMatrix
+    title: Cell Percentage Matrix
+    type: Table
+    visible: (rowVar && colVar && cellPercent)
+    columns:
+      - name: row_category
+        title: ''
+        type: text
+      # Dynamic columns will be added based on column variable levels
+
+  # Row Percentage Matrix  
+  - name: rowPercentMatrix
+    title: Row Percentage Matrix
+    type: Table
+    visible: (rowVar && colVar && rowPercent)
+    columns:
+      - name: row_category
+        title: ''
+        type: text
+      # Dynamic columns will be added based on column variable levels
+
+  # Column Percentage Matrix
+  - name: colPercentMatrix
+    title: Column Percentage Matrix
+    type: Table
+    visible: (rowVar && colVar && colPercent)
+    columns:
+      - name: row_category
+        title: ''
+        type: text
+      # Dynamic columns will be added based on column variable levels
+
+  # Statistical Tests
+  - name: testResults
+    title: Tests of Independence
+    type: Table
+    visible: (rowVar && colVar && (chiSquareTest || fisherTest))
+    columns:
+      - name: test_name
+        title: Test
+        type: text
+      - name: statistic
+        title: Statistic
+        type: number
+        format: zto
+      - name: df
+        title: df
+        type: integer
+      - name: p_value
+        title: p
+        type: number
+        format: zto,pvalue
+      - name: interpretation
+        title: Interpretation
+        type: text
+      - name: effect_size
+        title: Effect Size
+        type: text
+        visible: (associationMeasures)
+
+  # Association Measures
+  - name: associationMeasuresTable
+    title: Measures of Association
+    type: Table
+    visible: (rowVar && colVar && associationMeasures)
+    columns:
+      - name: measure
+        title: Measure
+        type: text
+      - name: value
+        title: Value
+        type: number
+        format: zto
+      - name: confidence_interval
+        title: 95% CI
+        type: text
+      - name: interpretation
+        title: Interpretation
+        type: text
+      - name: clinical_significance
+        title: Clinical Significance
+        type: text
+
+  # Expected Frequencies Check
+  - name: assumptionCheck
+    title: Assumption Validation
+    type: Table
+    visible: (rowVar && colVar && (showDiagnostics || expectedFrequencies))
+    columns:
+      - name: assumption
+        title: Assumption
+        type: text
+      - name: status
+        title: Status
+        type: text
+      - name: details
+        title: Details
+        type: text
+      - name: recommendation
+        title: Recommendation
+        type: text
+
+  # Diagnostic Information
+  - name: diagnostics
+    title: Diagnostic Information
+    type: Table
+    description: Computational diagnostics and data quality assessment
+    visible: (showDiagnostics)
+    columns:
+      - name: diagnostic_item
+        title: Diagnostic
+        type: text
+      - name: value
+        title: Value
+        type: text
+      - name: interpretation
+        title: Interpretation
+        type: text
+      - name: quality_flag
+        title: Quality Flag
+        type: text
+
+  # BlueSky Integration Summary
+  - name: comprehensiveAnalysisSummary
+    title: Comprehensive Two-Way Analysis Summary
+    type: Table
+    description: Enhanced statistical summary with BlueSky integration
+    visible: (bluesky_integration && comprehensive_output)
+    columns:
+      - name: measure
+        title: Measure
+        type: text
+      - name: value
+        title: Value
+        type: text
+      - name: interpretation
+        title: Interpretation
+        type: text
+      - name: clinical_significance
+        title: Clinical Significance
+        type: text
+
+  # Statistical Recommendations
+  - name: recommendations
+    title: Statistical Recommendations
+    type: Html
+    visible: (showRecommendations)
+
+  # Clinical Interpretation
+  - name: clinicalInterpretationGuide
+    title: Clinical Application Guidance
+    type: Html
+    visible: (clinicalInterpretation)
+
+  # Methods Explanation
+  - name: methodsExplanation
+    title: Statistical Methods and References
+    type: Html
+    visible: (detailedOutput)
+
+  # Visualization
+  - name: heatmapPlot
+    title: Frequency Heatmap
+    visible: (heatmapPlot)
+    type: Image
+    width: 500
+    height: 400
+    renderFun: .plotHeatmap
+
+  - name: mosaicPlot
+    title: Mosaic Plot
+    visible: (mosaicPlot)
+    type: Image
+    width: 600
+    height: 400
+    renderFun: .plotMosaic
+
+  # Residual Analysis Plot
+  - name: residualPlot
+    title: Standardized Residuals Plot
+    visible: (residualAnalysis && detailedOutput)
+    type: Image
+    width: 500
+    height: 400
+    renderFun: .plotResiduals

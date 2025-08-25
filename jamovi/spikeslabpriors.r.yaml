@@ -1,0 +1,283 @@
+---
+title: Analysis Results
+name: spikeslabpriors
+jrs: '1.1'
+items:
+    - name: variableSelection
+      title: Variable Selection Results
+      type: Table
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: inclusion_probability
+          title: Inclusion Probability
+          type: number
+        - name: bayes_factor
+          title: Bayes Factor
+          type: number
+        - name: selected
+          title: Selected
+          type: text
+        - name: rank
+          title: Importance Rank
+          type: integer
+
+    - name: inclusionProbabilities
+      title: Posterior Inclusion Probabilities
+      type: Table
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: posterior_pip
+          title: Posterior PIP
+          type: number
+        - name: prior_pip
+          title: Prior PIP
+          type: number
+        - name: bf_inclusion
+          title: BF (Inclusion)
+          type: number
+        - name: credible_interval_lower
+          title: PIP CI Lower
+          type: number
+        - name: credible_interval_upper
+          title: PIP CI Upper
+          type: number
+
+    - name: modelProbabilities
+      title: Top Model Probabilities
+      type: Table
+      columns:
+        - name: model_id
+          title: Model ID
+          type: integer
+        - name: variables_included
+          title: Variables Included
+          type: text
+        - name: model_size
+          title: Model Size
+          type: integer
+        - name: posterior_probability
+          title: Posterior Probability
+          type: number
+        - name: bayes_factor
+          title: Bayes Factor
+          type: number
+        - name: cumulative_probability
+          title: Cumulative Probability
+          type: number
+
+    - name: coefficientEstimates
+      title: Coefficient Estimates (Model Averaged)
+      type: Table
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: posterior_mean
+          title: Posterior Mean
+          type: number
+        - name: posterior_sd
+          title: Posterior SD
+          type: number
+        - name: credible_interval_lower
+          title: CI Lower
+          type: number
+        - name: credible_interval_upper
+          title: CI Upper
+          type: number
+        - name: conditional_mean
+          title: Conditional Mean
+          type: number
+        - name: conditional_sd
+          title: Conditional SD
+          type: number
+
+    - name: predictionPerformance
+      title: Prediction Performance Metrics
+      type: Table
+      columns:
+        - name: metric
+          title: Performance Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: convergenceDiagnostics
+      title: MCMC Convergence Diagnostics
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: rhat
+          title: R̂
+          type: number
+        - name: ess_bulk
+          title: Bulk ESS
+          type: integer
+        - name: ess_tail
+          title: Tail ESS
+          type: integer
+        - name: mcse
+          title: Monte Carlo SE
+          type: number
+        - name: convergence_status
+          title: Convergence Status
+          type: text
+
+    - name: variableImportance
+      title: Variable Importance Scores
+      type: Table
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: importance_score
+          title: Importance Score
+          type: number
+        - name: scaled_importance
+          title: Scaled Importance
+          type: number
+        - name: cumulative_importance
+          title: Cumulative Importance
+          type: number
+        - name: category
+          title: Importance Category
+          type: text
+
+    - name: modelComparison
+      title: Model Comparison Results
+      type: Table
+      columns:
+        - name: model_type
+          title: Model Type
+          type: text
+        - name: dic
+          title: DIC
+          type: number
+        - name: waic
+          title: WAIC
+          type: number
+        - name: loo
+          title: LOO
+          type: number
+        - name: marginal_likelihood
+          title: Marginal Likelihood
+          type: number
+        - name: preferred
+          title: Preferred Model
+          type: text
+
+    - name: dimensionSummary
+      title: Dimension Reduction Summary
+      type: Table
+      columns:
+        - name: stage
+          title: Analysis Stage
+          type: text
+        - name: n_variables
+          title: Number of Variables
+          type: integer
+        - name: reduction_method
+          title: Method Used
+          type: text
+        - name: reduction_ratio
+          title: Reduction Ratio
+          type: number
+
+    - name: groupSelection
+      title: Group Variable Selection Results
+      type: Table
+      columns:
+        - name: group
+          title: Variable Group
+          type: text
+        - name: n_variables
+          title: Variables in Group
+          type: integer
+        - name: group_inclusion_prob
+          title: Group Inclusion Probability
+          type: number
+        - name: n_selected
+          title: Variables Selected
+          type: integer
+        - name: group_selected
+          title: Group Selected
+          type: text
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation and Recommendations
+      type: Html
+
+    - name: methodsExplanation
+      title: Spike-and-Slab Methods and Theory
+      type: Html
+
+    - name: inclusionProbabilityPlot
+      title: Variable Inclusion Probability Plot
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotInclusionProbabilities
+
+    - name: modelSizePlot
+      title: Model Size Distribution
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plotModelSize
+
+    - name: coefficientPlot
+      title: Coefficient Estimates with Uncertainty
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotCoefficients
+
+    - name: variableImportancePlot
+      title: Variable Importance Visualization
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotVariableImportance
+
+    - name: convergencePlots
+      title: MCMC Convergence Plots
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotConvergence
+
+    - name: posteriorDistributionPlots
+      title: Posterior Distribution Plots
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotPosteriorDistributions
+
+    - name: modelComparisonPlot
+      title: Model Comparison Visualization
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotModelComparison
+
+    - name: predictionPerformancePlot
+      title: Prediction Performance Visualization
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotPredictionPerformance

@@ -23,7 +23,44 @@ effectsizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plotEffects = TRUE,
             plotType = "forest",
             plotWidth = 600,
-            plotHeight = 400, ...) {
+            plotHeight = 400,
+            measures_eta_squared = FALSE,
+            measures_partial_eta_squared = FALSE,
+            measures_omega_squared = FALSE,
+            measures_epsilon_squared = FALSE,
+            measures_cramers_v = FALSE,
+            measures_phi_coefficient = FALSE,
+            measures_cohens_w = FALSE,
+            measures_rank_biserial = FALSE,
+            measures_cliff_delta = FALSE,
+            measures_vargha_delaney_a = FALSE,
+            measures_common_language = FALSE,
+            measures_cohens_u3 = FALSE,
+            measures_probability_superiority = FALSE,
+            analysis_context = "ttest",
+            correction_method = "none",
+            bootstrap_ci = FALSE,
+            bootstrap_samples = 1000,
+            pooled_sd = TRUE,
+            welch_correction = FALSE,
+            paired_analysis = FALSE,
+            pairing_variable = NULL,
+            clinical_thresholds = FALSE,
+            small_effect_threshold = 0.2,
+            medium_effect_threshold = 0.5,
+            large_effect_threshold = 0.8,
+            power_analysis = FALSE,
+            alpha_level = 0.05,
+            desired_power = 0.8,
+            meta_analysis_format = FALSE,
+            study_weights = NULL,
+            bluesky_integration = TRUE,
+            comprehensive_output = FALSE,
+            effect_size_family = "smd",
+            forest_plot_advanced = FALSE,
+            effect_size_distribution = FALSE,
+            comparison_plot = FALSE,
+            export_format = "standard", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -122,6 +159,197 @@ effectsizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=400,
                 min=200,
                 max=800)
+            private$..measures_eta_squared <- jmvcore::OptionBool$new(
+                "measures_eta_squared",
+                measures_eta_squared,
+                default=FALSE)
+            private$..measures_partial_eta_squared <- jmvcore::OptionBool$new(
+                "measures_partial_eta_squared",
+                measures_partial_eta_squared,
+                default=FALSE)
+            private$..measures_omega_squared <- jmvcore::OptionBool$new(
+                "measures_omega_squared",
+                measures_omega_squared,
+                default=FALSE)
+            private$..measures_epsilon_squared <- jmvcore::OptionBool$new(
+                "measures_epsilon_squared",
+                measures_epsilon_squared,
+                default=FALSE)
+            private$..measures_cramers_v <- jmvcore::OptionBool$new(
+                "measures_cramers_v",
+                measures_cramers_v,
+                default=FALSE)
+            private$..measures_phi_coefficient <- jmvcore::OptionBool$new(
+                "measures_phi_coefficient",
+                measures_phi_coefficient,
+                default=FALSE)
+            private$..measures_cohens_w <- jmvcore::OptionBool$new(
+                "measures_cohens_w",
+                measures_cohens_w,
+                default=FALSE)
+            private$..measures_rank_biserial <- jmvcore::OptionBool$new(
+                "measures_rank_biserial",
+                measures_rank_biserial,
+                default=FALSE)
+            private$..measures_cliff_delta <- jmvcore::OptionBool$new(
+                "measures_cliff_delta",
+                measures_cliff_delta,
+                default=FALSE)
+            private$..measures_vargha_delaney_a <- jmvcore::OptionBool$new(
+                "measures_vargha_delaney_a",
+                measures_vargha_delaney_a,
+                default=FALSE)
+            private$..measures_common_language <- jmvcore::OptionBool$new(
+                "measures_common_language",
+                measures_common_language,
+                default=FALSE)
+            private$..measures_cohens_u3 <- jmvcore::OptionBool$new(
+                "measures_cohens_u3",
+                measures_cohens_u3,
+                default=FALSE)
+            private$..measures_probability_superiority <- jmvcore::OptionBool$new(
+                "measures_probability_superiority",
+                measures_probability_superiority,
+                default=FALSE)
+            private$..analysis_context <- jmvcore::OptionList$new(
+                "analysis_context",
+                analysis_context,
+                options=list(
+                    "ttest",
+                    "anova",
+                    "correlation",
+                    "chisquare",
+                    "nonparametric",
+                    "regression"),
+                default="ttest")
+            private$..correction_method <- jmvcore::OptionList$new(
+                "correction_method",
+                correction_method,
+                options=list(
+                    "none",
+                    "bonferroni",
+                    "holm",
+                    "fdr"),
+                default="none")
+            private$..bootstrap_ci <- jmvcore::OptionBool$new(
+                "bootstrap_ci",
+                bootstrap_ci,
+                default=FALSE)
+            private$..bootstrap_samples <- jmvcore::OptionInteger$new(
+                "bootstrap_samples",
+                bootstrap_samples,
+                default=1000,
+                min=100,
+                max=10000)
+            private$..pooled_sd <- jmvcore::OptionBool$new(
+                "pooled_sd",
+                pooled_sd,
+                default=TRUE)
+            private$..welch_correction <- jmvcore::OptionBool$new(
+                "welch_correction",
+                welch_correction,
+                default=FALSE)
+            private$..paired_analysis <- jmvcore::OptionBool$new(
+                "paired_analysis",
+                paired_analysis,
+                default=FALSE)
+            private$..pairing_variable <- jmvcore::OptionVariable$new(
+                "pairing_variable",
+                pairing_variable,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..clinical_thresholds <- jmvcore::OptionBool$new(
+                "clinical_thresholds",
+                clinical_thresholds,
+                default=FALSE)
+            private$..small_effect_threshold <- jmvcore::OptionNumber$new(
+                "small_effect_threshold",
+                small_effect_threshold,
+                default=0.2,
+                min=0.01,
+                max=1)
+            private$..medium_effect_threshold <- jmvcore::OptionNumber$new(
+                "medium_effect_threshold",
+                medium_effect_threshold,
+                default=0.5,
+                min=0.01,
+                max=2)
+            private$..large_effect_threshold <- jmvcore::OptionNumber$new(
+                "large_effect_threshold",
+                large_effect_threshold,
+                default=0.8,
+                min=0.01,
+                max=3)
+            private$..power_analysis <- jmvcore::OptionBool$new(
+                "power_analysis",
+                power_analysis,
+                default=FALSE)
+            private$..alpha_level <- jmvcore::OptionNumber$new(
+                "alpha_level",
+                alpha_level,
+                default=0.05,
+                min=0.001,
+                max=0.2)
+            private$..desired_power <- jmvcore::OptionNumber$new(
+                "desired_power",
+                desired_power,
+                default=0.8,
+                min=0.5,
+                max=0.99)
+            private$..meta_analysis_format <- jmvcore::OptionBool$new(
+                "meta_analysis_format",
+                meta_analysis_format,
+                default=FALSE)
+            private$..study_weights <- jmvcore::OptionVariable$new(
+                "study_weights",
+                study_weights,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..bluesky_integration <- jmvcore::OptionBool$new(
+                "bluesky_integration",
+                bluesky_integration,
+                default=TRUE)
+            private$..comprehensive_output <- jmvcore::OptionBool$new(
+                "comprehensive_output",
+                comprehensive_output,
+                default=FALSE)
+            private$..effect_size_family <- jmvcore::OptionList$new(
+                "effect_size_family",
+                effect_size_family,
+                options=list(
+                    "smd",
+                    "variance",
+                    "association",
+                    "rank",
+                    "all"),
+                default="smd")
+            private$..forest_plot_advanced <- jmvcore::OptionBool$new(
+                "forest_plot_advanced",
+                forest_plot_advanced,
+                default=FALSE)
+            private$..effect_size_distribution <- jmvcore::OptionBool$new(
+                "effect_size_distribution",
+                effect_size_distribution,
+                default=FALSE)
+            private$..comparison_plot <- jmvcore::OptionBool$new(
+                "comparison_plot",
+                comparison_plot,
+                default=FALSE)
+            private$..export_format <- jmvcore::OptionList$new(
+                "export_format",
+                export_format,
+                options=list(
+                    "standard",
+                    "apa",
+                    "meta",
+                    "comprehensive"),
+                default="standard")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -141,6 +369,43 @@ effectsizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plotType)
             self$.addOption(private$..plotWidth)
             self$.addOption(private$..plotHeight)
+            self$.addOption(private$..measures_eta_squared)
+            self$.addOption(private$..measures_partial_eta_squared)
+            self$.addOption(private$..measures_omega_squared)
+            self$.addOption(private$..measures_epsilon_squared)
+            self$.addOption(private$..measures_cramers_v)
+            self$.addOption(private$..measures_phi_coefficient)
+            self$.addOption(private$..measures_cohens_w)
+            self$.addOption(private$..measures_rank_biserial)
+            self$.addOption(private$..measures_cliff_delta)
+            self$.addOption(private$..measures_vargha_delaney_a)
+            self$.addOption(private$..measures_common_language)
+            self$.addOption(private$..measures_cohens_u3)
+            self$.addOption(private$..measures_probability_superiority)
+            self$.addOption(private$..analysis_context)
+            self$.addOption(private$..correction_method)
+            self$.addOption(private$..bootstrap_ci)
+            self$.addOption(private$..bootstrap_samples)
+            self$.addOption(private$..pooled_sd)
+            self$.addOption(private$..welch_correction)
+            self$.addOption(private$..paired_analysis)
+            self$.addOption(private$..pairing_variable)
+            self$.addOption(private$..clinical_thresholds)
+            self$.addOption(private$..small_effect_threshold)
+            self$.addOption(private$..medium_effect_threshold)
+            self$.addOption(private$..large_effect_threshold)
+            self$.addOption(private$..power_analysis)
+            self$.addOption(private$..alpha_level)
+            self$.addOption(private$..desired_power)
+            self$.addOption(private$..meta_analysis_format)
+            self$.addOption(private$..study_weights)
+            self$.addOption(private$..bluesky_integration)
+            self$.addOption(private$..comprehensive_output)
+            self$.addOption(private$..effect_size_family)
+            self$.addOption(private$..forest_plot_advanced)
+            self$.addOption(private$..effect_size_distribution)
+            self$.addOption(private$..comparison_plot)
+            self$.addOption(private$..export_format)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -160,7 +425,44 @@ effectsizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plotEffects = function() private$..plotEffects$value,
         plotType = function() private$..plotType$value,
         plotWidth = function() private$..plotWidth$value,
-        plotHeight = function() private$..plotHeight$value),
+        plotHeight = function() private$..plotHeight$value,
+        measures_eta_squared = function() private$..measures_eta_squared$value,
+        measures_partial_eta_squared = function() private$..measures_partial_eta_squared$value,
+        measures_omega_squared = function() private$..measures_omega_squared$value,
+        measures_epsilon_squared = function() private$..measures_epsilon_squared$value,
+        measures_cramers_v = function() private$..measures_cramers_v$value,
+        measures_phi_coefficient = function() private$..measures_phi_coefficient$value,
+        measures_cohens_w = function() private$..measures_cohens_w$value,
+        measures_rank_biserial = function() private$..measures_rank_biserial$value,
+        measures_cliff_delta = function() private$..measures_cliff_delta$value,
+        measures_vargha_delaney_a = function() private$..measures_vargha_delaney_a$value,
+        measures_common_language = function() private$..measures_common_language$value,
+        measures_cohens_u3 = function() private$..measures_cohens_u3$value,
+        measures_probability_superiority = function() private$..measures_probability_superiority$value,
+        analysis_context = function() private$..analysis_context$value,
+        correction_method = function() private$..correction_method$value,
+        bootstrap_ci = function() private$..bootstrap_ci$value,
+        bootstrap_samples = function() private$..bootstrap_samples$value,
+        pooled_sd = function() private$..pooled_sd$value,
+        welch_correction = function() private$..welch_correction$value,
+        paired_analysis = function() private$..paired_analysis$value,
+        pairing_variable = function() private$..pairing_variable$value,
+        clinical_thresholds = function() private$..clinical_thresholds$value,
+        small_effect_threshold = function() private$..small_effect_threshold$value,
+        medium_effect_threshold = function() private$..medium_effect_threshold$value,
+        large_effect_threshold = function() private$..large_effect_threshold$value,
+        power_analysis = function() private$..power_analysis$value,
+        alpha_level = function() private$..alpha_level$value,
+        desired_power = function() private$..desired_power$value,
+        meta_analysis_format = function() private$..meta_analysis_format$value,
+        study_weights = function() private$..study_weights$value,
+        bluesky_integration = function() private$..bluesky_integration$value,
+        comprehensive_output = function() private$..comprehensive_output$value,
+        effect_size_family = function() private$..effect_size_family$value,
+        forest_plot_advanced = function() private$..forest_plot_advanced$value,
+        effect_size_distribution = function() private$..effect_size_distribution$value,
+        comparison_plot = function() private$..comparison_plot$value,
+        export_format = function() private$..export_format$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -179,7 +481,44 @@ effectsizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plotEffects = NA,
         ..plotType = NA,
         ..plotWidth = NA,
-        ..plotHeight = NA)
+        ..plotHeight = NA,
+        ..measures_eta_squared = NA,
+        ..measures_partial_eta_squared = NA,
+        ..measures_omega_squared = NA,
+        ..measures_epsilon_squared = NA,
+        ..measures_cramers_v = NA,
+        ..measures_phi_coefficient = NA,
+        ..measures_cohens_w = NA,
+        ..measures_rank_biserial = NA,
+        ..measures_cliff_delta = NA,
+        ..measures_vargha_delaney_a = NA,
+        ..measures_common_language = NA,
+        ..measures_cohens_u3 = NA,
+        ..measures_probability_superiority = NA,
+        ..analysis_context = NA,
+        ..correction_method = NA,
+        ..bootstrap_ci = NA,
+        ..bootstrap_samples = NA,
+        ..pooled_sd = NA,
+        ..welch_correction = NA,
+        ..paired_analysis = NA,
+        ..pairing_variable = NA,
+        ..clinical_thresholds = NA,
+        ..small_effect_threshold = NA,
+        ..medium_effect_threshold = NA,
+        ..large_effect_threshold = NA,
+        ..power_analysis = NA,
+        ..alpha_level = NA,
+        ..desired_power = NA,
+        ..meta_analysis_format = NA,
+        ..study_weights = NA,
+        ..bluesky_integration = NA,
+        ..comprehensive_output = NA,
+        ..effect_size_family = NA,
+        ..forest_plot_advanced = NA,
+        ..effect_size_distribution = NA,
+        ..comparison_plot = NA,
+        ..export_format = NA)
 )
 
 effectsizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -193,7 +532,7 @@ effectsizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Effect Size Analysis Results")
+                title="Comprehensive Effect Size Analysis Results")
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -202,7 +541,23 @@ effectsizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     descriptives = function() private$.items[["descriptives"]],
                     testDetails = function() private$.items[["testDetails"]],
                     assumptions = function() private$.items[["assumptions"]],
-                    effectPlot = function() private$.items[["effectPlot"]]),
+                    comprehensiveEffectSizes = function() private$.items[["comprehensiveEffectSizes"]],
+                    varianceExplained = function() private$.items[["varianceExplained"]],
+                    associationMeasures = function() private$.items[["associationMeasures"]],
+                    rankBasedEffects = function() private$.items[["rankBasedEffects"]],
+                    commonLanguageEffects = function() private$.items[["commonLanguageEffects"]],
+                    powerAnalysisResults = function() private$.items[["powerAnalysisResults"]],
+                    metaAnalysisFormat = function() private$.items[["metaAnalysisFormat"]],
+                    clinicalSignificance = function() private$.items[["clinicalSignificance"]],
+                    bootstrapResults = function() private$.items[["bootstrapResults"]],
+                    effectSizeGuide = function() private$.items[["effectSizeGuide"]],
+                    clinicalGuidance = function() private$.items[["clinicalGuidance"]],
+                    methodsExplanation = function() private$.items[["methodsExplanation"]],
+                    effectPlot = function() private$.items[["effectPlot"]],
+                    advancedForestPlot = function() private$.items[["advancedForestPlot"]],
+                    effectDistributionPlot = function() private$.items[["effectDistributionPlot"]],
+                    comparisonPlot = function() private$.items[["comparisonPlot"]],
+                    powerCurvePlot = function() private$.items[["powerCurvePlot"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -343,12 +698,373 @@ effectsizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `name`="result", 
                                     `title`="Result", 
                                     `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="comprehensiveEffectSizes",
+                            title="Comprehensive Effect Size Analysis",
+                            visible="(bluesky_integration)",
+                            clearWith=list(
+                                "dep",
+                                "group",
+                                "analysisType",
+                                "effect_size_family"),
+                            columns=list(
+                                list(
+                                    `name`="family", 
+                                    `title`="Effect Size Family", 
+                                    `type`="text"),
+                                list(
+                                    `name`="measure", 
+                                    `title`="Measure", 
+                                    `type`="text"),
+                                list(
+                                    `name`="symbol", 
+                                    `title`="Symbol", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="lower_ci", 
+                                    `title`="Lower CI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="upper_ci", 
+                                    `title`="Upper CI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="magnitude", 
+                                    `title`="Magnitude", 
+                                    `type`="text"),
+                                list(
+                                    `name`="clinical_significance", 
+                                    `title`="Clinical Significance", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="varianceExplained",
+                            title="Variance Explained Measures",
+                            visible="(measures_eta_squared || measures_partial_eta_squared || measures_omega_squared)",
+                            columns=list(
+                                list(
+                                    `name`="measure", 
+                                    `title`="Measure", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="variance_percent", 
+                                    `title`="Variance %", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="associationMeasures",
+                            title="Association Effect Sizes",
+                            visible="(measures_cramers_v || measures_phi_coefficient || measures_cohens_w)",
+                            columns=list(
+                                list(
+                                    `name`="measure", 
+                                    `title`="Association Measure", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="strength", 
+                                    `title`="Association Strength", 
+                                    `type`="text"),
+                                list(
+                                    `name`="sample_size", 
+                                    `title`="Effective N", 
+                                    `type`="integer"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="rankBasedEffects",
+                            title="Rank-based Effect Sizes",
+                            visible="(measures_rank_biserial || measures_cliff_delta || measures_vargha_delaney_a)",
+                            columns=list(
+                                list(
+                                    `name`="measure", 
+                                    `title`="Rank-based Measure", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="probability_superiority", 
+                                    `title`="P(Superiority)", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="commonLanguageEffects",
+                            title="Common Language Effect Sizes",
+                            visible="(measures_common_language || measures_cohens_u3 || measures_probability_superiority)",
+                            columns=list(
+                                list(
+                                    `name`="measure", 
+                                    `title`="Measure", 
+                                    `type`="text"),
+                                list(
+                                    `name`="probability", 
+                                    `title`="Probability", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="percentage", 
+                                    `title`="Percentage", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="plain_language", 
+                                    `title`="Plain Language Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="powerAnalysisResults",
+                            title="Post-hoc Power Analysis",
+                            visible="(power_analysis)",
+                            columns=list(
+                                list(
+                                    `name`="effect_size_used", 
+                                    `title`="Effect Size Used", 
+                                    `type`="text"),
+                                list(
+                                    `name`="effect_magnitude", 
+                                    `title`="Effect Magnitude", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="sample_size", 
+                                    `title`="Sample Size", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="alpha_level", 
+                                    `title`="Alpha Level", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="observed_power", 
+                                    `title`="Observed Power", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="power_interpretation", 
+                                    `title`="Power Interpretation", 
+                                    `type`="text"),
+                                list(
+                                    `name`="required_n", 
+                                    `title`="N for Desired Power", 
+                                    `type`="integer"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="metaAnalysisFormat",
+                            title="Meta-analysis Ready Output",
+                            visible="(meta_analysis_format)",
+                            columns=list(
+                                list(
+                                    `name`="study_name", 
+                                    `title`="Study/Group", 
+                                    `type`="text"),
+                                list(
+                                    `name`="effect_size", 
+                                    `title`="Effect Size", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="standard_error", 
+                                    `title`="Standard Error", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="sample_size_1", 
+                                    `title`="N\u2081", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="sample_size_2", 
+                                    `title`="N\u2082", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="weight", 
+                                    `title`="Weight", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="mean_1", 
+                                    `title`="Mean\u2081", 
+                                    `type`="number"),
+                                list(
+                                    `name`="mean_2", 
+                                    `title`="Mean\u2082", 
+                                    `type`="number"),
+                                list(
+                                    `name`="sd_pooled", 
+                                    `title`="SD Pooled", 
+                                    `type`="number"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="clinicalSignificance",
+                            title="Clinical Significance Assessment",
+                            visible="(clinical_thresholds)",
+                            columns=list(
+                                list(
+                                    `name`="effect_size", 
+                                    `title`="Effect Size", 
+                                    `type`="text"),
+                                list(
+                                    `name`="observed_value", 
+                                    `title`="Observed Value", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="small_threshold", 
+                                    `title`="Small Effect Threshold", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="medium_threshold", 
+                                    `title`="Medium Effect Threshold", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="large_threshold", 
+                                    `title`="Large Effect Threshold", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="clinical_magnitude", 
+                                    `title`="Clinical Magnitude", 
+                                    `type`="text"),
+                                list(
+                                    `name`="clinical_interpretation", 
+                                    `title`="Clinical Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="bootstrapResults",
+                            title="Bootstrap Confidence Intervals",
+                            visible="(bootstrap_ci)",
+                            columns=list(
+                                list(
+                                    `name`="measure", 
+                                    `title`="Effect Size", 
+                                    `type`="text"),
+                                list(
+                                    `name`="bootstrap_estimate", 
+                                    `title`="Bootstrap Estimate", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="bootstrap_se", 
+                                    `title`="Bootstrap SE", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="percentile_lower", 
+                                    `title`="Percentile CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="percentile_upper", 
+                                    `title`="Percentile CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="bca_lower", 
+                                    `title`="BCa CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="bca_upper", 
+                                    `title`="BCa CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="bootstrap_samples", 
+                                    `title`="Bootstrap N", 
+                                    `type`="integer"))))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="effectSizeGuide",
+                            title="Effect Size Interpretation Guide",
+                            visible="(interpretation)"))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="clinicalGuidance",
+                            title="Clinical Application Guidance",
+                            visible="(clinical_thresholds)"))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="methodsExplanation",
+                            title="Statistical Methods and References",
+                            visible="(comprehensive_output)"))
                         self$add(jmvcore::Image$new(
                             options=options,
                             name="effectPlot",
                             title="Effect Size Visualization",
                             visible="(plotEffects)",
                             renderFun=".plotEffects",
+                            width=600,
+                            height=400,
                             clearWith=list(
                                 "dep",
                                 "group",
@@ -360,7 +1076,39 @@ effectsizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "ciWidth",
                                 "plotType",
                                 "plotWidth",
-                                "plotHeight")))}))$new(options=options))}))
+                                "plotHeight")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="advancedForestPlot",
+                            title="Advanced Forest Plot",
+                            visible="(forest_plot_advanced)",
+                            renderFun=".plotAdvancedForest",
+                            width=800,
+                            height=600))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="effectDistributionPlot",
+                            title="Effect Size Distribution",
+                            visible="(effect_size_distribution)",
+                            renderFun=".plotEffectDistribution",
+                            width=600,
+                            height=400))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="comparisonPlot",
+                            title="Effect Size Comparison",
+                            visible="(comparison_plot)",
+                            renderFun=".plotEffectComparison",
+                            width=700,
+                            height=500))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="powerCurvePlot",
+                            title="Power Analysis Curves",
+                            visible="(power_analysis)",
+                            renderFun=".plotPowerCurves",
+                            width=600,
+                            height=450))}))$new(options=options))}))
 
 effectsizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "effectsizeBase",
@@ -370,7 +1118,7 @@ effectsizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "effectsize",
-                version = c(0,0,1),
+                version = c(0,0,31),
                 options = options,
                 results = effectsizeResults$new(options=options),
                 data = data,
@@ -383,13 +1131,14 @@ effectsizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Effect Size Analysis
+#' Comprehensive Effect Size Analysis
 #'
-#' Comprehensive effect size analysis including Cohen's d, Hedges' g, and 
-#' Glass' delta.
-#' Essential for clinical significance assessment, meta-analyses, and power 
-#' analyses
-#' in medical and pathological research.
+#' Comprehensive effect size analysis toolkit with BlueSky R integration. 
+#' Includes
+#' Cohen's d, Hedges' g, Glass' delta, eta-squared, omega-squared, Cramér's V,
+#' phi coefficient, rank-based effect sizes, and more. Essential for clinical
+#' significance assessment, meta-analyses, power analyses, and reproducible
+#' research in medical and pathological studies.
 #' 
 #' @param data The data as a data frame.
 #' @param dep The continuous outcome variable
@@ -412,6 +1161,49 @@ effectsizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plotType Type of effect size visualization
 #' @param plotWidth Width of effect size plot
 #' @param plotHeight Height of effect size plot
+#' @param measures_eta_squared Calculate eta-squared effect size (ANOVA)
+#' @param measures_partial_eta_squared Calculate partial eta-squared effect
+#'   size
+#' @param measures_omega_squared Calculate omega-squared effect size
+#'   (unbiased)
+#' @param measures_epsilon_squared Calculate epsilon-squared effect size
+#' @param measures_cramers_v Calculate Cramér's V for categorical associations
+#' @param measures_phi_coefficient Calculate phi coefficient for 2x2
+#'   contingency tables
+#' @param measures_cohens_w Calculate Cohen's w for chi-square goodness of fit
+#' @param measures_rank_biserial Calculate rank-biserial correlation for
+#'   Mann-Whitney U
+#' @param measures_cliff_delta Calculate Cliff's delta for ordinal data
+#' @param measures_vargha_delaney_a Calculate Vargha-Delaney A measure
+#' @param measures_common_language Calculate common language effect size
+#'   (CLES)
+#' @param measures_cohens_u3 Calculate Cohen's U3 statistic
+#' @param measures_probability_superiority Calculate probability of
+#'   superiority
+#' @param analysis_context Statistical context for effect size calculation
+#' @param correction_method Correction method for multiple effect sizes
+#' @param bootstrap_ci Use bootstrap methods for confidence intervals
+#' @param bootstrap_samples Number of bootstrap samples
+#' @param pooled_sd Use pooled standard deviation for effect size calculations
+#' @param welch_correction Apply Welch correction for unequal variances
+#' @param paired_analysis Analyze paired/matched data
+#' @param pairing_variable Variable indicating pairs/matches
+#' @param clinical_thresholds Apply clinical significance thresholds
+#' @param small_effect_threshold Threshold for small effect size
+#' @param medium_effect_threshold Threshold for medium effect size
+#' @param large_effect_threshold Threshold for large effect size
+#' @param power_analysis Include post-hoc power analysis
+#' @param alpha_level Significance level for power calculations
+#' @param desired_power Desired statistical power
+#' @param meta_analysis_format Format output for meta-analysis software
+#' @param study_weights Variable containing study weights for meta-analysis
+#' @param bluesky_integration Use BlueSky R statistical environment features
+#' @param comprehensive_output Include comprehensive statistical details
+#' @param effect_size_family Focus on specific family of effect sizes
+#' @param forest_plot_advanced Create publication-ready forest plot
+#' @param effect_size_distribution Show sampling distribution of effect sizes
+#' @param comparison_plot Compare multiple effect size measures
+#' @param export_format Output formatting style
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -419,7 +1211,23 @@ effectsizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$results$descriptives} \tab \tab \tab \tab \tab Group descriptive statistics \cr
 #'   \code{results$results$testDetails} \tab \tab \tab \tab \tab t-test statistics and significance \cr
 #'   \code{results$results$assumptions} \tab \tab \tab \tab \tab Tests of normality and variance homogeneity \cr
+#'   \code{results$results$comprehensiveEffectSizes} \tab \tab \tab \tab \tab All requested effect size measures with interpretations \cr
+#'   \code{results$results$varianceExplained} \tab \tab \tab \tab \tab Eta-squared, omega-squared, and related measures \cr
+#'   \code{results$results$associationMeasures} \tab \tab \tab \tab \tab Cramér's V, phi coefficient, and association measures \cr
+#'   \code{results$results$rankBasedEffects} \tab \tab \tab \tab \tab Non-parametric effect size measures \cr
+#'   \code{results$results$commonLanguageEffects} \tab \tab \tab \tab \tab Intuitive probability-based effect sizes \cr
+#'   \code{results$results$powerAnalysisResults} \tab \tab \tab \tab \tab Statistical power calculations for observed effects \cr
+#'   \code{results$results$metaAnalysisFormat} \tab \tab \tab \tab \tab Formatted output for meta-analysis software \cr
+#'   \code{results$results$clinicalSignificance} \tab \tab \tab \tab \tab Clinical significance evaluation using thresholds \cr
+#'   \code{results$results$bootstrapResults} \tab \tab \tab \tab \tab Bootstrap-based confidence intervals for effect sizes \cr
+#'   \code{results$results$effectSizeGuide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$results$clinicalGuidance} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results$effectPlot} \tab \tab \tab \tab \tab Plot showing effect sizes with confidence intervals \cr
+#'   \code{results$results$advancedForestPlot} \tab \tab \tab \tab \tab Publication-ready forest plot of effect sizes \cr
+#'   \code{results$results$effectDistributionPlot} \tab \tab \tab \tab \tab Sampling distribution of effect sizes \cr
+#'   \code{results$results$comparisonPlot} \tab \tab \tab \tab \tab Comparison of multiple effect size measures \cr
+#'   \code{results$results$powerCurvePlot} \tab \tab \tab \tab \tab Power curves for different effect sizes and sample sizes \cr
 #' }
 #'
 #' @export
@@ -442,18 +1250,59 @@ effectsize <- function(
     plotEffects = TRUE,
     plotType = "forest",
     plotWidth = 600,
-    plotHeight = 400) {
+    plotHeight = 400,
+    measures_eta_squared = FALSE,
+    measures_partial_eta_squared = FALSE,
+    measures_omega_squared = FALSE,
+    measures_epsilon_squared = FALSE,
+    measures_cramers_v = FALSE,
+    measures_phi_coefficient = FALSE,
+    measures_cohens_w = FALSE,
+    measures_rank_biserial = FALSE,
+    measures_cliff_delta = FALSE,
+    measures_vargha_delaney_a = FALSE,
+    measures_common_language = FALSE,
+    measures_cohens_u3 = FALSE,
+    measures_probability_superiority = FALSE,
+    analysis_context = "ttest",
+    correction_method = "none",
+    bootstrap_ci = FALSE,
+    bootstrap_samples = 1000,
+    pooled_sd = TRUE,
+    welch_correction = FALSE,
+    paired_analysis = FALSE,
+    pairing_variable,
+    clinical_thresholds = FALSE,
+    small_effect_threshold = 0.2,
+    medium_effect_threshold = 0.5,
+    large_effect_threshold = 0.8,
+    power_analysis = FALSE,
+    alpha_level = 0.05,
+    desired_power = 0.8,
+    meta_analysis_format = FALSE,
+    study_weights,
+    bluesky_integration = TRUE,
+    comprehensive_output = FALSE,
+    effect_size_family = "smd",
+    forest_plot_advanced = FALSE,
+    effect_size_distribution = FALSE,
+    comparison_plot = FALSE,
+    export_format = "standard") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("effectsize requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(pairing_variable)) pairing_variable <- jmvcore::resolveQuo(jmvcore::enquo(pairing_variable))
+    if ( ! missing(study_weights)) study_weights <- jmvcore::resolveQuo(jmvcore::enquo(study_weights))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(group), group, NULL),
+            `if`( ! missing(pairing_variable), pairing_variable, NULL),
+            `if`( ! missing(study_weights), study_weights, NULL))
 
 
     options <- effectsizeOptions$new(
@@ -474,7 +1323,44 @@ effectsize <- function(
         plotEffects = plotEffects,
         plotType = plotType,
         plotWidth = plotWidth,
-        plotHeight = plotHeight)
+        plotHeight = plotHeight,
+        measures_eta_squared = measures_eta_squared,
+        measures_partial_eta_squared = measures_partial_eta_squared,
+        measures_omega_squared = measures_omega_squared,
+        measures_epsilon_squared = measures_epsilon_squared,
+        measures_cramers_v = measures_cramers_v,
+        measures_phi_coefficient = measures_phi_coefficient,
+        measures_cohens_w = measures_cohens_w,
+        measures_rank_biserial = measures_rank_biserial,
+        measures_cliff_delta = measures_cliff_delta,
+        measures_vargha_delaney_a = measures_vargha_delaney_a,
+        measures_common_language = measures_common_language,
+        measures_cohens_u3 = measures_cohens_u3,
+        measures_probability_superiority = measures_probability_superiority,
+        analysis_context = analysis_context,
+        correction_method = correction_method,
+        bootstrap_ci = bootstrap_ci,
+        bootstrap_samples = bootstrap_samples,
+        pooled_sd = pooled_sd,
+        welch_correction = welch_correction,
+        paired_analysis = paired_analysis,
+        pairing_variable = pairing_variable,
+        clinical_thresholds = clinical_thresholds,
+        small_effect_threshold = small_effect_threshold,
+        medium_effect_threshold = medium_effect_threshold,
+        large_effect_threshold = large_effect_threshold,
+        power_analysis = power_analysis,
+        alpha_level = alpha_level,
+        desired_power = desired_power,
+        meta_analysis_format = meta_analysis_format,
+        study_weights = study_weights,
+        bluesky_integration = bluesky_integration,
+        comprehensive_output = comprehensive_output,
+        effect_size_family = effect_size_family,
+        forest_plot_advanced = forest_plot_advanced,
+        effect_size_distribution = effect_size_distribution,
+        comparison_plot = comparison_plot,
+        export_format = export_format)
 
     analysis <- effectsizeClass$new(
         options = options,

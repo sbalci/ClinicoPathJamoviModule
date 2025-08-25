@@ -93,6 +93,10 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 private$.performKrippendorffAnalysis()
             }
 
+            if (self$options$consensus) {
+                private$.performConsensusAnalysis()
+            }
+
             # if (self$options$pairwiseAnalysis) {
             #     private$.performPairwiseAnalysis()
             # }
@@ -431,6 +435,182 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 ci_lower = if (bootstrap) NaN else NULL,
                 ci_upper = if (bootstrap) NaN else NULL,
                 interpretation = interpretation
+            ))
+        },
+
+        # Consensus scoring analysis
+        .performConsensusAnalysis = function() {
+            consensus_method <- self$options$consensus_method
+            tie_breaking <- self$options$tie_breaking
+            show_consensus_table <- self$options$show_consensus_table
+
+            # Calculate consensus for each case
+            consensus_results <- private$.calculateConsensusScores(consensus_method, tie_breaking)
+            
+            # Populate consensus summary table
+            summary_table <- self$results$consensusSummary
+            
+            # Calculate summary statistics
+            total_cases <- private$.n_cases
+            consensus_achieved <- sum(!is.na(consensus_results$consensus_scores))
+            unanimous_cases <- sum(consensus_results$agreement_levels == "Unanimous", na.rm = TRUE)
+            majority_cases <- sum(consensus_results$agreement_levels == "Majority", na.rm = TRUE)
+            super_majority_cases <- sum(consensus_results$agreement_levels == "Super Majority", na.rm = TRUE)
+            tied_cases <- sum(consensus_results$agreement_levels == "Tie", na.rm = TRUE)
+            no_consensus_cases <- sum(consensus_results$agreement_levels == "No Consensus", na.rm = TRUE)
+            
+            # Add summary rows
+            summary_table$addRow(rowKey = "total", values = list(
+                metric = "Total Cases",
+                value = as.character(total_cases),
+                percentage = 100.0
+            ))
+            
+            summary_table$addRow(rowKey = "consensus", values = list(
+                metric = "Consensus Achieved",
+                value = as.character(consensus_achieved),
+                percentage = round((consensus_achieved / total_cases) * 100, 1)
+            ))
+            
+            if (unanimous_cases > 0) {
+                summary_table$addRow(rowKey = "unanimous", values = list(
+                    metric = "Unanimous Agreement",
+                    value = as.character(unanimous_cases),
+                    percentage = round((unanimous_cases / total_cases) * 100, 1)
+                ))
+            }
+            
+            if (super_majority_cases > 0) {
+                summary_table$addRow(rowKey = "super_majority", values = list(
+                    metric = "Super Majority (≥2/3)",
+                    value = as.character(super_majority_cases),
+                    percentage = round((super_majority_cases / total_cases) * 100, 1)
+                ))
+            }
+            
+            if (majority_cases > 0) {
+                summary_table$addRow(rowKey = "majority", values = list(
+                    metric = "Majority (≥50%)",
+                    value = as.character(majority_cases),
+                    percentage = round((majority_cases / total_cases) * 100, 1)
+                ))
+            }
+            
+            if (tied_cases > 0) {
+                summary_table$addRow(rowKey = "tied", values = list(
+                    metric = "Tied Cases",
+                    value = as.character(tied_cases),
+                    percentage = round((tied_cases / total_cases) * 100, 1)
+                ))
+            }
+            
+            if (no_consensus_cases > 0) {
+                summary_table$addRow(rowKey = "no_consensus", values = list(
+                    metric = "No Consensus",
+                    value = as.character(no_consensus_cases),
+                    percentage = round((no_consensus_cases / total_cases) * 100, 1)
+                ))
+            }
+            
+            # Populate detailed consensus table if requested
+            if (show_consensus_table) {
+                consensus_table <- self$results$consensusTable
+                
+                for (i in 1:private$.n_cases) {
+                    case_id <- paste("Case", i)
+                    consensus_score <- consensus_results$consensus_scores[i]
+                    agreement_level <- consensus_results$agreement_levels[i]
+                    n_agreeing <- consensus_results$n_agreeing[i]
+                    
+                    # Format individual rater scores
+                    case_scores <- as.character(private$.data_matrix[i, ])
+                    rater_scores_text <- paste(paste(private$.rater_names, case_scores, sep = ": "), collapse = ", ")
+                    
+                    consensus_table$addRow(rowKey = case_id, values = list(
+                        case_id = case_id,
+                        consensus_score = if (is.na(consensus_score)) "No consensus" else as.character(consensus_score),
+                        agreement_level = agreement_level,
+                        n_agreeing = n_agreeing,
+                        rater_scores = rater_scores_text
+                    ))
+                }
+            }
+        },
+
+        # Calculate consensus scores using specified method
+        .calculateConsensusScores = function(method, tie_breaking) {
+            n_cases <- private$.n_cases
+            n_raters <- private$.n_raters
+            data_matrix <- private$.data_matrix
+            
+            consensus_scores <- rep(NA, n_cases)
+            agreement_levels <- rep("No Consensus", n_cases)
+            n_agreeing <- rep(0, n_cases)
+            
+            # Calculate consensus threshold
+            threshold <- switch(method,
+                "majority" = ceiling(n_raters / 2),
+                "super_majority" = ceiling(n_raters * 2/3),
+                "unanimous" = n_raters
+            )
+            
+            for (i in 1:n_cases) {
+                case_scores <- as.character(data_matrix[i, ])
+                score_counts <- table(case_scores)
+                max_count <- max(score_counts)
+                mode_scores <- names(score_counts)[score_counts == max_count]
+                
+                # Check if consensus threshold is met
+                if (max_count >= threshold) {
+                    if (length(mode_scores) == 1) {
+                        # Single consensus score
+                        consensus_scores[i] <- mode_scores[1]
+                        n_agreeing[i] <- max_count
+                        
+                        # Determine agreement level
+                        if (max_count == n_raters) {
+                            agreement_levels[i] <- "Unanimous"
+                        } else if (max_count >= ceiling(n_raters * 2/3)) {
+                            agreement_levels[i] <- "Super Majority"
+                        } else {
+                            agreement_levels[i] <- "Majority"
+                        }
+                    } else {
+                        # Tie at consensus level - handle based on tie_breaking method
+                        agreement_levels[i] <- "Tie"
+                        n_agreeing[i] <- max_count
+                        
+                        if (tie_breaking == "arbitration") {
+                            consensus_scores[i] <- "ARBITRATION_NEEDED"
+                        } else if (tie_breaking == "global_mode") {
+                            # Use most frequent category across all cases
+                            all_scores <- as.character(as.matrix(data_matrix))
+                            global_counts <- table(all_scores)
+                            global_mode <- names(global_counts)[which.max(global_counts)]
+                            
+                            # If one of the tied scores matches global mode, use it
+                            if (global_mode %in% mode_scores) {
+                                consensus_scores[i] <- global_mode
+                                agreement_levels[i] <- paste(agreement_levels[i], "(Resolved)")
+                            }
+                        }
+                        # If tie_breaking == "exclude", leave as NA (default)
+                    }
+                } else {
+                    # No consensus reached
+                    n_agreeing[i] <- max_count
+                    if (length(mode_scores) == 1) {
+                        agreement_levels[i] <- paste("Insufficient (", max_count, "/", n_raters, ")", sep = "")
+                    } else {
+                        agreement_levels[i] <- paste("Multiple ties (", max_count, "/", n_raters, ")", sep = "")
+                    }
+                }
+            }
+            
+            return(list(
+                consensus_scores = consensus_scores,
+                agreement_levels = agreement_levels,
+                n_agreeing = n_agreeing
             ))
         },
 

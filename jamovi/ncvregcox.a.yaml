@@ -5,7 +5,7 @@ menuGroup: Survival
 menuSubgroup: High-Dimensional Methods
 menuTitle: SCAD Cox Regression
 menuSubtitle: Variable selection with smoothly clipped absolute deviation penalty
-version: '1.0.0'
+version: '0.0.31'
 jas: '1.2'
 
 description:

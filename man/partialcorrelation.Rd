@@ -2,7 +2,7 @@
 % Please edit documentation in R/partialcorrelation.h.R
 \name{partialcorrelation}
 \alias{partialcorrelation}
-\title{Partial Correlation Analysis}
+\title{Enhanced Partial Correlation Analysis with BlueSky Integration}
 \usage{
 partialcorrelation(
   data,
@@ -14,7 +14,20 @@ partialcorrelation(
   sig = TRUE,
   sigLevel = 0.05,
   matrixPlot = FALSE,
-  showZeroOrder = TRUE
+  showZeroOrder = TRUE,
+  correlationType = "partial",
+  multipleComparison = "none",
+  robustErrorHandling = TRUE,
+  showDiagnostics = FALSE,
+  detailedOutput = FALSE,
+  bootstrapCI = FALSE,
+  bootstrapSamples = 1000,
+  showEffectSizes = TRUE,
+  assumptionChecks = FALSE,
+  clinicalInterpretation = TRUE,
+  showRecommendations = FALSE,
+  bluesky_integration = TRUE,
+  comprehensive_output = FALSE
 )
 }
 \arguments{
@@ -37,6 +50,44 @@ partialcorrelation(
 \item{matrixPlot}{.}
 
 \item{showZeroOrder}{.}
+
+\item{correlationType}{Type of correlation analysis (BlueSky
+BSkyPartialSemiCorrelations feature)}
+
+\item{multipleComparison}{Method for correcting p-values for multiple
+comparisons}
+
+\item{robustErrorHandling}{Use BlueSky-style error handling with graceful
+degradation}
+
+\item{showDiagnostics}{Display diagnostic information about computations
+and assumptions}
+
+\item{detailedOutput}{Include comprehensive statistical details and
+interpretations}
+
+\item{bootstrapCI}{Calculate bootstrap confidence intervals for
+correlations}
+
+\item{bootstrapSamples}{Number of bootstrap samples for confidence
+intervals}
+
+\item{showEffectSizes}{Include Cohen's interpretation of correlation effect
+sizes}
+
+\item{assumptionChecks}{Perform and report assumption checks for
+correlation analysis}
+
+\item{clinicalInterpretation}{Provide clinical context and interpretation
+guidance}
+
+\item{showRecommendations}{Provide recommendations based on analysis
+results}
+
+\item{bluesky_integration}{Use BlueSky R statistical environment features}
+
+\item{comprehensive_output}{Include comprehensive statistical details and
+diagnostics}
 }
 \value{
 A results object containing:
@@ -44,7 +95,16 @@ A results object containing:
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$partialCorr} \tab \tab \tab \tab \tab a table \cr
 \code{results$zeroOrder} \tab \tab \tab \tab \tab a table \cr
+\code{results$semipartialCorr} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnostics} \tab \tab \tab \tab \tab Computational diagnostics and assumption checks \cr
+\code{results$assumptionResults} \tab \tab \tab \tab \tab Results of statistical assumption testing \cr
+\code{results$comprehensiveAnalysisSummary} \tab \tab \tab \tab \tab Enhanced statistical summary with BlueSky integration \cr
+\code{results$recommendations} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalInterpretationGuide} \tab \tab \tab \tab \tab a html \cr
+\code{results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$partialCorrelationNetwork} \tab \tab \tab \tab \tab an image \cr
+\code{results$effectSizePlot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -54,5 +114,10 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$partialCorr)}
 }
 \description{
-Partial Correlation Analysis
+Enhanced partial correlation analysis toolkit with BlueSky integration for
+comprehensive correlation analysis while controlling for confounding
+variables.
+Includes partial and semi-partial correlations, robust error handling,
+multiple variable support, and advanced statistical inference. Perfect for
+clinicopathological research where controlling for covariates is essential.
 }

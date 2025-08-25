@@ -1,0 +1,121 @@
+case_id,glass_slides,digital_images,specimen_type,clinical_score,consensus_glass,consensus_digital,pathologist_experience
+HER2_001,Null,Null,Core biopsy,0,Null,Null,Senior
+HER2_002,Null,Ultralow,Core biopsy,0,Null,Ultralow,Senior
+HER2_003,Ultralow,Ultralow,Excisional,0,Ultralow,Ultralow,Senior
+HER2_004,Ultralow,1+,Core biopsy,0,Ultralow,1+,Senior
+HER2_005,1+,1+,Excisional,1+,1+,1+,Senior
+HER2_006,1+,2+,Core biopsy,1+,1+,1+,Senior
+HER2_007,2+,2+,Excisional,2+,2+,2+,Senior
+HER2_008,2+,3+,Core biopsy,2+,2+,2+,Senior
+HER2_009,3+,3+,Excisional,3+,3+,3+,Senior
+HER2_010,Null,Null,Core biopsy,0,Null,Null,Junior
+HER2_011,Null,Ultralow,Core biopsy,0,Null,Ultralow,Junior
+HER2_012,Ultralow,Ultralow,Excisional,0,Ultralow,Ultralow,Junior
+HER2_013,Ultralow,1+,Core biopsy,0,Ultralow,1+,Junior
+HER2_014,1+,1+,Excisional,1+,1+,1+,Junior
+HER2_015,1+,1+,Core biopsy,1+,1+,2+,Junior
+HER2_016,2+,2+,Excisional,2+,2+,2+,Junior
+HER2_017,2+,3+,Core biopsy,2+,2+,3+,Junior
+HER2_018,3+,3+,Excisional,3+,3+,3+,Junior
+HER2_019,Null,Null,Core biopsy,0,Null,Ultralow,Mid-level
+HER2_020,Null,Ultralow,Core biopsy,0,Null,Ultralow,Mid-level
+HER2_021,Ultralow,Ultralow,Excisional,0,Ultralow,1+,Mid-level
+HER2_022,Ultralow,1+,Core biopsy,0,Ultralow,1+,Mid-level
+HER2_023,1+,1+,Excisional,1+,1+,1+,Mid-level
+HER2_024,1+,2+,Core biopsy,1+,1+,2+,Mid-level
+HER2_025,2+,2+,Excisional,2+,2+,2+,Mid-level
+HER2_026,2+,2+,Core biopsy,2+,2+,3+,Mid-level
+HER2_027,3+,3+,Excisional,3+,3+,3+,Mid-level
+HER2_028,Null,Null,Core biopsy,0,Null,Null,Senior
+HER2_029,Null,Null,Core biopsy,0,Null,Ultralow,Senior
+HER2_030,Ultralow,Ultralow,Excisional,0,Ultralow,Ultralow,Senior
+HER2_031,Ultralow,Ultralow,Core biopsy,0,Ultralow,1+,Senior
+HER2_032,1+,1+,Excisional,1+,1+,1+,Senior
+HER2_033,1+,1+,Core biopsy,1+,1+,1+,Senior
+HER2_034,2+,2+,Excisional,2+,2+,2+,Senior
+HER2_035,2+,3+,Core biopsy,2+,2+,3+,Senior
+HER2_036,3+,3+,Excisional,3+,3+,3+,Senior
+HER2_037,Null,Ultralow,Core biopsy,0,Null,Ultralow,Junior
+HER2_038,Null,Null,Core biopsy,0,Null,Null,Junior
+HER2_039,Ultralow,Ultralow,Excisional,0,Ultralow,1+,Junior
+HER2_040,Ultralow,1+,Core biopsy,0,Ultralow,1+,Junior
+HER2_041,1+,1+,Excisional,1+,1+,1+,Junior
+HER2_042,1+,1+,Core biopsy,1+,1+,2+,Junior
+HER2_043,2+,2+,Excisional,2+,2+,2+,Junior
+HER2_044,2+,3+,Core biopsy,2+,2+,3+,Junior
+HER2_045,3+,3+,Excisional,3+,3+,3+,Junior
+HER2_046,Null,Null,Core biopsy,0,Null,Null,Mid-level
+HER2_047,Null,Null,Core biopsy,0,Null,Ultralow,Mid-level
+HER2_048,Ultralow,Ultralow,Excisional,0,Ultralow,Ultralow,Mid-level
+HER2_049,Ultralow,1+,Core biopsy,0,Ultralow,1+,Mid-level
+HER2_050,1+,1+,Excisional,1+,1+,2+,Mid-level
+HER2_051,1+,2+,Core biopsy,1+,1+,2+,Mid-level
+HER2_052,2+,2+,Excisional,2+,2+,2+,Mid-level
+HER2_053,2+,3+,Core biopsy,2+,2+,3+,Mid-level
+HER2_054,3+,3+,Excisional,3+,3+,3+,Mid-level
+HER2_055,Null,Ultralow,Core biopsy,0,Null,Ultralow,Senior
+HER2_056,Null,Null,Core biopsy,0,Null,Null,Senior
+HER2_057,Ultralow,Ultralow,Excisional,0,Ultralow,1+,Senior
+HER2_058,Ultralow,1+,Core biopsy,0,Ultralow,1+,Senior
+HER2_059,1+,1+,Excisional,1+,1+,1+,Senior
+HER2_060,1+,1+,Core biopsy,1+,1+,1+,Senior
+HER2_061,2+,2+,Excisional,2+,2+,2+,Senior
+HER2_062,2+,2+,Core biopsy,2+,2+,3+,Senior
+HER2_063,3+,3+,Excisional,3+,3+,3+,Senior
+HER2_064,Null,Null,Core biopsy,0,Null,Ultralow,Junior
+HER2_065,Null,Ultralow,Core biopsy,0,Null,Ultralow,Junior
+HER2_066,Ultralow,Ultralow,Excisional,0,Ultralow,Ultralow,Junior
+HER2_067,Ultralow,1+,Core biopsy,0,Ultralow,1+,Junior
+HER2_068,1+,1+,Excisional,1+,1+,1+,Junior
+HER2_069,1+,2+,Core biopsy,1+,1+,2+,Junior
+HER2_070,2+,2+,Excisional,2+,2+,2+,Junior
+HER2_071,2+,3+,Core biopsy,2+,2+,3+,Junior
+HER2_072,3+,3+,Excisional,3+,3+,3+,Junior
+HER2_073,Null,Null,Core biopsy,0,Null,Null,Mid-level
+HER2_074,Null,Ultralow,Core biopsy,0,Null,Ultralow,Mid-level
+HER2_075,Ultralow,Ultralow,Excisional,0,Ultralow,1+,Mid-level
+HER2_076,Ultralow,1+,Core biopsy,0,Ultralow,1+,Mid-level
+HER2_077,1+,1+,Excisional,1+,1+,1+,Mid-level
+HER2_078,1+,1+,Core biopsy,1+,1+,2+,Mid-level
+HER2_079,2+,2+,Excisional,2+,2+,2+,Mid-level
+HER2_080,2+,2+,Core biopsy,2+,2+,3+,Mid-level
+HER2_081,3+,3+,Excisional,3+,3+,3+,Mid-level
+HER2_082,Null,Null,Core biopsy,0,Null,Null,Senior
+HER2_083,Null,Null,Core biopsy,0,Null,Ultralow,Senior
+HER2_084,Ultralow,Ultralow,Excisional,0,Ultralow,Ultralow,Senior
+HER2_085,Ultralow,Ultralow,Core biopsy,0,Ultralow,1+,Senior
+HER2_086,1+,1+,Excisional,1+,1+,1+,Senior
+HER2_087,1+,2+,Core biopsy,1+,1+,2+,Senior
+HER2_088,2+,2+,Excisional,2+,2+,2+,Senior
+HER2_089,2+,3+,Core biopsy,2+,2+,3+,Senior
+HER2_090,3+,3+,Excisional,3+,3+,3+,Senior
+HER2_091,Null,Ultralow,Core biopsy,0,Null,Ultralow,Junior
+HER2_092,Null,Null,Core biopsy,0,Null,Null,Junior
+HER2_093,Ultralow,Ultralow,Excisional,0,Ultralow,1+,Junior
+HER2_094,Ultralow,1+,Core biopsy,0,Ultralow,1+,Junior
+HER2_095,1+,1+,Excisional,1+,1+,1+,Junior
+HER2_096,1+,1+,Core biopsy,1+,1+,1+,Junior
+HER2_097,2+,2+,Excisional,2+,2+,2+,Junior
+HER2_098,2+,3+,Core biopsy,2+,2+,3+,Junior
+HER2_099,3+,3+,Excisional,3+,3+,3+,Junior
+HER2_100,Null,Null,Core biopsy,0,Null,Ultralow,Mid-level
+HER2_101,Null,Ultralow,Core biopsy,0,Null,Ultralow,Mid-level
+HER2_102,Ultralow,Ultralow,Excisional,0,Ultralow,Ultralow,Mid-level
+HER2_103,Ultralow,1+,Core biopsy,0,Ultralow,1+,Mid-level
+HER2_104,1+,1+,Excisional,1+,1+,2+,Mid-level
+HER2_105,1+,2+,Core biopsy,1+,1+,2+,Mid-level
+HER2_106,2+,2+,Excisional,2+,2+,2+,Mid-level
+HER2_107,2+,3+,Core biopsy,2+,2+,3+,Mid-level
+HER2_108,3+,3+,Excisional,3+,3+,3+,Mid-level
+HER2_109,Null,Null,Core biopsy,0,Null,Null,Senior
+HER2_110,Null,Ultralow,Core biopsy,0,Null,Ultralow,Senior
+HER2_111,Ultralow,Ultralow,Excisional,0,Ultralow,1+,Senior
+HER2_112,Ultralow,1+,Core biopsy,0,Ultralow,1+,Senior
+HER2_113,1+,1+,Excisional,1+,1+,1+,Senior
+HER2_114,1+,1+,Core biopsy,1+,1+,2+,Senior
+HER2_115,2+,2+,Excisional,2+,2+,2+,Senior
+HER2_116,2+,3+,Core biopsy,2+,2+,3+,Senior
+HER2_117,3+,3+,Excisional,3+,3+,3+,Senior
+HER2_118,Null,Null,Core biopsy,0,Null,Ultralow,Junior
+HER2_119,Null,Ultralow,Core biopsy,0,Null,Ultralow,Junior
+HER2_120,Ultralow,Ultralow,Excisional,0,Ultralow,Ultralow,Junior

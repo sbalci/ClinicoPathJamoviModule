@@ -1,0 +1,249 @@
+---
+name: enhancedfactorvariable
+title: Enhanced Factor Variable Analysis with BlueSky Integration
+menuGroup: ExplorationD
+menuSubgroup: ClinicoPath Descriptives
+menuSubtitle: "Advanced factor level analysis with BlueSky features"
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Enhanced factor variable analysis toolkit with BlueSky integration for comprehensive
+        categorical variable profiling. Includes detailed factor level counting, top N factor 
+        display, summary statistics, and enhanced visualization capabilities. Perfect for 
+        exploring categorical pathology variables, biomarker categories, and clinical 
+        classification systems with advanced filtering and display options.
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: vars
+      title: 'Factor Variables'
+      type: Variables
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description: 'Factor variables for detailed level analysis (will be converted to factors if needed)'
+
+    # Core Analysis Options
+    - name: showOnlyTopFactors
+      title: 'Show Only Top Factors'
+      type: Bool
+      default: true
+      description: 'Display only the most frequent factor levels instead of all levels'
+
+    - name: maxTopFactors
+      title: 'Maximum Top Factors to Display'
+      type: Integer
+      default: 30
+      min: 5
+      max: 100
+      description: 'Number of top factor levels to display when limiting output'
+
+    - name: sortingMethod
+      title: 'Factor Level Sorting'
+      type: List
+      options:
+          - title: 'By Frequency (Descending)'
+            name: freq_desc
+          - title: 'By Frequency (Ascending)'
+            name: freq_asc
+          - title: 'By Level Name (Ascending)'
+            name: name_asc
+          - title: 'By Level Name (Descending)'
+            name: name_desc
+          - title: 'Original Factor Order'
+            name: original
+      default: freq_desc
+      description: 'Method for ordering factor levels in output tables'
+
+    # Output Options
+    - name: showDatasetOverview
+      title: 'Dataset Overview'
+      type: Bool
+      default: true
+      description: 'Display dataset summary with variable counts and observations'
+
+    - name: showNominalSummary
+      title: 'Nominal Variable Summary'
+      type: Bool
+      default: true
+      description: 'Display summary statistics for all factor variables'
+
+    - name: showDetailedLevels
+      title: 'Detailed Factor Levels'
+      type: Bool
+      default: true
+      description: 'Display detailed counts for each factor level'
+
+    - name: showCombinedAnalysis
+      title: 'Combined Factor Analysis'
+      type: Bool
+      default: false
+      description: 'Display all factors in a single combined table'
+
+    # Statistical Options
+    - name: includePercentages
+      title: 'Include Percentages'
+      type: Bool
+      default: true
+      description: 'Calculate and display percentages for factor levels'
+
+    - name: includeValidPercentages
+      title: 'Include Valid Percentages'
+      type: Bool
+      default: true
+      description: 'Calculate percentages excluding missing values'
+
+    - name: includeCumulativeStats
+      title: 'Include Cumulative Statistics'
+      type: Bool
+      default: false
+      description: 'Calculate and display cumulative frequencies and percentages'
+
+    # Missing Value Handling
+    - name: includeMissing
+      title: 'Include Missing Values'
+      type: Bool
+      default: true
+      description: 'Include missing values (NA) in factor level counts'
+
+    - name: missingLabel
+      title: 'Missing Value Label'
+      type: String
+      default: '<Missing>'
+      description: 'Label to display for missing factor levels'
+
+    # Filtering Options
+    - name: minimumCount
+      title: 'Minimum Count Filter'
+      type: Integer
+      default: 1
+      min: 1
+      max: 1000
+      description: 'Hide factor levels with counts below this threshold'
+
+    - name: minimumPercentage
+      title: 'Minimum Percentage Filter'
+      type: Number
+      default: 0.0
+      min: 0.0
+      max: 50.0
+      description: 'Hide factor levels with percentages below this threshold'
+
+    - name: excludeRareFactors
+      title: 'Group Rare Factors'
+      type: Bool
+      default: false
+      description: 'Group infrequent factor levels into "Other" category'
+
+    - name: rareFactorThreshold
+      title: 'Rare Factor Threshold'
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+      description: 'Percentage threshold below which factors are considered rare'
+
+    - name: rareFactorLabel
+      title: 'Rare Factor Label'
+      type: String
+      default: 'Other'
+      description: 'Label for grouped rare factor levels'
+
+    # Advanced Analysis
+    - name: factorComplexityAnalysis
+      title: 'Factor Complexity Analysis'
+      type: Bool
+      default: false
+      description: 'Analyze factor complexity with entropy and diversity measures'
+
+    - name: levelBalanceAnalysis
+      title: 'Level Balance Analysis'
+      type: Bool
+      default: false
+      description: 'Analyze balance between factor levels with statistical measures'
+
+    # BlueSky Integration
+    - name: bluesky_integration
+      title: 'Enhanced BlueSky Integration'
+      type: Bool
+      default: true
+      description: 'Use BlueSky R statistical environment features and algorithms'
+
+    - name: comprehensive_output
+      title: 'Comprehensive Statistical Output'
+      type: Bool
+      default: false
+      description: 'Include comprehensive statistical details and diagnostics'
+
+    - name: clinical_interpretation
+      title: 'Clinical Context'
+      type: Bool
+      default: true
+      description: 'Provide clinical context for factor variable analysis results'
+
+    # Visualization Options
+    - name: createVisualizations
+      title: 'Create Visualizations'
+      type: Bool
+      default: true
+      description: 'Generate plots for factor variable analysis'
+
+    - name: plotTopFactorsOnly
+      title: 'Plot Top Factors Only'
+      type: Bool
+      default: true
+      description: 'Limit plots to top factor levels only'
+
+    - name: plotOrientation
+      title: 'Plot Orientation'
+      type: List
+      options:
+          - title: 'Horizontal Bars'
+            name: horizontal
+          - title: 'Vertical Bars'
+            name: vertical
+      default: horizontal
+      description: 'Orientation for factor level bar plots'
+
+    - name: plotTheme
+      title: 'Plot Theme'
+      type: List
+      options:
+          - title: 'Clinical'
+            name: clinical
+          - title: 'Modern'
+            name: modern
+          - title: 'Classic'
+            name: classic
+      default: clinical
+      description: 'Visual theme for factor analysis plots'
+
+    # Export Options
+    - name: outputFormat
+      title: 'Output Format'
+      type: List
+      options:
+          - title: 'Standard (jamovi)'
+            name: standard
+          - title: 'Publication Ready'
+            name: publication
+          - title: 'Clinical Report'
+            name: clinical
+      default: standard
+      description: 'Output format style for tables and results'
+
+    - name: includeMethodology
+      title: 'Include Methodology'
+      type: Bool
+      default: false
+      description: 'Include detailed methodology and references in output'

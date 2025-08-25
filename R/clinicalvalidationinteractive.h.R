@@ -657,7 +657,7 @@ clinicalvalidationinteractiveResults <- if (requireNamespace("jmvcore", quietly=
                 options=options,
                 name="validationCurves",
                 title="Validation Learning Curves",
-                visible="(show_validation_curves)",
+                visible=FALSE,
                 requiresData=TRUE,
                 clearWith=list(
                     "validation_method",
@@ -696,7 +696,7 @@ clinicalvalidationinteractiveBase <- if (requireNamespace("jmvcore", quietly=TRU
             super$initialize(
                 package = "ClinicoPath",
                 name = "clinicalvalidationinteractive",
-                version = c(0,0,1),
+                version = c(0,0,31),
                 options = options,
                 results = clinicalvalidationinteractiveResults$new(options=options),
                 data = data,

@@ -12,7 +12,7 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.31.44"
+new_version: "0.0.31.45"
 new_date: "2025-08-25"
 quick: false
 TEST: true
@@ -137,6 +137,8 @@ jamovi_extensions:
   - ".a.yaml"
   - ".r.yaml"
   - ".u.yaml"
+  - ".js"      # JavaScript event files
+  - ".html"    # HTML content files
 
 # Security settings
 security:

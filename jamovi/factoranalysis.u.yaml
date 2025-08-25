@@ -1,0 +1,195 @@
+title: Factor Analysis
+name: factoranalysis
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables
+        children:
+          - type: VariablesListBox
+            name: vars
+            isTarget: true
+            itemDropBehaviour: emptyspace
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Extraction Method
+            children:
+              - type: ComboBox
+                name: method
+              - type: ComboBox
+                name: nFactorsMethod
+              - type: TextBox
+                name: nFactors
+                format: number
+                enable: (nFactorsMethod:manual)
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Rotation & Scores
+            children:
+              - type: ComboBox
+                name: rotation
+              - type: ComboBox
+                name: scores
+              - type: CheckBox
+                name: saveScores
+              - type: TextBox
+                name: scoresPrefix
+                format: string
+                enable: (saveScores)
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Display Options
+            children:
+              - type: CheckBox
+                name: showUnrotated
+              - type: CheckBox
+                name: showRotated
+              - type: CheckBox
+                name: hideSmallLoadings
+              - type: TextBox
+                name: loadingsCutoff
+                format: number
+                enable: (hideSmallLoadings)
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Plots
+            children:
+              - type: CheckBox
+                name: screePlot
+              - type: CheckBox
+                name: loadingsPlot
+              - type: CheckBox
+                name: biplot
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Extraction Settings
+                children:
+                  - type: ComboBox
+                    name: priorCommunalities
+                  - type: TextBox
+                    name: maxIterations
+                    format: number
+                  - type: TextBox
+                    name: convergence
+                    format: number
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Parallel Analysis
+                children:
+                  - type: TextBox
+                    name: parallel_iterations
+                    format: number
+                    enable: (nFactorsMethod:parallel)
+                  - type: TextBox
+                    name: parallel_percentile
+                    format: number
+                    enable: (nFactorsMethod:parallel)
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Statistical Tests
+                children:
+                  - type: CheckBox
+                    name: adequacyTests
+                  - type: CheckBox
+                    name: bartlettTest
+                  - type: CheckBox
+                    name: kmoTest
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Factor Information
+                children:
+                  - type: CheckBox
+                    name: factorCorrelations
+                  - type: CheckBox
+                    name: communalities
+                  - type: CheckBox
+                    name: eigenvalues
+  - type: CollapseBox
+    label: BlueSky Integration
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bluesky_integration
+          - type: CheckBox
+            name: comprehensive_output
+          - type: CheckBox
+            name: clinical_interpretation
+  - type: CollapseBox
+    label: Plot Settings
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: plotWidth
+            format: number
+          - type: TextBox
+            name: plotHeight
+            format: number

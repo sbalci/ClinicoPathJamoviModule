@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.31.41
+version: 0.0.31.44
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2025-08-24'
+date: '2025-08-25'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -3631,20 +3631,19 @@ analyses:
       relationships.  Multiple modeling approaches are supported including Aalen
       additive models,  Cox-Aalen hybrid models, and dynamic regression with
       time-updated coefficients.
-  - title: Bayesian Diagnostic Probability Updates
+  - title: Bayesian Diagnostic Test Evaluation
     name: bayesiandiagnostic
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
-    menuSubgroup: meddecide
-    menuTitle: Bayesian Diagnostic Probability Updates
-    description: >
-      Bayesian diagnostic probability calculations with prior probability
-      updates.
-
-      Implements likelihood ratios, posterior probability calculations, and
-
-      diagnostic test chain analysis with sequential updating.
+    menuGroup: meddecideD
+    menuSubgroup: Diagnostic Test Evaluation
+    menuTitle: Bayesian Diagnostic Test Evaluation
+    description: |
+      Comprehensive Bayesian evaluation of diagnostic test performance including
+      sensitivity, specificity, predictive values, likelihood ratios, and
+      diagnostic odds ratios with full uncertainty quantification. Supports
+      meta-analysis, hierarchical modeling, and comparative test evaluation.
+    menuSubtitle: Bayesian analysis of diagnostic test performance with uncertainty
   - title: Beta-Binomial Diagnostic Accuracy Models
     name: betabinomialdiagnostic
     ns: ClinicoPath
@@ -4119,14 +4118,26 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Exact Tests for Small Samples
     menuSubtitle: Precise inference for small sample sizes
-  - title: Partial Correlation Analysis
+  - title: Enhanced Partial Correlation Analysis with BlueSky Integration
     name: partialcorrelation
     ns: ClinicoPath
     category: analyses
     menuGroup: ClinicoPath
     menuSubgroup: ClinicoPath Descriptives
-    menuTitle: Partial Correlation Analysis
-    menuSubtitle: Correlation controlling for confounding variables
+    menuTitle: Enhanced Partial Correlation Analysis
+    menuSubtitle: Correlation analysis with BlueSky integration and advanced features
+    description: >
+      Enhanced partial correlation analysis toolkit with BlueSky integration for
+
+      comprehensive correlation analysis while controlling for confounding
+      variables.
+
+      Includes partial and semi-partial correlations, robust error handling,
+
+      multiple variable support, and advanced statistical inference. Perfect for
+
+      clinicopathological research where controlling for covariates is
+      essential.
   - title: Polychoric Correlation Analysis
     name: polychoriccorr
     ns: ClinicoPath
@@ -4235,7 +4246,7 @@ analyses:
     name: clinicalvalidationinteractive
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideD
+    menuGroup: meddecideT
     menuSubgroup: Clinical Decision Support
     menuTitle: Interactive Clinical Model Validation
     menuSubtitle: Interactive validation with real-time parameter optimization
@@ -4248,22 +4259,26 @@ analyses:
       parameter correction, clinical scenario presets, and dynamic threshold 
 
       optimization for medical research and diagnostic applications.
-  - title: Effect Size Analysis
+  - title: Comprehensive Effect Size Analysis
     name: effectsize
     ns: ClinicoPath
     category: analyses
     menuGroup: ClinicoPathDescriptives
     menuSubgroup: Statistical Tests
-    menuTitle: Effect Size Analysis
-    menuSubtitle: Cohen's d, Hedges' g, Glass' Δ
+    menuTitle: Comprehensive Effect Size Analysis
+    menuSubtitle: Complete effect size toolkit with BlueSky integration
     description: >
-      Comprehensive effect size analysis including Cohen's d, Hedges' g, and
-      Glass' delta.
+      Comprehensive effect size analysis toolkit with BlueSky R integration.
+      Includes
 
-      Essential for clinical significance assessment, meta-analyses, and power
-      analyses
+      Cohen's d, Hedges' g, Glass' delta, eta-squared, omega-squared, Cramér's
+      V,
 
-      in medical and pathological research.
+      phi coefficient, rank-based effect sizes, and more. Essential for clinical
+
+      significance assessment, meta-analyses, power analyses, and reproducible
+
+      research in medical and pathological studies.
   - title: Non-parametric Statistical Methods
     name: nonparametric
     ns: ClinicoPath
@@ -4315,6 +4330,160 @@ analyses:
       disease mapping capabilities, and hierarchical Bayesian modeling for
 
       clinical research with geographic components.
+  - title: Adaptive Trial Design Methods
+    name: adaptivetrialdesign
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideD
+    menuSubgroup: Advanced Bayesian Methods
+    menuTitle: Adaptive Trial Design Methods
+    menuSubtitle: Bayesian interim analysis and adaptive sample size re-estimation
+    description: |
+      Advanced adaptive trial design methods for clinical research including
+      Bayesian interim analysis, adaptive sample size re-estimation, futility
+      stopping rules, and group sequential designs. Designed for efficient
+      clinical trial conduct with ethical early stopping capabilities.
+  - title: Bayesian Network Meta-Analysis
+    name: bayesiannetworkma
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideD
+    menuSubgroup: Advanced Bayesian Methods
+    menuTitle: Bayesian Network Meta-Analysis
+    menuSubtitle: Multiple treatment comparison with network geometry
+    description: >
+      Advanced Bayesian network meta-analysis for multiple treatment comparisons
+
+      using network geometry. Supports direct and indirect comparisons, network
+
+      coherence assessment, and ranking of multiple interventions with
+      uncertainty
+
+      quantification for clinical decision making.
+  - title: Spike-and-Slab Variable Selection
+    name: spikeslabpriors
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideD
+    menuSubgroup: Advanced Bayesian Methods
+    menuTitle: Spike-and-Slab Variable Selection
+    menuSubtitle: Bayesian variable selection for high-dimensional data
+    description: |
+      Advanced Bayesian variable selection using spike-and-slab priors for
+      high-dimensional data analysis. Supports regression, classification, and
+      survival analysis with automatic variable selection, model averaging, and
+      uncertainty quantification for clinical biomarker discovery.
+  - title: Modality Comparison Analysis
+    name: modalitycomparison
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecide
+    menuSubgroup: Agreement
+    menuTitle: Modality Comparison Analysis
+    description: >
+      Modality Comparison Analysis for digital pathology validation studies.
+
+      Compare agreement between different diagnostic modalities (e.g., glass
+      slides vs digital images)
+
+      with specialized metrics for pathology applications including discordance
+      pattern analysis
+
+      and HER2 scoring validation.
+  - title: Comprehensive Factor Analysis
+    name: factoranalysis
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuSubgroup: Multivariate Analysis
+    menuTitle: Comprehensive Factor Analysis
+    menuSubtitle: Factor analysis with BlueSky integration
+    description: |
+      Comprehensive factor analysis toolkit with BlueSky R integration. Includes
+      maximum likelihood factor analysis, principal axis factoring, scree plots,
+      multiple rotation methods, and factor score extraction. Essential for
+      dimensionality reduction, scale development, and multivariate analysis
+      in clinical and pathological research.
+  - title: Enhanced ROC Analysis with Youden Index Optimization
+    name: enhancedroc
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecide
+    menuSubgroup: Diagnostic Performance
+    menuTitle: Enhanced ROC Analysis with Youden Index Optimization
+    menuSubtitle: ROC analysis with BlueSky integration
+    description: >
+      Enhanced ROC analysis toolkit with BlueSky integration for comprehensive
+
+      diagnostic performance evaluation. Includes ROC curve analysis, Youden
+      Index
+
+      optimization, sensitivity/specificity analysis, optimal cutoff
+      determination,
+
+      and comparative ROC analysis. Essential for biomarker validation,
+      diagnostic
+
+      test evaluation, and clinical decision support in medical research.
+  - title: Enhanced Frequency Analysis with BlueSky Integration
+    name: enhancedfrequency
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Enhanced Frequency Analysis with BlueSky Integration
+    menuSubtitle: Advanced frequency tables with BlueSky features
+    description: >
+      Enhanced frequency analysis toolkit with BlueSky integration for
+      comprehensive
+
+      categorical data exploration. Includes flexible ordering options (by
+      frequency, 
+
+      variable value, or natural order), comprehensive percentage calculations
+      (valid, 
+
+      cumulative, missing), and enhanced missing value handling. Perfect for
+      exploratory 
+
+      data analysis, categorical variable profiling, and data quality
+      assessment.
+  - title: Enhanced Factor Variable Analysis with BlueSky Integration
+    name: enhancedfactorvariable
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ExplorationD
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Enhanced Factor Variable Analysis with BlueSky Integration
+    menuSubtitle: Advanced factor level analysis with BlueSky features
+    description: >
+      Enhanced factor variable analysis toolkit with BlueSky integration for
+      comprehensive
+
+      categorical variable profiling. Includes detailed factor level counting,
+      top N factor 
+
+      display, summary statistics, and enhanced visualization capabilities.
+      Perfect for 
+
+      exploring categorical pathology variables, biomarker categories, and
+      clinical 
+
+      classification systems with advanced filtering and display options.
+  - title: Enhanced Two-Way Frequency Analysis with BlueSky Integration
+    name: enhancedtwowayfrequency
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPath
+    menuSubgroup: ClinicoPath Descriptives
+    menuTitle: Enhanced Two-Way Frequency Analysis
+    menuSubtitle: Cross-tabulation analysis with BlueSky integration and advanced features
+    description: |
+      Enhanced two-way frequency analysis toolkit with BlueSky integration for
+      comprehensive cross-tabulation analysis. Includes cell, row, and column 
+      percentages, statistical tests for association, robust error handling,
+      and clinical interpretation guidance. Perfect for exploring relationships 
+      between categorical variables in clinicopathological research.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

@@ -14,7 +14,20 @@ partialcorrelationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             sig = TRUE,
             sigLevel = 0.05,
             matrixPlot = FALSE,
-            showZeroOrder = TRUE, ...) {
+            showZeroOrder = TRUE,
+            correlationType = "partial",
+            multipleComparison = "none",
+            robustErrorHandling = TRUE,
+            showDiagnostics = FALSE,
+            detailedOutput = FALSE,
+            bootstrapCI = FALSE,
+            bootstrapSamples = 1000,
+            showEffectSizes = TRUE,
+            assumptionChecks = FALSE,
+            clinicalInterpretation = TRUE,
+            showRecommendations = FALSE,
+            bluesky_integration = TRUE,
+            comprehensive_output = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -72,6 +85,70 @@ partialcorrelationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 "showZeroOrder",
                 showZeroOrder,
                 default=TRUE)
+            private$..correlationType <- jmvcore::OptionList$new(
+                "correlationType",
+                correlationType,
+                options=list(
+                    "partial",
+                    "semipartial",
+                    "both"),
+                default="partial")
+            private$..multipleComparison <- jmvcore::OptionList$new(
+                "multipleComparison",
+                multipleComparison,
+                options=list(
+                    "none",
+                    "bonferroni",
+                    "holm",
+                    "fdr",
+                    "by"),
+                default="none")
+            private$..robustErrorHandling <- jmvcore::OptionBool$new(
+                "robustErrorHandling",
+                robustErrorHandling,
+                default=TRUE)
+            private$..showDiagnostics <- jmvcore::OptionBool$new(
+                "showDiagnostics",
+                showDiagnostics,
+                default=FALSE)
+            private$..detailedOutput <- jmvcore::OptionBool$new(
+                "detailedOutput",
+                detailedOutput,
+                default=FALSE)
+            private$..bootstrapCI <- jmvcore::OptionBool$new(
+                "bootstrapCI",
+                bootstrapCI,
+                default=FALSE)
+            private$..bootstrapSamples <- jmvcore::OptionInteger$new(
+                "bootstrapSamples",
+                bootstrapSamples,
+                default=1000,
+                min=100,
+                max=10000)
+            private$..showEffectSizes <- jmvcore::OptionBool$new(
+                "showEffectSizes",
+                showEffectSizes,
+                default=TRUE)
+            private$..assumptionChecks <- jmvcore::OptionBool$new(
+                "assumptionChecks",
+                assumptionChecks,
+                default=FALSE)
+            private$..clinicalInterpretation <- jmvcore::OptionBool$new(
+                "clinicalInterpretation",
+                clinicalInterpretation,
+                default=TRUE)
+            private$..showRecommendations <- jmvcore::OptionBool$new(
+                "showRecommendations",
+                showRecommendations,
+                default=FALSE)
+            private$..bluesky_integration <- jmvcore::OptionBool$new(
+                "bluesky_integration",
+                bluesky_integration,
+                default=TRUE)
+            private$..comprehensive_output <- jmvcore::OptionBool$new(
+                "comprehensive_output",
+                comprehensive_output,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..controls)
@@ -82,6 +159,19 @@ partialcorrelationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$.addOption(private$..sigLevel)
             self$.addOption(private$..matrixPlot)
             self$.addOption(private$..showZeroOrder)
+            self$.addOption(private$..correlationType)
+            self$.addOption(private$..multipleComparison)
+            self$.addOption(private$..robustErrorHandling)
+            self$.addOption(private$..showDiagnostics)
+            self$.addOption(private$..detailedOutput)
+            self$.addOption(private$..bootstrapCI)
+            self$.addOption(private$..bootstrapSamples)
+            self$.addOption(private$..showEffectSizes)
+            self$.addOption(private$..assumptionChecks)
+            self$.addOption(private$..clinicalInterpretation)
+            self$.addOption(private$..showRecommendations)
+            self$.addOption(private$..bluesky_integration)
+            self$.addOption(private$..comprehensive_output)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -92,7 +182,20 @@ partialcorrelationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         sig = function() private$..sig$value,
         sigLevel = function() private$..sigLevel$value,
         matrixPlot = function() private$..matrixPlot$value,
-        showZeroOrder = function() private$..showZeroOrder$value),
+        showZeroOrder = function() private$..showZeroOrder$value,
+        correlationType = function() private$..correlationType$value,
+        multipleComparison = function() private$..multipleComparison$value,
+        robustErrorHandling = function() private$..robustErrorHandling$value,
+        showDiagnostics = function() private$..showDiagnostics$value,
+        detailedOutput = function() private$..detailedOutput$value,
+        bootstrapCI = function() private$..bootstrapCI$value,
+        bootstrapSamples = function() private$..bootstrapSamples$value,
+        showEffectSizes = function() private$..showEffectSizes$value,
+        assumptionChecks = function() private$..assumptionChecks$value,
+        clinicalInterpretation = function() private$..clinicalInterpretation$value,
+        showRecommendations = function() private$..showRecommendations$value,
+        bluesky_integration = function() private$..bluesky_integration$value,
+        comprehensive_output = function() private$..comprehensive_output$value),
     private = list(
         ..vars = NA,
         ..controls = NA,
@@ -102,7 +205,20 @@ partialcorrelationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         ..sig = NA,
         ..sigLevel = NA,
         ..matrixPlot = NA,
-        ..showZeroOrder = NA)
+        ..showZeroOrder = NA,
+        ..correlationType = NA,
+        ..multipleComparison = NA,
+        ..robustErrorHandling = NA,
+        ..showDiagnostics = NA,
+        ..detailedOutput = NA,
+        ..bootstrapCI = NA,
+        ..bootstrapSamples = NA,
+        ..showEffectSizes = NA,
+        ..assumptionChecks = NA,
+        ..clinicalInterpretation = NA,
+        ..showRecommendations = NA,
+        ..bluesky_integration = NA,
+        ..comprehensive_output = NA)
 )
 
 partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -112,14 +228,23 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         instructions = function() private$.items[["instructions"]],
         partialCorr = function() private$.items[["partialCorr"]],
         zeroOrder = function() private$.items[["zeroOrder"]],
-        plot = function() private$.items[["plot"]]),
+        semipartialCorr = function() private$.items[["semipartialCorr"]],
+        diagnostics = function() private$.items[["diagnostics"]],
+        assumptionResults = function() private$.items[["assumptionResults"]],
+        comprehensiveAnalysisSummary = function() private$.items[["comprehensiveAnalysisSummary"]],
+        recommendations = function() private$.items[["recommendations"]],
+        clinicalInterpretationGuide = function() private$.items[["clinicalInterpretationGuide"]],
+        methodsExplanation = function() private$.items[["methodsExplanation"]],
+        plot = function() private$.items[["plot"]],
+        partialCorrelationNetwork = function() private$.items[["partialCorrelationNetwork"]],
+        effectSizePlot = function() private$.items[["effectSizePlot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Partial Correlation Analysis")
+                title="Enhanced Partial Correlation Analysis Results")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -129,7 +254,7 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="partialCorr",
                 title="Partial Correlations",
-                visible="(vars && controls)",
+                visible="(vars && controls && (correlationType:partial || correlationType:both))",
                 columns=list(
                     list(
                         `name`="var1", 
@@ -152,12 +277,18 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `name`="rCI", 
                         `title`="95% CI", 
                         `type`="text", 
-                        `visible`="(ci)"),
+                        `visible`="(ci || bootstrapCI)"),
                     list(
                         `name`="p", 
                         `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"),
+                    list(
+                        `name`="p_adjusted", 
+                        `title`="p (adjusted)", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(multipleComparison:!none)"),
                     list(
                         `name`="df", 
                         `title`="df", 
@@ -165,7 +296,17 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     list(
                         `name`="n", 
                         `title`="N", 
-                        `type`="integer"))))
+                        `type`="integer"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size", 
+                        `type`="text", 
+                        `visible`="(showEffectSizes)"),
+                    list(
+                        `name`="computation_notes", 
+                        `title`="Notes", 
+                        `type`="text", 
+                        `visible`="(robustErrorHandling)"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="zeroOrder",
@@ -194,6 +335,160 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `name`="n", 
                         `title`="N", 
                         `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="semipartialCorr",
+                title="Semi-partial Correlations",
+                visible="(vars && controls && (correlationType:semipartial || correlationType:both))",
+                columns=list(
+                    list(
+                        `name`="var1", 
+                        `title`="Variable 1", 
+                        `type`="text"),
+                    list(
+                        `name`="var2", 
+                        `title`="Variable 2", 
+                        `type`="text"),
+                    list(
+                        `name`="controls", 
+                        `title`="Controlling for", 
+                        `type`="text"),
+                    list(
+                        `name`="sr", 
+                        `title`="Semi-partial r", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="srCI", 
+                        `title`="95% CI", 
+                        `type`="text", 
+                        `visible`="(ci || bootstrapCI)"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="p_adjusted", 
+                        `title`="p (adjusted)", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(multipleComparison:!none)"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size", 
+                        `type`="text", 
+                        `visible`="(showEffectSizes)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="diagnostics",
+                title="Diagnostic Information",
+                visible="(showDiagnostics)",
+                columns=list(
+                    list(
+                        `name`="variable_pair", 
+                        `title`="Variable Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="control_variables", 
+                        `title`="Control Variables", 
+                        `type`="text"),
+                    list(
+                        `name`="sample_size", 
+                        `title`="Sample Size", 
+                        `type`="integer"),
+                    list(
+                        `name`="complete_cases", 
+                        `title`="Complete Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="missing_pattern", 
+                        `title`="Missing Pattern", 
+                        `type`="text"),
+                    list(
+                        `name`="computation_status", 
+                        `title`="Status", 
+                        `type`="text"),
+                    list(
+                        `name`="warnings", 
+                        `title`="Warnings", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="assumptionResults",
+                title="Assumption Check Results",
+                visible="(assumptionChecks)",
+                columns=list(
+                    list(
+                        `name`="variable_pair", 
+                        `title`="Variable Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="normality_test", 
+                        `title`="Normality Test", 
+                        `type`="text"),
+                    list(
+                        `name`="normality_p", 
+                        `title`="Normality p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="linearity_check", 
+                        `title`="Linearity", 
+                        `type`="text"),
+                    list(
+                        `name`="homoscedasticity", 
+                        `title`="Homoscedasticity", 
+                        `type`="text"),
+                    list(
+                        `name`="overall_assumptions", 
+                        `title`="Overall Assessment", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comprehensiveAnalysisSummary",
+                title="Comprehensive Partial Correlation Summary",
+                visible="(bluesky_integration && comprehensive_output)",
+                columns=list(
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"),
+                    list(
+                        `name`="clinical_significance", 
+                        `title`="Clinical Significance", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="recommendations",
+                title="Statistical Recommendations",
+                visible="(showRecommendations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalInterpretationGuide",
+                title="Clinical Application Guidance",
+                visible="(clinicalInterpretation)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="methodsExplanation",
+                title="Statistical Methods and References",
+                visible="(detailedOutput)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -201,7 +496,23 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 visible="(matrixPlot)",
                 width=500,
                 height=400,
-                renderFun=".plot"))}))
+                renderFun=".plot"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="partialCorrelationNetwork",
+                title="Partial Correlation Network",
+                visible="(matrixPlot && correlationType:!semipartial)",
+                width=600,
+                height=500,
+                renderFun=".plotNetwork"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="effectSizePlot",
+                title="Effect Size Distribution",
+                visible="(showEffectSizes && detailedOutput)",
+                width=500,
+                height=400,
+                renderFun=".plotEffectSizes"))}))
 
 partialcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "partialcorrelationBase",
@@ -211,7 +522,7 @@ partialcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 package = "ClinicoPath",
                 name = "partialcorrelation",
-                version = c(1,0,0),
+                version = c(0,0,31),
                 options = options,
                 results = partialcorrelationResults$new(options=options),
                 data = data,
@@ -224,8 +535,14 @@ partialcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 weightsSupport = 'auto')
         }))
 
-#' Partial Correlation Analysis
+#' Enhanced Partial Correlation Analysis with BlueSky Integration
 #'
+#' Enhanced partial correlation analysis toolkit with BlueSky integration for
+#' comprehensive correlation analysis while controlling for confounding 
+#' variables.
+#' Includes partial and semi-partial correlations, robust error handling,
+#' multiple variable support, and advanced statistical inference. Perfect for
+#' clinicopathological research where controlling for covariates is essential.
 #' 
 #' @param data .
 #' @param vars .
@@ -237,12 +554,46 @@ partialcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param sigLevel .
 #' @param matrixPlot .
 #' @param showZeroOrder .
+#' @param correlationType Type of correlation analysis (BlueSky
+#'   BSkyPartialSemiCorrelations feature)
+#' @param multipleComparison Method for correcting p-values for multiple
+#'   comparisons
+#' @param robustErrorHandling Use BlueSky-style error handling with graceful
+#'   degradation
+#' @param showDiagnostics Display diagnostic information about computations
+#'   and assumptions
+#' @param detailedOutput Include comprehensive statistical details and
+#'   interpretations
+#' @param bootstrapCI Calculate bootstrap confidence intervals for
+#'   correlations
+#' @param bootstrapSamples Number of bootstrap samples for confidence
+#'   intervals
+#' @param showEffectSizes Include Cohen's interpretation of correlation effect
+#'   sizes
+#' @param assumptionChecks Perform and report assumption checks for
+#'   correlation analysis
+#' @param clinicalInterpretation Provide clinical context and interpretation
+#'   guidance
+#' @param showRecommendations Provide recommendations based on analysis
+#'   results
+#' @param bluesky_integration Use BlueSky R statistical environment features
+#' @param comprehensive_output Include comprehensive statistical details and
+#'   diagnostics
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$partialCorr} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$zeroOrder} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$semipartialCorr} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$diagnostics} \tab \tab \tab \tab \tab Computational diagnostics and assumption checks \cr
+#'   \code{results$assumptionResults} \tab \tab \tab \tab \tab Results of statistical assumption testing \cr
+#'   \code{results$comprehensiveAnalysisSummary} \tab \tab \tab \tab \tab Enhanced statistical summary with BlueSky integration \cr
+#'   \code{results$recommendations} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalInterpretationGuide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$methodsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$partialCorrelationNetwork} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$effectSizePlot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -262,7 +613,20 @@ partialcorrelation <- function(
     sig = TRUE,
     sigLevel = 0.05,
     matrixPlot = FALSE,
-    showZeroOrder = TRUE) {
+    showZeroOrder = TRUE,
+    correlationType = "partial",
+    multipleComparison = "none",
+    robustErrorHandling = TRUE,
+    showDiagnostics = FALSE,
+    detailedOutput = FALSE,
+    bootstrapCI = FALSE,
+    bootstrapSamples = 1000,
+    showEffectSizes = TRUE,
+    assumptionChecks = FALSE,
+    clinicalInterpretation = TRUE,
+    showRecommendations = FALSE,
+    bluesky_integration = TRUE,
+    comprehensive_output = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("partialcorrelation requires jmvcore to be installed (restart may be required)")
@@ -285,7 +649,20 @@ partialcorrelation <- function(
         sig = sig,
         sigLevel = sigLevel,
         matrixPlot = matrixPlot,
-        showZeroOrder = showZeroOrder)
+        showZeroOrder = showZeroOrder,
+        correlationType = correlationType,
+        multipleComparison = multipleComparison,
+        robustErrorHandling = robustErrorHandling,
+        showDiagnostics = showDiagnostics,
+        detailedOutput = detailedOutput,
+        bootstrapCI = bootstrapCI,
+        bootstrapSamples = bootstrapSamples,
+        showEffectSizes = showEffectSizes,
+        assumptionChecks = assumptionChecks,
+        clinicalInterpretation = clinicalInterpretation,
+        showRecommendations = showRecommendations,
+        bluesky_integration = bluesky_integration,
+        comprehensive_output = comprehensive_output)
 
     analysis <- partialcorrelationClass$new(
         options = options,

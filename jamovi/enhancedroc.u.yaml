@@ -1,0 +1,205 @@
+title: Enhanced ROC Analysis
+name: enhancedroc
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+      - type: TargetLayoutBox
+        label: Predictor Variables
+        children:
+          - type: VariablesListBox
+            name: predictors
+            isTarget: true
+            itemDropBehaviour: emptyspace
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Analysis Options
+            children:
+              - type: ComboBox
+                name: analysisType
+              - type: ComboBox
+                name: direction
+              - type: CheckBox
+                name: youdenOptimization
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Output Tables
+            children:
+              - type: CheckBox
+                name: aucTable
+              - type: CheckBox
+                name: cutoffTable
+              - type: CheckBox
+                name: optimalCutoffs
+              - type: CheckBox
+                name: diagnosticMetrics
+              - type: CheckBox
+                name: clinicalMetrics
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Thresholds
+            children:
+              - type: TextBox
+                name: sensitivityThreshold
+                format: number
+              - type: TextBox
+                name: specificityThreshold
+                format: number
+              - type: TextBox
+                name: customCutoffs
+                format: string
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Plot Options
+            children:
+              - type: CheckBox
+                name: rocCurve
+              - type: CheckBox
+                name: showCutoffPoints
+                enable: (rocCurve)
+              - type: CheckBox
+                name: showConfidenceBands
+                enable: (rocCurve)
+              - type: ComboBox
+                name: plotTheme
+                enable: (rocCurve)
+  - type: CollapseBox
+    label: Statistical Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Confidence Intervals
+                children:
+                  - type: TextBox
+                    name: confidenceLevel
+                    suffix: '%'
+                    format: number
+                  - type: CheckBox
+                    name: useBootstrap
+                  - type: TextBox
+                    name: bootstrapSamples
+                    format: number
+                    enable: (useBootstrap)
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Comparisons
+                children:
+                  - type: CheckBox
+                    name: pairwiseComparisons
+                  - type: ComboBox
+                    name: comparisonMethod
+                    enable: (pairwiseComparisons)
+  - type: CollapseBox
+    label: Clinical Context
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            children:
+              - type: Label
+                label: Clinical Application
+                children:
+                  - type: ComboBox
+                    name: clinicalContext
+                  - type: TextBox
+                    name: prevalence
+                    format: number
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            children:
+              - type: Label
+                label: Advanced Options
+                children:
+                  - type: ComboBox
+                    name: smoothMethod
+                  - type: CheckBox
+                    name: partialAuc
+                  - type: TextBox
+                    name: partialRange
+                    format: string
+                    enable: (partialAuc)
+  - type: CollapseBox
+    label: BlueSky Integration
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bluesky_integration
+          - type: CheckBox
+            name: comprehensive_output
+          - type: CheckBox
+            name: clinical_interpretation
+  - type: CollapseBox
+    label: Plot Settings
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: plotWidth
+            format: number
+          - type: TextBox
+            name: plotHeight
+            format: number

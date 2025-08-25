@@ -241,6 +241,43 @@ items:
           title: 'Interpretation'
           type: text
 
+    - name: consensusTable
+      title: 'Consensus Scoring Results'
+      type: Table
+      visible: (consensus && show_consensus_table)
+      columns:
+        - name: case_id
+          title: 'Case ID'
+          type: text
+        - name: consensus_score
+          title: 'Consensus Score'
+          type: text
+        - name: agreement_level
+          title: 'Agreement Level'
+          type: text
+        - name: n_agreeing
+          title: 'Raters Agreeing'
+          type: integer
+        - name: rater_scores
+          title: 'Individual Scores'
+          type: text
+
+    - name: consensusSummary
+      title: 'Consensus Summary Statistics'
+      type: Table
+      visible: (consensus)
+      columns:
+        - name: metric
+          title: 'Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: zto
+
     # - name: interpretationTable
     #   title: 'Agreement Interpretation Guidelines'
     #   type: Table

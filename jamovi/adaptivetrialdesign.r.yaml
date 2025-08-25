@@ -1,0 +1,295 @@
+---
+title: Analysis Results
+name: adaptivetrialdesign
+jrs: '1.1'
+items:
+    - name: designSummary
+      title: Adaptive Trial Design Summary
+      type: Table
+      columns:
+        - name: parameter
+          title: Design Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: justification
+          title: Statistical Justification
+          type: text
+
+    - name: interimResults
+      title: Interim Analysis Results
+      type: Table
+      columns:
+        - name: analysis
+          title: Analysis
+          type: integer
+        - name: information_fraction
+          title: Information Fraction
+          type: number
+        - name: sample_size
+          title: Sample Size
+          type: integer
+        - name: treatment_effect
+          title: Treatment Effect
+          type: number
+        - name: posterior_prob_efficacy
+          title: P(Efficacy)
+          type: number
+        - name: posterior_prob_futility
+          title: P(Futility)
+          type: number
+        - name: decision
+          title: Decision
+          type: text
+        - name: recommendation
+          title: Recommendation
+          type: text
+
+    - name: stoppingBoundaries
+      title: Stopping Boundaries
+      type: Table
+      columns:
+        - name: analysis
+          title: Analysis
+          type: integer
+        - name: information_fraction
+          title: Information Fraction
+          type: number
+        - name: efficacy_boundary
+          title: Efficacy Boundary
+          type: number
+        - name: futility_boundary
+          title: Futility Boundary
+          type: number
+        - name: alpha_spent
+          title: Alpha Spent
+          type: number
+        - name: cumulative_alpha
+          title: Cumulative Alpha
+          type: number
+        - name: conditional_power
+          title: Conditional Power
+          type: number
+
+    - name: sampleSizeEvolution
+      title: Sample Size Evolution
+      type: Table
+      columns:
+        - name: analysis
+          title: Analysis
+          type: integer
+        - name: planned_n
+          title: Planned N
+          type: integer
+        - name: observed_n
+          title: Observed N
+          type: integer
+        - name: recommended_n
+          title: Recommended N
+          type: integer
+        - name: increase_factor
+          title: Increase Factor
+          type: number
+        - name: rationale
+          title: Rationale
+          type: text
+
+    - name: operatingCharacteristics
+      title: Operating Characteristics (Simulation Results)
+      type: Table
+      columns:
+        - name: true_effect
+          title: True Effect Size
+          type: number
+        - name: power
+          title: Power
+          type: number
+        - name: type1_error
+          title: Type I Error
+          type: number
+        - name: expected_n
+          title: Expected Sample Size
+          type: number
+        - name: prob_early_efficacy
+          title: P(Early Efficacy Stop)
+          type: number
+        - name: prob_early_futility
+          title: P(Early Futility Stop)
+          type: number
+        - name: expected_duration
+          title: Expected Duration
+          type: number
+
+    - name: posteriorEvolution
+      title: Posterior Distribution Evolution
+      type: Table
+      columns:
+        - name: analysis
+          title: Analysis
+          type: integer
+        - name: posterior_mean
+          title: Posterior Mean
+          type: number
+        - name: posterior_sd
+          title: Posterior SD
+          type: number
+        - name: credible_interval_lower
+          title: CI Lower
+          type: number
+        - name: credible_interval_upper
+          title: CI Upper
+          type: number
+        - name: posterior_prob_positive
+          title: P(Effect > 0)
+          type: number
+        - name: posterior_prob_mcid
+          title: P(Effect > MCID)
+          type: number
+
+    - name: decisionAnalysis
+      title: Decision Analysis Framework
+      type: Table
+      columns:
+        - name: decision
+          title: Decision Option
+          type: text
+        - name: expected_utility
+          title: Expected Utility
+          type: number
+        - name: expected_cost
+          title: Expected Cost
+          type: number
+        - name: expected_benefit
+          title: Expected Benefit
+          type: number
+        - name: value_of_information
+          title: Value of Information
+          type: number
+        - name: optimal
+          title: Optimal Decision
+          type: text
+
+    - name: bayesFactors
+      title: Bayes Factors Evolution
+      type: Table
+      columns:
+        - name: analysis
+          title: Analysis
+          type: integer
+        - name: bf_efficacy
+          title: BF (Efficacy)
+          type: number
+        - name: bf_futility
+          title: BF (Futility)
+          type: number
+        - name: bf_interpretation_efficacy
+          title: BF Efficacy Interpretation
+          type: text
+        - name: bf_interpretation_futility
+          title: BF Futility Interpretation
+          type: text
+
+    - name: predictivePower
+      title: Predictive Power Analysis
+      type: Table
+      columns:
+        - name: analysis
+          title: Analysis
+          type: integer
+        - name: predictive_power_current
+          title: Predictive Power (Current Design)
+          type: number
+        - name: predictive_power_reestimated
+          title: Predictive Power (Re-estimated)
+          type: number
+        - name: recommended_n_predictive
+          title: Recommended N (Predictive)
+          type: integer
+        - name: probability_success
+          title: P(Trial Success)
+          type: number
+
+    - name: regulatoryConsiderations
+      title: Regulatory Considerations
+      type: Table
+      columns:
+        - name: aspect
+          title: Regulatory Aspect
+          type: text
+        - name: requirement
+          title: Requirement
+          type: text
+        - name: compliance_status
+          title: Compliance Status
+          type: text
+        - name: recommendations
+          title: Recommendations
+          type: text
+
+    - name: dmbRecommendations
+      title: Data Monitoring Board Recommendation Templates
+      type: Table
+      columns:
+        - name: scenario
+          title: Scenario
+          type: text
+        - name: recommendation
+          title: DMB Recommendation
+          type: text
+        - name: statistical_basis
+          title: Statistical Basis
+          type: text
+        - name: clinical_rationale
+          title: Clinical Rationale
+          type: text
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation and Guidance
+      type: Html
+
+    - name: methodsExplanation
+      title: Statistical Methods and Regulatory Framework
+      type: Html
+
+    - name: stoppingBoundaryPlot
+      title: Stopping Boundary Visualization
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotStoppingBoundaries
+
+    - name: sampleSizeEvolutionPlot
+      title: Sample Size Evolution Plot
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotSampleSizeEvolution
+
+    - name: posteriorEvolutionPlot
+      title: Posterior Evolution Visualization
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotPosteriorEvolution
+
+    - name: operatingCharacteristicsPlot
+      title: Operating Characteristics Visualization
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotOperatingCharacteristics
+
+    - name: decisionAnalysisPlot
+      title: Decision Analysis Visualization
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotDecisionAnalysis
+
+    - name: predictivePowerPlot
+      title: Predictive Power Evolution
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotPredictivePower

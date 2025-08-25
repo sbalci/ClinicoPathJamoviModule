@@ -1,0 +1,354 @@
+---
+name: enhancedroc
+title: Enhanced ROC Analysis Results
+jrs: '1.1'
+
+items:
+    - title: Analysis Results
+      name: results
+      type: Group
+      items:
+          - name: instructions
+            title: Instructions
+            type: Html
+            visible: true
+
+          # AUC Summary Table
+          - name: aucSummary
+            title: Area Under the Curve (AUC) Summary
+            type: Table
+            description: AUC values with confidence intervals for each predictor
+            visible: (aucTable)
+            
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: auc
+                  title: 'AUC'
+                  type: number
+                  format: zto
+                - name: auc_lower
+                  title: 'AUC Lower CI'
+                  type: number
+                  format: zto
+                - name: auc_upper
+                  title: 'AUC Upper CI'
+                  type: number
+                  format: zto
+                - name: std_error
+                  title: 'Standard Error'
+                  type: number
+                  format: zto
+                - name: auc_interpretation
+                  title: 'AUC Interpretation'
+                  type: text
+                - name: clinical_utility
+                  title: 'Clinical Utility'
+                  type: text
+
+          # ROC Curve Comparisons
+          - name: rocComparisons
+            title: ROC Curve Comparisons
+            type: Table
+            description: Pairwise comparisons between ROC curves
+            visible: (pairwiseComparisons && analysisType:comparative)
+            
+            columns:
+                - name: predictor1
+                  title: 'Predictor 1'
+                  type: text
+                - name: predictor2
+                  title: 'Predictor 2'
+                  type: text
+                - name: auc_difference
+                  title: 'AUC Difference'
+                  type: number
+                  format: zto
+                - name: test_statistic
+                  title: 'Test Statistic'
+                  type: number
+                  format: zto
+                - name: p_value
+                  title: 'p-value'
+                  type: number
+                  format: zto;pvalue
+                - name: result
+                  title: 'Result'
+                  type: text
+                - name: clinical_significance
+                  title: 'Clinical Significance'
+                  type: text
+
+          # Optimal Cutoff Summary
+          - name: optimalCutoffSummary
+            title: Optimal Cutoff Analysis
+            type: Table
+            description: Youden Index optimization results for each predictor
+            visible: (optimalCutoffs)
+            
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: optimal_cutoff
+                  title: 'Optimal Cutoff'
+                  type: number
+                  format: zto
+                - name: youden_index
+                  title: 'Youden Index'
+                  type: number
+                  format: zto
+                - name: sensitivity
+                  title: 'Sensitivity'
+                  type: number
+                  format: zto
+                - name: specificity
+                  title: 'Specificity'
+                  type: number
+                  format: zto
+                - name: accuracy
+                  title: 'Accuracy'
+                  type: number
+                  format: zto
+                - name: clinical_recommendation
+                  title: 'Clinical Recommendation'
+                  type: text
+
+          # Detailed Cutoff Analysis
+          - name: cutoffAnalysis
+            title: Detailed Cutoff Analysis
+            type: Table
+            description: Comprehensive analysis across multiple cutoff values
+            visible: (cutoffTable)
+            
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: cutoff
+                  title: 'Cutoff'
+                  type: number
+                  format: zto
+                - name: sensitivity
+                  title: 'Sensitivity'
+                  type: number
+                  format: zto
+                - name: specificity
+                  title: 'Specificity'
+                  type: number
+                  format: zto
+                - name: one_minus_specificity
+                  title: '1-Specificity'
+                  type: number
+                  format: zto
+                - name: youden_index
+                  title: 'Youden Index'
+                  type: number
+                  format: zto
+                - name: true_positive
+                  title: 'True Positive'
+                  type: integer
+                - name: true_negative
+                  title: 'True Negative'
+                  type: integer
+                - name: false_positive
+                  title: 'False Positive'
+                  type: integer
+                - name: false_negative
+                  title: 'False Negative'
+                  type: integer
+
+          # Diagnostic Performance Metrics
+          - name: diagnosticPerformance
+            title: Diagnostic Performance Metrics
+            type: Table
+            description: Comprehensive diagnostic performance measures at optimal cutoff
+            visible: (diagnosticMetrics)
+            
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: cutoff
+                  title: 'Cutoff'
+                  type: number
+                  format: zto
+                - name: sensitivity
+                  title: 'Sensitivity'
+                  type: number
+                  format: zto
+                - name: sensitivity_ci
+                  title: 'Sensitivity 95% CI'
+                  type: text
+                - name: specificity
+                  title: 'Specificity'
+                  type: number
+                  format: zto
+                - name: specificity_ci
+                  title: 'Specificity 95% CI'
+                  type: text
+                - name: accuracy
+                  title: 'Accuracy'
+                  type: number
+                  format: zto
+                - name: balanced_accuracy
+                  title: 'Balanced Accuracy'
+                  type: number
+                  format: zto
+
+          # Clinical Application Metrics
+          - name: clinicalApplicationMetrics
+            title: Clinical Application Metrics
+            type: Table
+            description: Clinical metrics including predictive values and likelihood ratios
+            visible: (clinicalMetrics)
+            
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: prevalence
+                  title: 'Prevalence'
+                  type: number
+                  format: zto
+                - name: ppv
+                  title: 'PPV'
+                  type: number
+                  format: zto
+                - name: npv
+                  title: 'NPV'
+                  type: number
+                  format: zto
+                - name: lr_positive
+                  title: 'LR+'
+                  type: number
+                  format: zto
+                - name: lr_negative
+                  title: 'LR-'
+                  type: number
+                  format: zto
+                - name: diagnostic_odds_ratio
+                  title: 'Diagnostic OR'
+                  type: number
+                  format: zto
+                - name: clinical_interpretation
+                  title: 'Clinical Interpretation'
+                  type: text
+
+          # Partial AUC Analysis
+          - name: partialAucAnalysis
+            title: Partial AUC Analysis
+            type: Table
+            description: Partial AUC analysis for specific sensitivity/specificity ranges
+            visible: (partialAuc)
+            
+            columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
+                - name: range_type
+                  title: 'Range Type'
+                  type: text
+                - name: range_min
+                  title: 'Range Min'
+                  type: number
+                  format: zto
+                - name: range_max
+                  title: 'Range Max'
+                  type: number
+                  format: zto
+                - name: partial_auc
+                  title: 'Partial AUC'
+                  type: number
+                  format: zto
+                - name: normalized_pauc
+                  title: 'Normalized pAUC'
+                  type: number
+                  format: zto
+                - name: clinical_relevance
+                  title: 'Clinical Relevance'
+                  type: text
+
+          # Comprehensive Analysis Summary
+          - name: comprehensiveAnalysisSummary
+            title: Comprehensive ROC Analysis Summary
+            type: Table
+            description: Enhanced statistical summary with BlueSky integration
+            visible: (bluesky_integration && comprehensive_output)
+            
+            columns:
+                - name: measure
+                  title: 'Measure'
+                  type: text
+                - name: value
+                  title: 'Value'
+                  type: text
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+                - name: clinical_significance
+                  title: 'Clinical Significance'
+                  type: text
+
+          # Clinical Interpretation
+          - name: clinicalInterpretationGuide
+            title: Clinical Application Guidance
+            type: Html
+            visible: (clinical_interpretation)
+
+          # Statistical Methods
+          - name: methodsExplanation
+            title: Statistical Methods and References
+            type: Html
+            visible: (comprehensive_output)
+
+          # ROC Curve Plot
+          - name: rocCurvePlot
+            title: ROC Curve Analysis
+            type: Image
+            description: ROC curves with optimal cutoff points
+            visible: (rocCurve)
+            renderFun: .plotROCCurve
+            width: 600
+            height: 600
+
+          # Comparative ROC Plot
+          - name: comparativeROCPlot
+            title: Comparative ROC Analysis
+            type: Image
+            description: Multiple ROC curves for comparison
+            visible: (rocCurve && analysisType:comparative)
+            renderFun: .plotComparativeROC
+            width: 800
+            height: 600
+
+          # Cutoff Analysis Plot
+          - name: cutoffAnalysisPlot
+            title: Cutoff Analysis Plot
+            type: Image
+            description: Sensitivity and specificity across cutoff values
+            visible: (cutoffTable)
+            renderFun: .plotCutoffAnalysis
+            width: 700
+            height: 500
+
+          # Youden Index Plot
+          - name: youdenIndexPlot
+            title: Youden Index Optimization Plot
+            type: Image
+            description: Youden Index values across cutoff range
+            visible: (youdenOptimization)
+            renderFun: .plotYoudenIndex
+            width: 600
+            height: 400
+
+          # Clinical Decision Plot
+          - name: clinicalDecisionPlot
+            title: Clinical Decision Analysis Plot
+            type: Image
+            description: Clinical decision curves and threshold analysis
+            visible: (clinicalMetrics)
+            renderFun: .plotClinicalDecision
+            width: 700
+            height: 500

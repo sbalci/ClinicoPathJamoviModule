@@ -1,0 +1,439 @@
+---
+name: adaptivetrialdesign
+title: Adaptive Trial Design Methods
+menuGroup: meddecideD
+menuSubgroup: Advanced Bayesian Methods
+menuSubtitle: Bayesian interim analysis and adaptive sample size re-estimation
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced adaptive trial design methods for clinical research including
+        Bayesian interim analysis, adaptive sample size re-estimation, futility
+        stopping rules, and group sequential designs. Designed for efficient
+        clinical trial conduct with ethical early stopping capabilities.
+    R:
+        dontrun: false
+        usage: |
+            # Adaptive trial design with interim analysis
+            adaptivetrialdesign(
+                data = trial_data,
+                outcome = "response",
+                treatment = "arm",
+                adaptation_type = "sample_size",
+                interim_analysis = TRUE,
+                futility_boundary = 0.1
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for adaptive trial design analysis.
+
+    # Core trial variables
+    - name: outcome
+      title: Primary Outcome Variable
+      type: Variable
+      suggested: [continuous, nominal]
+      permitted: [numeric, factor]
+
+    - name: treatment
+      title: Treatment Assignment Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+
+    - name: outcomeLevel
+      title: Success/Response Level
+      type: Level
+      variable: (outcome)
+
+    - name: stratification_variables
+      title: Stratification Variables
+      type: Variables
+      suggested: [nominal, ordinal, continuous]
+      permitted: [factor, numeric]
+      default: null
+
+    - name: time_variable
+      title: Time to Event Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description: "For time-to-event endpoints"
+
+    # Adaptive design specification
+    - name: adaptation_type
+      title: Type of Adaptation
+      type: List
+      options:
+        - title: "Sample Size Re-estimation"
+          name: sample_size
+        - title: "Treatment Arm Selection"
+          name: arm_selection
+        - title: "Dose Finding"
+          name: dose_finding
+        - title: "Futility Stopping"
+          name: futility
+        - title: "Efficacy Stopping"
+          name: efficacy
+        - title: "Seamless Phase II/III"
+          name: seamless
+        - title: "Group Sequential"
+          name: group_sequential
+      default: sample_size
+
+    - name: design_framework
+      title: Statistical Framework
+      type: List
+      options:
+        - title: "Bayesian Adaptive"
+          name: bayesian
+        - title: "Frequentist Group Sequential"
+          name: frequentist
+        - title: "Hybrid Bayesian-Frequentist"
+          name: hybrid
+        - title: "Decision Theoretic"
+          name: decision_theory
+      default: bayesian
+
+    # Interim analysis settings
+    - name: interim_analysis
+      title: Perform Interim Analysis
+      type: Bool
+      default: true
+
+    - name: interim_timing
+      title: Interim Analysis Timing
+      type: List
+      options:
+        - title: "Information-Based"
+          name: information
+        - title: "Calendar Time-Based"
+          name: calendar
+        - title: "Patient Number-Based"
+          name: patient_number
+        - title: "Event-Based"
+          name: event_based
+      default: information
+
+    - name: interim_fractions
+      title: Interim Analysis Fractions
+      type: String
+      default: "0.25,0.50,0.75"
+      description: "Comma-separated fractions of planned information/sample size"
+
+    - name: max_interim_analyses
+      title: Maximum Interim Analyses
+      type: Integer
+      default: 3
+      min: 1
+      max: 10
+
+    # Stopping boundaries
+    - name: efficacy_boundary
+      title: Efficacy Stopping Boundary
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description: "Posterior probability threshold for efficacy stopping"
+
+    - name: futility_boundary
+      title: Futility Stopping Boundary
+      type: Number
+      default: 0.10
+      min: 0.01
+      max: 0.50
+      description: "Posterior probability threshold for futility stopping"
+
+    - name: boundary_type
+      title: Boundary Construction Method
+      type: List
+      options:
+        - title: "O'Brien-Fleming"
+          name: obrien_fleming
+        - title: "Pocock"
+          name: pocock
+        - title: "Lan-DeMets (O'Brien-Fleming)"
+          name: lan_demets_obf
+        - title: "Lan-DeMets (Pocock)"
+          name: lan_demets_pocock
+        - title: "Custom Alpha Spending"
+          name: custom_spending
+      default: obrien_fleming
+
+    # Sample size and power
+    - name: planned_sample_size
+      title: Initially Planned Sample Size
+      type: Integer
+      default: 100
+      min: 20
+      max: 10000
+
+    - name: minimum_effect_size
+      title: Minimum Clinically Important Effect
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 10.0
+      description: "Standardized or raw effect size"
+
+    - name: target_power
+      title: Target Statistical Power
+      type: Number
+      default: 0.80
+      min: 0.50
+      max: 0.99
+
+    - name: type1_error_rate
+      title: Type I Error Rate (α)
+      type: Number
+      default: 0.05
+      min: 0.01
+      max: 0.20
+
+    - name: max_sample_size_inflation
+      title: Maximum Sample Size Inflation
+      type: Number
+      default: 2.0
+      min: 1.0
+      max: 5.0
+      description: "Maximum fold increase from planned sample size"
+
+    # Bayesian prior specification
+    - name: prior_type
+      title: Prior Specification
+      type: List
+      options:
+        - title: "Non-informative (Uniform)"
+          name: noninformative
+        - title: "Weakly Informative"
+          name: weakly_informative
+        - title: "Informative (Historical)"
+          name: informative
+        - title: "Skeptical Prior"
+          name: skeptical
+        - title: "Optimistic Prior"
+          name: optimistic
+      default: weakly_informative
+
+    - name: historical_data_weight
+      title: Historical Data Weight
+      type: Number
+      default: 0.1
+      min: 0.0
+      max: 1.0
+      description: "Weight given to historical data in informative priors"
+
+    - name: prior_parameters
+      title: Custom Prior Parameters
+      type: String
+      default: ""
+      description: "Comma-separated prior parameters (mean,sd for normal)"
+
+    # Decision criteria
+    - name: decision_criterion
+      title: Decision Making Criterion
+      type: List
+      options:
+        - title: "Posterior Probability"
+          name: posterior_probability
+        - title: "Bayes Factor"
+          name: bayes_factor
+        - title: "Predictive Probability"
+          name: predictive_probability
+        - title: "Expected Utility"
+          name: expected_utility
+        - title: "Value of Information"
+          name: value_of_information
+      default: posterior_probability
+
+    - name: bayes_factor_threshold
+      title: Bayes Factor Threshold
+      type: Number
+      default: 3.0
+      min: 1.0
+      max: 100.0
+
+    - name: predictive_power_threshold
+      title: Predictive Power Threshold
+      type: Number
+      default: 0.80
+      min: 0.50
+      max: 0.99
+
+    # Simulation settings
+    - name: run_simulations
+      title: Run Operating Characteristics Simulation
+      type: Bool
+      default: true
+
+    - name: n_simulations
+      title: Number of Simulations
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+
+    - name: true_effect_scenarios
+      title: True Effect Size Scenarios
+      type: String
+      default: "0,0.3,0.5,0.8"
+      description: "Comma-separated effect sizes for simulation"
+
+    # MCMC settings (for Bayesian analyses)
+    - name: mcmc_samples
+      title: MCMC Samples per Analysis
+      type: Integer
+      default: 5000
+      min: 1000
+      max: 20000
+
+    - name: mcmc_burnin
+      title: MCMC Burn-in
+      type: Integer
+      default: 2000
+      min: 500
+      max: 10000
+
+    - name: mcmc_chains
+      title: Number of MCMC Chains
+      type: Integer
+      default: 3
+      min: 1
+      max: 6
+
+    # Output and reporting options
+    - name: show_design_summary
+      title: Show Design Summary
+      type: Bool
+      default: true
+
+    - name: show_interim_results
+      title: Show Interim Analysis Results
+      type: Bool
+      default: true
+
+    - name: show_stopping_boundaries
+      title: Show Stopping Boundaries
+      type: Bool
+      default: true
+
+    - name: show_sample_size_evolution
+      title: Show Sample Size Evolution
+      type: Bool
+      default: true
+
+    - name: show_operating_characteristics
+      title: Show Operating Characteristics
+      type: Bool
+      default: true
+
+    - name: show_posterior_evolution
+      title: Show Posterior Evolution
+      type: Bool
+      default: true
+
+    - name: show_decision_analysis
+      title: Show Decision Analysis
+      type: Bool
+      default: true
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+
+    # Advanced options
+    - name: alpha_spending_function
+      title: Alpha Spending Function
+      type: List
+      options:
+        - title: "O'Brien-Fleming Type"
+          name: obf_type
+        - title: "Pocock Type"
+          name: pocock_type
+        - title: "Power Family"
+          name: power_family
+        - title: "Custom Function"
+          name: custom
+      default: obf_type
+
+    - name: spending_parameter
+      title: Spending Function Parameter
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+
+    - name: blinded_sample_size_reestimation
+      title: Blinded Sample Size Re-estimation
+      type: Bool
+      default: false
+
+    - name: conditional_power_threshold
+      title: Conditional Power Threshold
+      type: Number
+      default: 0.20
+      min: 0.05
+      max: 0.50
+
+    # Clinical context
+    - name: clinical_context
+      title: Clinical Trial Context
+      type: List
+      options:
+        - title: "Phase II Efficacy"
+          name: phase2_efficacy
+        - title: "Phase III Confirmatory"
+          name: phase3_confirmatory
+        - title: "Oncology Trial"
+          name: oncology
+        - title: "Cardiovascular Trial"
+          name: cardiovascular
+        - title: "Rare Disease Trial"
+          name: rare_disease
+        - title: "Pediatric Trial"
+          name: pediatric
+        - title: "General Clinical Trial"
+          name: general
+      default: general
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+
+    # Regulatory considerations
+    - name: regulatory_framework
+      title: Regulatory Framework
+      type: List
+      options:
+        - title: "FDA Guidance"
+          name: fda
+        - title: "EMA Guideline"
+          name: ema
+        - title: "ICH E9(R1)"
+          name: ich_e9
+        - title: "General Guidelines"
+          name: general
+      default: general
+
+    - name: dmb_recommendations
+      title: Include DMB Recommendation Templates
+      type: Bool
+      default: true
+      description: "Generate templates for Data Monitoring Board recommendations"
