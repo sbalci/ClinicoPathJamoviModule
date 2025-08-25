@@ -359,12 +359,36 @@ options:
           name: treatment
         - title: "Risk Stratification"
           name: risk
+        - title: "Histological Classification"
+          name: histological
       default: diagnosis
 
     - name: show_clinical_interpretation
       title: Show Clinical Guidelines
       type: Bool
       default: true
+
+    - name: clinical_importance_interpretation
+      title: Clinical Variable Importance
+      type: Bool
+      default: true
+
+    - name: mdg_threshold
+      title: MDG Clinical Significance Threshold
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+
+    - name: show_feature_contributions
+      title: Show Feature Contribution Analysis
+      type: Bool
+      default: false
+
+    - name: survival_integration
+      title: Integrate with Survival Analysis
+      type: Bool
+      default: false
 
     # Reproducibility
     - name: set_seed

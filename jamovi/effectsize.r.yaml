@@ -1,0 +1,150 @@
+---
+name: effectsize
+title: Effect Size Analysis Results
+jrs: '1.1'
+
+items:
+    - title: Analysis Results
+      name: results
+      type: Group
+      items:
+          - name: instructions
+            title: Instructions
+            type: Html
+            visible: true
+
+          - name: effectSizes
+            title: Effect Size Statistics
+            type: Table
+            description: Effect size measures with confidence intervals
+            clearWith:
+                - dep
+                - group
+                - analysisType
+                - measures
+                - testValue
+                - group1Value
+                - group2Value
+                - ciWidth
+
+            columns:
+                - name: measure
+                  title: 'Effect Size'
+                  type: text
+                - name: estimate
+                  title: 'Estimate'
+                  type: number
+                  format: zto
+                - name: lower
+                  title: 'Lower CI'
+                  type: number
+                  format: zto
+                - name: upper
+                  title: 'Upper CI'
+                  type: number
+                  format: zto
+                - name: interpretation
+                  title: 'Interpretation'
+                  type: text
+
+          - name: descriptives
+            title: Descriptive Statistics
+            type: Table
+            description: Group descriptive statistics
+            visible: (descriptives)
+            clearWith:
+                - dep
+                - group
+                - analysisType
+
+            columns:
+                - name: group
+                  title: 'Group'
+                  type: text
+                - name: n
+                  title: 'N'
+                  type: integer
+                - name: mean
+                  title: 'Mean'
+                  type: number
+                - name: sd
+                  title: 'SD'
+                  type: number
+                - name: se
+                  title: 'SE'
+                  type: number
+
+          - name: testDetails
+            title: Statistical Test Details
+            type: Table
+            description: t-test statistics and significance
+            visible: (testDetails)
+            clearWith:
+                - dep
+                - group
+                - analysisType
+                - testValue
+                - group1Value
+                - group2Value
+
+            columns:
+                - name: testValue
+                  title: 'Test Value'
+                  type: number
+                - name: meanDiff
+                  title: 'Mean Difference'
+                  type: number
+                - name: tStat
+                  title: 't'
+                  type: number
+                - name: df
+                  title: 'df'
+                  type: integer
+                - name: pValue
+                  title: 'p'
+                  type: number
+                  format: zto;pvalue
+
+          - name: assumptions
+            title: Assumption Checks
+            type: Table
+            description: Tests of normality and variance homogeneity
+            visible: (assumptionChecks)
+            clearWith:
+                - dep
+                - group
+                - analysisType
+
+            columns:
+                - name: test
+                  title: 'Test'
+                  type: text
+                - name: statistic
+                  title: 'Statistic'
+                  type: number
+                - name: pValue
+                  title: 'p'
+                  type: number
+                  format: zto;pvalue
+                - name: result
+                  title: 'Result'
+                  type: text
+
+          - name: effectPlot
+            title: Effect Size Visualization
+            type: Image
+            description: Plot showing effect sizes with confidence intervals
+            visible: (plotEffects)
+            renderFun: .plotEffects
+            clearWith:
+                - dep
+                - group
+                - analysisType
+                - measures
+                - testValue
+                - group1Value
+                - group2Value
+                - ciWidth
+                - plotType
+                - plotWidth
+                - plotHeight

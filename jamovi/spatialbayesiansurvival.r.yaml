@@ -1,0 +1,259 @@
+---
+title: Analysis Results
+name: spatialbayesiansurvival
+jrs: '1.1'
+items:
+    - name: modelSummary
+      title: Spatial Bayesian Survival Model Summary
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: parameterEstimates
+      title: Posterior Parameter Estimates
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: mean
+          title: Posterior Mean
+          type: number
+        - name: sd
+          title: Posterior SD
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+        - name: rhat
+          title: R̂
+          type: number
+        - name: ess
+          title: Effective Sample Size
+          type: integer
+        - name: significance
+          title: Significance
+          type: text
+
+    - name: spatialEffects
+      title: Spatial Random Effects
+      type: Table
+      columns:
+        - name: region
+          title: Region/Location
+          type: text
+        - name: spatial_effect
+          title: Spatial Effect
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+        - name: relative_risk
+          title: Relative Risk
+          type: number
+        - name: interpretation
+          title: Risk Assessment
+          type: text
+
+    - name: modelFit
+      title: Model Fit and Diagnostics
+      type: Table
+      columns:
+        - name: criterion
+          title: Criterion
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: effective_parameters
+          title: Effective Parameters
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: spatialCorrelation
+      title: Spatial Correlation Structure
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: modelComparison
+      title: Model Comparison Results
+      type: Table
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: dic
+          title: DIC
+          type: number
+        - name: waic
+          title: WAIC
+          type: number
+        - name: loo
+          title: LOO-CV
+          type: number
+        - name: lpml
+          title: LPML
+          type: number
+        - name: rank
+          title: Rank
+          type: integer
+        - name: relative_performance
+          title: Relative Performance
+          type: text
+
+    - name: convergenceDiagnostics
+      title: MCMC Convergence Diagnostics
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: rhat
+          title: R̂
+          type: number
+        - name: ess_bulk
+          title: Bulk ESS
+          type: integer
+        - name: ess_tail
+          title: Tail ESS
+          type: integer
+        - name: mcse
+          title: Monte Carlo SE
+          type: number
+        - name: convergence_status
+          title: Convergence Status
+          type: text
+
+    - name: survivalPredictions
+      title: Spatial Survival Predictions
+      type: Table
+      columns:
+        - name: location
+          title: Location
+          type: text
+        - name: time_point
+          title: Time Point
+          type: number
+        - name: survival_prob
+          title: Survival Probability
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+        - name: hazard_rate
+          title: Hazard Rate
+          type: number
+        - name: risk_category
+          title: Risk Category
+          type: text
+
+    - name: spatialValidation
+      title: Spatial Cross-Validation Results
+      type: Table
+      columns:
+        - name: fold
+          title: CV Fold
+          type: integer
+        - name: log_likelihood
+          title: Log-Likelihood
+          type: number
+        - name: brier_score
+          title: Brier Score
+          type: number
+        - name: c_index
+          title: C-Index
+          type: number
+        - name: spatial_correlation
+          title: Spatial Correlation
+          type: number
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation and Guidelines
+      type: Html
+
+    - name: methodsExplanation
+      title: Statistical Methods and Theory
+      type: Html
+
+    - name: spatialMaps
+      title: Spatial Distribution Maps
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotSpatialMaps
+
+    - name: survivalMaps
+      title: Survival Probability Maps
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotSurvivalMaps
+
+    - name: hazardMaps
+      title: Hazard Rate Maps
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotHazardMaps
+
+    - name: residualMaps
+      title: Residual Analysis Maps
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotResidualMaps
+
+    - name: convergencePlots
+      title: MCMC Convergence Plots
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotConvergenceDiagnostics
+
+    - name: posteriorPlots
+      title: Posterior Distribution Plots
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotPosteriorDistributions
+
+    - name: spatialCorrelationPlot
+      title: Spatial Correlation Visualization
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plotSpatialCorrelation

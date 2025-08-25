@@ -4151,14 +4151,19 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Interactive Clinical Dashboard
     menuSubtitle: Real-time clinical analytics and visualization
-  - title: Clinical Validation Framework
+  - title: Clinical Model Validation Suite
     name: clinicalvalidation
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPath
-    menuSubgroup: ClinicoPath Descriptives
-    menuTitle: Clinical Validation Framework
-    menuSubtitle: Statistical accuracy and regulatory compliance validation
+    menuGroup: meddecideD
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Clinical Model Validation Suite
+    menuSubtitle: Comprehensive validation for clinical prediction models
+    description: |
+      Comprehensive validation suite for clinical prediction models including 
+      bootstrap validation, cross-validation, model calibration assessment, 
+      and clinical performance evaluation designed for medical research and 
+      diagnostic test evaluation.
   - title: Excess Mortality Analysis
     name: excessmortality
     ns: ClinicoPath
@@ -4226,6 +4231,90 @@ analyses:
       Minimum Volume Ellipsoid (MVE), and Minimum Covariance Determinant (MCD)
 
       correlation methods.
+  - title: Interactive Clinical Model Validation
+    name: clinicalvalidationinteractive
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideD
+    menuSubgroup: Clinical Decision Support
+    menuTitle: Interactive Clinical Model Validation
+    menuSubtitle: Interactive validation with real-time parameter optimization
+    description: >
+      Interactive clinical prediction model validation with real-time parameter 
+
+      validation, intelligent defaults, and guided workflows. Features
+      automatic 
+
+      parameter correction, clinical scenario presets, and dynamic threshold 
+
+      optimization for medical research and diagnostic applications.
+  - title: Effect Size Analysis
+    name: effectsize
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: ClinicoPathDescriptives
+    menuSubgroup: Statistical Tests
+    menuTitle: Effect Size Analysis
+    menuSubtitle: Cohen's d, Hedges' g, Glass' Δ
+    description: >
+      Comprehensive effect size analysis including Cohen's d, Hedges' g, and
+      Glass' delta.
+
+      Essential for clinical significance assessment, meta-analyses, and power
+      analyses
+
+      in medical and pathological research.
+  - title: Non-parametric Statistical Methods
+    name: nonparametric
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideD
+    menuSubgroup: Advanced Statistical Methods
+    menuTitle: Non-parametric Statistical Methods
+    menuSubtitle: Distribution-free statistical analysis for robust inference
+    description: >
+      Comprehensive non-parametric statistical methods including Kruskal-Wallis
+      test,
+
+      Friedman test, robust alternatives to classical procedures, and
+      distribution-free
+
+      methods designed for clinical research where normality assumptions are
+      violated.
+  - title: Non-parametric Regression Methods
+    name: nonparametricregression
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideD
+    menuSubgroup: Advanced Statistical Methods
+    menuTitle: Non-parametric Regression Methods
+    menuSubtitle: Distribution-free regression modeling for flexible data analysis
+    description: >
+      Comprehensive non-parametric regression methods including kernel
+      regression,
+
+      local polynomial smoothing (LOESS), spline regression, and robust
+      regression
+
+      techniques designed for clinical research where parametric assumptions are
+      violated.
+  - title: Spatial Bayesian Survival Analysis
+    name: spatialbayesiansurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: jsurvival
+    menuSubgroup: Advanced Bayesian Survival
+    menuTitle: Spatial Bayesian Survival Analysis
+    menuSubtitle: Geographic survival modeling with spatial correlation
+    description: >
+      Advanced spatial Bayesian survival analysis for modeling geographic
+      patterns
+
+      in survival outcomes. Incorporates spatial correlation structures, 
+
+      disease mapping capabilities, and hierarchical Bayesian modeling for
+
+      clinical research with geographic components.
 datasets:
   - name: histopathology including analysis
     path: histopathologyDescriptives.omv

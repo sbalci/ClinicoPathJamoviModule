@@ -251,6 +251,11 @@ Imports:
     mvtnorm,
     corpcor,
     spBayesSurv,
+    mgcv,
+    quantreg,
+    np,
+    KernSmooth,
+    locfit,
     BoomSpikeSlab,
     rstanarm,
     MCMCglmm,
@@ -266,7 +271,9 @@ Imports:
     robust,
     robustHD,
     RANN,
-    fastICA
+    fastICA,
+    ResourceSelection,
+    tools
 VignetteBuilder: 
     knitr, 
     tiff, 

@@ -51,6 +51,10 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             n_bootstrap = 500,
             clinical_context = "diagnosis",
             show_clinical_interpretation = TRUE,
+            clinical_importance_interpretation = TRUE,
+            mdg_threshold = 1,
+            show_feature_contributions = FALSE,
+            survival_integration = FALSE,
             set_seed = TRUE,
             seed_value = 42, ...) {
 
@@ -312,12 +316,31 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "screening",
                     "prognosis",
                     "treatment",
-                    "risk"),
+                    "risk",
+                    "histological"),
                 default="diagnosis")
             private$..show_clinical_interpretation <- jmvcore::OptionBool$new(
                 "show_clinical_interpretation",
                 show_clinical_interpretation,
                 default=TRUE)
+            private$..clinical_importance_interpretation <- jmvcore::OptionBool$new(
+                "clinical_importance_interpretation",
+                clinical_importance_interpretation,
+                default=TRUE)
+            private$..mdg_threshold <- jmvcore::OptionNumber$new(
+                "mdg_threshold",
+                mdg_threshold,
+                default=1,
+                min=0.1,
+                max=10)
+            private$..show_feature_contributions <- jmvcore::OptionBool$new(
+                "show_feature_contributions",
+                show_feature_contributions,
+                default=FALSE)
+            private$..survival_integration <- jmvcore::OptionBool$new(
+                "survival_integration",
+                survival_integration,
+                default=FALSE)
             private$..set_seed <- jmvcore::OptionBool$new(
                 "set_seed",
                 set_seed,
@@ -374,6 +397,10 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..n_bootstrap)
             self$.addOption(private$..clinical_context)
             self$.addOption(private$..show_clinical_interpretation)
+            self$.addOption(private$..clinical_importance_interpretation)
+            self$.addOption(private$..mdg_threshold)
+            self$.addOption(private$..show_feature_contributions)
+            self$.addOption(private$..survival_integration)
             self$.addOption(private$..set_seed)
             self$.addOption(private$..seed_value)
         }),
@@ -423,6 +450,10 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         n_bootstrap = function() private$..n_bootstrap$value,
         clinical_context = function() private$..clinical_context$value,
         show_clinical_interpretation = function() private$..show_clinical_interpretation$value,
+        clinical_importance_interpretation = function() private$..clinical_importance_interpretation$value,
+        mdg_threshold = function() private$..mdg_threshold$value,
+        show_feature_contributions = function() private$..show_feature_contributions$value,
+        survival_integration = function() private$..survival_integration$value,
         set_seed = function() private$..set_seed$value,
         seed_value = function() private$..seed_value$value),
     private = list(
@@ -471,6 +502,10 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..n_bootstrap = NA,
         ..clinical_context = NA,
         ..show_clinical_interpretation = NA,
+        ..clinical_importance_interpretation = NA,
+        ..mdg_threshold = NA,
+        ..show_feature_contributions = NA,
+        ..survival_integration = NA,
         ..set_seed = NA,
         ..seed_value = NA)
 )
@@ -490,7 +525,10 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         validationcurves = function() private$.items[["validationcurves"]],
         calibrationplot = function() private$.items[["calibrationplot"]],
         roccurve = function() private$.items[["roccurve"]],
-        clinicalinterpretation = function() private$.items[["clinicalinterpretation"]]),
+        clinicalinterpretation = function() private$.items[["clinicalinterpretation"]],
+        clinicalimportance = function() private$.items[["clinicalimportance"]],
+        featurecontributions = function() private$.items[["featurecontributions"]],
+        survivalintegration = function() private$.items[["survivalintegration"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -708,6 +746,74 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 clearWith=list(
                     "clinical_context",
                     "target",
+                    "targetLevel")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="clinicalimportance",
+                title="Clinical Variable Importance Analysis",
+                visible="(clinical_importance_interpretation)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel"),
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="mdg", 
+                        `title`="Mean Decrease Gini", 
+                        `type`="number", 
+                        `format`="zto,p:.3"),
+                    list(
+                        `name`="clinical_significance", 
+                        `title`="Clinical Significance", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="featurecontributions",
+                title="Feature Contribution Analysis",
+                visible="(show_feature_contributions)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel"),
+                columns=list(
+                    list(
+                        `name`="feature", 
+                        `title`="Feature", 
+                        `type`="text"),
+                    list(
+                        `name`="contribution_positive", 
+                        `title`="Contribution to Positive Class", 
+                        `type`="number", 
+                        `format`="zto,p:.3"),
+                    list(
+                        `name`="contribution_negative", 
+                        `title`="Contribution to Negative Class", 
+                        `type`="number", 
+                        `format`="zto,p:.3"),
+                    list(
+                        `name`="net_contribution", 
+                        `title`="Net Contribution", 
+                        `type`="number", 
+                        `format`="zto,p:.3"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survivalintegration",
+                title="Survival Integration Results",
+                visible="(survival_integration)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
                     "targetLevel")))}))
 
 treeadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -799,6 +905,10 @@ treeadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param n_bootstrap .
 #' @param clinical_context .
 #' @param show_clinical_interpretation .
+#' @param clinical_importance_interpretation .
+#' @param mdg_threshold .
+#' @param show_feature_contributions .
+#' @param survival_integration .
 #' @param set_seed .
 #' @param seed_value .
 #' @return A results object containing:
@@ -815,6 +925,9 @@ treeadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$calibrationplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$roccurve} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$clinicalinterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalimportance} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$featurecontributions} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$survivalintegration} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -871,6 +984,10 @@ treeadvanced <- function(
     n_bootstrap = 500,
     clinical_context = "diagnosis",
     show_clinical_interpretation = TRUE,
+    clinical_importance_interpretation = TRUE,
+    mdg_threshold = 1,
+    show_feature_contributions = FALSE,
+    survival_integration = FALSE,
     set_seed = TRUE,
     seed_value = 42) {
 
@@ -939,6 +1056,10 @@ treeadvanced <- function(
         n_bootstrap = n_bootstrap,
         clinical_context = clinical_context,
         show_clinical_interpretation = show_clinical_interpretation,
+        clinical_importance_interpretation = clinical_importance_interpretation,
+        mdg_threshold = mdg_threshold,
+        show_feature_contributions = show_feature_contributions,
+        survival_integration = survival_integration,
         set_seed = set_seed,
         seed_value = seed_value)
 

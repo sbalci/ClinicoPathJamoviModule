@@ -1,0 +1,432 @@
+---
+name: spatialbayesiansurvival
+title: Spatial Bayesian Survival Analysis
+menuGroup: jsurvival
+menuSubgroup: Advanced Bayesian Survival
+menuSubtitle: Geographic survival modeling with spatial correlation
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Advanced spatial Bayesian survival analysis for modeling geographic patterns
+        in survival outcomes. Incorporates spatial correlation structures, 
+        disease mapping capabilities, and hierarchical Bayesian modeling for
+        clinical research with geographic components.
+    R:
+        dontrun: false
+        usage: |
+            # Spatial Bayesian survival analysis
+            spatialbayesiansurvival(
+                data = clinical_data,
+                time = "survival_months",
+                status = "death_indicator",
+                predictors = c("age", "stage", "treatment"),
+                spatial_coords = c("latitude", "longitude"),
+                spatial_model = "car",
+                mcmc_samples = 5000
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for spatial Bayesian survival analysis.
+
+    # Core survival variables
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+
+    - name: status
+      title: Event Status Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+
+    - name: statusLevel
+      title: Event Level
+      type: Level
+      variable: (status)
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+
+    # Spatial components
+    - name: spatial_coords
+      title: Spatial Coordinates
+      type: Variables
+      suggested: [continuous]
+      permitted: [numeric]
+      description: "Longitude and Latitude coordinates (or X, Y coordinates)"
+
+    - name: region_id
+      title: Region Identifier
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: null
+      description: "Administrative region or area identifier"
+
+    - name: adjacency_matrix
+      title: Spatial Adjacency Structure
+      type: String
+      default: ""
+      description: "Path to adjacency matrix file or leave empty for distance-based"
+
+    # Spatial model specification
+    - name: spatial_model
+      title: Spatial Model Type
+      type: List
+      options:
+        - title: "Conditional Autoregressive (CAR)"
+          name: car
+        - title: "Simultaneous Autoregressive (SAR)"
+          name: sar
+        - title: "Gaussian Process"
+          name: gaussian_process
+        - title: "Besag-York-Mollié (BYM)"
+          name: bym
+        - title: "Leroux Model"
+          name: leroux
+        - title: "Distance-based Exponential"
+          name: distance_exp
+        - title: "Distance-based Gaussian"
+          name: distance_gaussian
+      default: car
+
+    - name: spatial_prior
+      title: Spatial Prior Structure
+      type: List
+      options:
+        - title: "Intrinsic CAR (ICAR)"
+          name: icar
+        - title: "Proper CAR"
+          name: proper_car
+        - title: "Scaled Inverse-Wishart"
+          name: scaled_inv_wishart
+        - title: "Inverse-Gamma"
+          name: inv_gamma
+      default: icar
+
+    # Distance and neighborhood
+    - name: distance_method
+      title: Distance Calculation Method
+      type: List
+      options:
+        - title: "Euclidean Distance"
+          name: euclidean
+        - title: "Great Circle Distance"
+          name: great_circle
+        - title: "Manhattan Distance"
+          name: manhattan
+        - title: "Haversine Distance"
+          name: haversine
+      default: great_circle
+
+    - name: neighborhood_threshold
+      title: Neighborhood Distance Threshold
+      type: Number
+      default: 50.0
+      min: 0.1
+      max: 1000.0
+      description: "Distance threshold for defining neighbors (km)"
+
+    - name: num_neighbors
+      title: Number of Nearest Neighbors
+      type: Integer
+      default: 5
+      min: 1
+      max: 20
+      description: "Number of nearest neighbors to consider"
+
+    # Baseline hazard specification
+    - name: baseline_hazard
+      title: Baseline Hazard Model
+      type: List
+      options:
+        - title: "Weibull"
+          name: weibull
+        - title: "Exponential"
+          name: exponential
+        - title: "Piecewise Constant"
+          name: piecewise
+        - title: "B-spline"
+          name: bspline
+        - title: "Gamma Process"
+          name: gamma_process
+      default: weibull
+
+    - name: piecewise_intervals
+      title: Number of Piecewise Intervals
+      type: Integer
+      default: 5
+      min: 2
+      max: 20
+      description: "Number of intervals for piecewise constant hazard"
+
+    - name: spline_knots
+      title: Number of B-spline Knots
+      type: Integer
+      default: 5
+      min: 3
+      max: 15
+      description: "Number of knots for B-spline baseline hazard"
+
+    # MCMC sampling parameters
+    - name: mcmc_samples
+      title: MCMC Samples
+      type: Integer
+      default: 5000
+      min: 1000
+      max: 50000
+
+    - name: mcmc_burnin
+      title: Burn-in Samples
+      type: Integer
+      default: 2000
+      min: 500
+      max: 20000
+
+    - name: mcmc_thin
+      title: Thinning Interval
+      type: Integer
+      default: 1
+      min: 1
+      max: 50
+
+    - name: mcmc_chains
+      title: Number of MCMC Chains
+      type: Integer
+      default: 3
+      min: 1
+      max: 8
+
+    # Prior specifications
+    - name: covariate_priors
+      title: Covariate Prior Type
+      type: List
+      options:
+        - title: "Normal (weakly informative)"
+          name: normal_weak
+        - title: "Normal (informative)"
+          name: normal_informative
+        - title: "Horseshoe"
+          name: horseshoe
+        - title: "Spike-and-Slab"
+          name: spike_slab
+        - title: "LASSO"
+          name: lasso
+      default: normal_weak
+
+    - name: covariate_prior_sd
+      title: Covariate Prior Standard Deviation
+      type: Number
+      default: 10.0
+      min: 0.1
+      max: 100.0
+
+    - name: spatial_precision_prior
+      title: Spatial Precision Prior
+      type: List
+      options:
+        - title: "Gamma"
+          name: gamma
+        - title: "Log-Normal"
+          name: lognormal
+        - title: "Inverse-Gamma"
+          name: inv_gamma
+        - title: "Penalized Complexity"
+          name: pc_prior
+      default: gamma
+
+    - name: spatial_precision_shape
+      title: Spatial Precision Shape Parameter
+      type: Number
+      default: 1.0
+      min: 0.1
+      max: 10.0
+
+    - name: spatial_precision_rate
+      title: Spatial Precision Rate Parameter
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 10.0
+
+    # Model selection and validation
+    - name: model_comparison
+      title: Model Comparison
+      type: Bool
+      default: true
+
+    - name: cross_validation
+      title: Spatial Cross-Validation
+      type: Bool
+      default: false
+
+    - name: cv_folds
+      title: CV Folds
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+
+    - name: model_selection_criteria
+      title: Model Selection Criterion
+      type: List
+      options:
+        - title: "DIC (Deviance Information Criterion)"
+          name: dic
+        - title: "WAIC (Widely Applicable Information Criterion)"
+          name: waic
+        - title: "LOO-CV"
+          name: loo
+        - title: "LPML (Log Pseudo Marginal Likelihood)"
+          name: lpml
+      default: dic
+
+    # Prediction and mapping
+    - name: spatial_prediction
+      title: Spatial Prediction
+      type: Bool
+      default: true
+
+    - name: prediction_grid_size
+      title: Prediction Grid Size
+      type: Integer
+      default: 50
+      min: 10
+      max: 200
+
+    - name: prediction_time_points
+      title: Prediction Time Points
+      type: String
+      default: "12,24,36,60"
+      description: "Comma-separated list of time points for prediction"
+
+    - name: confidence_level
+      title: Credible Interval Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+
+    # Output and visualization options
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+
+    - name: show_parameter_estimates
+      title: Show Parameter Estimates
+      type: Bool
+      default: true
+
+    - name: show_spatial_effects
+      title: Show Spatial Random Effects
+      type: Bool
+      default: true
+
+    - name: show_residual_maps
+      title: Show Residual Maps
+      type: Bool
+      default: true
+
+    - name: show_survival_maps
+      title: Show Survival Probability Maps
+      type: Bool
+      default: true
+
+    - name: show_hazard_maps
+      title: Show Hazard Rate Maps
+      type: Bool
+      default: false
+
+    - name: show_convergence_diagnostics
+      title: Show MCMC Convergence Diagnostics
+      type: Bool
+      default: true
+
+    - name: show_model_comparison
+      title: Show Model Comparison Table
+      type: Bool
+      default: true
+
+    - name: show_interpretation
+      title: Show Clinical Interpretation
+      type: Bool
+      default: true
+
+    # Advanced options
+    - name: standardize_predictors
+      title: Standardize Predictors
+      type: Bool
+      default: true
+
+    - name: include_intercept
+      title: Include Intercept
+      type: Bool
+      default: true
+
+    - name: missing_data_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: "Complete Cases Only"
+          name: complete_cases
+        - title: "Multiple Imputation"
+          name: multiple_imputation
+        - title: "Bayesian Imputation"
+          name: bayesian_imputation
+      default: complete_cases
+
+    - name: parallel_processing
+      title: Use Parallel Processing
+      type: Bool
+      default: true
+
+    - name: n_cores
+      title: Number of CPU Cores
+      type: Integer
+      default: 2
+      min: 1
+      max: 8
+
+    # Clinical context
+    - name: clinical_context
+      title: Clinical Application Context
+      type: List
+      options:
+        - title: "Cancer Epidemiology"
+          name: cancer_epidemiology
+        - title: "Disease Surveillance"
+          name: disease_surveillance
+        - title: "Environmental Health"
+          name: environmental_health
+        - title: "Health Services Research"
+          name: health_services
+        - title: "Infectious Disease"
+          name: infectious_disease
+        - title: "General Spatial Analysis"
+          name: general
+      default: cancer_epidemiology
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
