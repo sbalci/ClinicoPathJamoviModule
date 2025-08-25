@@ -2,63 +2,170 @@
 % Please edit documentation in R/clinicalvalidation.h.R
 \name{clinicalvalidation}
 \alias{clinicalvalidation}
-\title{Clinical Validation Framework}
+\title{Clinical Model Validation Suite}
 \usage{
 clinicalvalidation(
   data,
-  testVar,
-  referenceVar,
-  validationType = "accuracy",
-  referenceMethod = "r_stats",
-  toleranceLevel = 0.01,
-  confidenceLevel = 95,
-  performEquivalence = TRUE,
-  generateReport = TRUE,
-  regulatoryStandard = "fda",
-  documentationLevel = "comprehensive"
+  outcome,
+  outcomeLevel,
+  predictors,
+  time_variable = NULL,
+  model_type = "logistic",
+  model_formula = "",
+  validation_method = "bootstrap",
+  bootstrap_samples = 1000,
+  cv_folds = 10,
+  cv_repeats = 3,
+  holdout_proportion = 0.25,
+  stratified_sampling = TRUE,
+  clinical_context = "diagnosis",
+  prevalence_adjustment = FALSE,
+  population_prevalence = 10,
+  cost_matrix = "equal",
+  fn_fp_cost_ratio = 2,
+  performance_metrics = "all",
+  confidence_level = 0.95,
+  calibration_method = "all",
+  calibration_bins = 10,
+  compare_models = FALSE,
+  comparison_models = "logistic_rf",
+  show_model_summary = TRUE,
+  show_performance_table = TRUE,
+  show_calibration_plot = TRUE,
+  show_roc_curve = TRUE,
+  show_validation_curves = FALSE,
+  show_residual_plots = FALSE,
+  show_clinical_interpretation = TRUE,
+  export_results = FALSE,
+  detailed_bootstrap = FALSE,
+  missing_data_handling = "complete_cases",
+  imputation_methods = 5,
+  parallel_processing = FALSE,
+  n_cores = 2,
+  set_seed = TRUE,
+  seed_value = 42
 )
 }
 \arguments{
-\item{data}{.}
+\item{data}{The data as a data frame for clinical model validation.}
 
-\item{testVar}{.}
+\item{outcome}{.}
 
-\item{referenceVar}{.}
+\item{outcomeLevel}{.}
 
-\item{validationType}{.}
+\item{predictors}{.}
 
-\item{referenceMethod}{.}
+\item{time_variable}{.}
 
-\item{toleranceLevel}{.}
+\item{model_type}{.}
 
-\item{confidenceLevel}{.}
+\item{model_formula}{.}
 
-\item{performEquivalence}{.}
+\item{validation_method}{.}
 
-\item{generateReport}{.}
+\item{bootstrap_samples}{.}
 
-\item{regulatoryStandard}{.}
+\item{cv_folds}{.}
 
-\item{documentationLevel}{.}
+\item{cv_repeats}{.}
+
+\item{holdout_proportion}{.}
+
+\item{stratified_sampling}{.}
+
+\item{clinical_context}{.}
+
+\item{prevalence_adjustment}{.}
+
+\item{population_prevalence}{.}
+
+\item{cost_matrix}{.}
+
+\item{fn_fp_cost_ratio}{.}
+
+\item{performance_metrics}{.}
+
+\item{confidence_level}{.}
+
+\item{calibration_method}{.}
+
+\item{calibration_bins}{.}
+
+\item{compare_models}{.}
+
+\item{comparison_models}{.}
+
+\item{show_model_summary}{.}
+
+\item{show_performance_table}{.}
+
+\item{show_calibration_plot}{.}
+
+\item{show_roc_curve}{.}
+
+\item{show_validation_curves}{.}
+
+\item{show_residual_plots}{.}
+
+\item{show_clinical_interpretation}{.}
+
+\item{export_results}{.}
+
+\item{detailed_bootstrap}{.}
+
+\item{missing_data_handling}{.}
+
+\item{imputation_methods}{.}
+
+\item{parallel_processing}{.}
+
+\item{n_cores}{.}
+
+\item{set_seed}{.}
+
+\item{seed_value}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-\code{results$validationSummary} \tab \tab \tab \tab \tab a table \cr
-\code{results$accuracyTests} \tab \tab \tab \tab \tab a table \cr
-\code{results$equivalenceTest} \tab \tab \tab \tab \tab a table \cr
-\code{results$complianceChecklist} \tab \tab \tab \tab \tab a table \cr
-\code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
-\code{results$agreementPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$modelsummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$performancetable} \tab \tab \tab \tab \tab a table \cr
+\code{results$bootstrapresults} \tab \tab \tab \tab \tab a table \cr
+\code{results$calibrationtable} \tab \tab \tab \tab \tab a table \cr
+\code{results$brierscore} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelcomparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$costreduction} \tab \tab \tab \tab \tab a table \cr
+\code{results$validationcurves} \tab \tab \tab \tab \tab an image \cr
+\code{results$calibrationplot} \tab \tab \tab \tab \tab an image \cr
+\code{results$roccurve} \tab \tab \tab \tab \tab an image \cr
+\code{results$residualplots} \tab \tab \tab \tab \tab an image \cr
+\code{results$clinicalinterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$validationreport} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$validationSummary$asDF}
+\code{results$performancetable$asDF}
 
-\code{as.data.frame(results$validationSummary)}
+\code{as.data.frame(results$performancetable)}
 }
 \description{
-Clinical Validation Framework
+Comprehensive validation suite for clinical prediction models including
+bootstrap validation, cross-validation, model calibration assessment,
+and clinical performance evaluation designed for medical research and
+diagnostic test evaluation.
+}
+\examples{
+# Clinical model validation with bootstrap
+clinical_validation(
+    data = clinical_data,
+    outcome = "diagnosis",
+    predictors = c("biomarker1", "biomarker2", "age", "gender"),
+    model_type = "logistic",
+    validation_method = "bootstrap",
+    bootstrap_samples = 1000,
+    clinical_context = "diagnosis"
+)
+
 }

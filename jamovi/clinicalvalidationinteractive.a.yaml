@@ -1,30 +1,28 @@
 ---
-name: clinicalvalidation
-title: Clinical Model Validation Suite
+name: clinicalvalidationinteractive
+title: Interactive Clinical Model Validation
 menuGroup: meddecideD
 menuSubgroup: Clinical Decision Support
-menuSubtitle: Comprehensive validation for clinical prediction models
-version: '0.0.31'
+menuSubtitle: Interactive validation with real-time parameter optimization
+version: '0.0.1'
 jas: '1.2'
 
 description:
     main: |
-        Comprehensive validation suite for clinical prediction models including 
-        bootstrap validation, cross-validation, model calibration assessment, 
-        and clinical performance evaluation designed for medical research and 
-        diagnostic test evaluation.
+        Interactive clinical prediction model validation with real-time parameter 
+        validation, intelligent defaults, and guided workflows. Features automatic 
+        parameter correction, clinical scenario presets, and dynamic threshold 
+        optimization for medical research and diagnostic applications.
     R:
         dontrun: false
         usage: |
-            # Clinical model validation with bootstrap
-            clinical_validation(
+            # Interactive clinical validation with presets
+            clinical_validation_interactive(
                 data = clinical_data,
                 outcome = "diagnosis",
-                predictors = c("biomarker1", "biomarker2", "age", "gender"),
-                model_type = "logistic",
-                validation_method = "bootstrap",
-                bootstrap_samples = 1000,
-                clinical_context = "diagnosis"
+                predictors = c("biomarker1", "biomarker2", "age"),
+                clinical_preset = "diagnostic_biomarker",
+                auto_optimize = TRUE
             )
 
 options:
@@ -59,7 +57,30 @@ options:
       permitted: [numeric]
       default: null
 
-    # Model specification
+    # Clinical preset system
+    - name: clinical_preset
+      title: Clinical Scenario Preset
+      type: List
+      options:
+        - title: "Custom Configuration"
+          name: custom
+        - title: "Diagnostic Biomarker Study"
+          name: diagnostic_biomarker
+        - title: "Cancer Screening Test"
+          name: cancer_screening
+        - title: "Cardiovascular Risk Score"
+          name: cardiovascular_risk
+        - title: "Infectious Disease Diagnosis"
+          name: infectious_disease
+        - title: "Surgical Risk Assessment"
+          name: surgical_risk
+        - title: "Treatment Response Prediction"
+          name: treatment_response
+        - title: "Histological Classification"
+          name: histological_classification
+      default: custom
+
+    # Model specification with intelligent defaults
     - name: model_type
       title: Model Type
       type: List
@@ -76,12 +97,7 @@ options:
           name: lda
       default: logistic
 
-    - name: model_formula
-      title: Custom Model Formula
-      type: String
-      default: ""
-
-    # Validation methods
+    # Validation methods with dynamic parameters
     - name: validation_method
       title: Validation Method
       type: List
@@ -98,6 +114,7 @@ options:
           name: time_split
       default: bootstrap
 
+    # Dynamic validation parameters
     - name: bootstrap_samples
       title: Bootstrap Samples
       type: Integer
@@ -131,7 +148,7 @@ options:
       type: Bool
       default: true
 
-    # Clinical context and interpretation
+    # Clinical context with intelligent parameter adjustment
     - name: clinical_context
       title: Clinical Application
       type: List
@@ -150,6 +167,7 @@ options:
           name: histological
       default: diagnosis
 
+    # Prevalence with real-time PPV/NPV updates
     - name: prevalence_adjustment
       title: Adjust for Disease Prevalence
       type: Bool
@@ -162,6 +180,7 @@ options:
       min: 0.1
       max: 50
 
+    # Cost matrix with intelligent defaults
     - name: cost_matrix
       title: Clinical Cost Matrix
       type: List
@@ -182,6 +201,57 @@ options:
       default: 2.0
       min: 0.1
       max: 10.0
+
+    # Performance thresholds with validation
+    - name: min_sensitivity
+      title: Minimum Required Sensitivity
+      type: Number
+      default: 0.80
+      min: 0.50
+      max: 0.99
+
+    - name: min_specificity
+      title: Minimum Required Specificity
+      type: Number
+      default: 0.80
+      min: 0.50
+      max: 0.99
+
+    - name: min_ppv
+      title: Minimum Required PPV
+      type: Number
+      default: 0.70
+      min: 0.50
+      max: 0.99
+
+    - name: min_npv
+      title: Minimum Required NPV
+      type: Number
+      default: 0.90
+      min: 0.50
+      max: 0.99
+
+    # Auto-optimization features
+    - name: auto_optimize_threshold
+      title: Auto-Optimize Decision Threshold
+      type: Bool
+      default: false
+
+    - name: optimization_metric
+      title: Optimization Metric
+      type: List
+      options:
+        - title: "Youden Index (Sens + Spec - 1)"
+          name: youden
+        - title: "Clinical Utility (Cost-Weighted)"
+          name: utility
+        - title: "F1 Score"
+          name: f1
+        - title: "Matthews Correlation"
+          name: mcc
+        - title: "Custom Clinical Score"
+          name: custom
+      default: youden
 
     # Performance metrics
     - name: performance_metrics
@@ -205,47 +275,21 @@ options:
       min: 0.80
       max: 0.99
 
-    # Calibration assessment
-    - name: calibration_method
-      title: Calibration Assessment
-      type: List
-      options:
-        - title: "Hosmer-Lemeshow"
-          name: hosmer_lemeshow
-        - title: "Brier Score"
-          name: brier
-        - title: "Calibration Plot"
-          name: plot
-        - title: "All Methods"
-          name: all
-      default: all
-
-    - name: calibration_bins
-      title: Calibration Plot Bins
-      type: Integer
-      default: 10
-      min: 5
-      max: 20
-
-    # Model comparison
-    - name: compare_models
-      title: Compare Multiple Models
+    # Real-time feedback options
+    - name: show_realtime_metrics
+      title: Show Real-Time Metric Updates
       type: Bool
-      default: false
+      default: true
 
-    - name: comparison_models
-      title: Models to Compare
-      type: List
-      options:
-        - title: "Logistic vs. Random Forest"
-          name: logistic_rf
-        - title: "All Classification Models"
-          name: all_classification
-        - title: "Cox vs. Random Survival Forest"
-          name: cox_rsf
-        - title: "Custom Selection"
-          name: custom
-      default: logistic_rf
+    - name: show_parameter_warnings
+      title: Show Parameter Validation Warnings
+      type: Bool
+      default: true
+
+    - name: show_clinical_guidance
+      title: Show Clinical Decision Guidance
+      type: Bool
+      default: true
 
     # Output options
     - name: show_model_summary
@@ -268,13 +312,8 @@ options:
       type: Bool
       default: true
 
-    - name: show_validation_curves
-      title: Show Validation Learning Curves
-      type: Bool
-      default: false
-
-    - name: show_residual_plots
-      title: Show Model Residual Plots
+    - name: show_threshold_optimization
+      title: Show Threshold Optimization Plot
       type: Bool
       default: false
 
@@ -282,16 +321,6 @@ options:
       title: Show Clinical Guidelines
       type: Bool
       default: true
-
-    - name: export_results
-      title: Export Validation Results
-      type: Bool
-      default: false
-
-    - name: detailed_bootstrap
-      title: Detailed Bootstrap Analysis
-      type: Bool
-      default: false
 
     # Advanced options
     - name: missing_data_handling
@@ -305,25 +334,6 @@ options:
         - title: "Missing Indicator Method"
           name: indicator
       default: complete_cases
-
-    - name: imputation_methods
-      title: Imputation Methods
-      type: Integer
-      default: 5
-      min: 3
-      max: 10
-
-    - name: parallel_processing
-      title: Use Parallel Processing
-      type: Bool
-      default: false
-
-    - name: n_cores
-      title: Number of CPU Cores
-      type: Integer
-      default: 2
-      min: 1
-      max: 8
 
     # Reproducibility
     - name: set_seed

@@ -1,0 +1,153 @@
+---
+name: effectsize
+title: Effect Size Analysis
+menuGroup: ClinicoPathDescriptives
+menuSubgroup: Statistical Tests
+menuSubtitle: "Cohen's d, Hedges' g, Glass' Δ"
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive effect size analysis including Cohen's d, Hedges' g, and Glass' delta.
+        Essential for clinical significance assessment, meta-analyses, and power analyses
+        in medical and pathological research.
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame.
+
+    - name: dep
+      title: 'Dependent Variable'
+      type: Variable
+      suggested:
+          - continuous
+      permitted:
+          - numeric
+      description: 'The continuous outcome variable'
+
+    - name: group
+      title: 'Grouping Variable'
+      type: Variable
+      suggested:
+          - nominal
+          - ordinal
+      permitted:
+          - factor
+          - numeric
+      description: 'Variable to define groups for comparison (optional for one-sample analysis)'
+
+    - name: analysisType
+      title: 'Analysis Type'
+      type: List
+      options:
+          - title: 'One Sample (vs. Test Value)'
+            name: one_sample
+          - title: 'Two Sample (Group Comparison)'
+            name: two_sample
+      default: two_sample
+      description: 'Type of effect size analysis'
+
+    - name: measures_cohens_d
+      title: "Cohen's d"
+      type: Bool
+      default: true
+      description: "Calculate Cohen's d effect size"
+
+    - name: measures_hedges_g
+      title: "Hedges' g"
+      type: Bool
+      default: true
+      description: "Calculate Hedges' g effect size (bias-corrected)"
+
+    - name: measures_glass_delta
+      title: "Glass' Δ"
+      type: Bool
+      default: false
+      description: "Calculate Glass' delta effect size"
+
+    - name: testValue
+      title: 'Test Value'
+      type: Number
+      default: 0
+      description: 'Reference value for one-sample analysis'
+
+    - name: group1Value
+      title: 'Group 1 Value'
+      type: String
+      description: 'Specific value for first group (optional)'
+
+    - name: group2Value
+      title: 'Group 2 Value'
+      type: String
+      description: 'Specific value for second group (optional)'
+
+    - name: ciWidth
+      title: 'Confidence Interval'
+      type: Number
+      default: 95
+      min: 50
+      max: 99.9
+      description: 'Confidence level for effect size confidence intervals'
+
+    - name: interpretation
+      title: 'Effect Size Interpretation'
+      type: Bool
+      default: true
+      description: "Provide Cohen's (1988) interpretation guidelines"
+
+    - name: descriptives
+      title: 'Descriptive Statistics'
+      type: Bool
+      default: true
+      description: 'Show group descriptive statistics'
+
+    - name: testDetails
+      title: 'Statistical Test Details'
+      type: Bool
+      default: true
+      description: 'Show t-test statistics and p-values'
+
+    - name: assumptionChecks
+      title: 'Assumption Checks'
+      type: Bool
+      default: false
+      description: 'Perform normality and homogeneity of variance tests'
+
+    - name: plotEffects
+      title: 'Effect Size Plot'
+      type: Bool
+      default: true
+      description: 'Create visualization of effect sizes with confidence intervals'
+
+    - name: plotType
+      title: 'Plot Type'
+      type: List
+      options:
+          - title: 'Forest Plot'
+            name: forest
+          - title: 'Bar Chart'
+            name: bar
+          - title: 'Dot Plot'
+            name: dot
+      default: forest
+      description: 'Type of effect size visualization'
+
+    - name: plotWidth
+      title: 'Plot Width'
+      type: Integer
+      default: 600
+      min: 300
+      max: 1200
+      description: 'Width of effect size plot'
+
+    - name: plotHeight
+      title: 'Plot Height'
+      type: Integer
+      default: 400
+      min: 200
+      max: 800
+      description: 'Height of effect size plot'

@@ -1,0 +1,117 @@
+title: Effect Size Analysis
+name: effectsize
+jus: '3.0'
+stage: 0
+compilerMode: tame
+
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Dependent Variable
+        children:
+          - type: VariablesListBox
+            name: dep
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+            itemDropBehaviour: overwrite
+
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Analysis Options
+            children:
+              - type: ComboBox
+                name: analysisType
+              - type: CheckBox
+                name: interpretation
+              - type: CheckBox
+                name: descriptives
+              - type: CheckBox
+                name: testDetails
+              - type: CheckBox
+                name: assumptionChecks
+
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Effect Size Measures
+            children:
+              - type: CheckBox
+                name: measures_cohens_d
+              - type: CheckBox
+                name: measures_hedges_g
+              - type: CheckBox
+                name: measures_glass_delta
+
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Analysis Parameters
+            children:
+              - type: TextBox
+                name: testValue
+                format: number
+                enable: (analysisType:one_sample)
+              - type: TextBox
+                name: group1Value
+                format: string
+                enable: (analysisType:two_sample)
+              - type: TextBox
+                name: group2Value
+                format: string
+                enable: (analysisType:two_sample)
+              - type: TextBox
+                name: ciWidth
+                suffix: '%'
+                format: number
+
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 1
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Visualization Options
+            children:
+              - type: CheckBox
+                name: plotEffects
+              - type: ComboBox
+                name: plotType
+                enable: (plotEffects)
+              - type: TextBox
+                name: plotWidth
+                format: number
+                enable: (plotEffects)
+              - type: TextBox
+                name: plotHeight
+                format: number
+                enable: (plotEffects)

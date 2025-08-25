@@ -1,108 +1,281 @@
 ---
 name: clinicalvalidation
-title: Clinical Validation Framework
+title: Clinical Model Validation Suite
 jrs: '1.1'
+
 items:
-  - name: instructions
-    title: Instructions
-    type: Html
-    visible: true
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
 
-  - name: validationSummary
-    title: Validation Summary
-    type: Table
-    visible: true
-    columns:
-      - name: test_name
-        title: Validation Test
-        type: text
-      - name: result
-        title: Result
-        type: text
-      - name: p_value
-        title: p-value
-        type: number
-        format: zto,pvalue
-      - name: confidence_interval
-        title: 95% CI
-        type: text
-      - name: status
-        title: Status
-        type: text
+    - name: modelsummary
+      title: Model Summary
+      type: Html
+      visible: (show_model_summary)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - model_type
+        - model_formula
+        - time_variable
 
-  - name: accuracyTests
-    title: Statistical Accuracy Tests
-    type: Table
-    visible: (validationType:accuracy)
-    columns:
-      - name: metric
-        title: Accuracy Metric
-        type: text
-      - name: test_value
-        title: Test Value
-        type: number
-      - name: reference_value
-        title: Reference Value
-        type: number
-      - name: difference
-        title: Difference
-        type: number
-      - name: relative_error
-        title: Relative Error (%)
-        type: number
-      - name: within_tolerance
-        title: Within Tolerance
-        type: text
+    - name: performancetable
+      title: Performance Metrics
+      type: Table
+      visible: (show_performance_table)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - validation_method
+        - bootstrap_samples
+        - cv_folds
+        - performance_metrics
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: zto,p:.3
+        - name: lower_ci
+          title: Lower 95% CI
+          type: number
+          format: zto,p:.3
+        - name: upper_ci
+          title: Upper 95% CI
+          type: number
+          format: zto,p:.3
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
 
-  - name: equivalenceTest
-    title: Equivalence Testing
-    type: Table
-    visible: (performEquivalence)
-    columns:
-      - name: test_type
-        title: Test Type
-        type: text
-      - name: equivalence_margin
-        title: Equivalence Margin
-        type: number
-      - name: test_statistic
-        title: Test Statistic
-        type: number
-      - name: p_value
-        title: p-value
-        type: number
-        format: zto,pvalue
-      - name: conclusion
-        title: Conclusion
-        type: text
+    - name: bootstrapresults
+      title: Bootstrap Validation Results
+      type: Table
+      visible: (validation_method:bootstrap && detailed_bootstrap)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - bootstrap_samples
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: original
+          title: Original
+          type: number
+          format: zto,p:.3
+        - name: bias
+          title: Bias
+          type: number
+          format: zto,p:.4
+        - name: bias_corrected
+          title: Bias-Corrected
+          type: number
+          format: zto,p:.3
+        - name: percentile_ci_lower
+          title: Percentile CI Lower
+          type: number
+          format: zto,p:.3
+        - name: percentile_ci_upper
+          title: Percentile CI Upper
+          type: number
+          format: zto,p:.3
 
-  - name: complianceChecklist
-    title: Compliance Checklist
-    type: Table
-    visible: (validationType:clinical_guidelines || validationType:regulatory)
-    columns:
-      - name: requirement
-        title: Requirement
-        type: text
-      - name: standard
-        title: Standard
-        type: text
-      - name: status
-        title: Status
-        type: text
-      - name: notes
-        title: Notes
-        type: text
+    - name: calibrationtable
+      title: Model Calibration Assessment
+      type: Table
+      visible: (calibration_method:all || calibration_method:hosmer_lemeshow)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - calibration_method
+        - calibration_bins
+      columns:
+        - name: test
+          title: Calibration Test
+          type: text
+        - name: statistic
+          title: Test Statistic
+          type: number
+          format: zto,p:.3
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,p:.4
+        - name: interpretation
+          title: Interpretation
+          type: text
 
-  - name: validationReport
-    title: Validation Report
-    type: Html
-    visible: (generateReport)
+    - name: brierscore
+      title: Brier Score Analysis
+      type: Table
+      visible: (calibration_method:all || calibration_method:brier)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+      columns:
+        - name: component
+          title: Component
+          type: text
+        - name: value
+          title: Value
+          type: number
+          format: zto,p:.4
+        - name: interpretation
+          title: Clinical Meaning
+          type: text
 
-  - name: agreementPlot
-    title: Method Agreement Plot
-    visible: (testVar && referenceVar)
-    type: Image
-    width: 600
-    height: 500
-    renderFun: .agreementPlot
+    - name: modelcomparison
+      title: Model Comparison Results
+      type: Table
+      visible: (compare_models)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - comparison_models
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+          format: zto,p:.3
+        - name: accuracy
+          title: Accuracy
+          type: number
+          format: zto,p:.3
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: zto,p:.3
+        - name: specificity
+          title: Specificity
+          type: number
+          format: zto,p:.3
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: costreduction
+      title: Clinical Cost-Benefit Analysis
+      type: Table
+      visible: (cost_matrix:!equal)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - cost_matrix
+        - fn_fp_cost_ratio
+        - prevalence_adjustment
+      columns:
+        - name: threshold
+          title: Decision Threshold
+          type: number
+          format: zto,p:.3
+        - name: expected_cost
+          title: Expected Cost per Patient
+          type: number
+          format: zto,p:.2
+        - name: cost_reduction
+          title: Cost Reduction vs. Treat-All
+          type: number
+          format: zto,p:.2
+        - name: net_benefit
+          title: Net Benefit
+          type: number
+          format: zto,p:.4
+
+    - name: validationcurves
+      title: Validation Learning Curves
+      type: Image
+      width: 800
+      height: 600
+      renderFun: .validation_curves_plot
+      visible: (show_validation_curves)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - validation_method
+
+    - name: calibrationplot
+      title: Calibration Plot
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .calibration_plot
+      visible: (show_calibration_plot)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - calibration_bins
+
+    - name: roccurve
+      title: ROC Curve with Confidence Intervals
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .roc_curve_plot
+      visible: (show_roc_curve)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - confidence_level
+
+    - name: residualplots
+      title: Model Residual Analysis
+      type: Image
+      width: 900
+      height: 600
+      renderFun: .residual_plots
+      visible: (show_residual_plots)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - model_type
+
+    - name: clinicalinterpretation
+      title: Clinical Decision Guidelines
+      type: Html
+      visible: (show_clinical_interpretation)
+      clearWith:
+        - clinical_context
+        - outcome
+        - outcomeLevel
+        - cost_matrix
+
+    - name: validationreport
+      title: Validation Report Summary
+      type: Html
+      visible: (export_results)
+      clearWith:
+        - outcome
+        - outcomeLevel
+        - predictors
+        - validation_method
+
+refs:
+    - ClinicoPathJamoviModule
+    - rms
+    - boot
+    - caret
+    - pROC
+    - ResourceSelection
+    - MASS
+    - randomForest
+    - survival
+    - ggplot2
+    - stats

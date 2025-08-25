@@ -1,5 +1,5 @@
-title: Clinical Model Validation Suite
-name: clinicalvalidation
+title: Non-parametric Regression Methods
+name: nonparametricregression
 jus: '3.0'
 stage: 0
 compilerMode: aggressive
@@ -15,15 +15,6 @@ children:
             name: outcome
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: outcomeLevel
-  - type: VariableSupplier
-    persistentItems: false
-    stretchFactor: 1
-    children:
       - type: TargetLayoutBox
         label: Predictor Variables
         children:
@@ -31,33 +22,88 @@ children:
             name: predictors
             isTarget: true
       - type: TargetLayoutBox
-        label: Time Variable (for survival models)
+        label: Grouping Variable
         children:
           - type: VariablesListBox
-            name: time_variable
+            name: grouping_variable
             maxItemCount: 1
             isTarget: true
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: model_type
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: model_formula
-        format: string
+        name: regression_type
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: validation_method
+        name: kernel_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: bandwidth_method
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
-        name: bootstrap_samples
+        name: manual_bandwidth
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: loess_span
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: loess_degree
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: loess_iterations
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: spline_type
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: spline_df
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: spline_lambda
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: quantile_tau
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: quantile_method
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: gam_smoother
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: gam_basis_dim
         format: number
   - type: LayoutBox
     margin: large
@@ -74,46 +120,24 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: TextBox
-        name: holdout_proportion
-        format: number
+      - type: ComboBox
+        name: model_selection_criterion
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: stratified_sampling
+        name: robust_regression
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: clinical_context
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: prevalence_adjustment
+        name: robust_method
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
-        name: population_prevalence
+        name: outlier_threshold
         format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: cost_matrix
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: fn_fp_cost_ratio
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: performance_metrics
   - type: LayoutBox
     margin: large
     children:
@@ -123,45 +147,50 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: ComboBox
-        name: calibration_method
+      - type: CheckBox
+        name: bootstrap_ci
   - type: LayoutBox
     margin: large
     children:
       - type: TextBox
-        name: calibration_bins
+        name: bootstrap_samples
         format: number
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
-        name: compare_models
+        name: prediction_intervals
+      - type: CheckBox
+        name: residual_diagnostics
+      - type: CheckBox
+        name: influence_diagnostics
+      - type: CheckBox
+        name: goodness_of_fit
+      - type: CheckBox
+        name: show_fitted_curves
+      - type: CheckBox
+        name: show_confidence_bands
+      - type: CheckBox
+        name: show_prediction_bands
+      - type: CheckBox
+        name: show_residual_plots
+      - type: CheckBox
+        name: show_qq_plots
+      - type: CheckBox
+        name: show_partial_plots
+      - type: CheckBox
+        name: show_model_summary
+      - type: CheckBox
+        name: show_parameter_estimates
+      - type: CheckBox
+        name: show_model_comparison
+      - type: CheckBox
+        name: show_interpretation
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
-        name: comparison_models
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_model_summary
-      - type: CheckBox
-        name: show_performance_table
-      - type: CheckBox
-        name: show_calibration_plot
-      - type: CheckBox
-        name: show_roc_curve
-      - type: CheckBox
-        name: show_validation_curves
-      - type: CheckBox
-        name: show_residual_plots
-      - type: CheckBox
-        name: show_clinical_interpretation
-      - type: CheckBox
-        name: export_results
-      - type: CheckBox
-        name: detailed_bootstrap
+        name: multivariate_method
   - type: LayoutBox
     margin: large
     children:
@@ -170,8 +199,18 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: ComboBox
+        name: clinical_context
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: set_seed
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
-        name: imputation_methods
+        name: seed_value
         format: number
   - type: LayoutBox
     margin: large
@@ -183,15 +222,4 @@ children:
     children:
       - type: TextBox
         name: n_cores
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: set_seed
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: seed_value
         format: number

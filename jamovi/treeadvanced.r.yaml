@@ -194,6 +194,66 @@ items:
         - target
         - targetLevel
 
+    - name: clinicalimportance
+      title: Clinical Variable Importance Analysis
+      type: Table
+      visible: (clinical_importance_interpretation)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: mdg
+          title: Mean Decrease Gini
+          type: number
+          format: zto,p:.3
+        - name: clinical_significance
+          title: Clinical Significance
+          type: text
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+
+    - name: featurecontributions
+      title: Feature Contribution Analysis
+      type: Table
+      visible: (show_feature_contributions)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+      columns:
+        - name: feature
+          title: Feature
+          type: text
+        - name: contribution_positive
+          title: Contribution to Positive Class
+          type: number
+          format: zto,p:.3
+        - name: contribution_negative
+          title: Contribution to Negative Class
+          type: number
+          format: zto,p:.3
+        - name: net_contribution
+          title: Net Contribution
+          type: number
+          format: zto,p:.3
+
+    - name: survivalintegration
+      title: Survival Integration Results
+      type: Html
+      visible: (survival_integration)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+
 refs:
     - ClinicoPathJamoviModule
     - rpart

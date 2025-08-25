@@ -51,6 +51,10 @@ treeadvanced(
   n_bootstrap = 500,
   clinical_context = "diagnosis",
   show_clinical_interpretation = TRUE,
+  clinical_importance_interpretation = TRUE,
+  mdg_threshold = 1,
+  show_feature_contributions = FALSE,
+  survival_integration = FALSE,
   set_seed = TRUE,
   seed_value = 42
 )
@@ -148,6 +152,14 @@ treeadvanced(
 
 \item{show_clinical_interpretation}{.}
 
+\item{clinical_importance_interpretation}{.}
+
+\item{mdg_threshold}{.}
+
+\item{show_feature_contributions}{.}
+
+\item{survival_integration}{.}
+
 \item{set_seed}{.}
 
 \item{seed_value}{.}
@@ -167,6 +179,9 @@ A results object containing:
 \code{results$calibrationplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$roccurve} \tab \tab \tab \tab \tab an image \cr
 \code{results$clinicalinterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalimportance} \tab \tab \tab \tab \tab a table \cr
+\code{results$featurecontributions} \tab \tab \tab \tab \tab a table \cr
+\code{results$survivalintegration} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

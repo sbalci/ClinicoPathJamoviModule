@@ -1,5 +1,5 @@
-title: Clinical Model Validation Suite
-name: clinicalvalidation
+title: Interactive Clinical Model Validation
+name: clinicalvalidationinteractive
 jus: '3.0'
 stage: 0
 compilerMode: aggressive
@@ -41,13 +41,12 @@ children:
     margin: large
     children:
       - type: ComboBox
-        name: model_type
+        name: clinical_preset
   - type: LayoutBox
     margin: large
     children:
-      - type: TextBox
-        name: model_formula
-        format: string
+      - type: ComboBox
+        name: model_type
   - type: LayoutBox
     margin: large
     children:
@@ -112,6 +111,40 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: TextBox
+        name: min_sensitivity
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: min_specificity
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: min_ppv
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: min_npv
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: auto_optimize_threshold
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: optimization_metric
+  - type: LayoutBox
+    margin: large
+    children:
       - type: ComboBox
         name: performance_metrics
   - type: LayoutBox
@@ -123,27 +156,12 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: ComboBox
-        name: calibration_method
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: calibration_bins
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
       - type: CheckBox
-        name: compare_models
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: comparison_models
-  - type: LayoutBox
-    margin: large
-    children:
+        name: show_realtime_metrics
+      - type: CheckBox
+        name: show_parameter_warnings
+      - type: CheckBox
+        name: show_clinical_guidance
       - type: CheckBox
         name: show_model_summary
       - type: CheckBox
@@ -153,37 +171,14 @@ children:
       - type: CheckBox
         name: show_roc_curve
       - type: CheckBox
-        name: show_validation_curves
-      - type: CheckBox
-        name: show_residual_plots
+        name: show_threshold_optimization
       - type: CheckBox
         name: show_clinical_interpretation
-      - type: CheckBox
-        name: export_results
-      - type: CheckBox
-        name: detailed_bootstrap
   - type: LayoutBox
     margin: large
     children:
       - type: ComboBox
         name: missing_data_handling
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: imputation_methods
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: parallel_processing
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: n_cores
-        format: number
   - type: LayoutBox
     margin: large
     children:

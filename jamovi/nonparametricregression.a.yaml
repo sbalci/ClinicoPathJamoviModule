@@ -1,0 +1,430 @@
+---
+name: nonparametricregression
+title: Non-parametric Regression Methods
+menuGroup: meddecideD
+menuSubgroup: Advanced Statistical Methods
+menuSubtitle: Distribution-free regression modeling for flexible data analysis
+version: '0.0.31'
+jas: '1.2'
+
+description:
+    main: |
+        Comprehensive non-parametric regression methods including kernel regression,
+        local polynomial smoothing (LOESS), spline regression, and robust regression
+        techniques designed for clinical research where parametric assumptions are violated.
+    R:
+        dontrun: false
+        usage: |
+            # Kernel regression with automatic bandwidth selection
+            nonparametricregression(
+                data = clinical_data,
+                outcome = "biomarker_response",
+                predictors = c("age", "weight", "baseline_score"),
+                regression_type = "kernel",
+                bandwidth_method = "cross_validation"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            The data as a data frame for non-parametric regression analysis.
+
+    # Core variables
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal]
+      permitted: [numeric, factor]
+
+    - name: grouping_variable
+      title: Grouping Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: null
+
+    # Regression method selection
+    - name: regression_type
+      title: Non-parametric Regression Method
+      type: List
+      options:
+        - title: "Kernel Regression"
+          name: kernel
+        - title: "Local Polynomial (LOESS)"
+          name: loess
+        - title: "Spline Regression"
+          name: spline
+        - title: "Local Linear Regression"
+          name: local_linear
+        - title: "Nadaraya-Watson"
+          name: nadaraya_watson
+        - title: "Quantile Regression"
+          name: quantile
+        - title: "GAM (Generalized Additive Model)"
+          name: gam
+      default: kernel
+
+    # Kernel regression options
+    - name: kernel_type
+      title: Kernel Function
+      type: List
+      options:
+        - title: "Gaussian (Normal)"
+          name: gaussian
+        - title: "Epanechnikov"
+          name: epanechnikov
+        - title: "Uniform"
+          name: uniform
+        - title: "Triangular"
+          name: triangular
+        - title: "Biweight"
+          name: biweight
+        - title: "Triweight"
+          name: triweight
+      default: gaussian
+
+    - name: bandwidth_method
+      title: Bandwidth Selection
+      type: List
+      options:
+        - title: "Cross-Validation"
+          name: cross_validation
+        - title: "Plug-in Method"
+          name: plugin
+        - title: "Rule of Thumb"
+          name: rule_of_thumb
+        - title: "Manual"
+          name: manual
+        - title: "Least Squares CV"
+          name: least_squares_cv
+      default: cross_validation
+
+    - name: manual_bandwidth
+      title: Manual Bandwidth Value
+      type: Number
+      default: 0.1
+      min: 0.001
+      max: 2.0
+
+    # LOESS options
+    - name: loess_span
+      title: LOESS Span Parameter
+      type: Number
+      default: 0.75
+      min: 0.1
+      max: 2.0
+
+    - name: loess_degree
+      title: LOESS Polynomial Degree
+      type: List
+      options:
+        - title: "Linear (1)"
+          name: linear
+        - title: "Quadratic (2)"
+          name: quadratic
+      default: linear
+
+    - name: loess_iterations
+      title: LOESS Robust Iterations
+      type: Integer
+      default: 3
+      min: 0
+      max: 10
+
+    # Spline options
+    - name: spline_type
+      title: Spline Type
+      type: List
+      options:
+        - title: "Smoothing Spline"
+          name: smooth
+        - title: "Natural Spline"
+          name: natural
+        - title: "B-Spline"
+          name: b_spline
+        - title: "Penalized Spline"
+          name: penalized
+      default: smooth
+
+    - name: spline_df
+      title: Degrees of Freedom
+      type: Number
+      default: 4
+      min: 2
+      max: 20
+
+    - name: spline_lambda
+      title: Smoothing Parameter (λ)
+      type: Number
+      default: 0.1
+      min: 0.001
+      max: 10.0
+
+    # Quantile regression options
+    - name: quantile_tau
+      title: Quantile Level (τ)
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 0.99
+
+    - name: quantile_method
+      title: Quantile Regression Method
+      type: List
+      options:
+        - title: "Interior Point"
+          name: interior_point
+        - title: "Frisch-Newton"
+          name: frisch_newton
+        - title: "Barrodale-Roberts"
+          name: barrodale_roberts
+      default: interior_point
+
+    # GAM options
+    - name: gam_smoother
+      title: GAM Smoother
+      type: List
+      options:
+        - title: "Cubic Regression Spline"
+          name: cubic_spline
+        - title: "Thin Plate Spline"
+          name: thin_plate
+        - title: "P-Spline"
+          name: p_spline
+        - title: "Cyclic Cubic Spline"
+          name: cyclic_spline
+      default: cubic_spline
+
+    - name: gam_basis_dim
+      title: Basis Dimension
+      type: Integer
+      default: 10
+      min: 3
+      max: 30
+
+    # Cross-validation and model selection
+    - name: cv_folds
+      title: Cross-Validation Folds
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+
+    - name: cv_repeats
+      title: CV Repeats
+      type: Integer
+      default: 1
+      min: 1
+      max: 10
+
+    - name: model_selection_criterion
+      title: Model Selection Criterion
+      type: List
+      options:
+        - title: "Cross-Validation Error"
+          name: cv_error
+        - title: "AIC"
+          name: aic
+        - title: "BIC"
+          name: bic
+        - title: "Generalized Cross-Validation"
+          name: gcv
+      default: cv_error
+
+    # Robust options
+    - name: robust_regression
+      title: Use Robust Methods
+      type: Bool
+      default: false
+
+    - name: robust_method
+      title: Robust Method
+      type: List
+      options:
+        - title: "Huber M-estimator"
+          name: huber
+        - title: "Tukey Bisquare"
+          name: bisquare
+        - title: "Hampel"
+          name: hampel
+        - title: "Andrews"
+          name: andrews
+      default: huber
+
+    - name: outlier_threshold
+      title: Outlier Threshold (MAD multiples)
+      type: Number
+      default: 3.0
+      min: 1.0
+      max: 5.0
+
+    # Confidence intervals and inference
+    - name: confidence_level
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+
+    - name: bootstrap_ci
+      title: Bootstrap Confidence Intervals
+      type: Bool
+      default: true
+
+    - name: bootstrap_samples
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 5000
+
+    - name: prediction_intervals
+      title: Prediction Intervals
+      type: Bool
+      default: true
+
+    # Diagnostic and validation options
+    - name: residual_diagnostics
+      title: Residual Diagnostics
+      type: Bool
+      default: true
+
+    - name: influence_diagnostics
+      title: Influence Diagnostics
+      type: Bool
+      default: false
+
+    - name: goodness_of_fit
+      title: Goodness-of-Fit Tests
+      type: Bool
+      default: true
+
+    # Visualization options
+    - name: show_fitted_curves
+      title: Show Fitted Curves
+      type: Bool
+      default: true
+
+    - name: show_confidence_bands
+      title: Show Confidence Bands
+      type: Bool
+      default: true
+
+    - name: show_prediction_bands
+      title: Show Prediction Bands
+      type: Bool
+      default: false
+
+    - name: show_residual_plots
+      title: Show Residual Plots
+      type: Bool
+      default: true
+
+    - name: show_qq_plots
+      title: Show Q-Q Plots
+      type: Bool
+      default: true
+
+    - name: show_partial_plots
+      title: Show Partial Effect Plots
+      type: Bool
+      default: false
+
+    # Output options
+    - name: show_model_summary
+      title: Show Model Summary
+      type: Bool
+      default: true
+
+    - name: show_parameter_estimates
+      title: Show Parameter Estimates
+      type: Bool
+      default: true
+
+    - name: show_model_comparison
+      title: Show Model Comparison
+      type: Bool
+      default: false
+
+    - name: show_interpretation
+      title: Show Statistical Interpretation
+      type: Bool
+      default: true
+
+    # Advanced options
+    - name: multivariate_method
+      title: Multivariate Extension
+      type: List
+      options:
+        - title: "Product Kernel"
+          name: product
+        - title: "Additive Model"
+          name: additive
+        - title: "Interaction Terms"
+          name: interaction
+      default: additive
+
+    - name: missing_data_handling
+      title: Missing Data Handling
+      type: List
+      options:
+        - title: "Complete Cases Only"
+          name: complete_cases
+        - title: "Pairwise Deletion"
+          name: pairwise
+        - title: "Linear Interpolation"
+          name: linear_interpolation
+      default: complete_cases
+
+    # Clinical interpretation
+    - name: clinical_context
+      title: Clinical Application Context
+      type: List
+      options:
+        - title: "Dose-Response Analysis"
+          name: dose_response
+        - title: "Growth Curve Analysis"
+          name: growth_curve
+        - title: "Biomarker Trajectory"
+          name: biomarker_trajectory
+        - title: "Survival Function Estimation"
+          name: survival_function
+        - title: "Quality of Life Trends"
+          name: qol_trends
+        - title: "General Clinical Research"
+          name: general
+      default: general
+
+    # Reproducibility
+    - name: set_seed
+      title: Set Random Seed
+      type: Bool
+      default: true
+
+    - name: seed_value
+      title: Random Seed Value
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+
+    # Performance options
+    - name: parallel_processing
+      title: Use Parallel Processing
+      type: Bool
+      default: false
+
+    - name: n_cores
+      title: Number of CPU Cores
+      type: Integer
+      default: 2
+      min: 1
+      max: 8

@@ -1,0 +1,248 @@
+---
+name: clinicalvalidationinteractive
+title: Interactive Clinical Model Validation
+jrs: '1.1'
+items:
+  - name: modelSummary
+    title: Model Summary
+    type: Table
+    description: Summary of the fitted model
+    clearWith:
+      - outcome
+      - predictors
+      - model_type
+      - validation_method
+    columns:
+      - name: parameter
+        title: Parameter
+        type: text
+      - name: value
+        title: Value
+        type: text
+      - name: interpretation
+        title: Clinical Interpretation
+        type: text
+
+  - name: validationResults
+    title: Validation Performance Metrics
+    type: Table
+    description: Comprehensive validation performance metrics with confidence intervals
+    clearWith:
+      - outcome
+      - predictors
+      - validation_method
+      - bootstrap_samples
+      - cv_folds
+      - clinical_preset
+    columns:
+      - name: metric
+        title: Metric
+        type: text
+      - name: estimate
+        title: Estimate
+        type: number
+        format: zto
+      - name: lower_ci
+        title: Lower CI
+        type: number
+        format: zto
+      - name: upper_ci
+        title: Upper CI
+        type: number
+        format: zto
+      - name: clinical_threshold
+        title: Clinical Threshold
+        type: text
+      - name: meets_requirement
+        title: Meets Requirement
+        type: text
+
+  - name: performanceWarnings
+    title: Performance Warnings & Recommendations
+    type: Table
+    description: Real-time warnings and clinical recommendations
+    visible: (show_parameter_warnings)
+    columns:
+      - name: category
+        title: Category
+        type: text
+      - name: warning
+        title: Warning/Recommendation
+        type: text
+      - name: severity
+        title: Severity
+        type: text
+      - name: action
+        title: Suggested Action
+        type: text
+
+  - name: prevalenceAnalysis
+    title: Prevalence Impact Analysis
+    type: Table
+    description: Impact of disease prevalence on predictive values
+    visible: (prevalence_adjustment)
+    clearWith:
+      - population_prevalence
+      - outcome
+      - predictors
+    columns:
+      - name: prevalence_scenario
+        title: Prevalence Scenario
+        type: text
+      - name: prevalence_value
+        title: Prevalence (%)
+        type: number
+        format: pc
+      - name: estimated_ppv
+        title: Estimated PPV
+        type: number
+        format: pc
+      - name: estimated_npv
+        title: Estimated NPV
+        type: number
+        format: pc
+      - name: clinical_utility
+        title: Clinical Utility Score
+        type: number
+        format: zto
+
+  - name: thresholdOptimization
+    title: Decision Threshold Optimization
+    type: Table
+    description: Optimal decision thresholds for different clinical scenarios
+    visible: (auto_optimize_threshold)
+    clearWith:
+      - optimization_metric
+      - cost_matrix
+      - fn_fp_cost_ratio
+    columns:
+      - name: optimization_criterion
+        title: Optimization Criterion
+        type: text
+      - name: optimal_threshold
+        title: Optimal Threshold
+        type: number
+        format: zto
+      - name: sensitivity_at_threshold
+        title: Sensitivity
+        type: number
+        format: pc
+      - name: specificity_at_threshold
+        title: Specificity
+        type: number
+        format: pc
+      - name: clinical_utility_score
+        title: Clinical Utility
+        type: number
+        format: zto
+
+  - name: calibrationAssessment
+    title: Model Calibration Assessment
+    type: Table
+    description: Calibration performance metrics
+    visible: (show_calibration_plot)
+    columns:
+      - name: calibration_method
+        title: Method
+        type: text
+      - name: statistic
+        title: Test Statistic
+        type: number
+      - name: p_value
+        title: p-value
+        type: number
+        format: zto,pvalue
+      - name: interpretation
+        title: Interpretation
+        type: text
+
+  - name: clinicalGuidelines
+    title: Clinical Decision Guidelines
+    type: Table
+    description: Evidence-based clinical interpretation and recommendations
+    visible: (show_clinical_interpretation)
+    columns:
+      - name: guideline_category
+        title: Category
+        type: text
+      - name: recommendation
+        title: Recommendation
+        type: text
+      - name: evidence_level
+        title: Evidence Level
+        type: text
+      - name: clinical_impact
+        title: Clinical Impact
+        type: text
+
+  - name: rocCurve
+    title: ROC Curve with Optimal Thresholds
+    type: Image
+    description: ROC curve showing optimal decision thresholds
+    visible: (show_roc_curve)
+    requiresData: true
+    clearWith:
+      - outcome
+      - predictors
+      - model_type
+      - auto_optimize_threshold
+
+  - name: calibrationPlot
+    title: Calibration Plot
+    type: Image
+    description: Model calibration assessment plot
+    visible: (show_calibration_plot)
+    requiresData: true
+    clearWith:
+      - outcome
+      - predictors
+      - calibration_bins
+
+  - name: thresholdPlot
+    title: Threshold Optimization Plot
+    type: Image
+    description: Performance metrics across decision thresholds
+    visible: (show_threshold_optimization)
+    requiresData: true
+    clearWith:
+      - optimization_metric
+      - cost_matrix
+
+  - name: validationCurves
+    title: Validation Learning Curves
+    type: Image
+    description: Learning curves showing model performance vs sample size
+    visible: (show_validation_curves)
+    requiresData: true
+    clearWith:
+      - validation_method
+      - model_type
+
+  - name: realtimeMetrics
+    title: Real-Time Performance Updates
+    type: Html
+    description: Dynamic performance metric updates
+    visible: (show_realtime_metrics)
+    clearWith:
+      - outcome
+      - predictors
+
+  - name: interactiveGuidance
+    title: Interactive Clinical Guidance
+    type: Html
+    description: Dynamic clinical decision guidance
+    visible: (show_clinical_guidance)
+    clearWith:
+      - clinical_context
+      - clinical_preset
+
+  - name: parameterValidation
+    title: Parameter Validation Status
+    type: Html
+    description: Real-time parameter validation and warnings
+    visible: (show_parameter_warnings)
+
+  - name: exportSummary
+    title: Validation Report Summary
+    type: Html
+    description: Comprehensive validation summary for clinical reporting

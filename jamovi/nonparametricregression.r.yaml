@@ -1,0 +1,256 @@
+---
+title: Analysis Results
+name: nonparametricregression
+jrs: '1.1'
+items:
+    - name: modelSummary
+      title: Non-parametric Regression Model Summary
+      type: Table
+      columns:
+        - name: parameter
+          title: Parameter
+          type: text
+        - name: value
+          title: Value
+          type: text
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: parameterEstimates
+      title: Model Parameter Estimates
+      type: Table
+      columns:
+        - name: predictor
+          title: Predictor
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+        - name: se
+          title: Standard Error
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+        - name: edf
+          title: Effective df
+          type: number
+        - name: significance
+          title: Significance
+          type: text
+
+    - name: bandwidthSelection
+      title: Bandwidth/Smoothing Parameter Selection
+      type: Table
+      columns:
+        - name: predictor
+          title: Predictor Variable
+          type: text
+        - name: selected_bandwidth
+          title: Selected Bandwidth
+          type: number
+        - name: cv_error
+          title: CV Error
+          type: number
+        - name: gcv_score
+          title: GCV Score
+          type: number
+        - name: selection_method
+          title: Selection Method
+          type: text
+
+    - name: modelFit
+      title: Model Fit Statistics
+      type: Table
+      columns:
+        - name: statistic
+          title: Statistic
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: interpretation
+          title: Interpretation
+          type: text
+
+    - name: residualDiagnostics
+      title: Residual Diagnostics
+      type: Table
+      columns:
+        - name: diagnostic
+          title: Diagnostic Test
+          type: text
+        - name: statistic
+          title: Test Statistic
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: result
+          title: Result
+          type: text
+        - name: implication
+          title: Implication
+          type: text
+
+    - name: influenceDiagnostics
+      title: Influence Diagnostics
+      type: Table
+      columns:
+        - name: observation
+          title: Observation
+          type: integer
+        - name: leverage
+          title: Leverage
+          type: number
+        - name: cooks_d
+          title: Cook's Distance
+          type: number
+        - name: standardized_residual
+          title: Standardized Residual
+          type: number
+        - name: influential
+          title: Influential
+          type: text
+
+    - name: predictionTable
+      title: Fitted Values and Residuals
+      type: Table
+      columns:
+        - name: observation
+          title: Observation
+          type: integer
+        - name: observed
+          title: Observed
+          type: number
+        - name: fitted
+          title: Fitted
+          type: number
+        - name: residual
+          title: Residual
+          type: number
+        - name: standardized_residual
+          title: Standardized Residual
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+
+    - name: goodnessOfFit
+      title: Goodness-of-Fit Assessment
+      type: Table
+      columns:
+        - name: test
+          title: Test
+          type: text
+        - name: statistic
+          title: Statistic
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: Conclusion
+          type: text
+
+    - name: crossValidation
+      title: Cross-Validation Results
+      type: Table
+      columns:
+        - name: fold
+          title: Fold
+          type: integer
+        - name: mse
+          title: MSE
+          type: number
+        - name: mae
+          title: MAE
+          type: number
+        - name: r_squared
+          title: R²
+          type: number
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: cv_error
+          title: CV Error
+          type: number
+        - name: r_squared
+          title: R²
+          type: number
+        - name: rank
+          title: Rank
+          type: integer
+
+    - name: clinicalInterpretation
+      title: Clinical Interpretation and Guidelines
+      type: Html
+
+    - name: methodsExplanation
+      title: Statistical Methods and Theory
+      type: Html
+
+    - name: fittedCurvePlot
+      title: Fitted Regression Curves
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotFittedCurves
+
+    - name: residualPlots
+      title: Residual Diagnostic Plots
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotResidualDiagnostics
+
+    - name: qqPlots
+      title: Q-Q Plots for Model Assumptions
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plotQQDiagnostics
+
+    - name: partialEffectPlots
+      title: Partial Effect Plots
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plotPartialEffects
+
+    - name: influencePlots
+      title: Influence and Leverage Plots
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plotInfluenceDiagnostics
+
+    - name: bandwidthPlots
+      title: Bandwidth Selection Visualization
+      type: Image
+      width: 500
+      height: 350
+      renderFun: .plotBandwidthSelection

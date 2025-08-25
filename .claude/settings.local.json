@@ -97,7 +97,9 @@
       "Bash(do if grep -q \"jrs:\" jamovi/$func.r.yaml)",
       "Bash(else echo \"$func: ⚠ missing jrs\")",
       "WebFetch(domain:www.rdocumentation.org)",
-      "Read(//Users/serdarbalci/Downloads/**)"
+      "Read(//Users/serdarbalci/Downloads/**)",
+      "Read(//Users/serdarbalci/Documents/GitHub/BlueSky/R/**)",
+      "Read(//Users/serdarbalci/Documents/GitHub/BrawStats-for-Jamovi-Full/**)"
     ],
     "deny": [],
     "additionalDirectories": [
