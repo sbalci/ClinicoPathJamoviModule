@@ -1,0 +1,126 @@
+---
+name: multiclassdiagnostics
+title: Multi-class Diagnostic Performance Evaluation
+menuGroup: meddecideT
+menuSubgroup: Diagnostic Performance
+menuTitle: Multi-class Diagnostics
+version: '0.0.31'
+jas: '1.2'
+description:
+    main: >
+        Comprehensive evaluation of multi-class classification performance
+        including per-class and overall metrics, ROC curves, confusion matrices,
+        and model comparison capabilities.
+
+options:
+    - name: data
+      type: Data
+
+    - name: predicted
+      title: Predicted Classes
+      type: Variable
+      required: true
+      suggested:
+        - nominal
+        - ordinal
+      description: Variable containing predicted class labels
+
+    - name: actual
+      title: Actual Classes
+      type: Variable
+      required: true
+      suggested:
+        - nominal
+        - ordinal
+      description: Variable containing true class labels
+
+    - name: positiveClass
+      title: Positive Class (for binary)
+      type: Level
+      variable: (actual)
+      description: >
+        For binary classification, specify which class is considered positive
+
+    - name: confidenceLevel
+      title: Confidence Level
+      type: Number
+      min: 0.5
+      max: 0.99
+      default: 0.95
+      description: Confidence level for intervals
+
+    - name: showROC
+      title: ROC Curves
+      type: Bool
+      default: true
+      description: Display ROC curves for each class (one-vs-rest)
+
+    - name: showConfusion
+      title: Confusion Matrix
+      type: Bool
+      default: true
+      description: Display confusion matrix
+
+    - name: showPerClass
+      title: Per-Class Metrics
+      type: Bool
+      default: true
+      description: Show sensitivity, specificity, PPV, NPV for each class
+
+    - name: showOverall
+      title: Overall Metrics
+      type: Bool
+      default: true
+      description: Show overall accuracy, kappa, and weighted metrics
+
+    - name: compareModels
+      title: Compare Models
+      type: Bool
+      default: false
+      description: Enable model comparison
+
+    - name: predicted2
+      title: Predicted Classes (Model 2)
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      description: Predicted classes for second model (for comparison)
+
+    - name: modelNames
+      title: Model Names
+      type: String
+      default: Model 1,Model 2
+      description: Names for the models being compared (comma-separated)
+
+    - name: deLongTest
+      title: DeLong Test
+      type: Bool
+      default: true
+      description: >
+        Perform DeLong test for ROC curve comparison (binary classification only)
+
+    - name: mcnemarTest
+      title: McNemar Test
+      type: Bool
+      default: true
+      description: Perform McNemar test for paired model comparison
+
+    - name: plotTheme
+      title: Plot Theme
+      type: List
+      options:
+        - title: Default
+          name: default
+        - title: Minimal
+          name: minimal
+        - title: Classic
+          name: classic
+      default: default
+      description: Theme for plots
+
+    - name: saveResults
+      title: Save Results
+      type: Bool
+      default: false
+      description: Save detailed results to file

@@ -37,7 +37,11 @@ enhancedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             plotWidth = 600,
             plotHeight = 600,
             showCutoffPoints = TRUE,
-            showConfidenceBands = FALSE, ...) {
+            showConfidenceBands = FALSE,
+            showMetricsDiff = TRUE,
+            statisticalComparison = TRUE,
+            effectSizeAnalysis = FALSE,
+            powerAnalysis = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -220,6 +224,22 @@ enhancedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "showConfidenceBands",
                 showConfidenceBands,
                 default=FALSE)
+            private$..showMetricsDiff <- jmvcore::OptionBool$new(
+                "showMetricsDiff",
+                showMetricsDiff,
+                default=TRUE)
+            private$..statisticalComparison <- jmvcore::OptionBool$new(
+                "statisticalComparison",
+                statisticalComparison,
+                default=TRUE)
+            private$..effectSizeAnalysis <- jmvcore::OptionBool$new(
+                "effectSizeAnalysis",
+                effectSizeAnalysis,
+                default=FALSE)
+            private$..powerAnalysis <- jmvcore::OptionBool$new(
+                "powerAnalysis",
+                powerAnalysis,
+                default=FALSE)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..predictors)
@@ -253,6 +273,10 @@ enhancedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..plotHeight)
             self$.addOption(private$..showCutoffPoints)
             self$.addOption(private$..showConfidenceBands)
+            self$.addOption(private$..showMetricsDiff)
+            self$.addOption(private$..statisticalComparison)
+            self$.addOption(private$..effectSizeAnalysis)
+            self$.addOption(private$..powerAnalysis)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -286,7 +310,11 @@ enhancedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         plotWidth = function() private$..plotWidth$value,
         plotHeight = function() private$..plotHeight$value,
         showCutoffPoints = function() private$..showCutoffPoints$value,
-        showConfidenceBands = function() private$..showConfidenceBands$value),
+        showConfidenceBands = function() private$..showConfidenceBands$value,
+        showMetricsDiff = function() private$..showMetricsDiff$value,
+        statisticalComparison = function() private$..statisticalComparison$value,
+        effectSizeAnalysis = function() private$..effectSizeAnalysis$value,
+        powerAnalysis = function() private$..powerAnalysis$value),
     private = list(
         ..outcome = NA,
         ..predictors = NA,
@@ -319,7 +347,11 @@ enhancedrocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..plotWidth = NA,
         ..plotHeight = NA,
         ..showCutoffPoints = NA,
-        ..showConfidenceBands = NA)
+        ..showConfidenceBands = NA,
+        ..showMetricsDiff = NA,
+        ..statisticalComparison = NA,
+        ..effectSizeAnalysis = NA,
+        ..powerAnalysis = NA)
 )
 
 enhancedrocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -340,6 +372,8 @@ enhancedrocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     instructions = function() private$.items[["instructions"]],
                     aucSummary = function() private$.items[["aucSummary"]],
                     rocComparisons = function() private$.items[["rocComparisons"]],
+                    detailedComparison = function() private$.items[["detailedComparison"]],
+                    statisticalSummary = function() private$.items[["statisticalSummary"]],
                     optimalCutoffSummary = function() private$.items[["optimalCutoffSummary"]],
                     cutoffAnalysis = function() private$.items[["cutoffAnalysis"]],
                     diagnosticPerformance = function() private$.items[["diagnosticPerformance"]],
@@ -439,6 +473,78 @@ enhancedrocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="clinical_significance", 
                                     `title`="Clinical Significance", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="detailedComparison",
+                            title="Detailed Model Comparison",
+                            visible="(showMetricsDiff && analysisType:comparative)",
+                            columns=list(
+                                list(
+                                    `name`="metric", 
+                                    `title`="Metric", 
+                                    `type`="text"),
+                                list(
+                                    `name`="model1_value", 
+                                    `title`="Model 1 Value", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="model2_value", 
+                                    `title`="Model 2 Value", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="difference", 
+                                    `title`="Difference", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="percent_change", 
+                                    `title`="% Change", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto;pvalue"),
+                                list(
+                                    `name`="effect_size", 
+                                    `title`="Effect Size", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Clinical Interpretation", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="statisticalSummary",
+                            title="Statistical Comparison Summary",
+                            visible="(statisticalComparison && analysisType:comparative)",
+                            columns=list(
+                                list(
+                                    `name`="test_name", 
+                                    `title`="Statistical Test", 
+                                    `type`="text"),
+                                list(
+                                    `name`="test_statistic", 
+                                    `title`="Test Statistic", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto;pvalue"),
+                                list(
+                                    `name`="conclusion", 
+                                    `title`="Statistical Conclusion", 
+                                    `type`="text"),
+                                list(
+                                    `name`="effect_magnitude", 
+                                    `title`="Effect Magnitude", 
                                     `type`="text"))))
                         self$add(jmvcore::Table$new(
                             options=options,
@@ -801,11 +907,18 @@ enhancedrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plotHeight Height of ROC plots
 #' @param showCutoffPoints Highlight optimal cutoff points on ROC curve
 #' @param showConfidenceBands Display confidence bands around ROC curve
+#' @param showMetricsDiff Display detailed differences between model metrics
+#' @param statisticalComparison Perform comprehensive statistical comparison
+#'   between models
+#' @param effectSizeAnalysis Calculate effect sizes for model differences
+#' @param powerAnalysis Estimate statistical power for detecting differences
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results$aucSummary} \tab \tab \tab \tab \tab AUC values with confidence intervals for each predictor \cr
 #'   \code{results$results$rocComparisons} \tab \tab \tab \tab \tab Pairwise comparisons between ROC curves \cr
+#'   \code{results$results$detailedComparison} \tab \tab \tab \tab \tab Comprehensive comparison of diagnostic metrics between models \cr
+#'   \code{results$results$statisticalSummary} \tab \tab \tab \tab \tab Summary of statistical tests for model comparison \cr
 #'   \code{results$results$optimalCutoffSummary} \tab \tab \tab \tab \tab Youden Index optimization results for each predictor \cr
 #'   \code{results$results$cutoffAnalysis} \tab \tab \tab \tab \tab Comprehensive analysis across multiple cutoff values \cr
 #'   \code{results$results$diagnosticPerformance} \tab \tab \tab \tab \tab Comprehensive diagnostic performance measures at optimal cutoff \cr
@@ -855,7 +968,11 @@ enhancedroc <- function(
     plotWidth = 600,
     plotHeight = 600,
     showCutoffPoints = TRUE,
-    showConfidenceBands = FALSE) {
+    showConfidenceBands = FALSE,
+    showMetricsDiff = TRUE,
+    statisticalComparison = TRUE,
+    effectSizeAnalysis = FALSE,
+    powerAnalysis = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("enhancedroc requires jmvcore to be installed (restart may be required)")
@@ -901,7 +1018,11 @@ enhancedroc <- function(
         plotWidth = plotWidth,
         plotHeight = plotHeight,
         showCutoffPoints = showCutoffPoints,
-        showConfidenceBands = showConfidenceBands)
+        showConfidenceBands = showConfidenceBands,
+        showMetricsDiff = showMetricsDiff,
+        statisticalComparison = statisticalComparison,
+        effectSizeAnalysis = effectSizeAnalysis,
+        powerAnalysis = powerAnalysis)
 
     analysis <- enhancedrocClass$new(
         options = options,

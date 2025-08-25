@@ -1,0 +1,171 @@
+---
+name: multiclassdiagnostics
+title: Multi-class Diagnostic Performance Results
+jrs: '1.1'
+items:
+    - name: confusionMatrix
+      title: Confusion Matrix
+      type: Table
+      visible: (showConfusion)
+      columns:
+        - name: actual_class
+          title: Actual Class
+          type: text
+        - name: .total[predicted]
+          title: Total
+          type: integer
+
+    - name: perClassMetrics
+      title: Per-Class Performance Metrics
+      type: Table
+      visible: (showPerClass)
+      columns:
+        - name: class
+          title: Class
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: pc
+        - name: specificity
+          title: Specificity
+          type: number
+          format: pc
+        - name: ppv
+          title: PPV
+          type: number
+          format: pc
+        - name: npv
+          title: NPV
+          type: number
+          format: pc
+        - name: f1
+          title: F1 Score
+          type: number
+        - name: youden
+          title: Youden Index
+          type: number
+        - name: auc
+          title: AUC
+          type: number
+          format: zto(3)
+
+    - name: overallMetrics
+      title: Overall Performance Metrics
+      type: Table
+      visible: (showOverall)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: Value
+          type: number
+        - name: ci_lower
+          title: CI Lower
+          type: number
+        - name: ci_upper
+          title: CI Upper
+          type: number
+
+    - name: modelComparison
+      title: Model Comparison
+      type: Table
+      visible: (compareModels)
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: model1
+          title: Model 1
+          type: number
+        - name: model2
+          title: Model 2
+          type: number
+        - name: difference
+          title: Difference
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto(3)
+
+    - name: deLongResults
+      title: DeLong Test Results
+      type: Table
+      visible: (compareModels && deLongTest)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: z_statistic
+          title: Z Statistic
+          type: number
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto(3)
+
+    - name: mcnemarResults
+      title: McNemar Test Results
+      type: Table
+      visible: (compareModels && mcnemarTest)
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+        - name: chi_squared
+          title: Chi-squared
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p_value
+          title: p-value
+          type: number
+          format: zto(3)
+
+    - name: rocPlot
+      title: ROC Curves
+      type: Image
+      visible: (showROC)
+      width: 600
+      height: 500
+      renderFun: .rocPlot
+
+    - name: confusionPlot
+      title: Confusion Matrix Heatmap
+      type: Image
+      visible: (showConfusion)
+      width: 500
+      height: 500
+      renderFun: .confusionPlot
+
+    - name: metricsPlot
+      title: Performance Metrics Comparison
+      type: Image
+      visible: (showPerClass)
+      width: 600
+      height: 400
+      renderFun: .metricsPlot
+
+    - name: modelComparisonPlot
+      title: Model Comparison Plot
+      type: Image
+      visible: (compareModels)
+      width: 600
+      height: 400
+      renderFun: .modelComparisonPlot
+
+    - name: text
+      title: Analysis Summary
+      type: Preformatted
+      content: |-
+        Multi-class Diagnostic Performance Evaluation
+        
+        This analysis evaluates classification performance using comprehensive
+        diagnostic metrics including sensitivity, specificity, PPV, NPV,
+        F1 scores, and ROC analysis.

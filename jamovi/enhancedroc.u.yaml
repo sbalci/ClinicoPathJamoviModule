@@ -99,6 +99,17 @@ children:
               - type: ComboBox
                 name: plotTheme
                 enable: (rocCurve)
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showMetricsDiff
+              - type: CheckBox
+                name: statisticalComparison
+              - type: CheckBox
+                name: effectSizeAnalysis
+              - type: CheckBox
+                name: powerAnalysis
   - type: CollapseBox
     label: Statistical Options
     collapsed: true

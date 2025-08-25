@@ -37,7 +37,11 @@ enhancedroc(
   plotWidth = 600,
   plotHeight = 600,
   showCutoffPoints = TRUE,
-  showConfidenceBands = FALSE
+  showConfidenceBands = FALSE,
+  showMetricsDiff = TRUE,
+  statisticalComparison = TRUE,
+  effectSizeAnalysis = FALSE,
+  powerAnalysis = FALSE
 )
 }
 \arguments{
@@ -114,6 +118,15 @@ results}
 \item{showCutoffPoints}{Highlight optimal cutoff points on ROC curve}
 
 \item{showConfidenceBands}{Display confidence bands around ROC curve}
+
+\item{showMetricsDiff}{Display detailed differences between model metrics}
+
+\item{statisticalComparison}{Perform comprehensive statistical comparison
+between models}
+
+\item{effectSizeAnalysis}{Calculate effect sizes for model differences}
+
+\item{powerAnalysis}{Estimate statistical power for detecting differences}
 }
 \value{
 A results object containing:
@@ -121,6 +134,8 @@ A results object containing:
 \code{results$results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$results$aucSummary} \tab \tab \tab \tab \tab AUC values with confidence intervals for each predictor \cr
 \code{results$results$rocComparisons} \tab \tab \tab \tab \tab Pairwise comparisons between ROC curves \cr
+\code{results$results$detailedComparison} \tab \tab \tab \tab \tab Comprehensive comparison of diagnostic metrics between models \cr
+\code{results$results$statisticalSummary} \tab \tab \tab \tab \tab Summary of statistical tests for model comparison \cr
 \code{results$results$optimalCutoffSummary} \tab \tab \tab \tab \tab Youden Index optimization results for each predictor \cr
 \code{results$results$cutoffAnalysis} \tab \tab \tab \tab \tab Comprehensive analysis across multiple cutoff values \cr
 \code{results$results$diagnosticPerformance} \tab \tab \tab \tab \tab Comprehensive diagnostic performance measures at optimal cutoff \cr
